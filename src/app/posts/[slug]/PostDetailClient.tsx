@@ -35,8 +35,15 @@ function parseInlineMarkdown(text: string): React.ReactNode {
     const matchIndex = match.index;
     const matchStr = match[0];
     
+    // Texto antes do token — processa recursivamente para capturar links dentro
     if (matchIndex > currentIndex) {
-      parts.push(text.slice(currentIndex, matchIndex));
+      const between = text.slice(currentIndex, matchIndex);
+      // Verifica se o texto intermediário contém um link
+      if (between.includes("[") && between.includes("](")) {
+        parts.push(parseInlineMarkdown(between));
+      } else {
+        parts.push(between);
+      }
     }
     
     if (matchStr.startsWith("**") && matchStr.endsWith("**")) {
@@ -70,7 +77,13 @@ function parseInlineMarkdown(text: string): React.ReactNode {
   }
   
   if (currentIndex < text.length) {
-    parts.push(text.slice(currentIndex));
+    const remaining = text.slice(currentIndex);
+    // Verifica se o trecho restante contém um link não capturado
+    if (remaining.includes("[") && remaining.includes("](")) {
+      parts.push(parseInlineMarkdown(remaining));
+    } else {
+      parts.push(remaining);
+    }
   }
   
   return parts.length > 0 ? <>{parts}</> : text;
