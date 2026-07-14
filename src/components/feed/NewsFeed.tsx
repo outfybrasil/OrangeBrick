@@ -101,7 +101,7 @@ export function NewsFeed({ category }: NewsFeedProps) {
             </div>
           )}
           
-          <div className="absolute inset-0 bg-gradient-to-t from-background-void via-background-void/40 to-transparent opacity-95 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background-void/95 via-background-void/20 to-transparent z-10" />
           
           <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col justify-end gap-2 z-20">
             <div className="flex items-center gap-3">
@@ -138,20 +138,33 @@ export function NewsFeed({ category }: NewsFeedProps) {
               onKeyDown={(e) => { if (e.key === "Enter") router.push(`/posts/${post.slug}`); }}
               role="link"
               tabIndex={0}
-              className="flex-1 flex flex-col justify-between p-4 bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl cursor-pointer hover:border-brand-orange/30 hover:bg-card-slate/60 transition-all duration-300 group hover:-translate-y-0.5"
+              className="flex-1 flex flex-col overflow-hidden bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl cursor-pointer hover:border-brand-orange/30 hover:bg-card-slate/60 transition-all duration-300 group hover:-translate-y-0.5"
             >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <Tag category={post.category} />
-                  <Timer date={post.published_at ?? ""} />
+              {post.image_url && (
+                <div className="relative h-32 w-full overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={post.image_url}
+                    alt={post.image_alt || ""}
+                    className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card-slate/80 to-transparent" />
                 </div>
-                <h4 className="font-mono text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
-                  {post.title}
-                </h4>
-              </div>
-              <div className="mt-4 flex items-center justify-between text-[10px] font-mono text-gray-500">
-                <span>Por {post.author_name}</span>
-                <span className="text-brand-orange group-hover:translate-x-1 transition-transform duration-200">Ler post →</span>
+              )}
+              <div className="p-4 flex flex-col justify-between flex-1">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <Tag category={post.category} />
+                    <Timer date={post.published_at ?? ""} />
+                  </div>
+                  <h4 className="font-mono text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                    {post.title}
+                  </h4>
+                </div>
+                <div className="mt-4 flex items-center justify-between text-[10px] font-mono text-gray-500">
+                  <span>Por {post.author_name}</span>
+                  <span className="text-brand-orange group-hover:translate-x-1 transition-transform duration-200">Ler post →</span>
+                </div>
               </div>
             </div>
           ))}
