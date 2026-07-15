@@ -4,6 +4,9 @@ import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
+import { CATEGORY_CONFIG } from "@/lib/types/database";
+import { Tag } from "@/components/ui/Tag";
+import { Timer } from "@/components/ui/Timer";
 
 type ContentBlock =
   | { id: string; type: "text"; content: string }
@@ -28,6 +31,9 @@ function EditForm() {
 
   // Editor Modular por Blocos
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+
+  // Preview
+  const [showPreview, setShowPreview] = useState(false);
 
   // Estados de Carregamento e Erro
   const [isLoading, setIsLoading] = useState(false);
@@ -425,6 +431,12 @@ function EditForm() {
               >
                 {isSaving ? "Salvando..." : "Salvar como Rascunho"}
               </button>
+              <button
+                onClick={() => setShowPreview(true)}
+                className="w-full bg-accent-blue/10 hover:bg-accent-blue/20 text-accent-blue font-bold py-3 rounded-lg border border-accent-blue/20 hover:border-accent-blue/40 transition-all cursor-pointer text-center"
+              >
+                👁️ Visualizar Matéria
+              </button>
             </div>
           </div>
 
@@ -549,6 +561,106 @@ function EditForm() {
           </div>
         </div>
       </main>
+
+      {/* Modal de Preview */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 bg-background-void/95 backdrop-blur-sm overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-between mb-6 sticky top-0 bg-background-void/90 backdrop-blur-md py-3 z-10">
+              <h2 className="text-sm font-mono font-bold text-brand-orange uppercase tracking-wider">
+                👁️ Preview da Matéria
+              </h2>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="text-xs text-gray-400 hover:text-white border border-gray-500/30 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                ✕ Fechar Preview
+              </button>
+            </div>
+
+            <article className="space-y-6">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider border rounded-md ${(CATEGORY_CONFIG[category] || CATEGORY_CONFIG.breaking).color}`}
+                >
+                  {(CATEGORY_CONFIG[category] || CATEGORY_CONFIG.breaking).label}
+                </span>
+                <span className="text-[11px] font-mono text-brand-orange-muted">agora mesmo</span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white uppercase leading-tight">
+                {title || "Título da Matéria"}
+              </h1>
+
+              <p className="text-base text-gray-400 font-sans border-l-2 border-brand-orange pl-4 py-1 leading-relaxed">
+                {summary || "Resumo da matéria..."}
+              </p>
+
+              <div className="flex items-center gap-3 text-xs text-gray-500 py-2 border-y border-brand-orange-muted/10">
+                <span>
+                  Por <span className="text-white font-bold">{authorName || "Redação"}</span>
+                </span>
+                {authorTag && (
+                  <>
+                    <span>•</span>
+                    <span className="text-brand-orange-muted font-bold">{authorTag}</span>
+                  </>
+                )}
+              </div>
+
+              {imageUrl && (
+                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-brand-orange-muted/15 shadow-xl my-6">
+                  <img
+                    src={imageUrl}
+                    alt={imageAlt || title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="mt-8 space-y-6">
+                {blocks.map((block) => {
+                  if (block.type === "text") {
+                    return (
+                      <div key={block.id}>
+                        {block.content.split("\n").map((line, i) => {
+                          const t = line.trim();
+                          if (t.startsWith("### ")) return <h3 key={i} className="text-lg font-mono font-bold text-white mt-6 mb-3 uppercase tracking-tight">{t.slice(4)}</h3>;
+                          if (t.startsWith("## ")) return <h2 key={i} className="text-xl font-mono font-bold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/10 pb-2">{t.slice(3)}</h2>;
+                          if (t.startsWith("# ")) return <h1 key={i} className="text-2xl font-mono font-black text-white mt-10 mb-6 uppercase tracking-tight">{t.slice(2)}</h1>;
+                          if (t === "") return <div key={i} className="h-4" />;
+                          return <p key={i} className="text-gray-300 font-sans text-base leading-relaxed my-4">{line}</p>;
+                        })}
+                      </div>
+                    );
+                  }
+                  if (block.type === "image") {
+                    return (
+                      <div key={block.id} className="my-8 flex flex-col gap-2">
+                        {block.url ? (
+                          <>
+                            <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg">
+                              <img src={block.url} alt={block.alt || "Imagem da matéria"} className="w-full h-full object-cover" />
+                            </div>
+                            {block.caption && (
+                              <span className="text-xs text-gray-500 font-mono text-center">{block.caption}</span>
+                            )}
+                          </>
+                        ) : (
+                          <div className="aspect-video w-full rounded-xl border border-dashed border-brand-orange-muted/20 bg-card-slate/20 flex items-center justify-center">
+                            <span className="text-xs text-gray-500 font-mono">[ Imagem não inserida ]</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+            </article>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
