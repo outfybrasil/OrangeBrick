@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
 
-# Permissões necessárias para publicar no GitHub Pages usando o fluxo de Actions moderno
+# Permissões necessárias para publicar no GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -17,10 +17,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # Job de Compilação (Build)
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -37,7 +35,7 @@ jobs:
 
       - name: Build Next.js Static Export
         env:
-          # Variáveis necessárias do Supabase (configure-as como Secrets no seu repositório no GitHub)
+          # Variáveis do Supabase lidas das Secrets globais do repositório
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           # Se você usar o domínio padrão do Github Pages (ex: https://outfybrasil.github.io/OrangeBrick/),
@@ -46,14 +44,19 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: '/OrangeBrick'
         run: npm run build
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
       - name: Upload static files artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
+  # Job de Deploy (Publicação)
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
