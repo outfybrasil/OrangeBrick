@@ -2,71 +2,33 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
-
-# Permissões necessárias para publicar no GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches: [main]
 
 jobs:
-  # Job de Compilação (Build)
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Debug Environment Variables
-        run: |
-          echo "=== DEBUG ENVS ==="
-          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then echo "Secret URL: EMPTY"; else echo "Secret URL: OK"; fi
-          if [ -z "${{ vars.NEXT_PUBLIC_SUPABASE_URL }}" ]; then echo "Variable URL: EMPTY"; else echo "Variable URL: OK"; fi
-          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then echo "Secret ANON_KEY: EMPTY"; else echo "Secret ANON_KEY: OK"; fi
-          if [ -z "${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then echo "Variable ANON_KEY: EMPTY"; else echo "Variable ANON_KEY: OK"; fi
-          echo "=================="
-
-      - name: Build Next.js Static Export
+      - run: npm ci
+      - run: npm run build
         env:
-          # Variáveis do Supabase lidas das Secrets ou Variables do repositório
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || vars.ADMIN_EMAIL }}
-          # Se você usar o domínio padrão do Github Pages (ex: https://outfybrasil.github.io/OrangeBrick/),
-          # mantenha o NEXT_PUBLIC_BASE_PATH abaixo. Se for usar um domínio personalizado (ex: orangebrick.com.br),
-          # comente ou remova a linha abaixo.
-          NEXT_PUBLIC_BASE_PATH: '/OrangeBrick'
-        run: npm run build
-
-      - name: Upload static files artifact
-        uses: actions/upload-pages-artifact@v3
+          NEXT_PUBLIC_BASE_PATH: /OrangeBrick
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
-  # Job de Deploy (Publicação)
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
