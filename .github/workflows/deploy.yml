@@ -44,7 +44,7 @@ jobs:
 
       - name: Build Next.js Static Export
         env:
-          # Variáveis do Supabase lidas preferencialmente de Secrets, com fallback para Variables
+          # Variáveis do Supabase lidas das Secrets ou Variables do repositório
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           # Se você usar o domínio padrão do Github Pages (ex: https://outfybrasil.github.io/OrangeBrick/),
