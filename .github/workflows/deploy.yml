@@ -33,11 +33,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug Environment Variables
+        run: |
+          echo "=== DEBUG ENVS ==="
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then echo "Secret URL: EMPTY"; else echo "Secret URL: OK"; fi
+          if [ -z "${{ vars.NEXT_PUBLIC_SUPABASE_URL }}" ]; then echo "Variable URL: EMPTY"; else echo "Variable URL: OK"; fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then echo "Secret ANON_KEY: EMPTY"; else echo "Secret ANON_KEY: OK"; fi
+          if [ -z "${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then echo "Variable ANON_KEY: EMPTY"; else echo "Variable ANON_KEY: OK"; fi
+          echo "=================="
+
       - name: Build Next.js Static Export
         env:
-          # Variáveis do Supabase lidas das Secrets globais do repositório
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          # Variáveis do Supabase lidas preferencialmente de Secrets, com fallback para Variables
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           # Se você usar o domínio padrão do Github Pages (ex: https://outfybrasil.github.io/OrangeBrick/),
           # mantenha o NEXT_PUBLIC_BASE_PATH abaixo. Se for usar um domínio personalizado (ex: orangebrick.com.br),
           # comente ou remova a linha abaixo.
