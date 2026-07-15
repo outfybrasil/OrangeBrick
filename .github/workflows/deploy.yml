@@ -17,6 +17,8 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /OrangeBrick
+          NEXT_PUBLIC_SUPABASE_URL: https://hmjqqoselkgtfkkqrnit.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtanFxb3NlbGtndGZra3Fybml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMzk3NTYsImV4cCI6MjA5OTYxNTc1Nn0.oIHWexNUpYLjrqWqwK5C6c19Wju4x0MYomMvfi-d7e0
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
