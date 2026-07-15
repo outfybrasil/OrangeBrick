@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { parseInlineMarkdown } from "@/lib/markdown";
 import type { Post, PostCategory } from "@/lib/types/database";
 import { CATEGORY_CONFIG } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
@@ -625,11 +626,11 @@ function EditForm() {
                       <div key={block.id}>
                         {block.content.split("\n").map((line, i) => {
                           const t = line.trim();
-                          if (t.startsWith("### ")) return <h3 key={i} className="text-lg font-mono font-bold text-white mt-6 mb-3 uppercase tracking-tight">{t.slice(4)}</h3>;
-                          if (t.startsWith("## ")) return <h2 key={i} className="text-xl font-mono font-bold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/10 pb-2">{t.slice(3)}</h2>;
-                          if (t.startsWith("# ")) return <h1 key={i} className="text-2xl font-mono font-black text-white mt-10 mb-6 uppercase tracking-tight">{t.slice(2)}</h1>;
+                          if (t.startsWith("### ")) return <h3 key={i} className="text-lg font-mono font-bold text-white mt-6 mb-3 uppercase tracking-tight">{parseInlineMarkdown(t.slice(4))}</h3>;
+                          if (t.startsWith("## ")) return <h2 key={i} className="text-xl font-mono font-bold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/10 pb-2">{parseInlineMarkdown(t.slice(3))}</h2>;
+                          if (t.startsWith("# ")) return <h1 key={i} className="text-2xl font-mono font-black text-white mt-10 mb-6 uppercase tracking-tight">{parseInlineMarkdown(t.slice(2))}</h1>;
                           if (t === "") return <div key={i} className="h-4" />;
-                          return <p key={i} className="text-gray-300 font-sans text-base leading-relaxed my-4">{line}</p>;
+                          return <p key={i} className="text-gray-300 font-sans text-base leading-relaxed my-4">{parseInlineMarkdown(t)}</p>;
                         })}
                       </div>
                     );
