@@ -67,7 +67,13 @@
 - Usar **bold** para termos técnicos ou nomes próprios importantes (`**Game-Key Card**`)
 - Links internos para matérias relacionadas do próprio Orange Brick: `[texto](/posts/slug-da-materia)`
 
-### Regra de ouro: NUNCA copiar texto fonte
+### Regra de ouro 1: NUNCA publicar sem aprovação
+
+- Toda matéria criada pelo opencode DEVE ser salva como **rascunho** (`is_published: false`)
+- Nunca publicar diretamente — o usuário revisa e publica manualmente pelo painel admin
+- Exceção: apenas se o usuário EXPLICITAMENTE pedir para publicar
+
+### Regra de ouro 2: NUNCA copiar texto fonte
 
 - **Reescrever 100%** com outras palavras
 - Manter os fatos, mudar a estrutura das frases
