@@ -83,13 +83,27 @@ export function useReactions({ postId, initial }: UseReactionsOptions) {
 
       debounceRef.current = setTimeout(async () => {
         try {
-          const { error } = await (supabase.rpc as any)("toggle_reaction", {
-            p_post_id: postId,
-            p_device_id: deviceId,
-            p_reaction_type: type,
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+          const functionUrl = `${supabaseUrl}/functions/v1/toggle-reaction`;
+
+          const res = await fetch(functionUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${anonKey}`,
+            },
+            body: JSON.stringify({
+              post_id: postId,
+              device_id: deviceId,
+              reaction_type: type,
+            }),
           });
 
-          if (error) throw error;
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.error || "Erro ao registrar reação");
+          }
         } catch (err) {
           const msg =
             err && typeof err === "object" && "message" in err
@@ -108,7 +122,7 @@ export function useReactions({ postId, initial }: UseReactionsOptions) {
         }
       }, 300);
     },
-    [deviceId, postId, supabase]
+    [deviceId, postId]
   );
 
   return {
