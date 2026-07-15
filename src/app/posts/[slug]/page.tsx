@@ -1,14 +1,36 @@
 import type { Metadata } from "next";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { PostArticle } from "./PostDetailClient";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+// Criamos um cliente básico estático para consultas sem cookies em tempo de build/SSR
+function getStaticSupabaseClient() {
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
+
+export async function generateStaticParams() {
+  const supabase = getStaticSupabaseClient();
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (!posts) return [];
+
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createServerSupabaseClient();
+  const supabase = getStaticSupabaseClient();
   const { data } = await supabase
     .from("posts")
     .select("title, summary, image_url, author_name")
