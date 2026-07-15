@@ -157,7 +157,7 @@ export default function BrickboardPage() {
               return (
                 <Link
                   key={post.id}
-                  href={`/posts/${post.slug}`}
+                  href={`/post?slug=${post.slug}`}
                   style={{ gridRowEnd: `span ${rowSpan}` }}
                   className={`
                     group

@@ -82,8 +82,8 @@ export function NewsFeed({ category }: NewsFeedProps) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         <div
-          onClick={() => router.push(`/posts/${heroPost.slug}`)}
-          onKeyDown={(e) => { if (e.key === "Enter") router.push(`/posts/${heroPost.slug}`); }}
+          onClick={() => router.push(`/post?slug=${heroPost.slug}`)}
+          onKeyDown={(e) => { if (e.key === "Enter") router.push(`/post?slug=${heroPost.slug}`); }}
           role="link"
           tabIndex={0}
           className="lg:col-span-2 group relative aspect-[16/10] w-full rounded-xl overflow-hidden cursor-pointer border border-brand-orange-muted/15 hover:border-brand-orange/40 hover:shadow-[0_0_25px_rgba(255,94,0,0.15)] transition-all duration-300 hover:-translate-y-1"
@@ -134,8 +134,8 @@ export function NewsFeed({ category }: NewsFeedProps) {
           {sidePosts.map((post) => (
             <div
               key={post.id}
-              onClick={() => router.push(`/posts/${post.slug}`)}
-              onKeyDown={(e) => { if (e.key === "Enter") router.push(`/posts/${post.slug}`); }}
+               onClick={() => router.push(`/post?slug=${post.slug}`)}
+               onKeyDown={(e) => { if (e.key === "Enter") router.push(`/post?slug=${post.slug}`); }}
               role="link"
               tabIndex={0}
               className="flex-1 flex flex-col overflow-hidden bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl cursor-pointer hover:border-brand-orange/30 hover:bg-card-slate/60 transition-all duration-300 group hover:-translate-y-0.5"

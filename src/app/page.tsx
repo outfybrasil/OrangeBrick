@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { NewsFeed } from "@/components/feed/NewsFeed";
-import { MultimediaSection } from "@/components/feed/MultimediaSection";
+
 import { Footer } from "@/components/ui/Footer";
 import type { PostCategory } from "@/lib/types/database";
 
@@ -115,8 +115,6 @@ function HomeContent() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <NewsFeed category={activeCategory} />
         
-        {/* Renderiza a seção multimídia apenas na Home (sem filtros ativos) */}
-        {!activeCategory && <MultimediaSection />}
       </main>
 
       {/* Footer Global Reutilizável */}

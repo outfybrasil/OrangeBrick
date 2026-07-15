@@ -35,7 +35,7 @@ export function NewsCard({ post, initialReactions }: NewsCardProps) {
   const commentCount = useCommentCount(post.id);
 
   const handleClick = () => {
-    router.push(`/posts/${post.slug}`);
+    router.push(`/post?slug=${post.slug}`);
   };
 
   return (

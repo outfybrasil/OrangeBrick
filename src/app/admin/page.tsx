@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 px-6 text-right space-x-3">
                         <button
-                          onClick={() => router.push(`/posts/${post.slug}`)}
+                          onClick={() => router.push(`/post?slug=${post.slug}`)}
                           disabled={!post.is_published}
                           className="text-xs text-gray-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
