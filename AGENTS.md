@@ -58,6 +58,15 @@
 [text]  → Contexto maior + conclusão + fonte
 ```
 
+### Markdown suportado nos blocos de texto
+
+- **`**texto**`** → negrito (renderiza como `<strong>`)
+- **`[texto](url)`** → link (abre externo em `_blank`, interno fica na mesma aba)
+- **`## `** → subtítulo (`<h2>`)
+- **`### `** → sub-subtítulo (`<h3>`)
+- **`- `** ou **`* `** → lista (`<ul><li>`)
+- Parser compartilhado em `src/lib/markdown.tsx` — usado tanto no post quanto no preview do editor
+
 ### Tom de voz
 
 - **Direto, seco, sem firulas**
