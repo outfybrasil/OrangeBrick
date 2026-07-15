@@ -62,12 +62,19 @@ function EditForm() {
               type: "image",
               url: "",
               alt: "",
-              caption: "Legenda ilustrativa da imagem no meio da matéria.",
+              caption: "Legenda da primeira imagem ilustrativa da matéria.",
             },
             {
               id: "template-body",
               type: "text",
               content: "## Subtítulo Importante\n\nDesenvolva os fatos e argumentos da sua matéria aqui de forma clara e fluida, sem usar negritos artificiais em palavras soltas. Utilize listas para organizar pontos principais:\n\n- Ponto importante 1\n- Ponto importante 2",
+            },
+            {
+              id: "template-image-2",
+              type: "image",
+              url: "",
+              alt: "",
+              caption: "Legenda da segunda imagem — diferente da primeira, mostre outro ângulo ou conceito.",
             },
             {
               id: "template-conclusion",
