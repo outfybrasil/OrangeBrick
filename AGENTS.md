@@ -82,6 +82,22 @@
 - Nunca publicar diretamente — o usuário revisa e publica manualmente pelo painel admin
 - Exceção: apenas se o usuário EXPLICITAMENTE pedir para publicar
 
+### Sobre URLs do Unsplash
+
+- Formato que funciona: `https://images.unsplash.com/photo-XXXXXXXXXXXXXXXXXX?auto=format&fit=crop&w=1200&q=80`
+- Onde `XXXXXXXXXXXXXX` é um hash hexadecimal (ex: `photo-1606579350120-c1d9d5615a33`)
+- ❌ IDs curtos tipo `Zjn4dT993-g` retornam 404 — **não usar**
+- Sempre verificar a URL com fetch/curl antes de salvar
+
+### Checklist de qualidade (rodar ANTES de salvar)
+
+- [ ] **Sem caracteres CJK** (chinês/japonês/coreano) — usar `grep -rP "[\x{4e00}-\x{9fff}]"` no conteúdo
+- [ ] **Sem termos em inglês soltos** sem tradução ou explicação (ex: "engine" não vira "引擎" em tradutor automático)
+- [ ] **Imagens carregam** — testar URL com fetch/curl para confirmar HTTP 200
+- [ ] **Bold `**texto**` funciona** — verificar que o parse de markdown está rodando no preview
+- [ ] **Links internos** usam `/posts/slug-da-materia` (não URL absoluta)
+- [ ] **Fonte citada** no final com `**Fonte:** [Nome](url)`
+
 ### Regra de ouro 2: NUNCA copiar texto fonte
 
 - **Reescrever 100%** com outras palavras
