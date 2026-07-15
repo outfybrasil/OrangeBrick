@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Footer } from "@/components/ui/Footer";
 
 interface InstitutionalClientProps {
@@ -9,6 +10,7 @@ interface InstitutionalClientProps {
 }
 
 function AdvertiseSection() {
+  const supabase = useMemo(() => createClient(), []);
   const [formData, setFormData] = useState({
     name: "",
     company: "",
@@ -26,14 +28,15 @@ function AdvertiseSection() {
     setSubmitError(null);
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const { error } = await supabase.from("contact_submissions").insert({
+        name: formData.name,
+        company: formData.company,
+        email: formData.email,
+        budget: formData.budget,
+        message: formData.message,
+      } as any);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao enviar");
+      if (error) throw error;
 
       setSubmitted(true);
     } catch (err: any) {

@@ -31,15 +31,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      // 2. Chamar nossa API segura do admin
-      const res = await fetch("/api/admin/posts");
-      const data = await res.json();
+      const { data, error: fetchError } = await supabase
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (!res.ok) {
-        throw new Error(data.error || "Falha ao buscar postagens");
-      }
+      if (fetchError) throw fetchError;
 
-      setPosts(data.posts || []);
+      setPosts(data || []);
     } catch (err: any) {
       setError(err.message || "Erro desconhecido");
     } finally {
@@ -54,9 +53,14 @@ export default function AdminDashboard() {
   const handleDelete = async (id: string) => {
     try {
       setDeleteError(null);
-      const res = await fetch(`/api/admin/posts?id=${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao excluir");
+
+      const { error: deleteError } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", id);
+
+      if (deleteError) throw deleteError;
+
       setPosts((prev) => prev.filter((p) => p.id !== id));
       setDeleteConfirm(null);
     } catch (err: any) {

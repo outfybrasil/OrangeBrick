@@ -80,12 +80,14 @@ function EditForm() {
         }
 
         if (postId) {
-          const res = await fetch(`/api/admin/posts?id=${postId}`);
-          const data = await res.json();
+          const { data: post, error: fetchError } = await supabase
+            .from("posts")
+            .select("*")
+            .eq("id", postId)
+            .single();
 
-          if (!res.ok) throw new Error(data.error || "Erro ao carregar matéria");
-          
-          const post = data.post;
+          if (fetchError) throw fetchError;
+
           setTitle(post.title);
           setSlug(post.slug);
           setSummary(post.summary);
@@ -95,17 +97,14 @@ function EditForm() {
           setAuthorName(post.author_name);
           setAuthorTag(post.author_tag || "");
 
-          // Tentar carregar blocos modulares
           try {
             const parsedBlocks = JSON.parse(post.body);
             if (Array.isArray(parsedBlocks)) {
               setBlocks(parsedBlocks);
             } else {
-              // Se não for array, tratar como texto markdown clássico
               setBlocks([{ id: "legacy-block", type: "text", content: post.body }]);
             }
           } catch {
-            // Se falhar o parse do JSON, é markdown legado
             setBlocks([{ id: "legacy-block", type: "text", content: post.body }]);
           }
         }
@@ -127,10 +126,10 @@ function EditForm() {
         .toLowerCase()
         .trim()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // remove acentos
-        .replace(/[^a-z0-9\s-]/g, "") // remove caracteres especiais
-        .replace(/[\s_]+/g, "-") // substitui espaços por hífen
-        .replace(/^-+|-+$/g, ""); // remove hífens do início/fim
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/[\s_]+/g, "-")
+        .replace(/^-+|-+$/g, "");
       setSlug(generatedSlug);
     }
   };
@@ -197,30 +196,40 @@ function EditForm() {
 
     try {
       const payload = {
-        id: postId || undefined,
         slug,
         title,
         summary,
-        body: JSON.stringify(blocks), // Salvar blocos como string JSON
+        body: JSON.stringify(blocks),
         category,
-        image_url: imageUrl,
-        image_alt: imageAlt,
-        author_name: authorName,
-        author_tag: authorTag,
+        image_url: imageUrl || null,
+        image_alt: imageAlt || null,
+        author_name: authorName || "Redação",
+        author_tag: authorTag || null,
         is_published: isPublished,
+        published_at: isPublished ? new Date().toISOString() : null,
       };
 
-      const res = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      if (postId) {
+        const { error: updateError } = await supabase
+          .from("posts")
+          .update({
+            ...payload,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", postId);
 
-      const data = await res.json();
+        if (updateError) throw updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from("posts")
+          .insert({
+            ...payload,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as any);
 
-      if (!res.ok) throw new Error(data.error || "Erro ao salvar notícia");
+        if (insertError) throw insertError;
+      }
 
       router.push("/admin");
       router.refresh();
