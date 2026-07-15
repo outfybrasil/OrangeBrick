@@ -21,6 +21,7 @@ const REACTION_ICONS: Record<string, string> = {
 };
 
 export default function BrickboardPage() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createClient(), []);
   const [posts, setPosts] = useState<PostWithReactions[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +90,7 @@ export default function BrickboardPage() {
           <Link href="/" className="flex items-center gap-4 group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logos/Logo Tijolo Quebrado.PNG"
+              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
               className="h-10 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-300"
             />

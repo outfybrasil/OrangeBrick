@@ -10,6 +10,7 @@ type ContentBlock =
   | { id: string; type: "image"; url: string; alt: string; caption?: string };
 
 function EditForm() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -251,7 +252,7 @@ function EditForm() {
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/Logo Tijolo Quebrado.PNG" alt="Logo" className="h-10 w-auto object-contain" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain" />
             <h1 className="text-lg font-black uppercase">
               Orange<span className="text-brand-orange">_</span>Brick <span className="text-xs text-gray-500 font-normal">/ editor</span>
             </h1>

@@ -18,6 +18,7 @@ const CATEGORIES: { value: PostCategory | null; label: string; hoverColor: strin
 ];
 
 function HomeContent() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as PostCategory | null;
@@ -73,7 +74,7 @@ function HomeContent() {
             <div className="flex items-center cursor-pointer group gap-4" onClick={() => handleCategoryClick(null)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logos/Logo Tijolo Quebrado.PNG"
+                src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
                 alt="Orange Brick Logo Icon"
                 className="h-10 sm:h-16 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-300"
               />

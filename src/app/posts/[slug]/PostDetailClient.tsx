@@ -190,6 +190,7 @@ function PostContent({ post }: { post: Post }) {
 }
 
 export function PostArticle({ slug }: { slug: string }) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = createClient();
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
@@ -265,7 +266,7 @@ export function PostArticle({ slug }: { slug: string }) {
           </button>
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/Logo Tijolo Quebrado.PNG" alt="Logo" className="h-10 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-200" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-200" />
             <span className="text-sm font-mono font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>

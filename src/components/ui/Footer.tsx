@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 export function Footer() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   return (
     <footer className="bg-[#08090C] border-t border-brand-orange-muted/10 py-12 text-gray-500 text-xs font-mono">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -11,7 +12,7 @@ export function Footer() {
           <div className="flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logos/Logo Tijolo Quebrado.PNG"
+              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
               className="h-12 w-auto object-contain"
             />

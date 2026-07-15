@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLogin() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = createClient();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -66,7 +67,7 @@ export default function AdminLogin() {
         <div className="flex flex-col items-center gap-3 mb-8 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logos/Logo Tijolo Quebrado.PNG"
+            src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
             alt="Orange Brick Logo Icon"
             className="h-16 w-auto object-contain animate-pulse"
           />
