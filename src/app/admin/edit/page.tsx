@@ -191,6 +191,51 @@ function EditForm() {
     setBlocks(newBlocks);
   };
 
+  // Duplicar Postagem
+  const handleDuplicate = async () => {
+    if (!title || !slug || !summary) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const dupSlug = slug + "-copy-" + Date.now().toString(36);
+      const dupTitle = title + " (cópia)";
+
+      const payload = {
+        slug: dupSlug,
+        title: dupTitle,
+        summary,
+        body: JSON.stringify(blocks),
+        category,
+        image_url: imageUrl || null,
+        image_alt: imageAlt || null,
+        author_name: authorName || "Redação",
+        author_tag: authorTag || null,
+        is_published: false,
+        published_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error: insertError } = await (supabase as any)
+        .from("posts")
+        .insert(payload)
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      router.push(`/admin/edit?id=${data.id}`);
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Erro ao duplicar matéria");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Salvar Postagem
   const handleSave = async (isPublished: boolean) => {
     if (!title || !slug || !summary || !category) {
@@ -432,6 +477,15 @@ function EditForm() {
               >
                 {isSaving ? "Salvando..." : "Salvar como Rascunho"}
               </button>
+              {postId && (
+                <button
+                  onClick={handleDuplicate}
+                  disabled={isSaving}
+                  className="w-full bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-center"
+                >
+                  📋 Duplicar Matéria
+                </button>
+              )}
               <button
                 onClick={() => setShowPreview(true)}
                 className="w-full bg-accent-blue/10 hover:bg-accent-blue/20 text-accent-blue font-bold py-3 rounded-lg border border-accent-blue/20 hover:border-accent-blue/40 transition-all cursor-pointer text-center"
