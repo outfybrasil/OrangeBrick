@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { PostCategory } from "@/lib/types/database";
+import type { Post, PostCategory } from "@/lib/types/database";
 
 type ContentBlock =
   | { id: string; type: "text"; content: string }
@@ -80,7 +80,7 @@ function EditForm() {
         }
 
         if (postId) {
-          const { data: post, error: fetchError } = await supabase
+          const { data: post, error: fetchError } = await (supabase as any)
             .from("posts")
             .select("*")
             .eq("id", postId)
@@ -210,7 +210,7 @@ function EditForm() {
       };
 
       if (postId) {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase as any)
           .from("posts")
           .update({
             ...payload,
@@ -220,13 +220,13 @@ function EditForm() {
 
         if (updateError) throw updateError;
       } else {
-        const { error: insertError } = await supabase
+        const { error: insertError } = await (supabase as any)
           .from("posts")
           .insert({
             ...payload,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          } as any);
+          });
 
         if (insertError) throw insertError;
       }

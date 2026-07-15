@@ -31,14 +31,14 @@ export default function AdminDashboard() {
         return;
       }
 
-      const { data, error: fetchError } = await supabase
+      const { data, error: fetchError } = await (supabase as any)
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      setPosts(data || []);
+      setPosts((data as Post[]) || []);
     } catch (err: any) {
       setError(err.message || "Erro desconhecido");
     } finally {
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
     try {
       setDeleteError(null);
 
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await (supabase as any)
         .from("posts")
         .delete()
         .eq("id", id);
