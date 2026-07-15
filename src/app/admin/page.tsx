@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Post } from "@/lib/types/database";
 
+function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
+  return !!user?.user_metadata?.is_admin;
+}
+
 export default function AdminDashboard() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createClient(), []);
@@ -20,11 +24,9 @@ export default function AdminDashboard() {
       setIsLoading(true);
       setError(null);
 
-      // 1. Verificar autenticação via check-session seguro no servidor
-      const sessionRes = await fetch("/api/admin/check-session");
-      const sessionData = await sessionRes.json();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (!sessionData.isAdmin) {
+      if (!isAdmin(user)) {
         router.push("/admin/login");
         return;
       }

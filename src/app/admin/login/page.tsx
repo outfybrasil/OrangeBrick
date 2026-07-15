@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
+  return !!user?.user_metadata?.is_admin;
+}
+
 export default function AdminLogin() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = createClient();
@@ -16,16 +20,14 @@ export default function AdminLogin() {
   useEffect(() => {
     async function checkUser() {
       try {
-        const res = await fetch("/api/admin/check-session");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.isAdmin) router.push("/admin");
+        const { data: { user } } = await supabase.auth.getUser();
+        if (isAdmin(user)) router.push("/admin");
       } catch {
-        // Silencia — usuário só não está logado
+        // Silencia
       }
     }
     checkUser();
-  }, [router]);
+  }, [router, supabase]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,14 +42,11 @@ export default function AdminLogin() {
 
       if (signInError) throw signInError;
 
-      // Validar no servidor se o usuário que logou é o admin legítimo
-      const res = await fetch("/api/admin/check-session");
-      const sessionData = await res.json();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (!sessionData.isAdmin) {
-        // Logou mas não é o admin -> desloga e dá erro
+      if (!isAdmin(user)) {
         await supabase.auth.signOut();
-        throw new Error(sessionData.error || "Não autorizado: Este e-mail não possui privilégios de administrador.");
+        throw new Error("Não autorizado: Este e-mail não possui privilégios de administrador.");
       }
 
       router.push("/admin");

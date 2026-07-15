@@ -47,6 +47,7 @@ jobs:
           # Variáveis do Supabase lidas das Secrets ou Variables do repositório
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || vars.ADMIN_EMAIL }}
           # Se você usar o domínio padrão do Github Pages (ex: https://outfybrasil.github.io/OrangeBrick/),
           # mantenha o NEXT_PUBLIC_BASE_PATH abaixo. Se for usar um domínio personalizado (ex: orangebrick.com.br),
           # comente ou remova a linha abaixo.
