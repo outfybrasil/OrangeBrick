@@ -41,11 +41,9 @@ function EditForm() {
         setIsLoading(true);
         setError(null);
 
-        // Verificar autenticação via check-session seguro no servidor
-        const sessionRes = await fetch("/api/admin/check-session");
-        const sessionData = await sessionRes.json();
+        const { data: { user } } = await supabase.auth.getUser();
 
-        if (!sessionData.isAdmin) {
+        if (!user?.user_metadata?.is_admin) {
           router.push("/admin/login");
           return;
         }
