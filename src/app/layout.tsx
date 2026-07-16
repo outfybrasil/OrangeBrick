@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter, Fira_Code } from "next/font/google";
 import { ConsoleEasterEgg } from "@/components/ConsoleEasterEgg";
+import PushSetup from "@/components/PushSetup";
 import "./globals.css";
 
 const inter = Inter({
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-sans">
         <ConsoleEasterEgg />
         {children}
+        <PushSetup />
       </body>
     </html>
   );

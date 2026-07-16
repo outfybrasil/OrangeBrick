@@ -6,19 +6,21 @@
 - O resumo descreve UMA cena/conceito — a imagem DEVE mostrar essa cena
 - O alt text DEVE descrever a imagem E conectar com o contexto do resumo
 - A imagem DEVE ser da geração atual do assunto
-- Preferir fotos do Unsplash que mostrem objetos/cenas reais, não conceitos abstratos
+- **Usar imagens geradas por IA** — criar com base no resumo da matéria
+- **NUNCA repetir a mesma imagem** — cada bloco de imagem no corpo da matéria DEVE ser uma imagem diferente da anterior
+- **Diversidade visual:** a imagem de capa e as imagens do corpo devem mostrar **ângulos, objetos ou conceitos diferentes** (ex: capa mostra o console, corpo mostra algo complementar como justiça, indústria, disco, etc.)
 - Evitar imagens que mostram apenas controles quando o assunto é console, mídia física, ou tecnologia específica
+- A imagem deve ser **fotorrealista** — nada de arte conceitual ou abstrata
+- **Para fotos de jogos:** buscar screenshots reais do jogo, artes conceituais oficiais ou imagens promocionais — NÃO usar fotos genéricas de lugares/objetos reais
+- **Para eventos de jogos (E3, Gamescom, Nintendo Direct etc.):** buscar a **logo oficial do evento** ou foto do palco/banner do evento
 
-### Termos de busca no Unsplash por assunto
+### Prompt de IA para geração de imagem
 
-| Assunto | Termo de busca | O que NÃO usar |
-|---|---|---|
-| Nintendo/Switch | `"nintendo switch console dock"`, `"nintendo switch game cartridge"` | `"gaming controller"`, `"joy con"` (só controle) |
-| PlayStation | `"playstation 5 console"`, `"ps5 disc"`, `"sony playstation"` | `"ps3"`, `"ps2"`, `"controller"` isolado |
-| Xbox | `"xbox series x console"`, `"xbox game disc"` | `"xbox controller"` sozinho |
-| PC/Hardware | `"gaming pc setup"`, `"computer hardware components"`, `"graphics card"` | `"rgb keyboard"`, `"gaming mouse"` isolados |
-| Indústria geral | `"video game industry"`, `"gaming studio office"` | conceitos abstratos, `"money"` |
-| Modding | `"soldering iron"`, `"circuit board repair"`, `"custom console"` | `"gaming controller"` genérico |
+Usar o seguinte template de prompt para gerar as imagens:
+
+```
+Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia editorial, iluminação dramática, alta qualidade, resolução 4K. Mostrar [objeto/cena específico] em [ambiente/contexto]. Sem texto na imagem, sem marcas d'água.
+```
 
 ### Checklist de verificação
 
@@ -26,7 +28,9 @@
 - [ ] É da **geração atual** do assunto?
 - [ ] Mostra o **objeto certo**, não só um controle genérico?
 - [ ] O **alt text** conecta a imagem com o contexto do resumo?
-- [ ] É uma **foto real** (não arte conceitual/abstrata)?
+- [ ] É **fotorrealista** (não arte conceitual/abstrata)?
+- [ ] **Nenhuma imagem repetida** — capa, bloco 1, bloco 2 são todas diferentes?
+- [ ] A **URL da imagem** foi testada (HTTP 200)?
 
 ---
 
@@ -82,12 +86,13 @@
 - Nunca publicar diretamente — o usuário revisa e publica manualmente pelo painel admin
 - Exceção: apenas se o usuário EXPLICITAMENTE pedir para publicar
 
-### Sobre URLs do Unsplash
+### Busca de imagens
 
-- Formato que funciona: `https://images.unsplash.com/photo-XXXXXXXXXXXXXXXXXX?auto=format&fit=crop&w=1200&q=80`
-- Onde `XXXXXXXXXXXXXX` é um hash hexadecimal (ex: `photo-1606579350120-c1d9d5615a33`)
-- ❌ IDs curtos tipo `Zjn4dT993-g` retornam 404 — **não usar**
-- Sempre verificar a URL com fetch/curl antes de salvar
+- **Google Imagens** (`images.google.com`) — método principal, buscar pelo nome do jogo/evento/objeto + termo como "screenshot", "official art", "logo", "promotional image"
+- **IA generativa** — para imagens de conceitos, cenários, industriais, hardware (criar prompt baseado no resumo)
+- **Sempre testar a URL** com fetch/curl antes de salvar — confirmar HTTP 200
+- Preferir imagens com boa resolução (mínimo 1200px de largura)
+- Para logos de eventos: buscar `"[nome do evento] logo"` no Google Imagens
 
 ### Checklist de qualidade (rodar ANTES de salvar)
 
@@ -203,6 +208,7 @@ Exemplos:
 | Seu pedido | Ação do opencode |
 |---|---|
 | "Cria matéria sobre X" | Pesquisa 2-3 fontes confiáveis → reescreve 100% o conteúdo → busca imagens no Unsplash seguindo regras → monta blocos → salva como rascunho no Supabase |
+| "Qual vai ser a matéria do dia?" / "Materia do dia" | Busca **notícias publicadas HOJE** em fontes confiáveis (Gematsu, IGN Brasil, Eurogamer, VGC, GameSpot) → escolhe a mais relevante → pesquisa 2-3 fontes → reescreve 100% → busca **2 imagens diferentes** (fontes: Unsplash, Pexels, Pixabay) que mostrem **ângulos/conceitos diferentes** → monta blocos → salva como rascunho (`is_published: false`) |
 | "Corrige Y" | Lê código relevante → diagnostica o problema → propõe solução → edita → build → commit |
 | "O que acha de Z?" | Pesquisa → analisa → responde direto sem firulas |
 | "Quero X no estilo Orange Brick" | Segue todas as regras deste documento |

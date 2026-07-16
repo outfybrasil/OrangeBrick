@@ -83,16 +83,9 @@ export function useReactions({ postId, initial }: UseReactionsOptions) {
 
       debounceRef.current = setTimeout(async () => {
         try {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-          const functionUrl = `${supabaseUrl}/functions/v1/toggle-reaction`;
-
-          const res = await fetch(functionUrl, {
+          const res = await fetch("/api/reactions/toggle", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${anonKey}`,
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               post_id: postId,
               device_id: deviceId,

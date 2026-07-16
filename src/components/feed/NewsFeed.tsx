@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { NewsCard } from "@/components/card/NewsCard";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
@@ -28,28 +28,6 @@ export function NewsFeed({ category }: NewsFeedProps) {
     useInfiniteFeed(category);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  const handleIntersection = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (entry.isIntersecting && hasMore && !isLoadingMore && !isLoading) {
-        loadMore();
-      }
-    },
-    [hasMore, isLoadingMore, isLoading, loadMore]
-  );
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(handleIntersection, {
-      rootMargin: "400px",
-    });
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [handleIntersection]);
 
   if (isLoading) {
     return <NewsFeedSkeleton />;
@@ -205,6 +183,17 @@ export function NewsFeed({ category }: NewsFeedProps) {
       {isLoadingMore && (
         <div className="py-8 flex justify-center">
           <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
+        </div>
+      )}
+
+      {hasMore && !isLoadingMore && (
+        <div className="py-10 flex justify-center">
+          <button
+            onClick={loadMore}
+            className="font-mono text-xs text-brand-orange border border-brand-orange/30 px-6 py-3 rounded-lg hover:bg-brand-orange/10 hover:border-brand-orange/50 transition-all duration-200 cursor-pointer font-bold tracking-wider uppercase"
+          >
+            ← Carregar mais →
+          </button>
         </div>
       )}
 

@@ -8,6 +8,7 @@ import { NewsCardSummary } from "./NewsCardSummary";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { useReactions } from "@/lib/hooks/useReactions";
+import { usePostViews } from "@/lib/hooks/usePostViews";
 import { useCommentCount } from "@/lib/hooks/useCommentCount";
 import type { Post, ReactionType, PostCategory } from "@/lib/types/database";
 
@@ -32,6 +33,7 @@ export function NewsCard({ post, initialReactions }: NewsCardProps) {
     postId: post.id,
     initial: initialReactions,
   });
+  const { count: viewCount } = usePostViews({ postId: post.id });
   const commentCount = useCommentCount(post.id);
 
   const handleClick = () => {
@@ -94,6 +96,7 @@ export function NewsCard({ post, initialReactions }: NewsCardProps) {
             error={error}
             commentCount={commentCount}
             onCommentClick={() => setIsCommentOpen(true)}
+            viewCount={viewCount}
           />
         </div>
       </article>

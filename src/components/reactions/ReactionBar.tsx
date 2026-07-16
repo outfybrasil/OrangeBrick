@@ -15,6 +15,7 @@ interface ReactionBarProps {
   error?: string | null;
   commentCount?: number;
   onCommentClick?: () => void;
+  viewCount?: number;
 }
 
 export function ReactionBar({
@@ -29,6 +30,7 @@ export function ReactionBar({
   error,
   commentCount,
   onCommentClick,
+  viewCount,
 }: ReactionBarProps) {
   const isControversial = (salty + flop) > hype * 1.5 && hype > 0;
   const brickLabel = category === "opinion" ? "Enterrar" : "Brick";
@@ -76,7 +78,12 @@ export function ReactionBar({
           />
         )}
 
-        <div className="flex-1" />
+        <div className="flex items-center gap-2 text-[11px] font-mono text-gray-500 mr-2">
+          <Icon name="eye" size={14} />
+          {viewCount !== undefined && (
+            <span className="text-[10px] font-mono text-gray-500">{viewCount}</span>
+          )}
+        </div>
 
         <button
           type="button"

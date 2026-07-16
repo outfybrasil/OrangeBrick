@@ -8,6 +8,7 @@ import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentList } from "@/components/comments/CommentList";
 import { CommentForm } from "@/components/comments/CommentForm";
 import { useReactions } from "@/lib/hooks/useReactions";
+import { usePostViews } from "@/lib/hooks/usePostViews";
 import { useComments } from "@/lib/hooks/useComments";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
@@ -111,6 +112,14 @@ export function PostArticle({ slug }: { slug: string }) {
     initial: EMPTY_REACTIONS,
   });
 
+  const { count: viewCount, registerView } = usePostViews({ postId: post?.id || "" });
+
+  useEffect(() => {
+    if (post?.id) {
+      registerView();
+    }
+  }, [post?.id, registerView]);
+
   const { addComment } = useComments(post?.id || "");
 
   if (isLoading) {
@@ -182,18 +191,14 @@ export function PostArticle({ slug }: { slug: string }) {
                 <span className="text-brand-orange-muted font-bold">{post.author_tag}</span>
               </>
             )}
+            <span className="flex-1" />
+            <span className="flex items-center gap-1.5 text-gray-500">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5ZM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z" />
+              </svg>
+              <span className="text-[10px] font-mono">{viewCount} visualizações</span>
+            </span>
           </div>
-
-          {post.image_url && (
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl border border-brand-orange-muted/15 shadow-xl my-6">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={post.image_url}
-                alt={post.image_alt || post.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
 
           <div className="mt-8">
             <PostContent post={post} />

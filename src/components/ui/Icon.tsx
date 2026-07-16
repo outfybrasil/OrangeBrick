@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type IconName = "hype" | "flop" | "salty" | "defendo" | "comment" | "brick" | "close" | "chevron-right" | "sparkle";
+export type IconName = "hype" | "flop" | "salty" | "defendo" | "comment" | "brick" | "close" | "chevron-right" | "sparkle" | "eye";
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;
@@ -17,6 +17,7 @@ const PATHS: Record<IconName, string> = {
   close: "M6 6L18 18M18 6L6 18",
   "chevron-right": "M9 6L15 12L9 18",
   sparkle: "M12 2L13 9L20 12L13 15L12 22L11 15L4 12L11 9L12 2Z",
+  eye: "M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5ZM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z",
 };
 
 const VIEWBOX: Record<IconName, string> = {
@@ -29,6 +30,7 @@ const VIEWBOX: Record<IconName, string> = {
   close: "0 0 24 24",
   "chevron-right": "0 0 24 24",
   sparkle: "0 0 24 24",
+  eye: "0 0 24 24",
 };
 
 export function Icon({ name, size = 16, className, ...props }: IconProps) {

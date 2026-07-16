@@ -18,6 +18,16 @@ export interface Database {
         Insert: Omit<Comment, "id" | "created_at" | "updated_at">;
         Update: Partial<Omit<Comment, "id">>;
       };
+      post_views: {
+        Row: PostView;
+        Insert: Omit<PostView, "id" | "viewed_at">;
+        Update: Partial<Omit<PostView, "id">>;
+      };
+      push_subscriptions: {
+        Row: PushSubscription;
+        Insert: Omit<PushSubscription, "id" | "created_at">;
+        Update: Partial<Omit<PushSubscription, "id">>;
+      };
     };
     Functions: {
       toggle_reaction: {
@@ -75,6 +85,22 @@ export interface Comment {
   content: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface PostView {
+  id: string;
+  post_id: string;
+  device_id: string;
+  viewed_at: string;
+}
+
+export interface PushSubscription {
+  id: string;
+  endpoint: string;
+  p256dh_key: string;
+  auth_key: string;
+  user_agent: string | null;
+  created_at: string;
 }
 
 export type PostCategory = Post["category"];
