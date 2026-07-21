@@ -288,7 +288,7 @@ function EditForm() {
     }
   };
 
-  const handleSave = async (isPublished: boolean) => {
+  const handleSave = async (isPublished: boolean, updatePublishDate: boolean = false) => {
     if (!title || !slug || !summary || !category) {
       setError("Preencha todos os campos obrigatórios.");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -320,12 +320,16 @@ function EditForm() {
     setIsSaving(true);
     setError(null);
     try {
+      const newPublishedAt = isPublished
+        ? (updatePublishDate || !publishedAt ? new Date().toISOString() : publishedAt)
+        : null;
+
       const payload = {
         slug, title, summary, body: JSON.stringify(blocks), category,
         image_url: imageUrl || null, image_alt: imageAlt || null,
         author_name: authorName || "Redação", author_tag: authorTag || null,
         is_published: isPublished,
-        published_at: isPublished ? publishedAt || new Date().toISOString() : null,
+        published_at: newPublishedAt,
       };
       let savedPost: Post | null = null;
       if (postId) {
@@ -339,7 +343,7 @@ function EditForm() {
         if (insertError) throw insertError;
         savedPost = data as unknown as Post;
       }
-      if (isPublished && savedPost) {
+      if (isPublished && updatePublishDate && savedPost) {
         const np = { title: savedPost.title, slug: savedPost.slug, category: savedPost.category };
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
@@ -429,13 +433,13 @@ function EditForm() {
             <div className="lg:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
                 <span>Título da Notícia *</span>
-                <span className={`text-[9px] ${title.length > 65 ? "text-red-400" : "text-gray-500"}`}>{title.length}/70</span>
+                <span className={`text-[9px] ${title.length > 110 ? "text-red-400" : "text-gray-500"}`}>{title.length}/120</span>
               </label>
               <input
                 type="text" value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Título atraente (máx. 70 caracteres)..."
-                maxLength={70}
+                placeholder="Título atraente (máx. 120 caracteres)..."
+                maxLength={120}
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm font-bold"
               />
             </div>
@@ -469,14 +473,14 @@ function EditForm() {
             <div className="lg:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
                 <span>Resumo / Subtítulo *</span>
-                <span className={`text-[9px] ${summary.length > 170 ? "text-red-400" : "text-gray-500"}`}>{summary.length}/180</span>
+                <span className={`text-[9px] ${summary.length > 280 ? "text-red-400" : "text-gray-500"}`}>{summary.length}/300</span>
               </label>
               <textarea
                 value={summary}
                 onChange={(e) => { setSummary(e.target.value); setHasChanges(true); }}
-                maxLength={180}
+                maxLength={300}
                 rows={3}
-                placeholder="Uma frase com o fato e por que ele importa (cerca de 140 caracteres)..."
+                placeholder="Uma frase ou dois parágrafos explicando os fatos principais e por que a notícia importa (máx. 300 caracteres)..."
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors font-sans text-sm leading-relaxed"
               />
             </div>
@@ -769,25 +773,54 @@ function EditForm() {
             </h2>
           </div>
           <div className="p-6 flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={() => handleSave(true)}
-              disabled={isSaving}
-              className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
-            >
-              {isSaving ? "Salvando..." : "Publicar Notícia"}
-            </button>
-            <button
-              onClick={() => handleSave(false)}
-              disabled={isSaving}
-              className="flex-1 bg-card-slate/60 hover:bg-card-slate text-gray-300 font-bold py-3 rounded-lg border border-brand-orange-muted/10 hover:border-brand-orange/20 transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
-            >
-              {isSaving ? "Salvando..." : "Salvar como Rascunho"}
-            </button>
+            {publishedAt ? (
+              <>
+                <button
+                  onClick={() => handleSave(true, false)}
+                  disabled={isSaving}
+                  className="flex-1 bg-card-slate/80 hover:bg-card-slate text-white font-bold py-3 px-4 rounded-lg border border-brand-orange-muted/30 hover:border-brand-orange/40 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center flex items-center justify-center gap-1.5"
+                >
+                  {isSaving ? "Salvando..." : "💾 Salvar Apenas (Manter Data)"}
+                </button>
+                <button
+                  onClick={() => handleSave(true, true)}
+                  disabled={isSaving}
+                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center flex items-center justify-center gap-1.5"
+                >
+                  {isSaving ? "Republicando..." : "🚀 Republicar (Atualizar Data)"}
+                </button>
+                <button
+                  onClick={() => handleSave(false, false)}
+                  disabled={isSaving}
+                  className="px-4 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold py-3 rounded-lg border border-yellow-500/20 transition-all cursor-pointer disabled:opacity-50 text-xs text-center"
+                >
+                  {isSaving ? "Salvando..." : "📦 Mudar para Rascunho"}
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleSave(true, true)}
+                  disabled={isSaving}
+                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
+                >
+                  {isSaving ? "Publicando..." : "🚀 Publicar Notícia"}
+                </button>
+                <button
+                  onClick={() => handleSave(false, false)}
+                  disabled={isSaving}
+                  className="flex-1 bg-card-slate/60 hover:bg-card-slate text-gray-300 font-bold py-3 rounded-lg border border-brand-orange-muted/10 hover:border-brand-orange/20 transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
+                >
+                  {isSaving ? "Salvando..." : "💾 Salvar como Rascunho"}
+                </button>
+              </>
+            )}
+
             {postId && (
               <button
                 onClick={handleDuplicate}
                 disabled={isSaving}
-                className="px-6 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
+                className="px-5 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center"
               >
                 📋 Duplicar
               </button>

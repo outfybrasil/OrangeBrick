@@ -39,8 +39,8 @@ export function validateEditorialContent(content: EditorialContent): string[] {
   const textBlocks = blocks.filter((block): block is Extract<EditorialBlock, { type: "text" }> => block.type === "text");
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) errors.push("O slug deve usar apenas letras minúsculas, números e hífens.");
-  if (!title.trim() || title.length > 70) errors.push("O título deve ter entre 1 e 70 caracteres.");
-  if (summary.trim().length < 80 || summary.length > 180) errors.push("O resumo deve ter entre 80 e 180 caracteres e ficar próximo de 140.");
+  if (!title.trim() || title.length > 120) errors.push("O título deve ter entre 1 e 120 caracteres.");
+  if (summary.trim().length < 40 || summary.length > 300) errors.push("O resumo deve ter entre 40 e 300 caracteres.");
   if (!isHttpsUrl(imageUrl)) errors.push("A capa precisa ter uma URL HTTPS válida.");
   if (imageAlt.trim().length < 20) errors.push("O alt text da capa deve descrever a imagem e o contexto da matéria.");
   if (blocks.length < 5 || blocks[0]?.type !== "text" || blocks.at(-1)?.type !== "text") {
