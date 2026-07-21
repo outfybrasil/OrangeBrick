@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { TrendingTicker } from "@/components/feed/TrendingTicker";
+import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
 import { Footer } from "@/components/ui/Footer";
 import type { PostCategory } from "@/lib/types/database";
 
@@ -134,6 +135,7 @@ function HomeContent() {
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <h1 className="sr-only">Orange Brick — notícias de games, hardware e indústria</h1>
+        <ReleaseRadarStrip />
         <NewsFeed category={activeCategory} searchQuery={searchQuery} activeTag={activeTag} />
       </main>
 
