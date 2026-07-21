@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     url: "/",
   },
   twitter: { card: "summary_large_image", title: "Orange Brick", description: "Notícias de games, hardware, indústria e modding." },
+  verification: { google: "SZ4ycvzpvcO8D0aR8SoUJJA82vh_AxHgKx7yZzg9QXQ" },
 };
 
 export default function RootLayout({
