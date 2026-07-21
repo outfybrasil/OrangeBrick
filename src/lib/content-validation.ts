@@ -40,24 +40,31 @@ export function validateEditorialContent(content: EditorialContent): string[] {
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) errors.push("O slug deve usar apenas letras minúsculas, números e hífens.");
   if (!title.trim() || title.length > 120) errors.push("O título deve ter entre 1 e 120 caracteres.");
-  if (summary.trim().length < 40 || summary.length > 300) errors.push("O resumo deve ter entre 40 e 300 caracteres.");
-  if (!isHttpsUrl(imageUrl)) errors.push("A capa precisa ter uma URL HTTPS válida.");
-  if (imageAlt.trim().length < 20) errors.push("O alt text da capa deve descrever a imagem e o contexto da matéria.");
-  if (blocks.length < 5 || blocks[0]?.type !== "text" || blocks.at(-1)?.type !== "text") {
-    errors.push("Use a estrutura texto, imagem, texto, imagem e texto.");
+  if (summary.trim().length < 20 || summary.length > 300) errors.push("O resumo deve ter entre 20 e 300 caracteres.");
+
+  if (imageUrl && !isHttpsUrl(imageUrl)) {
+    errors.push("A capa precisa ter uma URL HTTPS válida.");
   }
-  if (imageBlocks.length < 2) errors.push("Inclua pelo menos duas imagens no corpo.");
-  if (imageBlocks.some((block) => !isHttpsUrl(block.url))) errors.push("Todas as imagens do corpo precisam ter URLs HTTPS válidas.");
-  if (imageBlocks.some((block) => block.alt.trim().length < 20)) errors.push("Cada imagem do corpo precisa de alt text contextual.");
+  if (imageUrl && imageAlt.trim().length < 3) {
+    errors.push("Informe o texto alternativo (Alt text) da imagem de capa.");
+  }
+
+  if (textBlocks.length === 0 || !textBlocks.some((b) => b.content.trim().length > 0)) {
+    errors.push("Adicione pelo menos um bloco de texto com conteúdo no corpo da matéria.");
+  }
+
+  if (imageBlocks.some((block) => block.url.trim() && !isHttpsUrl(block.url))) {
+    errors.push("Todas as imagens do corpo precisam ter URLs HTTPS válidas.");
+  }
 
   const urls = [imageUrl, ...imageBlocks.map((block) => block.url)].filter(Boolean);
-  if (new Set(urls).size !== urls.length) errors.push("A capa e as imagens do corpo devem ser diferentes.");
-
-  const finalText = textBlocks.at(-1)?.content || "";
-  if (!/\*\*Fonte:\*\*\s*\[[^\]]+\]\(https:\/\/[^)]+\)/i.test(finalText)) {
-    errors.push("O último bloco deve citar a fonte no formato **Fonte:** [Nome](URL).");
+  if (urls.length > 1 && new Set(urls).size !== urls.length) {
+    errors.push("As imagens do corpo e a capa não devem ter URLs repetidas.");
   }
-  if (hasCjk(text)) errors.push("O conteúdo contém caracteres CJK e precisa ser revisado.");
+
+  if (hasCjk(text)) {
+    errors.push("O conteúdo contém caracteres CJK (chinês/japonês/coreano) e precisa ser traduzido.");
+  }
 
   return errors;
 }

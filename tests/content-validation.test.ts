@@ -19,19 +19,26 @@ const validContent = {
   blocks,
 };
 
-test("aceita uma matéria que cumpre o padrão editorial", () => {
+test("aceita uma matéria que cumpre o padrão editorial com ou sem imagem", () => {
   assert.deepEqual(validateEditorialContent(validContent), []);
+  
+  const textOnlyContent = {
+    ...validContent,
+    imageUrl: "",
+    imageAlt: "",
+    blocks: [{ id: "1", type: "text" as const, content: "Texto completo sem imagens na matéria." }],
+  };
+  assert.deepEqual(validateEditorialContent(textOnlyContent), []);
 });
 
-test("bloqueia imagens repetidas, CJK e ausência de fonte", () => {
+test("bloqueia imagens repetidas e caracteres CJK", () => {
   const invalid = {
     ...validContent,
     title: "Console \u5f15\u64ce",
-    blocks: blocks.map((block) => block.id === "2" && block.type === "image" ? { ...block, url: validContent.imageUrl } : block).map((block) => block.id === "5" && block.type === "text" ? { ...block, content: "Conclusão sem fonte." } : block),
+    blocks: blocks.map((block) => block.id === "2" && block.type === "image" ? { ...block, url: validContent.imageUrl } : block),
   };
   const errors = validateEditorialContent(invalid);
-  assert.ok(errors.some((error) => error.includes("diferentes")));
-  assert.ok(errors.some((error) => error.includes("Fonte")));
+  assert.ok(errors.some((error) => error.includes("repetidas")));
   assert.ok(errors.some((error) => error.includes("CJK")));
 });
 
