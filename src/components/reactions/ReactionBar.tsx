@@ -1,16 +1,14 @@
 import { ReactionButton } from "./ReactionButton";
 import { ReactionsError } from "./ReactionsError";
 import { Icon } from "@/components/ui/Icon";
-import type { ReactionType, PostCategory } from "@/lib/types/database";
+import type { ReactionType } from "@/lib/types/database";
 
 interface ReactionBarProps {
   hype: number;
   flop: number;
   salty: number;
-  defendo: number;
-  brick: number;
-  category?: PostCategory;
   onToggle: (type: ReactionType) => void;
+  activeReaction?: ReactionType | null;
   disabled?: boolean;
   error?: string | null;
   commentCount?: number;
@@ -22,19 +20,14 @@ export function ReactionBar({
   hype,
   flop,
   salty,
-  defendo,
-  brick,
-  category,
   onToggle,
+  activeReaction,
   disabled,
   error,
   commentCount,
   onCommentClick,
   viewCount,
 }: ReactionBarProps) {
-  const isControversial = (salty + flop) > hype * 1.5 && hype > 0;
-  const brickLabel = category === "opinion" ? "Enterrar" : "Brick";
-
   return (
     <div>
       <div className="flex items-center gap-1 px-4 py-2 border-t border-brand-orange-muted/10 bg-black/10">
@@ -43,6 +36,7 @@ export function ReactionBar({
           icon="hype"
           count={hype}
           disabled={disabled}
+          active={activeReaction === "hype"}
           onClick={() => onToggle("hype")}
         />
         <ReactionButton
@@ -50,6 +44,7 @@ export function ReactionBar({
           icon="flop"
           count={flop}
           disabled={disabled}
+          active={activeReaction === "flop"}
           onClick={() => onToggle("flop")}
         />
         <ReactionButton
@@ -57,26 +52,11 @@ export function ReactionBar({
           icon="salty"
           count={salty}
           disabled={disabled}
+          active={activeReaction === "salty"}
           onClick={() => onToggle("salty")}
         />
-        <ReactionButton
-          type="defendo"
-          icon="defendo"
-          count={defendo}
-          disabled={disabled}
-          onClick={() => onToggle("defendo")}
-        />
 
-        {isControversial && (
-          <ReactionButton
-            type="brick"
-            icon="brick"
-            count={brick}
-            disabled={disabled}
-            variant="brick"
-            onClick={() => onToggle("brick")}
-          />
-        )}
+        <div className="flex-1" />
 
         <div className="flex items-center gap-2 text-[11px] font-mono text-gray-500 mr-2">
           <Icon name="eye" size={14} />

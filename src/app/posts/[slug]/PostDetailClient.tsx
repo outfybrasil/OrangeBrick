@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentList } from "@/components/comments/CommentList";
@@ -13,33 +12,28 @@ import { useComments } from "@/lib/hooks/useComments";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { Footer } from "@/components/ui/Footer";
-import type { Post, ReactionType } from "@/lib/types/database";
+import type { Post, PostStats } from "@/lib/types/database";
 
-const EMPTY_REACTIONS: Record<ReactionType, number> = {
-  hype: 0,
-  flop: 0,
-  salty: 0,
-  defendo: 0,
-  brick: 0,
-};
+type ContentBlock =
+  | { id: string; type: "text"; content: string }
+  | { id: string; type: "image"; url: string; alt: string; caption?: string };
 
 function PostContent({ post }: { post: Post }) {
-  const [isModular, setIsModular] = useState(false);
-  const [blocks, setBlocks] = useState<any[]>([]);
-
-  useEffect(() => {
+  const blocks = useMemo<ContentBlock[] | null>(() => {
     try {
-      const parsed = JSON.parse(post.body);
+      const parsed: unknown = JSON.parse(post.body);
       if (Array.isArray(parsed)) {
-        setIsModular(true);
-        setBlocks(parsed);
+        return parsed as ContentBlock[];
       }
     } catch {
-      setIsModular(false);
+      return null;
     }
+    return null;
   }, [post.body]);
 
-  if (isModular) {
+  if (blocks) {
+    const renderedUrls = new Set<string>();
+
     return (
       <div className="space-y-6">
         {blocks.map((block) => {
@@ -47,14 +41,18 @@ function PostContent({ post }: { post: Post }) {
             return <div key={block.id}>{parseMarkdownToReact(block.content)}</div>;
           }
           if (block.type === "image") {
+            if (!block.url || renderedUrls.has(block.url)) {
+              return null;
+            }
+            renderedUrls.add(block.url);
+
             return (
               <div key={block.id} className="my-8 flex flex-col gap-2">
-                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                <div className="relative w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg bg-card-slate/30 flex items-center justify-center">
                   <img
                     src={block.url}
                     alt={block.alt || "Imagem da matéria"}
-                    className="w-full h-full object-cover"
+                    className="w-full h-auto max-h-[550px] object-cover object-center rounded-xl"
                   />
                 </div>
                 {block.caption && (
@@ -74,78 +72,28 @@ function PostContent({ post }: { post: Post }) {
   return <div className="space-y-4">{parseMarkdownToReact(post.body)}</div>;
 }
 
-export function PostArticle({ slug }: { slug: string }) {
+export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const supabase = createClient();
   const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchPost() {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const { data, error: fetchError } = await supabase
-          .from("posts")
-          .select("*")
-          .eq("slug", slug)
-          .eq("is_published", true)
-          .single();
-
-        if (fetchError) throw fetchError;
-        setPost(data as Post);
-      } catch (err: any) {
-        setError(err.message || "Não foi possível carregar a notícia");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchPost();
-  }, [slug, supabase]);
-
-  const { counts, isPending, error: reactionError, toggleReaction } = useReactions({
-    postId: post?.id || "",
-    initial: EMPTY_REACTIONS,
+  const { counts, isPending, error: reactionError, toggleReaction, userReaction } = useReactions({
+    postId: post.id,
+    initial: stats.reactions,
+    initialUserReaction: stats.userReaction,
+    hydrate: true,
   });
 
-  const { count: viewCount, registerView } = usePostViews({ postId: post?.id || "" });
+  const { count: viewCount, registerView } = usePostViews({ postId: post.id, initialCount: stats.views });
 
   useEffect(() => {
-    if (post?.id) {
-      registerView();
-    }
-  }, [post?.id, registerView]);
+    registerView();
+  }, [registerView]);
 
-  const { addComment } = useComments(post?.id || "");
+  const { comments, isLoading: commentsLoading, error: commentsError, addComment, fetchComments } = useComments(post.id);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center bg-background-void text-mono text-sm">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-          <span className="text-gray-400">Carregando notícia...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !post) {
-    return (
-      <div className="min-h-dvh flex flex-col items-center justify-center bg-background-void text-center p-4 font-mono">
-        <p className="text-red-400 mb-4">{error || "Notícia não encontrada"}</p>
-        <button
-          onClick={() => router.push("/")}
-          className="text-xs text-brand-orange hover:text-white border border-brand-orange/30 px-4 py-2 rounded-lg hover:bg-brand-orange/10 transition-colors"
-        >
-          ← Voltar para a Home
-        </button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    queueMicrotask(() => void fetchComments());
+  }, [fetchComments]);
 
   return (
     <div className="min-h-dvh bg-background-void text-white font-mono pb-24">
@@ -158,7 +106,6 @@ export function PostArticle({ slug }: { slug: string }) {
             ← Voltar para a Home
           </button>
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-200" />
             <span className="text-sm font-mono font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors">
               Orange<span className="text-brand-orange">_</span>Brick
@@ -213,10 +160,8 @@ export function PostArticle({ slug }: { slug: string }) {
             hype={counts.hype}
             flop={counts.flop}
             salty={counts.salty}
-            defendo={counts.defendo}
-            brick={counts.brick}
-            category={post?.category}
             onToggle={toggleReaction}
+            activeReaction={userReaction}
             disabled={isPending}
             error={reactionError}
           />
@@ -230,7 +175,12 @@ export function PostArticle({ slug }: { slug: string }) {
             <CommentForm onSubmit={(content) => addComment(content)} />
           </div>
           <div className="max-h-[500px] overflow-y-auto pr-2">
-            <CommentList postId={post.id} />
+            <CommentList
+              comments={comments}
+              isLoading={commentsLoading}
+              error={commentsError}
+              onRetry={() => void fetchComments()}
+            />
           </div>
         </div>
       </main>

@@ -1,127 +1,68 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { invokeFunction } from "@/lib/supabase/functions";
 import { useDeviceId } from "./useDeviceId";
 import type { ReactionType } from "@/lib/types/database";
 
 interface UseReactionsOptions {
   postId: string;
   initial: Record<ReactionType, number>;
+  initialUserReaction?: ReactionType | null;
+  hydrate?: boolean;
 }
 
-interface ReactionState {
+interface ToggleReactionResponse {
+  activeReaction: ReactionType | null;
   counts: Record<ReactionType, number>;
-  isPending: boolean;
-  error: string | null;
 }
 
-export function useReactions({ postId, initial }: UseReactionsOptions) {
+export function useReactions({ postId, initial, initialUserReaction = null, hydrate = false }: UseReactionsOptions) {
   const deviceId = useDeviceId();
-  const supabase = useMemo(() => createClient(), []);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isSubscribedRef = useRef(false);
-  const [state, setState] = useState<ReactionState>({
-    counts: initial,
-    isPending: false,
-    error: null,
-  });
+  const pendingRef = useRef(false);
+  const [counts, setCounts] = useState(initial);
+  const [userReaction, setUserReaction] = useState<ReactionType | null>(initialUserReaction);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!deviceId || isSubscribedRef.current) return;
-    isSubscribedRef.current = true;
-
-    const channel = supabase
-      .channel(`reactions-${postId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "reactions",
-          filter: `post_id=eq.${postId}`,
-        },
-        (payload) => {
-          const eventType = payload.eventType;
-          const newRow = payload.new as { reaction_type: string } | null;
-          const oldRow = payload.old as { reaction_type: string } | null;
-
-          setState((prev) => {
-            const counts = { ...prev.counts };
-
-            if (eventType === "INSERT" && newRow) {
-              const t = newRow.reaction_type as ReactionType;
-              counts[t] = (counts[t] || 0) + 1;
-            } else if (eventType === "DELETE" && oldRow) {
-              const t = oldRow.reaction_type as ReactionType;
-              counts[t] = Math.max(0, (counts[t] || 0) - 1);
-            }
-
-            return { ...prev, counts };
-          });
-        }
-      )
-      .subscribe();
-
+    if (!hydrate || !deviceId || !postId) return;
+    let active = true;
+    invokeFunction<{ stats: Record<string, { reactions: Record<ReactionType, number>; userReaction: ReactionType | null }> }>("post-stats", {
+      post_ids: [postId],
+      device_id: deviceId,
+    }).then((result) => {
+      const current = result.stats[postId];
+      if (active && current) {
+        setCounts(current.reactions);
+        setUserReaction(current.userReaction);
+      }
+    }).catch(() => undefined);
     return () => {
-      supabase.removeChannel(channel);
-      isSubscribedRef.current = false;
+      active = false;
     };
-  }, [deviceId, postId, supabase]);
+  }, [deviceId, hydrate, postId]);
 
-  const toggleReaction = useCallback(
-    async (type: ReactionType) => {
-      if (!deviceId) return;
+  const toggleReaction = useCallback(async (type: ReactionType) => {
+    if (!deviceId || !postId || pendingRef.current) return;
+    pendingRef.current = true;
+    setIsPending(true);
+    setError(null);
+    try {
+      const result = await invokeFunction<ToggleReactionResponse>("toggle-reaction", {
+        post_id: postId,
+        device_id: deviceId,
+        reaction_type: type,
+      });
+      setCounts(result.counts);
+      setUserReaction(result.activeReaction);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Erro ao registrar reação");
+    } finally {
+      pendingRef.current = false;
+      setIsPending(false);
+    }
+  }, [deviceId, postId]);
 
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-
-      setState((prev) => ({
-        ...prev,
-        isPending: true,
-        error: null,
-      }));
-
-      debounceRef.current = setTimeout(async () => {
-        try {
-          const res = await fetch("/api/reactions/toggle", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              post_id: postId,
-              device_id: deviceId,
-              reaction_type: type,
-            }),
-          });
-
-          if (!res.ok) {
-            const errData = await res.json();
-            throw new Error(errData.error || "Erro ao registrar reação");
-          }
-        } catch (err) {
-          const msg =
-            err && typeof err === "object" && "message" in err
-              ? (err as Error).message
-              : "Erro ao registrar reação";
-          setState((prev) => ({
-            ...prev,
-            isPending: false,
-            error: msg,
-          }));
-          setTimeout(() => {
-            setState((prev) => ({ ...prev, error: null }));
-          }, 3000);
-        } finally {
-          setState((prev) => ({ ...prev, isPending: false }));
-        }
-      }, 300);
-    },
-    [deviceId, postId]
-  );
-
-  return {
-    counts: state.counts,
-    isPending: state.isPending,
-    error: state.error,
-    toggleReaction,
-  };
+  return { counts, isPending, error, toggleReaction, userReaction };
 }

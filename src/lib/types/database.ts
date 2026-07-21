@@ -5,40 +5,61 @@ export interface Database {
     Tables: {
       posts: {
         Row: Post;
-        Insert: Omit<Post, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Post, "id">>;
+        Insert: PostInsert;
+        Update: Partial<PostInsert>;
+        Relationships: [];
       };
       reactions: {
         Row: Reaction;
-        Insert: Omit<Reaction, "id" | "created_at">;
-        Update: Partial<Omit<Reaction, "id">>;
+        Insert: ReactionInsert;
+        Update: Partial<ReactionInsert>;
+        Relationships: [];
       };
       comments: {
         Row: Comment;
-        Insert: Omit<Comment, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Comment, "id">>;
+        Insert: CommentInsert;
+        Update: Partial<CommentInsert>;
+        Relationships: [];
       };
       post_views: {
         Row: PostView;
-        Insert: Omit<PostView, "id" | "viewed_at">;
-        Update: Partial<Omit<PostView, "id">>;
+        Insert: PostViewInsert;
+        Update: Partial<PostViewInsert>;
+        Relationships: [];
       };
       push_subscriptions: {
         Row: PushSubscription;
-        Insert: Omit<PushSubscription, "id" | "created_at">;
-        Update: Partial<Omit<PushSubscription, "id">>;
+        Insert: PushSubscriptionInsert;
+        Update: Partial<PushSubscriptionInsert>;
+        Relationships: [];
+      };
+      contact_submissions: {
+        Row: ContactSubmission;
+        Insert: ContactSubmissionInsert;
+        Update: Partial<ContactSubmissionInsert>;
+        Relationships: [];
+      };
+      rate_limits: {
+        Row: RateLimit;
+        Insert: RateLimitInsert;
+        Update: Partial<RateLimitInsert>;
+        Relationships: [];
       };
     };
     Functions: {
-      toggle_reaction: {
+      consume_rate_limit: {
         Args: {
-          p_post_id: string;
-          p_device_id: string;
-          p_reaction_type: "hype" | "flop" | "salty" | "defendo" | "brick";
+          p_action: string;
+          p_identity_hash: string;
+          p_window_start: string;
+          p_limit: number;
         };
-        Returns: Json;
+        Returns: boolean;
       };
     };
+    Views: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 
@@ -59,12 +80,39 @@ export interface Post {
   updated_at: string;
 }
 
+export interface PostInsert {
+  id?: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  category: Post["category"];
+  image_url?: string | null;
+  image_alt?: string | null;
+  author_name: string;
+  author_tag?: string | null;
+  is_published?: boolean;
+  published_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Reaction {
   id: number;
   post_id: string;
   device_id: string;
-  reaction_type: "hype" | "flop" | "salty" | "defendo" | "brick";
+  reaction_type: "hype" | "flop" | "salty";
+  ip_hash: string | null;
   created_at: string;
+}
+
+export interface ReactionInsert {
+  id?: number;
+  post_id: string;
+  device_id: string;
+  reaction_type: Reaction["reaction_type"];
+  ip_hash?: string | null;
+  created_at?: string;
 }
 
 export interface ContactSubmission {
@@ -74,7 +122,19 @@ export interface ContactSubmission {
   email: string;
   budget: string;
   message: string;
+  ip_hash: string | null;
   created_at: string;
+}
+
+export interface ContactSubmissionInsert {
+  id?: string;
+  name: string;
+  company: string;
+  email: string;
+  budget: string;
+  message: string;
+  ip_hash?: string | null;
+  created_at?: string;
 }
 
 export interface Comment {
@@ -87,11 +147,30 @@ export interface Comment {
   updated_at: string;
 }
 
+export interface CommentInsert {
+  id?: string;
+  post_id: string;
+  user_id: string;
+  parent_id?: string | null;
+  content: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface PostView {
   id: string;
   post_id: string;
   device_id: string;
+  ip_hash: string | null;
   viewed_at: string;
+}
+
+export interface PostViewInsert {
+  id?: string;
+  post_id: string;
+  device_id: string;
+  ip_hash?: string | null;
+  viewed_at?: string;
 }
 
 export interface PushSubscription {
@@ -103,8 +182,40 @@ export interface PushSubscription {
   created_at: string;
 }
 
+export interface PushSubscriptionInsert {
+  id?: string;
+  endpoint: string;
+  p256dh_key: string;
+  auth_key: string;
+  user_agent?: string | null;
+  created_at?: string;
+}
+
+export interface RateLimit {
+  id: string;
+  action: string;
+  identity_hash: string;
+  window_start: string;
+  request_count: number;
+}
+
+export interface RateLimitInsert {
+  id?: string;
+  action: string;
+  identity_hash: string;
+  window_start: string;
+  request_count?: number;
+}
+
 export type PostCategory = Post["category"];
 export type ReactionType = Reaction["reaction_type"];
+
+export interface PostStats {
+  reactions: Record<ReactionType, number>;
+  views: number;
+  comments: number;
+  userReaction: ReactionType | null;
+}
 
 export const CATEGORY_CONFIG: Record<PostCategory, { label: string; color: string }> = {
   breaking: { label: "Breaking", color: "bg-accent-blue/15 text-accent-blue border-accent-blue/30" },

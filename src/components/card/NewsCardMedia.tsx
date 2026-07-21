@@ -45,8 +45,6 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
           <div className="glitch-chromatic glitch-chromatic--b" aria-hidden="true" />
         </>
       )}
-
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt || ""}

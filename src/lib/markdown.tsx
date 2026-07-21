@@ -34,14 +34,21 @@ export function parseInlineMarkdown(text: string): ReactNode {
       const label = matchStr.slice(1, closeBracketIndex);
       const url = matchStr.slice(closeBracketIndex + 2, -1);
 
-      const isInternal = url.startsWith("/") || url.startsWith("file://");
+      const isInternal = url.startsWith("/") && !url.startsWith("//");
+      const isExternal = /^https?:\/\//i.test(url);
+
+      if (!isInternal && !isExternal) {
+        parts.push(label);
+        currentIndex = tokenRegex.lastIndex;
+        continue;
+      }
 
       parts.push(
         <a
           key={matchIndex}
           href={url}
-          target={isInternal ? undefined : "_blank"}
-          rel={isInternal ? undefined : "noopener noreferrer"}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
           className="text-brand-orange hover:underline font-semibold"
         >
           {label}

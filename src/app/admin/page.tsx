@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createDataClient } from "@/lib/supabase/client";
+import { invokeFunction } from "@/lib/supabase/functions";
+import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import type { Post, PostCategory } from "@/lib/types/database";
 
 const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
@@ -16,12 +18,16 @@ const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
 ];
 
 function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  return !!user?.user_metadata?.is_admin;
+  return user?.app_metadata?.is_admin === true;
+}
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
 }
 
 export default function AdminDashboard() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +40,7 @@ export default function AdminDashboard() {
   const [filterCategory, setFilterCategory] = useState<PostCategory | "__all__">("__all__");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
 
-  const checkAdminAndFetchPosts = async () => {
+  const checkAdminAndFetchPosts = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -46,24 +52,25 @@ export default function AdminDashboard() {
         return;
       }
 
-      const { data, error: fetchError } = await (supabase as any)
+      const { data, error: fetchError } = await supabase
         .from("posts")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .returns<Post[]>();
 
       if (fetchError) throw fetchError;
 
       setPosts((data as Post[]) || []);
-    } catch (err: any) {
-      setError(err.message || "Erro desconhecido");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Erro desconhecido"));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router, supabase]);
 
   useEffect(() => {
-    checkAdminAndFetchPosts();
-  }, [router]);
+    queueMicrotask(() => void checkAdminAndFetchPosts());
+  }, [checkAdminAndFetchPosts]);
 
   const filteredPosts = useMemo(() => {
     return posts.filter((p) => {
@@ -95,7 +102,7 @@ export default function AdminDashboard() {
     try {
       setDeleteError(null);
 
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await supabase
         .from("posts")
         .delete()
         .eq("id", id);
@@ -104,8 +111,8 @@ export default function AdminDashboard() {
 
       setPosts((prev) => prev.filter((p) => p.id !== id));
       setDeleteConfirm(null);
-    } catch (err: any) {
-      setDeleteError(err.message);
+    } catch (err: unknown) {
+      setDeleteError(errorMessage(err, "Erro ao excluir"));
     }
   };
 
@@ -113,7 +120,28 @@ export default function AdminDashboard() {
     setTogglingPublish(post.id);
     try {
       const newPublished = !post.is_published;
-      const { error: updateError } = await (supabase as any)
+      if (newPublished) {
+        let blocks: EditorialBlock[] = [];
+        try {
+          const parsed: unknown = JSON.parse(post.body);
+          if (Array.isArray(parsed)) blocks = parsed as EditorialBlock[];
+        } catch {
+          blocks = [];
+        }
+        const editorialErrors = validateEditorialContent({
+          slug: post.slug,
+          title: post.title,
+          summary: post.summary,
+          imageUrl: post.image_url || "",
+          imageAlt: post.image_alt || "",
+          blocks,
+        });
+        if (editorialErrors.length > 0) {
+          setError(editorialErrors.join(" "));
+          return;
+        }
+      }
+      const { error: updateError } = await supabase
         .from("posts")
         .update({
           is_published: newPublished,
@@ -134,33 +162,18 @@ export default function AdminDashboard() {
 
       if (newPublished) {
         const payload = { title: post.title, slug: post.slug, category: post.category };
-
-        fetch("/api/notify-post", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }).catch(() => {
-          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
-          fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${anonKey}`,
-            },
-            body: JSON.stringify({
-              title: `🧱 ${payload.title}`,
-              body: `Nova matéria publicada na categoria ${payload.category}`,
-              url: `${siteUrl}${basePath}/post?slug=${payload.slug}`,
-            }),
-          }).catch(() => {});
-        });
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+          await invokeFunction("send-push-notification", {
+            title: `🧱 ${payload.title}`,
+            body: `Nova matéria publicada na categoria ${payload.category}`,
+            url: `${siteUrl}/posts/${payload.slug}`,
+          }, { accessToken: session.access_token });
+        }
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Erro ao alterar publicação"));
     } finally {
       setTogglingPublish(null);
     }
@@ -187,7 +200,6 @@ export default function AdminDashboard() {
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-4">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain" />
             <h1 className="text-lg font-black uppercase">
               Orange<span className="text-brand-orange">_</span>Brick <span className="text-xs text-gray-500 font-normal">/ painel</span>
@@ -216,8 +228,6 @@ export default function AdminDashboard() {
             {error}
           </div>
         )}
-
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl p-5">
             <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Total</p>
@@ -236,8 +246,6 @@ export default function AdminDashboard() {
             <p className="text-2xl font-black text-purple-400">{Object.keys(stats.byCategory).length}</p>
           </div>
         </div>
-
-        {/* Category Breakdown */}
         <div className="flex flex-wrap gap-2 mb-8">
           {Object.entries(stats.byCategory).map(([cat, count]) => (
             <div key={cat} className="flex items-center gap-2 bg-card-slate/30 border border-brand-orange-muted/10 rounded-lg px-3 py-1.5">
@@ -264,8 +272,6 @@ export default function AdminDashboard() {
             + Nova Matéria
           </button>
         </div>
-
-        {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
           <div className="relative flex-1 w-full sm:w-auto">
             <input
@@ -356,7 +362,6 @@ export default function AdminDashboard() {
                       <td className="py-3 px-6">
                         {post.image_url ? (
                           <div className="w-12 h-8 rounded overflow-hidden border border-brand-orange-muted/10 flex-shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={post.image_url}
                               alt=""
@@ -400,7 +405,7 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-3 px-6 text-right space-x-3 whitespace-nowrap">
                         <button
-                          onClick={() => router.push(`/post?slug=${post.slug}`)}
+                          onClick={() => router.push(`/posts/${post.slug}`)}
                           disabled={!post.is_published}
                           className="text-xs text-gray-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >

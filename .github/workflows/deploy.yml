@@ -1,36 +1,23 @@
-name: Deploy to GitHub Pages
+name: Quality
 
 on:
   push:
     branches: [main]
+  pull_request:
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: npm run check
         env:
-          NEXT_PUBLIC_BASE_PATH: /OrangeBrick
-          NEXT_PUBLIC_SUPABASE_URL: https://hmjqqoselkgtfkkqrnit.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhtanFxb3NlbGtndGZra3Fybml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMzk3NTYsImV4cCI6MjA5OTYxNTc1Nn0.oIHWexNUpYLjrqWqwK5C6c19Wju4x0MYomMvfi-d7e0
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${{ vars.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import { timeAgo } from "@/lib/utils/time-ago";
 
 interface TimerProps {
@@ -8,21 +8,17 @@ interface TimerProps {
 }
 
 export function Timer({ date }: TimerProps) {
-  const [label, setLabel] = useState(() => timeAgo(date));
+  const [, refresh] = useReducer((value: number) => value + 1, 0);
 
   useEffect(() => {
-    setLabel(timeAgo(date));
-
-    const interval = setInterval(() => {
-      setLabel(timeAgo(date));
-    }, 60_000);
+    const interval = setInterval(refresh, 60_000);
 
     return () => clearInterval(interval);
   }, [date]);
 
   return (
     <span className="text-[11px] font-mono text-brand-orange-muted">
-      {label}
+      {timeAgo(date)}
     </span>
   );
 }

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Orange Brick
 
-## Getting Started
+Portal editorial em Next.js 16 com Supabase para dados, autenticação, armazenamento e Edge Functions.
 
-First, run the development server:
+## Arquitetura
+
+- Next.js hospedado em um servidor compatível, preferencialmente Vercel, para SSR, rotas canônicas e metadados por matéria.
+- Supabase Postgres e Auth para posts e comentários com RLS.
+- Supabase Edge Functions para reações, visualizações, estatísticas, contato, push e geração de imagens.
+- Supabase Storage para manter as imagens geradas em um bucket público e durável.
+
+GitHub Pages não é compatível com esta arquitetura porque entrega apenas arquivos estáticos. O workflow do repositório executa a validação; o deploy do aplicativo deve ser configurado no provedor do Next.js.
+
+## Desenvolvimento
+
+Copie `.env.example` para `.env.local`, preencha as variáveis e execute:
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A validação completa é:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run check
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Supabase
 
-## Learn More
+Instale ou use a CLI via `npx`, conecte o projeto e aplique a migração:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx supabase login
+npx supabase link --project-ref PROJECT_REF
+npx supabase db push
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ative login anônimo em Authentication para permitir comentários sem cadastro. Depois configure os segredos das Functions:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx supabase secrets set SITE_URL=https://seu-dominio.com RATE_LIMIT_SALT=valor-aleatorio VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:contato@seu-dominio.com
+```
 
-## Deploy on Vercel
+Caso um navegador use outro provedor de push, adicione os domínios permitidos em `PUSH_ENDPOINT_HOSTS`, separados por vírgula.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Publique todas as Functions com a configuração de JWT definida em `supabase/config.toml`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx supabase functions deploy --project-ref PROJECT_REF --use-api
+```
+
+Crie ou atualize o administrador com uma senha forte:
+
+```bash
+npm run admin:create
+```
+
+## Produção
+
+Configure no provedor do Next.js as variáveis públicas, `SUPABASE_SERVICE_ROLE_KEY` somente no servidor e o domínio definitivo em `NEXT_PUBLIC_SITE_URL`. Nunca exponha a service role no navegador ou em variáveis com prefixo `NEXT_PUBLIC_`.

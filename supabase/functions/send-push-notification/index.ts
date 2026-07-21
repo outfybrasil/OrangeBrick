@@ -1,94 +1,54 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push";
+import { handleOptions, json, serviceClient } from "../_shared/platform.ts";
 
-interface NotifyRequest {
-  title: string;
-  body: string;
-  url: string;
-  icon?: string;
-  badge?: string;
-}
-
-serve(async (req) => {
+Deno.serve(async (request) => {
+  const options = handleOptions(request);
+  if (options) return options;
+  if (request.method !== "POST") return json({ error: "Método não permitido" }, 405);
   try {
-    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
-    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
-
-    if (!vapidPublicKey || !vapidPrivateKey) {
-      return new Response(JSON.stringify({ error: "VAPID keys not configured" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    if (!token) return json({ error: "Não autorizado" }, 401);
+    const supabase = serviceClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || user?.app_metadata?.is_admin !== true) return json({ error: "Acesso proibido" }, 403);
+    const payload: unknown = await request.json();
+    if (!payload || typeof payload !== "object") return json({ error: "Payload inválido" }, 400);
+    const { title, body, url } = payload as Record<string, unknown>;
+    if (typeof title !== "string" || typeof body !== "string" || typeof url !== "string" || title.length > 120 || body.length > 240) {
+      return json({ error: "Notificação inválida" }, 400);
     }
-
-    webpush.setVapidDetails(
-      "mailto:contact@orangebrick.com",
-      vapidPublicKey,
-      vapidPrivateKey
-    );
-
-    const { title, body, url, icon, badge }: NotifyRequest = await req.json();
-
-    if (!title || !body || !url) {
-      return new Response(JSON.stringify({ error: "Campos obrigatórios: title, body, url" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data: subscriptions, error } = await supabase
-      .from("push_subscriptions")
-      .select("*");
-
+    const siteUrl = Deno.env.get("SITE_URL");
+    if (!siteUrl || new URL(url).origin !== new URL(siteUrl).origin) return json({ error: "URL não permitida" }, 400);
+    const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
+    const privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+    if (!publicKey || !privateKey) return json({ error: "VAPID não configurado" }, 500);
+    webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "mailto:contato@orangebrick.com", publicKey, privateKey);
+    const { data: subscriptions, error } = await supabase.from("push_subscriptions").select("endpoint, p256dh_key, auth_key");
     if (error) throw error;
-    if (!subscriptions || subscriptions.length === 0) {
-      return new Response(JSON.stringify({ sent: 0 }), {
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const payload = JSON.stringify({
+    const notification = JSON.stringify({
       title,
       body,
       url,
-      icon: icon || "/logos/Logo Tijolo Quebrado.PNG",
-      badge: badge || "/logos/Logo Tijolo Quebrado.PNG",
+      icon: `${siteUrl}/logos/Logo Tijolo Quebrado.PNG`,
+      badge: `${siteUrl}/logos/Logo Tijolo Quebrado.PNG`,
     });
-
     let sent = 0;
-    const results = await Promise.allSettled(
-      subscriptions.map((sub) =>
-        webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh_key,
-              auth: sub.auth_key,
-            },
-          },
-          payload
-        ).then(() => {
-          sent++;
-        }).catch(async (err) => {
-          if (err.statusCode === 410 || err.statusCode === 404) {
-            await supabase.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
-          }
-        })
-      )
-    );
-
-    return new Response(JSON.stringify({ sent, total: subscriptions.length }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    await Promise.allSettled((subscriptions || []).map(async (subscription) => {
+      try {
+        await webpush.sendNotification({
+          endpoint: subscription.endpoint,
+          keys: { p256dh: subscription.p256dh_key, auth: subscription.auth_key },
+        }, notification);
+        sent++;
+      } catch (error) {
+        const status = typeof error === "object" && error && "statusCode" in error ? Number(error.statusCode) : 0;
+        if (status === 404 || status === 410) {
+          await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
+        }
+      }
+    }));
+    return json({ sent, total: subscriptions?.length || 0 });
+  } catch (error) {
+    return json({ error: error instanceof Error ? error.message : "Erro interno" }, 500);
   }
 });

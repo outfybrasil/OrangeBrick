@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  return !!user?.user_metadata?.is_admin;
+  return user?.app_metadata?.is_admin === true;
 }
 
 export default function AdminLogin() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +23,6 @@ export default function AdminLogin() {
         const { data: { user } } = await supabase.auth.getUser();
         if (isAdmin(user)) router.push("/admin");
       } catch {
-        // Silencia
       }
     }
     checkUser();
@@ -51,8 +50,8 @@ export default function AdminLogin() {
 
       router.push("/admin");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Erro desconhecido ao efetuar login");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido ao efetuar login");
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +63,6 @@ export default function AdminLogin() {
 
       <div className="w-full max-w-md bg-card-slate/85 border border-brand-orange-muted/15 rounded-2xl p-8 shadow-2xl relative z-10">
         <div className="flex flex-col items-center gap-3 mb-8 text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
             alt="Orange Brick Logo Icon"

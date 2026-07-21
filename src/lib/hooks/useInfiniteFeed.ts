@@ -83,13 +83,15 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
         loadingRef.current = false;
       }
     },
-    [category]
+    [category, supabase]
   );
 
   useEffect(() => {
-    cursorRef.current = null;
-    setHasMore(true);
-    fetchPosts(true);
+    queueMicrotask(() => {
+      cursorRef.current = null;
+      setHasMore(true);
+      void fetchPosts(true);
+    });
   }, [fetchPosts]);
 
   const loadMore = useCallback(() => {

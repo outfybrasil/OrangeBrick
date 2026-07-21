@@ -1,0 +1,22 @@
+project_id = "orange-brick"
+
+[functions.toggle-reaction]
+verify_jwt = false
+
+[functions.register-view]
+verify_jwt = false
+
+[functions.post-stats]
+verify_jwt = false
+
+[functions.manage-push-subscription]
+verify_jwt = false
+
+[functions.submit-contact]
+verify_jwt = false
+
+[functions.send-push-notification]
+verify_jwt = true
+
+[functions.generate-image]
+verify_jwt = true

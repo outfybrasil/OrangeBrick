@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type IconName = "hype" | "flop" | "salty" | "defendo" | "comment" | "brick" | "close" | "chevron-right" | "sparkle" | "eye";
+export type IconName = "hype" | "flop" | "salty" | "comment" | "brick" | "close" | "chevron-right" | "sparkle" | "eye";
 
 interface IconProps extends SVGProps<SVGSVGElement> {
   name: IconName;
@@ -8,10 +8,9 @@ interface IconProps extends SVGProps<SVGSVGElement> {
 }
 
 const PATHS: Record<IconName, string> = {
-  hype: "M12 2L15 8.5L22 9.5L17 14.5L18 22L12 18.5L6 22L7 14.5L2 9.5L9 8.5L12 2Z",
-  flop: "M12 2L15 8.5L22 9.5L17 14.5L18 22L12 18.5L6 22L7 14.5L2 9.5L9 8.5L12 2Z",
+  hype: "M10 2C10 2 6 7 6 11c0 2.8 2.2 5 5 5s5-2.2 5-5c0-4-6-9-6-9zm0 12c-1.7 0-3-1.3-3-3 0-2 3-5 3-5s3 3 3 5c0 1.7-1.3 3-3 3z",
+  flop: "M6 6l12 12M18 6l-12 12",
   salty: "M8 10L16 10M8 14L14 14M12 2L2 7L2 17L12 22L22 17L22 7L12 2Z",
-  defendo: "M12 2L22 9L22 20L2 20L2 9L12 2ZM8 12L16 12M8 16L14 16M12 12V8",
   comment: "M2 2H22V18H6L2 22V2Z",
   brick: "M4 2H20V6H4V2ZM2 6H22V10H2V6ZM4 10H20V18H4V10ZM8 18H16V22H8V18Z",
   close: "M6 6L18 18M18 6L6 18",
@@ -24,7 +23,6 @@ const VIEWBOX: Record<IconName, string> = {
   hype: "0 0 24 24",
   flop: "0 0 24 24",
   salty: "0 0 24 24",
-  defendo: "0 0 24 24",
   comment: "0 0 24 24",
   brick: "0 0 24 24",
   close: "0 0 24 24",

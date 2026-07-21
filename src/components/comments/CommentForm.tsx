@@ -21,6 +21,8 @@ export function CommentForm({ onSubmit, placeholder = "Escreva seu comentário..
       try {
         await onSubmit(trimmed);
         setContent("");
+      } catch {
+        return;
       } finally {
         setIsSubmitting(false);
       }

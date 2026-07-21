@@ -13,7 +13,7 @@ interface CommentsDrawerProps {
 }
 
 export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps) {
-  const { addComment } = useComments(postId);
+  const { comments, isLoading, error, addComment, fetchComments } = useComments(postId);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -32,6 +32,10 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
       document.body.style.overflow = "";
     };
   }, [isOpen, handleKeyDown]);
+
+  useEffect(() => {
+    if (isOpen) queueMicrotask(() => void fetchComments());
+  }, [fetchComments, isOpen]);
 
   if (!isOpen) return null;
 
@@ -70,7 +74,7 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
         </div>
 
         <div className="flex-1 overflow-y-auto px-4">
-          <CommentList postId={postId} />
+          <CommentList comments={comments} isLoading={isLoading} error={error} onRetry={() => void fetchComments()} />
         </div>
 
         <div className="px-4 py-3 border-t border-brand-orange-muted/10">

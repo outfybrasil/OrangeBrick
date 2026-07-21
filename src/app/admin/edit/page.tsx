@@ -2,14 +2,35 @@
 
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { parseInlineMarkdown } from "@/lib/markdown";
+import Image from "next/image";
+import { createDataClient } from "@/lib/supabase/client";
+import { invokeFunction } from "@/lib/supabase/functions";
+import { parseMarkdownToReact } from "@/lib/markdown";
+import { AUTHOR_TAGS, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import type { Post, PostCategory } from "@/lib/types/database";
 import { CATEGORY_CONFIG } from "@/lib/types/database";
 
-type ContentBlock =
-  | { id: string; type: "text"; content: string }
-  | { id: string; type: "image"; url: string; alt: string; caption?: string };
+type ContentBlock = EditorialBlock;
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
+function imageLoads(url: string) {
+  return new Promise<boolean>((resolve) => {
+    const image = document.createElement("img");
+    const timeout = window.setTimeout(() => resolve(false), 12_000);
+    image.onload = () => {
+      window.clearTimeout(timeout);
+      resolve(true);
+    };
+    image.onerror = () => {
+      window.clearTimeout(timeout);
+      resolve(false);
+    };
+    image.src = url;
+  });
+}
 
 const CATEGORY_OPTIONS: { value: PostCategory; label: string; icon: string }[] = [
   { value: "breaking", label: "Breaking", icon: "⚡" },
@@ -36,7 +57,7 @@ function BlockIcon({ type }: { type: "text" | "image" }) {
 
 function EditForm() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
   const searchParams = useSearchParams();
   const postId = searchParams.get("id");
@@ -48,7 +69,8 @@ function EditForm() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageAlt, setImageAlt] = useState("");
   const [authorName, setAuthorName] = useState("Redação");
-  const [authorTag, setAuthorTag] = useState("");
+  const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
 
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
 
@@ -58,6 +80,20 @@ function EditForm() {
   const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const [aiPromptBlock, setAiPromptBlock] = useState<string | null>(null);
+  const [aiPrompts, setAiPrompts] = useState<Record<string, string>>({});
+  const [aiLoading, setAiLoading] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [coverAiPrompt, setCoverAiPrompt] = useState<string | null>(null);
+  const [coverAiLoading, setCoverAiLoading] = useState(false);
+
+  useEffect(() => {
+    if (!hasChanges) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [hasChanges]);
+
   useEffect(() => {
     async function init() {
       try {
@@ -66,14 +102,14 @@ function EditForm() {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!user?.user_metadata?.is_admin) {
+        if (user?.app_metadata?.is_admin !== true) {
           router.push("/admin/login");
           return;
         }
 
         if (!postId) {
           setAuthorName("The Brick");
-          setAuthorTag("Mistério");
+          setAuthorTag(AUTHOR_TAGS.breaking);
           setBlocks([
             { id: "template-intro", type: "text", content: "Insira aqui o parágrafo de introdução da sua matéria. Apresente os fatos principais de forma direta e impactante." },
             { id: "template-image", type: "image", url: "", alt: "", caption: "Legenda da primeira imagem ilustrativa da matéria." },
@@ -86,7 +122,7 @@ function EditForm() {
         }
 
         if (postId) {
-          const { data: post, error: fetchError } = await (supabase as any)
+          const { data: post, error: fetchError } = await supabase
             .from("posts")
             .select("*")
             .eq("id", postId)
@@ -94,35 +130,37 @@ function EditForm() {
 
           if (fetchError) throw fetchError;
 
-          setTitle(post.title);
-          setSlug(post.slug);
-          setSummary(post.summary);
-          setCategory(post.category as PostCategory);
-          setImageUrl(post.image_url || "");
-          setImageAlt(post.image_alt || "");
-          setAuthorName(post.author_name);
-          setAuthorTag(post.author_tag || "");
+          const typedPost = post as unknown as Post;
+          setTitle(typedPost.title);
+          setSlug(typedPost.slug);
+          setSummary(typedPost.summary);
+          setCategory(typedPost.category);
+          setImageUrl(typedPost.image_url || "");
+          setImageAlt(typedPost.image_alt || "");
+          setAuthorName(typedPost.author_name);
+          setAuthorTag(typedPost.author_tag || "");
+          setPublishedAt(typedPost.published_at || null);
 
           try {
-            const parsedBlocks = JSON.parse(post.body);
+            const parsedBlocks = JSON.parse(typedPost.body);
             if (Array.isArray(parsedBlocks)) {
               setBlocks(parsedBlocks);
             } else {
-              setBlocks([{ id: "legacy-block", type: "text", content: post.body }]);
+              setBlocks([{ id: "legacy-block", type: "text", content: typedPost.body }]);
             }
           } catch {
-            setBlocks([{ id: "legacy-block", type: "text", content: post.body }]);
+            setBlocks([{ id: "legacy-block", type: "text", content: typedPost.body }]);
           }
         }
-      } catch (err: any) {
-        setError(err.message || "Erro de inicialização");
+      } catch (err: unknown) {
+        setError(errorMessage(err, "Erro de inicialização"));
       } finally {
         setIsLoading(false);
       }
     }
 
     init();
-  }, [router, postId]);
+  }, [router, postId, supabase]);
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
@@ -136,11 +174,6 @@ function EditForm() {
         .replace(/^-+|-+$/g, "");
       setSlug(generatedSlug);
     }
-  };
-
-  const handleFieldChange = (setter: (v: string) => void) => (val: string) => {
-    setter(val);
-    setHasChanges(true);
   };
 
   const addTextBlock = () => {
@@ -175,6 +208,56 @@ function EditForm() {
     setHasChanges(true);
   };
 
+  const generateImage = async (blockId: string) => {
+    const prompt = aiPrompts[blockId];
+    if (!prompt || prompt.trim().length === 0) {
+      setAiError("Digite um prompt para gerar a imagem.");
+      return;
+    }
+    setAiLoading(blockId);
+    setAiError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const data = await invokeFunction<{ url: string }>("generate-image", { description: prompt }, { accessToken: session.access_token });
+      updateBlockValue(blockId, "url", data.url);
+      setAiPromptBlock(null);
+    } catch (err: unknown) {
+      setAiError(errorMessage(err, "Erro ao gerar imagem"));
+    } finally {
+      setAiLoading(null);
+    }
+  };
+
+  const generateCoverImage = async () => {
+    if (!coverAiPrompt || coverAiPrompt.trim().length === 0) return;
+    setCoverAiLoading(true);
+    setAiError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const data = await invokeFunction<{ url: string }>("generate-image", { description: coverAiPrompt }, { accessToken: session.access_token });
+      setImageUrl(data.url);
+      setHasChanges(true);
+      setCoverAiPrompt(null);
+    } catch (err: unknown) {
+      setAiError(errorMessage(err, "Erro ao gerar imagem"));
+    } finally {
+      setCoverAiLoading(false);
+    }
+  };
+
+  const toggleAiPrompt = (blockId: string, altText: string) => {
+    setAiPromptBlock((prev) => prev === blockId ? null : blockId);
+    if (aiPromptBlock !== blockId) {
+      setAiPrompts((prev) => ({
+        ...prev,
+        [blockId]: prev[blockId] || `Imagem fotorrealista de ${altText || "cena relacionada a videogames"}. Estilo fotografia editorial, iluminação dramática, alta qualidade, resolução 4K. Sem texto na imagem, sem marcas d'água.`,
+      }));
+      setAiError(null);
+    }
+  };
+
   const handleDuplicate = async () => {
     if (!title || !slug || !summary) return;
     setIsSaving(true);
@@ -182,7 +265,7 @@ function EditForm() {
     try {
       const dupSlug = slug + "-copy-" + Date.now().toString(36);
       const dupTitle = title + " (cópia)";
-      const { data, error: insertError } = await (supabase as any)
+      const { data, error: insertError } = await supabase
         .from("posts")
         .insert({
           slug: dupSlug, title: dupTitle, summary,
@@ -194,10 +277,11 @@ function EditForm() {
         })
         .select().single();
       if (insertError) throw insertError;
-      router.push(`/admin/edit?id=${data.id}`);
+      const duplicatedPost = data as unknown as Post;
+      router.push(`/admin/edit?id=${duplicatedPost.id}`);
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Erro ao duplicar matéria");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Erro ao duplicar matéria"));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSaving(false);
@@ -215,6 +299,24 @@ function EditForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    if (isPublished) {
+      const editorialErrors = validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks });
+      if (editorialErrors.length > 0) {
+        setError(editorialErrors.join(" "));
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      setIsSaving(true);
+      const imageUrls = [imageUrl, ...blocks.filter((block): block is Extract<ContentBlock, { type: "image" }> => block.type === "image").map((block) => block.url)];
+      const results = await Promise.all(imageUrls.map(imageLoads));
+      const failedIndex = results.findIndex((loaded) => !loaded);
+      if (failedIndex >= 0) {
+        setError(`A imagem não carregou e não pode ser publicada: ${imageUrls[failedIndex]}`);
+        setIsSaving(false);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -223,40 +325,36 @@ function EditForm() {
         image_url: imageUrl || null, image_alt: imageAlt || null,
         author_name: authorName || "Redação", author_tag: authorTag || null,
         is_published: isPublished,
-        published_at: isPublished ? new Date().toISOString() : null,
+        published_at: isPublished ? publishedAt || new Date().toISOString() : null,
       };
-      let savedPost: any = null;
+      let savedPost: Post | null = null;
       if (postId) {
-        const { data, error: updateError } = await (supabase as any)
+        const { data, error: updateError } = await supabase
           .from("posts").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", postId).select().single();
         if (updateError) throw updateError;
-        savedPost = data;
+        savedPost = data as unknown as Post;
       } else {
-        const { data, error: insertError } = await (supabase as any)
+        const { data, error: insertError } = await supabase
           .from("posts").insert({ ...payload, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }).select().single();
         if (insertError) throw insertError;
-        savedPost = data;
+        savedPost = data as unknown as Post;
       }
       if (isPublished && savedPost) {
         const np = { title: savedPost.title, slug: savedPost.slug, category: savedPost.category };
-        fetch("/api/notify-post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(np) })
-          .catch(() => {
-            const su = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-            const ak = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-            fetch(`${su}/functions/v1/send-push-notification`, {
-              method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${ak}` },
-              body: JSON.stringify({
-                title: `🧱 ${np.title}`, body: `Nova matéria em ${np.category}`,
-                url: `${siteUrl}${basePath}/post?slug=${np.slug}`,
-              }),
-            }).catch(() => {});
-          });
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+          await invokeFunction("send-push-notification", {
+            title: `🧱 ${np.title}`,
+            body: `Nova matéria em ${np.category}`,
+            url: `${siteUrl}/posts/${np.slug}`,
+          }, { accessToken: session.access_token });
+        }
       }
       router.push("/admin");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Erro ao salvar");
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Erro ao salvar"));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSaving(false);
@@ -276,11 +374,9 @@ function EditForm() {
 
   return (
     <div className="min-h-dvh bg-background-void text-white font-mono text-sm">
-      {/* ====== TOP HEADER ====== */}
       <header className="sticky top-0 z-40 border-b border-brand-orange-muted/10 bg-card-slate/90 backdrop-blur-md py-3">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 w-auto object-contain" />
             <div>
               <h1 className="text-base font-black uppercase leading-tight">
@@ -312,8 +408,11 @@ function EditForm() {
             {error}
           </div>
         )}
-
-        {/* ====== METADATA SECTION ====== */}
+        {aiError && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 rounded-lg text-xs">
+            {aiError}
+          </div>
+        )}
         <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden mb-8">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
@@ -327,7 +426,6 @@ function EditForm() {
           </div>
 
           <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
-            {/* Título */}
             <div className="lg:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
                 <span>Título da Notícia *</span>
@@ -341,8 +439,6 @@ function EditForm() {
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm font-bold"
               />
             </div>
-
-            {/* Slug */}
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">URL Amigável (Slug) *</label>
               <input
@@ -352,15 +448,13 @@ function EditForm() {
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors"
               />
             </div>
-
-            {/* Categoria */}
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Categoria *</label>
               <div className="flex gap-1.5 flex-wrap">
                 {CATEGORY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => { setCategory(opt.value); setHasChanges(true); }}
+                    onClick={() => { setCategory(opt.value); setAuthorTag(AUTHOR_TAGS[opt.value]); setHasChanges(true); }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                       category === opt.value
                         ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30"
@@ -372,24 +466,20 @@ function EditForm() {
                 ))}
               </div>
             </div>
-
-            {/* Resumo */}
             <div className="lg:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
                 <span>Resumo / Subtítulo *</span>
-                <span className={`text-[9px] ${summary.length > 260 ? "text-red-400" : "text-gray-500"}`}>{summary.length}/280</span>
+                <span className={`text-[9px] ${summary.length > 170 ? "text-red-400" : "text-gray-500"}`}>{summary.length}/180</span>
               </label>
               <textarea
                 value={summary}
                 onChange={(e) => { setSummary(e.target.value); setHasChanges(true); }}
-                maxLength={280}
+                maxLength={180}
                 rows={3}
-                placeholder="Resumo breve para o feed (máx. 280 caracteres)..."
+                placeholder="Uma frase com o fato e por que ele importa (cerca de 140 caracteres)..."
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors font-sans text-sm leading-relaxed"
               />
             </div>
-
-            {/* Imagem de Capa */}
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Imagem de Capa (URL)</label>
               <input
@@ -401,25 +491,73 @@ function EditForm() {
             </div>
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Alt da Imagem de Capa</label>
-              <input
-                type="text" value={imageAlt}
-                onChange={(e) => { setImageAlt(e.target.value); setHasChanges(true); }}
-                placeholder="Descrição da imagem..."
-                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text" value={imageAlt}
+                  onChange={(e) => { setImageAlt(e.target.value); setHasChanges(true); }}
+                  placeholder="Descrição da imagem..."
+                  className="flex-1 bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const alt = imageAlt || "cena relacionada a videogames";
+                    setCoverAiPrompt(alt);
+                  }}
+                  className="text-[10px] text-accent-blue hover:text-white border border-accent-blue/30 px-2.5 py-2 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                  </svg>
+                  IA
+                </button>
+              </div>
             </div>
-
-            {/* Preview da Capa */}
+            {coverAiPrompt && (
+              <div className="lg:col-span-2 bg-accent-blue/5 border border-accent-blue/20 rounded-lg p-4 space-y-3">
+                <label className="block text-[9px] uppercase font-bold text-accent-blue mb-1">
+                  🤖 Descrição para gerar a imagem de capa
+                </label>
+                <textarea
+                  value={coverAiPrompt}
+                  onChange={(e) => setCoverAiPrompt(e.target.value)}
+                  rows={3}
+                  placeholder="Descreva a imagem de capa que deseja gerar..."
+                  className="w-full bg-background-void border border-accent-blue/20 text-white rounded-lg p-3 outline-none focus:border-accent-blue/50 transition-colors font-sans text-xs leading-relaxed"
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={generateCoverImage}
+                    disabled={coverAiLoading || !coverAiPrompt?.trim()}
+                    className="bg-accent-blue hover:bg-accent-blue/80 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {coverAiLoading ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Gerando...
+                      </>
+                    ) : (
+                      "🎨 Gerar Imagem de Capa"
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCoverAiPrompt(null)}
+                    className="text-[10px] text-gray-400 hover:text-white border border-white/10 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
             {imageUrl && (
               <div className="lg:col-span-2">
                 <div className="relative aspect-video max-h-48 w-full max-w-md overflow-hidden rounded-lg border border-brand-orange-muted/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={imageUrl} alt={imageAlt || "Preview"} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
               </div>
             )}
-
-            {/* Autor */}
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Autor</label>
               <input
@@ -440,8 +578,6 @@ function EditForm() {
             </div>
           </div>
         </div>
-
-        {/* ====== BODY EDITOR ====== */}
         <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden mb-8">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
@@ -466,7 +602,6 @@ function EditForm() {
                     key={block.id}
                     className="relative bg-background-void border border-brand-orange-muted/10 rounded-xl group hover:border-brand-orange-muted/30 transition-colors"
                   >
-                    {/* Block header */}
                     <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-brand-orange-muted/5">
                       <div className="flex items-center gap-2">
                         <span className="text-brand-orange/70"><BlockIcon type={block.type} /></span>
@@ -500,8 +635,6 @@ function EditForm() {
                         </button>
                       </div>
                     </div>
-
-                    {/* Block body */}
                     <div className="p-5">
                       {block.type === "text" ? (
                         <textarea
@@ -542,10 +675,59 @@ function EditForm() {
                               className="w-full bg-card-slate/30 border border-brand-orange-muted/10 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/30 transition-colors"
                             />
                           </div>
+                          <div className="border-t border-brand-orange-muted/5 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleAiPrompt(block.id, block.alt)}
+                              className="text-[10px] text-accent-blue hover:text-white border border-accent-blue/30 px-3 py-1.5 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                              </svg>
+                              Gerar com IA
+                            </button>
+                          </div>
+                          {aiPromptBlock === block.id && (
+                            <div className="bg-accent-blue/5 border border-accent-blue/20 rounded-lg p-4 space-y-3">
+                              <label className="block text-[9px] uppercase font-bold text-accent-blue mb-1">
+                                🤖 Descrição para gerar a imagem
+                              </label>
+                              <textarea
+                                value={aiPrompts[block.id] || ""}
+                                onChange={(e) => setAiPrompts((prev) => ({ ...prev, [block.id]: e.target.value }))}
+                                rows={4}
+                                placeholder="Descreva a imagem que deseja gerar..."
+                                className="w-full bg-background-void border border-accent-blue/20 text-white rounded-lg p-3 outline-none focus:border-accent-blue/50 transition-colors font-sans text-xs leading-relaxed"
+                              />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => generateImage(block.id)}
+                                  disabled={aiLoading === block.id || !aiPrompts[block.id]?.trim()}
+                                  className="bg-accent-blue hover:bg-accent-blue/80 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                  {aiLoading === block.id ? (
+                                    <>
+                                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      Gerando...
+                                    </>
+                                  ) : (
+                                    "🎨 Gerar Imagem"
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setAiPromptBlock(null)}
+                                  className="text-[10px] text-gray-400 hover:text-white border border-white/10 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          )}
                           {block.url && (
                             <div className="relative aspect-video max-h-60 w-full overflow-hidden rounded-lg border border-brand-orange-muted/10">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={block.url} alt={block.alt || "Preview"} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                              <Image unoptimized fill sizes="(max-width: 768px) 100vw, 800px" src={block.url} alt={block.alt || "Preview"} className="object-cover" />
                             </div>
                           )}
                         </div>
@@ -555,8 +737,6 @@ function EditForm() {
                 ))}
               </div>
             )}
-
-            {/* Add block buttons */}
             <div className="flex items-center gap-3 border-t border-brand-orange-muted/10 pt-6 mt-6">
               <button
                 onClick={addTextBlock}
@@ -579,8 +759,6 @@ function EditForm() {
             </div>
           </div>
         </div>
-
-        {/* ====== ACTION BAR ====== */}
         <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
@@ -617,8 +795,6 @@ function EditForm() {
           </div>
         </div>
       </main>
-
-      {/* ====== PREVIEW MODAL ====== */}
       {showPreview && (
         <div className="fixed inset-0 z-50 bg-background-void/95 backdrop-blur-sm overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 py-6">
@@ -662,12 +838,7 @@ function EditForm() {
                     return (
                       <div key={block.id}>
                         {block.content.split("\n").map((line, i) => {
-                          const t = line.trim();
-                          if (t.startsWith("### ")) return <h3 key={i} className="text-lg font-mono font-bold text-white mt-6 mb-3 uppercase tracking-tight">{parseInlineMarkdown(t.slice(4))}</h3>;
-                          if (t.startsWith("## ")) return <h2 key={i} className="text-xl font-mono font-bold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/10 pb-2">{parseInlineMarkdown(t.slice(3))}</h2>;
-                          if (t.startsWith("# ")) return <h1 key={i} className="text-2xl font-mono font-black text-white mt-10 mb-6 uppercase tracking-tight">{parseInlineMarkdown(t.slice(2))}</h1>;
-                          if (t === "") return <div key={i} className="h-4" />;
-                          return <p key={i} className="text-gray-300 font-sans text-base leading-relaxed my-4">{parseInlineMarkdown(t)}</p>;
+                          return <div key={i}>{parseMarkdownToReact(line)}</div>;
                         })}
                       </div>
                     );
@@ -677,8 +848,8 @@ function EditForm() {
                       <div key={block.id} className="my-8 flex flex-col gap-2">
                         {block.url ? (
                           <>
-                            <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg">
-                              <img src={block.url} alt={block.alt || "Imagem da matéria"} className="w-full h-full object-cover" />
+                            <div className="relative w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg bg-card-slate/30 flex items-center justify-center">
+                              <img src={block.url} alt={block.alt || "Imagem da matéria"} className="w-full h-auto max-h-[550px] object-cover object-center rounded-xl" />
                             </div>
                             {block.caption && <span className="text-xs text-gray-500 font-mono text-center">{block.caption}</span>}
                           </>

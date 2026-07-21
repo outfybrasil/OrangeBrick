@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function generateId(): string {
   const arr = new Uint8Array(16);
@@ -11,16 +11,15 @@ function generateId(): string {
 const STORAGE_KEY = "orange_brick_device_id";
 
 export function useDeviceId(): string {
-  const [deviceId, setDeviceId] = useState<string>("");
-
-  useEffect(() => {
+  const [deviceId] = useState(() => {
+    if (typeof window === "undefined") return "";
     let id = localStorage.getItem(STORAGE_KEY);
     if (!id) {
       id = generateId();
       localStorage.setItem(STORAGE_KEY, id);
     }
-    setDeviceId(id);
-  }, []);
+    return id;
+  });
 
   return deviceId;
 }

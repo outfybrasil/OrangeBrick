@@ -8,13 +8,11 @@ import { NewsCardSummary } from "./NewsCardSummary";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { useReactions } from "@/lib/hooks/useReactions";
-import { usePostViews } from "@/lib/hooks/usePostViews";
-import { useCommentCount } from "@/lib/hooks/useCommentCount";
-import type { Post, ReactionType, PostCategory } from "@/lib/types/database";
+import type { Post, PostCategory, PostStats } from "@/lib/types/database";
 
 interface NewsCardProps {
   post: Post;
-  initialReactions: Record<ReactionType, number>;
+  stats: PostStats;
 }
 
 const HOVER_BORDER_COLOR: Record<PostCategory, string> = {
@@ -26,18 +24,17 @@ const HOVER_BORDER_COLOR: Record<PostCategory, string> = {
   opinion: "hover:border-yellow-500/40 hover:shadow-[0_0_20px_rgba(234,179,8,0.12)]",
 };
 
-export function NewsCard({ post, initialReactions }: NewsCardProps) {
+export function NewsCard({ post, stats }: NewsCardProps) {
   const router = useRouter();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
-  const { counts, isPending, error, toggleReaction } = useReactions({
+  const { counts, isPending, error, toggleReaction, userReaction } = useReactions({
     postId: post.id,
-    initial: initialReactions,
+    initial: stats.reactions,
+    initialUserReaction: stats.userReaction,
   });
-  const { count: viewCount } = usePostViews({ postId: post.id });
-  const commentCount = useCommentCount(post.id);
 
   const handleClick = () => {
-    router.push(`/post?slug=${post.slug}`);
+    router.push(`/posts/${post.slug}`);
   };
 
   return (
@@ -88,15 +85,13 @@ export function NewsCard({ post, initialReactions }: NewsCardProps) {
             hype={counts.hype}
             flop={counts.flop}
             salty={counts.salty}
-            defendo={counts.defendo}
-            brick={counts.brick}
-            category={post.category}
             onToggle={toggleReaction}
+            activeReaction={userReaction}
             disabled={isPending}
             error={error}
-            commentCount={commentCount}
+            commentCount={stats.comments}
             onCommentClick={() => setIsCommentOpen(true)}
-            viewCount={viewCount}
+            viewCount={stats.views}
           />
         </div>
       </article>
