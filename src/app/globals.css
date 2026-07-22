@@ -9,7 +9,7 @@
   --font-heading: var(--font-heading-var), "Outfit", sans-serif;
   --font-subtitle: var(--font-subtitle-var), "Space Grotesk", sans-serif;
   --font-body: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
-  --font-mono: var(--font-mono-var), "JetBrains Mono", monospace;
+  --font-mono: var(--font-heading-var), "Outfit", sans-serif;
   --font-sans: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
   --breakpoint-xs: 480px;
 }
@@ -27,7 +27,7 @@
 }
 
 .font-mono {
-  font-family: var(--font-mono-var), "JetBrains Mono", monospace;
+  font-family: var(--font-heading-var), "Outfit", sans-serif;
 }
 
 * {

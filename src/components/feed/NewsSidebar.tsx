@@ -22,12 +22,11 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
 
   return (
     <aside className="space-y-6">
-      {/* 🏆 AS MAIS HYPEADAS */}
       <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg">
         <div className="flex items-center gap-2 pb-3 mb-4 border-b border-brand-orange-muted/10">
           <span className="text-base">🏆</span>
           <h3 className="font-subtitle text-xs font-bold text-white uppercase tracking-wider">
-            Mais Hypeadas
+            Mais Hypadas
           </h3>
           <span className="ml-auto text-[9px] font-subtitle text-brand-orange font-bold uppercase tracking-widest bg-brand-orange/10 px-2 py-0.5 rounded border border-brand-orange/20">
             Top 4

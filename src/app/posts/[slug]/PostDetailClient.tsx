@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentList } from "@/components/comments/CommentList";
 import { CommentForm } from "@/components/comments/CommentForm";
+import { ComposeBrickModal } from "@/components/community/ComposeBrickModal";
+import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useReactions } from "@/lib/hooks/useReactions";
 import { usePostViews } from "@/lib/hooks/usePostViews";
 import { useComments } from "@/lib/hooks/useComments";
@@ -48,15 +50,16 @@ function PostContent({ post }: { post: Post }) {
 
             return (
               <div key={block.id} className="my-8 flex flex-col gap-2">
-                <div className="relative w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg bg-card-slate/30 flex items-center justify-center">
+                <div className="relative overflow-hidden rounded-2xl border border-brand-orange-muted/15 shadow-xl bg-card-slate/40">
                   <img
                     src={block.url}
-                    alt={block.alt || "Imagem da matéria"}
-                    className="w-full h-auto max-h-[550px] object-cover object-center rounded-xl"
+                    alt={block.alt || post.title}
+                    className="w-full h-auto object-cover max-h-[550px]"
+                    loading="lazy"
                   />
                 </div>
                 {block.caption && (
-                  <span className="text-xs text-gray-500 font-mono text-center">
+                  <span className="text-xs font-subtitle text-gray-400 text-center italic">
                     {block.caption}
                   </span>
                 )}
@@ -69,45 +72,72 @@ function PostContent({ post }: { post: Post }) {
     );
   }
 
-  return <div className="space-y-4">{parseMarkdownToReact(post.body)}</div>;
+  return <div>{parseMarkdownToReact(post.body)}</div>;
 }
 
-export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const router = useRouter();
+interface PostArticleProps {
+  post: Post;
+  stats: PostStats;
+}
 
-  const { counts, isPending, error: reactionError, toggleReaction, userReaction } = useReactions({
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuth } from "@/lib/contexts/AuthContext";
+
+export function PostArticle({ post, stats }: PostArticleProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const { counts, userReaction, isPending, error: reactionError, toggleReaction } = useReactions({
     postId: post.id,
     initial: stats.reactions,
     initialUserReaction: stats.userReaction,
-    hydrate: true,
   });
-
-  const { count: viewCount, registerView } = usePostViews({ postId: post.id, initialCount: stats.views });
-
-  useEffect(() => {
-    registerView();
-  }, [registerView]);
-
-  const { comments, isLoading: commentsLoading, error: commentsError, addComment, fetchComments } = useComments(post.id);
+  const { count: viewCount } = usePostViews({
+    postId: post.id,
+    initialCount: stats.views,
+  });
+  const { comments, isLoading: commentsLoading, error: commentsError, fetchComments, addComment, deleteComment } = useComments(post.id);
+  const { addPost: addCommunityBrick } = useCommunityFeed();
+  const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     queueMicrotask(() => void fetchComments());
   }, [fetchComments]);
 
+  const handleRepostClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsBrickModalOpen(true);
+  };
+
+  const attachedArticle = useMemo(
+    () => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      summary: post.summary,
+      image_url: post.image_url || undefined,
+      category: post.category,
+    }),
+    [post]
+  );
+
   return (
-    <div className="min-h-dvh bg-background-void text-white font-mono pb-24">
+    <div className="min-h-dvh bg-background-void text-white font-body pb-24">
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3 sm:py-4 sticky top-0 z-30 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 flex items-center justify-between gap-2">
           <button
             onClick={() => router.push("/")}
-            className="text-[10px] sm:text-xs text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center gap-1 sm:gap-2 shrink-0"
+            className="text-[10px] sm:text-xs text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center gap-1 sm:gap-2 shrink-0 font-subtitle font-semibold"
           >
             ← <span className="hidden xs:inline">Voltar</span> Home
           </button>
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0" onClick={() => router.push("/")}>
             <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain transform group-hover:scale-[1.05] transition-transform duration-200 shrink-0" />
-            <span className="hidden sm:inline text-sm font-mono font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
+            <span className="hidden sm:inline text-base font-heading font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
           </div>
@@ -121,7 +151,7 @@ export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
             <Timer date={post.published_at ?? ""} />
           </div>
 
-          <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-white uppercase leading-tight">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-heading font-black text-white uppercase leading-tight tracking-tight">
             {post.title}
           </h1>
           <p className="text-sm xs:text-base text-gray-400 font-sans border-l-2 border-brand-orange pl-3 sm:pl-4 py-1 leading-relaxed">
@@ -152,10 +182,7 @@ export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
           </div>
         </article>
 
-        <div className="mt-12 pt-8 border-t border-brand-orange-muted/10">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">
-            O que você achou dessa matéria?
-          </h3>
+        <div className="mt-10 pt-8 border-t border-brand-orange-muted/10">
           <ReactionBar
             hype={counts.hype}
             flop={counts.flop}
@@ -164,26 +191,58 @@ export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
             activeReaction={userReaction}
             disabled={isPending}
             error={reactionError}
+            commentCount={comments.length}
+            onCommentClick={() => document.getElementById("comments-section")?.scrollIntoView({ behavior: "smooth" })}
+            onRepostClick={handleRepostClick}
+            viewCount={viewCount}
           />
         </div>
 
-        <div className="mt-14 pt-10 border-t border-brand-orange-muted/10">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white mb-6">
-            Comentários da Comunidade
-          </h3>
-          <div className="mb-6 bg-card-slate/20 border border-brand-orange-muted/10 rounded-xl p-4">
-            <CommentForm onSubmit={(content) => addComment(content)} />
+        <div id="comments-section" className="mt-14 pt-10 border-t border-brand-orange-muted/15 space-y-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-6 bg-brand-orange rounded-full shadow-[0_0_12px_#FF5E00]" />
+              <h3 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-wider">
+                Comentários da Comunidade ({comments.length})
+              </h3>
+            </div>
+
+            <button
+              onClick={handleRepostClick}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-card-slate/80 border border-brand-orange/40 hover:bg-brand-orange hover:text-white text-brand-orange font-subtitle text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(255,94,0,0.15)] hover:scale-[1.02] cursor-pointer"
+            >
+              <span>🧱 Republicar no Brickboard</span>
+            </button>
           </div>
-          <div className="max-h-[500px] overflow-y-auto pr-2">
+
+          <CommentForm onSubmit={(content) => addComment(content)} />
+
+          <div className="space-y-4 pt-2">
             <CommentList
               comments={comments}
               isLoading={commentsLoading}
               error={commentsError}
               onRetry={() => void fetchComments()}
+              onDelete={(commentId) => void deleteComment(commentId)}
             />
           </div>
         </div>
       </main>
+
+      <ComposeBrickModal
+        isOpen={isBrickModalOpen}
+        onClose={() => setIsBrickModalOpen(false)}
+        initialArticle={attachedArticle}
+        onPublish={(content, platformTag, article, mediaUrl) => {
+          addCommunityBrick(content, platformTag, article, mediaUrl);
+          router.push("/brickboard");
+        }}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
 
       <Footer />
     </div>

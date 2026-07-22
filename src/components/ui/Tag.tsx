@@ -12,7 +12,7 @@ export function Tag({ category }: TagProps) {
     <span
       className={`
         inline-flex items-center px-2 py-0.5
-        text-[10px] font-mono font-semibold uppercase tracking-wider
+        text-[10px] font-subtitle font-bold uppercase tracking-wider
         border rounded-md
         ${config.color}
       `}

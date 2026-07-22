@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 50;
 
 interface UseInfiniteFeedReturn {
   posts: Post[];

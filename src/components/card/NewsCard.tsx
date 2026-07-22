@@ -1,13 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { NewsCardHeader } from "./NewsCardHeader";
 import { NewsCardMedia } from "./NewsCardMedia";
 import { NewsCardSummary } from "./NewsCardSummary";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
+import { ComposeBrickModal } from "@/components/community/ComposeBrickModal";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useReactions } from "@/lib/hooks/useReactions";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import type { Post, PostCategory, PostStats } from "@/lib/types/database";
 
 interface NewsCardProps {
@@ -26,7 +30,12 @@ const HOVER_BORDER_COLOR: Record<PostCategory, string> = {
 
 export function NewsCard({ post, stats }: NewsCardProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { addPost: addCommunityBrick } = useCommunityFeed();
+
   const { counts, isPending, error, toggleReaction, userReaction } = useReactions({
     postId: post.id,
     initial: stats.reactions,
@@ -36,6 +45,34 @@ export function NewsCard({ post, stats }: NewsCardProps) {
   const handleClick = () => {
     router.push(`/posts/${post.slug}`);
   };
+
+  const handleCommentClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsCommentOpen(true);
+  };
+
+  const handleRepostClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsBrickModalOpen(true);
+  };
+
+  const attachedArticle = useMemo(
+    () => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      summary: post.summary,
+      image_url: post.image_url || undefined,
+      category: post.category,
+    }),
+    [post]
+  );
 
   return (
     <>
@@ -60,15 +97,15 @@ export function NewsCard({ post, stats }: NewsCardProps) {
       >
         <NewsCardHeader category={post.category} publishedAt={post.published_at ?? ""} />
 
-          <h2 
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden"
-            }}
-            className="font-mono text-sm xs:text-base md:text-lg font-bold text-white leading-snug px-4 min-h-[36px] xs:min-h-[40px] md:min-h-[50px] mb-3 group-hover:text-brand-orange transition-colors duration-300"
-          >
+        <h2 
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden"
+          }}
+          className="font-heading text-base xs:text-lg md:text-xl font-extrabold text-white leading-snug px-4 min-h-[40px] xs:min-h-[48px] md:min-h-[56px] mb-3 group-hover:text-brand-orange transition-colors duration-300 tracking-tight"
+        >
           {post.title}
         </h2>
 
@@ -90,7 +127,8 @@ export function NewsCard({ post, stats }: NewsCardProps) {
             disabled={isPending}
             error={error}
             commentCount={stats.comments}
-            onCommentClick={() => setIsCommentOpen(true)}
+            onCommentClick={handleCommentClick}
+            onRepostClick={handleRepostClick}
             viewCount={stats.views}
           />
         </div>
@@ -100,6 +138,21 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         postId={post.id}
         isOpen={isCommentOpen}
         onClose={() => setIsCommentOpen(false)}
+      />
+
+      <ComposeBrickModal
+        isOpen={isBrickModalOpen}
+        onClose={() => setIsBrickModalOpen(false)}
+        initialArticle={attachedArticle}
+        onPublish={(content, platformTag, article, mediaUrl) => {
+          addCommunityBrick(content, platformTag, article, mediaUrl);
+          router.push("/brickboard");
+        }}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </>
   );

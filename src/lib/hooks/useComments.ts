@@ -89,5 +89,25 @@ export function useComments(postId: string) {
     }
   }, [postId, supabase]);
 
-  return { comments, isLoading, error, addComment, fetchComments };
+  const deleteComment = useCallback(
+    async (commentId: string) => {
+      setError(null);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Você precisa estar logado.");
+        const { error: deleteError } = await supabase
+          .from("comments")
+          .delete()
+          .eq("id", commentId);
+        if (deleteError) throw deleteError;
+        setComments((previous) => previous.filter((c) => c.id !== commentId));
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : "Erro ao apagar comentário";
+        setError(message);
+      }
+    },
+    [supabase]
+  );
+
+  return { comments, isLoading, error, addComment, deleteComment, fetchComments };
 }

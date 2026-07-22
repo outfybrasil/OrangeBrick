@@ -11,9 +11,11 @@ import { usePostStats } from "@/lib/hooks/usePostStats";
 import type { PostCategory, PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
+import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
 
 interface NewsFeedProps {
   category: PostCategory | null;
+  platformSlug?: PlatformSlug | null;
   searchQuery?: string;
   activeTag?: string | null;
   onSelectCategory?: (category: PostCategory | null) => void;
@@ -36,13 +38,40 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelectCategory }: NewsFeedProps) {
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category);
 
-  // Filter posts based on searchQuery or activeTag
   const posts = useMemo(() => {
     let result = rawPosts;
+
+    if (platformSlug && platformSlug in PLATFORMS_CONFIG) {
+      const keywords = PLATFORMS_CONFIG[platformSlug].tagKeywords;
+      result = result.filter((post) => {
+        const titleLower = post.title.toLowerCase();
+        const summaryLower = post.summary.toLowerCase();
+        const catLower = post.category.toLowerCase();
+        const tagLower = (post.author_tag || "").toLowerCase();
+        const fullText = `${titleLower} ${summaryLower} ${catLower} ${tagLower}`;
+
+        if (platformSlug === "playstation") {
+          if (titleLower.includes("xbox") || titleLower.includes("halo") || titleLower.includes("nintendo")) {
+            return false;
+          }
+        } else if (platformSlug === "xbox") {
+          if (titleLower.includes("playstation") || titleLower.includes("nintendo")) {
+            return false;
+          }
+        } else if (platformSlug === "nintendo") {
+          if (titleLower.includes("playstation") || titleLower.includes("xbox")) {
+            return false;
+          }
+        }
+
+        return keywords.some((kw) => fullText.includes(kw.toLowerCase()));
+      });
+    }
+
     const term = (searchQuery || activeTag || "").trim().toLowerCase();
     if (term) {
       result = result.filter(
@@ -53,7 +82,7 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
       );
     }
     return result;
-  }, [rawPosts, searchQuery, activeTag]);
+  }, [rawPosts, platformSlug, searchQuery, activeTag]);
 
   const stats = usePostStats(rawPosts.map((post) => post.id));
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -80,7 +109,7 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
     return <NewsFeedEmpty onRefresh={refresh} />;
   }
 
-  const isFiltering = Boolean(category || searchQuery || activeTag);
+  const isFiltering = Boolean(category || platformSlug || searchQuery || activeTag);
 
   const renderHeroSection = () => {
     if (isFiltering || rawPosts.length < 3) return null;
@@ -129,10 +158,10 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
         </Link>
 
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-brand-orange-muted/10">
-            <span className="w-1.5 h-4 bg-brand-orange rounded-full" />
-            <h3 className="text-xs font-mono font-bold text-gray-400 uppercase tracking-wider">
-              Últimos Destaques
+          <div className="flex items-center gap-3 pb-3 border-b border-brand-orange/30">
+            <span className="w-2.5 h-6 bg-brand-orange rounded-full shadow-[0_0_12px_#FF5E00]" />
+            <h3 className="text-base sm:text-lg font-heading font-black text-white uppercase tracking-wider">
+              ÚLTIMAS <span className="text-brand-orange">NOTÍCIAS</span>
             </h3>
           </div>
 
@@ -140,25 +169,25 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
-              className="flex-1 flex flex-col overflow-hidden bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl cursor-pointer hover:border-brand-orange/30 hover:bg-card-slate/60 transition-all duration-300 group hover:-translate-y-0.5"
+              className="flex-1 flex flex-col overflow-hidden bg-card-slate/50 border border-brand-orange-muted/15 rounded-2xl cursor-pointer hover:border-brand-orange/40 hover:bg-card-slate/80 hover:shadow-[0_4px_20px_rgba(255,94,0,0.12)] transition-all duration-300 group hover:-translate-y-1"
             >
               {post.image_url && (
-                <div className="relative h-20 xs:h-24 sm:h-28 w-full overflow-hidden flex-shrink-0">
+                <div className="relative h-24 xs:h-28 sm:h-32 w-full overflow-hidden flex-shrink-0">
                   <img
                     src={post.image_url}
                     alt={post.image_alt || ""}
                     className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card-slate/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card-slate/90 to-transparent" />
                 </div>
               )}
-              <div className="p-3 sm:p-3.5 flex flex-col justify-between flex-1">
+              <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center justify-between gap-2 mb-2">
                     <Tag category={post.category} />
                     <Timer date={post.published_at ?? ""} />
                   </div>
-                  <h4 className="font-mono text-[11px] sm:text-xs font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                  <h4 className="font-heading text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
                     {post.title}
                   </h4>
                 </div>
@@ -179,20 +208,26 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
     <div className="space-y-10">
       {renderHeroSection()}
 
-      {/* SEÇÃO SUPERIOR: Feed (2 colunas) + Sidebar (1 coluna) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* ESQUERDA: Primeiras 4 notícias + Filtro de Categorias */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-brand-orange-muted/10">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-brand-orange rounded-full animate-pulse" />
-              <h3 className="text-xs font-subtitle font-bold text-gray-300 uppercase tracking-wider">
-                {category ? `Notícias em ${category}` : "Feed de Notícias"}
-              </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-orange/20">
+            <div className="flex items-center gap-3">
+              <span className="w-3 h-8 bg-brand-orange rounded-full shadow-[0_0_15px_#FF5E00] animate-pulse" />
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-black text-white uppercase tracking-wider">
+                {category ? (
+                  <>
+                    NOTÍCIAS EM <span className="text-brand-orange">{category}</span>
+                  </>
+                ) : (
+                  <>
+                    ÚLTIMAS <span className="text-brand-orange">NOTÍCIAS</span>
+                  </>
+                )}
+              </h2>
             </div>
 
             {onSelectCategory && (
-              <nav className="flex items-center gap-1 overflow-x-auto scrollbar-none font-subtitle text-[10px] sm:text-xs font-semibold py-0.5 -mx-1 sm:mx-0 px-1 sm:px-0">
+              <nav className="flex items-center gap-1.5 overflow-x-auto scrollbar-none font-subtitle text-xs font-semibold py-1 -mx-1 sm:mx-0 px-1 sm:px-0">
                 {CATEGORIES.map((cat) => {
                   const isActive = category === cat.value;
                   return (
@@ -200,11 +235,11 @@ export function NewsFeed({ category, searchQuery = "", activeTag = null, onSelec
                       key={cat.label}
                       onClick={() => onSelectCategory(cat.value)}
                       className={`
-                        px-2 sm:px-2.5 py-1 rounded-lg border transition-all duration-200 cursor-pointer whitespace-nowrap text-[10px] sm:text-[11px]
+                        px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer whitespace-nowrap text-xs font-bold uppercase tracking-wider
                         ${
                           isActive
-                            ? "bg-brand-orange/20 text-brand-orange border-brand-orange/40 font-bold shadow-[0_0_10px_rgba(255,94,0,0.15)]"
-                            : `bg-card-slate/30 text-gray-400 border-brand-orange-muted/10 ${cat.hoverColor} hover:border-brand-orange-muted/30 hover:bg-card-slate/60`
+                            ? "bg-brand-orange text-white border-brand-orange shadow-[0_0_15px_rgba(255,94,0,0.35)]"
+                            : `bg-card-slate/50 text-gray-300 border-gray-700/40 ${cat.hoverColor} hover:border-brand-orange/40 hover:bg-card-slate`
                         }
                       `}
                     >

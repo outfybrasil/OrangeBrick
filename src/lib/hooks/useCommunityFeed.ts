@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import type { CommunityPost, CommunityPoll, AttachedArticle } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
 
+import { useAuth } from "@/lib/contexts/AuthContext";
+
 const MOCK_INITIAL_POSTS: CommunityPost[] = [
   {
     id: "brick-1",
@@ -64,6 +66,7 @@ const LOCAL_STORAGE_KEY = "orange_brick_community_posts_v1";
 const LOCAL_POLL_KEY = "orange_brick_community_poll_v1";
 
 export function useCommunityFeed() {
+  const { user, profile } = useAuth();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll>(MOCK_POLL);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -100,10 +103,23 @@ export function useCommunityFeed() {
 
   const addPost = useCallback(
     (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
+      const authorName =
+        profile?.nickname ||
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        user?.email?.split("@")[0] ||
+        "Leitor Orange Brick";
+
+      const authorAvatar =
+        profile?.avatar_url ||
+        user?.user_metadata?.avatar_url ||
+        user?.user_metadata?.picture ||
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+
       const newPost: CommunityPost = {
         id: `brick-${Date.now()}`,
-        author_name: "Leitor Orange Brick",
-        author_avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+        author_name: authorName,
+        author_avatar: authorAvatar,
         content,
         platform_tag: platformTag || null,
         attached_article: attachedArticle || null,
@@ -117,7 +133,7 @@ export function useCommunityFeed() {
       const updated = [newPost, ...posts];
       savePosts(updated);
     },
-    [posts, savePosts]
+    [posts, savePosts, user, profile]
   );
 
   const toggleReaction = useCallback(
@@ -174,11 +190,20 @@ export function useCommunityFeed() {
     [poll]
   );
 
+  const deletePost = useCallback(
+    (postId: string) => {
+      const updated = posts.filter((p) => p.id !== postId);
+      savePosts(updated);
+    },
+    [posts, savePosts]
+  );
+
   return {
     posts,
     poll,
     isLoaded,
     addPost,
+    deletePost,
     toggleReaction,
     votePoll,
   };

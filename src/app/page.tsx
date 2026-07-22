@@ -7,6 +7,7 @@ import Link from "next/link";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { TrendingTicker } from "@/components/feed/TrendingTicker";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
+import { PlatformBar } from "@/components/feed/PlatformBar";
 import { UserNav } from "@/components/auth/UserNav";
 import { Footer } from "@/components/ui/Footer";
 import type { PostCategory } from "@/lib/types/database";
@@ -123,6 +124,7 @@ function HomeContent() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="sr-only">Orange Brick — notícias de games, hardware e indústria</h1>
         <ReleaseRadarStrip />
+        <PlatformBar />
         <NewsFeed
           category={activeCategory}
           searchQuery={searchQuery}

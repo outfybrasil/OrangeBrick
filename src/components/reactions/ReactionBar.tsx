@@ -1,4 +1,3 @@
-import { ReactionButton } from "./ReactionButton";
 import { ReactionsError } from "./ReactionsError";
 import { Icon } from "@/components/ui/Icon";
 import type { ReactionType } from "@/lib/types/database";
@@ -13,6 +12,7 @@ interface ReactionBarProps {
   error?: string | null;
   commentCount?: number;
   onCommentClick?: () => void;
+  onRepostClick?: () => void;
   viewCount?: number;
 }
 
@@ -26,56 +26,80 @@ export function ReactionBar({
   error,
   commentCount,
   onCommentClick,
+  onRepostClick,
   viewCount,
 }: ReactionBarProps) {
+  const combinedFlop = flop + salty;
+
   return (
     <div>
-      <div className="flex items-center gap-2 px-4 py-2.5 border-t border-brand-orange-muted/10 bg-black/20 flex-wrap">
-        <ReactionButton
-          type="hype"
-          icon="hype"
-          count={hype}
-          disabled={disabled}
-          active={activeReaction === "hype"}
+      <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 border border-brand-orange-muted/20 bg-[#14161E]/80 backdrop-blur-md rounded-2xl flex-wrap shadow-lg">
+        <button
+          type="button"
           onClick={() => onToggle("hype")}
-        />
-        <ReactionButton
-          type="flop"
-          icon="flop"
-          count={flop}
           disabled={disabled}
-          active={activeReaction === "flop"}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-subtitle font-bold rounded-xl transition-all cursor-pointer group ${
+            activeReaction === "hype"
+              ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/50 shadow-[0_0_12px_rgba(255,94,0,0.25)]"
+              : "text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 hover:text-brand-orange hover:bg-card-slate hover:border-brand-orange/40"
+          }`}
+          title="Empolgado com essa notícia! (Hype)"
+        >
+          <Icon name="hype" size={15} className={`transition-all ${activeReaction === "hype" ? "scale-110" : "group-hover:scale-125"}`} />
+          <span>Hype</span>
+          <span className="text-[11px] font-bold tabular-nums opacity-90 bg-black/30 px-1.5 py-0.5 rounded-md">
+            {hype}
+          </span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => onToggle("flop")}
-        />
-        <ReactionButton
-          type="salty"
-          icon="salty"
-          count={salty}
           disabled={disabled}
-          active={activeReaction === "salty"}
-          onClick={() => onToggle("salty")}
-        />
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-subtitle font-bold rounded-xl transition-all cursor-pointer group ${
+            activeReaction === "flop" || activeReaction === "salty"
+              ? "bg-red-500/20 text-red-400 border border-red-500/50 shadow-[0_0_12px_rgba(239,68,68,0.25)]"
+              : "text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 hover:text-red-400 hover:bg-card-slate hover:border-red-500/40"
+          }`}
+          title="Decepcionou / Não curti (Flop)"
+        >
+          <Icon name="flop" size={15} className={`transition-all ${activeReaction === "flop" ? "scale-110" : "group-hover:rotate-12"}`} />
+          <span>Flop</span>
+          <span className="text-[11px] font-bold tabular-nums opacity-90 bg-black/30 px-1.5 py-0.5 rounded-md">
+            {combinedFlop}
+          </span>
+        </button>
 
-        <div className="flex-1 min-w-[8px]" />
+        <button
+          type="button"
+          onClick={onRepostClick}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-subtitle font-bold text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 hover:text-emerald-400 hover:bg-card-slate hover:border-emerald-500/40 rounded-xl transition-all cursor-pointer group"
+          title="Republicar e comentar sobre essa matéria no Brickboard"
+        >
+          <svg className="w-4 h-4 text-gray-400 group-hover:text-emerald-400 group-hover:rotate-180 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Republicar</span>
+        </button>
 
-        <div className="flex items-center gap-3 text-xs font-subtitle text-gray-400">
-          {viewCount !== undefined && (
-            <div className="flex items-center gap-1 text-[11px] font-subtitle text-gray-400 bg-card-slate/30 px-2 py-1 rounded-lg border border-brand-orange-muted/10">
-              <Icon name="eye" size={13} className="text-gray-400" />
-              <span className="font-semibold">{viewCount}</span>
-            </div>
-          )}
+        <button
+          type="button"
+          onClick={onCommentClick}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-subtitle font-bold text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 hover:text-white hover:bg-card-slate hover:border-brand-orange/40 rounded-xl transition-all cursor-pointer group"
+          title="Ver e enviar comentários"
+        >
+          <Icon name="comment" size={15} className="text-gray-400 group-hover:text-brand-orange group-hover:scale-110 transition-all" />
+          <span className="text-[11px] font-bold tabular-nums opacity-90 bg-black/30 px-1.5 py-0.5 rounded-md">
+            {commentCount ?? 0}
+          </span>
+        </button>
 
-          <button
-            type="button"
-            aria-label="Comentários"
-            onClick={onCommentClick}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-subtitle text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 rounded-lg hover:text-white hover:border-brand-orange/40 hover:bg-card-slate transition-all duration-200 cursor-pointer group/btn"
-          >
-            <Icon name="comment" size={13} className="text-brand-orange group-hover/btn:scale-110 transition-transform" />
-            <span className="font-semibold">{commentCount ?? 0}</span>
-          </button>
-        </div>
+        {viewCount !== undefined && (
+          <div className="flex items-center gap-1.5 text-xs font-subtitle text-gray-400 ml-auto px-2 py-1">
+            <Icon name="eye" size={14} className="text-gray-500" />
+            <span className="font-semibold tabular-nums">{viewCount}</span>
+          </div>
+        )}
       </div>
 
       <ReactionsError message={error || ""} />

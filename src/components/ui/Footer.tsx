@@ -6,7 +6,7 @@ import Image from "next/image";
 export function Footer() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   return (
-    <footer className="bg-[#08090C] border-t border-brand-orange-muted/10 py-8 sm:py-12 text-gray-500 text-xs font-mono">
+    <footer className="bg-[#08090C] border-t border-brand-orange-muted/10 py-8 sm:py-12 text-gray-400 text-xs font-subtitle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
         <div className="flex flex-col gap-3 sm:gap-4 sm:col-span-2">
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
@@ -16,7 +16,7 @@ export function Footer() {
               style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
               className="h-9 sm:h-10 w-auto object-contain shrink-0"
             />
-            <span className="text-xl sm:text-2xl font-mono font-black text-white uppercase tracking-wider">
+            <span className="text-xl sm:text-2xl font-heading font-black text-white uppercase tracking-wider">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
           </div>

@@ -243,7 +243,7 @@ export function ReleaseRadarStrip() {
                 <div className="absolute inset-0 bg-gradient-to-t from-card-slate via-card-slate/40 to-transparent" />
 
                 <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 drop-shadow-md">
-                  <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${item.badgeColor}`}>
+                  <span className={`text-[10px] font-subtitle font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border ${item.badgeColor}`}>
                     {item.badge}
                   </span>
                 </div>
@@ -251,11 +251,11 @@ export function ReleaseRadarStrip() {
 
               <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
                 <div>
-                  <div className="flex items-center justify-between text-[10px] font-mono text-brand-orange font-bold uppercase tracking-wider mb-1">
+                  <div className="flex items-center justify-between text-[10px] font-subtitle text-brand-orange font-bold uppercase tracking-wider mb-1">
                     <span>{item.releaseDate}</span>
                     <span className="text-gray-400 font-normal">{item.dayOfWeek}</span>
                   </div>
-                  <h3 className="font-mono text-xs md:text-sm font-bold text-white leading-snug line-clamp-2 group-hover:text-brand-orange transition-colors">
+                  <h3 className="font-heading text-xs md:text-sm font-extrabold text-white leading-snug line-clamp-2 group-hover:text-brand-orange transition-colors">
                     {item.game}
                   </h3>
                 </div>
@@ -265,14 +265,14 @@ export function ReleaseRadarStrip() {
                     {item.platforms.map((plat) => (
                       <span
                         key={plat}
-                        className="text-[9px] font-mono font-bold uppercase text-gray-300 bg-background-void/80 border border-brand-orange-muted/15 px-1.5 py-0.5 rounded"
+                        className="text-[9px] font-subtitle font-bold uppercase text-gray-300 bg-background-void/80 border border-brand-orange-muted/15 px-1.5 py-0.5 rounded"
                       >
                         {plat}
                       </span>
                     ))}
                   </div>
 
-                  <span className="text-[10px] font-mono text-brand-orange font-bold group-hover:translate-x-1 transition-transform">
+                  <span className="text-[10px] font-subtitle text-brand-orange font-bold group-hover:translate-x-1 transition-transform">
                     {item.slug ? "Ver post →" : "Detalhes"}
                   </span>
                 </div>

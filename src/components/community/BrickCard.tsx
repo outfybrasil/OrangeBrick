@@ -1,19 +1,85 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { CommunityPost } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
-import { ReactionButton } from "@/components/reactions/ReactionButton";
+import { ReactionBar } from "@/components/reactions/ReactionBar";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 interface BrickCardProps {
   post: CommunityPost;
   onReaction: (postId: string, type: ReactionType) => void;
+  onDeletePost?: (postId: string) => void;
 }
 
-export function BrickCard({ post, onReaction }: BrickCardProps) {
+interface LocalComment {
+  id: string;
+  author: string;
+  avatar?: string;
+  text: string;
+  time: string;
+}
+
+export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
+  const { user, profile } = useAuth();
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [comments, setComments] = useState<LocalComment[]>([]);
+  const [commentText, setCommentText] = useState("");
+
+  const currentUserName =
+    profile?.nickname ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Leitor Orange Brick";
+
+  const isPostOwner =
+    user &&
+    (post.author_name === currentUserName ||
+      (profile?.nickname && post.author_name === profile.nickname) ||
+      post.author_name === "Leitor Orange Brick");
+
+  const handleCommentClick = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsCommentOpen(!isCommentOpen);
+  };
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    const trimmed = commentText.trim();
+    if (!trimmed) return;
+
+    const newComment: LocalComment = {
+      id: `comm-${Date.now()}`,
+      author: currentUserName,
+      avatar: profile?.avatar_url || user?.user_metadata?.avatar_url,
+      text: trimmed,
+      time: "agora",
+    };
+
+    setComments((prev) => [...prev, newComment]);
+    setCommentText("");
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+  };
+
+  const totalCommentCount = (post.comments_count || 0) + comments.length;
+
   return (
-    <article className="bg-card-slate/60 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-4">
-      {/* CABEÇALHO DO BRICK */}
+    <article className="bg-card-slate/60 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-4 relative group/card">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
@@ -42,21 +108,29 @@ export function BrickCard({ post, onReaction }: BrickCardProps) {
             </span>
           </div>
         </div>
+
+        {isPostOwner && onDeletePost && (
+          <button
+            onClick={() => onDeletePost(post.id)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-subtitle text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+            title="Apagar este post"
+          >
+            <span>🗑️</span>
+            <span className="hidden xs:inline">Apagar</span>
+          </button>
+        )}
       </div>
 
-      {/* CONTEÚDO DO BRICK */}
       <p className="text-xs sm:text-sm text-gray-200 font-body leading-relaxed whitespace-pre-line">
         {post.content}
       </p>
 
-      {/* MÍDIA/IMAGEM DO BRICK */}
       {post.media_url && (
         <div className="rounded-xl overflow-hidden border border-brand-orange-muted/10 max-h-80">
           <img src={post.media_url} alt="Mídia do post" className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* MATÉRIA DO PORTAL ANEXADA */}
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
@@ -85,36 +159,81 @@ export function BrickCard({ post, onReaction }: BrickCardProps) {
         </Link>
       )}
 
-      {/* REAÇÕES & COMENTÁRIOS */}
-      <div className="flex items-center justify-between pt-3 border-t border-brand-orange-muted/10">
-        <div className="flex items-center gap-2">
-          <ReactionButton
-            type="hype"
-            icon="hype"
-            count={post.reactions.hype || 0}
-            active={post.user_reaction === "hype"}
-            onClick={() => onReaction(post.id, "hype")}
-          />
-          <ReactionButton
-            type="flop"
-            icon="flop"
-            count={post.reactions.flop || 0}
-            active={post.user_reaction === "flop"}
-            onClick={() => onReaction(post.id, "flop")}
-          />
-          <ReactionButton
-            type="salty"
-            icon="salty"
-            count={post.reactions.salty || 0}
-            active={post.user_reaction === "salty"}
-            onClick={() => onReaction(post.id, "salty")}
-          />
-        </div>
-
-        <div className="flex items-center gap-1 text-[11px] font-subtitle text-gray-400">
-          <span>{post.comments_count} comentários</span>
-        </div>
+      <div className="pt-2">
+        <ReactionBar
+          hype={post.reactions.hype || 0}
+          flop={(post.reactions.flop || 0) + (post.reactions.salty || 0)}
+          salty={0}
+          onToggle={(type) => onReaction(post.id, type)}
+          activeReaction={post.user_reaction}
+          commentCount={totalCommentCount}
+          onCommentClick={handleCommentClick}
+          onRepostClick={handleCommentClick}
+        />
       </div>
+
+      {isCommentOpen && (
+        <div className="pt-4 border-t border-brand-orange-muted/15 space-y-3">
+          <div className="flex items-center justify-between text-xs font-subtitle text-gray-400">
+            <span className="font-bold text-white">Respostas ({totalCommentCount})</span>
+          </div>
+
+          <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+            {comments.length === 0 ? (
+              <p className="text-xs text-gray-500 font-subtitle py-2 italic text-center">
+                Seja o primeiro a responder a esse Brick!
+              </p>
+            ) : (
+              comments.map((c) => {
+                const canDeleteComment = isPostOwner || c.author === currentUserName;
+                return (
+                  <div key={c.id} className="bg-[#0D0F14] border border-gray-800/80 rounded-xl p-3 text-xs space-y-1 shadow-inner group/comm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-heading font-bold text-white">{c.author}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-subtitle text-gray-500">{c.time}</span>
+                        {canDeleteComment && (
+                          <button
+                            onClick={() => handleDeleteComment(c.id)}
+                            className="text-gray-500 hover:text-red-400 p-0.5 transition-colors cursor-pointer text-[11px]"
+                            title="Apagar resposta"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-gray-300 font-body leading-relaxed">{c.text}</p>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <form onSubmit={handleAddComment} className="flex gap-2 pt-1">
+            <input
+              type="text"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Escreva sua resposta..."
+              maxLength={280}
+              className="flex-1 bg-[#0D0F14] border border-gray-800 focus:border-brand-orange px-3.5 py-2 text-xs font-body text-white placeholder-gray-500 rounded-xl outline-none transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={!commentText.trim()}
+              className="px-4 py-2 text-xs font-subtitle font-bold bg-brand-orange text-white rounded-xl disabled:opacity-40 hover:bg-brand-orange/90 transition-all cursor-pointer shrink-0"
+            >
+              Responder
+            </button>
+          </form>
+        </div>
+      )}
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </article>
   );
 }

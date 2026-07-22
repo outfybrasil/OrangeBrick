@@ -17,7 +17,7 @@ function BrickboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { posts, poll, isLoaded, addPost, toggleReaction, votePoll } = useCommunityFeed();
+  const { posts, poll, isLoaded, addPost, deletePost, toggleReaction, votePoll } = useCommunityFeed();
 
   const [activeTab, setActiveTab] = useState<"hype" | "latest" | "polls">("hype");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -177,7 +177,7 @@ function BrickboardContent() {
             {/* ESQUERDA: FEED DE BRICKS (2 COLUNAS) */}
             <div className="lg:col-span-2 space-y-6">
               {displayPosts.map((post) => (
-                <BrickCard key={post.id} post={post} onReaction={toggleReaction} />
+                <BrickCard key={post.id} post={post} onReaction={toggleReaction} onDeletePost={deletePost} />
               ))}
             </div>
 
