@@ -35,6 +35,18 @@ export default function ProfileSetup() {
     setSaving(true);
     setError(null);
     try {
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id, user_id")
+        .ilike("nickname", trimmed)
+        .maybeSingle();
+
+      if (existing && existing.user_id !== user!.id) {
+        setError("Este apelido já está em uso por outro usuário. Escolha outro!");
+        setSaving(false);
+        return;
+      }
+
       const { error: insertError } = await supabase.from("profiles").insert({
         user_id: user!.id,
         nickname: trimmed,

@@ -8,6 +8,8 @@ import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
+import { UserBadge } from "@/components/ui/UserBadge";
+
 interface BrickCardProps {
   post: CommunityPost;
   onReaction: (postId: string, type: ReactionType) => void;
@@ -88,10 +90,11 @@ export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
             className="w-10 h-10 rounded-full object-cover border border-brand-orange/30 shrink-0"
           />
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h4 className="font-subtitle text-xs font-bold text-white">
                 {post.author_name}
               </h4>
+              <UserBadge nickname={post.author_name} />
               {post.platform_tag && (
                 <span className="text-[10px] font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-2 py-0.5 rounded border border-brand-orange/20">
                   {post.platform_tag}

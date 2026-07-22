@@ -6,6 +6,8 @@ import type { CommentWithProfile } from "@/lib/hooks/useComments";
 
 import { useAuth } from "@/lib/contexts/AuthContext";
 
+import { UserBadge } from "@/components/ui/UserBadge";
+
 interface CommentItemProps {
   comment: CommentWithProfile;
   onDelete?: (commentId: string) => void;
@@ -58,13 +60,11 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-heading font-bold text-sm text-white group-hover:text-brand-orange transition-colors truncate">
                 {comment.author_nickname}
               </span>
-              <span className="text-[9px] font-subtitle font-bold uppercase tracking-wider bg-brand-orange/10 text-brand-orange border border-brand-orange/20 px-2 py-0.5 rounded-full shrink-0">
-                Leitor
-              </span>
+              <UserBadge nickname={comment.author_nickname} />
             </div>
             <span className="text-[10px] font-subtitle text-gray-500 block">
               {timeAgo(comment.created_at)}
