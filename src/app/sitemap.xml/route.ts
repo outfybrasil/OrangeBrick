@@ -25,7 +25,7 @@ export async function GET() {
 
   const staticUrls = [
     { url: `${siteUrl}`, priority: "1.0", changefreq: "hourly" },
-    { url: `${siteUrl}/brickboard`, priority: "0.8", changefreq: "daily" },
+
     { url: `${siteUrl}/institucional/termos`, priority: "0.2", changefreq: "yearly" },
     { url: `${siteUrl}/institucional/privacidade`, priority: "0.2", changefreq: "yearly" },
     { url: `${siteUrl}/institucional/anuncie`, priority: "0.4", changefreq: "monthly" },
