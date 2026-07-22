@@ -34,6 +34,15 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 
 ---
 
+## 📅 Game Release Dates & Official Cover Art Standards
+
+- **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**
+- **Datas e Meses:** Traduzir apenas os meses para o português (*28 de Julho*, *15 de Setembro*, *19 de Novembro*).
+- **Capas Oficiais:** As imagens do Radar de Lançamentos e matérias DEVEM ser **artes de capa oficiais, artes promocionais do estúdio ou screenshots oficiais** do jogo. **É estritamente proibido usar fotos genéricas** (ex: computadores/controles de bancos de imagens gratuitos como Unsplash/Pexels).
+- **Verificação de Datas:** Sempre validar as datas oficiais dos jogos antes de publicar. Jogos já lançados em anos/datas passadas não devem figurar na aba de futuros lançamentos.
+
+---
+
 ## 📝 Content Standards
 
 ### Título

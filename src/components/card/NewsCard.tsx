@@ -60,15 +60,15 @@ export function NewsCard({ post, stats }: NewsCardProps) {
       >
         <NewsCardHeader category={post.category} publishedAt={post.published_at ?? ""} />
 
-        <h2 
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden"
-          }}
-          className="font-mono text-base md:text-lg font-bold text-white leading-snug px-4 h-[44px] md:h-[50px] mb-3 group-hover:text-brand-orange transition-colors duration-300"
-        >
+          <h2 
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden"
+            }}
+            className="font-mono text-sm xs:text-base md:text-lg font-bold text-white leading-snug px-4 min-h-[36px] xs:min-h-[40px] md:min-h-[50px] mb-3 group-hover:text-brand-orange transition-colors duration-300"
+          >
           {post.title}
         </h2>
 

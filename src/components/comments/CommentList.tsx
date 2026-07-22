@@ -1,10 +1,10 @@
 "use client";
 
 import { CommentItem } from "./CommentItem";
-import type { Comment } from "@/lib/types/database";
+import type { CommentWithProfile } from "@/lib/hooks/useComments";
 
 interface CommentListProps {
-  comments: Comment[];
+  comments: CommentWithProfile[];
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
@@ -28,7 +28,7 @@ export function CommentList({ comments, isLoading, error, onRetry }: CommentList
   return (
     <div className="divide-y divide-brand-orange-muted/10">
       {comments.map((comment) => (
-        <CommentItem key={comment.id} content={comment.content} userId={comment.user_id} createdAt={comment.created_at} />
+        <CommentItem key={comment.id} comment={comment} />
       ))}
     </div>
   );

@@ -2,11 +2,16 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
-import type { Comment as DBComment } from "@/lib/types/database";
+import type { Comment as DBComment, Profile } from "@/lib/types/database";
+
+export interface CommentWithProfile extends DBComment {
+  author_nickname: string;
+  author_avatar: string | null;
+}
 
 export function useComments(postId: string) {
   const supabase = useMemo(() => createDataClient(), []);
-  const [comments, setComments] = useState<DBComment[]>([]);
+  const [comments, setComments] = useState<CommentWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +19,7 @@ export function useComments(postId: string) {
     setIsLoading(true);
     setError(null);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { data, error: fetchError } = await supabase
         .from("comments")
         .select("*")
@@ -21,7 +27,28 @@ export function useComments(postId: string) {
         .is("parent_id", null)
         .order("created_at", { ascending: false });
       if (fetchError) throw fetchError;
-      setComments((data as DBComment[]) || []);
+      const rawComments = (data as DBComment[]) || [];
+
+      const userIds = [...new Set(rawComments.map((c) => c.user_id))];
+      let profileMap: Record<string, { nickname: string; avatar_url: string | null }> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, nickname, avatar_url")
+          .in("user_id", userIds);
+        if (profiles) {
+          for (const p of profiles as Pick<Profile, "user_id" | "nickname" | "avatar_url">[]) {
+            profileMap[p.user_id] = { nickname: p.nickname, avatar_url: p.avatar_url };
+          }
+        }
+      }
+
+      const enriched: CommentWithProfile[] = rawComments.map((c) => ({
+        ...c,
+        author_nickname: profileMap[c.user_id]?.nickname || c.user_id.substring(0, 8),
+        author_avatar: profileMap[c.user_id]?.avatar_url || null,
+      }));
+      setComments(enriched);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Erro ao carregar comentários");
     } finally {
@@ -32,20 +59,29 @@ export function useComments(postId: string) {
   const addComment = useCallback(async (content: string) => {
     setError(null);
     try {
-      let { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        const { data, error: authError } = await supabase.auth.signInAnonymously();
-        if (authError) throw authError;
-        user = data.user;
-      }
-      if (!user) throw new Error("Não foi possível criar uma sessão para comentar");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Você precisa estar logado para comentar.");
       const { data, error: insertError } = await supabase
         .from("comments")
         .insert({ post_id: postId, user_id: user.id, parent_id: null, content })
         .select()
         .single();
       if (insertError) throw insertError;
-      setComments((previous) => [data as DBComment, ...previous]);
+      const inserted = data as DBComment;
+
+      let author_nickname = user.id.substring(0, 8);
+      let author_avatar: string | null = null;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("nickname, avatar_url")
+        .eq("user_id", user.id)
+        .single<Pick<Profile, "nickname" | "avatar_url">>();
+      if (profile) {
+        author_nickname = profile.nickname;
+        author_avatar = profile.avatar_url;
+      }
+
+      setComments((previous) => [{ ...inserted, author_nickname, author_avatar }, ...previous]);
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "Erro ao enviar comentário";
       setError(message);

@@ -9,12 +9,11 @@ interface PostPageProps {
 }
 
 async function getPost(slug: string): Promise<Post | null> {
-  const supabase = createPublicServerClient();
+  const supabase = createServiceRoleClient();
   const { data } = await supabase
     .from("posts")
     .select("*")
     .eq("slug", slug)
-    .eq("is_published", true)
     .maybeSingle();
   return data as Post | null;
 }

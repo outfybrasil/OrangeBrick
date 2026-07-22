@@ -18,7 +18,7 @@ const TRENDING_TAGS = [
 export function TrendingTicker({ activeTag, onSelectTag }: TrendingTickerProps) {
   return (
     <div className="w-full bg-card-slate/30 border-y border-brand-orange-muted/10 py-2.5 px-4 mb-6">
-      <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto scrollbar-none font-mono text-xs">
+      <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto scrollbar-none font-subtitle text-xs">
         <div className="flex items-center gap-1.5 shrink-0 text-brand-orange font-bold uppercase tracking-wider pr-2 border-r border-brand-orange-muted/20">
           <span className="w-2 h-2 rounded-full bg-brand-orange animate-ping" />
           <span>Em Alta</span>

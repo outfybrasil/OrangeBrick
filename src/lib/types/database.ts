@@ -27,6 +27,12 @@ export interface Database {
         Update: Partial<PostViewInsert>;
         Relationships: [];
       };
+      profiles: {
+        Row: Profile;
+        Insert: ProfileInsert;
+        Update: Partial<ProfileInsert>;
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: PushSubscription;
         Insert: PushSubscriptionInsert;
@@ -171,6 +177,24 @@ export interface PostViewInsert {
   device_id: string;
   ip_hash?: string | null;
   viewed_at?: string;
+}
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  nickname: string;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfileInsert {
+  id?: string;
+  user_id: string;
+  nickname: string;
+  avatar_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PushSubscription {

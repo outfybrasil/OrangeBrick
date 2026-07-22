@@ -30,7 +30,7 @@ export function ReactionBar({
 }: ReactionBarProps) {
   return (
     <div>
-      <div className="flex items-center gap-1 px-4 py-2 border-t border-brand-orange-muted/10 bg-black/10">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-t border-brand-orange-muted/10 bg-black/20 flex-wrap">
         <ReactionButton
           type="hype"
           icon="hype"
@@ -56,26 +56,26 @@ export function ReactionBar({
           onClick={() => onToggle("salty")}
         />
 
-        <div className="flex-1" />
+        <div className="flex-1 min-w-[8px]" />
 
-        <div className="flex items-center gap-2 text-[11px] font-mono text-gray-500 mr-2">
-          <Icon name="eye" size={14} />
+        <div className="flex items-center gap-3 text-xs font-subtitle text-gray-400">
           {viewCount !== undefined && (
-            <span className="text-[10px] font-mono text-gray-500">{viewCount}</span>
+            <div className="flex items-center gap-1 text-[11px] font-subtitle text-gray-400 bg-card-slate/30 px-2 py-1 rounded-lg border border-brand-orange-muted/10">
+              <Icon name="eye" size={13} className="text-gray-400" />
+              <span className="font-semibold">{viewCount}</span>
+            </div>
           )}
-        </div>
 
-        <button
-          type="button"
-          aria-label="Comentários"
-          onClick={onCommentClick}
-          className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-mono text-gray-500 border border-transparent rounded-none hover:text-gray-300 hover:border-gray-500/30 transition-all duration-100 group/btn"
-        >
-          <Icon name="comment" size={14} className="transition-colors duration-100" />
-          {commentCount !== undefined && commentCount > 0 && (
-            <span className="text-[10px] font-mono text-gray-500">{commentCount}</span>
-          )}
-        </button>
+          <button
+            type="button"
+            aria-label="Comentários"
+            onClick={onCommentClick}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-subtitle text-gray-300 bg-card-slate/40 border border-brand-orange-muted/15 rounded-lg hover:text-white hover:border-brand-orange/40 hover:bg-card-slate transition-all duration-200 cursor-pointer group/btn"
+          >
+            <Icon name="comment" size={13} className="text-brand-orange group-hover/btn:scale-110 transition-transform" />
+            <span className="font-semibold">{commentCount ?? 0}</span>
+          </button>
+        </div>
       </div>
 
       <ReactionsError message={error || ""} />

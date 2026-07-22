@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  return user?.app_metadata?.is_admin === true;
+  if (!user || !user.email) return false;
+  return user.email.toLowerCase() === "orangebrick0@gmail.com" && user.app_metadata?.is_admin === true;
 }
 
 export default function AdminLogin() {
@@ -92,7 +93,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="admin@orangebrick.com"
+              placeholder="Orangebrick0@gmail.com"
               className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-2.5 outline-none focus:border-brand-orange/50 transition-colors"
             />
           </div>

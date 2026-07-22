@@ -6,22 +6,20 @@ import Image from "next/image";
 export function Footer() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   return (
-    <footer className="bg-[#08090C] border-t border-brand-orange-muted/10 py-12 text-gray-500 text-xs font-mono">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="flex flex-col gap-4 md:col-span-2">
-          <div className="flex items-center gap-4">
-            <Image
+    <footer className="bg-[#08090C] border-t border-brand-orange-muted/10 py-8 sm:py-12 text-gray-500 text-xs font-mono">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        <div className="flex flex-col gap-3 sm:gap-4 sm:col-span-2">
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+            <img
               src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
-              width={96}
-              height={48}
-              className="h-12 w-auto object-contain"
+              className="h-9 sm:h-10 w-auto max-h-10 object-contain shrink-0"
             />
-            <span className="text-2xl font-mono font-black text-white uppercase tracking-wider">
+            <span className="text-xl sm:text-2xl font-mono font-black text-white uppercase tracking-wider">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
           </div>
-          <p className="text-[11px] text-gray-400 font-sans max-w-sm leading-relaxed">
+          <p className="text-[10px] sm:text-[11px] text-gray-400 font-sans max-w-sm leading-relaxed">
             O portal definitivo de notícias de games. Análises ácidas, hardware de ponta, modding e as últimas notícias do universo gamer de forma rápida, direta e independente.
           </p>
         </div>

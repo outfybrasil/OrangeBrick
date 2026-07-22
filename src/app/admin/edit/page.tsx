@@ -378,29 +378,29 @@ function EditForm() {
 
   return (
     <div className="min-h-dvh bg-background-void text-white font-mono text-sm">
-      <header className="sticky top-0 z-40 border-b border-brand-orange-muted/10 bg-card-slate/90 backdrop-blur-md py-3">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 w-auto object-contain" />
-            <div>
-              <h1 className="text-base font-black uppercase leading-tight">
-                Orange<span className="text-brand-orange">_</span>Brick <span className="text-[10px] text-gray-500 font-normal">/ editor</span>
+      <header className="sticky top-0 z-40 border-b border-brand-orange-muted/10 bg-card-slate/90 backdrop-blur-md py-2.5 sm:py-3">
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-7 sm:h-8 w-auto object-contain shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-base font-black uppercase leading-tight truncate">
+                Orange<span className="text-brand-orange">_</span>Brick <span className="text-[8px] sm:text-[10px] text-gray-500 font-normal">/ editor</span>
               </h1>
-              {hasChanges && <span className="text-[9px] text-yellow-400">* alterações não salvas</span>}
+              {hasChanges && <span className="text-[8px] sm:text-[9px] text-yellow-400">* alterações não salvas</span>}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => setShowPreview(true)}
-              className="text-xs text-accent-blue hover:text-white border border-accent-blue/30 px-3 py-1.5 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer"
+              className="text-[10px] sm:text-xs text-accent-blue hover:text-white border border-accent-blue/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer whitespace-nowrap"
             >
-              👁️ Preview
+              👁️ <span className="hidden xs:inline">Preview</span>
             </button>
             <button
               onClick={() => router.push("/admin")}
-              className="text-xs text-gray-400 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="text-[10px] sm:text-xs text-gray-400 hover:text-white border border-white/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
             >
-              ← Voltar
+              ← <span className="hidden xs:inline">Voltar</span>
             </button>
           </div>
         </div>
@@ -429,9 +429,9 @@ function EditForm() {
             <span className="text-[9px] text-gray-500 uppercase">{postId ? "Editando" : "Nova"}</span>
           </div>
 
-          <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
+          <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-4 sm:gap-y-5">
             <div className="lg:col-span-2">
-              <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
+              <label className="block text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 mb-1 sm:mb-1.5 flex items-center justify-between">
                 <span>Título da Notícia *</span>
                 <span className={`text-[9px] ${title.length > 110 ? "text-red-400" : "text-gray-500"}`}>{title.length}/120</span>
               </label>
@@ -440,7 +440,7 @@ function EditForm() {
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Título atraente (máx. 120 caracteres)..."
                 maxLength={120}
-                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm font-bold"
+                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 sm:px-4 py-2 sm:py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm font-bold"
               />
             </div>
             <div>
@@ -453,19 +453,19 @@ function EditForm() {
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Categoria *</label>
+              <label className="block text-[9px] sm:text-[10px] uppercase font-bold text-gray-400 mb-1 sm:mb-1.5">Categoria *</label>
               <div className="flex gap-1.5 flex-wrap">
                 {CATEGORY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => { setCategory(opt.value); setAuthorTag(AUTHOR_TAGS[opt.value]); setHasChanges(true); }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold border transition-all cursor-pointer ${
                       category === opt.value
                         ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30"
                         : "bg-background-void text-gray-400 border-brand-orange-muted/20 hover:border-brand-orange/30"
                     }`}
                   >
-                    {opt.icon} {opt.label}
+                    {opt.icon} <span className="hidden xs:inline">{opt.label}</span>
                   </button>
                 ))}
               </div>
@@ -772,29 +772,29 @@ function EditForm() {
               Ações
             </h2>
           </div>
-          <div className="p-6 flex flex-col sm:flex-row gap-3">
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
             {publishedAt ? (
               <>
                 <button
                   onClick={() => handleSave(true, false)}
                   disabled={isSaving}
-                  className="flex-1 bg-card-slate/80 hover:bg-card-slate text-white font-bold py-3 px-4 rounded-lg border border-brand-orange-muted/30 hover:border-brand-orange/40 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 bg-card-slate/80 hover:bg-card-slate text-white font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg border border-brand-orange-muted/30 hover:border-brand-orange/40 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center flex items-center justify-center gap-1.5"
                 >
-                  {isSaving ? "Salvando..." : "💾 Salvar Apenas (Manter Data)"}
+                  {isSaving ? "Salvando..." : "💾 Salvar (Manter Data)"}
                 </button>
                 <button
                   onClick={() => handleSave(true, true)}
                   disabled={isSaving}
-                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center flex items-center justify-center gap-1.5"
+                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
-                  {isSaving ? "Republicando..." : "🚀 Republicar (Atualizar Data)"}
+                  {isSaving ? "Republicando..." : "🚀 Republicar"}
                 </button>
                 <button
                   onClick={() => handleSave(false, false)}
                   disabled={isSaving}
-                  className="px-4 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold py-3 rounded-lg border border-yellow-500/20 transition-all cursor-pointer disabled:opacity-50 text-xs text-center"
+                  className="px-3 sm:px-4 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold py-2.5 sm:py-3 rounded-lg border border-yellow-500/20 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-xs text-center whitespace-nowrap"
                 >
-                  {isSaving ? "Salvando..." : "📦 Mudar para Rascunho"}
+                  {isSaving ? "Salvando..." : "📦 Rascunho"}
                 </button>
               </>
             ) : (
@@ -802,16 +802,16 @@ function EditForm() {
                 <button
                   onClick={() => handleSave(true, true)}
                   disabled={isSaving}
-                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
+                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-2.5 sm:py-3 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center whitespace-nowrap"
                 >
-                  {isSaving ? "Publicando..." : "🚀 Publicar Notícia"}
+                  {isSaving ? "Publicando..." : "🚀 Publicar"}
                 </button>
                 <button
                   onClick={() => handleSave(false, false)}
                   disabled={isSaving}
-                  className="flex-1 bg-card-slate/60 hover:bg-card-slate text-gray-300 font-bold py-3 rounded-lg border border-brand-orange-muted/10 hover:border-brand-orange/20 transition-all cursor-pointer disabled:opacity-50 text-sm text-center"
+                  className="flex-1 bg-card-slate/60 hover:bg-card-slate text-gray-300 font-bold py-2.5 sm:py-3 rounded-lg border border-brand-orange-muted/10 hover:border-brand-orange/20 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center whitespace-nowrap"
                 >
-                  {isSaving ? "Salvando..." : "💾 Salvar como Rascunho"}
+                  {isSaving ? "Salvando..." : "💾 Rascunho"}
                 </button>
               </>
             )}
@@ -820,9 +820,9 @@ function EditForm() {
               <button
                 onClick={handleDuplicate}
                 disabled={isSaving}
-                className="px-5 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center"
+                className="px-3 sm:px-5 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-2.5 sm:py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center whitespace-nowrap"
               >
-                📋 Duplicar
+                📋 <span className="hidden xs:inline">Duplicar</span>
               </button>
             )}
           </div>
@@ -830,15 +830,15 @@ function EditForm() {
       </main>
       {showPreview && (
         <div className="fixed inset-0 z-50 bg-background-void/95 backdrop-blur-sm overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            <div className="flex items-center justify-between mb-6 sticky top-0 bg-background-void/90 backdrop-blur-md py-3 z-10 border-b border-brand-orange-muted/10">
-              <h2 className="text-sm font-mono font-bold text-brand-orange uppercase tracking-wider flex items-center gap-2">
+          <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 sticky top-0 bg-background-void/90 backdrop-blur-md py-2 sm:py-3 z-10 border-b border-brand-orange-muted/10">
+              <h2 className="text-xs sm:text-sm font-mono font-bold text-brand-orange uppercase tracking-wider flex items-center gap-2">
                 👁️ Preview
-                {postId && <span className="text-[9px] text-gray-500 font-normal">(ID: {postId.slice(0, 8)}…)</span>}
+                {postId && <span className="text-[8px] sm:text-[9px] text-gray-500 font-normal">(ID: {postId.slice(0, 8)}…)</span>}
               </h2>
               <button
                 onClick={() => setShowPreview(false)}
-                className="text-xs text-gray-400 hover:text-white border border-gray-500/30 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="text-[10px] sm:text-xs text-gray-400 hover:text-white border border-gray-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors cursor-pointer"
               >
                 ✕ Fechar
               </button>

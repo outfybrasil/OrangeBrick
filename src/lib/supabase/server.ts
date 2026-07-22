@@ -26,3 +26,7 @@ export function createPublicServerClient() {
     }
   );
 }
+
+export async function createServerSupabaseClient() {
+  return createPublicServerClient();
+}

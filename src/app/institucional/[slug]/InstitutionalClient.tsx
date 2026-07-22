@@ -124,7 +124,7 @@ export function InstitutionalClient({ slug }: { slug: InstitutionalSlug }) {
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="text-xs text-gray-400 hover:text-white">← Voltar para a home</Link>
           <Link href="/" className="flex items-center gap-3">
-            <Image src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" width={80} height={40} className="h-10 w-auto" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0" />
             <span className="font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</span>
           </Link>
         </div>

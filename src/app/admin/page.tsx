@@ -18,7 +18,8 @@ const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
 ];
 
 function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  return user?.app_metadata?.is_admin === true;
+  if (!user || !user.email) return false;
+  return user.email.toLowerCase() === "orangebrick0@gmail.com" && user.app_metadata?.is_admin === true;
 }
 
 function errorMessage(error: unknown, fallback: string) {
@@ -196,25 +197,25 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-dvh bg-background-void text-white font-mono text-sm">
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-4">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain" />
-            <h1 className="text-lg font-black uppercase">
-              Orange<span className="text-brand-orange">_</span>Brick <span className="text-xs text-gray-500 font-normal">/ painel</span>
+    <div className="min-h-dvh bg-background-void text-white font-body text-sm">
+      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0" />
+            <h1 className="text-sm sm:text-xl font-heading font-extrabold uppercase truncate">
+              Orange<span className="text-brand-orange">_</span>Brick <span className="hidden sm:inline text-[10px] sm:text-xs text-brand-orange font-subtitle font-bold uppercase tracking-wider bg-brand-orange/10 px-2 py-0.5 rounded border border-brand-orange/20">Painel Admin</span>
             </h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <button
               onClick={() => router.push("/")}
-              className="text-xs text-gray-400 hover:text-white cursor-pointer transition-colors"
+              className="text-[10px] sm:text-xs font-subtitle text-gray-300 hover:text-white cursor-pointer transition-colors bg-card-slate/50 px-2 sm:px-3 py-1.5 rounded-lg border border-brand-orange-muted/15 whitespace-nowrap"
             >
-              Ver site
+              🌐 <span className="hidden xs:inline">Ver </span>Site
             </button>
             <button
               onClick={handleLogout}
-              className="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-3 py-1.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 cursor-pointer transition-all"
+              className="text-[10px] sm:text-xs font-subtitle text-red-400 hover:text-red-300 border border-red-500/20 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 cursor-pointer transition-all whitespace-nowrap"
             >
               Sair
             </button>
@@ -222,44 +223,36 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8">
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-subtitle text-xs">
             {error}
           </div>
         )}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl p-5">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Total</p>
-            <p className="text-2xl font-black text-white">{stats.total}</p>
+            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Total de Matérias</p>
+            <p className="text-3xl font-heading font-black text-white">{stats.total}</p>
           </div>
-          <div className="bg-card-slate/40 border border-green-500/10 rounded-xl p-5">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Publicados</p>
-            <p className="text-2xl font-black text-green-400">{stats.published}</p>
+          <div className="bg-card-slate/40 border border-green-500/20 rounded-xl p-5">
+            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Publicadas no Site</p>
+            <p className="text-3xl font-heading font-black text-green-400">{stats.published}</p>
           </div>
-          <div className="bg-card-slate/40 border border-yellow-500/10 rounded-xl p-5">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Rascunhos</p>
-            <p className="text-2xl font-black text-yellow-400">{stats.drafts}</p>
+          <div className="bg-card-slate/40 border border-yellow-500/20 rounded-xl p-5">
+            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Rascunhos (Em Revisão)</p>
+            <p className="text-3xl font-heading font-black text-yellow-400">{stats.drafts}</p>
           </div>
-          <div className="bg-card-slate/40 border border-purple-500/10 rounded-xl p-5">
-            <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Categorias</p>
-            <p className="text-2xl font-black text-purple-400">{Object.keys(stats.byCategory).length}</p>
+          <div className="bg-card-slate/40 border border-purple-500/20 rounded-xl p-5">
+            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Categorias Ativas</p>
+            <p className="text-3xl font-heading font-black text-purple-400">{Object.keys(stats.byCategory).length}</p>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2 mb-8">
-          {Object.entries(stats.byCategory).map(([cat, count]) => (
-            <div key={cat} className="flex items-center gap-2 bg-card-slate/30 border border-brand-orange-muted/10 rounded-lg px-3 py-1.5">
-              <span className="text-[10px] uppercase font-bold text-gray-400">{cat}</span>
-              <span className="text-xs font-bold text-white">{count}</span>
-            </div>
-          ))}
         </div>
 
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-brand-orange-muted/10">
-          <div>
-            <h2 className="text-xl font-bold uppercase tracking-tight text-white">Suas Notícias</h2>
-            <p className="text-xs text-gray-500 mt-1 font-sans">
-              {posts.length} postagen{posts.length !== 1 ? "ns" : "m"} no total
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-brand-orange-muted/10">
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-heading font-bold uppercase tracking-tight text-white truncate">Matérias & Rascunhos</h2>
+            <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-body">
+              {posts.length} postagen{posts.length !== 1 ? "ns" : "m"} cadastradas
               {filterCategory !== "__all__" || filterStatus !== "all" || searchQuery
                 ? ` (${filteredPosts.length} exibidas)`
                 : ""}
@@ -267,34 +260,34 @@ export default function AdminDashboard() {
           </div>
           <button
             onClick={() => router.push("/admin/edit")}
-            className="bg-brand-orange hover:bg-brand-orange/90 text-white font-bold px-4 py-2.5 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer text-xs"
+            className="shrink-0 bg-brand-orange hover:bg-brand-orange/90 text-white font-subtitle font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-lg hover:shadow-[0_0_20px_rgba(255,94,0,0.35)] transition-all cursor-pointer text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap"
           >
             + Nova Matéria
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
-          <div className="relative flex-1 w-full sm:w-auto">
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+          <div className="relative w-full sm:flex-1 sm:max-w-xs">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por título ou slug..."
-              className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 pl-9 outline-none focus:border-brand-orange/50 transition-colors text-xs"
+              placeholder="Buscar título ou slug..."
+              className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 pl-8 sm:pl-9 outline-none focus:border-brand-orange/50 transition-colors text-[11px] sm:text-xs font-body"
             />
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
 
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="text-gray-500 uppercase tracking-wider">Categoria:</span>
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none font-subtitle text-[10px] sm:text-xs w-full sm:w-auto">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.label}
                 onClick={() => setFilterCategory(cat.value)}
-                className={`px-2.5 py-1.5 rounded-lg border transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border transition-all duration-200 cursor-pointer whitespace-nowrap ${
                   filterCategory === cat.value
-                    ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30"
+                    ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30 font-bold"
                     : "bg-transparent text-gray-400 border-transparent hover:border-brand-orange-muted/20 hover:bg-card-slate/30"
                 }`}
               >
@@ -303,16 +296,16 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1 bg-card-slate/40 border border-brand-orange-muted/10 rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-card-slate/40 border border-brand-orange-muted/10 rounded-lg p-0.5 shrink-0 font-subtitle text-[10px] sm:text-xs">
             {(["all", "published", "draft"] as const).map((s) => {
-              const label = s === "all" ? "Tudo" : s === "published" ? "Publicado" : "Rascunho";
+              const label = s === "all" ? "Tudo" : s === "published" ? "Publicados" : "Rascunhos";
               return (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
                     filterStatus === s
-                      ? "bg-brand-orange/15 text-brand-orange"
+                      ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/30"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
@@ -324,8 +317,8 @@ export default function AdminDashboard() {
         </div>
 
         {filteredPosts.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-brand-orange-muted/20 rounded-xl">
-            <p className="text-gray-500 mb-4">
+          <div className="text-center py-20 border border-dashed border-brand-orange-muted/20 rounded-xl font-subtitle">
+            <p className="text-gray-400 mb-4">
               {posts.length === 0
                 ? "Nenhuma postagem encontrada."
                 : "Nenhuma postagem corresponde aos filtros atuais."}
@@ -333,35 +326,35 @@ export default function AdminDashboard() {
             {posts.length === 0 && (
               <button
                 onClick={() => router.push("/admin/edit")}
-                className="text-xs text-brand-orange hover:text-white border border-brand-orange/30 px-4 py-2 rounded-lg hover:bg-brand-orange/10 transition-colors"
+                className="text-xs font-subtitle font-bold text-brand-orange hover:text-white border border-brand-orange/30 px-5 py-2.5 rounded-xl hover:bg-brand-orange/10 transition-colors"
               >
-                Escrever meu primeiro post
+                Escrever primeira matéria
               </button>
             )}
           </div>
         ) : (
-          <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden shadow-xl">
+          <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-2xl overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-brand-orange-muted/10 bg-card-slate/60 text-xs text-gray-400 uppercase">
-                    <th className="py-4 px-6 font-bold w-14"></th>
-                    <th className="py-4 px-6 font-bold">Título</th>
-                    <th className="py-4 px-6 font-bold">Categoria</th>
-                    <th className="py-4 px-6 font-bold">Status</th>
-                    <th className="py-4 px-6 font-bold">Data</th>
-                    <th className="py-4 px-6 font-bold text-right">Ações</th>
+                  <tr className="border-b border-brand-orange-muted/10 bg-card-slate/60 text-[10px] sm:text-xs font-subtitle text-gray-400 uppercase tracking-wider">
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold w-12 sm:w-16">Mídia</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold">Título</th>
+                    <th className="hidden sm:table-cell py-3 sm:py-4 px-3 sm:px-6 font-bold">Categoria</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold">Status</th>
+                    <th className="hidden sm:table-cell py-3 sm:py-4 px-3 sm:px-6 font-bold">Data</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-brand-orange-muted/5 font-body">
                   {filteredPosts.map((post) => (
                     <tr
                       key={post.id}
-                      className="border-b border-brand-orange-muted/5 hover:bg-card-slate/20 transition-colors"
+                      className="hover:bg-card-slate/30 transition-colors"
                     >
-                      <td className="py-3 px-6">
+                      <td className="py-2 sm:py-3 px-3 sm:px-6">
                         {post.image_url ? (
-                          <div className="w-12 h-8 rounded overflow-hidden border border-brand-orange-muted/10 flex-shrink-0">
+                          <div className="w-10 sm:w-12 h-8 sm:h-9 rounded-lg overflow-hidden border border-brand-orange-muted/10 shrink-0">
                             <img
                               src={post.image_url}
                               alt=""
@@ -369,59 +362,58 @@ export default function AdminDashboard() {
                             />
                           </div>
                         ) : (
-                          <div className="w-12 h-8 rounded bg-card-slate flex items-center justify-center border border-brand-orange-muted/5">
-                            <span className="text-[8px] text-gray-600">—</span>
+                          <div className="w-10 sm:w-12 h-8 sm:h-9 rounded-lg bg-card-slate flex items-center justify-center border border-brand-orange-muted/5 text-[8px] sm:text-[9px] text-gray-500">
+                            Sem foto
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-6 font-bold text-white max-w-xs truncate">
+                      <td className="py-2 sm:py-3 px-3 sm:px-6 font-bold text-white max-w-[120px] sm:max-w-sm truncate text-[11px] sm:text-sm">
                         {post.title}
                       </td>
-                      <td className="py-3 px-6">
-                        <span className="text-xs border border-white/10 px-2 py-0.5 rounded-md uppercase bg-white/5">
+                      <td className="hidden sm:table-cell py-2 sm:py-3 px-3 sm:px-6">
+                        <span className="text-[10px] sm:text-[11px] font-subtitle font-bold border border-brand-orange-muted/20 px-2 sm:px-2.5 py-0.5 rounded-md uppercase bg-brand-orange/5 text-brand-orange">
                           {post.category}
                         </span>
                       </td>
-                      <td className="py-3 px-6">
+                      <td className="py-2 sm:py-3 px-3 sm:px-6">
                         <button
                           onClick={() => handleTogglePublish(post)}
                           disabled={togglingPublish === post.id}
-                          className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-md border transition-all cursor-pointer disabled:opacity-50 ${
+                          className={`inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-subtitle font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
                             post.is_published
-                              ? "text-green-400 border-green-500/20 bg-green-500/5 hover:bg-green-500/10"
-                              : "text-yellow-400 border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10"
+                              ? "text-green-400 border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
+                              : "text-yellow-400 border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/20"
                           }`}
                         >
                           {togglingPublish === post.id ? (
-                            <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
                           ) : (
-                            <span className={`w-1.5 h-1.5 rounded-full ${post.is_published ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`} />
+                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${post.is_published ? "bg-green-400 animate-pulse" : "bg-yellow-400"}`} />
                           )}
-                          {post.is_published ? "Publicado" : "Rascunho"}
+                          <span className="hidden xs:inline">{post.is_published ? "Publicado" : "Rascunho"}</span>
                         </button>
                       </td>
-                      <td className="py-3 px-6 text-xs text-gray-500 whitespace-nowrap">
+                      <td className="hidden sm:table-cell py-2 sm:py-3 px-3 sm:px-6 text-[11px] sm:text-xs text-gray-400 whitespace-nowrap font-subtitle">
                         {new Date(post.created_at).toLocaleDateString("pt-BR")}
                       </td>
-                      <td className="py-3 px-6 text-right space-x-3 whitespace-nowrap">
+                      <td className="py-2 sm:py-3 px-3 sm:px-6 text-right space-x-1.5 sm:space-x-3 whitespace-nowrap font-subtitle text-[10px] sm:text-xs">
                         <button
-                          onClick={() => router.push(`/posts/${post.slug}`)}
-                          disabled={!post.is_published}
-                          className="text-xs text-gray-400 hover:text-white cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          onClick={() => window.open(`/posts/${post.slug}`, "_blank")}
+                          className="text-gray-300 hover:text-white cursor-pointer transition-colors"
                         >
-                          Ver
+                          👁️
                         </button>
                         <button
                           onClick={() => router.push(`/admin/edit?id=${post.id}`)}
-                          className="text-xs text-brand-orange hover:text-white cursor-pointer font-bold transition-colors"
+                          className="text-brand-orange hover:text-white cursor-pointer font-bold transition-colors"
                         >
-                          Editar
+                          ✏️
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(post.id)}
-                          className="text-xs text-red-400 hover:text-red-300 cursor-pointer font-bold transition-colors"
+                          className="text-red-400 hover:text-red-300 cursor-pointer font-bold transition-colors"
                         >
-                          Excluir
+                          🗑️
                         </button>
                       </td>
                     </tr>
@@ -434,27 +426,27 @@ export default function AdminDashboard() {
       </main>
 
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-          <div className="bg-card-slate border border-brand-orange-muted/20 rounded-xl p-6 max-w-sm w-full shadow-2xl">
-            <h3 className="text-sm font-bold font-mono text-white mb-2 uppercase">Excluir postagem?</h3>
-            <p className="text-xs font-mono text-gray-400 mb-6">Esta ação não pode ser desfeita.</p>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4 backdrop-blur-sm">
+          <div className="bg-card-slate border border-brand-orange-muted/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="text-base font-bold font-heading text-white mb-2 uppercase">Excluir postagem?</h3>
+            <p className="text-xs font-body text-gray-400 mb-6">Esta ação apagará a matéria permanentemente.</p>
 
             {deleteError && (
-              <p className="text-xs font-mono text-red-400 mb-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <p className="text-xs font-body text-red-400 mb-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                 {deleteError}
               </p>
             )}
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-3 font-subtitle text-xs">
               <button
                 onClick={() => { setDeleteConfirm(null); setDeleteError(null); }}
-                className="px-4 py-2 text-xs font-mono text-gray-400 hover:text-white border border-gray-500/20 rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-2 text-gray-300 hover:text-white border border-gray-500/20 rounded-xl transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="px-4 py-2 text-xs font-mono text-white bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors cursor-pointer font-bold"
+                className="px-4 py-2 text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors cursor-pointer font-bold shadow-md"
               >
                 Sim, excluir
               </button>

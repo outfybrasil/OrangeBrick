@@ -97,17 +97,17 @@ export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
 
   return (
     <div className="min-h-dvh bg-background-void text-white font-mono pb-24">
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-4 sticky top-0 z-30 backdrop-blur-md">
-        <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
+      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3 sm:py-4 sticky top-0 z-30 backdrop-blur-md">
+        <div className="max-w-3xl mx-auto px-4 flex items-center justify-between gap-2">
           <button
             onClick={() => router.push("/")}
-            className="text-xs text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center gap-2"
+            className="text-[10px] sm:text-xs text-gray-400 hover:text-white cursor-pointer transition-colors flex items-center gap-1 sm:gap-2 shrink-0"
           >
-            ← Voltar para a Home
+            ← <span className="hidden xs:inline">Voltar</span> Home
           </button>
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-10 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-200" />
-            <span className="text-sm font-mono font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors">
+          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0" onClick={() => router.push("/")}>
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain transform group-hover:scale-[1.05] transition-transform duration-200 shrink-0" />
+            <span className="hidden sm:inline text-sm font-mono font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
           </div>
@@ -121,10 +121,10 @@ export function PostArticle({ post, stats }: { post: Post; stats: PostStats }) {
             <Timer date={post.published_at ?? ""} />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white uppercase leading-tight">
+          <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-white uppercase leading-tight">
             {post.title}
           </h1>
-          <p className="text-base text-gray-400 font-sans border-l-2 border-brand-orange pl-4 py-1 leading-relaxed">
+          <p className="text-sm xs:text-base text-gray-400 font-sans border-l-2 border-brand-orange pl-3 sm:pl-4 py-1 leading-relaxed">
             {post.summary}
           </p>
 

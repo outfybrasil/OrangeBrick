@@ -6,8 +6,28 @@
   --color-brand-orange-muted: #A84300;
   --color-card-slate: #1C1E24;
   --color-accent-blue: #00A3FF;
-  --font-sans: "Inter", "Roboto", system-ui, sans-serif;
-  --font-mono: "Fira Code", "JetBrains Mono", monospace;
+  --font-heading: var(--font-heading-var), "Outfit", sans-serif;
+  --font-subtitle: var(--font-subtitle-var), "Space Grotesk", sans-serif;
+  --font-body: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
+  --font-mono: var(--font-mono-var), "JetBrains Mono", monospace;
+  --font-sans: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
+  --breakpoint-xs: 480px;
+}
+
+.font-heading {
+  font-family: var(--font-heading-var), "Outfit", sans-serif;
+}
+
+.font-subtitle {
+  font-family: var(--font-subtitle-var), "Space Grotesk", sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono-var), "JetBrains Mono", monospace;
 }
 
 * {
@@ -18,12 +38,32 @@
 body {
   background-color: #0D0E12;
   color: #e5e5e5;
-  font-family: "Inter", "Roboto", system-ui, sans-serif;
+  font-family: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading-var), "Outfit", sans-serif;
 }
 
 ::selection {
   background-color: rgba(255, 94, 0, 0.3);
   color: #ffffff;
+}
+
+/* ============================================
+   Responsividade Global
+   ============================================ */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img, video, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 480px) {
+  .hide-xs { display: none !important; }
 }
 
 /* ============================================

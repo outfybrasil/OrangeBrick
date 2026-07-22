@@ -52,9 +52,9 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
         aria-modal="true"
         aria-label="Comentários"
         className="
-          fixed bottom-0 left-0 right-0 z-50
+          fixed bottom-0 left-0 right-0 z-50 max-h-[85dvh]
           md:bottom-auto md:top-0 md:right-0 md:left-auto
-          md:w-[420px] md:h-full
+          md:w-[420px] md:h-full md:max-h-none
           bg-card-slate border-t md:border-l border-brand-orange-muted/20
           animate-slide-up md:animate-slide-in-right
           flex flex-col

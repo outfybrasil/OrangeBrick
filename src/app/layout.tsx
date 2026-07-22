@@ -1,18 +1,34 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter, Fira_Code } from "next/font/google";
+import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
 import PushSetup from "@/components/PushSetup";
 import "./globals.css";
 
-const inter = Inter({
+const headingFont = Outfit({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-heading-var",
   display: "swap",
+  weight: ["500", "600", "700", "800", "900"],
 });
 
-const firaCode = Fira_Code({
+const subtitleFont = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-fira-code",
+  variable: "--font-subtitle-var",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const bodyFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-body-var",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const monoFont = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-var",
   display: "swap",
 });
 
@@ -44,10 +60,10 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${firaCode.variable} h-full antialiased`}
+      className={`${headingFont.variable} ${subtitleFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
     >
-      <body className="min-h-dvh flex flex-col bg-background-void text-white font-sans">
-        {children}
+      <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
+        <AuthProvider>{children}</AuthProvider>
         <PushSetup />
       </body>
     </html>
