@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -9,6 +9,18 @@ export function UserNav() {
   const { user, profile, signOut, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown automatically when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   if (isLoading) {
     return (
@@ -43,7 +55,8 @@ export function UserNav() {
   const displayName = profile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || "Leitor";
 
   return (
-    <div className="flex items-center gap-2 relative">
+    <div ref={dropdownRef} className="flex items-center gap-2 relative">
+      {/* DIRECT PAINEL ADMIN BUTTON IN HEADER (EXCLUSIVELY FOR ADMIN) */}
       {isAdmin && (
         <Link
           href="/admin"
@@ -57,6 +70,7 @@ export function UserNav() {
         </Link>
       )}
 
+      {/* USER PROFILE TRIGGER BUTTON */}
       <button
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-card-slate/80 hover:bg-card-slate border border-brand-orange-muted/20 hover:border-brand-orange/40 transition-all cursor-pointer"
@@ -78,8 +92,9 @@ export function UserNav() {
         <span className="text-[10px] text-gray-400">▼</span>
       </button>
 
+      {/* DROPDOWN MENU */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-card-slate border border-brand-orange-muted/20 rounded-xl p-2 shadow-2xl z-50 space-y-1 font-subtitle text-xs">
+        <div className="absolute right-0 top-full mt-2 w-52 bg-card-slate border border-brand-orange-muted/30 rounded-xl p-2 shadow-2xl z-50 space-y-1 font-subtitle text-xs backdrop-blur-md animate-fade-in">
           <div className="px-3 py-2 border-b border-brand-orange-muted/10">
             <p className="font-bold text-white truncate">{displayName}</p>
             <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
@@ -91,7 +106,9 @@ export function UserNav() {
               onClick={() => setIsDropdownOpen(false)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-brand-orange hover:bg-brand-orange/10 font-bold transition-colors"
             >
-              <span>⚙️</span>
+              <svg className="w-4 h-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
               <span>Painel Admin</span>
             </Link>
           )}
@@ -103,7 +120,9 @@ export function UserNav() {
             }}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 font-medium transition-colors text-left"
           >
-            <span>🚪</span>
+            <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             <span>Sair</span>
           </button>
         </div>
