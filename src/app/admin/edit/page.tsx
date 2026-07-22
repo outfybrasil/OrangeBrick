@@ -102,7 +102,9 @@ function EditForm() {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (user?.app_metadata?.is_admin !== true) {
+        const emailOk = user?.email?.toLowerCase() === "orangebrick0@gmail.com";
+        const isAdmin = user?.app_metadata?.is_admin === true;
+        if (!emailOk || !isAdmin) {
           router.push("/admin/login");
           return;
         }

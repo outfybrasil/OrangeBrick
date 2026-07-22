@@ -18,8 +18,10 @@ const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
 ];
 
 function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  if (!user || !user.email) return false;
-  return user.email.toLowerCase() === "orangebrick0@gmail.com" && user.app_metadata?.is_admin === true;
+  if (!user?.email) return false;
+  const emailOk = user.email.toLowerCase() === "orangebrick0@gmail.com";
+  const metadataOk = user.app_metadata?.is_admin === true;
+  return emailOk && metadataOk;
 }
 
 function errorMessage(error: unknown, fallback: string) {

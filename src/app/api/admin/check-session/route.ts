@@ -1,24 +1,14 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { isAdminUser } from "@/lib/auth";
 
-export const dynamic = "force-static";
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const supabase = await createServerSupabaseClient();
-    
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const supabase = await createServerSupabaseClient(request);
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error || !user) {
-      return NextResponse.json({ isAdmin: false, error: "Usuário não autenticado" });
-    }
-
-    const adminEmail = process.env.ADMIN_EMAIL || "Orangebrick0@gmail.com";
-    if (user.email?.toLowerCase() !== adminEmail.toLowerCase()) {
-      return NextResponse.json({ isAdmin: false, error: "E-mail não autorizado" });
+    if (error || !user || !isAdminUser(user)) {
+      return NextResponse.json({ isAdmin: false, error: "Não autorizado" });
     }
 
     return NextResponse.json({ isAdmin: true, email: user.email });
