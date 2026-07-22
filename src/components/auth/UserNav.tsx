@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
-import NotificationBell from "@/components/NotificationBell";
+import { NotificationCenter } from "@/components/ui/NotificationCenter";
 
 export function UserNav() {
   const { user, profile, signOut, isLoading } = useAuth();
@@ -33,8 +33,6 @@ export function UserNav() {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <NotificationBell />
-
         <button
           onClick={() => setIsAuthModalOpen(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-card-slate/60 hover:bg-card-slate text-white border border-brand-orange-muted/20 hover:border-brand-orange/40 font-subtitle text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap"
@@ -58,7 +56,7 @@ export function UserNav() {
 
   return (
     <div ref={dropdownRef} className="flex items-center gap-2 relative">
-      <NotificationBell />
+      <NotificationCenter />
       {/* DIRECT PAINEL ADMIN BUTTON IN HEADER (EXCLUSIVELY FOR ADMIN) */}
       {isAdmin && (
         <Link

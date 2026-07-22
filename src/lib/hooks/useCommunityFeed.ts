@@ -1,108 +1,170 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { CommunityPost, CommunityPoll, AttachedArticle } from "@/lib/types/community";
-import type { ReactionType } from "@/lib/types/database";
-
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createDataClient } from "@/lib/supabase/client";
+import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle } from "@/lib/types/community";
+import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
-
-const MOCK_INITIAL_POSTS: CommunityPost[] = [
-  {
-    id: "brick-1",
-    author_name: "Gabriel 'Viper' Silva",
-    author_avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
-    content: "Galera, o Switch 2 manter os cartuchos físicos com o novo Game-Key Card é a melhor decisão pro mercado de colecionadores. Finalmente a Nintendo acertou!",
-    platform_tag: "[SWITCH 2]",
-    attached_article: {
-      id: "switch-2-media",
-      slug: "nintendo-switch-2-game-key-card",
-      title: "Nintendo Switch 2 mantém cartuchos, mas inventa o 'Game-Key Card'",
-      summary: "O Switch 2 trouxe dois tipos de mídia física: o cartucho clássico e o Game-Key Card.",
-      image_url: "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&w=600&q=80",
-      category: "hardware",
-    },
-    reactions: { hype: 42, flop: 5, salty: 3 },
-    user_reaction: null,
-    comments_count: 14,
-    created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    is_pinned: true,
-  },
-  {
-    id: "brick-2",
-    author_name: "Mariana Costa",
-    author_avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80",
-    content: "Se a Sony realmente encerrar discos físicos em 2028 no PS6, vai ser um tiro no pé gigantesco na América Latina onde jogos usados movimentam a comunidade...",
-    platform_tag: "[PS5]",
-    attached_article: {
-      id: "sony-midia-fisica",
-      slug: "sony-anuncia-fim-definitivo-midia-fisica-2028",
-      title: "Sony anuncia fim definitivo de mídias físicas no PlayStation a partir de 2028",
-      summary: "A Sony confirmou que a próxima geração do PlayStation funcionará exclusivamente por downloads e nuvem.",
-      image_url: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=600&q=80",
-      category: "industry",
-    },
-    reactions: { hype: 8, flop: 38, salty: 64 },
-    user_reaction: null,
-    comments_count: 29,
-    created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-  },
-];
-
-const MOCK_POLL: CommunityPoll = {
-  id: "poll-1",
-  question: "Qual recurso do Switch 2 mais te empolga até agora?",
-  options: [
-    { id: 1, text: "Cartuchos clássicos mantidos + retrocompatibilidade", votes: 142 },
-    { id: 2, text: "Novo chip gráfico DLSS customizado pela NVIDIA", votes: 98 },
-    { id: 3, text: "Tela OLED de 120Hz nativa na caixa", votes: 76 },
-    { id: 4, text: "Game-Key Card para instalações ultrarrápidas", votes: 34 },
-  ],
-  total_votes: 350,
-  user_voted_option: null,
-  created_at: new Date().toISOString(),
-};
-
-const LOCAL_STORAGE_KEY = "orange_brick_community_posts_v1";
-const LOCAL_POLL_KEY = "orange_brick_community_poll_v1";
 
 export function useCommunityFeed() {
   const { user, profile } = useAuth();
+  const supabase = useMemo(() => createDataClient(), []);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [poll, setPoll] = useState<CommunityPoll>(MOCK_POLL);
+  const [poll, setPoll] = useState<CommunityPoll | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     try {
-      const savedPosts = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (savedPosts) {
-        setPosts(JSON.parse(savedPosts));
-      } else {
-        setPosts(MOCK_INITIAL_POSTS);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(MOCK_INITIAL_POSTS));
+      const { data: postRows } = await supabase
+        .from("community_posts")
+        .select("*")
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      let userReactions: Record<string, ReactionType> = {};
+      if (user) {
+        const { data: reactions } = await supabase
+          .from("community_reactions")
+          .select("*")
+          .eq("user_id", user.id);
+        if (reactions) {
+          for (const r of reactions as CommunityReactionRow[]) {
+            userReactions[r.post_id] = r.reaction_type;
+          }
+        }
       }
 
-      const savedPoll = localStorage.getItem(LOCAL_POLL_KEY);
-      if (savedPoll) {
-        setPoll(JSON.parse(savedPoll));
-      } else {
-        localStorage.setItem(LOCAL_POLL_KEY, JSON.stringify(MOCK_POLL));
+      const { data: allReactions } = await supabase
+        .from("community_reactions")
+        .select("*");
+
+      const reactionMap: Record<string, Record<ReactionType, number>> = {};
+      if (allReactions) {
+        for (const r of allReactions as CommunityReactionRow[]) {
+          if (!reactionMap[r.post_id]) {
+            reactionMap[r.post_id] = { hype: 0, flop: 0, salty: 0 };
+          }
+          reactionMap[r.post_id][r.reaction_type]++;
+        }
       }
-    } catch {
-      setPosts(MOCK_INITIAL_POSTS);
+
+      const { data: allComments } = await supabase
+        .from("community_comments")
+        .select("*");
+
+      const commentCountMap: Record<string, number> = {};
+      if (allComments) {
+        for (const c of allComments as CommunityCommentRow[]) {
+          commentCountMap[c.post_id] = (commentCountMap[c.post_id] || 0) + 1;
+        }
+      }
+
+      const mappedPosts: CommunityPost[] = (postRows as CommunityPostRow[] | null || []).map((row) => ({
+        id: row.id,
+        user_id: row.user_id,
+        author_name: row.author_name,
+        author_avatar: row.author_avatar,
+        content: row.content,
+        media_url: row.media_url,
+        platform_tag: row.platform_tag,
+        attached_article: row.attached_article as AttachedArticle | null,
+        reactions: reactionMap[row.id] || { hype: 0, flop: 0, salty: 0 },
+        user_reaction: userReactions[row.id] || null,
+        comments_count: commentCountMap[row.id] || 0,
+        created_at: row.created_at,
+        is_pinned: row.is_pinned,
+      }));
+
+      setPosts(mappedPosts);
+
+      const { data: pollRows } = await supabase
+        .from("community_polls")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (pollRows) {
+        const pollRow = pollRows as CommunityPollRow;
+        let userVotedOption: number | undefined;
+        if (user) {
+          const { data: vote } = await supabase
+            .from("community_poll_votes")
+            .select("*")
+            .eq("poll_id", pollRow.id)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          if (vote) {
+            userVotedOption = (vote as CommunityPollVoteRow).option_index;
+          }
+        }
+
+        const { data: allVotes } = await supabase
+          .from("community_poll_votes")
+          .select("*")
+          .eq("poll_id", pollRow.id);
+
+        const voteCounts: Record<number, number> = {};
+        if (allVotes) {
+          for (const v of allVotes as CommunityPollVoteRow[]) {
+            voteCounts[v.option_index] = (voteCounts[v.option_index] || 0) + 1;
+          }
+        }
+
+        const rawOptions = pollRow.options as Array<{ id: number; text: string }>;
+        const options = rawOptions.map((opt) => ({
+          ...opt,
+          votes: voteCounts[opt.id] || 0,
+        }));
+
+        setPoll({
+          id: pollRow.id,
+          question: pollRow.question,
+          options,
+          total_votes: allVotes?.length || 0,
+          user_voted_option: userVotedOption ?? null,
+          created_at: pollRow.created_at,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load community data:", err);
     } finally {
       setIsLoaded(true);
     }
-  }, []);
+  }, [user, supabase]);
 
-  const savePosts = useCallback((newPosts: CommunityPost[]) => {
-    setPosts(newPosts);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newPosts));
-    } catch {}
-  }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const channelName = `community_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public" },
+        (payload) => {
+          if (
+            payload.table === "community_posts" ||
+            payload.table === "community_reactions" ||
+            payload.table === "community_poll_votes"
+          ) {
+            fetchData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchData]);
 
   const addPost = useCallback(
-    (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
+    async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
+      if (!user) return;
+
       const authorName =
         profile?.nickname ||
         user?.user_metadata?.full_name ||
@@ -116,86 +178,125 @@ export function useCommunityFeed() {
         user?.user_metadata?.picture ||
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
 
-      const newPost: CommunityPost = {
-        id: `brick-${Date.now()}`,
+      await supabase.from("community_posts").insert({
+        user_id: user.id,
         author_name: authorName,
         author_avatar: authorAvatar,
         content,
         platform_tag: platformTag || null,
         attached_article: attachedArticle || null,
         media_url: mediaUrl || null,
-        reactions: { hype: 1, flop: 0, salty: 0 },
-        user_reaction: "hype",
-        comments_count: 0,
-        created_at: new Date().toISOString(),
-      };
-
-      const updated = [newPost, ...posts];
-      savePosts(updated);
+      });
     },
-    [posts, savePosts, user, profile]
+    [user, profile, supabase]
   );
 
   const toggleReaction = useCallback(
-    (postId: string, reactionType: ReactionType) => {
-      const updated = posts.map((post) => {
-        if (post.id !== postId) return post;
+    async (postId: string, reactionType: ReactionType) => {
+      if (!user) return;
 
-        const currentReaction = post.user_reaction;
-        const newReactions = { ...post.reactions };
+      const { data: existing } = await supabase
+        .from("community_reactions")
+        .select("*")
+        .eq("post_id", postId)
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-        if (currentReaction === reactionType) {
-          newReactions[reactionType] = Math.max(0, newReactions[reactionType] - 1);
-          return { ...post, user_reaction: null, reactions: newReactions };
+      const existingRow = existing as CommunityReactionRow | null;
+
+      if (existingRow) {
+        if (existingRow.reaction_type === reactionType) {
+          await supabase.from("community_reactions").delete().eq("id", existingRow.id);
+        } else {
+          await supabase.from("community_reactions").update({ reaction_type: reactionType }).eq("id", existingRow.id);
         }
-
-        if (currentReaction) {
-          newReactions[currentReaction] = Math.max(0, newReactions[currentReaction] - 1);
-        }
-
-        newReactions[reactionType] = (newReactions[reactionType] || 0) + 1;
-
-        return {
-          ...post,
-          user_reaction: reactionType,
-          reactions: newReactions,
-        };
-      });
-
-      savePosts(updated);
+      } else {
+        await supabase.from("community_reactions").insert({
+          post_id: postId,
+          user_id: user.id,
+          reaction_type: reactionType,
+        });
+      }
     },
-    [posts, savePosts]
+    [user, supabase]
   );
 
   const votePoll = useCallback(
-    (optionId: number) => {
-      if (poll.user_voted_option) return;
+    async (optionId: number) => {
+      if (!user || !poll) return;
 
-      const newOptions = poll.options.map((opt) =>
-        opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
-      );
-
-      const updatedPoll: CommunityPoll = {
-        ...poll,
-        options: newOptions,
-        total_votes: poll.total_votes + 1,
-        user_voted_option: optionId,
-      };
-
-      setPoll(updatedPoll);
-      try {
-        localStorage.setItem(LOCAL_POLL_KEY, JSON.stringify(updatedPoll));
-      } catch {}
+      await supabase.from("community_poll_votes").insert({
+        poll_id: poll.id,
+        user_id: user.id,
+        option_index: optionId,
+      });
     },
-    [poll]
+    [user, poll, supabase]
   );
 
   const deletePost = useCallback(
-    (postId: string) => {
-      const updated = posts.filter((p) => p.id !== postId);
-      savePosts(updated);
+    async (postId: string) => {
+      if (!user) return;
+      await supabase.from("community_posts").delete().eq("id", postId).eq("user_id", user.id);
     },
-    [posts, savePosts]
+    [user, supabase]
+  );
+
+  const addComment = useCallback(
+    async (postId: string, content: string) => {
+      if (!user) return;
+
+      const authorName =
+        profile?.nickname ||
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        user?.email?.split("@")[0] ||
+        "Leitor Orange Brick";
+
+      const authorAvatar =
+        profile?.avatar_url ||
+        user?.user_metadata?.avatar_url ||
+        user?.user_metadata?.picture ||
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+
+      await supabase.from("community_comments").insert({
+        post_id: postId,
+        user_id: user.id,
+        author_name: authorName,
+        author_avatar: authorAvatar,
+        content,
+      });
+    },
+    [user, profile, supabase]
+  );
+
+  const deleteComment = useCallback(
+    async (commentId: string) => {
+      if (!user) return;
+      await supabase.from("community_comments").delete().eq("id", commentId).eq("user_id", user.id);
+    },
+    [user, supabase]
+  );
+
+  const getComments = useCallback(
+    async (postId: string): Promise<CommunityComment[]> => {
+      const { data } = await supabase
+        .from("community_comments")
+        .select("*")
+        .eq("post_id", postId)
+        .order("created_at", { ascending: true });
+
+      return (data as CommunityCommentRow[] | null || []).map((row) => ({
+        id: row.id,
+        post_id: row.post_id,
+        user_id: row.user_id,
+        author_name: row.author_name,
+        author_avatar: row.author_avatar,
+        content: row.content,
+        created_at: row.created_at,
+      }));
+    },
+    [supabase]
   );
 
   return {
@@ -206,5 +307,8 @@ export function useCommunityFeed() {
     deletePost,
     toggleReaction,
     votePoll,
+    addComment,
+    deleteComment,
+    getComments,
   };
 }

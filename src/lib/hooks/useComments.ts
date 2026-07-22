@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
+import { createNotification } from "@/lib/notifications";
 import type { Comment as DBComment, Profile } from "@/lib/types/database";
 
 export interface CommentWithProfile extends DBComment {
@@ -79,6 +80,30 @@ export function useComments(postId: string) {
       if (profile) {
         author_nickname = profile.nickname;
         author_avatar = profile.avatar_url;
+      }
+
+      const { data: commenters } = await supabase
+        .from("comments")
+        .select("user_id")
+        .neq("user_id", user.id)
+        .eq("post_id", postId)
+        .is("parent_id", null);
+
+      const notified = new Set<string>();
+      if (commenters) {
+        for (const c of commenters as { user_id: string }[]) {
+          if (!notified.has(c.user_id)) {
+            notified.add(c.user_id);
+            createNotification({
+              user_id: c.user_id,
+              type: "comment",
+              message: `${author_nickname} comentou em uma matéria que você também comentou`,
+              reference_type: "post",
+              reference_id: postId,
+              actor_id: user.id,
+            });
+          }
+        }
       }
 
       setComments((previous) => [{ ...inserted, author_nickname, author_avatar }, ...previous]);

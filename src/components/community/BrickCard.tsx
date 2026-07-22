@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { CommunityPost } from "@/lib/types/community";
+import type { CommunityPost, CommunityComment } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -14,22 +14,21 @@ interface BrickCardProps {
   post: CommunityPost;
   onReaction: (postId: string, type: ReactionType) => void;
   onDeletePost?: (postId: string) => void;
+  onAddComment: (postId: string, content: string) => Promise<void>;
+  onDeleteComment: (commentId: string) => Promise<void>;
+  getComments: (postId: string) => Promise<CommunityComment[]>;
 }
 
-interface LocalComment {
-  id: string;
-  author: string;
-  avatar?: string;
-  text: string;
-  time: string;
-}
-
-export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
+export function BrickCard({ post, onReaction, onDeletePost, onAddComment, onDeleteComment, getComments }: BrickCardProps) {
   const { user, profile } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [comments, setComments] = useState<LocalComment[]>([]);
+  const [comments, setComments] = useState<CommunityComment[]>([]);
   const [commentText, setCommentText] = useState("");
+  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+
+  const currentUserId = user?.id;
+  const isPostOwner = !!(user && post.user_id && post.user_id === user.id);
 
   const currentUserName =
     profile?.nickname ||
@@ -38,21 +37,28 @@ export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
     user?.email?.split("@")[0] ||
     "Leitor Orange Brick";
 
-  const isPostOwner =
-    user &&
-    (post.author_name === currentUserName ||
-      (profile?.nickname && post.author_name === profile.nickname) ||
-      post.author_name === "Leitor Orange Brick");
-
-  const handleCommentClick = () => {
+  const handleCommentClick = async () => {
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
-    setIsCommentOpen(!isCommentOpen);
+    if (isCommentOpen) {
+      setIsCommentOpen(false);
+      return;
+    }
+    setIsCommentOpen(true);
+    if (comments.length === 0) {
+      setIsCommentsLoading(true);
+      try {
+        const fetched = await getComments(post.id);
+        setComments(fetched);
+      } finally {
+        setIsCommentsLoading(false);
+      }
+    }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       setIsAuthModalOpen(true);
@@ -62,23 +68,19 @@ export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
     const trimmed = commentText.trim();
     if (!trimmed) return;
 
-    const newComment: LocalComment = {
-      id: `comm-${Date.now()}`,
-      author: currentUserName,
-      avatar: profile?.avatar_url || user?.user_metadata?.avatar_url,
-      text: trimmed,
-      time: "agora",
-    };
-
-    setComments((prev) => [...prev, newComment]);
+    await onAddComment(post.id, trimmed);
     setCommentText("");
+
+    const fetched = await getComments(post.id);
+    setComments(fetched);
   };
 
-  const handleDeleteComment = (commentId: string) => {
+  const handleDeleteComment = async (commentId: string) => {
+    await onDeleteComment(commentId);
     setComments((prev) => prev.filter((c) => c.id !== commentId));
   };
 
-  const totalCommentCount = (post.comments_count || 0) + comments.length;
+  const totalCommentCount = comments.length || post.comments_count || 0;
 
   return (
     <article className="bg-card-slate/60 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-4 relative group/card">
@@ -182,19 +184,25 @@ export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
           </div>
 
           <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-            {comments.length === 0 ? (
+            {isCommentsLoading ? (
+              <div className="flex justify-center py-4">
+                <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
+              </div>
+            ) : comments.length === 0 ? (
               <p className="text-xs text-gray-500 font-subtitle py-2 italic text-center">
                 Seja o primeiro a responder a esse Brick!
               </p>
             ) : (
               comments.map((c) => {
-                const canDeleteComment = isPostOwner || c.author === currentUserName;
+                const canDeleteComment = isPostOwner || c.user_id === currentUserId;
                 return (
                   <div key={c.id} className="bg-[#0D0F14] border border-gray-800/80 rounded-xl p-3 text-xs space-y-1 shadow-inner group/comm">
                     <div className="flex items-center justify-between">
-                      <span className="font-heading font-bold text-white">{c.author}</span>
+                      <span className="font-heading font-bold text-white">{c.author_name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-subtitle text-gray-500">{c.time}</span>
+                        <span className="text-[10px] font-subtitle text-gray-500">
+                          {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
                         {canDeleteComment && (
                           <button
                             onClick={() => handleDeleteComment(c.id)}
@@ -206,7 +214,7 @@ export function BrickCard({ post, onReaction, onDeletePost }: BrickCardProps) {
                         )}
                       </div>
                     </div>
-                    <p className="text-gray-300 font-body leading-relaxed">{c.text}</p>
+                    <p className="text-gray-300 font-body leading-relaxed">{c.content}</p>
                   </div>
                 );
               })

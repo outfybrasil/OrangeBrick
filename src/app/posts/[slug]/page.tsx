@@ -4,26 +4,29 @@ import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, PostStats, ReactionType } from "@/lib/types/database";
 
+export const dynamic = "force-dynamic";
+
 interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
 async function getPost(slug: string): Promise<Post | null> {
-  const supabase = createServiceRoleClient();
+  const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("posts")
     .select("*")
     .eq("slug", slug)
+    .eq("is_published", true)
     .maybeSingle();
   return data as Post | null;
 }
 
 async function getStats(postId: string): Promise<PostStats> {
-  const supabase = createServiceRoleClient();
+  const serviceClient = createServiceRoleClient();
   const [reactions, views, comments] = await Promise.all([
-    supabase.from("reactions").select("reaction_type").eq("post_id", postId).returns<{ reaction_type: ReactionType }[]>(),
-    supabase.from("post_views").select("id", { count: "exact", head: true }).eq("post_id", postId),
-    supabase.from("comments").select("id", { count: "exact", head: true }).eq("post_id", postId),
+    serviceClient.from("reactions").select("reaction_type").eq("post_id", postId).returns<{ reaction_type: ReactionType }[]>(),
+    serviceClient.from("post_views").select("id", { count: "exact", head: true }).eq("post_id", postId),
+    serviceClient.from("comments").select("id", { count: "exact", head: true }).eq("post_id", postId),
   ]);
   const counts: Record<ReactionType, number> = { hype: 0, flop: 0, salty: 0 };
   for (const row of reactions.data || []) {

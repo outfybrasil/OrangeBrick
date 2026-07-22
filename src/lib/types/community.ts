@@ -31,6 +31,16 @@ export interface PollOption {
   votes: number;
 }
 
+export interface CommunityComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar: string;
+  content: string;
+  created_at: string;
+}
+
 export interface CommunityPoll {
   id: string;
   question: string;

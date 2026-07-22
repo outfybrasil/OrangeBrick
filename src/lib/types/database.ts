@@ -39,6 +39,12 @@ export interface Database {
         Update: Partial<PushSubscriptionInsert>;
         Relationships: [];
       };
+      notifications: {
+        Row: AppNotification;
+        Insert: AppNotificationInsert;
+        Update: Partial<AppNotificationInsert>;
+        Relationships: [];
+      };
       contact_submissions: {
         Row: ContactSubmission;
         Insert: ContactSubmissionInsert;
@@ -49,6 +55,36 @@ export interface Database {
         Row: RateLimit;
         Insert: RateLimitInsert;
         Update: Partial<RateLimitInsert>;
+        Relationships: [];
+      };
+      community_posts: {
+        Row: CommunityPostRow;
+        Insert: CommunityPostInsert;
+        Update: Partial<CommunityPostInsert>;
+        Relationships: [];
+      };
+      community_reactions: {
+        Row: CommunityReactionRow;
+        Insert: CommunityReactionInsert;
+        Update: Partial<CommunityReactionInsert>;
+        Relationships: [];
+      };
+      community_comments: {
+        Row: CommunityCommentRow;
+        Insert: CommunityCommentInsert;
+        Update: Partial<CommunityCommentInsert>;
+        Relationships: [];
+      };
+      community_polls: {
+        Row: CommunityPollRow;
+        Insert: CommunityPollInsert;
+        Update: Partial<CommunityPollInsert>;
+        Relationships: [];
+      };
+      community_poll_votes: {
+        Row: CommunityPollVoteRow;
+        Insert: CommunityPollVoteInsert;
+        Update: Partial<CommunityPollVoteInsert>;
         Relationships: [];
       };
     };
@@ -229,6 +265,124 @@ export interface RateLimitInsert {
   identity_hash: string;
   window_start: string;
   request_count?: number;
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: "reaction" | "comment" | "reply" | "system";
+  message: string;
+  reference_type: "post" | "comment";
+  reference_id: string;
+  actor_id: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface AppNotificationInsert {
+  id?: string;
+  user_id: string;
+  type: AppNotification["type"];
+  message: string;
+  reference_type: AppNotification["reference_type"];
+  reference_id: string;
+  actor_id?: string | null;
+  is_read?: boolean;
+  created_at?: string;
+}
+
+export interface CommunityPostRow {
+  id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar: string;
+  content: string;
+  media_url: string | null;
+  platform_tag: string | null;
+  attached_article: Json | null;
+  is_pinned: boolean;
+  created_at: string;
+}
+
+export interface CommunityPostInsert {
+  id?: string;
+  user_id: string;
+  author_name: string;
+  author_avatar: string;
+  content: string;
+  media_url?: string | null;
+  platform_tag?: string | null;
+  attached_article?: Json | null;
+  is_pinned?: boolean;
+  created_at?: string;
+}
+
+export interface CommunityReactionRow {
+  id: string;
+  post_id: string;
+  user_id: string;
+  reaction_type: "hype" | "flop" | "salty";
+  created_at: string;
+}
+
+export interface CommunityReactionInsert {
+  id?: string;
+  post_id: string;
+  user_id: string;
+  reaction_type: CommunityReactionRow["reaction_type"];
+  created_at?: string;
+}
+
+export interface CommunityCommentRow {
+  id: string;
+  post_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar: string;
+  content: string;
+  created_at: string;
+}
+
+export interface CommunityCommentInsert {
+  id?: string;
+  post_id: string;
+  user_id: string;
+  author_name: string;
+  author_avatar: string;
+  content: string;
+  created_at?: string;
+}
+
+export interface CommunityPollRow {
+  id: string;
+  question: string;
+  options: Json;
+  created_at: string;
+  expires_at: string | null;
+}
+
+export interface CommunityPollInsert {
+  id?: string;
+  question: string;
+  options: Json;
+  created_at?: string;
+  expires_at?: string | null;
+}
+
+export interface CommunityPollVoteRow {
+  id: string;
+  poll_id: string;
+  user_id: string;
+  option_index: number;
+  created_at: string;
+}
+
+export interface CommunityPollVoteInsert {
+  id?: string;
+  poll_id: string;
+  user_id: string;
+  option_index: number;
+  created_at?: string;
 }
 
 export type PostCategory = Post["category"];

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 
 const PAGE_SIZE = 50;
+const REFRESH_INTERVAL = 30_000;
 
 interface UseInfiniteFeedReturn {
   posts: Post[];
@@ -43,7 +44,7 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
           .from("posts")
           .select("*")
           .eq("is_published", true)
-          .order("published_at", { ascending: false })
+          .order("created_at", { ascending: false })
           .limit(PAGE_SIZE);
 
         if (category) {
@@ -51,14 +52,16 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
         }
 
         if (!isRefresh && cursorRef.current) {
-          query = query.lt("published_at", cursorRef.current);
+          query = query.lt("created_at", cursorRef.current);
         }
 
         const { data, error: fetchError } = await query;
 
         if (fetchError) throw fetchError;
 
-        const newPosts = (data as Post[]) || [];
+        const newPosts = ((data as Post[]) || []).filter(
+          (p) => p.is_published
+        );
 
         if (isRefresh) {
           setPosts(newPosts);
@@ -69,7 +72,7 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
         if (newPosts.length < PAGE_SIZE) {
           setHasMore(false);
         } else {
-          cursorRef.current = newPosts[newPosts.length - 1].published_at;
+          cursorRef.current = newPosts[newPosts.length - 1].created_at;
         }
       } catch (err) {
         const msg =
@@ -92,6 +95,16 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
       setHasMore(true);
       void fetchPosts(true);
     });
+
+    const interval = setInterval(() => {
+      if (!loadingRef.current) {
+        cursorRef.current = null;
+        setHasMore(true);
+        fetchPosts(true);
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
   }, [fetchPosts]);
 
   const loadMore = useCallback(() => {

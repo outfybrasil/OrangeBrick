@@ -17,7 +17,7 @@ function BrickboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { posts, poll, isLoaded, addPost, deletePost, toggleReaction, votePoll } = useCommunityFeed();
+  const { posts, poll, isLoaded, addPost, deletePost, toggleReaction, votePoll, addComment, deleteComment, getComments } = useCommunityFeed();
 
   const [activeTab, setActiveTab] = useState<"hype" | "latest" | "polls">("hype");
   const [isComposeOpen, setIsComposeOpen] = useState(false);
@@ -166,7 +166,7 @@ function BrickboardContent() {
           </div>
         )}
 
-        {isLoaded && activeTab === "polls" && (
+        {isLoaded && activeTab === "polls" && poll && (
           <div className="space-y-6">
             <GamerPollWidget poll={poll} onVote={votePoll} />
           </div>
@@ -177,13 +177,13 @@ function BrickboardContent() {
             {/* ESQUERDA: FEED DE BRICKS (2 COLUNAS) */}
             <div className="lg:col-span-2 space-y-6">
               {displayPosts.map((post) => (
-                <BrickCard key={post.id} post={post} onReaction={toggleReaction} onDeletePost={deletePost} />
+                <BrickCard key={post.id} post={post} onReaction={toggleReaction} onDeletePost={deletePost} onAddComment={addComment} onDeleteComment={deleteComment} getComments={getComments} />
               ))}
             </div>
 
             {/* DIREITA: ENQUETE & DEBATES SIDEBAR (1 COLUNA) */}
             <div className="space-y-6 sticky top-20">
-              <GamerPollWidget poll={poll} onVote={votePoll} />
+              {poll && <GamerPollWidget poll={poll} onVote={votePoll} />}
 
               <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg space-y-3">
                 <div className="flex items-center gap-2 pb-2 border-b border-brand-orange-muted/10">
