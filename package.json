@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
-    "admin:create": "node scripts/create-admin.mjs"
+    "admin:create": "node scripts/create-admin.mjs",
+    "scan-news": "node scripts/scan-news.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
