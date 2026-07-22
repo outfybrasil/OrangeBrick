@@ -4,7 +4,10 @@ import { createPublicServerClient } from "@/lib/supabase/server";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://orange-brick.vercel.app");
+
   const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("posts")
@@ -15,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: siteUrl, changeFrequency: "hourly", priority: 1 },
-
+    { url: `${siteUrl}/brickboard`, changeFrequency: "daily", priority: 0.8 },
     { url: `${siteUrl}/institucional/termos`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${siteUrl}/institucional/privacidade`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${siteUrl}/institucional/anuncie`, changeFrequency: "monthly", priority: 0.4 },
