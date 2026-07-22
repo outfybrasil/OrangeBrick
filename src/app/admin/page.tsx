@@ -200,10 +200,13 @@ export default function AdminDashboard() {
     <div className="min-h-dvh bg-background-void text-white font-body text-sm">
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0" />
-            <h1 className="text-sm sm:text-xl font-heading font-extrabold uppercase truncate">
-              Orange<span className="text-brand-orange">_</span>Brick <span className="hidden sm:inline text-[10px] sm:text-xs text-brand-orange font-subtitle font-bold uppercase tracking-wider bg-brand-orange/10 px-2 py-0.5 rounded border border-brand-orange/20">Painel Admin</span>
+            <h1 className="text-sm sm:text-xl font-heading font-extrabold uppercase truncate flex items-center gap-3">
+              <span>Orange<span className="text-brand-orange">_</span>Brick</span>
+              <span className="hidden sm:inline-flex items-center text-[10px] sm:text-xs text-brand-orange font-subtitle font-bold uppercase tracking-wider bg-brand-orange/10 px-2.5 py-1 rounded-lg border border-brand-orange/30 ml-2 shadow-sm">
+                Painel Admin
+              </span>
             </h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">
