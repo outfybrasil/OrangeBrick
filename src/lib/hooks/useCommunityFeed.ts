@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createDataClient } from "@/lib/supabase/client";
-import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle } from "@/lib/types/community";
+import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
@@ -59,21 +59,46 @@ export function useCommunityFeed() {
         }
       }
 
-      const mappedPosts: CommunityPost[] = (postRows as CommunityPostRow[] | null || []).map((row) => ({
-        id: row.id,
-        user_id: row.user_id,
-        author_name: row.author_name,
-        author_avatar: row.author_avatar,
-        content: row.content,
-        media_url: row.media_url,
-        platform_tag: row.platform_tag,
-        attached_article: row.attached_article as AttachedArticle | null,
-        reactions: reactionMap[row.id] || { hype: 0, flop: 0, salty: 0 },
-        user_reaction: userReactions[row.id] || null,
-        comments_count: commentCountMap[row.id] || 0,
-        created_at: row.created_at,
-        is_pinned: row.is_pinned,
-      }));
+      const shareCountMap: Record<string, number> = {};
+      if (postRows) {
+        for (const row of postRows as CommunityPostRow[]) {
+          const article = row.attached_article as Record<string, unknown> | null;
+          if (article && article._type === "shared_post") {
+            const origId = article.original_post_id as string;
+            shareCountMap[origId] = (shareCountMap[origId] || 0) + 1;
+          }
+        }
+      }
+
+      const mappedPosts: CommunityPost[] = (postRows as CommunityPostRow[] | null || []).map((row) => {
+        const rawArticle = row.attached_article as Record<string, unknown> | null;
+        let attachedArticle: AttachedArticle | null = null;
+        let sharedPost: SharedPostData | null = null;
+
+        if (rawArticle && rawArticle._type === "shared_post") {
+          sharedPost = rawArticle as unknown as SharedPostData;
+        } else if (rawArticle) {
+          attachedArticle = rawArticle as unknown as AttachedArticle;
+        }
+
+        return {
+          id: row.id,
+          user_id: row.user_id,
+          author_name: row.author_name,
+          author_avatar: row.author_avatar,
+          content: row.content,
+          media_url: row.media_url,
+          platform_tag: row.platform_tag,
+          attached_article: attachedArticle,
+          shared_post: sharedPost,
+          reactions: reactionMap[row.id] || { hype: 0, flop: 0, salty: 0 },
+          user_reaction: userReactions[row.id] || null,
+          comments_count: commentCountMap[row.id] || 0,
+          shares_count: shareCountMap[row.id] || 0,
+          created_at: row.created_at,
+          is_pinned: row.is_pinned,
+        };
+      });
 
       setPosts(mappedPosts);
 
@@ -208,7 +233,12 @@ export function useCommunityFeed() {
         if (existingRow.reaction_type === reactionType) {
           await supabase.from("community_reactions").delete().eq("id", existingRow.id);
         } else {
-          await supabase.from("community_reactions").update({ reaction_type: reactionType }).eq("id", existingRow.id);
+          await supabase.from("community_reactions").delete().eq("id", existingRow.id);
+          await supabase.from("community_reactions").insert({
+            post_id: postId,
+            user_id: user.id,
+            reaction_type: reactionType,
+          });
         }
       } else {
         await supabase.from("community_reactions").insert({
@@ -232,6 +262,42 @@ export function useCommunityFeed() {
       });
     },
     [user, poll, supabase]
+  );
+
+  const sharePost = useCallback(
+    async (originalPost: CommunityPost, comment: string) => {
+      if (!user) return;
+
+      const authorName =
+        profile?.nickname ||
+        user?.user_metadata?.full_name ||
+        user?.user_metadata?.name ||
+        user?.email?.split("@")[0] ||
+        "Leitor Orange Brick";
+
+      const authorAvatar =
+        profile?.avatar_url ||
+        user?.user_metadata?.avatar_url ||
+        user?.user_metadata?.picture ||
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+
+      await supabase.from("community_posts").insert({
+        user_id: user.id,
+        author_name: authorName,
+        author_avatar: authorAvatar,
+        content: comment,
+        attached_article: {
+          _type: "shared_post",
+          original_post_id: originalPost.id,
+          original_author_name: originalPost.author_name,
+          original_author_avatar: originalPost.author_avatar,
+          original_content: originalPost.content,
+          original_created_at: originalPost.created_at,
+          original_platform_tag: originalPost.platform_tag || undefined,
+        },
+      });
+    },
+    [user, profile, supabase]
   );
 
   const deletePost = useCallback(
@@ -305,6 +371,7 @@ export function useCommunityFeed() {
     isLoaded,
     addPost,
     deletePost,
+    sharePost,
     toggleReaction,
     votePoll,
     addComment,

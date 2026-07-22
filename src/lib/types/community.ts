@@ -9,6 +9,16 @@ export interface AttachedArticle {
   category: string;
 }
 
+export interface SharedPostData {
+  _type: "shared_post";
+  original_post_id: string;
+  original_author_name: string;
+  original_author_avatar: string;
+  original_content: string;
+  original_created_at: string;
+  original_platform_tag?: string;
+}
+
 export interface CommunityPost {
   id: string;
   user_id?: string;
@@ -18,9 +28,11 @@ export interface CommunityPost {
   media_url?: string | null;
   platform_tag?: string | null; // e.g. "[PS5]", "[XSX]", "[SWITCH 2]", "[PC]"
   attached_article?: AttachedArticle | null;
+  shared_post?: SharedPostData | null;
   reactions: Record<ReactionType, number>;
   user_reaction?: ReactionType | null;
   comments_count: number;
+  shares_count?: number;
   created_at: string;
   is_pinned?: boolean;
 }
