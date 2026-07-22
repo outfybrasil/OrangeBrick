@@ -77,7 +77,8 @@ function HomeContent() {
             <img
               src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
-              className="h-8 sm:h-9 w-auto max-h-9 object-contain transform group-hover:scale-[1.05] transition-transform duration-300 shrink-0"
+              style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
+              className="h-8 sm:h-9 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-300 shrink-0"
             />
             <span className="hidden sm:inline text-xl sm:text-2xl font-heading font-extrabold text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 shrink-0 whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick

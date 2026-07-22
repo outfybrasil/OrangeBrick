@@ -13,7 +13,8 @@ export function Footer() {
             <img
               src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
-              className="h-9 sm:h-10 w-auto max-h-10 object-contain shrink-0"
+              style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
+              className="h-9 sm:h-10 w-auto object-contain shrink-0"
             />
             <span className="text-xl sm:text-2xl font-mono font-black text-white uppercase tracking-wider">
               Orange<span className="text-brand-orange">_</span>Brick

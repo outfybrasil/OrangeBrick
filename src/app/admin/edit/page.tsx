@@ -381,7 +381,12 @@ function EditForm() {
       <header className="sticky top-0 z-40 border-b border-brand-orange-muted/10 bg-card-slate/90 backdrop-blur-md py-2.5 sm:py-3">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-7 sm:h-8 w-auto object-contain shrink-0" />
+            <img
+              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
+              alt="Orange Brick Logo"
+              style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
+              className="h-8 w-auto object-contain shrink-0"
+            />
             <div className="min-w-0">
               <h1 className="text-xs sm:text-base font-black uppercase leading-tight truncate">
                 Orange<span className="text-brand-orange">_</span>Brick <span className="text-[8px] sm:text-[10px] text-gray-500 font-normal">/ editor</span>
