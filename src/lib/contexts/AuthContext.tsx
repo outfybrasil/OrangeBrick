@@ -55,7 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase, fetchProfile]);
 
   const signInWithGoogle = useCallback(async () => {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
