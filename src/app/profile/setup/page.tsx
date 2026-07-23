@@ -22,8 +22,15 @@ export default function ProfileSetup() {
     }
     if (profile) {
       router.push("/");
+      return;
     }
-  }, [user, profile, isLoading, router]);
+    if (user) {
+      const googlePic = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+      if (googlePic && !avatarUrl) {
+        setAvatarUrl(googlePic);
+      }
+    }
+  }, [user, profile, isLoading, router, avatarUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
