@@ -120,7 +120,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const totalCommentCount = comments.length || post.comments_count || 0;
 
   return (
-    <article className="bg-card-slate/60 border border-brand-orange-muted/15 rounded-2xl p-4 sm:p-5 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-4 relative group/card">
+    <article className="bg-card-slate/70 border border-brand-orange-muted/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-3 sm:space-y-4 relative group/card">
       <div className="flex items-start justify-between gap-3">
         <Link href={`/profile/${encodeURIComponent(post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
           <img
