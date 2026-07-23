@@ -124,8 +124,9 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       <div className="flex items-start justify-between gap-3">
         <Link href={`/profile/${encodeURIComponent(post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
           <img
-            src={post.author_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"}
+            src={avatarSrc}
             alt={post.author_name}
+            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-brand-orange/30 shrink-0 group-hover/author:scale-105 transition-transform"
           />
           <div className="min-w-0">
@@ -154,10 +155,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         {isPostOwner && onDeletePost && (
           <button
             onClick={() => onDeletePost(post.id)}
-            className="flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-subtitle text-gray-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-subtitle text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer shrink-0"
             title="Apagar este post"
           >
-            <span>🗑️</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
             <span className="hidden xs:inline">Apagar</span>
           </button>
         )}

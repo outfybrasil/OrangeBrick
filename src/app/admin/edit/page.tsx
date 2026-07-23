@@ -465,14 +465,15 @@ function EditForm() {
                 {CATEGORY_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
+                    type="button"
                     onClick={() => { setCategory(opt.value); setAuthorTag(AUTHOR_TAGS[opt.value]); setHasChanges(true); }}
-                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold border transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border transition-all cursor-pointer uppercase tracking-wider ${
                       category === opt.value
-                        ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30"
-                        : "bg-background-void text-gray-400 border-brand-orange-muted/20 hover:border-brand-orange/30"
+                        ? "bg-brand-orange/15 text-brand-orange border-brand-orange/40 shadow-sm"
+                        : "bg-background-void text-gray-400 border-brand-orange-muted/20 hover:border-brand-orange/30 hover:text-white"
                     }`}
                   >
-                    {opt.icon} <span className="hidden xs:inline">{opt.label}</span>
+                    {opt.label}
                   </button>
                 ))}
               </div>
@@ -639,7 +640,7 @@ function EditForm() {
                         </button>
                         <button
                           onClick={() => removeBlock(block.id)}
-                          className="p-1.5 rounded bg-card-slate hover:bg-red-500/10 hover:text-red-400 text-gray-400 cursor-pointer transition-colors"
+                          className="p-1.5 rounded bg-card-slate text-red-400/80 hover:text-red-400 hover:bg-red-500/15 cursor-pointer transition-colors"
                           title="Excluir Bloco"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>

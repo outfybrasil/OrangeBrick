@@ -87,18 +87,22 @@ function BrickboardContent() {
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setIsBookmarkOpen(true)}
-              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-card-slate/60 border border-brand-orange-muted/15 text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1"
+              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-card-slate/60 border border-brand-orange-muted/15 text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1.5"
               title="Ver matérias salvas"
             >
-              <span>🔖</span>
+              <svg className="w-3.5 h-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
               <span className="hidden sm:inline font-subtitle font-bold">Salvos</span>
             </button>
 
             <Link
               href="/"
-              className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-brand-orange-muted/15 text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1 font-subtitle font-bold"
+              className="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-brand-orange-muted/15 text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1.5 font-subtitle font-bold"
             >
-              <span>←</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
               <span className="hidden sm:inline">Portal</span>
             </Link>
 
@@ -116,42 +120,42 @@ function BrickboardContent() {
 
       <main className="max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6 min-h-dvh">
         <div className="border-b border-brand-orange-muted/20 bg-background-void/90 sticky top-12 z-20">
-          <nav className="flex items-center justify-around font-subtitle text-xs sm:text-sm font-bold">
+          <nav className="flex items-center justify-around font-subtitle text-xs sm:text-sm font-bold tracking-wider">
             <button
               onClick={() => setActiveTab("hype")}
-              className={`flex-1 py-3 text-center transition-all cursor-pointer relative ${
+              className={`flex-1 py-3 text-center transition-all cursor-pointer relative uppercase ${
                 activeTab === "hype"
                   ? "text-brand-orange font-black"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              🔥 Em Alta
+              Em Alta
               {activeTab === "hype" && (
                 <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-brand-orange rounded-full shadow-[0_0_8px_#FF5E00]" />
               )}
             </button>
             <button
               onClick={() => setActiveTab("latest")}
-              className={`flex-1 py-3 text-center transition-all cursor-pointer relative ${
+              className={`flex-1 py-3 text-center transition-all cursor-pointer relative uppercase ${
                 activeTab === "latest"
                   ? "text-brand-orange font-black"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              ⚡ Recentes
+              Recentes
               {activeTab === "latest" && (
                 <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-brand-orange rounded-full shadow-[0_0_8px_#FF5E00]" />
               )}
             </button>
             <button
               onClick={() => setActiveTab("polls")}
-              className={`flex-1 py-3 text-center transition-all cursor-pointer relative ${
+              className={`flex-1 py-3 text-center transition-all cursor-pointer relative uppercase ${
                 activeTab === "polls"
                   ? "text-brand-orange font-black"
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              📊 Enquetes
+              Enquetes
               {activeTab === "polls" && (
                 <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-brand-orange rounded-full shadow-[0_0_8px_#FF5E00]" />
               )}
@@ -160,18 +164,25 @@ function BrickboardContent() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-card-slate/40 border border-brand-orange-muted/15 p-2.5 rounded-xl">
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
-            {["TODOS", "[PS5]", "[XSX]", "[SWITCH 2]", "[PC]", "[MOBILE]"].map((platform) => (
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+            {[
+              { id: "TODOS", label: "Todos" },
+              { id: "[PS5]", label: "PS5" },
+              { id: "[XSX]", label: "Xbox Series" },
+              { id: "[SWITCH 2]", label: "Switch 2" },
+              { id: "[PC]", label: "PC" },
+              { id: "[MOBILE]", label: "Mobile" },
+            ].map((platform) => (
               <button
-                key={platform}
-                onClick={() => setSelectedPlatform(platform)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-subtitle font-bold border transition-all cursor-pointer whitespace-nowrap ${
-                  selectedPlatform === platform
-                    ? "bg-brand-orange/20 text-brand-orange border-brand-orange/50 shadow-[0_0_8px_rgba(255,94,0,0.2)]"
-                    : "bg-background-void/60 text-gray-400 border-brand-orange-muted/15 hover:text-white"
+                key={platform.id}
+                onClick={() => setSelectedPlatform(platform.id)}
+                className={`px-3 py-1 rounded-full text-xs font-body font-semibold border transition-all cursor-pointer whitespace-nowrap ${
+                  selectedPlatform === platform.id
+                    ? "bg-brand-orange/20 text-brand-orange border-brand-orange/50 shadow-sm"
+                    : "bg-background-void/60 text-gray-300 border-brand-orange-muted/15 hover:text-white hover:border-brand-orange/30"
                 }`}
               >
-                {platform}
+                {platform.label}
               </button>
             ))}
           </div>
@@ -259,7 +270,9 @@ function BrickboardContent() {
         className="fixed bottom-5 right-4 z-40 sm:hidden w-13 h-13 bg-brand-orange text-white text-xl rounded-full shadow-[0_0_20px_rgba(255,94,0,0.5)] flex items-center justify-center border-2 border-white/20 active:scale-95 transition-transform cursor-pointer"
         title="Criar novo Brick"
       >
-        ✍️
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
       </button>
 
       <ComposeBrickModal
