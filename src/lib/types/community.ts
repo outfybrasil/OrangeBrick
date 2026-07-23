@@ -17,6 +17,7 @@ export interface SharedPostData {
   original_content: string;
   original_created_at: string;
   original_platform_tag?: string;
+  original_attached_article?: AttachedArticle | null;
 }
 
 export interface CommunityPost {
@@ -26,7 +27,7 @@ export interface CommunityPost {
   author_avatar: string;
   content: string;
   media_url?: string | null;
-  platform_tag?: string | null; // e.g. "[PS5]", "[XSX]", "[SWITCH 2]", "[PC]"
+  platform_tag?: string | null;
   attached_article?: AttachedArticle | null;
   shared_post?: SharedPostData | null;
   reactions: Record<ReactionType, number>;
@@ -51,6 +52,8 @@ export interface CommunityComment {
   author_avatar: string;
   content: string;
   created_at: string;
+  likes_count: number;
+  user_has_liked?: boolean;
 }
 
 export interface CommunityPoll {

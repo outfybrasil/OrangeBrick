@@ -497,7 +497,7 @@ function EditForm() {
                 type="url" value={imageUrl}
                 onChange={(e) => { setImageUrl(e.target.value); setHasChanges(true); }}
                 placeholder="https://..."
-                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors"
+                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors text-xs font-mono"
               />
             </div>
             <div>
@@ -564,8 +564,8 @@ function EditForm() {
             )}
             {imageUrl && (
               <div className="lg:col-span-2">
-                <div className="relative aspect-video max-h-48 w-full max-w-md overflow-hidden rounded-lg border border-brand-orange-muted/10">
-                  <img src={imageUrl} alt={imageAlt || "Preview"} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div className="relative aspect-video max-h-48 w-full max-w-md overflow-hidden rounded-lg border border-brand-orange-muted/20 bg-background-void/90 flex items-center justify-center p-1">
+                  <img src={imageUrl} alt={imageAlt || "Preview"} className="w-full h-full object-contain rounded-md" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
               </div>
             )}
@@ -888,8 +888,8 @@ function EditForm() {
                       <div key={block.id} className="my-8 flex flex-col gap-2">
                         {block.url ? (
                           <>
-                            <div className="relative w-full overflow-hidden rounded-xl border border-brand-orange-muted/10 shadow-lg bg-card-slate/30 flex items-center justify-center">
-                              <img src={block.url} alt={block.alt || "Imagem da matéria"} className="w-full h-auto max-h-[550px] object-cover object-center rounded-xl" />
+                            <div className="relative w-full overflow-hidden rounded-xl border border-brand-orange-muted/20 shadow-lg bg-[#08090C] flex items-center justify-center p-1">
+                              <img src={block.url} alt={block.alt || "Imagem da matéria"} className="w-full h-auto max-h-[600px] object-contain rounded-lg" />
                             </div>
                             {block.caption && <span className="text-xs text-gray-500 font-mono text-center">{block.caption}</span>}
                           </>

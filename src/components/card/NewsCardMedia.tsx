@@ -31,10 +31,17 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
   return (
     <div
       className={`
-        relative aspect-video w-full overflow-hidden border-y border-brand-orange-muted/10
+        relative aspect-video w-full overflow-hidden border-y border-brand-orange-muted/10 bg-[#08090C]
         ${isBreaking ? "glitch-container" : ""}
       `}
     >
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover blur-md opacity-25 transform scale-110"
+      />
+
       <div className="absolute inset-0 bg-gradient-to-t from-background-void/80 via-transparent to-transparent z-10 pointer-events-none" />
 
       {isBreaking && (
@@ -49,7 +56,7 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
         src={src}
         alt={alt || ""}
         className={`
-          w-full h-full object-cover transform scale-100
+          relative z-0 w-full h-full object-contain transform scale-100
           group-hover:scale-105 transition-transform duration-500 ease-out
           ${isBreaking ? "glitch-img" : ""}
         `}

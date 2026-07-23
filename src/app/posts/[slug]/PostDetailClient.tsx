@@ -50,11 +50,11 @@ function PostContent({ post }: { post: Post }) {
 
             return (
               <div key={block.id} className="my-8 flex flex-col gap-2">
-                <div className="relative overflow-hidden rounded-2xl border border-brand-orange-muted/15 shadow-xl bg-card-slate/40">
+                <div className="relative overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-xl bg-[#08090C] flex items-center justify-center p-1 sm:p-2">
                   <img
                     src={block.url}
                     alt={block.alt || post.title}
-                    className="w-full h-auto object-cover max-h-[550px]"
+                    className="w-full h-auto max-h-[650px] object-contain rounded-xl"
                     loading="lazy"
                   />
                 </div>
@@ -82,11 +82,14 @@ interface PostArticleProps {
 
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useBookmarks } from "@/lib/hooks/useBookmarks";
 
 export function PostArticle({ post, stats }: PostArticleProps) {
   const router = useRouter();
   const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+  const bookmarked = isBookmarked(post.id);
   const { counts, userReaction, isPending, error: reactionError, toggleReaction } = useReactions({
     postId: post.id,
     initial: stats.reactions,
@@ -111,6 +114,23 @@ export function PostArticle({ post, stats }: PostArticleProps) {
       return;
     }
     setIsBrickModalOpen(true);
+  };
+
+  const shareUrl = typeof window !== "undefined" ? window.location.href : `/posts/${post.slug}`;
+  const shareText = `Confira no Orange Brick: "${post.title}"`;
+
+  const handleShareSocial = (platform: "whatsapp" | "twitter" | "telegram") => {
+    let url = "";
+    if (platform === "whatsapp") {
+      url = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    } else if (platform === "twitter") {
+      url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    } else if (platform === "telegram") {
+      url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
   };
 
   const attachedArticle = useMemo(
@@ -146,9 +166,22 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
       <main className="max-w-3xl mx-auto px-4 py-10">
         <article className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Tag category={post.category} />
-            <Timer date={post.published_at ?? ""} />
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Tag category={post.category} />
+              <Timer date={post.published_at ?? ""} />
+            </div>
+            <button
+              type="button"
+              onClick={() => toggleBookmark(post)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-subtitle font-bold transition-all ${
+                bookmarked
+                  ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/40"
+                  : "bg-card-slate text-gray-300 border border-brand-orange-muted/15 hover:text-white"
+              }`}
+            >
+              {bookmarked ? "🔖 Matéria Salva" : "🔖 Salvar Matéria"}
+            </button>
           </div>
 
           <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-heading font-black text-white uppercase leading-tight tracking-tight">
@@ -158,23 +191,40 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             {post.summary}
           </p>
 
-          <div className="flex items-center gap-3 text-xs text-gray-500 py-2 border-y border-brand-orange-muted/10">
-            <span>
-              Por <span className="text-white font-bold">{post.author_name}</span>
-            </span>
-            {post.author_tag && (
-              <>
-                <span>•</span>
-                <span className="text-brand-orange-muted font-bold">{post.author_tag}</span>
-              </>
-            )}
-            <span className="flex-1" />
-            <span className="flex items-center gap-1.5 text-gray-500">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5ZM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3Z" />
-              </svg>
-              <span className="text-[10px] font-mono">{viewCount} visualizações</span>
-            </span>
+          <div className="flex items-center justify-between gap-3 text-xs text-gray-500 py-2.5 border-y border-brand-orange-muted/10 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span>
+                Por <span className="text-white font-bold">{post.author_name}</span>
+              </span>
+              {post.author_tag && (
+                <>
+                  <span>•</span>
+                  <span className="text-brand-orange-muted font-bold">{post.author_tag}</span>
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-subtitle uppercase text-gray-500">Compartilhar:</span>
+              <button
+                onClick={() => handleShareSocial("whatsapp")}
+                className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs transition-colors"
+              >
+                WhatsApp
+              </button>
+              <button
+                onClick={() => handleShareSocial("telegram")}
+                className="px-2 py-1 rounded bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 text-xs transition-colors"
+              >
+                Telegram
+              </button>
+              <button
+                onClick={() => handleShareSocial("twitter")}
+                className="px-2 py-1 rounded bg-gray-500/10 text-gray-300 hover:bg-gray-500/20 text-xs transition-colors"
+              >
+                X / Twitter
+              </button>
+            </div>
           </div>
 
           <div className="mt-8">

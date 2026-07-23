@@ -28,6 +28,8 @@ const HOVER_BORDER_COLOR: Record<PostCategory, string> = {
   opinion: "hover:border-yellow-500/40 hover:shadow-[0_0_20px_rgba(234,179,8,0.12)]",
 };
 
+import { useBookmarks } from "@/lib/hooks/useBookmarks";
+
 export function NewsCard({ post, stats }: NewsCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -35,6 +37,8 @@ export function NewsCard({ post, stats }: NewsCardProps) {
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { addPost: addCommunityBrick } = useCommunityFeed();
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+  const bookmarked = isBookmarked(post.id);
 
   const { counts, isPending, error, toggleReaction, userReaction } = useReactions({
     postId: post.id,
@@ -60,6 +64,24 @@ export function NewsCard({ post, stats }: NewsCardProps) {
       return;
     }
     setIsBrickModalOpen(true);
+  };
+
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.slug}` : `/posts/${post.slug}`;
+  const shareText = `Confira no Orange Brick: "${post.title}"`;
+
+  const handleShareSocial = (platform: "whatsapp" | "twitter" | "telegram", e: React.MouseEvent) => {
+    e.stopPropagation();
+    let url = "";
+    if (platform === "whatsapp") {
+      url = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
+    } else if (platform === "twitter") {
+      url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    } else if (platform === "telegram") {
+      url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
   };
 
   const attachedArticle = useMemo(
@@ -95,7 +117,24 @@ export function NewsCard({ post, stats }: NewsCardProps) {
           ${HOVER_BORDER_COLOR[post.category]}
         `}
       >
-        <NewsCardHeader category={post.category} publishedAt={post.published_at ?? ""} />
+        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+          <NewsCardHeader category={post.category} publishedAt={post.published_at ?? ""} />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleBookmark(post);
+            }}
+            className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
+              bookmarked
+                ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/40"
+                : "text-gray-400 hover:text-white hover:bg-card-slate"
+            }`}
+            title={bookmarked ? "Remover das matérias salvas" : "Salvar matéria para ler depois"}
+          >
+            {bookmarked ? "🔖 Salvo" : "🔖 Ler Depois"}
+          </button>
+        </div>
 
         <h2 
           style={{
@@ -112,6 +151,36 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         <NewsCardMedia src={post.image_url} alt={post.image_alt} category={post.category} />
 
         <NewsCardSummary summary={post.summary} author={post.author_name} tag={post.author_tag} />
+
+        <div
+          className="flex items-center justify-between px-4 py-1.5 border-t border-brand-orange-muted/10 text-xs text-gray-400"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-[10px] font-subtitle uppercase tracking-wider text-gray-500">Compartilhar:</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={(e) => handleShareSocial("whatsapp", e)}
+              className="p-1 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[11px] transition-colors"
+              title="Compartilhar no WhatsApp"
+            >
+              WhatsApp
+            </button>
+            <button
+              onClick={(e) => handleShareSocial("telegram", e)}
+              className="p-1 rounded-md bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 text-[11px] transition-colors"
+              title="Compartilhar no Telegram"
+            >
+              Telegram
+            </button>
+            <button
+              onClick={(e) => handleShareSocial("twitter", e)}
+              className="p-1 rounded-md bg-gray-500/10 text-gray-300 hover:bg-gray-500/20 text-[11px] transition-colors"
+              title="Compartilhar no X (Twitter)"
+            >
+              X / Twitter
+            </button>
+          </div>
+        </div>
 
         <div
           onClick={(e) => e.stopPropagation()}

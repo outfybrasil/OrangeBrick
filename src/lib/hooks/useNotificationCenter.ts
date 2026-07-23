@@ -43,8 +43,43 @@ export function useNotificationCenter() {
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, POLL_INTERVAL);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+
+    if (!user) return () => clearInterval(interval);
+
+    const channelName = `notifs_${user.id}_${Math.random().toString(36).slice(2, 8)}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newNotif = payload.new as AppNotification;
+          setNotifications((prev) => [newNotif, ...prev]);
+          setUnreadCount((prev) => prev + 1);
+
+          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification("Orange Brick 🍊", {
+                body: newNotif.message,
+                icon: "/logos/Logo Tijolo Quebrado.PNG",
+              });
+            } catch {
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [fetchNotifications, user, supabase]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {

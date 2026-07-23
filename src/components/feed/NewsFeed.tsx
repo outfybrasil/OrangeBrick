@@ -124,11 +124,19 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           className="lg:col-span-2 group relative aspect-[16/10] w-full rounded-2xl overflow-hidden cursor-pointer border border-brand-orange-muted/15 hover:border-brand-orange/40 hover:shadow-[0_0_25px_rgba(255,94,0,0.15)] transition-all duration-300 hover:-translate-y-1"
         >
           {heroPost.image_url ? (
-            <img
-              src={heroPost.image_url}
-              alt={heroPost.image_alt || ""}
-              className="absolute inset-0 w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
-            />
+            <div className="absolute inset-0 bg-[#08090C] overflow-hidden">
+              <img
+                src={heroPost.image_url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover blur-lg opacity-30 transform scale-110"
+              />
+              <img
+                src={heroPost.image_url}
+                alt={heroPost.image_alt || ""}
+                className="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out z-0"
+              />
+            </div>
           ) : (
             <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
               <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">Sem mídia</span>

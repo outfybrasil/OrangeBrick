@@ -77,6 +77,8 @@ export const metadata: Metadata = {
   verification: { google: "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs" },
 };
 
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -90,6 +92,7 @@ export default function RootLayout({
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <AuthProvider>{children}</AuthProvider>
         <PushSetup />
+        <PwaInstallBanner />
         <CookieConsent />
       </body>
     </html>

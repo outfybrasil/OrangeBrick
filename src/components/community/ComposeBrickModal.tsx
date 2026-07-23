@@ -131,7 +131,7 @@ export function ComposeBrickModal({ isOpen, onClose, onPublish, initialArticle }
 
           {/* ANEXO DE IMAGEM */}
           {showMediaInput && (
-            <div>
+            <div className="space-y-2">
               <input
                 type="url"
                 value={mediaUrl}
@@ -139,6 +139,18 @@ export function ComposeBrickModal({ isOpen, onClose, onPublish, initialArticle }
                 placeholder="URL da Imagem ou Screenshot (https://...)"
                 className="w-full bg-background-void border border-brand-orange-muted/15 rounded-xl px-3.5 py-2 text-white placeholder-gray-500 font-body text-xs outline-none focus:border-brand-orange/50"
               />
+              {mediaUrl.trim() && (
+                <div className="rounded-xl overflow-hidden border border-brand-orange-muted/20 bg-background-void/90 p-1 max-h-48 flex justify-center items-center">
+                  <img
+                    src={mediaUrl}
+                    alt="Preview da imagem"
+                    className="max-h-44 w-auto object-contain rounded-lg"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
 
