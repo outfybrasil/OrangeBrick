@@ -21,6 +21,16 @@ interface BrickCardProps {
   getComments: (postId: string) => Promise<CommunityComment[]>;
 }
 
+function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string): string {
+  const name = (authorName || "").toLowerCase().trim();
+  const isOfficial = name === "orange brick" || name === "orangebrick" || name === "orange_brick";
+  if (isOfficial) return "/logos/Logo Tijolo Quebrado.PNG";
+  if (avatarUrl && (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://") || avatarUrl.startsWith("/") || avatarUrl.startsWith("data:"))) {
+    return avatarUrl;
+  }
+  return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+}
+
 export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments }: BrickCardProps) {
   const { user, profile } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -118,6 +128,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   };
 
   const totalCommentCount = comments.length || post.comments_count || 0;
+  const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name);
 
   return (
     <article className="bg-card-slate/70 border border-brand-orange-muted/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-3 sm:space-y-4 relative group/card">
