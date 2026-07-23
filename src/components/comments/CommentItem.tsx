@@ -30,13 +30,6 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
     }
   };
 
-  const initials = (comment.author_nickname || "OB")
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   return (
     <div className="bg-[#15171F] border border-gray-800/80 hover:border-brand-orange/30 rounded-2xl p-4 sm:p-5 shadow-lg transition-all duration-300 space-y-3 group">
       <div className="flex items-center justify-between gap-3">
@@ -70,7 +63,8 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
           {isOwner && onDelete && (
             <button
               onClick={() => onDelete(comment.id)}
-              className="p-1.5 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer text-xs"
+              aria-label="Apagar comentário"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-xs text-red-300/70 transition-colors hover:bg-red-500/15 hover:text-red-200"
               title="Apagar comentário"
             >
               🗑️
@@ -79,7 +73,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
 
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-subtitle font-bold border transition-all cursor-pointer ${
+            className={`flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border px-2.5 text-xs font-bold transition-all cursor-pointer ${
               hasLiked
                 ? "bg-brand-orange/20 text-brand-orange border-brand-orange/50 shadow-[0_0_10px_rgba(255,94,0,0.2)]"
                 : "bg-[#0E1015] text-gray-400 border-gray-800 hover:border-gray-700 hover:text-white"

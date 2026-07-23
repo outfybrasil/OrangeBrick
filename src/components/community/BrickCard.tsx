@@ -24,7 +24,7 @@ interface BrickCardProps {
 
 
 export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments }: BrickCardProps) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareText, setShareText] = useState("");
@@ -120,7 +120,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   };
 
   const totalCommentCount = comments.length || post.comments_count || 0;
-  const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name);
+  const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name, post.is_official);
 
   return (
     <article className="bg-card-slate/70 border border-brand-orange-muted/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-3 sm:space-y-4 relative group/card">
@@ -138,7 +138,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               <h4 className="font-subtitle text-xs font-bold text-white truncate group-hover/author:text-brand-orange transition-colors">
                 {post.author_name}
               </h4>
-              <UserBadge nickname={post.author_name} />
+              <UserBadge nickname={post.author_name} isOfficial={post.is_official} />
               {post.platform_tag && (
                 <span className="text-[9px] sm:text-[10px] font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20">
                   {post.platform_tag}
@@ -159,7 +159,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         {isPostOwner && onDeletePost && (
           <button
             onClick={() => onDeletePost(post.id)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-subtitle text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer shrink-0"
+            aria-label="Apagar este post"
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs text-red-300/75 transition-all hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200"
             title="Apagar este post"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -220,7 +221,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           </div>
           <div className="flex gap-2.5 items-start">
             <img
-              src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name)}
+              src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name, post.shared_post.original_is_official)}
               alt={post.shared_post.original_author_name}
               onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
               style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", borderRadius: "9999px", objectFit: "cover" }}
@@ -231,7 +232,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 <span className="text-[11px] font-subtitle font-bold text-white">
                   {post.shared_post.original_author_name}
                 </span>
-                <UserBadge nickname={post.shared_post.original_author_name} />
+                <UserBadge nickname={post.shared_post.original_author_name} isOfficial={post.shared_post.original_is_official} />
                 {post.shared_post.original_platform_tag && (
                   <span className="text-[9px] font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20">
                     {post.shared_post.original_platform_tag}
@@ -290,20 +291,20 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           <p className="text-[11px] font-subtitle text-gray-400">
             Adicione seu comentário ao republicar:
           </p>
-          <form onSubmit={handleSubmitShare} className="flex gap-2">
+          <form onSubmit={handleSubmitShare} className="flex flex-col gap-2 xs:flex-row">
             <input
               type="text"
               value={shareText}
               onChange={(e) => setShareText(e.target.value)}
               placeholder="Seu comentário sobre isso..."
               maxLength={280}
-              className="flex-1 bg-[#0D0F14] border border-gray-800 focus:border-emerald-500 px-3.5 py-2 text-xs font-body text-white placeholder-gray-500 rounded-xl outline-none transition-colors"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-emerald-500"
               autoFocus
             />
             <button
               type="submit"
               disabled={!shareText.trim() || isSharing}
-              className="px-3.5 py-2 text-xs font-subtitle font-bold bg-emerald-600 text-white rounded-xl disabled:opacity-40 hover:bg-emerald-500 transition-all cursor-pointer shrink-0"
+              className="min-h-11 shrink-0 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-emerald-500 disabled:opacity-40"
             >
               {isSharing ? "..." : "Republicar"}
             </button>
@@ -334,14 +335,14 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                     <div className="flex items-center justify-between gap-2">
                       <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="flex items-center gap-2 min-w-0 group/cauthor">
                         <img
-                          src={resolveAvatarUrl(c.author_avatar, c.author_name)}
+                          src={resolveAvatarUrl(c.author_avatar, c.author_name, c.is_official)}
                           alt={c.author_name}
                           onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
                           style={{ width: "26px", height: "26px", minWidth: "26px", minHeight: "26px", maxWidth: "26px", maxHeight: "26px", borderRadius: "9999px", objectFit: "cover" }}
                           className="border border-brand-orange/20 shrink-0 group-hover/cauthor:scale-105 transition-transform bg-[#08090C]"
                         />
                         <span className="font-heading font-bold text-white truncate group-hover/cauthor:text-brand-orange transition-colors">{c.author_name}</span>
-                        <UserBadge nickname={c.author_name} />
+                        <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
                       </Link>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-[10px] font-subtitle text-gray-500">
@@ -350,7 +351,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                         {canDeleteComment && (
                           <button
                             onClick={() => handleDeleteComment(c.id)}
-                            className="text-gray-500 hover:text-red-400 p-0.5 transition-colors cursor-pointer text-[11px]"
+                            aria-label="Apagar resposta"
+                            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-[11px] text-red-300/70 transition-colors hover:bg-red-500/15 hover:text-red-200"
                             title="Apagar resposta"
                           >
                             🗑️
@@ -363,7 +365,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                       <button
                         type="button"
                         onClick={() => handleLikeComment(c.id)}
-                        className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-subtitle font-bold transition-all cursor-pointer ${
+                        className={`flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-bold transition-all cursor-pointer ${
                           c.user_has_liked
                             ? "bg-red-500/20 text-red-400 border border-red-500/40"
                             : "text-gray-400 hover:text-red-400 hover:bg-card-slate"
@@ -379,19 +381,19 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             )}
           </div>
 
-          <form onSubmit={handleAddComment} className="flex gap-2 pt-1">
+          <form onSubmit={handleAddComment} className="flex flex-col gap-2 pt-1 xs:flex-row">
             <input
               type="text"
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Escreva sua resposta..."
               maxLength={280}
-              className="flex-1 bg-[#0D0F14] border border-gray-800 focus:border-brand-orange px-3.5 py-2 text-xs font-body text-white placeholder-gray-500 rounded-xl outline-none transition-colors"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange"
             />
             <button
               type="submit"
               disabled={!commentText.trim()}
-              className="px-4 py-2 text-xs font-subtitle font-bold bg-brand-orange text-white rounded-xl disabled:opacity-40 hover:bg-brand-orange/90 transition-all cursor-pointer shrink-0"
+              className="min-h-11 shrink-0 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange/90 disabled:opacity-40"
             >
               Responder
             </button>

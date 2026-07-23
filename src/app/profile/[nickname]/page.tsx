@@ -26,6 +26,7 @@ function ProfileContent() {
     avatar_url: string;
     bio?: string;
     created_at?: string;
+    is_official?: boolean;
   } | null>(null);
 
   const { user } = useAuth();
@@ -74,6 +75,7 @@ function ProfileContent() {
             avatar_url: finalAvatar,
             bio: finalBio,
             created_at: profileRow.created_at,
+            is_official: profileRow.is_official,
           });
           setEditAvatarUrl(finalAvatar);
           setEditBio(profileRow.bio || "");
@@ -209,7 +211,7 @@ function ProfileContent() {
                 <h1 className="text-2xl sm:text-3xl font-heading font-black text-white">
                   {profileData?.nickname}
                 </h1>
-                <UserBadge nickname={profileData?.nickname} />
+                <UserBadge nickname={profileData?.nickname} isOfficial={profileData?.is_official} />
                 {isProfileOwner && (
                   <button
                     onClick={() => setIsEditModalOpen(true)}
@@ -226,6 +228,7 @@ function ProfileContent() {
                 <GamerBadges
                   nickname={profileData?.nickname || ""}
                   postCount={userPosts.length}
+                  isOfficial={profileData?.is_official}
                 />
               </div>
             </div>

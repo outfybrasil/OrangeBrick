@@ -17,11 +17,11 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 flex justify-end bg-background-void/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex justify-end bg-background-void/80 animate-fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-md bg-card-slate border-l border-brand-orange-muted/20 h-dvh p-4 sm:p-6 flex flex-col justify-between shadow-2xl relative"
+        className="relative flex h-dvh w-full flex-col justify-between border-l border-brand-orange-muted/20 bg-card-slate px-3 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl sm:max-w-md sm:p-6"
       >
         <div className="space-y-5 overflow-hidden flex flex-col h-full">
           <div className="flex items-center justify-between pb-4 border-b border-brand-orange-muted/15">
@@ -35,7 +35,8 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-card-slate/80 transition-colors cursor-pointer"
+              aria-label="Fechar matérias salvas"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
             >
               <Icon name="close" size={20} />
             </button>
@@ -78,7 +79,8 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
                   </div>
                   <button
                     onClick={() => toggleBookmark(post)}
-                    className="text-gray-400 hover:text-red-400 p-1.5 transition-colors shrink-0 cursor-pointer"
+                    aria-label="Remover das matérias salvas"
+                    className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-red-300/75 transition-colors hover:bg-red-500/15 hover:text-red-200"
                     title="Remover das matérias salvas"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -94,7 +96,7 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
         <div className="pt-4 border-t border-brand-orange-muted/15">
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-brand-orange-muted/20 text-gray-300 font-subtitle text-xs font-bold uppercase tracking-wider hover:bg-brand-orange-muted/30 transition-colors cursor-pointer"
+            className="min-h-11 w-full rounded-xl bg-brand-orange-muted/20 text-xs font-bold uppercase tracking-wider text-gray-300 transition-colors hover:bg-brand-orange-muted/30"
           >
             Fechar Painel
           </button>

@@ -1,138 +1,153 @@
 import type { Metadata } from "next";
+import { PrivacyControls } from "@/components/ui/PrivacyControls";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade",
-  description: "Política de Privacidade do Orange Brick — como coletamos, usamos e protegemos seus dados pessoais.",
+  description: "Como o Orange Brick coleta, utiliza, compartilha e protege dados pessoais.",
 };
 
 export default function PrivacidadePage() {
   return (
-    <main className="min-h-dvh bg-background-void text-white px-4 py-12">
-      <article className="max-w-3xl mx-auto space-y-6 font-sans text-sm leading-relaxed text-gray-300">
-        <h1 className="text-3xl font-black uppercase text-white mb-8">Política de Privacidade</h1>
-        <p className="text-gray-500 text-xs">Última atualização: Julho de 2026</p>
+    <main className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
+      <article className="mx-auto max-w-3xl font-body text-sm leading-7 text-[#c3c5cc]">
+        <header className="border-b border-white/10 pb-8">
+          <p className="text-sm font-bold text-brand-orange">Privacidade no Orange Brick</p>
+          <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">Política de Privacidade</h1>
+          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 23 de julho de 2026</p>
+        </header>
+
+        <PrivacyControls />
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">1. Quem somos</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">1. Sobre esta política</h2>
           <p>
-            O <strong>Orange Brick</strong> é um portal de notícias sobre games, hardware, indústria e cultura gaming.
-            Esta Política de Privacidade explica como tratamos os dados pessoais dos nossos usuários e leitores,
-            em conformidade com a <strong>Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018)</strong>.
+            O Orange Brick é um portal editorial sobre games com recursos de comunidade. Esta política
+            descreve o tratamento de dados no site e deve ser lida junto aos Termos de Uso. O canal de
+            privacidade e atendimento é{" "}
+            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange underline underline-offset-4">
+              orangebrick0@gmail.com
+            </a>.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">2. Dados que coletamos</h2>
-          <p>Podemos coletar as seguintes informações:</p>
-          <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Dados de cadastro:</strong> nome, e-mail e foto do perfil (quando você faz login via Google OAuth).</li>
-            <li><strong>Dados de navegação:</strong> endereço IP, tipo de navegador, páginas visitadas, data e hora do acesso.</li>
-            <li><strong>Dados de interação:</strong> comentários, reações em posts, e preferências de conteúdo.</li>
-            <li><strong>Cookies:</strong> utilizamos cookies essenciais para o funcionamento do site e cookies opcionais para analytics.</li>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">2. Dados tratados</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><strong className="text-white">Conta Google:</strong> identificador da conta, nome, e-mail e foto informados pelo Google.</li>
+            <li><strong className="text-white">Perfil e comunidade:</strong> apelido, avatar, biografia, publicações, comentários, votos, curtidas e reações.</li>
+            <li><strong className="text-white">Contato comercial:</strong> nome, empresa, e-mail, faixa de orçamento e mensagem enviados voluntariamente.</li>
+            <li><strong className="text-white">Segurança:</strong> registros técnicos, agente do navegador e hash de IP usado para limitar abuso. O hash reduz a exposição do IP, mas continua sendo tratado como dado pessoal quando puder ser relacionado a uma pessoa.</li>
+            <li><strong className="text-white">Métricas opcionais:</strong> com sua permissão, um identificador aleatório do dispositivo reconhece reações e leituras. Ele não contém nome ou e-mail.</li>
+            <li><strong className="text-white">Notificações push:</strong> endereço técnico da assinatura e chaves fornecidas pelo navegador quando você ativa o recurso.</li>
           </ul>
+          <p className="mt-4">
+            Apelido, avatar, biografia e conteúdo publicado no Brickboard são visíveis publicamente.
+            Não publique telefone, endereço, documentos, senhas ou outros dados sensíveis.
+          </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">3. Como usamos seus dados</h2>
-          <p>Seus dados são utilizados para:</p>
-          <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li>Autenticar sua conta via login social (Google).</li>
-            <li>Permitir que você comente e reaja a posts.</li>
-            <li>Melhorar a experiência do site com base no comportamento de navegação.</li>
-            <li>Enviar notificações push (apenas com seu consentimento explícito).</li>
-            <li>Cumprir obrigações legais e regulatórias.</li>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">3. Finalidades e bases legais</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li>Executar os recursos solicitados, como autenticação, perfil e comunidade.</li>
+            <li>Atender solicitações e contatos iniciados pelo titular.</li>
+            <li>Prevenir fraude, spam e uso abusivo, respeitando os direitos do titular.</li>
+            <li>Cumprir obrigações legais, regulatórias e ordens de autoridades competentes.</li>
+            <li>Registrar métricas opcionais e enviar push somente após uma escolha afirmativa.</li>
           </ul>
+          <p className="mt-4">
+            Dependendo da finalidade, usamos execução de contrato ou procedimentos preliminares,
+            legítimo interesse com avaliação de necessidade, cumprimento de obrigação legal, exercício
+            regular de direitos ou consentimento. O consentimento pode ser revogado sem afetar tratamentos
+            anteriores realizados de forma válida.
+          </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">4. Base legal para o tratamento</h2>
-          <p>Tratamos seus dados com base nas seguintes hipóteses legais da LGPD:</p>
-          <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Consentimento:</strong> para cookies não essenciais e notificações push.</li>
-            <li><strong>Execução de contrato:</strong> para viabilizar o funcionamento da plataforma e da sua conta.</li>
-            <li><strong>Legítimo interesse:</strong> para analytics e melhoria do serviço.</li>
-            <li><strong>Cumprimento de obrigação legal:</strong> quando exigido por lei.</li>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">4. Armazenamento local e cookies</h2>
+          <p>
+            A sessão de login utiliza cookies necessários de autenticação e segurança. O navegador também
+            guarda sua escolha de privacidade. O identificador persistente usado para métricas e reações só
+            é criado após “Permitir métricas” e é apagado quando você escolhe “Só essenciais” ou revoga a
+            preferência nesta página.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">5. Fornecedores e compartilhamento</h2>
+          <p>Dados são compartilhados na medida necessária com fornecedores que sustentam o serviço:</p>
+          <ul className="mt-3 list-disc space-y-2 pl-5">
+            <li><strong className="text-white">Supabase:</strong> autenticação, banco, armazenamento e funções de backend.</li>
+            <li><strong className="text-white">Google:</strong> autenticação social escolhida pelo usuário.</li>
+            <li><strong className="text-white">Vercel:</strong> hospedagem e entrega do site.</li>
+            <li><strong className="text-white">Serviços de push do navegador:</strong> entrega de notificações quando ativadas.</li>
           </ul>
-        </section>
-
-        <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">5. Compartilhamento de dados</h2>
-          <p>Compartilhamos seus dados apenas com:</p>
-          <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Supabase:</strong> nosso provedor de banco de dados e autenticação (hospedado nos EUA).</li>
-            <li><strong>Google:</strong> provedor de login OAuth — apenas o e-mail e nome público.</li>
-            <li><strong>Vercel:</strong> plataforma de hospedagem do site.</li>
-          </ul>
-          <p className="mt-2">Não vendemos, alugamos ou compartilhamos seus dados com terceiros para fins de marketing.</p>
-        </section>
-
-        <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">6. Seus direitos como titular (LGPD)</h2>
-          <p>Você tem direito a:</p>
-          <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li><strong>Confirmação e acesso:</strong> saber quais dados tratamos e solicitar uma cópia.</li>
-            <li><strong>Correção:</strong> corrigir dados incompletos, inexatos ou desatualizados.</li>
-            <li><strong>Anonimização, bloqueio ou eliminação:</strong> solicitar a remoção de dados desnecessários.</li>
-            <li><strong>Portabilidade:</strong> solicitar a transferência dos seus dados a outro fornecedor.</li>
-            <li><strong>Eliminação:</strong> solicitar a exclusão completa da sua conta e dados associados.</li>
-            <li><strong>Revogação do consentimento:</strong> retirar seu consentimento a qualquer momento.</li>
-          </ul>
-          <p className="mt-2">
-            Para exercer qualquer um desses direitos, entre em contato pelo e-mail:{ " " }
-            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange hover:underline">orangebrick0@gmail.com</a>.
+          <p className="mt-4">
+            O Orange Brick não vende dados pessoais. Imagens carregadas de domínios externos podem informar
+            o IP do visitante ao respectivo provedor; por isso, novas publicações da comunidade não aceitam
+            mais URLs arbitrárias de imagem.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">7. Cookies</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">6. Transferência internacional</h2>
           <p>
-            Utilizamos cookies essenciais para o funcionamento do site (autenticação e segurança).
-            Cookies de analytics e preferências são opcionais e podem ser gerenciados no banner de cookies.
-            Você pode configurar seu navegador para recusar cookies, mas algumas funcionalidades podem ser afetadas.
+            Alguns fornecedores podem processar dados fora do Brasil. Quando houver transferência
+            internacional, ela deve observar a LGPD, as regras da ANPD e um mecanismo jurídico válido,
+            além de medidas de segurança compatíveis com o risco. Informações sobre o mecanismo aplicável
+            podem ser solicitadas pelo canal de privacidade.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">8. Segurança dos dados</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">7. Retenção e eliminação</h2>
           <p>
-            Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo criptografia em trânsito (TLS),
-            controle de acesso baseado em funções (RBAC), e monitoramento contínuo de segurança.
+            Dados de conta e comunidade são mantidos enquanto a conta estiver ativa ou enquanto forem
+            necessários para prestar o serviço. Registros de segurança, atendimento, incidentes e
+            obrigações legais podem permanecer pelo prazo necessário à finalidade ou ao exercício de
+            direitos. A exclusão da conta remove os dados diretamente associados no banco ativo; cópias
+            residuais em backup seguem o ciclo técnico restrito do fornecedor e não são reutilizadas.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">9. Retenção dos dados</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">8. Direitos do titular</h2>
           <p>
-            Mantemos seus dados enquanto sua conta estiver ativa. Após solicitação de exclusão,
-            todos os dados pessoais são removidos em até 30 dias, exceto quando a retenção for exigida por lei.
+            Você pode solicitar confirmação, acesso, correção, anonimização, bloqueio, eliminação,
+            portabilidade quando aplicável, informação sobre compartilhamentos, revisão de decisões
+            automatizadas e revogação do consentimento. Use os controles desta página ou escreva para o
+            canal de privacidade. Podemos pedir informações adicionais para confirmar sua identidade.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">10. Transferência internacional</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">9. Crianças e adolescentes</h2>
           <p>
-            Seus dados podem ser armazenados e processados em servidores localizados nos Estados Unidos,
-            com garantias de proteção equivalentes às da LGPD por meio de cláusulas contratuais padrão.
+            A comunidade não é direcionada a crianças. Adolescentes devem participar com conhecimento e
+            acompanhamento de seus responsáveis. Se houver indício de tratamento inadequado de dados de
+            criança ou adolescente, o responsável pode solicitar análise e remoção pelo canal de
+            privacidade. O melhor interesse do menor orientará a decisão.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">11. Alterações nesta política</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">10. Segurança e incidentes</h2>
           <p>
-            Esta política pode ser atualizada periodicamente. Notificaremos sobre mudanças significativas
-            através do site ou por e-mail. Recomendamos revisar esta página regularmente.
+            São aplicados controles de acesso, autenticação, políticas de banco, criptografia em trânsito,
+            validação de entradas e limitação de abuso. Nenhum sistema é infalível. Incidentes com risco
+            relevante serão avaliados e comunicados à ANPD e aos titulares nos casos e prazos previstos na
+            regulamentação.
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-bold text-white mt-8 mb-3">12. Contato com o encarregado (DPO)</h2>
+          <h2 className="mb-3 mt-10 text-xl font-bold text-white">11. Atualizações e contato</h2>
           <p>
-            Para questões relacionadas à LGPD e ao tratamento dos seus dados, entre em contato com nosso
-            Encarregado de Proteção de Dados (DPO):
-          </p>
-          <p className="mt-2">
-            <strong>E-mail:</strong>{" "}
-            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange hover:underline">orangebrick0@gmail.com</a>
+            Mudanças materiais serão destacadas no site e, quando a base legal exigir, será solicitada uma
+            nova escolha. Dúvidas, denúncias ou pedidos relacionados a dados pessoais podem ser enviados para{" "}
+            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange underline underline-offset-4">
+              orangebrick0@gmail.com
+            </a>.
           </p>
         </section>
       </article>

@@ -8,7 +8,7 @@ function isProtected(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!isProtected(pathname)) {
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next();
+  const response = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

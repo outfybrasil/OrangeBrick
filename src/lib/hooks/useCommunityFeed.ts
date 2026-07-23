@@ -2,17 +2,20 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createDataClient } from "@/lib/supabase/client";
-import { createNotification } from "@/lib/notifications";
 import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
-export function useCommunityFeed() {
+interface UseCommunityFeedOptions {
+  load?: boolean;
+}
+
+export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) {
   const { user, profile } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(!load);
 
   const fetchData = useCallback(async () => {
     try {
@@ -108,6 +111,7 @@ export function useCommunityFeed() {
           shares_count: shareCountMap[row.id] || 0,
           created_at: row.created_at,
           is_pinned: row.is_pinned,
+          is_official: row.is_official,
         };
       });
 
@@ -170,10 +174,12 @@ export function useCommunityFeed() {
   }, [user, supabase]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!load) return;
+    queueMicrotask(() => void fetchData());
+  }, [fetchData, load]);
 
   useEffect(() => {
+    if (!load) return;
     const channelName = `community_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const channel = supabase
       .channel(channelName)
@@ -195,7 +201,7 @@ export function useCommunityFeed() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, fetchData]);
+  }, [supabase, fetchData, load]);
 
   const addPost = useCallback(
     async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
@@ -231,13 +237,6 @@ export function useCommunityFeed() {
     async (postId: string, reactionType: ReactionType) => {
       if (!user) return;
 
-      const authorName =
-        profile?.nickname ||
-        user?.user_metadata?.full_name ||
-        user?.user_metadata?.name ||
-        user?.email?.split("@")[0] ||
-        "Leitor Orange Brick";
-
       setPosts((prevPosts) =>
         prevPosts.map((p) => {
           if (p.id !== postId) return p;
@@ -259,12 +258,6 @@ export function useCommunityFeed() {
       );
 
       try {
-        const { data: targetPost } = await supabase
-          .from("community_posts")
-          .select("user_id")
-          .eq("id", postId)
-          .maybeSingle();
-
         const { data: existing } = await supabase
           .from("community_reactions")
           .select("*")
@@ -292,23 +285,12 @@ export function useCommunityFeed() {
             reaction_type: reactionType,
           });
 
-          const postOwnerId = (targetPost as { user_id?: string } | null)?.user_id;
-          if (postOwnerId && postOwnerId !== user.id) {
-            await createNotification({
-              user_id: postOwnerId,
-              actor_id: user.id,
-              type: "reaction",
-              message: `${authorName} reagiu ao seu Brick (${reactionType.toUpperCase()})`,
-              reference_type: "post",
-              reference_id: postId,
-            });
-          }
         }
-      } catch (err) {
+      } catch {
         fetchData();
       }
     },
-    [user, profile, supabase, fetchData]
+    [user, supabase, fetchData]
   );
 
   const votePoll = useCallback(
@@ -358,16 +340,6 @@ export function useCommunityFeed() {
         },
       });
 
-      if (originalPost.user_id && originalPost.user_id !== user.id) {
-        await createNotification({
-          user_id: originalPost.user_id,
-          actor_id: user.id,
-          type: "comment",
-          message: `${authorName} republicou o seu Brickboard`,
-          reference_type: "post",
-          reference_id: originalPost.id,
-        });
-      }
     },
     [user, profile, supabase]
   );
@@ -405,23 +377,6 @@ export function useCommunityFeed() {
         content,
       });
 
-      const { data: targetPost } = await supabase
-        .from("community_posts")
-        .select("user_id")
-        .eq("id", postId)
-        .maybeSingle();
-
-      const postOwnerId = (targetPost as { user_id?: string } | null)?.user_id;
-      if (postOwnerId && postOwnerId !== user.id) {
-        await createNotification({
-          user_id: postOwnerId,
-          actor_id: user.id,
-          type: "comment",
-          message: `${authorName} respondeu ao seu Brickboard`,
-          reference_type: "post",
-          reference_id: postId,
-        });
-      }
     },
     [user, profile, supabase]
   );
@@ -438,20 +393,7 @@ export function useCommunityFeed() {
     async (commentId: string) => {
       if (!user) return;
 
-      const authorName =
-        profile?.nickname ||
-        user?.user_metadata?.full_name ||
-        user?.user_metadata?.name ||
-        user?.email?.split("@")[0] ||
-        "Leitor Orange Brick";
-
       try {
-        const { data: targetComment } = await supabase
-          .from("community_comments")
-          .select("user_id, post_id")
-          .eq("id", commentId)
-          .maybeSingle();
-
         const { data: existing } = await supabase
           .from("community_comment_likes")
           .select("*")
@@ -469,22 +411,11 @@ export function useCommunityFeed() {
             user_id: user.id,
           });
 
-          const commentOwnerId = (targetComment as { user_id?: string } | null)?.user_id;
-          if (commentOwnerId && commentOwnerId !== user.id) {
-            await createNotification({
-              user_id: commentOwnerId,
-              actor_id: user.id,
-              type: "reaction",
-              message: `${authorName} curtiu a sua resposta no Brickboard`,
-              reference_type: "comment",
-              reference_id: commentId,
-            });
-          }
         }
-      } catch (err) {
+      } catch {
       }
     },
-    [user, profile, supabase]
+    [user, supabase]
   );
 
   const getComments = useCallback(
@@ -499,8 +430,8 @@ export function useCommunityFeed() {
       if (!rows || rows.length === 0) return [];
 
       const commentIds = rows.map((c) => c.id);
-      let likesMap: Record<string, number> = {};
-      let userLikesMap: Record<string, boolean> = {};
+      const likesMap: Record<string, number> = {};
+      const userLikesMap: Record<string, boolean> = {};
 
       try {
         const { data: likesData } = await supabase
@@ -516,7 +447,7 @@ export function useCommunityFeed() {
             }
           }
         }
-      } catch (err) {
+      } catch {
       }
 
       return rows.map((row) => ({
@@ -525,6 +456,7 @@ export function useCommunityFeed() {
         user_id: row.user_id,
         author_name: row.author_name,
         author_avatar: row.author_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+        is_official: row.is_official,
         content: row.content,
         created_at: row.created_at,
         likes_count: likesMap[row.id] || 0,

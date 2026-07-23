@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import PushSetup from "@/components/PushSetup";
 
 export function Footer() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -21,23 +21,23 @@ export function Footer() {
             </span>
           </div>
           <p className="text-[10px] sm:text-[11px] text-gray-400 font-sans max-w-sm leading-relaxed">
-            O portal definitivo de notícias de games. Análises ácidas, hardware de ponta, modding e as últimas notícias do universo gamer de forma rápida, direta e independente.
+            Notícias de games, indústria e hardware com apuração direta, contexto e espaço para debate.
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Categorias</h4>
-          <div className="flex flex-col gap-2 text-[11px]">
-            <Link href="/?category=breaking" className="hover:text-white transition-colors">
+          <div className="flex flex-col text-[11px]">
+            <Link href="/?category=breaking" className="flex min-h-11 items-center transition-colors hover:text-white">
               Breaking News
             </Link>
-            <Link href="/?category=review" className="hover:text-white transition-colors">
+            <Link href="/?category=review" className="flex min-h-11 items-center transition-colors hover:text-white">
               Reviews Detalhadas
             </Link>
-            <Link href="/?category=hardware" className="hover:text-white transition-colors">
+            <Link href="/?category=hardware" className="flex min-h-11 items-center transition-colors hover:text-white">
               Hardware & Consoles
             </Link>
-            <Link href="/?category=opinion" className="hover:text-white transition-colors">
+            <Link href="/?category=opinion" className="flex min-h-11 items-center transition-colors hover:text-white">
               Opinião & Debates
             </Link>
           </div>
@@ -45,25 +45,25 @@ export function Footer() {
 
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Institucional</h4>
-          <div className="flex flex-col gap-2 text-[11px]">
-            <Link href="/institucional/termos" className="hover:text-white transition-colors">
+          <div className="flex flex-col text-[11px]">
+            <Link href="/termos" className="flex min-h-11 items-center transition-colors hover:text-white">
               Termos de Uso
             </Link>
-            <Link href="/institucional/privacidade" className="hover:text-white transition-colors">
+            <Link href="/privacidade" className="flex min-h-11 items-center transition-colors hover:text-white">
               Política de Privacidade
             </Link>
-            <Link href="/institucional/anuncie" className="hover:text-white transition-colors">
+            <Link href="/institucional/anuncie" className="flex min-h-11 items-center transition-colors hover:text-white">
               Anuncie
             </Link>
             <span className="text-brand-orange-muted font-bold">Versão Beta v2.0</span>
+            <PushSetup />
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-brand-orange-muted/5 mt-10 pt-6 text-center text-[10px] text-gray-600">
         <p suppressHydrationWarning>
-          © 2026 Orange Brick Media Group. Todos os direitos reservados.
-          Inspirado na estética de portais gamers modernos.
+          © 2026 Orange Brick. Conteúdo editorial protegido nos termos da legislação aplicável.
         </p>
       </div>
     </footer>

@@ -1,25 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
+import {
+  CONSENT_CHANGE_EVENT,
+  DEVICE_STORAGE_KEY,
+  getConsent,
+} from "@/lib/consent";
 
-function generateId(): string {
-  const arr = new Uint8Array(16);
-  crypto.getRandomValues(arr);
-  return Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("");
+function subscribe(callback: () => void) {
+  window.addEventListener(CONSENT_CHANGE_EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    window.removeEventListener(CONSENT_CHANGE_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
 }
 
-const STORAGE_KEY = "orange_brick_device_id";
+function getSnapshot(): string {
+  if (getConsent() !== "accepted") return "";
+  return window.localStorage.getItem(DEVICE_STORAGE_KEY) ?? "";
+}
 
 export function useDeviceId(): string {
-  const [deviceId] = useState(() => {
-    if (typeof window === "undefined") return "";
-    let id = localStorage.getItem(STORAGE_KEY);
-    if (!id) {
-      id = generateId();
-      localStorage.setItem(STORAGE_KEY, id);
-    }
-    return id;
-  });
-
-  return deviceId;
+  return useSyncExternalStore(subscribe, getSnapshot, () => "");
 }

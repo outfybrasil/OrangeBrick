@@ -75,6 +75,12 @@ export interface Database {
         Update: Partial<CommunityCommentInsert>;
         Relationships: [];
       };
+      community_comment_likes: {
+        Row: CommunityCommentLikeRow;
+        Insert: CommunityCommentLikeInsert;
+        Update: Partial<CommunityCommentLikeInsert>;
+        Relationships: [];
+      };
       community_polls: {
         Row: CommunityPollRow;
         Insert: CommunityPollInsert;
@@ -221,6 +227,7 @@ export interface Profile {
   nickname: string;
   avatar_url: string | null;
   bio?: string | null;
+  is_official: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -231,6 +238,7 @@ export interface ProfileInsert {
   nickname: string;
   avatar_url?: string | null;
   bio?: string | null;
+  is_official?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -302,6 +310,8 @@ export interface CommunityPostRow {
   media_url: string | null;
   platform_tag: string | null;
   attached_article: Json | null;
+  shared_post_id: string | null;
+  is_official: boolean;
   is_pinned: boolean;
   created_at: string;
 }
@@ -315,6 +325,8 @@ export interface CommunityPostInsert {
   media_url?: string | null;
   platform_tag?: string | null;
   attached_article?: Json | null;
+  shared_post_id?: string | null;
+  is_official?: boolean;
   is_pinned?: boolean;
   created_at?: string;
 }
@@ -341,6 +353,7 @@ export interface CommunityCommentRow {
   user_id: string;
   author_name: string;
   author_avatar: string;
+  is_official: boolean;
   content: string;
   created_at: string;
 }
@@ -351,6 +364,7 @@ export interface CommunityCommentInsert {
   user_id: string;
   author_name: string;
   author_avatar: string;
+  is_official?: boolean;
   content: string;
   created_at?: string;
 }
@@ -384,6 +398,20 @@ export interface CommunityPollVoteInsert {
   poll_id: string;
   user_id: string;
   option_index: number;
+  created_at?: string;
+}
+
+export interface CommunityCommentLikeRow {
+  id: string;
+  comment_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface CommunityCommentLikeInsert {
+  id?: string;
+  comment_id: string;
+  user_id: string;
   created_at?: string;
 }
 

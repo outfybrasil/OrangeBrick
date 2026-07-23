@@ -38,7 +38,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   if (!user) {
     return (
       <>
-        <div className="relative overflow-hidden bg-gradient-to-r from-card-slate/80 via-[#181A22] to-card-slate/80 border border-brand-orange-muted/20 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-xl backdrop-blur-md">
+        <div className="relative space-y-4 overflow-hidden rounded-2xl border border-brand-orange-muted/20 bg-card-slate/80 p-5 text-center shadow-xl sm:rounded-3xl sm:p-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-orange/15 border border-brand-orange/30 text-brand-orange shadow-[0_0_15px_rgba(255,94,0,0.2)]">
             <span className="text-xl">💬</span>
           </div>
@@ -55,7 +55,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
           <button
             type="button"
             onClick={() => setIsAuthModalOpen(true)}
-            className="inline-flex items-center gap-2 py-3 px-8 bg-brand-orange hover:bg-brand-orange/90 text-white font-subtitle text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(255,94,0,0.3)] hover:scale-[1.02] cursor-pointer"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-orange px-6 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-orange/90 xs:w-auto sm:text-sm"
           >
             <span>Fazer Login para Comentar</span>
             <span>→</span>
@@ -71,7 +71,6 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   }
 
   const userDisplayName = profile?.nickname || user.email?.split("@")[0] || "Usuário";
-  const userInitials = userDisplayName.substring(0, 2).toUpperCase();
   const avatarUrl = resolveAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture, userDisplayName);
 
   return (
@@ -97,7 +96,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
         <button
           type="button"
           onClick={signOut}
-          className="text-gray-500 hover:text-red-400 transition-colors cursor-pointer text-[11px] font-semibold"
+          className="min-h-11 rounded-xl px-3 text-[11px] font-semibold text-red-300/75 transition-colors hover:bg-red-500/15 hover:text-red-200"
         >
           Sair
         </button>
@@ -119,7 +118,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
           "
         />
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 xs:flex-row xs:items-center xs:justify-between">
           <span className="text-[11px] font-subtitle text-gray-500">
             {content.length} / 500 caracteres
           </span>
@@ -128,11 +127,11 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
             type="submit"
             disabled={!content.trim() || isSubmitting}
             className="
-              px-6 py-2.5 text-xs font-subtitle font-bold uppercase tracking-wider
+              min-h-11 px-6 text-xs font-subtitle font-bold uppercase tracking-wider
               bg-brand-orange text-white rounded-xl shadow-[0_0_15px_rgba(255,94,0,0.25)]
               hover:bg-brand-orange/90 hover:scale-[1.02] cursor-pointer
               disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none
-              transition-all flex items-center gap-2
+              transition-all flex w-full items-center justify-center gap-2 xs:w-auto
             "
           >
             {isSubmitting ? (

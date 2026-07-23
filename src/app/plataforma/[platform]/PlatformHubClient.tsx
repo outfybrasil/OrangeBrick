@@ -28,8 +28,8 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
   return (
     <div className="min-h-dvh flex flex-col bg-background-void text-white font-body">
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/10 py-3 sm:py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-row items-center justify-between gap-2 sm:gap-4">
-          <Link href="/" className="flex items-center cursor-pointer group gap-2 sm:gap-3 shrink-0 min-w-0">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
+          <Link href="/" aria-label="Ir para a página inicial" className="group flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-xl sm:gap-3">
             <img
               src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
@@ -41,14 +41,19 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
             </span>
           </Link>
 
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
-            <form onSubmit={handleSearchSubmit} className="relative w-full max-w-[140px] sm:max-w-xs lg:max-w-sm">
+          {/* BARRA DE PESQUISA EXPANDIDA NO CENTRO */}
+          <div className="order-3 w-full min-w-0 flex-none sm:order-none sm:mx-6 sm:flex-1 sm:max-w-xl">
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <label htmlFor="platform-search" className="sr-only">
+                Buscar matérias
+              </label>
               <input
+                id="platform-search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..."
-                className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-3 py-1.5 sm:px-4 sm:py-2 pl-8 sm:pl-10 outline-none focus:border-brand-orange/50 transition-colors font-body text-xs sm:text-sm shadow-inner"
+                placeholder="Buscar matérias..."
+                className="min-h-11 w-full rounded-xl border border-brand-orange-muted/20 bg-background-void/90 px-3 pl-9 text-xs text-white shadow-inner outline-none transition-all focus:border-brand-orange/60 focus:ring-1 focus:ring-brand-orange/30 sm:pl-10 sm:text-sm"
               />
               <svg
                 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
@@ -60,15 +65,19 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </form>
+          </div>
 
+          {/* BOTÕES DE AÇÃO NA DIREITA */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <Link
               href="/brickboard"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand-orange/15 border border-brand-orange/40 hover:bg-brand-orange hover:text-white text-brand-orange font-subtitle text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_12px_rgba(255,94,0,0.15)] whitespace-nowrap"
+              aria-label="Abrir Brickboard"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-brand-orange/40 bg-brand-orange/15 px-3 text-xs font-bold uppercase tracking-wider text-brand-orange transition-colors hover:bg-brand-orange hover:text-white sm:px-3.5"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <span>Brickboard</span>
+              <span className="hidden xs:inline">Brickboard</span>
             </Link>
 
             <UserNav />
@@ -76,23 +85,23 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-r ${config.gradientFrom} to-card-slate/80 border ${config.borderColor} p-6 sm:p-8 shadow-2xl backdrop-blur-md`}>
+      <main className="mx-auto w-full min-w-0 max-w-7xl flex-1 space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${config.gradientFrom} to-card-slate/80 border ${config.borderColor} p-4 sm:rounded-3xl sm:p-8 shadow-2xl backdrop-blur-md`}>
           <div className="relative z-10 space-y-3">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col items-start gap-3 xs:flex-row xs:items-center xs:justify-between">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background-void/60 border border-gray-700/50 hover:border-white text-gray-300 hover:text-white font-subtitle text-xs font-bold uppercase tracking-wider transition-colors"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-gray-700/50 bg-background-void/60 px-3 text-xs font-bold uppercase tracking-wider text-gray-300 transition-colors hover:border-white hover:text-white"
               >
                 ← Todos os Conteúdos
               </Link>
 
-              <span className={`px-3 py-1 rounded-full text-xs font-subtitle font-bold uppercase tracking-wider border ${config.badgeBg} ${config.badgeText}`}>
+              <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider xs:text-xs ${config.badgeBg} ${config.badgeText}`}>
                 Hub Oficial {config.shortName}
               </span>
             </div>
 
-            <div className="flex items-center gap-3.5 pt-2">
+            <div className="flex min-w-0 items-center gap-3 pt-2 sm:gap-3.5">
               {config.iconUrl ? (
                 <img
                   src={config.iconUrl}
@@ -103,7 +112,7 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
               ) : (
                 <span className="text-3xl sm:text-4xl">{config.icon}</span>
               )}
-              <h1 className="font-heading text-3xl sm:text-5xl font-black text-white uppercase tracking-wider">
+              <h1 className="min-w-0 break-words font-heading text-[clamp(1.65rem,9vw,3rem)] font-black uppercase leading-tight tracking-tight text-white">
                 {config.name}
               </h1>
             </div>

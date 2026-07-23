@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
 
@@ -27,7 +28,7 @@ export default function ProfileSetup() {
     if (user) {
       const googlePic = user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
       if (googlePic && !avatarUrl) {
-        setAvatarUrl(googlePic);
+        queueMicrotask(() => setAvatarUrl(googlePic));
       }
     }
   }, [user, profile, isLoading, router, avatarUrl]);
@@ -77,8 +78,8 @@ export default function ProfileSetup() {
   }
 
   return (
-    <div className="min-h-dvh bg-background-void text-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-card-slate/40 border border-brand-orange-muted/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+    <div className="flex min-h-dvh items-center justify-center bg-background-void px-3 py-[max(0.75rem,env(safe-area-inset-top))] text-white sm:px-4">
+      <div className="w-full max-w-md rounded-2xl border border-brand-orange-muted/20 bg-card-slate/40 p-5 shadow-2xl sm:p-8">
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-2xl mx-auto mb-3">
             {avatarUrl ? (
@@ -144,9 +145,9 @@ export default function ProfileSetup() {
 
         <p className="text-[9px] text-gray-600 text-center mt-4">
           Ao criar um perfil, você concorda com nossos{" "}
-          <a href="/institucional/termos" className="text-brand-orange hover:text-white transition-colors">
+          <Link href="/termos" className="text-brand-orange hover:text-white transition-colors">
             Termos de Uso
-          </a>.
+          </Link>.
         </p>
       </div>
     </div>

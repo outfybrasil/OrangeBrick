@@ -35,7 +35,7 @@ export function useCommentCount(postId: string) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [postId]);
+  }, [postId, supabase]);
 
   return count;
 }

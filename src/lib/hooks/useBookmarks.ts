@@ -24,7 +24,7 @@ export function useBookmarks() {
   }, []);
 
   useEffect(() => {
-    loadBookmarks();
+    queueMicrotask(loadBookmarks);
 
     const handleCustomEvent = () => loadBookmarks();
     window.addEventListener(EVENT_NAME, handleCustomEvent);

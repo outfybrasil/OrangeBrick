@@ -35,10 +35,39 @@
   scrollbar-color: rgba(168, 67, 0, 0.3) transparent;
 }
 
+.scrollbar-none {
+  scrollbar-width: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+
 body {
   background-color: #0D0E12;
   color: #e5e5e5;
   font-family: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
+}
+
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid #FF5E00;
+  outline-offset: 3px;
+}
+
+.news-feed-grid > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -55,6 +84,15 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 html {
   -webkit-text-size-adjust: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 img, video, svg {
@@ -64,6 +102,19 @@ img, video, svg {
 
 @media (max-width: 480px) {
   .hide-xs { display: none !important; }
+
+  body:has([data-mobile-bottom-overlay]) .mobile-overlay-sensitive {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* ============================================
@@ -221,7 +272,7 @@ img, video, svg {
   border-radius: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hand-underline:hover::after {
@@ -229,26 +280,19 @@ img, video, svg {
 }
 
 /* Wobble sutil em tags ao hover */
-@keyframes wobble {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-1deg); }
-  75% { transform: rotate(1deg); }
-}
-
 .wobble-hover:hover {
-  animation: wobble 0.2s ease-in-out;
+  transform: rotate(-0.5deg);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Brick pulando — loader */
-@keyframes brick-bounce {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-12px) rotate(-8deg); }
-  50% { transform: translateY(0) rotate(0deg); }
-  75% { transform: translateY(-6px) rotate(5deg); }
+@keyframes brick-float {
+  0%, 100% { transform: translateY(0); opacity: 0.75; }
+  50% { transform: translateY(-5px); opacity: 1; }
 }
 
 .brick-bounce {
-  animation: brick-bounce 0.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+  animation: brick-float 1.1s ease-in-out infinite;
 }
 
 /* Brick girando — loading spinner alternativo */
@@ -259,7 +303,7 @@ img, video, svg {
 }
 
 .brick-spin {
-  animation: brick-spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  animation: brick-spin 1.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 /* Piscada aleatória no "Beta" */
@@ -283,7 +327,7 @@ img, video, svg {
 }
 
 .reaction-pop {
-  animation: reaction-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: reaction-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Skeleton com formato de tijolo rachado */

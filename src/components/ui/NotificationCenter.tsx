@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { useNotificationCenter } from "@/lib/hooks/useNotificationCenter";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type { AppNotification } from "@/lib/types/database";
@@ -78,7 +77,7 @@ export function NotificationCenter() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((p) => !p)}
-        className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-brand-orange-muted/20 text-gray-400 hover:text-white hover:border-brand-orange/40 bg-card-slate/80 hover:bg-card-slate transition-all cursor-pointer"
+        className="relative flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-brand-orange-muted/20 bg-card-slate/80 text-gray-400 transition-all hover:border-brand-orange/40 hover:bg-card-slate hover:text-white"
         aria-label="Notificações"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -92,13 +91,13 @@ export function NotificationCenter() {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 mt-2 w-80 max-h-96 rounded-xl border border-brand-orange-muted/20 bg-[#12141C] shadow-2xl z-50 overflow-hidden animate-fade-in">
+        <div className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-50 max-h-[calc(100dvh-5rem)] overflow-hidden rounded-xl border border-brand-orange-muted/20 bg-[#12141C] shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 sm:max-h-96">
           <div className="flex items-center justify-between px-4 py-3 border-b border-brand-orange-muted/10">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">Notificações</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-[9px] text-brand-orange hover:underline cursor-pointer"
+                className="min-h-11 rounded-lg px-2 text-[10px] text-brand-orange hover:bg-brand-orange/10"
               >
                 Marcar todas lidas
               </button>

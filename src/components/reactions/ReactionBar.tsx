@@ -35,12 +35,12 @@ export function ReactionBar({
 
   return (
     <div>
-      <div className="grid grid-cols-4 sm:flex sm:items-center sm:gap-2 px-1.5 sm:px-4 py-1.5 border border-brand-orange-muted/20 bg-[#14161E]/90 backdrop-blur-md rounded-2xl shadow-lg">
+      <div className="grid min-w-0 grid-cols-4 rounded-2xl border border-brand-orange-muted/20 bg-[#14161E]/90 px-1.5 py-1.5 shadow-lg sm:flex sm:items-center sm:gap-2 sm:px-4">
         <button
           type="button"
           onClick={() => onToggle("hype")}
           disabled={disabled}
-          className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-subtitle font-bold rounded-xl transition-all cursor-pointer group ${
+          className={`group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
             activeReaction === "hype"
               ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/50 shadow-[0_0_12px_rgba(255,94,0,0.25)]"
               : "text-gray-400 border border-transparent hover:text-brand-orange hover:bg-card-slate/50"
@@ -58,7 +58,7 @@ export function ReactionBar({
           type="button"
           onClick={() => onToggle("flop")}
           disabled={disabled}
-          className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-subtitle font-bold rounded-xl transition-all cursor-pointer group ${
+          className={`group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
             activeReaction === "flop" || activeReaction === "salty"
               ? "bg-red-500/20 text-red-400 border border-red-500/50 shadow-[0_0_12px_rgba(239,68,68,0.25)]"
               : "text-gray-400 border border-transparent hover:text-red-400 hover:bg-card-slate/50"
@@ -75,7 +75,7 @@ export function ReactionBar({
         <button
           type="button"
           onClick={onCommentClick}
-          className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-subtitle font-bold text-gray-400 border border-transparent hover:text-brand-orange hover:bg-card-slate/50 rounded-xl transition-all cursor-pointer group"
+          className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[11px] font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs"
           title="Ver e enviar respostas"
         >
           <Icon name="comment" size={14} className="text-gray-400 group-hover:text-brand-orange group-hover:scale-110 transition-all" />
@@ -88,7 +88,7 @@ export function ReactionBar({
         <button
           type="button"
           onClick={onRepostClick}
-          className="flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-subtitle font-bold text-gray-400 border border-transparent hover:text-emerald-400 hover:bg-card-slate/50 rounded-xl transition-all cursor-pointer group"
+          className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[11px] font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-emerald-400 sm:gap-1.5 sm:px-3 sm:text-xs"
           title="Republicar e comentar sobre isso no Brickboard"
         >
           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-emerald-400 group-hover:rotate-180 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

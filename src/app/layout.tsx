@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
-import PushSetup from "@/components/PushSetup";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 import "./globals.css";
 
@@ -37,6 +36,7 @@ export const viewport: Viewport = {
   themeColor: "#FF5E00",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -91,7 +91,6 @@ export default function RootLayout({
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <AuthProvider>{children}</AuthProvider>
-        <PushSetup />
         <PwaInstallBanner />
         <CookieConsent />
       </body>

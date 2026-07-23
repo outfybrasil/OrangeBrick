@@ -1,66 +1,68 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const COOKIE_CONSENT_KEY = "ob-cookie-consent";
-
-type ConsentLevel = "accepted" | "denied" | null;
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getConsent, saveConsent } from "@/lib/consent";
 
 export function CookieConsent() {
-  const [consent, setConsent] = useState<ConsentLevel>(null);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(COOKIE_CONSENT_KEY) as ConsentLevel | null;
-    if (!stored) {
-      const timer = setTimeout(() => setShow(true), 1000);
-      return () => clearTimeout(timer);
-    }
-    setConsent(stored);
+    if (getConsent()) return;
+    const frame = window.requestAnimationFrame(() => setShow(true));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  const handleAccept = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
-    setConsent("accepted");
-    setShow(false);
-  };
-
-  const handleDeny = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "denied");
-    setConsent("denied");
+  const choose = (level: "accepted" | "denied") => {
+    saveConsent(level);
     setShow(false);
   };
 
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-      <div className="max-w-2xl mx-auto bg-card-slate border border-brand-orange-muted/20 rounded-xl shadow-2xl p-5 backdrop-blur-md">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white mb-1">🍪 Cookies</p>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Usamos cookies essenciais para o funcionamento do site e cookies opcionais
-              para analytics. Consulte nossa{" "}
-              <a href="/privacidade" className="text-brand-orange hover:underline">Política de Privacidade</a>.
+    <section
+      aria-labelledby="consent-title"
+      aria-describedby="consent-description"
+      data-mobile-bottom-overlay
+      className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5"
+    >
+      <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#17191f] shadow-[0_18px_60px_rgba(0,0,0,0.55)]">
+        <div className="h-1 bg-brand-orange" />
+        <div className="grid gap-4 p-4 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-5 sm:p-6">
+          <div>
+            <p id="consent-title" className="font-heading text-base font-bold text-white">
+              Sua leitura, sua escolha
+            </p>
+            <p id="consent-description" className="mt-2 max-w-xl text-sm leading-6 text-[#b8bac2]">
+              O site funciona com armazenamento essencial. Com sua permissão, também guardamos um
+              identificador aleatório para reconhecer reações e medir leituras sem usar seu nome ou e-mail.{" "}
+              <Link
+                href="/privacidade"
+                className="font-semibold text-brand-orange underline decoration-brand-orange/40 underline-offset-4 hover:decoration-brand-orange"
+              >
+                Saiba mais
+              </Link>.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="grid grid-cols-2 gap-2 sm:flex">
             <button
-              onClick={handleDeny}
-              className="text-xs text-gray-400 hover:text-white border border-gray-600 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+              type="button"
+              onClick={() => choose("denied")}
+              className="min-h-11 rounded-xl border border-white/15 px-4 text-sm font-semibold text-[#d7d8dc] transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
             >
-              Recusar
+              Só essenciais
             </button>
             <button
-              onClick={handleAccept}
-              className="text-xs font-bold text-white bg-brand-orange hover:bg-brand-orange/90 px-4 py-2 rounded-lg transition-colors cursor-pointer"
+              type="button"
+              onClick={() => choose("accepted")}
+              className="min-h-11 rounded-xl bg-brand-orange px-5 text-sm font-bold text-white transition-colors hover:bg-[#e95500] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              Aceitar
+              Permitir métricas
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

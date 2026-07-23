@@ -21,61 +21,74 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
     .slice(0, 4);
 
   return (
-    <aside className="space-y-6">
-      <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-2xl p-5 shadow-lg">
-        <div className="flex items-center gap-2 pb-3 mb-4 border-b border-brand-orange-muted/10">
-          <span className="text-base">🏆</span>
-          <h3 className="font-subtitle text-xs font-bold text-white uppercase tracking-wider">
-            Mais Hypadas
-          </h3>
-          <span className="ml-auto text-[9px] font-subtitle text-brand-orange font-bold uppercase tracking-widest bg-brand-orange/10 px-2 py-0.5 rounded border border-brand-orange/20">
-            Top 4
-          </span>
+    <aside>
+      <section aria-labelledby="most-hyped-title" className="border-y border-white/10">
+        <div className="flex items-end justify-between gap-3 border-b border-white/10 py-4">
+          <div>
+            <h3 id="most-hyped-title" className="font-heading text-xl font-black tracking-[-0.025em] text-white">
+              Mais hypadas
+            </h3>
+            <p className="mt-1 text-[11px] text-gray-500">Ranking por leitura e reações</p>
+          </div>
+          <span className="pb-0.5 text-[10px] font-bold uppercase text-gray-600">Top 4</span>
         </div>
 
-        <div className="space-y-4">
+        {topHypePosts.length === 0 ? (
+          <p className="py-8 text-sm leading-6 text-gray-500">O ranking aparece assim que as matérias recebem leituras e reações.</p>
+        ) : (
+          <ol className="divide-y divide-white/[0.08]">
           {topHypePosts.map((post, index) => {
             const postStat = stats[post.id];
             const hypeCount = postStat?.reactions.hype || 0;
 
             return (
-              <Link
-                key={post.id}
-                href={`/posts/${post.slug}`}
-                className="group flex gap-3 items-start p-2 rounded-xl hover:bg-card-slate/60 transition-all duration-200"
-              >
-                <div className="relative shrink-0 w-7 h-7 rounded-lg bg-background-void border border-brand-orange-muted/20 flex items-center justify-center font-heading font-black text-xs text-brand-orange group-hover:border-brand-orange transition-colors">
-                  {index + 1}
-                </div>
+              <li key={post.id}>
+                <Link
+                  href={`/posts/${post.slug}`}
+                  className="group grid grid-cols-[32px_minmax(0,1fr)_64px] items-center gap-3 py-4 transition-colors hover:bg-white/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
+                >
+                  <span className="font-heading text-2xl font-black tracking-[-0.04em] text-gray-600 transition-colors group-hover:text-brand-orange">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Tag category={post.category} />
-                    {hypeCount > 0 && (
-                      <span className="text-[10px] font-subtitle text-brand-orange font-bold">
-                        🔥 {hypeCount} hype
-                      </span>
-                    )}
+                  <div className="min-w-0">
+                    <div className="mb-1.5 flex items-center gap-2">
+                      <Tag category={post.category} />
+                      {hypeCount > 0 && (
+                        <span className="text-[10px] font-bold text-brand-orange">
+                          {hypeCount} {hypeCount === 1 ? "hype" : "hypes"}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="line-clamp-2 text-xs font-bold leading-snug text-gray-200 transition-colors group-hover:text-white">
+                      {post.title}
+                    </h4>
                   </div>
-                  <h4 className="font-subtitle text-xs font-bold text-white leading-snug line-clamp-2 group-hover:text-brand-orange transition-colors">
-                    {post.title}
-                  </h4>
-                </div>
 
-                {post.image_url && (
-                  <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-brand-orange-muted/10">
-                    <img
-                      src={post.image_url}
-                      alt={post.image_alt || ""}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
-              </Link>
+                  {post.image_url ? (
+                    <div className="relative h-14 w-16 overflow-hidden bg-[#08090C]">
+                      <img
+                        src={post.image_url}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-20 blur-sm"
+                      />
+                      <img
+                        src={post.image_url}
+                        alt={post.image_alt || ""}
+                        className="relative h-full w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <span className="h-14 w-16 bg-card-slate" aria-hidden="true" />
+                  )}
+                </Link>
+              </li>
             );
           })}
-        </div>
-      </div>
+          </ol>
+        )}
+      </section>
     </aside>
   );
 }

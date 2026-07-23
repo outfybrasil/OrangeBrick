@@ -61,7 +61,6 @@ export function MultimediaSection() {
             {/* Thumbnail Wrapper */}
             <div className="relative aspect-video w-full overflow-hidden">
               {/* Image */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={item.thumbnail}
                 alt={item.title}

@@ -1,24 +1,13 @@
-export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string | null): string {
-  const name = (authorName || "").toLowerCase().trim();
+export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string | null, isOfficial = false): string {
   const raw = (avatarUrl || "").trim();
-
-  const isOfficial =
-    name === "orange brick" ||
-    name === "orangebrick" ||
-    name === "orange_brick" ||
-    raw.toLowerCase() === "orangebrick" ||
-    raw.toLowerCase() === "orange brick" ||
-    raw.toLowerCase() === "orange_brick";
 
   if (isOfficial) {
     return "/logos/Logo Tijolo Quebrado.PNG";
   }
 
   if (
-    raw.startsWith("http://") ||
     raw.startsWith("https://") ||
-    raw.startsWith("/") ||
-    raw.startsWith("data:")
+    raw.startsWith("/")
   ) {
     return raw;
   }

@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "scripts/**",
     "supabase/functions/**",
+    ".agents/**",
   ]),
 ]);
 

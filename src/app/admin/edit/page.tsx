@@ -3,9 +3,11 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { parseMarkdownToReact } from "@/lib/markdown";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { AUTHOR_TAGS, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory } from "@/lib/types/database";
@@ -57,7 +59,6 @@ function BlockIcon({ type }: { type: "text" | "image" }) {
 }
 
 function EditForm() {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,6 +88,31 @@ function EditForm() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [coverAiPrompt, setCoverAiPrompt] = useState<string | null>(null);
   const [coverAiLoading, setCoverAiLoading] = useState(false);
+
+  const editorialChecklist = useMemo(() => {
+    const textContent = blocks
+      .filter((block): block is Extract<ContentBlock, { type: "text" }> => block.type === "text")
+      .map((block) => block.content)
+      .join("\n");
+    const imageBlocks = blocks.filter((block): block is Extract<ContentBlock, { type: "image" }> => block.type === "image");
+    const imageUrls = [imageUrl, ...imageBlocks.map((block) => block.url)].filter(Boolean);
+
+    return [
+      { label: "Título e slug definidos", complete: Boolean(title.trim() && slug.trim()) },
+      { label: "Resumo editorial preenchido", complete: summary.trim().length >= 20 },
+      { label: "Capa com texto alternativo", complete: Boolean(imageUrl.trim() && imageAlt.trim().length >= 3) },
+      { label: "Corpo com texto", complete: textContent.trim().length > 0 },
+      { label: "Imagens sem repetição", complete: new Set(imageUrls).size === imageUrls.length },
+      { label: "Fonte citada no final", complete: /\*\*Fonte:\*\*/i.test(textContent) },
+    ];
+  }, [blocks, imageAlt, imageUrl, slug, summary, title]);
+
+  const completedChecklistItems = editorialChecklist.filter((item) => item.complete).length;
+  const publishingIssues = useMemo(
+    () => validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks }),
+    [blocks, imageAlt, imageUrl, slug, summary, title],
+  );
+  const previewDialogRef = useModalDialog<HTMLDivElement>(showPreview, () => setShowPreview(false));
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -378,52 +404,46 @@ function EditForm() {
   }
 
   return (
-    <div className="min-h-dvh bg-background-void text-white font-mono text-sm">
-      <header className="sticky top-0 z-40 border-b border-brand-orange-muted/10 bg-card-slate/90 backdrop-blur-md py-2.5 sm:py-3">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <img
-              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-              alt="Orange Brick Logo"
-              style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
-              className="h-8 w-auto object-contain shrink-0"
-            />
-            <div className="min-w-0">
-              <h1 className="text-xs sm:text-base font-black uppercase leading-tight truncate">
-                Orange<span className="text-brand-orange">_</span>Brick <span className="text-[8px] sm:text-[10px] text-gray-500 font-normal">/ editor</span>
-              </h1>
-              {hasChanges && <span className="text-[8px] sm:text-[9px] text-yellow-400">* alterações não salvas</span>}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <button
-              onClick={() => setShowPreview(true)}
-              className="text-[10px] sm:text-xs text-accent-blue hover:text-white border border-accent-blue/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer whitespace-nowrap"
-            >
-              👁️ <span className="hidden xs:inline">Preview</span>
-            </button>
-            <button
-              onClick={() => router.push("/admin")}
-              className="text-[10px] sm:text-xs text-gray-400 hover:text-white border border-white/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
-            >
-              ← <span className="hidden xs:inline">Voltar</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 py-6">
+    <AdminShell
+      active="editor"
+      title={postId ? "Editar matéria" : "Nova matéria"}
+      description={postId
+        ? "Revise o conteúdo, corrija pendências e escolha como esta versão deve voltar ao ar."
+        : "Construa a matéria em blocos, valide a apresentação e salve primeiro como rascunho."}
+      status={hasChanges ? (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+          Alterações não salvas
+        </span>
+      ) : (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold text-gray-400">
+          Sem alterações pendentes
+        </span>
+      )}
+      actions={
+        <button
+          type="button"
+          onClick={() => setShowPreview(true)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.07] px-4 text-sm font-bold text-gray-100 transition-colors hover:bg-white/[0.11] focus-visible:outline-2 focus-visible:outline-brand-orange"
+        >
+          Pré-visualizar
+        </button>
+      }
+      wide
+    >
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-xs">
+          <div role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm leading-6 text-red-200">
             {error}
           </div>
         )}
         {aiError && (
-          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 rounded-lg text-xs">
+          <div role="alert" className="mb-5 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 text-sm leading-6 text-amber-200">
             {aiError}
           </div>
         )}
-        <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden mb-8">
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 space-y-6">
+        <div className="overflow-hidden rounded-2xl bg-[#15161d]">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -466,7 +486,7 @@ function EditForm() {
                     key={opt.value}
                     type="button"
                     onClick={() => { setCategory(opt.value); setAuthorTag(AUTHOR_TAGS[opt.value]); setHasChanges(true); }}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border transition-all cursor-pointer uppercase tracking-wider ${
+                    className={`min-h-11 px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border transition-all cursor-pointer uppercase tracking-wider ${
                       category === opt.value
                         ? "bg-brand-orange/15 text-brand-orange border-brand-orange/40 shadow-sm"
                         : "bg-background-void text-gray-400 border-brand-orange-muted/20 hover:border-brand-orange/30 hover:text-white"
@@ -515,7 +535,7 @@ function EditForm() {
                     const alt = imageAlt || "cena relacionada a videogames";
                     setCoverAiPrompt(alt);
                   }}
-                  className="text-[10px] text-accent-blue hover:text-white border border-accent-blue/30 px-2.5 py-2 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                  className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-accent-blue/30 px-2.5 py-2 text-[10px] text-accent-blue transition-all hover:bg-accent-blue/10 hover:text-white"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -541,7 +561,7 @@ function EditForm() {
                     type="button"
                     onClick={generateCoverImage}
                     disabled={coverAiLoading || !coverAiPrompt?.trim()}
-                    className="bg-accent-blue hover:bg-accent-blue/80 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="flex min-h-11 items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-xs font-bold text-white transition-all hover:bg-accent-blue/80 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {coverAiLoading ? (
                       <>
@@ -555,7 +575,7 @@ function EditForm() {
                   <button
                     type="button"
                     onClick={() => setCoverAiPrompt(null)}
-                    className="text-[10px] text-gray-400 hover:text-white border border-white/10 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                    className="min-h-11 rounded-lg border border-white/10 px-3 py-2 text-[10px] text-gray-400 transition-colors hover:text-white"
                   >
                     Cancelar
                   </button>
@@ -589,7 +609,7 @@ function EditForm() {
             </div>
           </div>
         </div>
-        <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden mb-8">
+        <div className="overflow-hidden rounded-2xl bg-[#15161d]">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -600,7 +620,7 @@ function EditForm() {
             <span className="text-[9px] text-gray-500">{blocks.length} bloco{blocks.length !== 1 ? "s" : ""}</span>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {blocks.length === 0 ? (
               <div className="text-center py-16 text-gray-500 font-sans border border-dashed border-brand-orange-muted/10 rounded-xl">
                 <p className="mb-4">Nenhum bloco ainda.</p>
@@ -624,7 +644,7 @@ function EditForm() {
                         <button
                           onClick={() => moveBlock(index, "up")}
                           disabled={index === 0}
-                          className="p-1.5 rounded bg-card-slate hover:bg-brand-orange/10 hover:text-brand-orange text-gray-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-card-slate text-gray-400 transition-colors hover:bg-brand-orange/10 hover:text-brand-orange disabled:cursor-not-allowed disabled:opacity-20"
                           title="Mover para cima"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
@@ -632,14 +652,14 @@ function EditForm() {
                         <button
                           onClick={() => moveBlock(index, "down")}
                           disabled={index === blocks.length - 1}
-                          className="p-1.5 rounded bg-card-slate hover:bg-brand-orange/10 hover:text-brand-orange text-gray-400 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-card-slate text-gray-400 transition-colors hover:bg-brand-orange/10 hover:text-brand-orange disabled:cursor-not-allowed disabled:opacity-20"
                           title="Mover para baixo"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </button>
                         <button
                           onClick={() => removeBlock(block.id)}
-                          className="p-1.5 rounded bg-card-slate text-red-400/80 hover:text-red-400 hover:bg-red-500/15 cursor-pointer transition-colors"
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-card-slate text-red-300/80 transition-colors hover:bg-red-500/15 hover:text-red-200"
                           title="Excluir Bloco"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -690,7 +710,7 @@ function EditForm() {
                             <button
                               type="button"
                               onClick={() => toggleAiPrompt(block.id, block.alt)}
-                              className="text-[10px] text-accent-blue hover:text-white border border-accent-blue/30 px-3 py-1.5 rounded-lg hover:bg-accent-blue/10 transition-all cursor-pointer flex items-center gap-1.5"
+                              className="flex min-h-11 items-center gap-1.5 rounded-lg border border-accent-blue/30 px-3 py-1.5 text-[10px] text-accent-blue transition-all hover:bg-accent-blue/10 hover:text-white"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -715,7 +735,7 @@ function EditForm() {
                                   type="button"
                                   onClick={() => generateImage(block.id)}
                                   disabled={aiLoading === block.id || !aiPrompts[block.id]?.trim()}
-                                  className="bg-accent-blue hover:bg-accent-blue/80 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                  className="flex min-h-11 items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-xs font-bold text-white transition-all hover:bg-accent-blue/80 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {aiLoading === block.id ? (
                                     <>
@@ -729,7 +749,7 @@ function EditForm() {
                                 <button
                                   type="button"
                                   onClick={() => setAiPromptBlock(null)}
-                                  className="text-[10px] text-gray-400 hover:text-white border border-white/10 px-3 py-2 rounded-lg transition-colors cursor-pointer"
+                                  className="min-h-11 rounded-lg border border-white/10 px-3 py-2 text-[10px] text-gray-400 transition-colors hover:text-white"
                                 >
                                   Cancelar
                                 </button>
@@ -770,38 +790,75 @@ function EditForm() {
             </div>
           </div>
         </div>
-        <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl overflow-hidden">
+          </div>
+
+          <aside className="space-y-6 xl:sticky xl:top-28">
+            <section aria-labelledby="editor-checklist-title" className="rounded-2xl bg-[#15161d] p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h2 id="editor-checklist-title" className="font-heading text-lg font-extrabold text-white">Checklist editorial</h2>
+                <span className="text-xs font-bold text-brand-orange">
+                  {completedChecklistItems}/{editorialChecklist.length}
+                </span>
+              </div>
+              <div className="mt-4 space-y-3">
+                {editorialChecklist.map((item) => (
+                  <div key={item.label} className="flex items-start gap-3">
+                    {item.complete ? (
+                      <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[11px] font-black text-emerald-300">
+                        ✓
+                      </span>
+                    ) : (
+                      <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[11px] font-black text-gray-600">
+                        ·
+                      </span>
+                    )}
+                    <span className={`text-xs leading-5 ${item.complete ? "text-gray-300" : "text-gray-500"}`}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className={`mt-5 rounded-xl p-3 text-xs leading-5 ${
+                publishingIssues.length === 0
+                  ? "bg-emerald-500/10 text-emerald-200"
+                  : "bg-amber-500/10 text-amber-200"
+              }`}>
+                {publishingIssues.length === 0
+                  ? "A validação técnica não encontrou bloqueios para publicação."
+                  : `${publishingIssues.length} bloqueio${publishingIssues.length === 1 ? "" : "s"} técnico${publishingIssues.length === 1 ? "" : "s"} ainda precisa${publishingIssues.length === 1 ? "" : "m"} de correção.`}
+              </div>
+            </section>
+
+        <div className="overflow-hidden rounded-2xl bg-[#15161d]">
           <div className="border-b border-brand-orange-muted/10 bg-card-slate/30 px-6 py-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-orange flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Ações
+              Publicação
             </h2>
           </div>
-          <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="flex flex-col gap-2 p-4 sm:p-5">
             {publishedAt ? (
               <>
                 <button
                   onClick={() => handleSave(true, false)}
                   disabled={isSaving}
-                  className="flex-1 bg-card-slate/80 hover:bg-card-slate text-white font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg border border-brand-orange-muted/30 hover:border-brand-orange/40 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center flex items-center justify-center gap-1.5"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white/[0.07] px-4 text-sm font-bold text-white transition-colors hover:bg-white/[0.11] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {isSaving ? "Salvando..." : "💾 Salvar (Manter Data)"}
+                  {isSaving ? "Salvando..." : "Salvar sem republicar"}
                 </button>
                 <button
                   onClick={() => handleSave(true, true)}
                   disabled={isSaving}
-                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="flex min-h-11 w-full items-center justify-center rounded-xl bg-brand-orange px-4 text-sm font-bold text-white transition-colors hover:bg-[#ff7122] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {isSaving ? "Republicando..." : "🚀 Republicar"}
+                  {isSaving ? "Republicando..." : "Republicar com nova data"}
                 </button>
                 <button
                   onClick={() => handleSave(false, false)}
                   disabled={isSaving}
-                  className="px-3 sm:px-4 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-bold py-2.5 sm:py-3 rounded-lg border border-yellow-500/20 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-xs text-center whitespace-nowrap"
+                  className="min-h-11 w-full rounded-xl px-4 text-sm font-bold text-amber-300 transition-colors hover:bg-amber-500/10 disabled:cursor-wait disabled:opacity-50"
                 >
-                  {isSaving ? "Salvando..." : "📦 Rascunho"}
+                  {isSaving ? "Salvando..." : "Retirar do ar e salvar"}
                 </button>
               </>
             ) : (
@@ -809,16 +866,16 @@ function EditForm() {
                 <button
                   onClick={() => handleSave(true, true)}
                   disabled={isSaving}
-                  className="flex-1 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-2.5 sm:py-3 rounded-lg shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center whitespace-nowrap"
+                  className="min-h-11 w-full rounded-xl bg-brand-orange px-4 text-sm font-bold text-white transition-colors hover:bg-[#ff7122] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {isSaving ? "Publicando..." : "🚀 Publicar"}
+                  {isSaving ? "Publicando..." : "Publicar matéria"}
                 </button>
                 <button
                   onClick={() => handleSave(false, false)}
                   disabled={isSaving}
-                  className="flex-1 bg-card-slate/60 hover:bg-card-slate text-gray-300 font-bold py-2.5 sm:py-3 rounded-lg border border-brand-orange-muted/10 hover:border-brand-orange/20 transition-all cursor-pointer disabled:opacity-50 text-xs sm:text-sm text-center whitespace-nowrap"
+                  className="min-h-11 w-full rounded-xl bg-white/[0.07] px-4 text-sm font-bold text-gray-200 transition-colors hover:bg-white/[0.11] disabled:cursor-wait disabled:opacity-50"
                 >
-                  {isSaving ? "Salvando..." : "💾 Rascunho"}
+                  {isSaving ? "Salvando..." : "Salvar como rascunho"}
                 </button>
               </>
             )}
@@ -827,27 +884,36 @@ function EditForm() {
               <button
                 onClick={handleDuplicate}
                 disabled={isSaving}
-                className="px-3 sm:px-5 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 font-bold py-2.5 sm:py-3 rounded-lg border border-purple-600/20 hover:border-purple-600/40 transition-all cursor-pointer disabled:opacity-50 text-[10px] sm:text-sm text-center whitespace-nowrap"
+                className="min-h-11 w-full rounded-xl px-4 text-sm font-bold text-violet-300 transition-colors hover:bg-violet-500/10 disabled:cursor-wait disabled:opacity-50"
               >
-                📋 <span className="hidden xs:inline">Duplicar</span>
+                Duplicar como rascunho
               </button>
             )}
           </div>
         </div>
-      </main>
+          </aside>
+        </div>
       {showPreview && (
-        <div className="fixed inset-0 z-50 bg-background-void/95 backdrop-blur-sm overflow-y-auto">
+        <div
+          ref={previewDialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="preview-title"
+          tabIndex={-1}
+          className="fixed inset-0 z-50 overflow-y-auto bg-background-void/95 backdrop-blur-sm"
+        >
           <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
             <div className="flex items-center justify-between mb-4 sm:mb-6 sticky top-0 bg-background-void/90 backdrop-blur-md py-2 sm:py-3 z-10 border-b border-brand-orange-muted/10">
-              <h2 className="text-xs sm:text-sm font-mono font-bold text-brand-orange uppercase tracking-wider flex items-center gap-2">
-                👁️ Preview
+              <h2 id="preview-title" className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-orange sm:text-sm">
+                Pré-visualização
                 {postId && <span className="text-[8px] sm:text-[9px] text-gray-500 font-normal">(ID: {postId.slice(0, 8)}…)</span>}
               </h2>
               <button
+                type="button"
                 onClick={() => setShowPreview(false)}
-                className="text-[10px] sm:text-xs text-gray-400 hover:text-white border border-gray-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="min-h-11 rounded-xl px-3 text-xs text-gray-400 transition-colors hover:bg-white/[0.06] hover:text-white"
               >
-                ✕ Fechar
+                Fechar
               </button>
             </div>
 
@@ -908,7 +974,7 @@ function EditForm() {
           </div>
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }
 

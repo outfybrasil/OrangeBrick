@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AttachedArticle } from "@/lib/types/community";
 import { Icon } from "@/components/ui/Icon";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 interface ComposeBrickModalProps {
   isOpen: boolean;
@@ -16,70 +17,87 @@ const PLATFORM_OPTIONS = ["[PS5]", "[XSX]", "[SWITCH 2]", "[PC]", "[MOBILE]"];
 export function ComposeBrickModal({ isOpen, onClose, onPublish, initialArticle }: ComposeBrickModalProps) {
   const [content, setContent] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [mediaUrl, setMediaUrl] = useState("");
-  const [showMediaInput, setShowMediaInput] = useState(false);
   const [attachedArticle, setAttachedArticle] = useState<AttachedArticle | null>(initialArticle || null);
+  const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
+  const charCount = content.length;
+  const isPublishDisabled = content.trim().length === 0 || charCount > 280;
 
   if (!isOpen) return null;
 
-  const charCount = content.length;
-  const isOverLimit = charCount > 280;
-  const isPublishDisabled = content.trim().length === 0 || isOverLimit;
-
-  const handlePublish = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePublish = (event: React.FormEvent) => {
+    event.preventDefault();
     if (isPublishDisabled) return;
 
-    onPublish(content.trim(), selectedTag || undefined, attachedArticle || undefined, mediaUrl.trim() || undefined);
+    onPublish(content.trim(), selectedTag || undefined, attachedArticle || undefined);
     setContent("");
     setSelectedTag(null);
-    setMediaUrl("");
     setAttachedArticle(null);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background-void/80 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-lg bg-card-slate border border-brand-orange-muted/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-        <div className="flex items-center justify-between pb-4 border-b border-brand-orange-muted/10 mb-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background-void/90 px-3 py-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="compose-brick-title"
+        tabIndex={-1}
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-[#191b21] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+      >
+        <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-5 w-5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            <h3 className="font-heading text-lg font-bold text-white uppercase tracking-wider">
-              Criar Novo Brick
-            </h3>
+            <h2 id="compose-brick-title" className="font-heading text-lg font-bold text-white">
+              Criar novo Brick
+            </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-card-slate/80 transition-colors"
+            aria-label="Fechar criação de Brick"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
             <Icon name="close" size={18} />
           </button>
         </div>
 
-        <form onSubmit={handlePublish} className="space-y-4">
+        <form onSubmit={handlePublish} className="space-y-4 sm:space-y-5">
           <div>
+            <label htmlFor="brick-content" className="sr-only">
+              Texto do Brick
+            </label>
             <textarea
+              id="brick-content"
               rows={4}
+              maxLength={280}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="O que você está achando desse anúncio ou jogo? Solte o verbo no Brickboard..."
-              className="w-full bg-background-void border border-brand-orange-muted/15 rounded-xl p-3.5 text-white placeholder-gray-500 font-body text-sm outline-none focus:border-brand-orange/50 transition-colors resize-none"
+              onChange={(event) => setContent(event.target.value)}
+              placeholder="Qual é a sua leitura sobre esse anúncio ou jogo?"
+              aria-describedby="brick-guidance brick-count"
+              className="w-full resize-none rounded-xl border border-white/10 bg-background-void p-3.5 text-sm text-white outline-none transition-colors placeholder:text-[#777982] focus:border-brand-orange/60 focus-visible:outline-2 focus-visible:outline-brand-orange/30"
             />
-            <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
-              <span className="text-gray-500">Seja respeitoso e evite spoilers sem aviso.</span>
-              <span className={isOverLimit ? "text-red-400 font-bold" : "text-gray-400"}>
+            <div className="mt-2 flex items-start justify-between gap-4 text-[11px]">
+              <span id="brick-guidance" className="leading-5 text-[#9698a1]">
+                Debate firme, ataque pessoal não. Avise antes de spoilers.
+              </span>
+              <span id="brick-count" className="shrink-0 text-[#aeb0b8]">
                 {charCount}/280
               </span>
             </div>
           </div>
 
-          {/* SELETOR DE PLATAFORMA */}
-          <div>
-            <label className="block text-[11px] font-subtitle font-bold text-gray-400 uppercase tracking-wider mb-2">
-              Plataforma / Tag (Opcional):
-            </label>
+          <fieldset>
+            <legend className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#aeb0b8]">
+              Plataforma opcional
+            </legend>
             <div className="flex flex-wrap gap-2">
               {PLATFORM_OPTIONS.map((tag) => {
                 const isSelected = selectedTag === tag;
@@ -87,11 +105,12 @@ export function ComposeBrickModal({ isOpen, onClose, onPublish, initialArticle }
                   <button
                     key={tag}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => setSelectedTag(isSelected ? null : tag)}
-                    className={`px-3 py-1 rounded-lg text-xs font-subtitle font-bold border transition-all cursor-pointer ${
+                    className={`min-h-11 rounded-xl border px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brand-orange ${
                       isSelected
-                        ? "bg-brand-orange/20 text-brand-orange border-brand-orange/50 shadow-[0_0_10px_rgba(255,94,0,0.2)]"
-                        : "bg-background-void/60 text-gray-400 border-brand-orange-muted/15 hover:text-white hover:border-brand-orange/30"
+                        ? "border-brand-orange/60 bg-brand-orange/15 text-brand-orange"
+                        : "border-white/10 bg-black/15 text-[#b8bac2] hover:border-white/25 hover:text-white"
                     }`}
                   >
                     {tag}
@@ -99,89 +118,50 @@ export function ComposeBrickModal({ isOpen, onClose, onPublish, initialArticle }
                 );
               })}
             </div>
-          </div>
+          </fieldset>
 
-          {/* MATÉRIA ANEXADA */}
           {attachedArticle && (
-            <div className="relative p-3 rounded-xl bg-background-void/80 border border-brand-orange/30 flex gap-3 items-center">
+            <div className="flex items-center gap-3 rounded-xl border border-brand-orange/30 bg-background-void/80 p-3">
               {attachedArticle.image_url && (
                 <img
                   src={attachedArticle.image_url}
-                  alt={attachedArticle.title}
-                  className="w-16 h-12 rounded-lg object-cover shrink-0"
+                  alt=""
+                  className="h-12 w-16 shrink-0 rounded-lg object-cover"
+                  referrerPolicy="no-referrer"
                 />
               )}
-              <div className="flex-1 min-w-0">
-                <span className="text-[9px] font-subtitle font-bold text-brand-orange uppercase tracking-wider">
-                  Matéria Anexada
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
+                  Matéria anexada
                 </span>
-                <h4 className="text-xs font-subtitle font-bold text-white line-clamp-1">
-                  {attachedArticle.title}
-                </h4>
+                <p className="line-clamp-1 text-xs font-bold text-white">{attachedArticle.title}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setAttachedArticle(null)}
-                className="text-gray-500 hover:text-red-400 text-xs p-1"
+                aria-label="Remover matéria anexada"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white"
               >
-                ✕
+                ×
               </button>
             </div>
           )}
 
-          {/* ANEXO DE IMAGEM */}
-          {showMediaInput && (
-            <div className="space-y-2">
-              <input
-                type="url"
-                value={mediaUrl}
-                onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="URL da Imagem ou Screenshot (https://...)"
-                className="w-full bg-background-void border border-brand-orange-muted/15 rounded-xl px-3.5 py-2 text-white placeholder-gray-500 font-body text-xs outline-none focus:border-brand-orange/50"
-              />
-              {mediaUrl.trim() && (
-                <div className="rounded-xl overflow-hidden border border-brand-orange-muted/20 bg-background-void/90 p-1 max-h-48 flex justify-center items-center">
-                  <img
-                    src={mediaUrl}
-                    alt="Preview da imagem"
-                    className="max-h-44 w-auto object-contain rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between pt-3 border-t border-brand-orange-muted/10">
+          <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-4 sm:flex sm:items-center sm:justify-end">
             <button
               type="button"
-              onClick={() => setShowMediaInput(!showMediaInput)}
-              className="flex items-center gap-1.5 text-xs font-subtitle text-gray-400 hover:text-brand-orange transition-colors"
+              onClick={onClose}
+              className="min-h-11 rounded-xl px-4 text-xs font-semibold text-[#b8bac2] transition-colors hover:bg-white/5 hover:text-white"
             >
-              <svg className="w-4 h-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>{showMediaInput ? "Remover Imagem" : "Adicionar Imagem"}</span>
+              Cancelar
             </button>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 rounded-xl text-xs font-subtitle font-semibold text-gray-400 hover:text-white transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={isPublishDisabled}
-                className="px-5 py-2 rounded-xl bg-brand-orange hover:bg-brand-orange/90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-subtitle text-xs font-bold uppercase tracking-wider shadow-lg transition-all"
-              >
-                Publicar Brick
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isPublishDisabled}
+              className="min-h-11 rounded-xl bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-[#e95500] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Publicar Brick
+            </button>
           </div>
         </form>
       </div>

@@ -5,15 +5,10 @@ interface GamerBadgesProps {
   postCount?: number;
   reactionsCount?: number;
   commentsCount?: number;
+  isOfficial?: boolean;
 }
 
-export function GamerBadges({ nickname, postCount = 0, reactionsCount = 0, commentsCount = 0 }: GamerBadgesProps) {
-  const lower = nickname.toLowerCase().trim();
-  const isOfficial =
-    lower === "orange brick" ||
-    lower === "orangebrick" ||
-    lower === "orange_brick";
-
+export function GamerBadges({ postCount = 0, reactionsCount = 0, commentsCount = 0, isOfficial = false }: GamerBadgesProps) {
   const badges = [];
 
   if (isOfficial) {

@@ -168,8 +168,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 pb-3 border-b border-brand-orange/30">
             <span className="w-2.5 h-6 bg-brand-orange rounded-full shadow-[0_0_12px_#FF5E00]" />
-            <h3 className="text-base sm:text-lg font-heading font-black text-white uppercase tracking-wider">
-              ÚLTIMAS <span className="text-brand-orange">NOTÍCIAS</span>
+            <h3 className="text-base font-heading font-bold text-white sm:text-lg">
+              Últimas <span className="text-brand-orange">notícias</span>
             </h3>
           </div>
 
@@ -213,29 +213,29 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   const lowerPosts = displayPosts.slice(4);
 
   return (
-    <div className="space-y-10">
+    <div className="min-w-0 space-y-8 sm:space-y-10">
       {renderHeroSection()}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-3">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-orange/20">
             <div className="flex items-center gap-3">
               <span className="w-3 h-8 bg-brand-orange rounded-full shadow-[0_0_15px_#FF5E00] animate-pulse" />
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-heading font-black text-white uppercase tracking-wider">
+              <h2 className="font-heading text-[clamp(1.5rem,8vw,2.25rem)] font-black leading-tight text-white">
                 {category ? (
                   <>
-                    NOTÍCIAS EM <span className="text-brand-orange">{category}</span>
+                    Notícias em <span className="text-brand-orange">{category}</span>
                   </>
                 ) : (
                   <>
-                    ÚLTIMAS <span className="text-brand-orange">NOTÍCIAS</span>
+                    Últimas <span className="text-brand-orange">notícias</span>
                   </>
                 )}
               </h2>
             </div>
 
             {onSelectCategory && (
-              <nav className="flex items-center gap-1.5 overflow-x-auto scrollbar-none font-subtitle text-xs font-semibold py-1 -mx-1 sm:mx-0 px-1 sm:px-0">
+              <nav className="-mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1 py-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
                 {CATEGORIES.map((cat) => {
                   const isActive = category === cat.value;
                   return (
@@ -243,7 +243,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                       key={cat.label}
                       onClick={() => onSelectCategory(cat.value)}
                       className={`
-                        px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer whitespace-nowrap text-xs font-bold uppercase tracking-wider
+                        min-h-11 shrink-0 rounded-xl border px-3 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap
                         ${
                           isActive
                             ? "bg-brand-orange text-white border-brand-orange shadow-[0_0_15px_rgba(255,94,0,0.35)]"
@@ -262,7 +262,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {topPosts.map((post) => (
               <NewsCard
-                key={`${post.id}:${JSON.stringify(stats[post.id] || EMPTY_STATS)}`}
+                key={post.id}
                 post={post}
                 stats={stats[post.id] || EMPTY_STATS}
               />
@@ -280,10 +280,10 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       {lowerPosts.length > 0 && (
         <div className="space-y-6 pt-4 border-t border-brand-orange-muted/10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lowerPosts.map((post, idx) => {
+            {lowerPosts.map((post) => {
               const cardComponent = (
                 <NewsCard
-                  key={`${post.id}:${JSON.stringify(stats[post.id] || EMPTY_STATS)}`}
+                  key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
                 />

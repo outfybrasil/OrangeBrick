@@ -1,8 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { createServerClient as createSsrServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/types/database";
-import type { RequestCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import type { NextRequest } from "next/server";
 
 export function createServiceRoleClient() {
   return createClient<Database>(

@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
-import { createNotification } from "@/lib/notifications";
 import type { Comment as DBComment, Profile } from "@/lib/types/database";
 
 export interface CommentWithProfile extends DBComment {
@@ -20,7 +19,6 @@ export function useComments(postId: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       const { data, error: fetchError } = await supabase
         .from("comments")
         .select("*")
@@ -31,7 +29,7 @@ export function useComments(postId: string) {
       const rawComments = (data as DBComment[]) || [];
 
       const userIds = [...new Set(rawComments.map((c) => c.user_id))];
-      let profileMap: Record<string, { nickname: string; avatar_url: string | null }> = {};
+      const profileMap: Record<string, { nickname: string; avatar_url: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
@@ -80,30 +78,6 @@ export function useComments(postId: string) {
       if (profile) {
         author_nickname = profile.nickname;
         author_avatar = profile.avatar_url;
-      }
-
-      const { data: commenters } = await supabase
-        .from("comments")
-        .select("user_id")
-        .neq("user_id", user.id)
-        .eq("post_id", postId)
-        .is("parent_id", null);
-
-      const notified = new Set<string>();
-      if (commenters) {
-        for (const c of commenters as { user_id: string }[]) {
-          if (!notified.has(c.user_id)) {
-            notified.add(c.user_id);
-            createNotification({
-              user_id: c.user_id,
-              type: "comment",
-              message: `${author_nickname} comentou em uma matéria que você também comentou`,
-              reference_type: "post",
-              reference_id: postId,
-              actor_id: user.id,
-            });
-          }
-        }
       }
 
       setComments((previous) => [{ ...inserted, author_nickname, author_avatar }, ...previous]);

@@ -1,29 +1,100 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createDataClient } from "@/lib/supabase/client";
-import { invokeFunction } from "@/lib/supabase/functions";
-import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { isAdminUser } from "@/lib/auth";
+import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { invokeFunction } from "@/lib/supabase/functions";
+import { createDataClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 
-const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
-  { value: "__all__", label: "Todas" },
-  { value: "breaking", label: "Breaking" },
-  { value: "industry", label: "Indústria" },
-  { value: "hardware", label: "Hardware" },
-  { value: "review", label: "Review" },
-  { value: "opinion", label: "Opinião" },
-  { value: "modding", label: "Modding" },
-];
+type StatusFilter = "all" | "published" | "draft";
+type SortOrder = "updated" | "created" | "title";
+
+const CATEGORY_LABELS: Record<PostCategory, string> = {
+  breaking: "Breaking",
+  industry: "Indústria",
+  hardware: "Hardware",
+  review: "Review",
+  opinion: "Opinião",
+  modding: "Modding",
+};
+
+const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABELS) as [PostCategory, string][];
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function parseBlocks(body: string): EditorialBlock[] {
+  try {
+    const parsed: unknown = JSON.parse(body);
+    return Array.isArray(parsed) ? parsed as EditorialBlock[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function editorialIssues(post: Post) {
+  return validateEditorialContent({
+    slug: post.slug,
+    title: post.title,
+    summary: post.summary,
+    imageUrl: post.image_url || "",
+    imageAlt: post.image_alt || "",
+    blocks: parseBlocks(post.body),
+  });
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function SearchIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="m14 5 5 5M4 20l4.5-1L19 8.5a2.1 2.1 0 0 0-3-3L5.5 16z" />
+    </svg>
+  );
+}
+
+function ExternalIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M14 5h5v5M19 5l-9 9" />
+      <path d="M18 13v6H5V6h6" />
+    </svg>
+  );
+}
+
+function DeleteIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+    </svg>
+  );
+}
+
+function Spinner() {
+  return <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />;
+}
+
 export default function AdminDashboard() {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -31,17 +102,17 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [togglingPublish, setTogglingPublish] = useState<string | null>(null);
-
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState<PostCategory | "__all__">("__all__");
-  const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
+  const [filterCategory, setFilterCategory] = useState<PostCategory | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<StatusFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("updated");
 
   const checkAdminAndFetchPosts = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!isAdminUser(user)) {
@@ -52,14 +123,13 @@ export default function AdminDashboard() {
       const { data, error: fetchError } = await supabase
         .from("posts")
         .select("*")
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .returns<Post[]>();
 
       if (fetchError) throw fetchError;
-
-      setPosts((data as Post[]) || []);
+      setPosts(data || []);
     } catch (err: unknown) {
-      setError(errorMessage(err, "Erro desconhecido"));
+      setError(errorMessage(err, "Não foi possível carregar as matérias."));
     } finally {
       setIsLoading(false);
     }
@@ -69,403 +139,445 @@ export default function AdminDashboard() {
     queueMicrotask(() => void checkAdminAndFetchPosts());
   }, [checkAdminAndFetchPosts]);
 
-  const filteredPosts = useMemo(() => {
-    return posts.filter((p) => {
-      if (filterCategory !== "__all__" && p.category !== filterCategory) return false;
-      if (filterStatus === "published" && !p.is_published) return false;
-      if (filterStatus === "draft" && p.is_published) return false;
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const matchTitle = p.title.toLowerCase().includes(q);
-        const matchSlug = p.slug.toLowerCase().includes(q);
-        if (!matchTitle && !matchSlug) return false;
-      }
-      return true;
-    });
-  }, [posts, filterCategory, filterStatus, searchQuery]);
+  const postReadiness = useMemo(
+    () => new Map(posts.map((post) => [post.id, editorialIssues(post)])),
+    [posts],
+  );
 
-  const stats = useMemo(() => {
-    const total = posts.length;
-    const published = posts.filter((p) => p.is_published).length;
-    const drafts = total - published;
-    const byCategory = posts.reduce((acc, p) => {
-      acc[p.category] = (acc[p.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    return { total, published, drafts, byCategory };
-  }, [posts]);
+  const drafts = useMemo(() => posts.filter((post) => !post.is_published), [posts]);
+  const readyDrafts = useMemo(
+    () => drafts.filter((post) => (postReadiness.get(post.id)?.length || 0) === 0),
+    [drafts, postReadiness],
+  );
+
+  const filteredPosts = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase("pt-BR");
+    return posts
+      .filter((post) => {
+        if (filterCategory !== "all" && post.category !== filterCategory) return false;
+        if (filterStatus === "published" && !post.is_published) return false;
+        if (filterStatus === "draft" && post.is_published) return false;
+        if (!query) return true;
+        return [post.title, post.slug, post.author_name]
+          .some((value) => value.toLocaleLowerCase("pt-BR").includes(query));
+      })
+      .sort((a, b) => {
+        if (sortOrder === "title") return a.title.localeCompare(b.title, "pt-BR");
+        const key = sortOrder === "created" ? "created_at" : "updated_at";
+        return new Date(b[key]).getTime() - new Date(a[key]).getTime();
+      });
+  }, [filterCategory, filterStatus, posts, searchQuery, sortOrder]);
+
+  const categoryCounts = useMemo(
+    () => posts.reduce<Record<PostCategory, number>>((counts, post) => {
+      counts[post.category] += 1;
+      return counts;
+    }, { breaking: 0, industry: 0, hardware: 0, review: 0, opinion: 0, modding: 0 }),
+    [posts],
+  );
 
   const handleDelete = async (id: string) => {
     try {
+      setDeleting(id);
       setDeleteError(null);
-
-      const { error: deleteError } = await supabase
-        .from("posts")
-        .delete()
-        .eq("id", id);
-
-      if (deleteError) throw deleteError;
-
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      const { error: removeError } = await supabase.from("posts").delete().eq("id", id);
+      if (removeError) throw removeError;
+      setPosts((current) => current.filter((post) => post.id !== id));
       setDeleteConfirm(null);
     } catch (err: unknown) {
-      setDeleteError(errorMessage(err, "Erro ao excluir"));
+      setDeleteError(errorMessage(err, "Não foi possível excluir a matéria. Tente novamente."));
+    } finally {
+      setDeleting(null);
     }
   };
 
   const handleTogglePublish = async (post: Post) => {
+    const nextPublished = !post.is_published;
     setTogglingPublish(post.id);
+    setError(null);
+
     try {
-      const newPublished = !post.is_published;
-      if (newPublished) {
-        let blocks: EditorialBlock[] = [];
-        try {
-          const parsed: unknown = JSON.parse(post.body);
-          if (Array.isArray(parsed)) blocks = parsed as EditorialBlock[];
-        } catch {
-          blocks = [];
-        }
-        const editorialErrors = validateEditorialContent({
-          slug: post.slug,
-          title: post.title,
-          summary: post.summary,
-          imageUrl: post.image_url || "",
-          imageAlt: post.image_alt || "",
-          blocks,
-        });
-        if (editorialErrors.length > 0) {
-          setError(editorialErrors.join(" "));
+      if (nextPublished) {
+        const issues = postReadiness.get(post.id) || [];
+        if (issues.length > 0) {
+          setError(`Revise “${post.title}” antes de publicar: ${issues.join(" ")}`);
           return;
         }
       }
+
+      const nextPublishedAt = nextPublished ? new Date().toISOString() : null;
       const { error: updateError } = await supabase
         .from("posts")
         .update({
-          is_published: newPublished,
-          published_at: newPublished ? new Date().toISOString() : null,
+          is_published: nextPublished,
+          published_at: nextPublishedAt,
           updated_at: new Date().toISOString(),
         })
         .eq("id", post.id);
 
       if (updateError) throw updateError;
 
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === post.id
-            ? { ...p, is_published: newPublished, published_at: newPublished ? new Date().toISOString() : null }
-            : p
-        )
-      );
+      setPosts((current) => current.map((item) =>
+        item.id === post.id
+          ? { ...item, is_published: nextPublished, published_at: nextPublishedAt, updated_at: new Date().toISOString() }
+          : item
+      ));
 
-      if (newPublished) {
-        const payload = { title: post.title, slug: post.slug, category: post.category };
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-          await invokeFunction("send-push-notification", {
-            title: `🧱 ${payload.title}`,
-            body: `Nova matéria publicada na categoria ${payload.category}`,
-            url: `${siteUrl}/posts/${payload.slug}`,
-          }, { accessToken: session.access_token });
+      if (nextPublished) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+            await invokeFunction("send-push-notification", {
+              title: `🧱 ${post.title}`,
+              body: `Nova matéria em ${CATEGORY_LABELS[post.category]}`,
+              url: `${siteUrl}/posts/${post.slug}`,
+            }, { accessToken: session.access_token });
+          }
+        } catch {
+          setError("A matéria foi publicada, mas a notificação push não pôde ser enviada.");
         }
       }
     } catch (err: unknown) {
-      setError(errorMessage(err, "Erro ao alterar publicação"));
+      setError(errorMessage(err, "Não foi possível alterar o status da matéria."));
     } finally {
       setTogglingPublish(null);
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/admin/login");
-  };
-
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-background-void text-mono text-sm">
+      <div className="flex min-h-dvh items-center justify-center bg-background-void px-6 text-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-          <span className="text-gray-400">Verificando sessão e carregando posts...</span>
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />
+          <p className="text-sm text-gray-400">Preparando a mesa de redação...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-background-void text-white font-body text-sm">
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0" />
-            <h1 className="text-sm sm:text-xl font-heading font-extrabold uppercase truncate flex items-center gap-3">
-              <span>Orange<span className="text-brand-orange">_</span>Brick</span>
-              <span className="hidden sm:inline-flex items-center text-[10px] sm:text-xs text-brand-orange font-subtitle font-bold uppercase tracking-wider bg-brand-orange/10 px-2.5 py-1 rounded-lg border border-brand-orange/30 ml-2 shadow-sm">
-                Painel Admin
-              </span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            <button
-              onClick={() => router.push("/")}
-              className="text-[10px] sm:text-xs font-subtitle text-gray-300 hover:text-white cursor-pointer transition-colors bg-card-slate/50 px-2.5 sm:px-3.5 py-1.5 rounded-lg border border-brand-orange-muted/15 whitespace-nowrap flex items-center gap-1.5"
-            >
-              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-              </svg>
-              <span>Ver Site</span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-[10px] sm:text-xs font-subtitle text-red-400 hover:text-red-300 border border-red-500/20 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 cursor-pointer transition-all whitespace-nowrap"
-            >
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-subtitle text-xs">
-            {error}
-          </div>
-        )}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-xl p-5">
-            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Total de Matérias</p>
-            <p className="text-3xl font-heading font-black text-white">{stats.total}</p>
-          </div>
-          <div className="bg-card-slate/40 border border-green-500/20 rounded-xl p-5">
-            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Publicadas no Site</p>
-            <p className="text-3xl font-heading font-black text-green-400">{stats.published}</p>
-          </div>
-          <div className="bg-card-slate/40 border border-yellow-500/20 rounded-xl p-5">
-            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Rascunhos (Em Revisão)</p>
-            <p className="text-3xl font-heading font-black text-yellow-400">{stats.drafts}</p>
-          </div>
-          <div className="bg-card-slate/40 border border-sky-500/20 rounded-xl p-5">
-            <p className="text-[10px] font-subtitle uppercase tracking-wider text-gray-400 mb-1">Categorias Ativas</p>
-            <p className="text-3xl font-heading font-black text-sky-400">{Object.keys(stats.byCategory).length}</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-brand-orange-muted/10">
-          <div className="min-w-0">
-            <h2 className="text-lg sm:text-2xl font-heading font-bold uppercase tracking-tight text-white truncate">Matérias & Rascunhos</h2>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-1 font-body">
-              {posts.length} postagen{posts.length !== 1 ? "ns" : "m"} cadastradas
-              {filterCategory !== "__all__" || filterStatus !== "all" || searchQuery
-                ? ` (${filteredPosts.length} exibidas)`
-                : ""}
-            </p>
-          </div>
-          <button
-            onClick={() => router.push("/admin/edit")}
-            className="shrink-0 bg-brand-orange hover:bg-brand-orange/90 text-white font-subtitle font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-lg hover:shadow-[0_0_20px_rgba(255,94,0,0.35)] transition-all cursor-pointer text-[10px] sm:text-xs uppercase tracking-wider whitespace-nowrap"
-          >
-            + Nova Matéria
+    <AdminShell
+      active="overview"
+      title="Visão geral"
+      description="Acompanhe o que está publicado, encontre pendências e mova cada matéria para a próxima etapa."
+      status={
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          Dados sincronizados
+        </span>
+      }
+      actions={
+        <Link
+          href="/admin/edit"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-brand-orange px-4 text-sm font-bold text-white transition-colors hover:bg-[#ff7122] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">+</span>
+          Nova matéria
+        </Link>
+      }
+      wide
+    >
+      {error && (
+        <div role="alert" className="mb-5 flex items-start justify-between gap-4 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm leading-6 text-red-200">
+          <span>{error}</span>
+          <button type="button" onClick={() => setError(null)} className="min-h-7 shrink-0 font-bold text-red-300 hover:text-white">
+            Fechar
           </button>
         </div>
+      )}
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-          <div className="relative w-full sm:flex-1 sm:max-w-xs">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar título ou slug..."
-              className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 pl-8 sm:pl-9 outline-none focus:border-brand-orange/50 transition-colors text-[11px] sm:text-xs font-body"
-            />
-            <svg className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+      <section aria-label="Resumo editorial" className="mb-6 overflow-hidden rounded-2xl bg-[#15161d]">
+        <div className="grid grid-cols-2 divide-x divide-y divide-white/[0.07] sm:grid-cols-4 sm:divide-y-0">
+          <div className="p-4 sm:p-5">
+            <p className="text-xs font-semibold text-gray-500">Acervo editorial</p>
+            <p className="mt-2 font-heading text-3xl font-black tracking-[-0.03em]">{posts.length}</p>
+            <p className="mt-1 text-xs text-gray-500">matérias cadastradas</p>
           </div>
-
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none font-subtitle text-[10px] sm:text-xs w-full sm:w-auto">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.label}
-                onClick={() => setFilterCategory(cat.value)}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border transition-all duration-200 cursor-pointer whitespace-nowrap ${
-                  filterCategory === cat.value
-                    ? "bg-brand-orange/15 text-brand-orange border-brand-orange/30 font-bold"
-                    : "bg-transparent text-gray-400 border-transparent hover:border-brand-orange-muted/20 hover:bg-card-slate/30"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          <div className="p-4 sm:p-5">
+            <p className="text-xs font-semibold text-gray-500">No ar</p>
+            <p className="mt-2 font-heading text-3xl font-black tracking-[-0.03em] text-emerald-300">
+              {posts.length - drafts.length}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">visíveis no site</p>
           </div>
-
-          <div className="flex items-center gap-1 bg-card-slate/40 border border-brand-orange-muted/10 rounded-lg p-0.5 shrink-0 font-subtitle text-[10px] sm:text-xs">
-            {(["all", "published", "draft"] as const).map((s) => {
-              const label = s === "all" ? "Tudo" : s === "published" ? "Publicados" : "Rascunhos";
-              return (
-                <button
-                  key={s}
-                  onClick={() => setFilterStatus(s)}
-                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
-                    filterStatus === s
-                      ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/30"
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+          <div className="p-4 sm:p-5">
+            <p className="text-xs font-semibold text-gray-500">Em rascunho</p>
+            <p className="mt-2 font-heading text-3xl font-black tracking-[-0.03em] text-amber-300">{drafts.length}</p>
+            <p className="mt-1 text-xs text-gray-500">aguardando revisão</p>
+          </div>
+          <div className="p-4 sm:p-5">
+            <p className="text-xs font-semibold text-gray-500">Prontas</p>
+            <p className="mt-2 font-heading text-3xl font-black tracking-[-0.03em] text-brand-orange">{readyDrafts.length}</p>
+            <p className="mt-1 text-xs text-gray-500">sem pendências técnicas</p>
           </div>
         </div>
+      </section>
 
-        {filteredPosts.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-brand-orange-muted/20 rounded-xl font-subtitle">
-            <p className="text-gray-400 mb-4">
-              {posts.length === 0
-                ? "Nenhuma postagem encontrada."
-                : "Nenhuma postagem corresponde aos filtros atuais."}
-            </p>
-            {posts.length === 0 && (
-              <button
-                onClick={() => router.push("/admin/edit")}
-                className="text-xs font-subtitle font-bold text-brand-orange hover:text-white border border-brand-orange/30 px-5 py-2.5 rounded-xl hover:bg-brand-orange/10 transition-colors"
-              >
-                Escrever primeira matéria
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="bg-card-slate/40 border border-brand-orange-muted/10 rounded-2xl overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-brand-orange-muted/10 bg-card-slate/60 text-[10px] sm:text-xs font-subtitle text-gray-400 uppercase tracking-wider">
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold w-12 sm:w-16">Mídia</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold">Título</th>
-                    <th className="hidden sm:table-cell py-3 sm:py-4 px-3 sm:px-6 font-bold">Categoria</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold">Status</th>
-                    <th className="hidden sm:table-cell py-3 sm:py-4 px-3 sm:px-6 font-bold">Data</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 font-bold text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-orange-muted/5 font-body">
-                  {filteredPosts.map((post) => (
-                    <tr
-                      key={post.id}
-                      className="hover:bg-card-slate/30 transition-colors"
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="min-w-0" aria-labelledby="content-queue-title">
+          <div className="rounded-2xl bg-[#15161d]">
+            <div className="border-b border-white/[0.07] p-4 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 id="content-queue-title" className="font-heading text-xl font-extrabold">Fila editorial</h2>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {filteredPosts.length} de {posts.length} matérias
+                  </p>
+                </div>
+                <div role="group" aria-label="Filtrar por status" className="grid grid-cols-3 rounded-xl bg-background-void p-1">
+                  {([
+                    ["all", "Todas"],
+                    ["draft", "Rascunhos"],
+                    ["published", "No ar"],
+                  ] as [StatusFilter, string][]).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setFilterStatus(value)}
+                      aria-pressed={filterStatus === value}
+                      className={`min-h-11 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brand-orange ${
+                        filterStatus === value ? "bg-white/[0.09] text-white" : "text-gray-500 hover:text-white"
+                      }`}
                     >
-                      <td className="py-2 sm:py-3 px-3 sm:px-6">
-                        {post.image_url ? (
-                          <div className="w-10 sm:w-12 h-8 sm:h-9 rounded-lg overflow-hidden border border-brand-orange-muted/10 shrink-0">
-                            <img
-                              src={post.image_url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-10 sm:w-12 h-8 sm:h-9 rounded-lg bg-card-slate flex items-center justify-center border border-brand-orange-muted/5 text-[8px] sm:text-[9px] text-gray-500">
-                            Sem foto
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-6 font-bold text-white max-w-[120px] sm:max-w-sm truncate text-[11px] sm:text-sm">
-                        {post.title}
-                      </td>
-                      <td className="hidden sm:table-cell py-2 sm:py-3 px-3 sm:px-6">
-                        <span className="text-[10px] sm:text-[11px] font-subtitle font-bold border border-brand-orange-muted/20 px-2 sm:px-2.5 py-0.5 rounded-md uppercase bg-brand-orange/5 text-brand-orange">
-                          {post.category}
-                        </span>
-                      </td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-6">
-                        <button
-                          onClick={() => handleTogglePublish(post)}
-                          disabled={togglingPublish === post.id}
-                          className={`inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-subtitle font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg border transition-all cursor-pointer disabled:opacity-50 ${
-                            post.is_published
-                              ? "text-green-400 border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
-                              : "text-yellow-400 border-yellow-500/30 bg-yellow-500/10 hover:bg-yellow-500/20"
-                          }`}
-                        >
-                          {togglingPublish === post.id ? (
-                            <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${post.is_published ? "bg-green-400 animate-pulse" : "bg-yellow-400"}`} />
-                          )}
-                          <span className="hidden xs:inline">{post.is_published ? "Publicado" : "Rascunho"}</span>
-                        </button>
-                      </td>
-                      <td className="hidden sm:table-cell py-2 sm:py-3 px-3 sm:px-6 text-[11px] sm:text-xs text-gray-400 whitespace-nowrap font-subtitle">
-                        {new Date(post.created_at).toLocaleDateString("pt-BR")}
-                      </td>
-                      <td className="py-2 sm:py-3 px-3 sm:px-6 text-right space-x-1.5 sm:space-x-3 whitespace-nowrap font-subtitle text-[10px] sm:text-xs">
-                        <button
-                          onClick={() => window.open(`/posts/${post.slug}`, "_blank")}
-                          className="text-gray-400 hover:text-white cursor-pointer transition-colors p-1"
-                          title="Visualizar no site"
-                        >
-                          <svg className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => router.push(`/admin/edit?id=${post.id}`)}
-                          className="text-brand-orange hover:text-white cursor-pointer font-bold transition-colors p-1"
-                          title="Editar matéria"
-                        >
-                          <svg className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => setDeleteConfirm(post.id)}
-                          className="text-red-400 hover:text-red-300 cursor-pointer font-bold transition-colors p-1"
-                          title="Excluir matéria"
-                        >
-                          <svg className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
+                      {label}
+                    </button>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </main>
+                </div>
+              </div>
 
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4 backdrop-blur-sm">
-          <div className="bg-card-slate border border-brand-orange-muted/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <h3 className="text-base font-bold font-heading text-white mb-2 uppercase">Excluir postagem?</h3>
-            <p className="text-xs font-body text-gray-400 mb-6">Esta ação apagará a matéria permanentemente.</p>
+              <div className="mt-4 grid gap-2 md:grid-cols-[minmax(220px,1fr)_170px_170px]">
+                <label className="relative block">
+                  <span className="sr-only">Buscar matérias</span>
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    <SearchIcon />
+                  </span>
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Título, slug ou autor"
+                    className="min-h-11 w-full rounded-xl border border-white/[0.08] bg-background-void pl-10 pr-3 text-sm text-white outline-none placeholder:text-gray-600 focus:border-brand-orange/60 focus:ring-1 focus:ring-brand-orange/25"
+                  />
+                </label>
+                <label>
+                  <span className="sr-only">Filtrar por categoria</span>
+                  <select
+                    value={filterCategory}
+                    onChange={(event) => setFilterCategory(event.target.value as PostCategory | "all")}
+                    className="min-h-11 w-full rounded-xl border border-white/[0.08] bg-background-void px-3 text-sm text-gray-300 outline-none focus:border-brand-orange/60"
+                  >
+                    <option value="all">Todas as categorias</option>
+                    {CATEGORY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span className="sr-only">Ordenar matérias</span>
+                  <select
+                    value={sortOrder}
+                    onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+                    className="min-h-11 w-full rounded-xl border border-white/[0.08] bg-background-void px-3 text-sm text-gray-300 outline-none focus:border-brand-orange/60"
+                  >
+                    <option value="updated">Atualizadas agora</option>
+                    <option value="created">Criadas agora</option>
+                    <option value="title">Título A–Z</option>
+                  </select>
+                </label>
+              </div>
+            </div>
 
             {deleteError && (
-              <p className="text-xs font-body text-red-400 mb-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <div role="alert" className="border-b border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200 sm:px-5">
                 {deleteError}
-              </p>
+              </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 font-subtitle text-xs">
-              <button
-                onClick={() => { setDeleteConfirm(null); setDeleteError(null); }}
-                className="px-4 py-2 text-gray-300 hover:text-white border border-gray-500/20 rounded-xl transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="px-4 py-2 text-white bg-red-600 hover:bg-red-500 rounded-xl transition-colors cursor-pointer font-bold shadow-md"
-              >
-                Sim, excluir
-              </button>
-            </div>
+            {filteredPosts.length === 0 ? (
+              <div className="px-6 py-16 text-center">
+                <p className="font-heading text-lg font-bold text-white">
+                  {posts.length === 0 ? "A redação ainda está vazia" : "Nenhuma matéria encontrada"}
+                </p>
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-gray-500">
+                  {posts.length === 0
+                    ? "Crie a primeira matéria e salve como rascunho para iniciar o fluxo editorial."
+                    : "Ajuste a busca ou remova um dos filtros para ampliar os resultados."}
+                </p>
+                {posts.length === 0 && (
+                  <Link href="/admin/edit" className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-brand-orange px-4 text-sm font-bold">
+                    Criar primeira matéria
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.07]">
+                {filteredPosts.map((post) => {
+                  const issues = postReadiness.get(post.id) || [];
+                  const isConfirmingDelete = deleteConfirm === post.id;
+                  return (
+                    <article key={post.id} className="p-4 transition-colors hover:bg-white/[0.018] sm:p-5">
+                      <div className="grid min-w-0 gap-4 sm:grid-cols-[96px_minmax(0,1fr)] 2xl:grid-cols-[96px_minmax(0,1fr)_auto] 2xl:items-center">
+                        <div className="aspect-[4/3] overflow-hidden rounded-xl bg-background-void">
+                          {post.image_url ? (
+                            <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center px-2 text-center text-[10px] font-semibold text-gray-600">
+                              Sem capa
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-bold text-brand-orange">{CATEGORY_LABELS[post.category]}</span>
+                            <span className="text-[11px] text-gray-600">•</span>
+                            <span className="text-[11px] text-gray-500">Atualizada em {formatDate(post.updated_at)}</span>
+                          </div>
+                          <h3 className="line-clamp-2 font-heading text-base font-extrabold leading-5 text-white sm:text-lg">
+                            {post.title}
+                          </h3>
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleTogglePublish(post)}
+                              disabled={togglingPublish === post.id}
+                              aria-label={post.is_published ? `Retirar ${post.title} do ar` : `Publicar ${post.title}`}
+                              className={`inline-flex min-h-9 items-center gap-2 rounded-lg px-2.5 text-xs font-bold transition-colors disabled:cursor-wait disabled:opacity-60 ${
+                                post.is_published
+                                  ? "bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/15"
+                                  : "bg-amber-500/10 text-amber-300 hover:bg-amber-500/15"
+                              }`}
+                            >
+                              {togglingPublish === post.id ? <Spinner /> : <span className={`h-1.5 w-1.5 rounded-full ${post.is_published ? "bg-emerald-400" : "bg-amber-400"}`} />}
+                              {post.is_published ? "No ar" : "Rascunho"}
+                            </button>
+                            {!post.is_published && (
+                              <span className={`text-xs ${issues.length === 0 ? "text-emerald-300" : "text-gray-500"}`}>
+                                {issues.length === 0 ? "Pronta para publicar" : `${issues.length} pendência${issues.length === 1 ? "" : "s"}`}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-1.5 sm:col-start-2 2xl:col-start-auto">
+                          <Link
+                            href={`/admin/edit?id=${post.id}`}
+                            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/[0.06] px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-brand-orange"
+                          >
+                            <EditIcon />
+                            Editar
+                          </Link>
+                          {post.is_published && (
+                            <Link
+                              href={`/posts/${post.slug}`}
+                              target="_blank"
+                              aria-label={`Abrir ${post.title} no site`}
+                              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+                            >
+                              <ExternalIcon />
+                            </Link>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDeleteConfirm(post.id);
+                              setDeleteError(null);
+                            }}
+                            aria-label={`Excluir ${post.title}`}
+                            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-red-300/50 transition-colors hover:bg-red-500/10 hover:text-red-200 focus-visible:outline-2 focus-visible:outline-red-400"
+                          >
+                            <DeleteIcon />
+                          </button>
+                        </div>
+                      </div>
+
+                      {isConfirmingDelete && (
+                        <div className="mt-4 rounded-xl bg-red-500/10 p-3 sm:ml-28">
+                          <p className="text-sm font-semibold text-red-100">Excluir esta matéria permanentemente?</p>
+                          <p className="mt-1 text-xs leading-5 text-red-200/70">Essa ação remove o conteúdo do painel e não pode ser desfeita.</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(post.id)}
+                              disabled={deleting === post.id}
+                              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-500 px-3 text-xs font-bold text-white disabled:opacity-60"
+                            >
+                              {deleting === post.id && <Spinner />}
+                              Excluir matéria
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirm(null)}
+                              className="min-h-11 rounded-xl px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.06]"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        </section>
+
+        <aside className="space-y-6">
+          <section aria-labelledby="review-title" className="rounded-2xl bg-[#15161d] p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 id="review-title" className="font-heading text-lg font-extrabold">Próximos passos</h2>
+              <span className="text-xs font-bold text-amber-300">{drafts.length} em revisão</span>
+            </div>
+
+            {drafts.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-sm font-semibold text-white">Fila limpa</p>
+                <p className="mt-1 text-xs leading-5 text-gray-500">Não há rascunhos aguardando trabalho.</p>
+              </div>
+            ) : (
+              <div className="mt-4 divide-y divide-white/[0.07]">
+                {drafts.slice(0, 5).map((post) => {
+                  const issues = postReadiness.get(post.id) || [];
+                  return (
+                    <Link
+                      key={post.id}
+                      href={`/admin/edit?id=${post.id}`}
+                      className="group block py-3 focus-visible:outline-2 focus-visible:outline-brand-orange"
+                    >
+                      <p className="line-clamp-2 text-sm font-bold leading-5 text-gray-200 transition-colors group-hover:text-white">{post.title}</p>
+                      <p className={`mt-1 text-xs ${issues.length === 0 ? "text-emerald-300" : "text-gray-500"}`}>
+                        {issues.length === 0 ? "Pronta para publicação" : `${issues.length} ponto${issues.length === 1 ? "" : "s"} para revisar`}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="categories-title" className="rounded-2xl bg-[#15161d] p-5">
+            <h2 id="categories-title" className="font-heading text-lg font-extrabold">Distribuição</h2>
+            <p className="mt-1 text-xs text-gray-500">Conteúdo por categoria</p>
+            <div className="mt-5 space-y-4">
+              {CATEGORY_OPTIONS.map(([category, label]) => {
+                const count = categoryCounts[category];
+                const width = posts.length === 0 ? 0 : Math.max((count / posts.length) * 100, count > 0 ? 6 : 0);
+                return (
+                  <div key={category}>
+                    <div className="mb-1.5 flex items-center justify-between text-xs">
+                      <span className="font-semibold text-gray-300">{label}</span>
+                      <span className="text-gray-500">{count}</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-background-void">
+                      <div className="h-full rounded-full bg-brand-orange" style={{ width: `${width}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </aside>
+      </div>
+    </AdminShell>
   );
 }

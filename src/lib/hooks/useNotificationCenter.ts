@@ -5,8 +5,6 @@ import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type { AppNotification } from "@/lib/types/database";
 
-const POLL_INTERVAL = 15_000;
-
 export function useNotificationCenter() {
   const { user } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
@@ -22,7 +20,7 @@ export function useNotificationCenter() {
     }
     try {
       setIsLoading(true);
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)
@@ -34,17 +32,14 @@ export function useNotificationCenter() {
       setNotifications(list);
       setUnreadCount(list.filter((n) => !n.is_read).length);
     } catch {
-      // silent
     } finally {
       setIsLoading(false);
     }
   }, [user, supabase]);
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, POLL_INTERVAL);
-
-    if (!user) return () => clearInterval(interval);
+    queueMicrotask(() => void fetchNotifications());
+    if (!user) return;
 
     const channelName = `notifs_${user.id}_${Math.random().toString(36).slice(2, 8)}`;
     const channel = supabase
@@ -76,29 +71,26 @@ export function useNotificationCenter() {
       .subscribe();
 
     return () => {
-      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [fetchNotifications, user, supabase]);
 
   const markAsRead = useCallback(async (id: string) => {
     try {
-      await (supabase as any).from("notifications").update({ is_read: true }).eq("id", id);
+      await supabase.from("notifications").update({ is_read: true }).eq("id", id);
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch {
-      // silent
     }
   }, [supabase]);
 
   const markAllAsRead = useCallback(async () => {
     if (!user) return;
     try {
-      await (supabase as any).from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
+      await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch {
-      // silent
     }
   }, [user, supabase]);
 
