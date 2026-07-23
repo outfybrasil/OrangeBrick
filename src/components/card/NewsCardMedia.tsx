@@ -56,7 +56,7 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
         src={src}
         alt={alt || ""}
         className={`
-          relative z-0 w-full h-full object-contain transform scale-100
+          relative z-0 w-full h-full object-cover transform scale-100
           group-hover:scale-105 transition-transform duration-500 ease-out
           ${isBreaking ? "glitch-img" : ""}
         `}

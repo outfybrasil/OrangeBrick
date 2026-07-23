@@ -21,6 +21,7 @@ function ProfileContent() {
   const { posts, deletePost, sharePost, toggleReaction, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
   const [profileData, setProfileData] = useState<{
+    user_id?: string;
     nickname: string;
     avatar_url: string;
     bio?: string;
@@ -58,7 +59,7 @@ function ProfileContent() {
         if (profileRow) {
           const validProfileAvatar =
             profileRow.avatar_url &&
-            (profileRow.avatar_url.startsWith("http://") || profileRow.avatar_url.startsWith("https://") || profileRow.avatar_url.startsWith("/") || profileRow.avatar_url.startsWith("data:"))
+            (profileRow.avatar_url.startsWith("https://") || profileRow.avatar_url.startsWith("/"))
               ? profileRow.avatar_url
               : null;
 
@@ -68,6 +69,7 @@ function ProfileContent() {
 
           const finalBio = profileRow.bio || "Leitor do Orange Brick e entusiasta de games.";
           setProfileData({
+            user_id: profileRow.user_id,
             nickname: profileRow.nickname,
             avatar_url: finalAvatar,
             bio: finalBio,
@@ -82,7 +84,7 @@ function ProfileContent() {
           const rawAvatar = userPosts[0]?.author_avatar;
           const validPostAvatar =
             rawAvatar &&
-            (rawAvatar.startsWith("http://") || rawAvatar.startsWith("https://") || rawAvatar.startsWith("/") || rawAvatar.startsWith("data:"))
+            (rawAvatar.startsWith("https://") || rawAvatar.startsWith("/"))
               ? rawAvatar
               : null;
 
@@ -122,8 +124,7 @@ function ProfileContent() {
 
   const isProfileOwner =
     user && profileData &&
-    (user.user_metadata?.full_name?.toLowerCase() === profileData.nickname.toLowerCase() ||
-     isOfficialProfile);
+    profileData.user_id === user.id;
 
   const handleSaveProfile = async () => {
     if (!user || !profileData) return;

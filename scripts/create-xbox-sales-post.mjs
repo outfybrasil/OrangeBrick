@@ -18,8 +18,8 @@ const summary = "Em meio à desaceleração global do mercado de consoles, a lin
 const category = "industry";
 const authorName = "Redação";
 const authorTag = "📡 Radar";
-const coverImageUrl = "/images/xbox-sales-surge-2026.png";
-const coverImageAlt = "Console Xbox Series X iluminado por luzes de estúdio em tom laranja e verde";
+const coverImageUrl = "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&w=1400&q=80";
+const coverImageAlt = "Console Xbox Series X iluminado por luzes de estúdio em tom verde e preto";
 
 const editorialBlocks = [
   {
@@ -30,7 +30,7 @@ const editorialBlocks = [
   {
     id: "b2",
     type: "image",
-    url: "/images/xbox-sales-surge-2026.png",
+    url: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&w=1400&q=80",
     alt: "Console Xbox Series X sob iluminação dramática de estúdio de tecnologia",
     caption: "A linha Xbox Series registrou forte alta nas vendas impulsionada pela busca de hardware antes de reajustes."
   },
@@ -42,7 +42,7 @@ const editorialBlocks = [
   {
     id: "b4",
     type: "image",
-    url: "/images/hardware-market-trend-2026.png",
+    url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80",
     alt: "Linha de montagem industrial de componentes eletrônicos e microchips de videogames",
     caption: "A escassez e o custo de semicondutores continuam pressionando toda a indústria de hardware."
   },

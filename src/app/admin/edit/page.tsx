@@ -7,6 +7,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { AUTHOR_TAGS, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory } from "@/lib/types/database";
 import { CATEGORY_CONFIG } from "@/lib/types/database";
 
@@ -102,9 +103,7 @@ function EditForm() {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        const emailOk = user?.email?.toLowerCase() === "orangebrick0@gmail.com";
-        const isAdmin = user?.app_metadata?.is_admin === true;
-        if (!emailOk || !isAdmin) {
+        if (!isAdminUser(user)) {
           router.push("/admin/login");
           return;
         }

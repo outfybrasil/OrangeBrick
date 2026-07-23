@@ -5,7 +5,10 @@ import type { Database } from "@/lib/types/database";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const requestedNext = searchParams.get("next");
+  const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+    ? requestedNext
+    : "/";
 
   if (code) {
     const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = [];

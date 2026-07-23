@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationCenter } from "@/components/ui/NotificationCenter";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { isAdminUser } from "@/lib/auth";
 
 export function UserNav() {
   const { user, profile, signOut, isLoading } = useAuth();
@@ -29,7 +30,7 @@ export function UserNav() {
     );
   }
 
-  const isAdmin = user?.email?.toLowerCase() === "orangebrick0@gmail.com";
+  const isAdmin = isAdminUser(user);
 
   if (!user) {
     return (

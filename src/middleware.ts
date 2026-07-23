@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "orangebrick0@gmail.com";
-
-const ADMIN_ROUTES = ["/admin"];
 const PROTECTED_PREFIXES = ["/admin"];
 
 function isProtected(pathname: string): boolean {
@@ -33,11 +30,7 @@ export async function middleware(request: NextRequest) {
         setAll: (cookies) => {
           for (const { name, value, options } of cookies) {
             request.cookies.set(name, value);
-            response = NextResponse.next({ request });
-            for (const c of cookies) {
-              response.cookies.set(c.name, c.value, c.options);
-            }
-            return;
+            response.cookies.set(name, value, options);
           }
         },
       },
@@ -52,10 +45,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const emailOk = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   const isAdmin = user.app_metadata?.is_admin === true;
 
-  if (!emailOk || !isAdmin) {
+  if (!isAdmin) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);

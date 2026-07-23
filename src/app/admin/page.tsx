@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory } from "@/lib/types/database";
 
 const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
@@ -16,13 +17,6 @@ const CATEGORIES: { value: PostCategory | "__all__"; label: string }[] = [
   { value: "opinion", label: "Opinião" },
   { value: "modding", label: "Modding" },
 ];
-
-function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  if (!user?.email) return false;
-  const emailOk = user.email.toLowerCase() === "orangebrick0@gmail.com";
-  const metadataOk = user.app_metadata?.is_admin === true;
-  return emailOk && metadataOk;
-}
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -50,7 +44,7 @@ export default function AdminDashboard() {
 
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!isAdmin(user)) {
+      if (!isAdminUser(user)) {
         router.push("/admin/login");
         return;
       }

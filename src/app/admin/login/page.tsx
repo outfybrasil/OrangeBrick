@@ -3,13 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-
-function isAdmin(user: import("@supabase/supabase-js").User | null): boolean {
-  if (!user?.email) return false;
-  const emailOk = user.email.toLowerCase() === "orangebrick0@gmail.com";
-  const metadataOk = user.app_metadata?.is_admin === true;
-  return emailOk && metadataOk;
-}
+import { isAdminUser } from "@/lib/auth";
 
 export default function AdminLogin() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -24,7 +18,7 @@ export default function AdminLogin() {
     async function checkUser() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (isAdmin(user)) router.push("/admin");
+        if (isAdminUser(user)) router.push("/admin");
       } catch {
       }
     }
@@ -46,7 +40,7 @@ export default function AdminLogin() {
 
       const { data: { user } } = await supabase.auth.getUser();
 
-      if (!isAdmin(user)) {
+      if (!isAdminUser(user)) {
         await supabase.auth.signOut();
         throw new Error("Não autorizado: Este e-mail não possui privilégios de administrador.");
       }
