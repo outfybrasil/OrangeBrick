@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { resolveAvatarUrl } from "@/lib/avatar";
 
 interface CommentFormProps {
   onSubmit: (content: string) => Promise<void>;
@@ -71,28 +72,21 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
 
   const userDisplayName = profile?.nickname || user.email?.split("@")[0] || "Usuário";
   const userInitials = userDisplayName.substring(0, 2).toUpperCase();
+  const avatarUrl = resolveAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture, userDisplayName);
 
   return (
     <div className="bg-[#15171F] border border-brand-orange-muted/20 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       <div className="flex items-center justify-between text-xs font-subtitle">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-orange to-amber-500 p-[1px] flex items-center justify-center shadow-md">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="w-full h-full rounded-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <div className="w-full h-full rounded-full bg-[#1C1E26] flex items-center justify-center">
-                <span className="font-heading font-bold text-[10px] text-brand-orange">
-                  {userInitials}
-                </span>
-              </div>
-            )}
+            <img
+              src={avatarUrl}
+              alt=""
+              className="w-full h-full rounded-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+              }}
+            />
           </div>
           <span className="text-gray-300">
             Comentando como <strong className="text-white font-bold">{userDisplayName}</strong>

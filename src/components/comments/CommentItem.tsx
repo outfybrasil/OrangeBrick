@@ -7,6 +7,7 @@ import type { CommentWithProfile } from "@/lib/hooks/useComments";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { UserBadge } from "@/components/ui/UserBadge";
+import { resolveAvatarUrl } from "@/lib/avatar";
 
 interface CommentItemProps {
   comment: CommentWithProfile;
@@ -41,22 +42,14 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-brand-orange to-amber-500 p-[1.5px] shadow-md shrink-0 flex items-center justify-center">
-            {comment.author_avatar ? (
-              <img
-                src={comment.author_avatar}
-                alt={comment.author_nickname}
-                className="w-full h-full rounded-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <div className="w-full h-full rounded-full bg-[#1C1E26] flex items-center justify-center">
-                <span className="font-heading font-extrabold text-xs text-brand-orange">
-                  {initials}
-                </span>
-              </div>
-            )}
+            <img
+              src={resolveAvatarUrl(comment.author_avatar, comment.author_nickname)}
+              alt={comment.author_nickname}
+              className="w-full h-full rounded-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+              }}
+            />
           </div>
 
           <div className="min-w-0">

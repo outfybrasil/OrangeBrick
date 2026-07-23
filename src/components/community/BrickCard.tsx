@@ -9,6 +9,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { UserBadge } from "@/components/ui/UserBadge";
+import { resolveAvatarUrl } from "@/lib/avatar";
 
 interface BrickCardProps {
   post: CommunityPost;
@@ -21,15 +22,6 @@ interface BrickCardProps {
   getComments: (postId: string) => Promise<CommunityComment[]>;
 }
 
-function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string): string {
-  const name = (authorName || "").toLowerCase().trim();
-  const isOfficial = name === "orange brick" || name === "orangebrick" || name === "orange_brick";
-  if (isOfficial) return "/logos/Logo Tijolo Quebrado.PNG";
-  if (avatarUrl && (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://") || avatarUrl.startsWith("/") || avatarUrl.startsWith("data:"))) {
-    return avatarUrl;
-  }
-  return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
-}
 
 export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments }: BrickCardProps) {
   const { user, profile } = useAuth();
@@ -227,8 +219,9 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           </div>
           <div className="flex gap-2.5 items-start">
             <img
-              src={post.shared_post.original_author_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"}
+              src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name)}
               alt={post.shared_post.original_author_name}
+              onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
               className="w-7 h-7 rounded-full object-cover border border-emerald-500/30 shrink-0 mt-0.5"
             />
             <div className="flex-1 min-w-0">
@@ -339,8 +332,9 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                     <div className="flex items-center justify-between gap-2">
                       <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="flex items-center gap-2 min-w-0 group/cauthor">
                         <img
-                          src={c.author_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"}
+                          src={resolveAvatarUrl(c.author_avatar, c.author_name)}
                           alt={c.author_name}
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
                           className="w-6 h-6 rounded-full object-cover border border-brand-orange/20 shrink-0 group-hover/cauthor:scale-105 transition-transform"
                         />
                         <span className="font-heading font-bold text-white truncate group-hover/cauthor:text-brand-orange transition-colors">{c.author_name}</span>
