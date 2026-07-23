@@ -46,9 +46,6 @@ function ProfileContent() {
       setIsLoading(true);
       try {
         const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-        const defaultAvatar = isOfficialProfile
-          ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
-          : (googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80");
 
         const { data } = await supabase
           .from("profiles")
@@ -59,7 +56,16 @@ function ProfileContent() {
         const profileRow = data as Profile | null;
 
         if (profileRow) {
-          const finalAvatar = profileRow.avatar_url || defaultAvatar;
+          const validProfileAvatar =
+            profileRow.avatar_url &&
+            (profileRow.avatar_url.startsWith("http://") || profileRow.avatar_url.startsWith("https://") || profileRow.avatar_url.startsWith("/") || profileRow.avatar_url.startsWith("data:"))
+              ? profileRow.avatar_url
+              : null;
+
+          const finalAvatar = isOfficialProfile
+            ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
+            : (validProfileAvatar || googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80");
+
           const finalBio = profileRow.bio || "Leitor do Orange Brick e entusiasta de games.";
           setProfileData({
             nickname: profileRow.nickname,
@@ -67,13 +73,22 @@ function ProfileContent() {
             bio: finalBio,
             created_at: profileRow.created_at,
           });
-          setEditAvatarUrl(profileRow.avatar_url || "");
+          setEditAvatarUrl(finalAvatar);
           setEditBio(profileRow.bio || "");
         } else {
           const userPosts = posts.filter(
             (p) => p.author_name.toLowerCase().trim() === decodedNickname.toLowerCase().trim()
           );
-          const avatar = userPosts[0]?.author_avatar || defaultAvatar;
+          const rawAvatar = userPosts[0]?.author_avatar;
+          const validPostAvatar =
+            rawAvatar &&
+            (rawAvatar.startsWith("http://") || rawAvatar.startsWith("https://") || rawAvatar.startsWith("/") || rawAvatar.startsWith("data:"))
+              ? rawAvatar
+              : null;
+
+          const avatar = isOfficialProfile
+            ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
+            : (validPostAvatar || googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80");
 
           setProfileData({
             nickname: decodedNickname,

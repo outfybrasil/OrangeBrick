@@ -51,7 +51,14 @@ export function UserNav() {
     );
   }
 
-  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url;
+  const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+  const validProfileAvatar =
+    profile?.avatar_url &&
+    (profile.avatar_url.startsWith("http://") || profile.avatar_url.startsWith("https://") || profile.avatar_url.startsWith("/") || profile.avatar_url.startsWith("data:"))
+      ? profile.avatar_url
+      : null;
+
+  const avatarUrl = validProfileAvatar || googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
   const displayName = profile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || "Leitor";
 
   return (

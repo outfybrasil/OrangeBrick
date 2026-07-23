@@ -22,42 +22,52 @@ export function useCommunityFeed() {
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
 
-      let userReactions: Record<string, ReactionType> = {};
+      const userReactions: Record<string, ReactionType> = {};
       if (user) {
-        const { data: reactions } = await supabase
-          .from("community_reactions")
-          .select("*")
-          .eq("user_id", user.id);
-        if (reactions) {
-          for (const r of reactions as CommunityReactionRow[]) {
-            userReactions[r.post_id] = r.reaction_type;
+        try {
+          const { data: reactions } = await supabase
+            .from("community_reactions")
+            .select("*")
+            .eq("user_id", user.id);
+          if (reactions) {
+            for (const r of reactions as CommunityReactionRow[]) {
+              userReactions[r.post_id] = r.reaction_type;
+            }
           }
+        } catch {
+          // Fallback silencioso
         }
       }
-
-      const { data: allReactions } = await supabase
-        .from("community_reactions")
-        .select("*");
 
       const reactionMap: Record<string, Record<ReactionType, number>> = {};
-      if (allReactions) {
-        for (const r of allReactions as CommunityReactionRow[]) {
-          if (!reactionMap[r.post_id]) {
-            reactionMap[r.post_id] = { hype: 0, flop: 0, salty: 0 };
+      try {
+        const { data: allReactions } = await supabase
+          .from("community_reactions")
+          .select("*");
+        if (allReactions) {
+          for (const r of allReactions as CommunityReactionRow[]) {
+            if (!reactionMap[r.post_id]) {
+              reactionMap[r.post_id] = { hype: 0, flop: 0, salty: 0 };
+            }
+            reactionMap[r.post_id][r.reaction_type]++;
           }
-          reactionMap[r.post_id][r.reaction_type]++;
         }
+      } catch {
+        // Fallback silencioso
       }
 
-      const { data: allComments } = await supabase
-        .from("community_comments")
-        .select("*");
-
       const commentCountMap: Record<string, number> = {};
-      if (allComments) {
-        for (const c of allComments as CommunityCommentRow[]) {
-          commentCountMap[c.post_id] = (commentCountMap[c.post_id] || 0) + 1;
+      try {
+        const { data: allComments } = await supabase
+          .from("community_comments")
+          .select("*");
+        if (allComments) {
+          for (const c of allComments as CommunityCommentRow[]) {
+            commentCountMap[c.post_id] = (commentCountMap[c.post_id] || 0) + 1;
+          }
         }
+      } catch {
+        // Fallback silencioso
       }
 
       const shareCountMap: Record<string, number> = {};
