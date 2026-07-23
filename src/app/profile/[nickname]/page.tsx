@@ -8,8 +8,8 @@ import { UserBadge } from "@/components/ui/UserBadge";
 import { GamerBadges } from "@/components/community/GamerBadges";
 import { BrickCard } from "@/components/community/BrickCard";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { Footer } from "@/components/ui/Footer";
-
 import type { Profile } from "@/lib/types/database";
 
 function ProfileContent() {
