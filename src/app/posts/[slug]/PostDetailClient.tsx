@@ -187,7 +187,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
           <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-heading font-black text-white uppercase leading-tight tracking-tight">
             {post.title}
           </h1>
-          <p className="text-sm xs:text-base text-gray-400 font-sans border-l-2 border-brand-orange pl-3 sm:pl-4 py-1 leading-relaxed">
+          <p className="text-sm xs:text-base text-gray-200 font-body border-l-2 border-brand-orange pl-3 sm:pl-4 py-1 leading-relaxed">
             {post.summary}
           </p>
 

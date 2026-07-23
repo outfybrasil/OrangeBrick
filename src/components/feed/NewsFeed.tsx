@@ -151,16 +151,16 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               <Timer date={heroPost.published_at ?? ""} />
             </div>
 
-            <h2 className="font-mono text-base sm:text-xl md:text-3xl font-bold text-white leading-tight group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
+            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
               {heroPost.title}
             </h2>
 
-            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-300 line-clamp-2 mt-0.5 sm:mt-1 font-sans">
+            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-200 line-clamp-2 mt-0.5 sm:mt-1 font-body leading-relaxed">
               {heroPost.summary}
             </p>
 
-            <div className="mt-1 sm:mt-2 text-[9px] sm:text-[10px] font-mono text-gray-400">
-              Por <span className="text-white font-semibold">{heroPost.author_name}</span>
+            <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs font-subtitle text-gray-400">
+              Por <span className="text-white font-bold">{heroPost.author_name}</span>
             </div>
           </div>
         </Link>
