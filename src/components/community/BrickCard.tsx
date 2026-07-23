@@ -130,7 +130,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             src={avatarSrc}
             alt={post.author_name}
             onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-brand-orange/30 shrink-0 group-hover/author:scale-105 transition-transform"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-brand-orange/30 shrink-0 aspect-square group-hover/author:scale-105 transition-transform"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -222,7 +222,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name)}
               alt={post.shared_post.original_author_name}
               onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
-              className="w-7 h-7 rounded-full object-cover border border-emerald-500/30 shrink-0 mt-0.5"
+              className="w-7 h-7 rounded-full object-cover border border-emerald-500/30 shrink-0 aspect-square mt-0.5"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -335,7 +335,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                           src={resolveAvatarUrl(c.author_avatar, c.author_name)}
                           alt={c.author_name}
                           onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
-                          className="w-6 h-6 rounded-full object-cover border border-brand-orange/20 shrink-0 group-hover/cauthor:scale-105 transition-transform"
+                          className="w-6 h-6 rounded-full object-cover border border-brand-orange/20 shrink-0 aspect-square group-hover/cauthor:scale-105 transition-transform"
                         />
                         <span className="font-heading font-bold text-white truncate group-hover/cauthor:text-brand-orange transition-colors">{c.author_name}</span>
                         <UserBadge nickname={c.author_name} />

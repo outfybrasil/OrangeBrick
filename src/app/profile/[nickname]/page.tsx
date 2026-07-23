@@ -192,7 +192,7 @@ function ProfileContent() {
               <img
                 src={profileData?.avatar_url}
                 alt={profileData?.nickname}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-orange/40 shadow-xl shrink-0"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-orange/40 shadow-xl shrink-0 aspect-square"
               />
               {isProfileOwner && (
                 <button

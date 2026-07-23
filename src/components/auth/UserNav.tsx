@@ -82,7 +82,7 @@ export function UserNav() {
           <img
             src={avatarUrl}
             alt={displayName}
-            className="w-7 h-7 rounded-full object-cover border border-brand-orange/30"
+            className="w-7 h-7 rounded-full object-cover border border-brand-orange/30 shrink-0 aspect-square"
           />
         ) : (
           <div className="w-7 h-7 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold text-xs">

@@ -23,5 +23,6 @@ export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string 
     return raw;
   }
 
-  return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+  const displayName = authorName || "Leitor";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=12141C&color=FF5E00&bold=true`;
 }
