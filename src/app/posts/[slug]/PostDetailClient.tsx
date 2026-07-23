@@ -156,7 +156,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             ← <span className="hidden xs:inline">Voltar</span> Home
           </button>
           <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group min-w-0" onClick={() => router.push("/")}>
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" className="h-8 sm:h-9 w-auto max-h-9 object-contain transform group-hover:scale-[1.05] transition-transform duration-200 shrink-0" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }} className="h-7 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
             <span className="hidden sm:inline text-base font-heading font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>

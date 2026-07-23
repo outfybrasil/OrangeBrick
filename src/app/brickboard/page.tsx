@@ -76,7 +76,8 @@ function BrickboardContent() {
             <img
               src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
               alt="Orange Brick Logo Icon"
-              className="h-7 sm:h-8 w-auto object-contain transform group-hover:scale-105 transition-transform shrink-0"
+              style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }}
+              className="h-7 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform shrink-0"
             />
             <span className="text-base sm:text-lg font-heading font-extrabold text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
