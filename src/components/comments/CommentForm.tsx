@@ -82,7 +82,8 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
             <img
               src={avatarUrl}
               alt=""
-              className="w-full h-full rounded-full object-cover"
+              style={{ width: "26px", height: "26px", minWidth: "26px", minHeight: "26px", maxWidth: "26px", maxHeight: "26px", borderRadius: "9999px", objectFit: "cover" }}
+              className="shrink-0 bg-[#08090C]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
               }}

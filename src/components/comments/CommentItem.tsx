@@ -45,7 +45,8 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
             <img
               src={resolveAvatarUrl(comment.author_avatar, comment.author_nickname)}
               alt={comment.author_nickname}
-              className="w-full h-full rounded-full object-cover"
+              style={{ width: "36px", height: "36px", minWidth: "36px", minHeight: "36px", maxWidth: "36px", maxHeight: "36px", borderRadius: "9999px", objectFit: "cover" }}
+              className="shrink-0 bg-[#08090C]"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
               }}
