@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationCenter } from "@/components/ui/NotificationCenter";
 import { resolveAvatarUrl } from "@/lib/avatar";
 
