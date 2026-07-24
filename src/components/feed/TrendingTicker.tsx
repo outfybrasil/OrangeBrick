@@ -6,13 +6,13 @@ interface TrendingTickerProps {
 }
 
 const TRENDING_TAGS = [
-  { id: "halo", label: "🎮 Halo UE5 Remake" },
-  { id: "switch2", label: "🕹️ Nintendo Switch 2" },
-  { id: "psplus", label: "⚡ PS Plus de Julho" },
-  { id: "witcher", label: "⚔️ Witcher 3 Expansão" },
-  { id: "cod", label: "💣 Modern Warfare 4" },
-  { id: "wreck", label: "🏎️ Wreckreation 2" },
-  { id: "bethesda", label: "☢️ Fallout 5 & TES 6" },
+  { id: "halo", label: "Halo UE5 Remake" },
+  { id: "switch2", label: "Nintendo Switch 2" },
+  { id: "psplus", label: "PS Plus de Julho" },
+  { id: "witcher", label: "Witcher 3 Expansão" },
+  { id: "cod", label: "Modern Warfare 4" },
+  { id: "wreck", label: "Wreckreation 2" },
+  { id: "bethesda", label: "Fallout 5 & TES 6" },
 ];
 
 export function TrendingTicker({ activeTag, onSelectTag }: TrendingTickerProps) {

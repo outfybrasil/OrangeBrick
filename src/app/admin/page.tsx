@@ -225,11 +225,47 @@ export default function AdminDashboard() {
 
       if (nextPublished) {
         try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: existingThread } = await supabase
+              .from("community_posts")
+              .select("id")
+              .eq("source_post_id", post.id)
+              .eq("is_official_thread", true)
+              .maybeSingle();
+
+            if (!existingThread) {
+              const { error: threadError } = await supabase.from("community_posts").insert({
+                user_id: user.id,
+                author_name: "Orange Brick",
+                author_avatar: "",
+                content: post.summary.slice(0, 280),
+                attached_article: {
+                  id: post.id,
+                  slug: post.slug,
+                  title: post.title,
+                  summary: post.summary,
+                  image_url: post.image_url,
+                  category: post.category,
+                  topic_id: post.topic_id,
+                },
+                topic_id: post.topic_id,
+                source_post_id: post.id,
+                is_official_thread: true,
+              });
+              if (threadError) throw threadError;
+            }
+          }
+        } catch {
+          setError("A matéria foi publicada, mas a conversa oficial não pôde ser criada.");
+        }
+
+        try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
             await invokeFunction("send-push-notification", {
-              title: `🧱 ${post.title}`,
+              title: post.title,
               body: `Nova matéria em ${CATEGORY_LABELS[post.category]}`,
               url: `${siteUrl}/posts/${post.slug}`,
             }, { accessToken: session.access_token });

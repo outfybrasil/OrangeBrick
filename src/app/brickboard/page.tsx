@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
@@ -18,11 +18,14 @@ function BrickboardContent() {
 
   const { posts, poll, isLoaded, addPost, deletePost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
-  const [activeTab, setActiveTab] = useState<"hype" | "latest" | "polls">("hype");
+  const [activeTab, setActiveTab] = useState<"latest" | "polls">("latest");
+  const articleSlug = searchParams.get("article");
+  const topicId = searchParams.get("topic");
+  const targetPostId = searchParams.get("post");
   const attachSlug = searchParams.get("attach");
   const attachTitle = searchParams.get("title");
   const [isComposeOpen, setIsComposeOpen] = useState(Boolean(attachSlug && attachTitle));
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedPlatform, setSelectedPlatform] = useState<string>("TODOS");
   const [preAttachedArticle, setPreAttachedArticle] = useState<AttachedArticle | null>(() => {
     if (attachSlug && attachTitle) {
@@ -47,17 +50,31 @@ function BrickboardContent() {
     const matchesPlatform =
       selectedPlatform === "TODOS" || post.platform_tag === selectedPlatform;
 
-    return matchesSearch && matchesPlatform;
+    const matchesArticle =
+      !articleSlug ||
+      post.attached_article?.slug === articleSlug ||
+      post.shared_post?.original_attached_article?.slug === articleSlug;
+
+    const matchesTopic = !topicId || post.topic_id === topicId;
+    const matchesSelectedPost = !targetPostId || post.id === targetPostId;
+
+    return matchesSearch && matchesPlatform && matchesArticle && matchesTopic && matchesSelectedPost;
   });
 
-  const displayPosts = [...filteredPosts].sort((a, b) => {
-    if (activeTab === "hype") {
-      const hypeA = (a.reactions.hype || 0) + (a.reactions.salty || 0);
-      const hypeB = (b.reactions.hype || 0) + (b.reactions.salty || 0);
-      return hypeB - hypeA;
-    }
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
+  const conversationTitle = articleSlug
+    ? posts.find((post) => post.attached_article?.slug === articleSlug)?.attached_article?.title ||
+      posts.find((post) => post.shared_post?.original_attached_article?.slug === articleSlug)
+        ?.shared_post?.original_attached_article?.title
+    : null;
+
+  const displayPosts = [...filteredPosts].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  useEffect(() => {
+    if (!isLoaded || !targetPostId) return;
+    document.getElementById(`brick-${targetPostId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [isLoaded, targetPostId]);
 
   return (
     <>
@@ -76,6 +93,12 @@ function BrickboardContent() {
           </Link>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <Link
+              href="/assuntos"
+              className="hidden min-h-11 items-center px-2 text-xs font-bold text-gray-400 transition-colors hover:text-white sm:flex"
+            >
+              Assuntos
+            </Link>
             <Link
               href="/"
               aria-label="Voltar ao portal"
@@ -103,19 +126,6 @@ function BrickboardContent() {
         <div className="border-b border-brand-orange-muted/20 bg-background-void/90 sticky top-12 z-20">
           <nav className="flex min-w-0 items-center justify-around text-xs font-bold tracking-wide sm:text-sm sm:tracking-wider">
             <button
-              onClick={() => setActiveTab("hype")}
-              className={`relative min-h-11 min-w-0 flex-1 px-1 py-3 text-center uppercase transition-all cursor-pointer ${
-                activeTab === "hype"
-                  ? "text-brand-orange font-black"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Em Alta
-              {activeTab === "hype" && (
-                <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-brand-orange rounded-full shadow-[0_0_8px_#FF5E00]" />
-              )}
-            </button>
-            <button
               onClick={() => setActiveTab("latest")}
               className={`relative min-h-11 min-w-0 flex-1 px-1 py-3 text-center uppercase transition-all cursor-pointer ${
                 activeTab === "latest"
@@ -136,13 +146,47 @@ function BrickboardContent() {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              Enquetes
+              Pergunta do dia
               {activeTab === "polls" && (
                 <span className="absolute bottom-0 left-1/4 right-1/4 h-1 bg-brand-orange rounded-full shadow-[0_0_8px_#FF5E00]" />
               )}
             </button>
           </nav>
         </div>
+
+        {articleSlug && (
+          <section className="flex flex-col gap-3 border-y border-brand-orange/30 bg-brand-orange/[0.06] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-orange">
+                Conversa da matéria
+              </p>
+              <h1 className="mt-1 truncate font-heading text-base font-black text-white sm:text-lg">
+                {conversationTitle || "Discussão no Brickboard"}
+              </h1>
+            </div>
+            <Link
+              href="/brickboard"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/15 px-4 text-xs font-bold text-gray-200 transition-colors hover:border-white/30 hover:text-white"
+            >
+              Ver toda a timeline
+            </Link>
+          </section>
+        )}
+
+        {targetPostId && (
+          <section className="flex items-center justify-between gap-4 border-y border-brand-orange/30 bg-brand-orange/[0.06] px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-brand-orange">Conversa selecionada</p>
+              <p className="mt-1 truncate text-sm text-gray-300">Você chegou por um destaque da página inicial.</p>
+            </div>
+            <Link
+              href="/brickboard"
+              className="min-h-11 shrink-0 content-center text-xs font-bold text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
+            >
+              Ver timeline
+            </Link>
+          </section>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-card-slate/40 border border-brand-orange-muted/15 p-2.5 rounded-xl">
           <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto scrollbar-none sm:pb-0">
@@ -182,7 +226,9 @@ function BrickboardContent() {
                 aria-label="Limpar busca"
                 className="absolute right-0 top-1/2 flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-xs text-gray-500 hover:text-white"
               >
-                ✕
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6 6 18" />
+                </svg>
               </button>
             )}
           </div>
@@ -205,22 +251,37 @@ function BrickboardContent() {
             <div className="lg:col-span-2 space-y-3 sm:space-y-4">
               {displayPosts.length === 0 ? (
                 <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-xl p-8 text-center text-gray-400 space-y-2">
-                  <span className="text-2xl block">🔍</span>
-                  <p className="text-xs font-subtitle">Nenhum Brick encontrado para estes filtros.</p>
+                  <svg aria-hidden="true" className="mx-auto h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+                  </svg>
+                  <p className="text-xs font-subtitle">
+                    {targetPostId
+                      ? "Esta conversa não está mais disponível."
+                      : "Nenhum Brick encontrado para estes filtros."}
+                  </p>
+                  {targetPostId && (
+                    <Link
+                      href="/brickboard"
+                      className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+                    >
+                      Voltar para a timeline
+                    </Link>
+                  )}
                 </div>
               ) : (
                 displayPosts.map((post) => (
-                  <BrickCard
-                    key={post.id}
-                    post={post}
-                    onReaction={toggleReaction}
-                    onDeletePost={deletePost}
-                    onSharePost={sharePost}
-                    onAddComment={addComment}
-                    onDeleteComment={deleteComment}
-                    onToggleCommentLike={toggleCommentLike}
-                    getComments={getComments}
-                  />
+                  <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28">
+                    <BrickCard
+                      post={post}
+                      onReaction={toggleReaction}
+                      onDeletePost={deletePost}
+                      onSharePost={sharePost}
+                      onAddComment={addComment}
+                      onDeleteComment={deleteComment}
+                      onToggleCommentLike={toggleCommentLike}
+                      getComments={getComments}
+                    />
+                  </div>
                 ))
               )}
             </div>
@@ -229,15 +290,14 @@ function BrickboardContent() {
               {poll && <GamerPollWidget poll={poll} onVote={votePoll} />}
 
               <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-xl p-4 shadow-lg space-y-2">
-                <div className="flex items-center gap-2 pb-2 border-b border-brand-orange-muted/10">
-                  <span className="text-base">💬</span>
+                <div className="pb-2 border-b border-brand-orange-muted/10">
                   <h4 className="font-subtitle text-xs font-bold text-white uppercase tracking-wider">
                     Regras da Comunidade
                   </h4>
                 </div>
                 <ul className="text-[11px] text-gray-400 font-body space-y-1.5 list-disc list-inside leading-relaxed">
                   <li>Respeito total aos outros leitores.</li>
-                  <li>Sem console wars tóxicas.</li>
+                  <li>Sem guerras de console tóxicas.</li>
                   <li>Use as tags para categorizar seu post.</li>
                   <li>Sem spoilers sem aviso.</li>
                 </ul>

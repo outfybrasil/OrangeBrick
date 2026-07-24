@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, type ReactNode } from "react";
 import Link from "next/link";
 import { NewsCard } from "@/components/card/NewsCard";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
@@ -20,6 +20,7 @@ interface NewsFeedProps {
   searchQuery?: string;
   activeTag?: string | null;
   onSelectCategory?: (category: PostCategory | null) => void;
+  homeHighlights?: ReactNode;
 }
 
 const CATEGORIES: { label: string; value: PostCategory | null }[] = [
@@ -39,7 +40,7 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory }: NewsFeedProps) {
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, homeHighlights }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category);
 
@@ -122,6 +123,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         <Link
           href={`/posts/${heroPost.slug}`}
+          data-home-event="article"
+          data-home-target={heroPost.slug}
           className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden cursor-pointer border border-white/10 bg-background-void hover:border-brand-orange/40 transition-colors duration-300"
         >
           {heroPost.image_url ? (
@@ -172,7 +175,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
 
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 pb-3 border-b border-brand-orange/30">
-            <span className="w-2.5 h-6 bg-brand-orange rounded-full shadow-[0_0_12px_#FF5E00]" />
+            <span className="h-6 w-1 bg-brand-orange" />
             <h3 className="text-base font-heading font-bold text-white sm:text-lg">
               Últimas <span className="text-brand-orange">notícias</span>
             </h3>
@@ -182,6 +185,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
+              data-home-event="article"
+              data-home-target={post.slug}
               className="flex-1 flex flex-col overflow-hidden bg-background-void border border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group"
             >
               {post.image_url && (
@@ -226,12 +231,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   return (
     <div className="min-w-0 space-y-8 sm:space-y-10">
       {renderHeroSection()}
+      {!isFiltering && homeHighlights}
 
       <div className="grid min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-3">
         <div className="min-w-0 space-y-6 lg:col-span-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-orange/20">
+          <div id="ultimas-noticias" className="scroll-mt-24 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-orange/20">
             <div className="flex items-center gap-3">
-              <span className="w-3 h-8 bg-brand-orange rounded-full shadow-[0_0_15px_#FF5E00] animate-pulse" />
+              <span className="h-8 w-1 bg-brand-orange" />
               <h2 className="font-heading text-[clamp(1.5rem,8vw,2.25rem)] font-black leading-tight text-white">
                 {category ? (
                   <>
@@ -319,7 +325,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             onClick={loadMore}
             className="font-subtitle text-xs text-brand-orange border border-brand-orange/30 px-6 py-3 rounded-xl hover:bg-brand-orange/10 hover:border-brand-orange/50 transition-all duration-200 cursor-pointer font-bold tracking-wider uppercase shadow-md"
           >
-            ← Carregar mais notícias →
+            Carregar mais notícias
           </button>
         </div>
       )}

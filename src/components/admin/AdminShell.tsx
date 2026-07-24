@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminSection = "overview" | "editor" | "images" | "releases";
+type AdminSection = "overview" | "editor" | "images" | "releases" | "community";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -48,6 +48,15 @@ function ReleasesIcon() {
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M6 3v3M18 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
       <path d="M8 13h3v3H8z" />
+    </svg>
+  );
+}
+
+function CommunityIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M5 6h14v9H9l-4 3z" />
+      <path d="M8 10h8M8 13h5" />
     </svg>
   );
 }
@@ -133,6 +142,10 @@ export function AdminShell({
           <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
             <ReleasesIcon />
             Radar de lançamentos
+          </Link>
+          <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}>
+            <CommunityIcon />
+            Comunidade
           </Link>
         </nav>
 
@@ -226,6 +239,15 @@ export function AdminShell({
             >
               <ReleasesIcon />
               Radar
+            </Link>
+            <Link
+              href="/admin/community"
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-bold ${
+                active === "community" ? "bg-brand-orange text-white" : "text-gray-400"
+              }`}
+            >
+              <CommunityIcon />
+              Comunidade
             </Link>
           </nav>
         </header>

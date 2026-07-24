@@ -17,6 +17,14 @@ function formatBytes(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function isHttpSource(value: string) {
+  return value.startsWith("https://") || value.startsWith("http://");
+}
+
+function sourceLabel(value: string) {
+  return value.startsWith("upload:") ? value.slice("upload:".length) : value;
+}
+
 export default function AdminImagesPage() {
   const supabase = useMemo(() => createDataClient(), []);
   const [images, setImages] = useState<LibraryImage[]>([]);
@@ -99,9 +107,13 @@ export default function AdminImagesPage() {
                 </a>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase text-gray-500 md:hidden">Origem</p>
-                  <a href={image.source_url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-gray-300 hover:text-brand-orange md:mt-0">
-                    {image.source_url}
-                  </a>
+                  {isHttpSource(image.source_url) ? (
+                    <a href={image.source_url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-gray-300 hover:text-brand-orange md:mt-0">
+                      {image.source_url}
+                    </a>
+                  ) : (
+                    <p className="mt-1 truncate text-xs text-gray-300 md:mt-0">{sourceLabel(image.source_url)}</p>
+                  )}
                   <p className="mt-1 text-[10px] text-gray-500">{image.kind === "cover" ? "Capa" : image.kind === "body" ? "Corpo" : "Lançamento"}</p>
                 </div>
                 <div className="min-w-0">
@@ -116,7 +128,7 @@ export default function AdminImagesPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase text-gray-500 md:hidden">Arquivo</p>
-                  <p className="mt-1 text-xs text-gray-300 md:mt-0">1280 × 720</p>
+                  <p className="mt-1 text-xs text-gray-300 md:mt-0">{image.width} × {image.height}</p>
                   <p className="mt-1 text-[10px] text-gray-500">WebP · {formatBytes(image.file_size)}</p>
                 </div>
                 <time className="text-xs text-gray-400" dateTime={image.created_at}>

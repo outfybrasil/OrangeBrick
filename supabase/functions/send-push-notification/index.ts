@@ -3,6 +3,11 @@ import { handleOptions, json, serviceClient } from "../_shared/platform.ts";
 
 type CommunityEvent = "reaction" | "comment" | "repost" | "comment_like";
 
+function cleanText(value: unknown, maximumLength: number) {
+  if (typeof value !== "string") return "";
+  return value.replace(/\s+/g, " ").trim().slice(0, maximumLength);
+}
+
 Deno.serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
@@ -20,26 +25,57 @@ Deno.serve(async (request) => {
     if (!payload || typeof payload !== "object") return json({ error: "Payload inválido" }, 400);
 
     const values = payload as Record<string, unknown>;
-    const siteUrl = Deno.env.get("SITE_URL");
+    const siteUrl = Deno.env.get("SITE_URL") || "https://orangebrick.com.br";
     const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
     const privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
-    if (!siteUrl || !publicKey || !privateKey) return json({ error: "Push não configurado" }, 500);
+    if (!publicKey || !privateKey) return json({ error: "Push não configurado (chaves VAPID ausentes)" }, 500);
+
+    let siteBaseUrl: string;
+    let siteOrigin: string;
+    try {
+      let formatted = siteUrl.trim();
+      if (!formatted.startsWith("http://") && !formatted.startsWith("https://")) {
+        formatted = `https://${formatted}`;
+      }
+      const parsedBase = new URL(formatted.endsWith("/") ? formatted : `${formatted}/`);
+      siteBaseUrl = parsedBase.href;
+      siteOrigin = parsedBase.origin;
+    } catch {
+      return json({ error: "SITE_URL inválida" }, 500);
+    }
 
     let title: string;
     let body: string;
     let url: string;
+    let tag: string;
+    let kind: "news" | "community";
     let recipientId: string | null = null;
 
     if (user.app_metadata?.is_admin === true && typeof values.title === "string") {
-      title = values.title;
-      body = typeof values.body === "string" ? values.body : "";
-      url = typeof values.url === "string" ? values.url : "";
-      if (!title || !body || title.length > 120 || body.length > 240) {
+      title = cleanText(values.title, 120);
+      body = cleanText(values.body, 240);
+      const requestedUrl = cleanText(values.url, 2048);
+      tag = cleanText(values.tag, 96) || `news-${crypto.randomUUID()}`;
+      kind = "news";
+      if (!title || !body || !requestedUrl) {
         return json({ error: "Notificação inválida" }, 400);
       }
-      if (new URL(url).origin !== new URL(siteUrl).origin) {
+
+      let targetUrl: URL;
+      try {
+        if (requestedUrl.startsWith("http://") || requestedUrl.startsWith("https://")) {
+          targetUrl = new URL(requestedUrl);
+        } else {
+          const cleanPath = requestedUrl.startsWith("/") ? requestedUrl : `/${requestedUrl}`;
+          targetUrl = new URL(cleanPath, siteBaseUrl);
+        }
+      } catch {
+        return json({ error: "URL da notícia inválida" }, 400);
+      }
+      if (targetUrl.origin !== siteOrigin) {
         return json({ error: "URL não permitida" }, 400);
       }
+      url = targetUrl.toString();
     } else {
       const eventType = values.event_type as CommunityEvent;
       const referenceId = values.reference_id;
@@ -125,7 +161,9 @@ Deno.serve(async (request) => {
 
       if (!recipientId || recipientId === user.id) return json({ sent: 0, total: 0 });
       title = "Orange Brick";
-      url = `${siteUrl}/brickboard`;
+      url = new URL("/brickboard", siteBaseUrl).toString();
+      tag = `community-${eventType}-${referenceId}`.slice(0, 96);
+      kind = "community";
     }
 
     webpush.setVapidDetails(
@@ -146,29 +184,51 @@ Deno.serve(async (request) => {
       title,
       body,
       url,
-      icon: `${siteUrl}/icons/icon-192.png`,
-      badge: `${siteUrl}/icons/icon-192.png`,
+      tag,
+      kind,
+      icon: new URL("/icons/icon-192.png", siteBaseUrl).toString(),
+      badge: new URL("/icons/icon-192.png", siteBaseUrl).toString(),
+      timestamp: Date.now(),
     });
 
-    let sent = 0;
-    await Promise.allSettled((subscriptions || []).map(async (subscription) => {
+    const results = await Promise.all((subscriptions || []).map(async (subscription) => {
       try {
         await webpush.sendNotification({
           endpoint: subscription.endpoint,
           keys: { p256dh: subscription.p256dh_key, auth: subscription.auth_key },
-        }, notification);
-        sent++;
+        }, notification, {
+          TTL: kind === "news" ? 86400 : 14400,
+          urgency: kind === "news" ? "high" : "normal",
+        });
+        return "sent" as const;
       } catch (cause) {
         const status = typeof cause === "object" && cause && "statusCode" in cause
           ? Number(cause.statusCode)
           : 0;
         if (status === 404 || status === 410) {
           await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
+          return "expired" as const;
         }
+        return "failed" as const;
       }
     }));
 
-    return json({ sent, total: subscriptions?.length || 0 });
+    const sent = results.filter((result) => result === "sent").length;
+    const expired = results.filter((result) => result === "expired").length;
+    const failed = results.filter((result) => result === "failed").length;
+    const total = subscriptions?.length || 0;
+
+    if (total > 0 && sent === 0 && failed > 0) {
+      return json({
+        error: "O alerta não chegou aos aparelhos. Verifique as chaves VAPID e tente novamente.",
+        sent,
+        failed,
+        expired,
+        total,
+      }, 502);
+    }
+
+    return json({ sent, failed, expired, total });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Erro interno" }, 500);
   }

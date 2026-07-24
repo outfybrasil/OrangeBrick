@@ -785,21 +785,6 @@ function releaseDateValue(item: ReleaseItem) {
   return new Date(Date.UTC(2026, MONTHS[match[2]], Number(match[1]), 12));
 }
 
-function getWeekGroup(item: ReleaseItem): { key: string; label: string } {
-  const date = releaseDateValue(item);
-  if (!date) return { key: "sem-data", label: "Sem data definida" };
-  const monday = new Date(date);
-  const weekday = monday.getUTCDay() || 7;
-  monday.setUTCDate(monday.getUTCDate() - weekday + 1);
-  const sunday = new Date(monday);
-  sunday.setUTCDate(monday.getUTCDate() + 6);
-  const format = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", timeZone: "UTC" });
-  return {
-    key: monday.toISOString().slice(0, 10),
-    label: `${format.format(monday)} a ${format.format(sunday)}`,
-  };
-}
-
 export function ReleaseRadarStrip() {
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>(

@@ -18,11 +18,11 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider bg-brand-orange/15 px-2.5 py-1 rounded-lg border border-brand-orange/30 whitespace-nowrap shrink-0">
-            Enquete da Semana
+            Pergunta do dia
           </span>
         </div>
         <span className="text-[11px] font-subtitle text-gray-400 font-medium whitespace-nowrap">
-          {poll.total_votes} votos acumulados
+          {poll.total_votes} participações
         </span>
       </div>
 
@@ -62,7 +62,7 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
                 <span className="font-semibold">{option.text}</span>
                 {hasVoted ? (
                   <span className="font-bold tabular-nums shrink-0">
-                    {percentage}% {isSelected && "✓"}
+                    {percentage}% {isSelected && "Selecionada"}
                   </span>
                 ) : (
                   <span className="text-[10px] uppercase font-bold text-brand-orange opacity-0 group-hover:opacity-100 transition-opacity shrink-0">

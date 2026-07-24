@@ -5,7 +5,7 @@ Deno.serve(async (request) => {
   if (options) return options;
   if (request.method !== "POST") return json({ error: "Método não permitido" }, 405);
   try {
-    const rate = await allowRequest(request, "push-subscription", 10, 3600);
+    const rate = await allowRequest(request, "push-subscription", 30, 3600);
     if (!rate.allowed) return json({ error: "Muitas tentativas" }, 429);
     const payload: unknown = await request.json();
     if (!payload || typeof payload !== "object") return json({ error: "Payload inválido" }, 400);

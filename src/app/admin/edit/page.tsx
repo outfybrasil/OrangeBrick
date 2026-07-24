@@ -11,7 +11,7 @@ import { parseMarkdownToReact } from "@/lib/markdown";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import { isAdminUser } from "@/lib/auth";
-import type { EditorialImage, Post, PostCategory } from "@/lib/types/database";
+import type { EditorialImage, Post, PostCategory, Topic } from "@/lib/types/database";
 import { CATEGORY_CONFIG } from "@/lib/types/database";
 
 type ContentBlock = EditorialBlock;
@@ -69,6 +69,8 @@ function EditForm() {
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState<PostCategory>("breaking");
+  const [topicId, setTopicId] = useState("");
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const [imageAlt, setImageAlt] = useState("");
   const [authorName, setAuthorName] = useState("Redação");
@@ -139,6 +141,13 @@ function EditForm() {
           return;
         }
 
+        const { data: topicData } = await supabase
+          .from("topics")
+          .select("*")
+          .eq("is_active", true)
+          .order("name", { ascending: true });
+        setTopics((topicData || []) as Topic[]);
+
         if (!postId) {
           setAuthorName("The Brick");
           setAuthorTag(AUTHOR_TAGS.breaking);
@@ -167,6 +176,7 @@ function EditForm() {
           setSlug(typedPost.slug);
           setSummary(typedPost.summary);
           setCategory(typedPost.category);
+          setTopicId(typedPost.topic_id || "");
           setImageUrl(typedPost.image_url || "");
           setImageAlt(typedPost.image_alt || "");
           setAuthorName(typedPost.author_name);
@@ -377,6 +387,7 @@ function EditForm() {
           body: JSON.stringify(blocks), category,
           image_url: imageUrl || null, image_alt: imageAlt || null,
           author_name: authorName || "Redação", author_tag: authorTag || null,
+          topic_id: topicId || null,
           is_published: false, published_at: null,
           created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
         })
@@ -433,6 +444,7 @@ function EditForm() {
         slug, title, summary, body: JSON.stringify(blocks), category,
         image_url: imageUrl || null, image_alt: imageAlt || null,
         author_name: authorName || "Redação", author_tag: authorTag || null,
+        topic_id: topicId || null,
         is_published: isPublished,
         published_at: newPublishedAt,
       };
@@ -447,6 +459,37 @@ function EditForm() {
           .from("posts").insert({ ...payload, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }).select().single();
         if (insertError) throw insertError;
         savedPost = data as unknown as Post;
+      }
+      if (savedPost && isPublished) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: existingThread } = await supabase
+            .from("community_posts")
+            .select("id")
+            .eq("source_post_id", savedPost.id)
+            .eq("is_official_thread", true)
+            .maybeSingle();
+          if (!existingThread) {
+            await supabase.from("community_posts").insert({
+              user_id: user.id,
+              author_name: "Orange Brick",
+              author_avatar: "",
+              content: savedPost.summary.slice(0, 280),
+              attached_article: {
+                id: savedPost.id,
+                slug: savedPost.slug,
+                title: savedPost.title,
+                summary: savedPost.summary,
+                image_url: savedPost.image_url,
+                category: savedPost.category,
+                topic_id: savedPost.topic_id,
+              },
+              topic_id: savedPost.topic_id,
+              source_post_id: savedPost.id,
+              is_official_thread: true,
+            });
+          }
+        }
       }
       const imageIdsToLink = [
         ...(coverImageId ? [coverImageId] : []),
@@ -466,15 +509,22 @@ function EditForm() {
         if (!response.ok) throw new Error("A matéria foi salva, mas a imagem não pôde ser vinculada");
       }
       if (isPublished && updatePublishDate && savedPost) {
-        const np = { title: savedPost.title, slug: savedPost.slug, category: savedPost.category };
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) throw new Error("Sessão expirada");
+          const origin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
           await invokeFunction("send-push-notification", {
-            title: `🧱 ${np.title}`,
-            body: `Nova matéria em ${np.category}`,
-            url: `${siteUrl}/posts/${np.slug}`,
+            title: savedPost.title,
+            body: savedPost.summary,
+            url: `${origin}/posts/${savedPost.slug}`,
+            tag: `news-${savedPost.slug}`,
+            kind: "news",
           }, { accessToken: session.access_token });
+        } catch (pushErr: unknown) {
+          const detail = pushErr instanceof Error ? pushErr.message : "";
+          setError(`A matéria foi salva e publicada, mas o alerta de push falhou (${detail || "Verifique a configuração de VAPID/SITE_URL"}).`);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
         }
       }
       router.push("/admin");
@@ -592,6 +642,19 @@ function EditForm() {
                 ))}
               </div>
             </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Assunto</label>
+              <select
+                value={topicId}
+                onChange={(event) => { setTopicId(event.target.value); setHasChanges(true); }}
+                className="w-full rounded-lg border border-brand-orange-muted/20 bg-background-void px-3 text-sm text-white outline-none focus:border-brand-orange/50"
+              >
+                <option value="">Sem assunto vinculado</option>
+                {topics.map((topic) => (
+                  <option key={topic.id} value={topic.id}>{topic.name}</option>
+                ))}
+              </select>
+            </div>
             <div className="lg:col-span-2">
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5 flex items-center justify-between">
                 <span>Resumo / Subtítulo *</span>
@@ -663,7 +726,7 @@ function EditForm() {
             {coverAiPrompt && (
               <div className="lg:col-span-2 bg-accent-blue/5 border border-accent-blue/20 rounded-lg p-4 space-y-3">
                 <label className="block text-[9px] uppercase font-bold text-accent-blue mb-1">
-                  🤖 Descrição para gerar a imagem de capa
+                  Descrição para gerar a imagem de capa
                 </label>
                 <textarea
                   value={coverAiPrompt}
@@ -685,7 +748,7 @@ function EditForm() {
                         Gerando...
                       </>
                     ) : (
-                      "🎨 Gerar Imagem de Capa"
+                      "Gerar imagem de capa"
                     )}
                   </button>
                   <button
@@ -850,7 +913,7 @@ function EditForm() {
                           {aiPromptBlock === block.id && (
                             <div className="bg-accent-blue/5 border border-accent-blue/20 rounded-lg p-4 space-y-3">
                               <label className="block text-[9px] uppercase font-bold text-accent-blue mb-1">
-                                🤖 Descrição para gerar a imagem
+                                Descrição para gerar a imagem
                               </label>
                               <textarea
                                 value={aiPrompts[block.id] || ""}
@@ -872,7 +935,7 @@ function EditForm() {
                                       Gerando...
                                     </>
                                   ) : (
-                                    "🎨 Gerar Imagem"
+                                    "Gerar imagem"
                                   )}
                                 </button>
                                 <button
@@ -934,7 +997,7 @@ function EditForm() {
                   <div key={item.label} className="flex items-start gap-3">
                     {item.complete ? (
                       <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[11px] font-black text-emerald-300">
-                        ✓
+                        Concluído
                       </span>
                     ) : (
                       <span aria-hidden="true" className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[11px] font-black text-gray-600">

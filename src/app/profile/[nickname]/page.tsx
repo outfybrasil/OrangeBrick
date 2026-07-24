@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { UserBadge } from "@/components/ui/UserBadge";
-import { GamerBadges } from "@/components/community/GamerBadges";
 import { BrickCard } from "@/components/community/BrickCard";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -125,6 +124,33 @@ function ProfileContent() {
     );
   }, [posts, decodedNickname]);
 
+  const profileSignals = useMemo(() => {
+    const platformCounts = new Map<string, number>();
+    const subjectCounts = new Map<string, number>();
+
+    for (const post of userPosts) {
+      if (post.platform_tag) {
+        const platform = post.platform_tag.replaceAll("[", "").replaceAll("]", "");
+        platformCounts.set(platform, (platformCounts.get(platform) || 0) + 1);
+      }
+      if (post.attached_article?.category) {
+        const subject = post.attached_article.category;
+        subjectCounts.set(subject, (subjectCounts.get(subject) || 0) + 1);
+      }
+    }
+
+    const rank = (entries: Map<string, number>) =>
+      [...entries.entries()]
+        .sort((first, second) => second[1] - first[1])
+        .slice(0, 3)
+        .map(([label]) => label);
+
+    return {
+      platforms: rank(platformCounts),
+      subjects: rank(subjectCounts),
+    };
+  }, [userPosts]);
+
   const isProfileOwner =
     user && profileData &&
     profileData.user_id === user.id;
@@ -204,7 +230,7 @@ function ProfileContent() {
                   onClick={() => setIsEditModalOpen(true)}
                   className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity text-xs font-bold text-white cursor-pointer"
                 >
-                  ✏️ Alterar
+                  Alterar
                 </button>
               )}
             </div>
@@ -219,20 +245,27 @@ function ProfileContent() {
                     onClick={() => setIsEditModalOpen(true)}
                     className="text-xs font-subtitle text-brand-orange hover:underline ml-2"
                   >
-                    ✏️ Editar Perfil
+                    Editar perfil
                   </button>
                 )}
               </div>
               <p className="text-xs sm:text-sm text-gray-300 font-body leading-relaxed max-w-xl">
                 {profileData?.bio}
               </p>
-              <div className="pt-2">
-                <GamerBadges
-                  nickname={profileData?.nickname || ""}
-                  postCount={userPosts.length}
-                  isOfficial={profileData?.is_official}
-                />
-              </div>
+              {(profileSignals.platforms.length > 0 || profileSignals.subjects.length > 0) && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {profileSignals.platforms.map((platform) => (
+                    <span key={platform} className="rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[10px] font-bold uppercase text-brand-orange">
+                      {platform}
+                    </span>
+                  ))}
+                  {profileSignals.subjects.map((subject) => (
+                    <span key={subject} className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-bold uppercase text-gray-300">
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -266,7 +299,7 @@ function ProfileContent() {
 
         <div className="space-y-4">
           <h3 className="font-heading text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span>🧱</span> Bricks de {profileData?.nickname} ({userPosts.length})
+            Bricks de {profileData?.nickname} ({userPosts.length})
           </h3>
 
           {userPosts.length === 0 ? (
@@ -298,13 +331,13 @@ function ProfileContent() {
           <div className="max-w-md w-full bg-card-slate border border-brand-orange-muted/20 rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-brand-orange-muted/15">
               <h3 className="font-heading text-base font-bold text-white uppercase tracking-wider">
-                ✏️ Editar Foto e Perfil
+                Editar foto e perfil
               </h3>
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 className="text-gray-400 hover:text-white p-1 text-xs"
               >
-                ✕
+                Fechar
               </button>
             </div>
 

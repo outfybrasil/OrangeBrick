@@ -1,13 +1,95 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/ui/Footer";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
 import { ALL_RELEASES_DATA, type ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
 import { isAllowedReleaseImageUrl } from "@/lib/release-images";
-import type { ReleaseRadarItem } from "@/lib/types/database";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import type {
+  ReleaseHypeCount,
+  ReleaseHypeVote,
+  ReleaseHypeVoteSelection,
+  ReleaseRadarItem,
+} from "@/lib/types/database";
+
+type HypeVoteType = ReleaseHypeVote["vote_type"];
+type HypeCounts = Record<HypeVoteType, number>;
+
+const EMPTY_HYPE_COUNTS: HypeCounts = { buy: 0, watch: 0, skip: 0 };
+const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string }[] = [
+  { type: "buy", label: "Já garanti", shortLabel: "Garanti" },
+  { type: "watch", label: "No meu radar", shortLabel: "Radar" },
+  { type: "skip", label: "Passo reto", shortLabel: "Passo" },
+];
+
+function ReleaseHypeMeter({
+  releaseId,
+  counts,
+  selectedVote,
+  isVoting,
+  onVote,
+}: {
+  releaseId: string;
+  counts: HypeCounts;
+  selectedVote?: HypeVoteType;
+  isVoting: boolean;
+  onVote: (releaseId: string, vote: HypeVoteType) => void;
+}) {
+  const total = counts.buy + counts.watch + counts.skip;
+  const positiveShare = total === 0 ? 0 : Math.round(((counts.buy + counts.watch) / total) * 100);
+
+  return (
+    <div className="mt-4 border-t border-white/[0.08] pt-3">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
+        <span className="text-[9px] font-black uppercase tracking-[0.16em] text-gray-500">
+          Termômetro da comunidade
+        </span>
+        <span className="text-[10px] font-bold tabular-nums text-gray-400">
+          {total === 0 ? "Seja o primeiro" : `${positiveShare}% no hype`}
+        </span>
+      </div>
+      <div className="mb-2.5 flex h-1 overflow-hidden bg-white/[0.06]" aria-hidden="true">
+        {total > 0 && (
+          <>
+            <span className="bg-brand-orange" style={{ width: `${(counts.buy / total) * 100}%` }} />
+            <span className="bg-[#F4A261]" style={{ width: `${(counts.watch / total) * 100}%` }} />
+            <span className="bg-gray-600" style={{ width: `${(counts.skip / total) * 100}%` }} />
+          </>
+        )}
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {HYPE_OPTIONS.map((option) => {
+          const isSelected = selectedVote === option.type;
+          return (
+            <button
+              key={option.type}
+              type="button"
+              onClick={() => onVote(releaseId, option.type)}
+              disabled={isVoting}
+              aria-pressed={isSelected}
+              aria-label={`${option.label}: ${counts[option.type]} votos`}
+              className={`min-h-9 border px-1.5 text-[9px] font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
+                isSelected
+                  ? "border-brand-orange bg-brand-orange text-white"
+                  : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/25 hover:text-white"
+              }`}
+            >
+              <span className="block sm:hidden">{option.shortLabel}</span>
+              <span className="hidden sm:block">{option.label}</span>
+              <span className={`ml-1 tabular-nums ${isSelected ? "text-white/75" : "text-gray-600"}`}>
+                {counts[option.type]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const LEGACY_RELEASES: ReleaseItem[] = [
   // --- JULHO 2026 ---
@@ -261,11 +343,18 @@ function extractDayNumber(dateStr: string, isoStr?: string): number {
 
 export function ReleasesPageClient() {
   const router = useRouter();
+  const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>(INITIAL_RELEASES);
   const [search, setSearch] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
+  const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>({});
+  const [myVotes, setMyVotes] = useState<Record<string, HypeVoteType>>({});
+  const [votingReleaseId, setVotingReleaseId] = useState<string | null>(null);
+  const [pendingVote, setPendingVote] = useState<{ releaseId: string; vote: HypeVoteType } | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hypeError, setHypeError] = useState("");
 
   useEffect(() => {
     queueMicrotask(async () => {
@@ -294,6 +383,95 @@ export function ReleasesPageClient() {
       setReleases([...merged.values()]);
     });
   }, [supabase]);
+
+  const loadHype = useCallback(async () => {
+    const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
+    if (countError) {
+      setHypeError("O termômetro está indisponível agora.");
+      return;
+    }
+
+    const nextCounts: Record<string, HypeCounts> = {};
+    for (const row of (countData || []) as ReleaseHypeCount[]) {
+      const current = nextCounts[row.release_id] || { ...EMPTY_HYPE_COUNTS };
+      current[row.vote_type] = Number(row.vote_count);
+      nextCounts[row.release_id] = current;
+    }
+    setHypeCounts(nextCounts);
+
+    if (!user) {
+      setMyVotes({});
+      return;
+    }
+
+    const { data: voteData } = await supabase.rpc("get_my_release_hype_votes");
+    const nextVotes: Record<string, HypeVoteType> = {};
+    for (const row of (voteData || []) as ReleaseHypeVoteSelection[]) {
+      nextVotes[row.release_id] = row.vote_type;
+    }
+    setMyVotes(nextVotes);
+  }, [supabase, user]);
+
+  useEffect(() => {
+    queueMicrotask(loadHype);
+  }, [loadHype]);
+
+  const commitVote = useCallback(async (releaseId: string, vote: HypeVoteType) => {
+    if (!user || votingReleaseId) return;
+
+    const previousVote = myVotes[releaseId];
+    const previousCounts = hypeCounts[releaseId] || { ...EMPTY_HYPE_COUNTS };
+    const nextVote = previousVote === vote ? undefined : vote;
+    const nextCounts = { ...previousCounts };
+
+    if (previousVote) nextCounts[previousVote] = Math.max(0, nextCounts[previousVote] - 1);
+    if (nextVote) nextCounts[nextVote] += 1;
+
+    setVotingReleaseId(releaseId);
+    setHypeError("");
+    setHypeCounts((current) => ({ ...current, [releaseId]: nextCounts }));
+    setMyVotes((current) => {
+      const next = { ...current };
+      if (nextVote) next[releaseId] = nextVote;
+      else delete next[releaseId];
+      return next;
+    });
+
+    const operation = nextVote
+      ? supabase
+          .from("release_hype_votes")
+          .upsert(
+            { release_id: releaseId, user_id: user.id, vote_type: nextVote },
+            { onConflict: "release_id,user_id" }
+          )
+      : supabase
+          .from("release_hype_votes")
+          .delete()
+          .eq("release_id", releaseId)
+          .eq("user_id", user.id);
+
+    const { error } = await operation;
+    if (error) {
+      setHypeCounts((current) => ({ ...current, [releaseId]: previousCounts }));
+      setMyVotes((current) => {
+        const next = { ...current };
+        if (previousVote) next[releaseId] = previousVote;
+        else delete next[releaseId];
+        return next;
+      });
+      setHypeError("Seu voto não foi salvo. Tente novamente.");
+    }
+    setVotingReleaseId(null);
+  }, [hypeCounts, myVotes, supabase, user, votingReleaseId]);
+
+  const handleVote = useCallback((releaseId: string, vote: HypeVoteType) => {
+    if (!user) {
+      setPendingVote({ releaseId, vote });
+      setIsAuthModalOpen(true);
+      return;
+    }
+    void commitVote(releaseId, vote);
+  }, [commitVote, user]);
 
   const filteredReleases = useMemo(() => {
     return releases.filter((item) => {
@@ -338,6 +516,23 @@ export function ReleasesPageClient() {
         return first.key.localeCompare(second.key);
       });
   }, [filteredReleases]);
+
+  const weeklyHypeRanking = useMemo(() => {
+    return releases
+      .filter((item) => item.category === "week")
+      .map((item) => {
+        const counts = hypeCounts[item.id] || EMPTY_HYPE_COUNTS;
+        return {
+          item,
+          counts,
+          score: counts.buy * 3 + counts.watch * 2,
+          total: counts.buy + counts.watch + counts.skip,
+        };
+      })
+      .filter((entry) => entry.total > 0)
+      .sort((first, second) => second.score - first.score || second.total - first.total)
+      .slice(0, 5);
+  }, [hypeCounts, releases]);
 
   return (
     <div className="min-h-dvh bg-background-void text-white">
@@ -392,7 +587,9 @@ export function ReleasesPageClient() {
                   onClick={() => setSearch("")}
                   className="absolute right-3 top-2.5 text-xs text-gray-400 hover:text-white"
                 >
-                  ✕
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
                 </button>
               )}
             </div>
@@ -424,6 +621,57 @@ export function ReleasesPageClient() {
 
       {/* Grade Principal de Lançamentos */}
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <section className="mb-12 border-y border-white/10" aria-labelledby="weekly-hype-title">
+          <div className="grid gap-0 lg:grid-cols-[0.8fr_2.2fr]">
+            <div className="border-b border-white/10 py-6 lg:border-b-0 lg:border-r lg:pr-8">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange">
+                Voto da comunidade
+              </p>
+              <h2 id="weekly-hype-title" className="mt-2 font-heading text-2xl font-black leading-none text-white sm:text-3xl">
+                Os mais aguardados da semana
+              </h2>
+              <p className="mt-3 max-w-sm text-xs leading-5 text-gray-400">
+                Pré-venda vale três pontos. Entrar no radar vale dois. Sem algoritmo escondido.
+              </p>
+            </div>
+
+            <div className="py-2 lg:pl-8">
+              {weeklyHypeRanking.length === 0 ? (
+                <div className="flex min-h-28 items-center">
+                  <p className="text-sm text-gray-400">
+                    O ranking abre assim que chegar o primeiro voto.
+                  </p>
+                </div>
+              ) : (
+                <ol className="divide-y divide-white/[0.08]">
+                  {weeklyHypeRanking.map(({ item, counts, total }, index) => (
+                    <li key={item.id} className="grid grid-cols-[2rem_1fr_auto] items-center gap-3 py-3">
+                      <span className={`font-heading text-xl font-black tabular-nums ${index === 0 ? "text-brand-orange" : "text-gray-600"}`}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-extrabold text-white">{item.game}</p>
+                        <p className="mt-0.5 text-[10px] uppercase tracking-wide text-gray-500">
+                          {counts.buy} garantiram · {counts.watch} no radar
+                        </p>
+                      </div>
+                      <span className="text-xs font-bold tabular-nums text-gray-400">
+                        {total} {total === 1 ? "voto" : "votos"}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {hypeError && (
+          <div role="status" className="mb-6 border-l-2 border-brand-orange bg-brand-orange/[0.06] px-4 py-3 text-xs text-gray-300">
+            {hypeError}
+          </div>
+        )}
+
         {groupedReleases.length === 0 ? (
           <div className="py-20 text-center">
             <p className="text-sm font-mono text-gray-400">Nenhum jogo encontrado para os filtros selecionados.</p>
@@ -480,7 +728,7 @@ export function ReleasesPageClient() {
                           </h3>
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between gap-2 border-t border-white/[0.08] pt-3">
+                        <div className="mt-4 flex items-end justify-between gap-2">
                           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 truncate">
                             {item.platforms.join(" · ")}
                           </p>
@@ -497,6 +745,21 @@ export function ReleasesPageClient() {
                             </span>
                           )}
                         </div>
+
+                        <Link
+                          href={`/assuntos/${item.id}`}
+                          className="mt-3 inline-flex min-h-9 items-center text-[10px] font-bold uppercase tracking-wide text-gray-400 transition-colors hover:text-white"
+                        >
+                          Matérias e conversas
+                        </Link>
+
+                        <ReleaseHypeMeter
+                          releaseId={item.id}
+                          counts={hypeCounts[item.id] || EMPTY_HYPE_COUNTS}
+                          selectedVote={myVotes[item.id]}
+                          isVoting={votingReleaseId === item.id}
+                          onVote={handleVote}
+                        />
                       </div>
                     </article>
                   ))}
@@ -508,6 +771,17 @@ export function ReleasesPageClient() {
       </main>
 
       <Footer />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingVote(null);
+        }}
+        onSuccess={() => {
+          setIsAuthModalOpen(false);
+          if (pendingVote) setHypeError("Volte ao Radar depois do acesso para confirmar seu voto.");
+        }}
+      />
     </div>
   );
 }

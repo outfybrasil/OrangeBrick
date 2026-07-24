@@ -37,7 +37,11 @@ function AdvertiseSection() {
   if (submitted) {
     return (
       <div className="max-w-xl mx-auto text-center py-20 space-y-5">
-        <div className="w-12 h-12 mx-auto rounded-full border border-green-500/40 bg-green-500/10 text-green-400 flex items-center justify-center text-xl">✓</div>
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-green-500/40 bg-green-500/10 text-green-400">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="m5 12 4 4L19 6" />
+          </svg>
+        </div>
         <h1 className="text-2xl font-black uppercase">Proposta enviada</h1>
         <p className="text-sm text-gray-400 font-sans">A equipe comercial recebeu sua mensagem e responderá pelo e-mail informado.</p>
         <button type="button" onClick={() => setSubmitted(false)} className="text-brand-orange hover:underline cursor-pointer">Enviar outra proposta</button>

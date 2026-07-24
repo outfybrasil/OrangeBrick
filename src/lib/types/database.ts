@@ -21,6 +21,18 @@ export interface Database {
         Update: Partial<ReleaseRadarItemInsert>;
         Relationships: [];
       };
+      release_hype_votes: {
+        Row: ReleaseHypeVote;
+        Insert: ReleaseHypeVoteInsert;
+        Update: Partial<ReleaseHypeVoteInsert>;
+        Relationships: [];
+      };
+      topics: {
+        Row: Topic;
+        Insert: TopicInsert;
+        Update: Partial<TopicInsert>;
+        Relationships: [];
+      };
       reactions: {
         Row: Reaction;
         Insert: ReactionInsert;
@@ -116,6 +128,14 @@ export interface Database {
         };
         Returns: boolean;
       };
+      get_release_hype_counts: {
+        Args: Record<string, never>;
+        Returns: ReleaseHypeCount[];
+      };
+      get_my_release_hype_votes: {
+        Args: Record<string, never>;
+        Returns: ReleaseHypeVoteSelection[];
+      };
     };
     Views: Record<string, never>;
     Enums: Record<string, never>;
@@ -138,6 +158,7 @@ export interface Post {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  topic_id: string | null;
 }
 
 export interface PostInsert {
@@ -155,6 +176,7 @@ export interface PostInsert {
   published_at?: string | null;
   created_at?: string;
   updated_at?: string;
+  topic_id?: string | null;
 }
 
 export interface EditorialImage {
@@ -191,6 +213,28 @@ export interface EditorialImageInsert {
   updated_at?: string;
 }
 
+export interface Topic {
+  id: string;
+  name: string;
+  kind: "game" | "subject";
+  description: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TopicInsert {
+  id: string;
+  name: string;
+  kind?: Topic["kind"];
+  description?: string | null;
+  image_url?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ReleaseRadarItem {
   id: string;
   game: string;
@@ -206,6 +250,7 @@ export interface ReleaseRadarItem {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  topic_id: string | null;
 }
 
 export interface ReleaseRadarItemInsert {
@@ -223,6 +268,34 @@ export interface ReleaseRadarItemInsert {
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
+  topic_id?: string | null;
+}
+
+export interface ReleaseHypeVote {
+  id: string;
+  release_id: string;
+  user_id: string;
+  vote_type: "buy" | "watch" | "skip";
+  created_at: string;
+}
+
+export interface ReleaseHypeVoteInsert {
+  id?: string;
+  release_id: string;
+  user_id: string;
+  vote_type: ReleaseHypeVote["vote_type"];
+  created_at?: string;
+}
+
+export interface ReleaseHypeCount {
+  release_id: string;
+  vote_type: ReleaseHypeVote["vote_type"];
+  vote_count: number;
+}
+
+export interface ReleaseHypeVoteSelection {
+  release_id: string;
+  vote_type: ReleaseHypeVote["vote_type"];
 }
 
 export interface Reaction {
@@ -396,6 +469,9 @@ export interface CommunityPostRow {
   is_official: boolean;
   is_pinned: boolean;
   created_at: string;
+  topic_id: string | null;
+  source_post_id: string | null;
+  is_official_thread: boolean;
 }
 
 export interface CommunityPostInsert {
@@ -411,6 +487,9 @@ export interface CommunityPostInsert {
   is_official?: boolean;
   is_pinned?: boolean;
   created_at?: string;
+  topic_id?: string | null;
+  source_post_id?: string | null;
+  is_official_thread?: boolean;
 }
 
 export interface CommunityReactionRow {
@@ -457,6 +536,8 @@ export interface CommunityPollRow {
   options: Json;
   created_at: string;
   expires_at: string | null;
+  prompt_date: string | null;
+  is_active: boolean;
 }
 
 export interface CommunityPollInsert {
@@ -465,6 +546,8 @@ export interface CommunityPollInsert {
   options: Json;
   created_at?: string;
   expires_at?: string | null;
+  prompt_date?: string | null;
+  is_active?: boolean;
 }
 
 export interface CommunityPollVoteRow {

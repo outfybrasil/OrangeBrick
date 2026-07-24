@@ -15,7 +15,7 @@ export const AUTHOR_TAGS: Record<PostCategory, string> = {
 
 export function normalizeAuthorTag(value: string | null | undefined): string {
   return (value || "")
-    .replace(/^(?:💣|🛠️?|📡|🔧|🎮|🔥|⚡)\s*/u, "")
+    .replace(/^(?:\u{1F4A3}|\u{1F6E0}\u{FE0F}?|\u{1F4E1}|\u{1F527}|\u{1F3AE}|\u{1F525}|\u{26A1})\s*/u, "")
     .trim();
 }
 

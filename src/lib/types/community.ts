@@ -7,6 +7,7 @@ export interface AttachedArticle {
   summary: string;
   image_url?: string | null;
   category: string;
+  topic_id?: string | null;
 }
 
 export interface SharedPostData {
@@ -38,6 +39,9 @@ export interface CommunityPost {
   created_at: string;
   is_pinned?: boolean;
   is_official?: boolean;
+  topic_id?: string | null;
+  source_post_id?: string | null;
+  is_official_thread?: boolean;
 }
 
 export interface PollOption {

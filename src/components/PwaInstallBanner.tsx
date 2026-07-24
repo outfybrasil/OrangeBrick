@@ -9,8 +9,16 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PwaInstallBanner() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker
+      .register(`${basePath}/sw.js`, { scope: `${basePath}/` })
+      .catch(() => undefined);
+  }, [basePath]);
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -61,8 +69,11 @@ export function PwaInstallBanner() {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center text-xl shrink-0">
-            📲
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-orange/40 bg-brand-orange/20 text-brand-orange">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" />
+              <path d="M9 18h6M12 6v7m0 0 3-3m-3 3-3-3" />
+            </svg>
           </div>
           <div>
             <h4 id="pwa-title" className="font-subtitle text-sm font-bold text-white">
@@ -79,7 +90,9 @@ export function PwaInstallBanner() {
           aria-label="Fechar convite para instalar o aplicativo"
           className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white"
         >
-          ✕
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
         </button>
       </div>
 

@@ -11,7 +11,7 @@ const CSS = [
 
 const MSG = [
   "",
-  "🧱 ORANGE BRICK — Portal de notícias de games",
+  "ORANGE BRICK — Portal de notícias de games",
   "───────────────────────────────────────",
   "",
   "  Feito por humanos, pra humanos.",
@@ -33,7 +33,7 @@ export function useConsoleEasterEgg() {
   useEffect(() => {
     console.log("%c" + MSG.join("\n"), CSS.join(""));
     console.log(
-      "%c🔧 Pssiu... se você chegou até aqui, tem um cookie esperando. 🍪",
+      "%cPssiu... se você chegou até aqui, tem um cookie esperando.",
       "color: #FF5E00; font-size: 11px; font-style: italic;"
     );
   }, []);

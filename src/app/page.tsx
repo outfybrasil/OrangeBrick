@@ -6,6 +6,9 @@ import Link from "next/link";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
 import { PlatformBar } from "@/components/feed/PlatformBar";
+import { CommunityPulse } from "@/components/feed/CommunityPulse";
+import { SinceLastVisit } from "@/components/feed/SinceLastVisit";
+import { HomeEngagementTracker } from "@/components/feed/HomeEngagementTracker";
 import { UserNav } from "@/components/auth/UserNav";
 import { Footer } from "@/components/ui/Footer";
 import type { PostCategory } from "@/lib/types/database";
@@ -96,7 +99,15 @@ function HomeContent() {
           {/* BOTÕES DE AÇÃO NA DIREITA */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <Link
+              href="/assuntos"
+              className="hidden min-h-11 items-center px-2 text-xs font-bold text-gray-400 transition-colors hover:text-white sm:flex"
+            >
+              Assuntos
+            </Link>
+            <Link
               href="/brickboard"
+              data-home-event="brickboard"
+              data-home-target="header"
               aria-label="Abrir Brickboard"
               className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-brand-orange/40 bg-brand-orange/10 px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange sm:px-3.5"
             >
@@ -112,14 +123,23 @@ function HomeContent() {
       </header>
 
       <main className="mx-auto w-full min-w-0 max-w-7xl flex-1 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <HomeEngagementTracker />
         <h1 className="sr-only">Orange Brick — notícias de games, hardware e indústria</h1>
-        <ReleaseRadarStrip />
-        <PlatformBar />
         <NewsFeed
           category={activeCategory}
           searchQuery={searchQuery}
           activeTag={activeTag}
           onSelectCategory={handleCategoryClick}
+          homeHighlights={
+            <>
+              <SinceLastVisit />
+              <CommunityPulse />
+              <div data-home-event="radar" data-home-target="home">
+                <ReleaseRadarStrip />
+              </div>
+              <PlatformBar />
+            </>
+          }
         />
       </main>
 

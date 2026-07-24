@@ -15,11 +15,51 @@ function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   return buffer;
 }
 
+function pushErrorMessage(cause: unknown) {
+  if (cause instanceof DOMException) {
+    if (cause.name === "NotAllowedError") {
+      return "Os alertas estão bloqueados. Libere as notificações nas configurações do navegador.";
+    }
+    if (cause.name === "AbortError") {
+      return "O navegador interrompeu a ativação. Tente de novo em alguns segundos.";
+    }
+    if (cause.name === "InvalidStateError") {
+      return "Instale o Orange Brick na tela inicial e tente novamente.";
+    }
+  }
+  return cause instanceof Error ? cause.message : "Não foi possível alterar os alertas.";
+}
+
+function shouldSyncSubscription(endpoint: string, userId: string) {
+  try {
+    const saved = JSON.parse(localStorage.getItem("ob_push_sync") || "{}") as {
+      endpoint?: string;
+      userId?: string;
+      syncedAt?: number;
+    };
+    return saved.endpoint !== endpoint
+      || saved.userId !== userId
+      || !saved.syncedAt
+      || Date.now() - saved.syncedAt > 6 * 60 * 60 * 1000;
+  } catch {
+    return true;
+  }
+}
+
+function saveSubscriptionSync(endpoint: string, userId: string) {
+  localStorage.setItem("ob_push_sync", JSON.stringify({
+    endpoint,
+    userId,
+    syncedAt: Date.now(),
+  }));
+}
+
 export default function NotificationBell() {
   const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [mounted, setMounted] = useState(false);
   const [supported, setSupported] = useState(false);
+  const [requiresInstall, setRequiresInstall] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +70,14 @@ export default function NotificationBell() {
       "serviceWorker" in navigator &&
       "PushManager" in window &&
       "Notification" in window;
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || (navigator as Navigator & { standalone?: boolean }).standalone === true;
     queueMicrotask(() => {
       setMounted(true);
       setSupported(isSupported);
+      setRequiresInstall(isIos && !isStandalone);
     });
     if (!isSupported) return;
 
@@ -45,7 +90,7 @@ export default function NotificationBell() {
         }
         const subscription = await registration.pushManager.getSubscription();
         setSubscribed(Boolean(subscription));
-        if (subscription && user) {
+        if (subscription && user && shouldSyncSubscription(subscription.endpoint, user.id)) {
           try {
             const raw = subscription.toJSON();
             const supabase = createClient();
@@ -58,9 +103,10 @@ export default function NotificationBell() {
                 auth_key: raw.keys.auth,
                 user_agent: navigator.userAgent,
               }, { accessToken: session.access_token });
+              saveSubscriptionSync(raw.endpoint, user.id);
             }
           } catch {
-            setError("As notificações estão ativas neste aparelho, mas a conta ainda não foi sincronizada.");
+            setError("Os alertas estão ativos neste aparelho, mas a conta não foi sincronizada. Toque novamente para tentar.");
           }
         }
       })
@@ -74,21 +120,21 @@ export default function NotificationBell() {
     try {
       if (typeof window !== "undefined" && "Notification" in window) {
         if (Notification.permission === "denied") {
-          throw new Error("Permissão bloqueada nas configurações do seu navegador.");
+          throw new Error("Os alertas estão bloqueados. Libere as notificações nas configurações do navegador.");
         }
         if (Notification.permission !== "granted") {
           const permission = await Notification.requestPermission();
           if (permission !== "granted") {
-            throw new Error("Permissão de notificação não foi concedida.");
+            throw new Error("Sem permissão, o Orange Brick não consegue avisar quando o app está fechado.");
           }
         }
       }
 
       const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-      if (!publicKey) throw new Error("Chave de notificação VAPID não configurada.");
+      if (!publicKey) throw new Error("Os alertas ainda não foram configurados no servidor.");
 
       const registration = await navigator.serviceWorker.register(`${basePath}/sw.js`, { scope: `${basePath}/` });
-      await navigator.serviceWorker.ready;
+      await registration.update().catch(() => undefined);
 
       const existingSubscription = await registration.pushManager.getSubscription();
       const subscription = existingSubscription || await registration.pushManager.subscribe({
@@ -97,7 +143,9 @@ export default function NotificationBell() {
         });
 
       const raw = subscription.toJSON();
-      if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys.auth) throw new Error("Assinatura de notificação inválida.");
+      if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys.auth) {
+        throw new Error("O navegador criou um alerta incompleto. Atualize a página e tente novamente.");
+      }
 
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -109,13 +157,14 @@ export default function NotificationBell() {
         user_agent: navigator.userAgent,
       }, { accessToken: session?.access_token });
 
+      if (user) saveSubscriptionSync(raw.endpoint, user.id);
       setSubscribed(true);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Erro ao ativar notificações.");
+      setError(pushErrorMessage(cause));
     } finally {
       setLoading(false);
     }
-  }, [basePath, loading]);
+  }, [basePath, loading, user]);
 
   const unsubscribe = useCallback(async () => {
     if (loading) return;
@@ -125,31 +174,55 @@ export default function NotificationBell() {
       const registration = await navigator.serviceWorker.getRegistration(`${basePath}/`);
       const subscription = await registration?.pushManager.getSubscription();
       if (subscription) {
-        await invokeFunction("manage-push-subscription", { action: "unsubscribe", endpoint: subscription.endpoint });
+        const endpoint = subscription.endpoint;
         await subscription.unsubscribe();
+        setSubscribed(false);
+        localStorage.removeItem("ob_push_sync");
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        try {
+          await invokeFunction(
+            "manage-push-subscription",
+            { action: "unsubscribe", endpoint },
+            { accessToken: session?.access_token }
+          );
+        } catch {
+          setError("Os alertas foram desligados neste aparelho. O servidor removerá a assinatura antiga automaticamente.");
+        }
       }
+      localStorage.removeItem("ob_push_sync");
       setSubscribed(false);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Erro ao desativar notificações.");
+      setError(pushErrorMessage(cause));
     } finally {
       setLoading(false);
     }
   }, [basePath, loading]);
 
-  if (!mounted || !supported) return null;
+  if (!mounted) return null;
+
+  if (!supported || requiresInstall) {
+    if (!requiresInstall) return null;
+    return (
+      <p className="max-w-64 text-[11px] leading-relaxed text-gray-300">
+        No iPhone, adicione o Orange Brick à Tela de Início para receber alertas mesmo com o app fechado.
+      </p>
+    );
+  }
 
   return (
     <div className="relative inline-block">
       <button
         onClick={subscribed ? unsubscribe : subscribe}
         disabled={loading}
-        aria-label={subscribed ? "Desativar notificações" : "Ativar notificações"}
+        aria-label={subscribed ? "Desativar alertas" : "Ativar alertas"}
+        aria-describedby={error ? "push-notification-error" : undefined}
         className={`flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-bold transition-colors ${
           subscribed
             ? "bg-brand-orange/15 text-brand-orange border-brand-orange/40"
             : "bg-card-slate/90 text-gray-200 border-brand-orange-muted/20 hover:border-brand-orange/40 hover:text-white"
         } disabled:opacity-50`}
-        title={subscribed ? "Notificações ativas (Clique para gerenciar)" : "Ativar notificações em tempo real"}
+        title={subscribed ? "Desativar alertas neste aparelho" : "Receber alertas de novas matérias"}
       >
         {loading ? (
           <span className="w-3.5 h-3.5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
@@ -158,11 +231,12 @@ export default function NotificationBell() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" />
           </svg>
         )}
-        <span className="whitespace-nowrap">{subscribed ? "Notificações Ativas" : "Ativar Notificações"}</span>
+        <span className="whitespace-nowrap">{subscribed ? "Alertas ativos" : "Receber alertas"}</span>
       </button>
 
       {error && (
         <div
+          id="push-notification-error"
           role="alert"
           className="absolute bottom-full left-0 z-50 mb-2 w-[min(15rem,calc(100vw-2rem))] rounded-xl border border-red-500/40 bg-[#12141C] p-3 text-xs text-red-300 shadow-2xl animate-fade-in"
         >
@@ -170,10 +244,10 @@ export default function NotificationBell() {
             <span>{error}</span>
             <button
               onClick={() => setError(null)}
-              aria-label="Fechar erro de notificações"
+              aria-label="Fechar aviso de alertas"
               className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-red-200 transition-colors hover:bg-red-500/15 hover:text-white"
             >
-              ✕
+              ×
             </button>
           </div>
         </div>

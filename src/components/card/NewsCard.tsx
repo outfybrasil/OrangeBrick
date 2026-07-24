@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { NewsCardHeader } from "./NewsCardHeader";
 import { NewsCardMedia } from "./NewsCardMedia";
 import { NewsCardSummary } from "./NewsCardSummary";
@@ -9,7 +9,7 @@ import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { ComposeBrickModal } from "@/components/community/ComposeBrickModal";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { BookmarkIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
+import { BookmarkIcon } from "@/components/ui/ContentActionIcons";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useReactions } from "@/lib/hooks/useReactions";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -28,6 +28,7 @@ export function NewsCard({ post, stats }: NewsCardProps) {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied" | "error">("idle");
   const { addPost: addCommunityBrick } = useCommunityFeed({ load: false });
   const { toggleBookmark, isBookmarked } = useBookmarks();
   const bookmarked = isBookmarked(post.id);
@@ -61,20 +62,28 @@ export function NewsCard({ post, stats }: NewsCardProps) {
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.slug}` : `/posts/${post.slug}`;
   const shareText = `Confira no Orange Brick: "${post.title}"`;
 
-  const handleShareSocial = (platform: "whatsapp" | "twitter" | "telegram", e: React.MouseEvent) => {
+  const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    let url = "";
-    if (platform === "whatsapp") {
-      url = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`;
-    } else if (platform === "twitter") {
-      url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-    } else if (platform === "telegram") {
-      url = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: post.title, text: shareText, url: shareUrl });
+      } catch {
+      }
+      return;
     }
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatus("copied");
+    } catch {
+      setShareStatus("error");
     }
   };
+
+  useEffect(() => {
+    if (shareStatus === "idle") return;
+    const timeoutId = window.setTimeout(() => setShareStatus("idle"), 2500);
+    return () => window.clearTimeout(timeoutId);
+  }, [shareStatus]);
 
   const attachedArticle = useMemo(
     () => ({
@@ -91,6 +100,8 @@ export function NewsCard({ post, stats }: NewsCardProps) {
   return (
     <>
       <article
+        data-home-event="article"
+        data-home-target={post.slug}
         role="article"
         tabIndex={0}
         onClick={handleClick}
@@ -146,39 +157,6 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         <NewsCardSummary summary={post.summary} author={post.author_name} tag={post.author_tag} />
 
         <div
-          className="flex items-center justify-between border-t border-brand-orange-muted/10 px-3 py-2 text-xs text-gray-400 sm:px-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="text-[11px] font-semibold text-gray-500">Compartilhar</span>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={(e) => handleShareSocial("whatsapp", e)}
-              aria-label="Compartilhar no WhatsApp"
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#25D366] transition-colors hover:bg-[#25D366]/10 hover:text-[#50e383]"
-              title="Compartilhar no WhatsApp"
-            >
-              <SocialLogo network="whatsapp" />
-            </button>
-            <button
-              onClick={(e) => handleShareSocial("telegram", e)}
-              aria-label="Compartilhar no Telegram"
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#26A5E4] transition-colors hover:bg-[#26A5E4]/10 hover:text-[#62c3f2]"
-              title="Compartilhar no Telegram"
-            >
-              <SocialLogo network="telegram" />
-            </button>
-            <button
-              onClick={(e) => handleShareSocial("twitter", e)}
-              aria-label="Compartilhar no X"
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-gray-200 transition-colors hover:bg-white/[0.07] hover:text-white"
-              title="Compartilhar no X"
-            >
-              <SocialLogo network="x" />
-            </button>
-          </div>
-        </div>
-
-        <div
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
           role="presentation"
@@ -196,6 +174,26 @@ export function NewsCard({ post, stats }: NewsCardProps) {
             onRepostClick={handleRepostClick}
             viewCount={stats.views}
           />
+          <div className="flex justify-end border-t border-white/[0.06] px-3 py-1 sm:px-4">
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-live="polite"
+              className="flex min-h-11 items-center gap-2 px-2 text-xs font-semibold text-gray-400 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" />
+              </svg>
+              {shareStatus === "copied"
+                ? "Link copiado"
+                : shareStatus === "error"
+                  ? "Não foi possível copiar"
+                  : "Compartilhar"}
+            </button>
+          </div>
         </div>
       </article>
 

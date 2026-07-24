@@ -15,6 +15,8 @@ import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { Footer } from "@/components/ui/Footer";
 import { BookmarkIcon, RepostIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
+import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
+import { createDataClient } from "@/lib/supabase/client";
 import type { Post, PostStats } from "@/lib/types/database";
 
 type ContentBlock =
@@ -87,6 +89,7 @@ import { useBookmarks } from "@/lib/hooks/useBookmarks";
 
 export function PostArticle({ post, stats }: PostArticleProps) {
   const router = useRouter();
+  const supabase = useMemo(() => createDataClient(), []);
   const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const { toggleBookmark, isBookmarked } = useBookmarks();
@@ -104,6 +107,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
   const { addPost: addCommunityBrick } = useCommunityFeed({ load: false });
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [conversationCount, setConversationCount] = useState(0);
 
   useEffect(() => {
     queueMicrotask(() => void fetchComments());
@@ -112,6 +116,18 @@ export function PostArticle({ post, stats }: PostArticleProps) {
   useEffect(() => {
     void registerView();
   }, [registerView]);
+
+  useEffect(() => {
+    async function loadConversationCount() {
+      const { count } = await supabase
+        .from("community_posts")
+        .select("id", { count: "exact", head: true })
+        .contains("attached_article", { slug: post.slug });
+      setConversationCount(count || 0);
+    }
+
+    void loadConversationCount();
+  }, [post.slug, supabase]);
 
   const handleRepostClick = () => {
     if (!user) {
@@ -146,9 +162,25 @@ export function PostArticle({ post, stats }: PostArticleProps) {
       summary: post.summary,
       image_url: post.image_url || undefined,
       category: post.category,
+      topic_id: post.topic_id,
     }),
     [post]
   );
+
+  const conversationUrl = useMemo(() => {
+    if (conversationCount > 0) {
+      return `/brickboard?article=${encodeURIComponent(post.slug)}`;
+    }
+
+    const params = new URLSearchParams({
+      attach: post.slug,
+      title: post.title,
+      summary: post.summary,
+      cat: post.category,
+    });
+    if (post.image_url) params.set("img", post.image_url);
+    return `/brickboard?${params.toString()}`;
+  }, [conversationCount, post]);
 
   return (
     <div className="min-h-dvh min-w-0 bg-background-void pb-16 text-white sm:pb-24">
@@ -265,6 +297,30 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             viewCount={viewCount}
           />
         </div>
+
+        <ArticleHypeSummary postSlug={post.slug} />
+
+        <section className="mt-10 border-y border-brand-orange/30 bg-brand-orange/[0.05] px-4 py-5 sm:px-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-heading text-lg font-black uppercase text-white">
+                Continue no Brickboard
+              </h2>
+              <p className="mt-1 text-sm text-gray-300">
+                {conversationCount > 0
+                  ? `${conversationCount} ${conversationCount === 1 ? "leitor publicou" : "leitores publicaram"} sobre esta matéria.`
+                  : "Abra a conversa e diga o que esta notícia muda para você."}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(conversationUrl)}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90"
+            >
+              {conversationCount > 0 ? "Ver conversa" : "Abrir conversa"}
+            </button>
+          </div>
+        </section>
 
         <div id="comments-section" className="mt-10 space-y-6 border-t border-brand-orange-muted/15 pt-8 sm:mt-14 sm:pt-10">
           <div className="flex items-center justify-between gap-4 flex-wrap">

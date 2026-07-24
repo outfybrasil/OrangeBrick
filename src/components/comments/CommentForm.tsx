@@ -39,8 +39,10 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
     return (
       <>
         <div className="relative space-y-4 overflow-hidden rounded-2xl border border-brand-orange-muted/20 bg-card-slate/80 p-5 text-center shadow-xl sm:rounded-3xl sm:p-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-orange/15 border border-brand-orange/30 text-brand-orange shadow-[0_0_15px_rgba(255,94,0,0.2)]">
-            <span className="text-xl">💬</span>
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-orange/30 bg-brand-orange/15 text-brand-orange">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+            </svg>
           </div>
 
           <div className="space-y-1.5 max-w-md mx-auto">
@@ -138,10 +140,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
             {isSubmitting ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <>
-                <span>Publicar Comentário</span>
-                <span>🚀</span>
-              </>
+              <span>Publicar Comentário</span>
             )}
           </button>
         </div>

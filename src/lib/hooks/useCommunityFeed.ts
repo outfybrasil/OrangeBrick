@@ -129,6 +129,9 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           created_at: row.created_at,
           is_pinned: row.is_pinned,
           is_official: row.is_official,
+          topic_id: row.topic_id,
+          source_post_id: row.source_post_id,
+          is_official_thread: row.is_official_thread,
         };
       });
 
@@ -137,7 +140,9 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       const { data: pollRows } = await supabase
         .from("community_polls")
         .select("*")
-        .order("created_at", { ascending: false })
+        .eq("is_active", true)
+        .lte("prompt_date", new Date().toISOString().slice(0, 10))
+        .order("prompt_date", { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -244,6 +249,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         platform_tag: platformTag || null,
         attached_article: attachedArticle || null,
         media_url: mediaUrl || null,
+        topic_id: attachedArticle?.topic_id || null,
       });
     },
     [user, profile, supabase]
@@ -354,6 +360,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           original_platform_tag: originalPost.platform_tag || undefined,
           original_attached_article: originalPost.attached_article || undefined,
         },
+        topic_id: originalPost.topic_id || null,
       });
       if (!error) await sendCommunityPush("repost", originalPost.id);
     },
