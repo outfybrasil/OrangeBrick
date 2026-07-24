@@ -5,6 +5,8 @@ import { createDataClient } from "@/lib/supabase/client";
 import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { getGoogleAvatarUrl } from "@/lib/avatar";
+import { invokeFunction } from "@/lib/supabase/functions";
 
 interface UseCommunityFeedOptions {
   load?: boolean;
@@ -16,6 +18,21 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
   const [isLoaded, setIsLoaded] = useState(!load);
+
+  const sendCommunityPush = useCallback(async (
+    eventType: "reaction" | "comment" | "repost" | "comment_like",
+    referenceId: string
+  ) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      await invokeFunction("send-push-notification", {
+        event_type: eventType,
+        reference_id: referenceId,
+      }, { accessToken: session.access_token });
+    } catch {
+    }
+  }, [supabase]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -216,9 +233,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
 
       const authorAvatar =
         profile?.avatar_url ||
-        user?.user_metadata?.avatar_url ||
-        user?.user_metadata?.picture ||
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+        getGoogleAvatarUrl(user) ||
+        "";
 
       await supabase.from("community_posts").insert({
         user_id: user.id,
@@ -272,25 +288,26 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
             await supabase.from("community_reactions").delete().eq("id", existingRow.id);
           } else {
             await supabase.from("community_reactions").delete().eq("id", existingRow.id);
-            await supabase.from("community_reactions").insert({
+            const { error } = await supabase.from("community_reactions").insert({
               post_id: postId,
               user_id: user.id,
               reaction_type: reactionType,
             });
+            if (!error) await sendCommunityPush("reaction", postId);
           }
         } else {
-          await supabase.from("community_reactions").insert({
+          const { error } = await supabase.from("community_reactions").insert({
             post_id: postId,
             user_id: user.id,
             reaction_type: reactionType,
           });
-
+          if (!error) await sendCommunityPush("reaction", postId);
         }
       } catch {
         fetchData();
       }
     },
-    [user, supabase, fetchData]
+    [user, supabase, fetchData, sendCommunityPush]
   );
 
   const votePoll = useCallback(
@@ -319,11 +336,10 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
 
       const authorAvatar =
         profile?.avatar_url ||
-        user?.user_metadata?.avatar_url ||
-        user?.user_metadata?.picture ||
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+        getGoogleAvatarUrl(user) ||
+        "";
 
-      await supabase.from("community_posts").insert({
+      const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
         author_avatar: authorAvatar,
@@ -339,9 +355,9 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           original_attached_article: originalPost.attached_article || undefined,
         },
       });
-
+      if (!error) await sendCommunityPush("repost", originalPost.id);
     },
-    [user, profile, supabase]
+    [user, profile, supabase, sendCommunityPush]
   );
 
   const deletePost = useCallback(
@@ -365,20 +381,19 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
 
       const authorAvatar =
         profile?.avatar_url ||
-        user?.user_metadata?.avatar_url ||
-        user?.user_metadata?.picture ||
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+        getGoogleAvatarUrl(user) ||
+        "";
 
-      await supabase.from("community_comments").insert({
+      const { error } = await supabase.from("community_comments").insert({
         post_id: postId,
         user_id: user.id,
         author_name: authorName,
         author_avatar: authorAvatar,
         content,
       });
-
+      if (!error) await sendCommunityPush("comment", postId);
     },
-    [user, profile, supabase]
+    [user, profile, supabase, sendCommunityPush]
   );
 
   const deleteComment = useCallback(
@@ -406,16 +421,16 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         if (existingRow) {
           await supabase.from("community_comment_likes").delete().eq("id", existingRow.id);
         } else {
-          await supabase.from("community_comment_likes").insert({
+          const { error } = await supabase.from("community_comment_likes").insert({
             comment_id: commentId,
             user_id: user.id,
           });
-
+          if (!error) await sendCommunityPush("comment_like", commentId);
         }
       } catch {
       }
     },
-    [user, supabase]
+    [user, supabase, sendCommunityPush]
   );
 
   const getComments = useCallback(

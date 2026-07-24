@@ -9,7 +9,7 @@ interface NewsCardHeaderProps {
 
 export function NewsCardHeader({ category, publishedAt }: NewsCardHeaderProps) {
   return (
-    <div className="flex items-center justify-between px-4 pt-3 pb-2">
+    <div className="flex items-center gap-3 min-w-0">
       <Tag category={category} />
       <Timer date={publishedAt} />
     </div>

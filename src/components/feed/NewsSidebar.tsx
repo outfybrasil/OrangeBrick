@@ -45,7 +45,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
               <li key={post.id}>
                 <Link
                   href={`/posts/${post.slug}`}
-                  className="group grid grid-cols-[32px_minmax(0,1fr)_64px] items-center gap-3 py-4 transition-colors hover:bg-white/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
+                  className="group grid grid-cols-[32px_minmax(0,1fr)_80px] items-center gap-3 py-4 transition-colors hover:bg-white/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
                 >
                   <span className="font-heading text-2xl font-black tracking-[-0.04em] text-gray-600 transition-colors group-hover:text-brand-orange">
                     {String(index + 1).padStart(2, "0")}
@@ -66,21 +66,21 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                   </div>
 
                   {post.image_url ? (
-                    <div className="relative h-14 w-16 overflow-hidden bg-[#08090C]">
+                    <div className="relative aspect-video w-20 overflow-hidden rounded-md bg-[#08090C]">
                       <img
                         src={post.image_url}
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-20 blur-sm"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-sm"
                       />
                       <img
                         src={post.image_url}
                         alt={post.image_alt || ""}
-                        className="relative h-full w-full object-contain"
+                        className="relative h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
                       />
                     </div>
                   ) : (
-                    <span className="h-14 w-16 bg-card-slate" aria-hidden="true" />
+                    <span className="aspect-video w-20 rounded-md bg-card-slate" aria-hidden="true" />
                   )}
                 </Link>
               </li>

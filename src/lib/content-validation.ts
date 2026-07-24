@@ -5,13 +5,19 @@ export type EditorialBlock =
   | { id: string; type: "image"; url: string; alt: string; caption?: string };
 
 export const AUTHOR_TAGS: Record<PostCategory, string> = {
-  breaking: "💣 Plantão",
-  hardware: "🛠️ Hard News",
-  industry: "📡 Radar",
-  modding: "🔧 Gambiarra",
-  review: "🎮 Review",
-  opinion: "🔥 Opinião",
+  breaking: "Plantão",
+  hardware: "Hard News",
+  industry: "Radar",
+  modding: "Gambiarra",
+  review: "Review",
+  opinion: "Opinião",
 };
+
+export function normalizeAuthorTag(value: string | null | undefined): string {
+  return (value || "")
+    .replace(/^(?:💣|🛠️?|📡|🔧|🎮|🔥|⚡)\s*/u, "")
+    .trim();
+}
 
 interface EditorialContent {
   slug: string;

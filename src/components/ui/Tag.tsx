@@ -11,9 +11,8 @@ export function Tag({ category }: TagProps) {
   return (
     <span
       className={`
-        inline-flex items-center px-2 py-0.5
-        text-[10px] font-subtitle font-bold uppercase tracking-wider
-        border rounded-md
+        inline-flex shrink-0 items-center border-b pb-1
+        text-[10px] font-subtitle font-bold uppercase tracking-[0.08em]
         ${config.color}
       `}
     >

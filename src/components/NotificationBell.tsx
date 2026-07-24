@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { invokeFunction } from "@/lib/supabase/functions";
+import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -14,6 +16,7 @@ function base64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
 }
 
 export default function NotificationBell() {
+  const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [mounted, setMounted] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -42,9 +45,27 @@ export default function NotificationBell() {
         }
         const subscription = await registration.pushManager.getSubscription();
         setSubscribed(Boolean(subscription));
+        if (subscription && user) {
+          try {
+            const raw = subscription.toJSON();
+            const supabase = createClient();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (raw.endpoint && raw.keys?.p256dh && raw.keys.auth && session?.access_token) {
+              await invokeFunction("manage-push-subscription", {
+                action: "subscribe",
+                endpoint: raw.endpoint,
+                p256dh_key: raw.keys.p256dh,
+                auth_key: raw.keys.auth,
+                user_agent: navigator.userAgent,
+              }, { accessToken: session.access_token });
+            }
+          } catch {
+            setError("As notificações estão ativas neste aparelho, mas a conta ainda não foi sincronizada.");
+          }
+        }
       })
       .catch(() => setSubscribed(false));
-  }, [basePath]);
+  }, [basePath, user]);
 
   const subscribe = useCallback(async () => {
     if (loading) return;
@@ -69,21 +90,24 @@ export default function NotificationBell() {
       const registration = await navigator.serviceWorker.register(`${basePath}/sw.js`, { scope: `${basePath}/` });
       await navigator.serviceWorker.ready;
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: base64ToUint8Array(publicKey),
-      });
+      const existingSubscription = await registration.pushManager.getSubscription();
+      const subscription = existingSubscription || await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: base64ToUint8Array(publicKey),
+        });
 
       const raw = subscription.toJSON();
       if (!raw.endpoint || !raw.keys?.p256dh || !raw.keys.auth) throw new Error("Assinatura de notificação inválida.");
 
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
       await invokeFunction("manage-push-subscription", {
         action: "subscribe",
         endpoint: raw.endpoint,
         p256dh_key: raw.keys.p256dh,
         auth_key: raw.keys.auth,
         user_agent: navigator.userAgent,
-      });
+      }, { accessToken: session?.access_token });
 
       setSubscribed(true);
     } catch (cause) {
@@ -120,7 +144,7 @@ export default function NotificationBell() {
         onClick={subscribed ? unsubscribe : subscribe}
         disabled={loading}
         aria-label={subscribed ? "Desativar notificações" : "Ativar notificações"}
-        className={`flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-full border px-3.5 text-xs font-bold shadow-xl transition-all ${
+        className={`flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-bold transition-colors ${
           subscribed
             ? "bg-brand-orange/15 text-brand-orange border-brand-orange/40"
             : "bg-card-slate/90 text-gray-200 border-brand-orange-muted/20 hover:border-brand-orange/40 hover:text-white"

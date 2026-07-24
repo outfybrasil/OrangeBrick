@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, use, useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createDataClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
+import { getGoogleAvatarUrl } from "@/lib/avatar";
 
 interface AuthState {
   user: User | null;
@@ -17,17 +18,24 @@ interface AuthState {
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createDataClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (authenticatedUser: User) => {
     const { data } = await supabase
       .from("profiles")
       .select("*")
-      .eq("user_id", userId)
-      .single<Profile>();
+      .eq("user_id", authenticatedUser.id)
+      .maybeSingle<Profile>();
+
+    const googleAvatarUrl = getGoogleAvatarUrl(authenticatedUser);
+    if (data && !data.avatar_url && googleAvatarUrl) {
+      setProfile({ ...data, avatar_url: googleAvatarUrl });
+      return;
+    }
+
     setProfile(data);
   }, [supabase]);
 
@@ -36,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
-        await fetchProfile(session.user.id);
+        await fetchProfile(session.user);
       }
       setIsLoading(false);
     };
@@ -45,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        await fetchProfile(session.user);
       } else {
         setProfile(null);
       }
@@ -76,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user);
     }
   }, [user, fetchProfile]);
 

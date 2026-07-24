@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { UserBadge } from "@/components/ui/UserBadge";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 interface BrickCardProps {
   post: CommunityPost;
@@ -33,6 +34,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+  const [commentPendingDelete, setCommentPendingDelete] = useState<string | null>(null);
+  const [isDeletingComment, setIsDeletingComment] = useState(false);
+  const deleteDialogRef = useModalDialog<HTMLDivElement>(
+    commentPendingDelete !== null,
+    () => setCommentPendingDelete(null)
+  );
 
   const currentUserId = user?.id;
   const isPostOwner = !!(user && post.user_id && post.user_id === user.id);
@@ -97,8 +104,14 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    await onDeleteComment(commentId);
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    setIsDeletingComment(true);
+    try {
+      await onDeleteComment(commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setCommentPendingDelete(null);
+    } finally {
+      setIsDeletingComment(false);
+    }
   };
 
   const handleLikeComment = async (commentId: string) => {
@@ -129,7 +142,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           <img
             src={avatarSrc}
             alt={post.author_name}
-            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = resolveAvatarUrl(null, post.author_name, post.is_official); }}
             style={{ width: "38px", height: "38px", minWidth: "38px", minHeight: "38px", maxWidth: "38px", maxHeight: "38px", borderRadius: "9999px", objectFit: "cover" }}
             className="border border-brand-orange/30 shrink-0 group-hover/author:scale-105 transition-transform bg-[#08090C]"
           />
@@ -318,7 +331,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             <span className="font-bold text-white">Respostas ({totalCommentCount})</span>
           </div>
 
-          <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+          <div className="max-h-64 overflow-y-auto pr-1">
             {isCommentsLoading ? (
               <div className="flex justify-center py-4">
                 <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
@@ -331,49 +344,62 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               comments.map((c) => {
                 const canDeleteComment = isPostOwner || c.user_id === currentUserId;
                 return (
-                  <div key={c.id} className="bg-[#0D0F14] border border-gray-800/80 rounded-xl p-3 text-xs space-y-2 shadow-inner group/comm">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="flex items-center gap-2 min-w-0 group/cauthor">
+                  <div key={c.id} className="group/comm border-t border-white/[0.07] py-3 first:border-t-0">
+                    <div className="flex items-start gap-2.5">
+                      <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="shrink-0 group/cauthor">
                         <img
                           src={resolveAvatarUrl(c.author_avatar, c.author_name, c.is_official)}
                           alt={c.author_name}
                           onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
-                          style={{ width: "26px", height: "26px", minWidth: "26px", minHeight: "26px", maxWidth: "26px", maxHeight: "26px", borderRadius: "9999px", objectFit: "cover" }}
+                          style={{ width: "30px", height: "30px", minWidth: "30px", minHeight: "30px", maxWidth: "30px", maxHeight: "30px", borderRadius: "9999px", objectFit: "cover" }}
                           className="border border-brand-orange/20 shrink-0 group-hover/cauthor:scale-105 transition-transform bg-[#08090C]"
                         />
-                        <span className="font-heading font-bold text-white truncate group-hover/cauthor:text-brand-orange transition-colors">{c.author_name}</span>
-                        <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
                       </Link>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] font-subtitle text-gray-500">
-                          {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                        {canDeleteComment && (
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="truncate text-xs font-bold text-white transition-colors hover:text-brand-orange">
+                              {c.author_name}
+                            </Link>
+                            <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
+                            <span className="text-[10px] text-gray-500">
+                              {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            {canDeleteComment && (
+                              <button
+                                onClick={() => setCommentPendingDelete(c.id)}
+                                aria-label="Apagar resposta"
+                                className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-red-300/60 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                                title="Apagar resposta"
+                              >
+                                <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+                                </svg>
+                              </button>
+                            )}
                           <button
-                            onClick={() => handleDeleteComment(c.id)}
-                            aria-label="Apagar resposta"
-                            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-[11px] text-red-300/70 transition-colors hover:bg-red-500/15 hover:text-red-200"
-                            title="Apagar resposta"
+                            type="button"
+                            onClick={() => handleLikeComment(c.id)}
+                            className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold transition-colors ${
+                              c.user_has_liked
+                                ? "bg-brand-orange/10 text-brand-orange"
+                                : "text-gray-500 hover:bg-white/5 hover:text-white"
+                            }`}
+                            aria-label="Curtir resposta"
                           >
-                            🗑️
+                            <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={c.user_has_liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.8}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />
+                            </svg>
+                            <span>{c.likes_count || 0}</span>
                           </button>
-                        )}
+                          </div>
+                        </div>
+                        <p className="mt-1.5 whitespace-pre-line break-words text-xs leading-relaxed text-gray-300">
+                          {c.content}
+                        </p>
                       </div>
-                    </div>
-                    <p className="text-gray-300 font-body leading-relaxed pl-8 break-words">{c.content}</p>
-                    <div className="flex items-center justify-end pl-8 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleLikeComment(c.id)}
-                        className={`flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-bold transition-all cursor-pointer ${
-                          c.user_has_liked
-                            ? "bg-red-500/20 text-red-400 border border-red-500/40"
-                            : "text-gray-400 hover:text-red-400 hover:bg-card-slate"
-                        }`}
-                      >
-                        <span>{c.user_has_liked ? "❤️" : "🤍"}</span>
-                        <span>{c.likes_count || 0}</span>
-                      </button>
                     </div>
                   </div>
                 );
@@ -405,6 +431,50 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {commentPendingDelete && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background-void/90 p-3 sm:p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isDeletingComment) setCommentPendingDelete(null);
+          }}
+        >
+          <div
+            ref={deleteDialogRef}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={`delete-brick-comment-title-${commentPendingDelete}`}
+            aria-describedby={`delete-brick-comment-description-${commentPendingDelete}`}
+            tabIndex={-1}
+            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+          >
+            <h3 id={`delete-brick-comment-title-${commentPendingDelete}`} className="text-lg font-bold text-white">
+              Apagar comentário?
+            </h3>
+            <p id={`delete-brick-comment-description-${commentPendingDelete}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setCommentPendingDelete(null)}
+                disabled={isDeletingComment}
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDeleteComment(commentPendingDelete)}
+                disabled={isDeletingComment}
+                className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingComment ? "Apagando…" : "Apagar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

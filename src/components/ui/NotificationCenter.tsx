@@ -4,18 +4,21 @@ import { useState, useRef, useEffect } from "react";
 import { useNotificationCenter } from "@/lib/hooks/useNotificationCenter";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type { AppNotification } from "@/lib/types/database";
+import NotificationBell from "@/components/NotificationBell";
 
 function NotificationIcon({ type }: { type: AppNotification["type"] }) {
-  switch (type) {
-    case "reaction":
-      return <span className="text-sm">🔥</span>;
-    case "comment":
-      return <span className="text-sm">💬</span>;
-    case "reply":
-      return <span className="text-sm">↩️</span>;
-    case "system":
-      return <span className="text-sm">📢</span>;
-  }
+  const labels: Record<AppNotification["type"], string> = {
+    reaction: "Curtida",
+    comment: "Comentário",
+    reply: "Resposta",
+    system: "Aviso",
+  };
+
+  return (
+    <span className="text-[9px] font-semibold uppercase tracking-wide text-brand-orange">
+      {labels[type]}
+    </span>
+  );
 }
 
 function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (id: string) => void }) {
@@ -39,7 +42,7 @@ function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (
         n.is_read ? "opacity-50" : "bg-brand-orange/5"
       } hover:bg-card-slate/60 border-b border-brand-orange-muted/5 last:border-0`}
     >
-      <div className="mt-0.5 shrink-0">
+      <div className="mt-0.5 w-16 shrink-0">
         <NotificationIcon type={n.type} />
       </div>
       <div className="flex-1 min-w-0">
@@ -114,6 +117,9 @@ export function NotificationCenter() {
                 <NotificationItem key={n.id} n={n} onMarkRead={markAsRead} />
               ))
             )}
+          </div>
+          <div className="border-t border-brand-orange-muted/10 px-4 py-3">
+            <NotificationBell />
           </div>
         </div>
       )}

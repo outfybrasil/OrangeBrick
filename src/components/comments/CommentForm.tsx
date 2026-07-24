@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { resolveAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 
 interface CommentFormProps {
   onSubmit: (content: string) => Promise<void>;
@@ -71,7 +71,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   }
 
   const userDisplayName = profile?.nickname || user.email?.split("@")[0] || "Usuário";
-  const avatarUrl = resolveAvatarUrl(profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture, userDisplayName);
+  const avatarUrl = resolveAvatarUrl(profile?.avatar_url || getGoogleAvatarUrl(user), userDisplayName);
 
   return (
     <div className="bg-[#15171F] border border-brand-orange-muted/20 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
@@ -81,10 +81,11 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
             <img
               src={avatarUrl}
               alt=""
+              referrerPolicy="no-referrer"
               style={{ width: "26px", height: "26px", minWidth: "26px", minHeight: "26px", maxWidth: "26px", maxHeight: "26px", borderRadius: "9999px", objectFit: "cover" }}
               className="shrink-0 bg-[#08090C]"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80";
+                (e.target as HTMLImageElement).src = resolveAvatarUrl(null, userDisplayName);
               }}
             />
           </div>

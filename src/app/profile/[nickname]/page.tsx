@@ -11,6 +11,7 @@ import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Footer } from "@/components/ui/Footer";
 import type { Profile } from "@/lib/types/database";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 
 function ProfileContent() {
   const params = useParams();
@@ -47,7 +48,7 @@ function ProfileContent() {
     async function loadProfile() {
       setIsLoading(true);
       try {
-        const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+        const googleAvatar = getGoogleAvatarUrl(user);
 
         const { data } = await supabase
           .from("profiles")
@@ -66,7 +67,7 @@ function ProfileContent() {
 
           const finalAvatar = isOfficialProfile
             ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
-            : (validProfileAvatar || googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80");
+            : resolveAvatarUrl(validProfileAvatar || googleAvatar, profileRow.nickname);
 
           const finalBio = profileRow.bio || "Leitor do Orange Brick e entusiasta de games.";
           setProfileData({
@@ -92,7 +93,7 @@ function ProfileContent() {
 
           const avatar = isOfficialProfile
             ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
-            : (validPostAvatar || googleAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80");
+            : resolveAvatarUrl(validPostAvatar || googleAvatar, decodedNickname);
 
           setProfileData({
             nickname: decodedNickname,
@@ -105,7 +106,7 @@ function ProfileContent() {
       } catch {
         setProfileData({
           nickname: decodedNickname,
-          avatar_url: isOfficialProfile ? `${basePath}/logos/Logo Tijolo Quebrado.PNG` : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+          avatar_url: isOfficialProfile ? `${basePath}/logos/Logo Tijolo Quebrado.PNG` : resolveAvatarUrl(null, decodedNickname),
           bio: "Leitor do Orange Brick.",
         });
       } finally {
@@ -161,7 +162,7 @@ function ProfileContent() {
   };
 
   const handleResetGoogleAvatar = () => {
-    const googlePic = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
+    const googlePic = getGoogleAvatarUrl(user) || "";
     setEditAvatarUrl(googlePic);
   };
 
@@ -195,6 +196,7 @@ function ProfileContent() {
               <img
                 src={profileData?.avatar_url}
                 alt={profileData?.nickname}
+                referrerPolicy="no-referrer"
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-orange/40 shadow-xl shrink-0 aspect-square"
               />
               {isProfileOwner && (

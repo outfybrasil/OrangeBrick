@@ -9,6 +9,18 @@ export interface Database {
         Update: Partial<PostInsert>;
         Relationships: [];
       };
+      editorial_images: {
+        Row: EditorialImage;
+        Insert: EditorialImageInsert;
+        Update: Partial<EditorialImageInsert>;
+        Relationships: [];
+      };
+      release_radar_items: {
+        Row: ReleaseRadarItem;
+        Insert: ReleaseRadarItemInsert;
+        Update: Partial<ReleaseRadarItemInsert>;
+        Relationships: [];
+      };
       reactions: {
         Row: Reaction;
         Insert: ReactionInsert;
@@ -145,6 +157,74 @@ export interface PostInsert {
   updated_at?: string;
 }
 
+export interface EditorialImage {
+  id: string;
+  post_id: string | null;
+  kind: "cover" | "body" | "release";
+  source_url: string;
+  storage_path: string;
+  public_url: string;
+  alt_text: string | null;
+  width: number;
+  height: number;
+  file_size: number;
+  mime_type: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EditorialImageInsert {
+  id?: string;
+  post_id?: string | null;
+  kind?: EditorialImage["kind"];
+  source_url: string;
+  storage_path: string;
+  public_url: string;
+  alt_text?: string | null;
+  width: number;
+  height: number;
+  file_size: number;
+  mime_type?: string;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ReleaseRadarItem {
+  id: string;
+  game: string;
+  release_label: string;
+  release_date: string | null;
+  schedule_label: string;
+  platforms: string[];
+  image_url: string | null;
+  badge: string;
+  category: "week" | "upcoming";
+  post_slug: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReleaseRadarItemInsert {
+  id: string;
+  game: string;
+  release_label: string;
+  release_date?: string | null;
+  schedule_label: string;
+  platforms?: string[];
+  image_url?: string | null;
+  badge: string;
+  category: ReleaseRadarItem["category"];
+  post_slug?: string | null;
+  sort_order?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Reaction {
   id: number;
   post_id: string;
@@ -245,6 +325,7 @@ export interface ProfileInsert {
 
 export interface PushSubscription {
   id: string;
+  user_id: string | null;
   endpoint: string;
   p256dh_key: string;
   auth_key: string;
@@ -254,6 +335,7 @@ export interface PushSubscription {
 
 export interface PushSubscriptionInsert {
   id?: string;
+  user_id?: string | null;
   endpoint: string;
   p256dh_key: string;
   auth_key: string;
@@ -426,10 +508,10 @@ export interface PostStats {
 }
 
 export const CATEGORY_CONFIG: Record<PostCategory, { label: string; color: string }> = {
-  breaking: { label: "Breaking", color: "bg-accent-blue/15 text-accent-blue border-accent-blue/30" },
-  hardware: { label: "Hardware", color: "bg-brand-orange/10 text-brand-orange border-brand-orange/30" },
-  industry: { label: "Indústria", color: "bg-white/5 text-gray-300 border-white/10" },
-  modding: { label: "Modding", color: "bg-purple-500/10 text-purple-400 border-purple-500/30" },
-  review: { label: "Review", color: "bg-green-500/10 text-green-400 border-green-500/30" },
-  opinion: { label: "Opinião", color: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" },
+  breaking: { label: "Plantão", color: "text-brand-orange border-brand-orange/50" },
+  hardware: { label: "Hard News", color: "text-brand-orange border-brand-orange/50" },
+  industry: { label: "Radar", color: "text-brand-orange border-brand-orange/50" },
+  modding: { label: "Gambiarra", color: "text-brand-orange border-brand-orange/50" },
+  review: { label: "Review", color: "text-brand-orange border-brand-orange/50" },
+  opinion: { label: "Opinião", color: "text-brand-orange border-brand-orange/50" },
 };

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminSection = "overview" | "editor";
+type AdminSection = "overview" | "editor" | "images" | "releases";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -29,6 +29,25 @@ function ComposeIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z" />
+    </svg>
+  );
+}
+
+function ImagesIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <circle cx="9" cy="10" r="1.5" />
+      <path d="m5.5 17 4.5-4 3 2.5 2.5-2 3 3.5" />
+    </svg>
+  );
+}
+
+function ReleasesIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M6 3v3M18 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
+      <path d="M8 13h3v3H8z" />
     </svg>
   );
 }
@@ -107,6 +126,14 @@ export function AdminShell({
             <ComposeIcon />
             Nova matéria
           </Link>
+          <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}>
+            <ImagesIcon />
+            Biblioteca de imagens
+          </Link>
+          <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
+            <ReleasesIcon />
+            Radar de lançamentos
+          </Link>
         </nav>
 
         <div className="space-y-1 border-t border-white/[0.07] p-4">
@@ -181,6 +208,24 @@ export function AdminShell({
             >
               <ComposeIcon />
               Nova matéria
+            </Link>
+            <Link
+              href="/admin/images"
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-bold ${
+                active === "images" ? "bg-brand-orange text-white" : "text-gray-400"
+              }`}
+            >
+              <ImagesIcon />
+              Imagens
+            </Link>
+            <Link
+              href="/admin/releases"
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-bold ${
+                active === "releases" ? "bg-brand-orange text-white" : "text-gray-400"
+              }`}
+            >
+              <ReleasesIcon />
+              Radar
             </Link>
           </nav>
         </header>

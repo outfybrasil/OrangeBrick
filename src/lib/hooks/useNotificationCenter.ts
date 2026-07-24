@@ -56,21 +56,16 @@ export function useNotificationCenter() {
           const newNotif = payload.new as AppNotification;
           setNotifications((prev) => [newNotif, ...prev]);
           setUnreadCount((prev) => prev + 1);
-
-          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-            try {
-              new Notification("Orange Brick 🍊", {
-                body: newNotif.message,
-                icon: "/logos/Logo Tijolo Quebrado.PNG",
-              });
-            } catch {
-            }
-          }
         }
       )
       .subscribe();
+    const refreshInterval = window.setInterval(() => void fetchNotifications(), 30000);
+    const refreshOnFocus = () => void fetchNotifications();
+    window.addEventListener("focus", refreshOnFocus);
 
     return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener("focus", refreshOnFocus);
       supabase.removeChannel(channel);
     };
   }, [fetchNotifications, user, supabase]);

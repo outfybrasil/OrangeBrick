@@ -2,15 +2,16 @@
 
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
-import { AUTHOR_TAGS, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import { isAdminUser } from "@/lib/auth";
-import type { Post, PostCategory } from "@/lib/types/database";
+import type { EditorialImage, Post, PostCategory } from "@/lib/types/database";
 import { CATEGORY_CONFIG } from "@/lib/types/database";
 
 type ContentBlock = EditorialBlock;
@@ -35,13 +36,13 @@ function imageLoads(url: string) {
   });
 }
 
-const CATEGORY_OPTIONS: { value: PostCategory; label: string; icon: string }[] = [
-  { value: "breaking", label: "Breaking", icon: "⚡" },
-  { value: "review", label: "Review", icon: "🎮" },
-  { value: "hardware", label: "Hardware", icon: "🛠️" },
-  { value: "opinion", label: "Opinião", icon: "🔥" },
-  { value: "industry", label: "Indústria", icon: "📡" },
-  { value: "modding", label: "Modding", icon: "🔧" },
+const CATEGORY_OPTIONS: { value: PostCategory; label: string }[] = [
+  { value: "breaking", label: "Breaking" },
+  { value: "review", label: "Review" },
+  { value: "hardware", label: "Hardware" },
+  { value: "opinion", label: "Opinião" },
+  { value: "industry", label: "Indústria" },
+  { value: "modding", label: "Modding" },
 ];
 
 function BlockIcon({ type }: { type: "text" | "image" }) {
@@ -88,6 +89,10 @@ function EditForm() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [coverAiPrompt, setCoverAiPrompt] = useState<string | null>(null);
   const [coverAiLoading, setCoverAiLoading] = useState(false);
+  const [coverImageId, setCoverImageId] = useState<string | null>(null);
+  const [isProcessingCover, setIsProcessingCover] = useState(false);
+  const [bodyImageIds, setBodyImageIds] = useState<Record<string, string>>({});
+  const [processingBodyImageId, setProcessingBodyImageId] = useState<string | null>(null);
 
   const editorialChecklist = useMemo(() => {
     const textContent = blocks
@@ -165,7 +170,7 @@ function EditForm() {
           setImageUrl(typedPost.image_url || "");
           setImageAlt(typedPost.image_alt || "");
           setAuthorName(typedPost.author_name);
-          setAuthorTag(typedPost.author_tag || "");
+          setAuthorTag(normalizeAuthorTag(typedPost.author_tag));
           setPublishedAt(typedPost.published_at || null);
 
           try {
@@ -274,6 +279,79 @@ function EditForm() {
     }
   };
 
+  const processCoverImage = async () => {
+    if (!imageUrl.trim()) {
+      setError("Informe a URL da imagem de capa.");
+      return;
+    }
+
+    setIsProcessingCover(true);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const response = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          sourceUrl: imageUrl,
+          postId,
+          altText: imageAlt,
+          kind: "cover",
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Falha ao processar a imagem");
+      const processedImage = payload.image as EditorialImage;
+      setImageUrl(processedImage.public_url);
+      setCoverImageId(processedImage.id);
+      setHasChanges(true);
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Falha ao processar a imagem"));
+    } finally {
+      setIsProcessingCover(false);
+    }
+  };
+
+  const processBodyImage = async (block: Extract<ContentBlock, { type: "image" }>) => {
+    if (!block.url.trim()) {
+      setError("Informe a URL da imagem do bloco.");
+      return;
+    }
+
+    setProcessingBodyImageId(block.id);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const response = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          sourceUrl: block.url,
+          postId,
+          altText: block.alt,
+          kind: "body",
+        }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Falha ao processar a imagem");
+      const processedImage = payload.image as EditorialImage;
+      updateBlockValue(block.id, "url", processedImage.public_url);
+      setBodyImageIds((current) => ({ ...current, [block.id]: processedImage.id }));
+    } catch (err: unknown) {
+      setError(errorMessage(err, "Falha ao processar a imagem"));
+    } finally {
+      setProcessingBodyImageId(null);
+    }
+  };
+
   const toggleAiPrompt = (blockId: string, altText: string) => {
     setAiPromptBlock((prev) => prev === blockId ? null : blockId);
     if (aiPromptBlock !== blockId) {
@@ -369,6 +447,23 @@ function EditForm() {
           .from("posts").insert({ ...payload, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }).select().single();
         if (insertError) throw insertError;
         savedPost = data as unknown as Post;
+      }
+      const imageIdsToLink = [
+        ...(coverImageId ? [coverImageId] : []),
+        ...Object.values(bodyImageIds),
+      ];
+      if (savedPost && imageIdsToLink.length > 0) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Sessão expirada");
+        const response = await fetch("/api/admin/images", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ imageIds: imageIdsToLink, postId: savedPost.id }),
+        });
+        if (!response.ok) throw new Error("A matéria foi salva, mas a imagem não pôde ser vinculada");
       }
       if (isPublished && updatePublishDate && savedPost) {
         const np = { title: savedPost.title, slug: savedPost.slug, category: savedPost.category };
@@ -519,6 +614,27 @@ function EditForm() {
                 placeholder="https://..."
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors text-xs font-mono"
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={processCoverImage}
+                  disabled={isProcessingCover || !imageUrl.trim()}
+                  className="min-h-11 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {isProcessingCover ? "Baixando e convertendo…" : "Baixar e padronizar"}
+                </button>
+                <Link
+                  href="/admin/images"
+                  className="inline-flex min-h-11 items-center rounded-xl px-3 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  Abrir biblioteca
+                </Link>
+              </div>
+              {coverImageId && (
+                <p className="mt-2 text-[11px] text-emerald-300">
+                  Imagem armazenada em WebP, 1280 × 720.
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1.5">Alt da Imagem de Capa</label>
@@ -603,7 +719,7 @@ function EditForm() {
               <input
                 type="text" value={authorTag}
                 onChange={(e) => { setAuthorTag(e.target.value); setHasChanges(true); }}
-                placeholder="🛠️ Hard News"
+                placeholder="Hard News"
                 className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/50 transition-colors"
               />
             </div>
@@ -706,7 +822,15 @@ function EditForm() {
                               className="w-full bg-card-slate/30 border border-brand-orange-muted/10 text-white rounded-lg px-3 py-2 outline-none focus:border-brand-orange/30 transition-colors"
                             />
                           </div>
-                          <div className="border-t border-brand-orange-muted/5 pt-3">
+                          <div className="flex flex-wrap gap-2 border-t border-brand-orange-muted/5 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => processBodyImage(block)}
+                              disabled={processingBodyImageId === block.id || !block.url.trim()}
+                              className="min-h-11 rounded-xl bg-brand-orange px-3 text-[10px] font-bold text-white transition-colors hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-45"
+                            >
+                              {processingBodyImageId === block.id ? "Convertendo…" : "Baixar e padronizar"}
+                            </button>
                             <button
                               type="button"
                               onClick={() => toggleAiPrompt(block.id, block.alt)}
@@ -717,6 +841,11 @@ function EditForm() {
                               </svg>
                               Gerar com IA
                             </button>
+                            {bodyImageIds[block.id] && (
+                              <span className="inline-flex min-h-11 items-center text-[10px] font-semibold text-emerald-300">
+                                WebP 1280 × 720
+                              </span>
+                            )}
                           </div>
                           {aiPromptBlock === block.id && (
                             <div className="bg-accent-blue/5 border border-accent-blue/20 rounded-lg p-4 space-y-3">
@@ -758,7 +887,7 @@ function EditForm() {
                           )}
                           {block.url && (
                             <div className="relative aspect-video max-h-60 w-full overflow-hidden rounded-lg border border-brand-orange-muted/10">
-                              <Image unoptimized fill sizes="(max-width: 768px) 100vw, 800px" src={block.url} alt={block.alt || "Preview"} className="object-cover" />
+                              <Image unoptimized fill sizes="(max-width: 768px) 100vw, 800px" src={block.url} alt={block.alt || "Preview"} className="object-contain" />
                             </div>
                           )}
                         </div>

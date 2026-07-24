@@ -31,7 +31,7 @@ export function CommentList({ comments, isLoading, error, onRetry, onDelete }: C
   }
   if (comments.length === 0) {
     return (
-      <div className="py-8 text-center bg-[#14161E]/40 border border-gray-800/40 rounded-2xl">
+      <div className="border-t border-white/[0.07] py-6 text-center">
         <p className="text-xs font-subtitle text-gray-500">
           Nenhum comentário ainda. Seja o primeiro a compartilhar sua visão!
         </p>
@@ -39,7 +39,7 @@ export function CommentList({ comments, isLoading, error, onRetry, onDelete }: C
     );
   }
   return (
-    <div className="space-y-4">
+    <div>
       {comments.map((comment) => (
         <CommentItem key={comment.id} comment={comment} onDelete={onDelete} />
       ))}

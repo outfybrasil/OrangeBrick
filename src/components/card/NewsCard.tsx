@@ -101,10 +101,10 @@ export function NewsCard({ post, stats }: NewsCardProps) {
           }
         }}
         className={`
-          group bg-card-slate/85 border border-white/[0.08]
-          rounded-xl overflow-hidden cursor-pointer
+          group bg-background-void border-b border-r border-white/10
+          overflow-hidden cursor-pointer
           transition-colors duration-200
-          hover:border-white/[0.16] hover:bg-card-slate
+          hover:bg-white/[0.025] hover:border-white/20
           focus-visible:outline-2 focus-visible:outline-brand-orange
         `}
       >
@@ -146,37 +146,34 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         <NewsCardSummary summary={post.summary} author={post.author_name} tag={post.author_tag} />
 
         <div
-          className="flex flex-col gap-2 border-t border-brand-orange-muted/10 px-3 py-2 text-xs text-gray-400 xs:flex-row xs:items-center xs:justify-between sm:px-4"
+          className="flex items-center justify-between border-t border-brand-orange-muted/10 px-3 py-2 text-xs text-gray-400 sm:px-4"
           onClick={(e) => e.stopPropagation()}
         >
           <span className="text-[11px] font-semibold text-gray-500">Compartilhar</span>
-          <div className="grid w-full grid-cols-3 gap-1.5 xs:w-auto">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={(e) => handleShareSocial("whatsapp", e)}
               aria-label="Compartilhar no WhatsApp"
-              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-[#25D366] transition-colors hover:bg-[#25D366]/10 hover:text-[#50e383] xs:text-[11px]"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#25D366] transition-colors hover:bg-[#25D366]/10 hover:text-[#50e383]"
               title="Compartilhar no WhatsApp"
             >
               <SocialLogo network="whatsapp" />
-              <span>WhatsApp</span>
             </button>
             <button
               onClick={(e) => handleShareSocial("telegram", e)}
               aria-label="Compartilhar no Telegram"
-              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-[#26A5E4] transition-colors hover:bg-[#26A5E4]/10 hover:text-[#62c3f2] xs:text-[11px]"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#26A5E4] transition-colors hover:bg-[#26A5E4]/10 hover:text-[#62c3f2]"
               title="Compartilhar no Telegram"
             >
               <SocialLogo network="telegram" />
-              <span>Telegram</span>
             </button>
             <button
               onClick={(e) => handleShareSocial("twitter", e)}
               aria-label="Compartilhar no X"
-              className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-gray-200 transition-colors hover:bg-white/[0.07] hover:text-white xs:text-[11px]"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-gray-200 transition-colors hover:bg-white/[0.07] hover:text-white"
               title="Compartilhar no X"
             >
               <SocialLogo network="x" />
-              <span>X</span>
             </button>
           </div>
         </div>

@@ -418,7 +418,7 @@ export default function AdminDashboard() {
                       <div className="grid min-w-0 gap-4 sm:grid-cols-[96px_minmax(0,1fr)] 2xl:grid-cols-[96px_minmax(0,1fr)_auto] 2xl:items-center">
                         <div className="aspect-[4/3] overflow-hidden rounded-xl bg-background-void">
                           {post.image_url ? (
-                            <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+                            <img src={post.image_url} alt="" className="h-full w-full object-contain" />
                           ) : (
                             <div className="flex h-full items-center justify-center px-2 text-center text-[10px] font-semibold text-gray-600">
                               Sem capa

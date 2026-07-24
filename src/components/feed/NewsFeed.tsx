@@ -12,6 +12,7 @@ import type { PostCategory, PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
+import { normalizeAuthorTag } from "@/lib/content-validation";
 
 interface NewsFeedProps {
   category: PostCategory | null;
@@ -21,14 +22,14 @@ interface NewsFeedProps {
   onSelectCategory?: (category: PostCategory | null) => void;
 }
 
-const CATEGORIES: { label: string; value: PostCategory | null; hoverColor: string }[] = [
-  { label: "Tudo", value: null, hoverColor: "hover:text-white" },
-  { label: "Breaking", value: "breaking", hoverColor: "hover:text-red-400" },
-  { label: "Reviews", value: "review", hoverColor: "hover:text-brand-orange" },
-  { label: "Hardware", value: "hardware", hoverColor: "hover:text-blue-400" },
-  { label: "Opinião", value: "opinion", hoverColor: "hover:text-yellow-400" },
-  { label: "Indústria", value: "industry", hoverColor: "hover:text-purple-400" },
-  { label: "Modding", value: "modding", hoverColor: "hover:text-green-400" },
+const CATEGORIES: { label: string; value: PostCategory | null }[] = [
+  { label: "Tudo", value: null },
+  { label: "Plantão", value: "breaking" },
+  { label: "Review", value: "review" },
+  { label: "Hard News", value: "hardware" },
+  { label: "Opinião", value: "opinion" },
+  { label: "Radar", value: "industry" },
+  { label: "Gambiarra", value: "modding" },
 ];
 
 const EMPTY_STATS: PostStats = {
@@ -121,7 +122,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
         <Link
           href={`/posts/${heroPost.slug}`}
-          className="lg:col-span-2 group relative aspect-[16/10] w-full rounded-2xl overflow-hidden cursor-pointer border border-brand-orange-muted/15 hover:border-brand-orange/40 hover:shadow-[0_0_25px_rgba(255,94,0,0.15)] transition-all duration-300 hover:-translate-y-1"
+          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden cursor-pointer border border-white/10 bg-background-void hover:border-brand-orange/40 transition-colors duration-300"
         >
           {heroPost.image_url ? (
             <div className="absolute inset-0 bg-[#08090C] overflow-hidden">
@@ -129,12 +130,12 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                 src={heroPost.image_url}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover blur-lg opacity-30 transform scale-110"
+                className="absolute inset-0 w-full h-full object-cover blur-lg opacity-40 transform scale-110"
               />
               <img
                 src={heroPost.image_url}
                 alt={heroPost.image_alt || ""}
-                className="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-105 transition-transform duration-700 ease-out z-0"
+                className="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-[1.02] transition-transform duration-700 ease-out z-0"
               />
             </div>
           ) : (
@@ -159,8 +160,12 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               {heroPost.summary}
             </p>
 
-            <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs font-subtitle text-gray-400">
-              Por <span className="text-white font-bold">{heroPost.author_name}</span>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] font-subtitle sm:mt-2 sm:text-xs">
+              <span className="text-gray-400">Por</span>
+              <strong className="font-bold text-white">{heroPost.author_name}</strong>
+              {normalizeAuthorTag(heroPost.author_tag) && (
+                <span className="text-brand-orange">{normalizeAuthorTag(heroPost.author_tag)}</span>
+              )}
             </div>
           </div>
         </Link>
@@ -177,14 +182,20 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
-              className="flex-1 flex flex-col overflow-hidden bg-card-slate/50 border border-brand-orange-muted/15 rounded-2xl cursor-pointer hover:border-brand-orange/40 hover:bg-card-slate/80 hover:shadow-[0_4px_20px_rgba(255,94,0,0.12)] transition-all duration-300 group hover:-translate-y-1"
+              className="flex-1 flex flex-col overflow-hidden bg-background-void border border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group"
             >
               {post.image_url && (
-                <div className="relative h-24 xs:h-28 sm:h-32 w-full overflow-hidden flex-shrink-0">
+                <div className="relative h-24 xs:h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
+                  <img
+                    src={post.image_url}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-md"
+                  />
                   <img
                     src={post.image_url}
                     alt={post.image_alt || ""}
-                    className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500"
+                    className="relative h-full w-full object-contain transform scale-100 group-hover:scale-[1.02] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-card-slate/90 to-transparent" />
                 </div>
@@ -235,7 +246,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             </div>
 
             {onSelectCategory && (
-              <nav className="-mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1 py-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
+              <nav className="-mx-1 flex max-w-full items-center overflow-x-auto px-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
                 {CATEGORIES.map((cat) => {
                   const isActive = category === cat.value;
                   return (
@@ -243,15 +254,16 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                       key={cat.label}
                       onClick={() => onSelectCategory(cat.value)}
                       className={`
-                        min-h-11 shrink-0 rounded-xl border px-3 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer whitespace-nowrap
+                        relative min-h-11 shrink-0 border-b border-white/10 px-3 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap
                         ${
                           isActive
-                            ? "bg-brand-orange text-white border-brand-orange shadow-[0_0_15px_rgba(255,94,0,0.35)]"
-                            : `bg-card-slate/50 text-gray-300 border-gray-700/40 ${cat.hoverColor} hover:border-brand-orange/40 hover:bg-card-slate`
+                            ? "text-white"
+                            : "text-gray-500 hover:text-gray-200"
                         }
                       `}
                     >
                       {cat.label}
+                      {isActive && <span aria-hidden="true" className="absolute inset-x-3 -bottom-px h-0.5 bg-brand-orange" />}
                     </button>
                   );
                 })}

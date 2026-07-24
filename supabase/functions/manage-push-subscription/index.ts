@@ -14,6 +14,8 @@ Deno.serve(async (request) => {
       return json({ error: "Assinatura inválida" }, 400);
     }
     const supabase = serviceClient();
+    const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } };
     if (action === "unsubscribe") {
       const { error } = await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
       if (error) throw error;
@@ -27,6 +29,7 @@ Deno.serve(async (request) => {
       p256dh_key,
       auth_key,
       user_agent: typeof user_agent === "string" ? user_agent.slice(0, 512) : null,
+      user_id: user?.id || null,
     }, { onConflict: "endpoint" });
     if (error) throw error;
     return json({ success: true });

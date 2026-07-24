@@ -43,6 +43,6 @@ test("bloqueia imagens repetidas e caracteres CJK", () => {
 });
 
 test("mantém as tags de autoria definidas por categoria", () => {
-  assert.equal(AUTHOR_TAGS.breaking, "💣 Plantão");
-  assert.equal(AUTHOR_TAGS.opinion, "🔥 Opinião");
+  assert.equal(AUTHOR_TAGS.breaking, "Plantão");
+  assert.equal(AUTHOR_TAGS.opinion, "Opinião");
 });

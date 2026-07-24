@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationCenter } from "@/components/ui/NotificationCenter";
 import { BookmarkDrawer } from "@/components/ui/BookmarkDrawer";
-import { resolveAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import { isAdminUser } from "@/lib/auth";
 
 export function UserNav() {
@@ -56,7 +56,7 @@ export function UserNav() {
   }
 
   const displayName = profile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || "Leitor";
-  const rawAvatar = profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture;
+  const rawAvatar = profile?.avatar_url || getGoogleAvatarUrl(user);
   const avatarUrl = resolveAvatarUrl(rawAvatar, displayName);
 
   return (
@@ -71,6 +71,7 @@ export function UserNav() {
             <img
               src={avatarUrl}
               alt={displayName}
+              referrerPolicy="no-referrer"
               style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", borderRadius: "9999px", objectFit: "cover" }}
               className="border border-brand-orange/30 shrink-0 bg-[#08090C]"
             />

@@ -17,7 +17,7 @@ export function Timer({ date }: TimerProps) {
   }, [date]);
 
   return (
-    <span className="text-[11px] font-subtitle font-medium text-gray-400">
+    <span className="text-[11px] font-subtitle font-medium text-gray-400 shrink-0 whitespace-nowrap">
       {timeAgo(date)}
     </span>
   );

@@ -216,31 +216,31 @@ export function PostArticle({ post, stats }: PostArticleProps) {
               )}
             </div>
 
-            <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:items-center">
-              <span className="col-span-3 text-[11px] font-semibold text-gray-500">Compartilhar</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-gray-500 mr-1">Compartilhar</span>
               <button
                 onClick={() => handleShareSocial("whatsapp")}
                 aria-label="Compartilhar no WhatsApp"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-[#25D366] transition-colors hover:bg-[#25D366]/10 hover:text-[#50e383] xs:text-xs"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#25D366] transition-colors hover:bg-[#25D366]/10 hover:text-[#50e383]"
+                title="Compartilhar no WhatsApp"
               >
                 <SocialLogo network="whatsapp" />
-                <span>WhatsApp</span>
               </button>
               <button
                 onClick={() => handleShareSocial("telegram")}
                 aria-label="Compartilhar no Telegram"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-[#26A5E4] transition-colors hover:bg-[#26A5E4]/10 hover:text-[#62c3f2] xs:text-xs"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-[#26A5E4] transition-colors hover:bg-[#26A5E4]/10 hover:text-[#62c3f2]"
+                title="Compartilhar no Telegram"
               >
                 <SocialLogo network="telegram" />
-                <span>Telegram</span>
               </button>
               <button
                 onClick={() => handleShareSocial("twitter")}
                 aria-label="Compartilhar no X"
-                className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/[0.08] px-2 text-[10px] font-semibold text-gray-200 transition-colors hover:bg-white/[0.07] hover:text-white xs:text-xs"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/[0.08] text-gray-200 transition-colors hover:bg-white/[0.07] hover:text-white"
+                title="Compartilhar no X"
               >
                 <SocialLogo network="x" />
-                <span>X</span>
               </button>
             </div>
           </div>

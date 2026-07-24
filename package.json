@@ -12,6 +12,7 @@
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "admin:create": "node scripts/create-admin.mjs",
+    "images:migrate": "node --env-file=.env.local scripts/migrate-editorial-images.mjs",
     "scan-news": "node scripts/scan-news.mjs"
   },
   "dependencies": {

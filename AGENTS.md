@@ -39,6 +39,11 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**
 - **Datas e Meses:** Traduzir apenas os meses para o português (*28 de Julho*, *15 de Setembro*, *19 de Novembro*).
 - **Capas Oficiais:** As imagens do Radar de Lançamentos e matérias DEVEM ser **artes de capa oficiais, artes promocionais do estúdio ou screenshots oficiais** do jogo. **É estritamente proibido usar fotos genéricas** (ex: computadores/controles de bancos de imagens gratuitos como Unsplash/Pexels).
+- **Resolução do Radar:** Usar imagens horizontais em proporção **16:9**, com no mínimo **1200 × 675 px** e preferência por **1920 × 1080 px** ou superior.
+- **Evitar miniaturas:** Não usar `header.jpg`, `capsule_616x353`, thumbnails do Google/Bing ou outras cápsulas pequenas da Steam como imagem final do Radar. Buscar a arte promocional original em alta resolução no site oficial, press kit, publisher, console store ou CDN oficial.
+- **Validação visual:** Abrir a URL original e confirmar que a imagem não está previamente cortada, comprimida ou ampliada. Além do HTTP 200, verificar dimensões e enquadramento antes de salvar.
+- **Organização semanal:** Todo item com data definida deve preencher `release_date` e aparecer agrupado pela semana de lançamento, de segunda a domingo.
+- **Retenção mensal:** Após a virada do mês, remover do Radar os itens de meses anteriores. Se a imagem estiver no Storage do Orange Brick, remover também o arquivo e seu registro na biblioteca; URLs externas não ocupam Storage.
 - **Verificação de Datas:** Sempre validar as datas oficiais dos jogos antes de publicar. Jogos já lançados em anos/datas passadas não devem figurar na aba de futuros lançamentos.
 
 ---
