@@ -39,12 +39,10 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
             <button
               key={option.id}
               onClick={() => onVote(option.id)}
-              disabled={hasVoted}
+              disabled={isSelected}
               className={`group relative w-full text-left p-3 rounded-xl border transition-all duration-200 overflow-hidden cursor-pointer ${
                 isSelected
                   ? "bg-brand-orange/20 border-brand-orange text-white shadow-[0_0_15px_rgba(255,94,0,0.2)]"
-                  : hasVoted
-                  ? "bg-background-void/50 border-brand-orange-muted/15 text-gray-300"
                   : "bg-background-void/70 border-brand-orange-muted/20 text-gray-200 hover:border-brand-orange/50 hover:bg-card-slate"
               }`}
             >

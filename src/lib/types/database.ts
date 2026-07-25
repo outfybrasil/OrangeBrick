@@ -244,6 +244,8 @@ export interface ReleaseRadarItem {
   platforms: string[];
   image_url: string | null;
   badge: string;
+  product_type: "game" | "dlc";
+  is_indie: boolean;
   category: "week" | "upcoming";
   post_slug: string | null;
   sort_order: number;
@@ -262,6 +264,8 @@ export interface ReleaseRadarItemInsert {
   platforms?: string[];
   image_url?: string | null;
   badge: string;
+  product_type?: ReleaseRadarItem["product_type"];
+  is_indie?: boolean;
   category: ReleaseRadarItem["category"];
   post_slug?: string | null;
   sort_order?: number;

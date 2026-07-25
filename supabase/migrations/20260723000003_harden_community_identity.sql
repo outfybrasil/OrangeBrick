@@ -91,6 +91,9 @@ begin
   end if;
 
   if auth.uid() is null or new.user_id <> auth.uid() then
+    if TG_OP = 'UPDATE' and old.shared_post_id is not null and new.shared_post_id is null and new.user_id = old.user_id and new.content = old.content then
+      return new;
+    end if;
     raise exception 'Publicação não autorizada';
   end if;
 

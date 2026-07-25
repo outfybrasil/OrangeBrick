@@ -129,11 +129,13 @@ export function useNotificationCenter() {
 
   const deleteNotification = useCallback(async (id: string) => {
     try {
-      const { error: deleteError } = await supabase
-        .from("notifications")
-        .delete()
-        .eq("id", id);
-      if (deleteError) throw deleteError;
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+      const response = await fetch(`${basePath}/api/notifications`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!response.ok) throw new Error("Falha ao apagar notificação");
       const removed = notifications.find((notification) => notification.id === id);
       setNotifications((prev) => prev.filter((notification) => notification.id !== id));
       if (removed && !removed.is_read) setUnreadCount((prev) => Math.max(0, prev - 1));
@@ -142,16 +144,18 @@ export function useNotificationCenter() {
       setError("Não foi possível apagar o alerta. Tente novamente.");
       return false;
     }
-  }, [notifications, supabase]);
+  }, [notifications]);
 
   const deleteAllNotifications = useCallback(async () => {
     if (!user) return false;
     try {
-      const { error: deleteError } = await supabase
-        .from("notifications")
-        .delete()
-        .eq("user_id", user.id);
-      if (deleteError) throw deleteError;
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+      const response = await fetch(`${basePath}/api/notifications`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!response.ok) throw new Error("Falha ao apagar notificações");
       setNotifications([]);
       setUnreadCount(0);
       return true;
@@ -159,7 +163,7 @@ export function useNotificationCenter() {
       setError("Não foi possível limpar os alertas. Tente novamente.");
       return false;
     }
-  }, [user, supabase]);
+  }, [user]);
 
   return {
     notifications,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
@@ -15,6 +16,17 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { signInWithGoogle } = useAuth();
   const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      setMounted(false);
+    };
+  }, []);
 
   const handleGoogleLogin = useCallback(async () => {
     if (!eligibilityConfirmed) return;
@@ -24,7 +36,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background-void/90 px-3 py-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-4"
       onMouseDown={(event) => {
@@ -102,4 +114,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
       </div>
     </div>
   );
+
+  if (mounted) {
+    return createPortal(modalContent, document.body);
+  }
+
+  return null;
 }

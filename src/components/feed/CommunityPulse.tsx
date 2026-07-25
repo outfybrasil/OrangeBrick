@@ -21,41 +21,56 @@ export function CommunityPulse() {
   const pulseItems: Array<PulsePost | null> = isLoaded ? posts : [null, null, null];
 
   const loadPosts = useCallback(async () => {
-    setHasError(false);
-    const { data, error } = await supabase
-      .from("community_posts")
-      .select("id, author_name, content, created_at")
-      .or("is_pinned.is.null,is_pinned.eq.false")
-      .order("created_at", { ascending: false })
-      .limit(3);
+    try {
+      const { data, error } = await supabase
+        .from("community_posts")
+        .select("id, author_name, content, created_at")
+        .or("is_pinned.is.null,is_pinned.eq.false")
+        .order("created_at", { ascending: false })
+        .limit(3);
 
-    if (error) {
-      setHasError(true);
-      setIsLoaded(true);
-      return;
-    }
-
-    const rows = (data || []) as Array<Omit<PulsePost, "comments_count">>;
-    const ids = rows.map((post) => post.id);
-    const commentCounts = new Map<string, number>();
-
-    if (ids.length > 0) {
-      const { data: comments } = await supabase
-        .from("community_comments")
-        .select("post_id")
-        .in("post_id", ids);
-
-      for (const comment of (comments || []) as Array<{ post_id: string }>) {
-        commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
+      if (error) {
+        console.error("Error fetching community posts:", error);
+        setHasError(true);
+        setIsLoaded(true);
+        return;
       }
-    }
 
-    setPosts(rows.map((post) => ({ ...post, comments_count: commentCounts.get(post.id) || 0 })));
-    setIsLoaded(true);
+      const rows = (data || []) as Array<Omit<PulsePost, "comments_count">>;
+      const ids = rows.filter((post) => post && post.id).map((post) => post.id);
+      const commentCounts = new Map<string, number>();
+
+      if (ids.length > 0) {
+        const { data: comments, error: commentsError } = await supabase
+          .from("community_comments")
+          .select("post_id")
+          .in("post_id", ids);
+
+        if (commentsError) {
+          console.error("Error fetching community comments:", commentsError);
+        } else {
+          for (const comment of (comments || []) as Array<{ post_id: string }>) {
+            if (comment && comment.post_id) {
+              commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
+            }
+          }
+        }
+      }
+
+      setPosts(rows.map((post) => ({ ...post, comments_count: commentCounts.get(post.id) || 0 })));
+    } catch (err) {
+      console.error("Unexpected error in loadPosts:", err);
+      setHasError(true);
+    } finally {
+      setIsLoaded(true);
+    }
   }, [supabase]);
 
   useEffect(() => {
-    queueMicrotask(() => void loadPosts());
+    const timer = setTimeout(() => {
+      void loadPosts();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadPosts]);
 
   if (isLoaded && posts.length === 0 && !hasError) {
@@ -84,7 +99,10 @@ export function CommunityPulse() {
           <p className="text-sm text-gray-300">Não foi possível carregar as conversas recentes.</p>
           <button
             type="button"
-            onClick={() => void loadPosts()}
+            onClick={() => {
+              setHasError(false);
+              void loadPosts();
+            }}
             className="min-h-11 text-xs font-bold text-brand-orange transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
             Tentar novamente

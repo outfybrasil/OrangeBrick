@@ -41,6 +41,13 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     () => setCommentPendingDelete(null)
   );
 
+  const [isDeletePostOpen, setIsDeletePostOpen] = useState(false);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const deletePostDialogRef = useModalDialog<HTMLDivElement>(
+    isDeletePostOpen,
+    () => setIsDeletePostOpen(false)
+  );
+
   const currentUserId = user?.id;
   const isPostOwner = !!(user && post.user_id && post.user_id === user.id);
 
@@ -114,6 +121,17 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     }
   };
 
+  const handleDeletePost = async () => {
+    if (!onDeletePost) return;
+    setIsDeletingPost(true);
+    try {
+      await onDeletePost(post.id);
+      setIsDeletePostOpen(false);
+    } finally {
+      setIsDeletingPost(false);
+    }
+  };
+
   const handleLikeComment = async (commentId: string) => {
     if (!user) {
       setIsAuthModalOpen(true);
@@ -136,7 +154,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name, post.is_official);
 
   return (
-    <article className="bg-card-slate/70 border border-brand-orange-muted/15 rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg hover:border-brand-orange-muted/30 transition-all space-y-3 sm:space-y-4 relative group/card">
+    <article className="group/card relative space-y-4 border-b border-white/10 bg-card-slate/20 px-1 pb-6 pt-2 transition-colors hover:bg-white/[0.025] sm:px-5 sm:pb-7 sm:pt-5">
       <div className="flex items-start justify-between gap-3">
         <Link href={`/profile/${encodeURIComponent(post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
           <img
@@ -144,7 +162,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             alt={post.author_name}
             onError={(e) => { (e.target as HTMLImageElement).src = resolveAvatarUrl(null, post.author_name, post.is_official); }}
             style={{ width: "38px", height: "38px", minWidth: "38px", minHeight: "38px", maxWidth: "38px", maxHeight: "38px", borderRadius: "9999px", objectFit: "cover" }}
-            className="border border-brand-orange/30 shrink-0 group-hover/author:scale-105 transition-transform bg-[#08090C]"
+            className="shrink-0 border border-white/15 bg-[#08090C] transition-colors group-hover/author:border-brand-orange/60"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -153,12 +171,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               </h4>
               <UserBadge nickname={post.author_name} isOfficial={post.is_official} />
               {post.platform_tag && (
-                <span className="text-[9px] sm:text-[10px] font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20">
+                <span className="border-b border-brand-orange/60 px-1 py-0.5 font-subtitle text-[9px] font-bold text-brand-orange sm:text-[10px]">
                   {post.platform_tag}
                 </span>
               )}
               {post.is_pinned && (
-                <span className="text-[9px] font-subtitle font-bold text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/20">
+                <span className="border-b border-yellow-400/60 px-1 py-0.5 font-subtitle text-[9px] font-bold text-yellow-300">
                   Fixo
                 </span>
               )}
@@ -171,7 +189,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
 
         {isPostOwner && onDeletePost && (
           <button
-            onClick={() => onDeletePost(post.id)}
+            onClick={() => setIsDeletePostOpen(true)}
             aria-label="Apagar este post"
             className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs text-red-300/75 transition-all hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200"
             title="Apagar este post"
@@ -184,37 +202,37 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         )}
       </div>
 
-      <p className="text-xs sm:text-sm text-gray-200 font-body leading-relaxed whitespace-pre-line break-words">
+      <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-[15px]">
         {post.content}
       </p>
 
       {post.media_url && (
-        <div className="rounded-xl overflow-hidden border border-brand-orange-muted/15 bg-background-void/90 p-1 flex justify-center items-center">
-          <img src={post.media_url} alt="Mídia do post" className="max-h-[500px] w-full object-contain rounded-lg" />
+        <div className="flex items-center justify-center overflow-hidden border-y border-white/10 bg-background-void/90">
+          <img src={post.media_url} alt="Mídia do post" className="h-auto w-full object-contain" />
         </div>
       )}
 
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article block p-3 sm:p-3.5 rounded-xl bg-background-void/70 border border-brand-orange-muted/20 hover:border-brand-orange/40 transition-all"
+          className="group/article block border-y border-white/10 bg-background-void/60 py-3 transition-colors hover:border-brand-orange/40 sm:py-3.5"
         >
-          <div className="flex gap-3 items-center">
+          <div className="flex items-start gap-3">
             {post.attached_article.image_url && (
               <img
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="w-14 h-11 sm:w-16 sm:h-12 rounded-lg object-cover shrink-0 group-hover/article:scale-105 transition-transform"
+                className="h-14 w-20 shrink-0 object-cover sm:h-16 sm:w-24"
               />
             )}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <span className="text-[9px] font-subtitle font-bold text-brand-orange uppercase tracking-wider">
                 Matéria do Orange Brick
               </span>
-              <h5 className="text-xs font-subtitle font-bold text-white line-clamp-1 group-hover/article:text-brand-orange transition-colors">
+              <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange sm:text-sm">
                 {post.attached_article.title}
               </h5>
-              <p className="text-[11px] text-gray-400 font-body line-clamp-1 mt-0.5">
+              <p className="mt-1 break-words font-body text-[11px] leading-5 text-gray-400 sm:text-xs">
                 {post.attached_article.summary}
               </p>
             </div>
@@ -223,12 +241,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       )}
 
       {post.shared_post && (
-        <div className="p-3 sm:p-3.5 rounded-xl bg-[#0D0F14]/80 border border-emerald-500/20 space-y-2">
+        <div className="space-y-3 border-y border-emerald-500/25 bg-[#0D0F14]/70 py-3 sm:py-3.5">
           <div className="flex items-center gap-2">
             <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span className="text-[10px] font-subtitle font-bold text-emerald-400 uppercase tracking-wider truncate">
+            <span className="break-words text-[10px] font-subtitle font-bold uppercase tracking-wider text-emerald-400">
               Republicado de {post.shared_post.original_author_name}
             </span>
           </div>
@@ -261,7 +279,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                   href={`/posts/${post.shared_post.original_attached_article.slug}`}
                   className="group/article block p-2.5 mt-2 rounded-lg bg-background-void/90 border border-brand-orange-muted/20 hover:border-brand-orange/40 transition-all"
                 >
-                  <div className="flex gap-2.5 items-center">
+                  <div className="flex items-start gap-2.5">
                     {post.shared_post.original_attached_article.image_url && (
                       <img
                         src={post.shared_post.original_attached_article.image_url}
@@ -273,7 +291,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                       <span className="text-[8px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
                         Matéria Citada
                       </span>
-                      <h5 className="text-[11px] font-subtitle font-bold text-white line-clamp-1 group-hover/article:text-brand-orange transition-colors">
+                      <h5 className="break-words font-subtitle text-[11px] font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange">
                         {post.shared_post.original_attached_article.title}
                       </h5>
                     </div>
@@ -331,7 +349,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             <span className="font-bold text-white">Respostas ({totalCommentCount})</span>
           </div>
 
-          <div className="max-h-64 overflow-y-auto pr-1">
+          <div>
             {isCommentsLoading ? (
               <div className="flex justify-center py-4">
                 <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
@@ -470,6 +488,49 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isDeletingComment ? "Apagando…" : "Apagar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isDeletePostOpen && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background-void/90 p-3 sm:p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isDeletingPost) setIsDeletePostOpen(false);
+          }}
+        >
+          <div
+            ref={deletePostDialogRef}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={`delete-brick-post-title-${post.id}`}
+            aria-describedby={`delete-brick-post-description-${post.id}`}
+            tabIndex={-1}
+            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+          >
+            <h3 id={`delete-brick-post-title-${post.id}`} className="text-lg font-bold text-white">
+              Apagar publicação?
+            </h3>
+            <p id={`delete-brick-post-description-${post.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
+              Esta ação não pode ser desfeita e removerá a publicação permanentemente.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDeletePostOpen(false)}
+                disabled={isDeletingPost}
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePost}
+                disabled={isDeletingPost}
+                className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingPost ? "Apagando…" : "Apagar"}
               </button>
             </div>
           </div>

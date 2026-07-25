@@ -120,10 +120,16 @@ create policy community_poll_votes_insert on public.community_poll_votes
   for insert to authenticated
   with check (auth.uid() = user_id);
 
+drop policy if exists community_poll_votes_update on public.community_poll_votes;
+create policy community_poll_votes_update on public.community_poll_votes
+  for update to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 grant select, insert on public.community_posts to anon, authenticated;
 grant delete on public.community_posts to authenticated;
 grant select, insert, delete on public.community_reactions to authenticated;
 grant select, insert on public.community_comments to anon, authenticated;
 grant delete on public.community_comments to authenticated;
 grant select on public.community_polls to anon, authenticated;
-grant select, insert on public.community_poll_votes to authenticated;
+grant select, insert, update on public.community_poll_votes to authenticated;

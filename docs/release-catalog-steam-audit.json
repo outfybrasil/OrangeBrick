@@ -1,0 +1,3302 @@
+[
+  {
+    "id": "heartopia",
+    "game": "Heartopia",
+    "releaseLabel": "7 de Janeiro",
+    "releaseDate": "2026-01-07",
+    "status": "matched",
+    "appId": 4025700,
+    "steamName": "Heartopia",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "XD"
+    ],
+    "publishers": [
+      "XD"
+    ],
+    "genres": [
+      "Casual",
+      "Simulation",
+      "Free To Play"
+    ],
+    "releaseDateSteam": "16 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4025700/6752380746cc6ca97c3b3af3512ede6847124eb1/ss_6752380746cc6ca97c3b3af3512ede6847124eb1.1920x1080.jpg?t=1783671810",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4025700/5e40a2c5f9197466fb950aaa4d22e580bee2aa70/ss_5e40a2c5f9197466fb950aaa4d22e580bee2aa70.1920x1080.jpg?t=1783671810",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4025700/786d2e2ab0a9eabe1678ef1da731579ad136d674/ss_786d2e2ab0a9eabe1678ef1da731579ad136d674.1920x1080.jpg?t=1783671810",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4025700/deaf3082420b41090bdaaae3034a872b3359ad61/ss_deaf3082420b41090bdaaae3034a872b3359ad61.1920x1080.jpg?t=1783671810",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4025700/971b17a8d739588611eb6cbde0de029b4c722b01/ss_971b17a8d739588611eb6cbde0de029b4c722b01.1920x1080.jpg?t=1783671810"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "blasten",
+    "game": "Blasten!!",
+    "releaseLabel": "8 de Janeiro",
+    "releaseDate": "2026-01-08",
+    "status": "matched",
+    "appId": 1494090,
+    "steamName": "Blasten!!",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "TriPaw Games"
+    ],
+    "publishers": [
+      "TriPaw Games"
+    ],
+    "genres": [
+      "Action",
+      "Indie"
+    ],
+    "releaseDateSteam": "8 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_1b4447eebec1fcc85eeb7bffef88620a7a27d979.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_ee1368ab7e8210e376e1f61cfac624a4a8c3b966.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_a9917b68dc788a76262a831cca4042f4087a7096.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_5e88c56c0af43b3c4bc362cc9b3f931604197a9c.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_e1a2a32d2b195f3c7287dee235944bf6b88285fc.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_6299dfbefd4649e819b0176288b77e018e7dcf5c.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_371b2f5561fe8eaad3c8b5b9c24188a103f26bc8.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_b514540c8ff77db6e2f0cb3ea5d51e1eae115ae8.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_21ed51929974a5beb723e99e5c03371db9157bc7.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_40be8d56febae77630e8d741e9d84113dec92f52.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/e47aa10a3ecee3c6b5bfaf34656200753a2f4b7f/ss_e47aa10a3ecee3c6b5bfaf34656200753a2f4b7f.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_c938877ff26aae40e7446b4996200b0c8842a92a.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ss_65e8e5ce694b0ee2877129abd5f9ab695d61550d.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/58d669c5a7c32141e74bc72fc2eca2d2100e51ac/ss_58d669c5a7c32141e74bc72fc2eca2d2100e51ac.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/f2e60710795839e09f87fba8869e07a8d5e14992/ss_f2e60710795839e09f87fba8869e07a8d5e14992.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/3d9df06cd685e3211b1a84999cbce80926ba69f2/ss_3d9df06cd685e3211b1a84999cbce80926ba69f2.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/f5f8b77eb13926b4eaeffb3b446d9e109b0d75ed/ss_f5f8b77eb13926b4eaeffb3b446d9e109b0d75ed.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/8a42c295180cc0332626ee573c335907792c4ada/ss_8a42c295180cc0332626ee573c335907792c4ada.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/b8b2085935269345897849e3ac0ecb39e297e1ac/ss_b8b2085935269345897849e3ac0ecb39e297e1ac.1920x1080.jpg?t=1781162310",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1494090/ac4bedf6cc41ab6543255d17c4b9bfaf2ca100cd/ss_ac4bedf6cc41ab6543255d17c4b9bfaf2ca100cd.1920x1080.jpg?t=1781162310"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "cozy-caravan",
+    "game": "Cozy Caravan",
+    "releaseLabel": "8 de Janeiro",
+    "releaseDate": "2026-01-08",
+    "status": "matched",
+    "appId": 2788520,
+    "steamName": "Cozy Caravan",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "5 Lives Studios"
+    ],
+    "publishers": [
+      "5 Lives Studios"
+    ],
+    "genres": [
+      "Adventure",
+      "Casual",
+      "Indie"
+    ],
+    "releaseDateSteam": "7 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/f63969445f61638c3feedb043d03e03ea4242ec1/ss_f63969445f61638c3feedb043d03e03ea4242ec1.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/481fe4f420044d508ebe1df8444e78b1482e0531/ss_481fe4f420044d508ebe1df8444e78b1482e0531.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/8dfbcb2a2615b3b2d65cffa0a185f9acee46496b/ss_8dfbcb2a2615b3b2d65cffa0a185f9acee46496b.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/ebf3cebdda932f114abef2a98c8210a0b568b97e/ss_ebf3cebdda932f114abef2a98c8210a0b568b97e.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/b171f2d4a7d11caeeedb7267530ff9d80ffbdc37/ss_b171f2d4a7d11caeeedb7267530ff9d80ffbdc37.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/14861b641b155ade59fcca211492833e72dc6048/ss_14861b641b155ade59fcca211492833e72dc6048.1920x1080.jpg?t=1767858782",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2788520/0ebfbcd573b270706aabf2962174176c73740ba6/ss_0ebfbcd573b270706aabf2962174176c73740ba6.1920x1080.jpg?t=1767858782"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "pathologic-3",
+    "game": "Pathologic 3",
+    "releaseLabel": "9 de Janeiro",
+    "releaseDate": "2026-01-09",
+    "status": "matched",
+    "appId": 3199650,
+    "steamName": "Pathologic 3",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Ice-Pick Lodge"
+    ],
+    "publishers": [
+      "HypeTrain Digital"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie",
+      "RPG",
+      "Simulation"
+    ],
+    "releaseDateSteam": "9 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/73e44df664a5cbdf3d22d75494bb547fffdc6fd6/ss_73e44df664a5cbdf3d22d75494bb547fffdc6fd6.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/93413bb3b63d270d96d5b719e18e7a612d341de2/ss_93413bb3b63d270d96d5b719e18e7a612d341de2.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/22612e2a68713ffc68cfc7828b835a70c5918463/ss_22612e2a68713ffc68cfc7828b835a70c5918463.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/bbb9d14bdf1b08e9e0a2f5f83a05a7acb501b82c/ss_bbb9d14bdf1b08e9e0a2f5f83a05a7acb501b82c.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/27f74b3f017ae5665c8e3203ce32c63d3c6f57a0/ss_27f74b3f017ae5665c8e3203ce32c63d3c6f57a0.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/27529703d4ea81ee3173a63de7765ad84619e340/ss_27529703d4ea81ee3173a63de7765ad84619e340.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/94adb48468f2415150c596d1ad9dd60a21eba1b2/ss_94adb48468f2415150c596d1ad9dd60a21eba1b2.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/708c0b7a4671414e7be6bb3cd31edd9ae0ec4d59/ss_708c0b7a4671414e7be6bb3cd31edd9ae0ec4d59.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/9038c7f8a547e29736c63a3d11cbc6c8cf88d851/ss_9038c7f8a547e29736c63a3d11cbc6c8cf88d851.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/970dd3eaa6d00526d64c0b74d31104416d17d8b6/ss_970dd3eaa6d00526d64c0b74d31104416d17d8b6.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/671cf983abf0302a64be36d1a6f7cea69b37ad2c/ss_671cf983abf0302a64be36d1a6f7cea69b37ad2c.1920x1080.jpg?t=1778605937",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3199650/b2be470a434e7793b192086513cb21347059d304/ss_b2be470a434e7793b192086513cb21347059d304.1920x1080.jpg?t=1778605937"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "spear",
+    "game": "Spear",
+    "releaseLabel": "9 de Janeiro",
+    "releaseDate": "2026-01-09",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "Blood Spear",
+        "id": 1638660,
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1638660/capsule_231x87.jpg?t=1630014855",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.5
+      },
+      {
+        "type": "app",
+        "name": "Spear Song",
+        "id": 2103510,
+        "price": {
+          "currency": "BRL",
+          "initial": 4699,
+          "final": 4699
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2103510/capsule_231x87.jpg?t=1777472959",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.5
+      },
+      {
+        "type": "app",
+        "name": "Dragon Spear",
+        "id": 886960,
+        "price": {
+          "currency": "BRL",
+          "initial": 2899,
+          "final": 2899
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/886960/capsule_231x87.jpg?t=1667265348",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.5
+      }
+    ]
+  },
+  {
+    "id": "quarantine-zone-the-last-check",
+    "game": "Quarantine Zone: The Last Check",
+    "releaseLabel": "12 de Janeiro",
+    "releaseDate": "2026-01-12",
+    "status": "matched",
+    "appId": 3419520,
+    "steamName": "Quarantine Zone: The Last Check",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Brigada Games"
+    ],
+    "publishers": [
+      "Devolver Digital"
+    ],
+    "genres": [
+      "Indie",
+      "Simulation",
+      "Strategy"
+    ],
+    "releaseDateSteam": "12 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/a6e1bd5ef23026f5f0e12abdf74015bde9edf184/ss_a6e1bd5ef23026f5f0e12abdf74015bde9edf184.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/e623633d8f64997c5b9a268a80b81d7d150fe015/ss_e623633d8f64997c5b9a268a80b81d7d150fe015.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/4a9c7643b40398b9606c723fef62ff81c9a5e294/ss_4a9c7643b40398b9606c723fef62ff81c9a5e294.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/6a472aeb098321bb146e7c3dbcf9faf8c699ef76/ss_6a472aeb098321bb146e7c3dbcf9faf8c699ef76.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/ebfa385fb4b16f919647d73c2d6ce42beb4a6c42/ss_ebfa385fb4b16f919647d73c2d6ce42beb4a6c42.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/7a5bb24ea6e0d176bb87d8b500c98764d35c2949/ss_7a5bb24ea6e0d176bb87d8b500c98764d35c2949.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/e74f25d26574b1083b54b8c8c406b78ab614b289/ss_e74f25d26574b1083b54b8c8c406b78ab614b289.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/4a88179a43a4dafdf01c8fa0256e1a3cb0db4af9/ss_4a88179a43a4dafdf01c8fa0256e1a3cb0db4af9.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/782764dccf2e3b273acd80ad7d55d845ee35aa77/ss_782764dccf2e3b273acd80ad7d55d845ee35aa77.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/b7363218ca6490bb5153c059b2b738f9abb94174/ss_b7363218ca6490bb5153c059b2b738f9abb94174.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/292748f0206a2975264942204afc393c5c4773bd/ss_292748f0206a2975264942204afc393c5c4773bd.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/a217160fb0e4c8d4f3e151e3ebe4de6504180c1e/ss_a217160fb0e4c8d4f3e151e3ebe4de6504180c1e.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/0756c2ea766d18c0c78965e55e7c07a270f93e8a/ss_0756c2ea766d18c0c78965e55e7c07a270f93e8a.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/863ba591ba683e42e744d2b0788596ca0ef66b4b/ss_863ba591ba683e42e744d2b0788596ca0ef66b4b.1920x1080.jpg?t=1781533742",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3419520/e54401cdb01aa6da993e90f4ac086cc13f64fce2/ss_e54401cdb01aa6da993e90f4ac086cc13f64fce2.1920x1080.jpg?t=1781533742"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "streetdog-bmx",
+    "game": "Streetdog BMX",
+    "releaseLabel": "14 de Janeiro",
+    "releaseDate": "2026-01-14",
+    "status": "matched",
+    "appId": 2707870,
+    "steamName": "Streetdog BMX",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Yeah Us! Games"
+    ],
+    "publishers": [
+      "Yeah Us! Games"
+    ],
+    "genres": [
+      "Indie",
+      "Sports"
+    ],
+    "releaseDateSteam": "14 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_87306364afc05acc7b8fe9c2a2f88d4b5edbcc59.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_e18ce4c3b17e59f47a67e7b4acff2ea2ba274137.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_bc09275b37b7b77d8e177a083d7ac1d499b787eb.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_c642e481e6ea69ec581972aed07171f7e63db73e.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_dd87fa83d5cf42651306da6037d5cf8b35733dfd.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_aeeda7ca8f1ee296329e4df043f9c99e4654c383.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_d83d93daaf16fefb73a9ebf02b4757356a1a04a2.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_c5184fe837f341b736c439aadc18024a71862a63.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_36da5d0dc07470e1dce7a22d8522eb6dabd2f83c.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_aa7a116e103447432a80bbf7f59a88b234579fda.1920x1080.jpg?t=1768397837",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2707870/ss_bc56c95d07c1d52745b840b62fb41b23c0489632.1920x1080.jpg?t=1768397837"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "cassette-boy",
+    "game": "Cassette Boy",
+    "releaseLabel": "15 de Janeiro",
+    "releaseDate": "2026-01-15",
+    "status": "matched",
+    "appId": 2334330,
+    "steamName": "CASSETTE BOY",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Wonderland Kazakiri inc."
+    ],
+    "publishers": [
+      "Pocketpair Publishing"
+    ],
+    "genres": [
+      "Action",
+      "Indie",
+      "RPG"
+    ],
+    "releaseDateSteam": "14 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/ss_89a6d2e94de772502c4610e84012a4d6eee32707.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/ss_24ecc66faeaeb03e22c49109a44cd9baaec1ded3.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/ss_024a27a8e68d39c312640db47e01733b786802fd.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/e21fc56b0d366651bfd67181106a945d63f8b1b9/ss_e21fc56b0d366651bfd67181106a945d63f8b1b9.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/67da7ecea18ec87b4a1170a9c6ecbdd4c0b4e6ee/ss_67da7ecea18ec87b4a1170a9c6ecbdd4c0b4e6ee.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/4486f6c87b591ea999388e0b6f820a8d8e55d2e4/ss_4486f6c87b591ea999388e0b6f820a8d8e55d2e4.1920x1080.jpg?t=1770888009",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2334330/06c1302c4989dd9888c6d1cb401d5ffc01d0d8bb/ss_06c1302c4989dd9888c6d1cb401d5ffc01d0d8bb.1920x1080.jpg?t=1770888009"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "trails-beyond-the-horizon",
+    "game": "The Legend of Heroes: Trails Beyond the Horizon",
+    "releaseLabel": "15 de Janeiro",
+    "releaseDate": "2026-01-15",
+    "status": "matched",
+    "appId": 3316940,
+    "steamName": "The Legend of Heroes: Trails beyond the Horizon",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Nihon Falcom",
+      "PH3 GmbH"
+    ],
+    "publishers": [
+      "NIS America, Inc."
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "releaseDateSteam": "15 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/98ae78c86324ce123e560d13d48aba72592042b5/ss_98ae78c86324ce123e560d13d48aba72592042b5.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/f329c3db227b2ba3a24c58c398d6564fdb5d23f7/ss_f329c3db227b2ba3a24c58c398d6564fdb5d23f7.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/e8a37a59072901b9576919d32aa2def9e07ddf66/ss_e8a37a59072901b9576919d32aa2def9e07ddf66.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/47f6af41dff967e37d2b633f392a55581765f152/ss_47f6af41dff967e37d2b633f392a55581765f152.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/05bf3cd554f55f0abefc0f6e5e8b4b3053aa15ea/ss_05bf3cd554f55f0abefc0f6e5e8b4b3053aa15ea.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/4d5cd7c2dd26409dfed4c5414855399234fb0a64/ss_4d5cd7c2dd26409dfed4c5414855399234fb0a64.1920x1080.jpg?t=1771470581",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3316940/07e5365d4c5f30e1d1ad541f3988631e25f083f5/ss_07e5365d4c5f30e1d1ad541f3988631e25f083f5.1920x1080.jpg?t=1771470581"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "brokenlore-unfollow",
+    "game": "BrokenLore: Unfollow",
+    "releaseLabel": "16 de Janeiro",
+    "releaseDate": "2026-01-16",
+    "status": "matched",
+    "appId": 2133830,
+    "steamName": "BrokenLore: UNFOLLOW",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Serafini Productions"
+    ],
+    "publishers": [
+      "Serafini Productions",
+      "Shochiku"
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "15 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/b1bf909f7bdd5e601f3c7953d34d22a8deb14061/ss_b1bf909f7bdd5e601f3c7953d34d22a8deb14061.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/999577b341f9c0fa3718e63c5bd3c895360acce1/ss_999577b341f9c0fa3718e63c5bd3c895360acce1.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/353d3adf0fba4dfba2e9312c548d8d81a4accd16/ss_353d3adf0fba4dfba2e9312c548d8d81a4accd16.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/86b24c080991171c2946799855075b47ac10cec3/ss_86b24c080991171c2946799855075b47ac10cec3.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/5cbb487b8a2317a72591830fe934f25257848cf5/ss_5cbb487b8a2317a72591830fe934f25257848cf5.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/28bca5b13426371d8344d621e710f59804b3e1b8/ss_28bca5b13426371d8344d621e710f59804b3e1b8.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/f2a2c4a65baac82ea917c2c3f69b1032f9aabce6/ss_f2a2c4a65baac82ea917c2c3f69b1032f9aabce6.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/e57fa7bc2d7447c45b9b377af060ea6971ad6891/ss_e57fa7bc2d7447c45b9b377af060ea6971ad6891.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/39e9ea0fb8a3a5270808c4768f78b97879f30df8/ss_39e9ea0fb8a3a5270808c4768f78b97879f30df8.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/42a6cf5f281c2e98315197880c2e848d18eab12b/ss_42a6cf5f281c2e98315197880c2e848d18eab12b.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/84129a69bf3d675828a2819ba431a648977f86a3/ss_84129a69bf3d675828a2819ba431a648977f86a3.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/a567df5fec80fadfcf2742403e9ac7de74d67c6d/ss_a567df5fec80fadfcf2742403e9ac7de74d67c6d.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/a2357da6d75195b0cd0b21612bc32cdc0904ca72/ss_a2357da6d75195b0cd0b21612bc32cdc0904ca72.1920x1080.jpg?t=1781090500",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2133830/8cdf8d74ef240a52296e579baad1d4c9cfe39a76/ss_8cdf8d74ef240a52296e579baad1d4c9cfe39a76.1920x1080.jpg?t=1781090500"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "ghetto-zombies-graffiti-squad",
+    "game": "Ghetto Zombies Graffiti Squad",
+    "releaseLabel": "16 de Janeiro",
+    "releaseDate": "2026-01-16",
+    "status": "matched",
+    "appId": 3047820,
+    "steamName": "Ghetto Zombies: Graffiti Squad",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Fogo Games"
+    ],
+    "publishers": [
+      "Nuntius Games",
+      "Vsoo Games"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Casual",
+      "Indie"
+    ],
+    "releaseDateSteam": "16 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3047820/85932188b52ce427bb5f32c4f28f9b1abf81a21a/ss_85932188b52ce427bb5f32c4f28f9b1abf81a21a.1920x1080.jpg?t=1782855926",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3047820/745fdc6afbadcb271bec56e2e80482056d0ee5f6/ss_745fdc6afbadcb271bec56e2e80482056d0ee5f6.1920x1080.jpg?t=1782855926",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3047820/3382bd6d8d68f65e1f3a9ee80fdc2eab4c292fb8/ss_3382bd6d8d68f65e1f3a9ee80fdc2eab4c292fb8.1920x1080.jpg?t=1782855926",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3047820/9f4d3b6519099ed0290189bee615f46123eb33fa/ss_9f4d3b6519099ed0290189bee615f46123eb33fa.1920x1080.jpg?t=1782855926",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3047820/15028b6a0bb913a094a6c24ba04a09dfb707fea0/ss_15028b6a0bb913a094a6c24ba04a09dfb707fea0.1920x1080.jpg?t=1782855926"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "carnedge",
+    "game": "Carnedge",
+    "releaseLabel": "19 de Janeiro",
+    "releaseDate": "2026-01-19",
+    "status": "matched",
+    "appId": 3907920,
+    "steamName": "CARNEDGE",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "OneShark"
+    ],
+    "publishers": [
+      "OneShark"
+    ],
+    "genres": [
+      "Casual",
+      "RPG",
+      "Strategy"
+    ],
+    "releaseDateSteam": "19 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/d5566a8efdebe048353842e628e6474b63c7604e/ss_d5566a8efdebe048353842e628e6474b63c7604e.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/b40385df5d02af8669d55492e920a52316d2c52e/ss_b40385df5d02af8669d55492e920a52316d2c52e.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/089b8035244ae54b4332a7c7dd4a50db94f20013/ss_089b8035244ae54b4332a7c7dd4a50db94f20013.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/9297312ded3d5e73270c377158b97c008d6545bc/ss_9297312ded3d5e73270c377158b97c008d6545bc.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/f2b293debb2a0fe8fb24acf6e1bda7ab55f56ea1/ss_f2b293debb2a0fe8fb24acf6e1bda7ab55f56ea1.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/862d29bee9d6ae1d881126d2d7b27da2d1f9694e/ss_862d29bee9d6ae1d881126d2d7b27da2d1f9694e.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/0535e84e2095740ffd49171656f2155449f652fb/ss_0535e84e2095740ffd49171656f2155449f652fb.1920x1080.jpg?t=1768935030",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3907920/983eabdd0e4dfac479fe055cf805c3903d556d09/ss_983eabdd0e4dfac479fe055cf805c3903d556d09.1920x1080.jpg?t=1768935030"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "duet-night-abyss",
+    "game": "Duet Night Abyss",
+    "releaseLabel": "19 de Janeiro",
+    "releaseDate": "2026-01-19",
+    "status": "matched",
+    "appId": 3950020,
+    "steamName": "Duet Night Abyss",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Pan Studio"
+    ],
+    "publishers": [
+      "Hero Games"
+    ],
+    "genres": [
+      "Action",
+      "RPG",
+      "Free To Play"
+    ],
+    "releaseDateSteam": "19 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/ac73b8642339f8f4f095de023fc1f36950276f59/ss_ac73b8642339f8f4f095de023fc1f36950276f59.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/96d08788cd0f4bdaf821d1387824ba20199dd155/ss_96d08788cd0f4bdaf821d1387824ba20199dd155.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/b0493b270ddc8668535f6c79be3d3670e4611e99/ss_b0493b270ddc8668535f6c79be3d3670e4611e99.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/45a5549be050e3855d156d45048aec1741280a34/ss_45a5549be050e3855d156d45048aec1741280a34.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/c813324664eb4752c5791ae8613b8244ba135bec/ss_c813324664eb4752c5791ae8613b8244ba135bec.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/b1632f67487948f84563d3256ca98242105412aa/ss_b1632f67487948f84563d3256ca98242105412aa.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/49fe40265c1fdcc87ed3ebcb0a7215810130acb3/ss_49fe40265c1fdcc87ed3ebcb0a7215810130acb3.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/d234355e17b7825a49d38cb1b955ec47b51d668a/ss_d234355e17b7825a49d38cb1b955ec47b51d668a.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/a28dc4d92311aa9af70a7605916eedfb08712c0b/ss_a28dc4d92311aa9af70a7605916eedfb08712c0b.1920x1080.jpg?t=1780564469",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3950020/05b8cc37b4601109a114bb4c6d1509c4ec39966c/ss_05b8cc37b4601109a114bb4c6d1509c4ec39966c.1920x1080.jpg?t=1780564469"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "mio-memories-in-orbit",
+    "game": "MIO: Memories In Orbit",
+    "releaseLabel": "20 de Janeiro",
+    "releaseDate": "2026-01-20",
+    "status": "matched",
+    "appId": 1672810,
+    "steamName": "MIO: Memories in Orbit",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Douze Dixièmes"
+    ],
+    "publishers": [
+      "Focus Entertainment"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "20 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/b32f6acd670ce78fa98486262b1986afaa64f760/ss_b32f6acd670ce78fa98486262b1986afaa64f760.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/7afff53eeda042c7a83d9fb980440cc8df3b4f68/ss_7afff53eeda042c7a83d9fb980440cc8df3b4f68.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/621c705d36ddd60a7ae0b86ad19be6b445bc7bf2/ss_621c705d36ddd60a7ae0b86ad19be6b445bc7bf2.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/c097ab9dab2edaa583399cd7c2c0f91ab35e32de/ss_c097ab9dab2edaa583399cd7c2c0f91ab35e32de.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/46cf6c8ce4edb50b0d525322ac1d780e88497f2e/ss_46cf6c8ce4edb50b0d525322ac1d780e88497f2e.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/686755c9249fe409e955a2916bce51e24dcdd5a6/ss_686755c9249fe409e955a2916bce51e24dcdd5a6.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/44251215d04fd2806b91be86f2d2fc3b16beb55e/ss_44251215d04fd2806b91be86f2d2fc3b16beb55e.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/4dadc5ff2f71d2511048a5ce9c06b7f386b75bc9/ss_4dadc5ff2f71d2511048a5ce9c06b7f386b75bc9.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/41d68e690ee07551ac8e9ba4b10c519def7e3bec/ss_41d68e690ee07551ac8e9ba4b10c519def7e3bec.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/627425a726dc4b49db7f03052cda8ff48c34760a/ss_627425a726dc4b49db7f03052cda8ff48c34760a.1920x1080.jpg?t=1784714312",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1672810/a9d67772c04b6e7cb98b94c1885d8395133b2242/ss_a9d67772c04b6e7cb98b94c1885d8395133b2242.1920x1080.jpg?t=1784714312"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "eldegarde",
+    "game": "Eldegarde",
+    "releaseLabel": "21 de Janeiro",
+    "releaseDate": "2026-01-21",
+    "status": "matched",
+    "appId": 2344320,
+    "steamName": "Eldegarde",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Notorious Studios"
+    ],
+    "publishers": [
+      "Notorious Studios"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Massively Multiplayer",
+      "RPG"
+    ],
+    "releaseDateSteam": "21 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/eb50e04eb8eeb7fcb25f962d79ce64fa121fec33/ss_eb50e04eb8eeb7fcb25f962d79ce64fa121fec33.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/2d00f5062b40e711ff266cff56992355c54e7aca/ss_2d00f5062b40e711ff266cff56992355c54e7aca.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/59df8c9dea2671a4c209067606d88db78fa04d00/ss_59df8c9dea2671a4c209067606d88db78fa04d00.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/0cb69eca2bf36d90cc692459033f05c155b9e5ac/ss_0cb69eca2bf36d90cc692459033f05c155b9e5ac.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/ec820deb4e93e9aede5fc2a2bb52adb4a026beaf/ss_ec820deb4e93e9aede5fc2a2bb52adb4a026beaf.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/40a7de9c8b3cdaef30ad2b3eaa55d767120ff4a1/ss_40a7de9c8b3cdaef30ad2b3eaa55d767120ff4a1.1920x1080.jpg?t=1773949199",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2344320/c788823dc3f1c34c3242a658ab80e974fb23a2d4/ss_c788823dc3f1c34c3242a658ab80e974fb23a2d4.1920x1080.jpg?t=1773949199"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "gooey",
+    "game": "Gooey",
+    "releaseLabel": "21 de Janeiro",
+    "releaseDate": "2026-01-21",
+    "status": "matched",
+    "appId": 3689150,
+    "steamName": "Gooey",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Turbo Pixel"
+    ],
+    "publishers": [
+      "Turbo Pixel"
+    ],
+    "genres": [
+      "Action",
+      "Casual",
+      "Indie",
+      "Racing"
+    ],
+    "releaseDateSteam": "21 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/7da0175ff648fdea6bacfef7fb15a319dcc9b31a/ss_7da0175ff648fdea6bacfef7fb15a319dcc9b31a.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/3071c34a5a87ec69246d1794ff01f97b20b550ab/ss_3071c34a5a87ec69246d1794ff01f97b20b550ab.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/22712a44f231ce60aa04f01799da4f6f98697323/ss_22712a44f231ce60aa04f01799da4f6f98697323.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/971b6d675085febe5b74be75e3de452726d6488f/ss_971b6d675085febe5b74be75e3de452726d6488f.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/805db35c6f08cf0b0f9054440c2539442ab2ed98/ss_805db35c6f08cf0b0f9054440c2539442ab2ed98.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/2b6806848e8b9b072f33aeb1c8e6de843fc71a74/ss_2b6806848e8b9b072f33aeb1c8e6de843fc71a74.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/3684c7fa780fab087cd505f53923597c2131d3b4/ss_3684c7fa780fab087cd505f53923597c2131d3b4.1920x1080.jpg?t=1769054173",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3689150/bea3ff928282c1fdc0527d7430086b251000ebe4/ss_bea3ff928282c1fdc0527d7430086b251000ebe4.1920x1080.jpg?t=1769054173"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "tr-49",
+    "game": "TR-49",
+    "releaseLabel": "21 de Janeiro",
+    "releaseDate": "2026-01-21",
+    "status": "matched",
+    "appId": 3838370,
+    "steamName": "TR-49",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "inkle Ltd"
+    ],
+    "publishers": [
+      "inkle Ltd"
+    ],
+    "genres": [
+      "Adventure"
+    ],
+    "releaseDateSteam": "21 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3838370/3bc0adff5ae49cbcea90cc50909af18ee3052f76/ss_3bc0adff5ae49cbcea90cc50909af18ee3052f76.1920x1080.jpg?t=1771259279",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3838370/e1401bdf6b46b73eac9469e17934f8324722d22a/ss_e1401bdf6b46b73eac9469e17934f8324722d22a.1920x1080.jpg?t=1771259279",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3838370/d7dcaacf7764ca327f5e3fdaa2b5f6c9653a654a/ss_d7dcaacf7764ca327f5e3fdaa2b5f6c9653a654a.1920x1080.jpg?t=1771259279",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3838370/bd1a7f02721e3c415db2ee6564e8c6d5223bdbf1/ss_bd1a7f02721e3c415db2ee6564e8c6d5223bdbf1.1920x1080.jpg?t=1771259279",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3838370/79d5c3fc865b03646f1fa7e63fdfb16b303c739e/ss_79d5c3fc865b03646f1fa7e63fdfb16b303c739e.1920x1080.jpg?t=1771259279"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "arknights-endfield",
+    "game": "Arknights: Endfield",
+    "releaseLabel": "22 de Janeiro",
+    "releaseDate": "2026-01-22",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "hermit-and-pig",
+    "game": "Hermit and Pig",
+    "releaseLabel": "22 de Janeiro",
+    "releaseDate": "2026-01-22",
+    "status": "matched",
+    "appId": 2408350,
+    "steamName": "Hermit and Pig",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Heavy Lunch Studio LLC"
+    ],
+    "publishers": [
+      "Heavy Lunch Studio LLC"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "releaseDateSteam": "5 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/914b548c36c601ba6a6b27fc7e42651597834631/ss_914b548c36c601ba6a6b27fc7e42651597834631.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/a83c6cc0afed05dce0306b9f68a8760de046d3c4/ss_a83c6cc0afed05dce0306b9f68a8760de046d3c4.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/35ed6d89b71322c8df5f407fd6e3c7daeee21a45/ss_35ed6d89b71322c8df5f407fd6e3c7daeee21a45.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/b332236731d07cd62c95a46bfc54a8c6f5e89afe/ss_b332236731d07cd62c95a46bfc54a8c6f5e89afe.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/38cf3e1b7601f21b816ef3d5d5e71e468df7dfcb/ss_38cf3e1b7601f21b816ef3d5d5e71e468df7dfcb.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/078f3f2bea81de6d7a79d6909cc47bd75defef01/ss_078f3f2bea81de6d7a79d6909cc47bd75defef01.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/305b56d28bac9989dd31b178c341f74243769248/ss_305b56d28bac9989dd31b178c341f74243769248.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/1c93f0bc6d70f574f4ae8f1fd8e71b90bb21318a/ss_1c93f0bc6d70f574f4ae8f1fd8e71b90bb21318a.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/6ec69c9ae2f02ffb0a5f274dc8d552eb4cf71efb/ss_6ec69c9ae2f02ffb0a5f274dc8d552eb4cf71efb.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/1762108f01cc1a5383dc19523ebcac6022b73074/ss_1762108f01cc1a5383dc19523ebcac6022b73074.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/7a39f605ce6926488e03b9184745a0ebd83069ea/ss_7a39f605ce6926488e03b9184745a0ebd83069ea.1920x1080.jpg?t=1776777281",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2408350/a6e9d913ef5bd880c3f2daa953ade4426fda1b4d/ss_a6e9d913ef5bd880c3f2daa953ade4426fda1b4d.1920x1080.jpg?t=1776777281"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "banquet-for-fools",
+    "game": "Banquet For Fools",
+    "releaseLabel": "23 de Janeiro",
+    "releaseDate": "2026-01-23",
+    "status": "matched",
+    "appId": 3172700,
+    "steamName": "Banquet for Fools",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Hannah and Joseph Games"
+    ],
+    "publishers": [
+      "Hannah and Joseph Games"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "RPG"
+    ],
+    "releaseDateSteam": "5 Mar, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/c3aff2f40f3889c67e07184b6aeb358af9880cec/ss_c3aff2f40f3889c67e07184b6aeb358af9880cec.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/a1b430a077192a6ee379af779599d9233cd17a48/ss_a1b430a077192a6ee379af779599d9233cd17a48.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/636e8506768f39251741d152a437b129c6a724ec/ss_636e8506768f39251741d152a437b129c6a724ec.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/3776afdefb663650d6e517720f977805e8dea0f2/ss_3776afdefb663650d6e517720f977805e8dea0f2.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/f04674c2a5c679e244e0888f420596e9784813a1/ss_f04674c2a5c679e244e0888f420596e9784813a1.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/f43e4197161be8e23c1e4119824935bcc10cc0f2/ss_f43e4197161be8e23c1e4119824935bcc10cc0f2.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/a6f881872384e05bf0338606485d349174a3760a/ss_a6f881872384e05bf0338606485d349174a3760a.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/003e873044b9ee8518b2b467bd1c79b56797d157/ss_003e873044b9ee8518b2b467bd1c79b56797d157.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/edc3dc329b99bbec45838d45be4d7477be5668f5/ss_edc3dc329b99bbec45838d45be4d7477be5668f5.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/701071efaf3b91e3fa7821313ab5f4a4f02ee779/ss_701071efaf3b91e3fa7821313ab5f4a4f02ee779.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/73553d8065f8453110d1c66122587f704b5a108b/ss_73553d8065f8453110d1c66122587f704b5a108b.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/52eb68f399f23ab7789285d244bd893851aa655e/ss_52eb68f399f23ab7789285d244bd893851aa655e.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/20b6c2b49cd3a432135d6238d60d5964ac02bca1/ss_20b6c2b49cd3a432135d6238d60d5964ac02bca1.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/ce1bf160c8b39508376fc696581971696e38f63f/ss_ce1bf160c8b39508376fc696581971696e38f63f.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/540e612c8452a9a123125feef57a72037bc1b94d/ss_540e612c8452a9a123125feef57a72037bc1b94d.1920x1080.jpg?t=1782422770",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3172700/b21e84a6f5a39de38cbfbfadf0cfa62e7c157282/ss_b21e84a6f5a39de38cbfbfadf0cfa62e7c157282.1920x1080.jpg?t=1782422770"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "escape-the-ever-after",
+    "game": "Escape The Ever After",
+    "releaseLabel": "23 de Janeiro",
+    "releaseDate": "2026-01-23",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "the-fortress",
+    "game": "The Fortress",
+    "releaseLabel": "23 de Janeiro",
+    "releaseDate": "2026-01-23",
+    "status": "matched",
+    "appId": 3459150,
+    "steamName": "The Fortress",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Baryonyx Games"
+    ],
+    "publishers": [
+      "Baryonyx Games",
+      "Stratos Gaming"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie",
+      "RPG"
+    ],
+    "releaseDateSteam": "22 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/78de114a732d61bc483e7f9eab627a10724888f7/ss_78de114a732d61bc483e7f9eab627a10724888f7.1920x1080.jpg?t=1782220371",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/fcfd75b4d0edf13a7a7f00e1e0076571b1df2882/ss_fcfd75b4d0edf13a7a7f00e1e0076571b1df2882.1920x1080.jpg?t=1782220371",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/c27e8f61d1f12f7cfcdc0ee8614df19cc74c4c92/ss_c27e8f61d1f12f7cfcdc0ee8614df19cc74c4c92.1920x1080.jpg?t=1782220371",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/5a618b4529955a5176c37dbfdf364eddafd8266e/ss_5a618b4529955a5176c37dbfdf364eddafd8266e.1920x1080.jpg?t=1782220371",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/66466891198c5c112def2c99f6f02a1b52b82359/ss_66466891198c5c112def2c99f6f02a1b52b82359.1920x1080.jpg?t=1782220371",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3459150/936568b4715646202fc34e51d8b631a53b14e3e4/ss_936568b4715646202fc34e51d8b631a53b14e3e4.1920x1080.jpg?t=1782220371"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "highguard",
+    "game": "Highguard",
+    "releaseLabel": "26 de Janeiro",
+    "releaseDate": "2026-01-26",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "conquest-tactics",
+    "game": "Conquest Tactics",
+    "releaseLabel": "27 de Janeiro",
+    "releaseDate": "2026-01-27",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "Conquest Tactics : Realm of Sin",
+        "id": 3308960,
+        "price": {
+          "currency": "BRL",
+          "initial": 4699,
+          "final": 4699
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3308960/659d49258156314899b001dc6077692e3f1f0499/capsule_231x87.jpg?t=1784106874",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.4
+      },
+      {
+        "type": "app",
+        "name": "Conquest Tactics : Realm of Sin Demo",
+        "id": 3399230,
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3399230/659d49258156314899b001dc6077692e3f1f0499/capsule_231x87.jpg?t=1770199961",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.3333333333333333
+      },
+      {
+        "type": "app",
+        "name": "Conquest Tactics - Elenora, the Playful Bunny Maid",
+        "id": 4663240,
+        "price": {
+          "currency": "BRL",
+          "initial": 795,
+          "final": 795
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4663240/97d7b20e4b9c7665766486737d3447b0446536b1/capsule_231x87.jpg?t=1777435373",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.3333333333333333
+      }
+    ]
+  },
+  {
+    "id": "earth-must-die",
+    "game": "Earth Must Die",
+    "releaseLabel": "27 de Janeiro",
+    "releaseDate": "2026-01-27",
+    "status": "matched",
+    "appId": 3639780,
+    "steamName": "Earth Must Die",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Size Five Games"
+    ],
+    "publishers": [
+      "No More Robots"
+    ],
+    "genres": [
+      "Adventure",
+      "RPG"
+    ],
+    "releaseDateSteam": "27 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/a3ad474f6b45bf7148068eeccef0e8966e604eab/ss_a3ad474f6b45bf7148068eeccef0e8966e604eab.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/282ee64352536b194e46b2976a953ed6772fa127/ss_282ee64352536b194e46b2976a953ed6772fa127.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/353e967672020115c2368eeff3128df2e3c4ffb0/ss_353e967672020115c2368eeff3128df2e3c4ffb0.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/85e1015d5373adfdb283eb0872530e8d7b51ba1f/ss_85e1015d5373adfdb283eb0872530e8d7b51ba1f.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/f16dc077db17cbbcfd9b41cb0bf291d44236a9d5/ss_f16dc077db17cbbcfd9b41cb0bf291d44236a9d5.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/6f025f7d8746db034890dd7f0af2bc69ddea0074/ss_6f025f7d8746db034890dd7f0af2bc69ddea0074.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/eef8ba71a22839473e8bf96ad6e8b85c26fea617/ss_eef8ba71a22839473e8bf96ad6e8b85c26fea617.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/50b3f431fb81a11d70172de3ce10c70616da86f9/ss_50b3f431fb81a11d70172de3ce10c70616da86f9.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/86cbc61301c41f75e51b77d7cd8f8066f7329034/ss_86cbc61301c41f75e51b77d7cd8f8066f7329034.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/24ada3019282ddad1c38847343a91914e83abdb8/ss_24ada3019282ddad1c38847343a91914e83abdb8.1920x1080.jpg?t=1769538597",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3639780/03ae803d17aea20d13a5c90b7bba825c0e039d09/ss_03ae803d17aea20d13a5c90b7bba825c0e039d09.1920x1080.jpg?t=1769538597"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "rightfully-beary-arms",
+    "game": "Rightfully, Beary Arms",
+    "releaseLabel": "27 de Janeiro",
+    "releaseDate": "2026-01-27",
+    "status": "matched",
+    "appId": 1928030,
+    "steamName": "Rightfully, Beary Arms",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Daylight Basement Studio LLC"
+    ],
+    "publishers": [
+      "Daylight Basement Studio LLC"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "27 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_ede2e7f7ca3869bde4beb5051ca837a2cf3c2052.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_add74e9736f6eaeebc3fb3619c616fd3b5b477d6.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_e158863d429728bf9448c3425c0ecf0c30480c16.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_d5635c98cfbfad79467e076bf83d04b4e7ed51c9.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_2e11ac36ac1e612e187b74b97ea041dbe906df91.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_779bf27890e19a40f9a7a8634bfc7b5ee79cb62f.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_f7eda35bf92f663ea31d56826532c06134bba58b.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_45bba1fc2d9db46a923444f6c09bb0e2fe14013c.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_353219bf288ffe71a4bcc0d76eb9f27ce8eda0f9.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_18fcb7dab62068b31f73ec9a1c9076d762509fd5.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_becb55334877b5a34757e95e3ec80b66ae07219c.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_ab22987fd56677242d957d880831ff226ea792ff.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_f5e86b3be4bdfe45eaa6703760510ec6e09f50a2.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_109b3bd85baf33402a396a23c130c4e0ab8554e2.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_97ac35adda5237974dd077eecd403164ac313023.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_ba80e46f251d1065dab8583ea952af4ec22eae2a.1920x1080.jpg?t=1769525479",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1928030/ss_5480ebe54ea2dd0d0d5cc0f6f0c65f48985f892a.1920x1080.jpg?t=1769525479"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "underground-garage",
+    "game": "Underground Garage",
+    "releaseLabel": "27 de Janeiro",
+    "releaseDate": "2026-01-27",
+    "status": "matched",
+    "appId": 1452250,
+    "steamName": "Underground Garage",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "BeardedBrothers.games"
+    ],
+    "publishers": [
+      "astragon Entertainment"
+    ],
+    "genres": [
+      "Simulation"
+    ],
+    "releaseDateSteam": "27 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/ss_20da0ff378ab706d4c3a3ef67cb45e158df50c57.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/ea02410d979111c6560d227ec7a9a0f5f545ef5a/ss_ea02410d979111c6560d227ec7a9a0f5f545ef5a.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/35f7e2f6a5ea323d8c948ff4ee62ba852c95d569/ss_35f7e2f6a5ea323d8c948ff4ee62ba852c95d569.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/93b40ffe0fb10930ac889226ee7f5fbbe6b0ffb4/ss_93b40ffe0fb10930ac889226ee7f5fbbe6b0ffb4.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/fe3ecb88c13f9314a91384ac576f65daa8b9ee0b/ss_fe3ecb88c13f9314a91384ac576f65daa8b9ee0b.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/e01d657e25a21e264eb2ed9454210de2b20c52f0/ss_e01d657e25a21e264eb2ed9454210de2b20c52f0.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/6c4ab3361c11f27ae909340a47031da45ca5668d/ss_6c4ab3361c11f27ae909340a47031da45ca5668d.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/975b3feaebe86aac65f24652e04516630ec8ed1f/ss_975b3feaebe86aac65f24652e04516630ec8ed1f.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/61476c16c3a73431d02730648337943d61ecdb24/ss_61476c16c3a73431d02730648337943d61ecdb24.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/ss_714a1ccad9db2923e688d69613e6b4d154960166.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/96c705abd63b9d19b2de6c50a0c5041ecbdbd9b5/ss_96c705abd63b9d19b2de6c50a0c5041ecbdbd9b5.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/a5e2d16ae94d4b0a09f10b340f274bd2e46b3cce/ss_a5e2d16ae94d4b0a09f10b340f274bd2e46b3cce.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/a29af8fa235573798762d1cd3392469ffe88d027/ss_a29af8fa235573798762d1cd3392469ffe88d027.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/66ac26b16cfd2454539d86f2e8f38cc3ee3a4677/ss_66ac26b16cfd2454539d86f2e8f38cc3ee3a4677.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/6be046b851598abecd20d5b81cb595507d177382/ss_6be046b851598abecd20d5b81cb595507d177382.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/191c4d0cbf00b659a8d1c074fa736adcd72f9ae6/ss_191c4d0cbf00b659a8d1c074fa736adcd72f9ae6.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/2d977ca60a849b88a0aee7ea766502be281722eb/ss_2d977ca60a849b88a0aee7ea766502be281722eb.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/c60fe1960abe9cc114c5bb42e366d626bfcdbf77/ss_c60fe1960abe9cc114c5bb42e366d626bfcdbf77.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/09034d3d5bb0b8f887f737ba5401ba5ccb605232/ss_09034d3d5bb0b8f887f737ba5401ba5ccb605232.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/ss_2d8bcd4242fbf4a61da3bb74b140cfc73ea147a8.1920x1080.jpg?t=1770381764",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1452250/2739e9b80b3771f3ce593d54347c3f5c9625b923/ss_2739e9b80b3771f3ce593d54347c3f5c9625b923.1920x1080.jpg?t=1770381764"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "lanesplit",
+    "game": "Lanesplit",
+    "releaseLabel": "28 de Janeiro",
+    "releaseDate": "2026-01-28",
+    "status": "matched",
+    "appId": 3278310,
+    "steamName": "LANESPLIT",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "FunkyMouse"
+    ],
+    "publishers": [
+      "FunkyMouse"
+    ],
+    "genres": [
+      "Action",
+      "Indie",
+      "Racing",
+      "Simulation",
+      "Sports"
+    ],
+    "releaseDateSteam": "28 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/71563e5f14c64a10d0adef142c1b9f513836dafc/ss_71563e5f14c64a10d0adef142c1b9f513836dafc.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_cf39ac4291c7f1954bb8a853d7ff878ca8694ea1.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/8feaee6c769b05f4952984b1bd631a398bce75af/ss_8feaee6c769b05f4952984b1bd631a398bce75af.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_fb7d12dc70f7ce2f42bc91dd82262ab8e959130d.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_8085018a3d67d546dd790e0a099f0d6ef5f9108d.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_0a1d94117137931aad72f8601339a923fcdc3593.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_0d7da276c060956e4843600f1e70f433bd4f2e80.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_f2bc537ca5ed51c9cb1643213f04dac0f1f15998.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_ae68628e017047ad6ddfbdf339c2bb608820961a.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_0713849b8c2e5206924bc9ff75f9e76d5e9e518a.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_c1ce4dbfe7fba87294a8203ead41a750b40969da.1920x1080.jpg?t=1782741920",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3278310/ss_3a90bf0beaed100846824272911a0d5851cd13b2.1920x1080.jpg?t=1782741920"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "seven-deadly-sins-origin",
+    "game": "The Seven Deadly Sins: Origin",
+    "releaseLabel": "28 de Janeiro",
+    "releaseDate": "2026-01-28",
+    "status": "matched",
+    "appId": 3679080,
+    "steamName": "The Seven Deadly Sins: Origin",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Netmarble F&C"
+    ],
+    "publishers": [
+      "Netmarble"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Massively Multiplayer",
+      "RPG",
+      "Simulation",
+      "Free To Play"
+    ],
+    "releaseDateSteam": "16 Mar, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/53373b98ce2cec50ffdf76f7cd072aa8f6eda7d2/ss_53373b98ce2cec50ffdf76f7cd072aa8f6eda7d2.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/33059da9c5bc2e3a9b4335700d7453970cba7700/ss_33059da9c5bc2e3a9b4335700d7453970cba7700.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/58fc82c529edeaa16fbdf16b6bdd329cae8b80d7/ss_58fc82c529edeaa16fbdf16b6bdd329cae8b80d7.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/ec066430e514ec4ac7a6c7c92e4c7dc932be6cdb/ss_ec066430e514ec4ac7a6c7c92e4c7dc932be6cdb.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/92f269d3d2b376d6207c080e235417b878225c83/ss_92f269d3d2b376d6207c080e235417b878225c83.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/7786cedb73c01e249d332358a54bcb5e43988752/ss_7786cedb73c01e249d332358a54bcb5e43988752.1920x1080.jpg?t=1782362949",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3679080/b1c06d7bb6010b6b6f8c70d097f28090d06e4824/ss_b1c06d7bb6010b6b6f8c70d097f28090d06e4824.1920x1080.jpg?t=1782362949"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "cairn",
+    "game": "Cairn",
+    "releaseLabel": "29 de Janeiro",
+    "releaseDate": "2026-01-29",
+    "status": "matched",
+    "appId": 1588550,
+    "steamName": "Cairn",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "The Game Bakers"
+    ],
+    "publishers": [
+      "The Game Bakers"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Indie",
+      "Simulation",
+      "Sports"
+    ],
+    "releaseDateSteam": "29 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/bf1a0195af2a834226b5747bb0c304f36b55072c/ss_bf1a0195af2a834226b5747bb0c304f36b55072c.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/827a05c5af0d469f5e27bbd4e5b298be244f7fb4/ss_827a05c5af0d469f5e27bbd4e5b298be244f7fb4.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/bae00fc0710749179c1f87d41aa4c1733f5fa9a0/ss_bae00fc0710749179c1f87d41aa4c1733f5fa9a0.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/c5bcd1ca562b791b8191771af3917cc852634639/ss_c5bcd1ca562b791b8191771af3917cc852634639.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/48e842321193d50c98df59ac4cd29cdc3b512d56/ss_48e842321193d50c98df59ac4cd29cdc3b512d56.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/aedd55253a365e28eeb2ac65adb92f41c6911feb/ss_aedd55253a365e28eeb2ac65adb92f41c6911feb.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/c12d7afe49643939e1fbb339d60acf449a203ee3/ss_c12d7afe49643939e1fbb339d60acf449a203ee3.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/a6c12610ddc959dfea72f978e96eb871aa665bce/ss_a6c12610ddc959dfea72f978e96eb871aa665bce.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/6e6de2c22cec3310e4070d53b866da877e263676/ss_6e6de2c22cec3310e4070d53b866da877e263676.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/e43bc7a2106fd7fb45a9a9174cbc3fdd5b2e969f/ss_e43bc7a2106fd7fb45a9a9174cbc3fdd5b2e969f.1920x1080.jpg?t=1782391789",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1588550/6e53d0c2e7d945fc6d6fba7d3f5547796cfe10b5/ss_6e53d0c2e7d945fc6d6fba7d3f5547796cfe10b5.1920x1080.jpg?t=1782391789"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "dark-auction",
+    "game": "Dark Auction",
+    "releaseLabel": "29 de Janeiro",
+    "releaseDate": "2026-01-29",
+    "status": "matched",
+    "appId": 2363180,
+    "steamName": "Dark Auction",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "IzanagiGames"
+    ],
+    "publishers": [
+      "IzanagiGames",
+      "GOOD SMILE COMPANY"
+    ],
+    "genres": [
+      "Adventure"
+    ],
+    "releaseDateSteam": "28 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/001d38ed8652369883903440adf8ef2533034105/ss_001d38ed8652369883903440adf8ef2533034105.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/6b85c4502505586935d862931787a32b5f7ba5a2/ss_6b85c4502505586935d862931787a32b5f7ba5a2.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/c7eaca7e4a91c98a4aa95aa2c76ca12595e251f7/ss_c7eaca7e4a91c98a4aa95aa2c76ca12595e251f7.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/ffe1772249d6be0bd2a0f712b6e944e15d63b620/ss_ffe1772249d6be0bd2a0f712b6e944e15d63b620.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/eabacd6dfd799555d815752bed5354ee564b8d67/ss_eabacd6dfd799555d815752bed5354ee564b8d67.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/3667fd44275cf0a8c55f73d7a762866dcf6687ec/ss_3667fd44275cf0a8c55f73d7a762866dcf6687ec.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/b016a365687bd341aa2fe659769effedddd2051a/ss_b016a365687bd341aa2fe659769effedddd2051a.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/eeb5804bff755fc587b351d9fa57b2470a2169bb/ss_eeb5804bff755fc587b351d9fa57b2470a2169bb.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/8ad35395c2ee0036754886add31c56b480130d82/ss_8ad35395c2ee0036754886add31c56b480130d82.1920x1080.jpg?t=1772510193",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2363180/6f0a60dd80b9e69cae7bf0dcc52f695f03b86a96/ss_6f0a60dd80b9e69cae7bf0dcc52f695f03b86a96.1920x1080.jpg?t=1772510193"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "i-hate-this-place",
+    "game": "I Hate This Place",
+    "releaseLabel": "29 de Janeiro",
+    "releaseDate": "2026-01-29",
+    "status": "matched",
+    "appId": 2604490,
+    "steamName": "I Hate This Place",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Rock Square Thunder"
+    ],
+    "publishers": [
+      "Feardemic"
+    ],
+    "genres": [
+      "Indie"
+    ],
+    "releaseDateSteam": "29 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/13123e621adf64da82114abda8654c5b01fca728/ss_13123e621adf64da82114abda8654c5b01fca728.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/941c690eaef9ace4f5de7204d19e35630ff19b54/ss_941c690eaef9ace4f5de7204d19e35630ff19b54.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/c3991ac235018d122f173d17aa5787ec57634515/ss_c3991ac235018d122f173d17aa5787ec57634515.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/e13fe7cff41f4fa4969241ae5b14c64633be17e3/ss_e13fe7cff41f4fa4969241ae5b14c64633be17e3.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/c42057feeb3b2f1054dc20b44d94e464878d5776/ss_c42057feeb3b2f1054dc20b44d94e464878d5776.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/96a2a6afcfb5264165c7585f3987aa460c4b7ade/ss_96a2a6afcfb5264165c7585f3987aa460c4b7ade.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/fa560a254a135c0e88bad0b3b2a52e943a12c8bd/ss_fa560a254a135c0e88bad0b3b2a52e943a12c8bd.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/458929484f38fed8bca5d43c5fab5b20c71fac9b/ss_458929484f38fed8bca5d43c5fab5b20c71fac9b.1920x1080.jpg?t=1770213560",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2604490/f3d8576002bd25aff1bda2176ad8559c1dae1719/ss_f3d8576002bd25aff1bda2176ad8559c1dae1719.1920x1080.jpg?t=1770213560"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "space-warlord-baby-trading-simulator",
+    "game": "Space Warlord Baby Trading Simulator",
+    "releaseLabel": "29 de Janeiro",
+    "releaseDate": "2026-01-29",
+    "status": "matched",
+    "appId": 3642000,
+    "steamName": "Space Warlord Baby Trading Simulator",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Strange Scaffold"
+    ],
+    "publishers": [
+      "Frosty Pop",
+      "Strange Scaffold"
+    ],
+    "genres": [
+      "Simulation"
+    ],
+    "releaseDateSteam": "29 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/8c5c0e3313f8efe0e39d9fc19de5aecb52abf4c2/ss_8c5c0e3313f8efe0e39d9fc19de5aecb52abf4c2.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/32d6e55228698b548ad06b4656f372c635771fb0/ss_32d6e55228698b548ad06b4656f372c635771fb0.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/95453a050c2d67d50c3631d7f98de2722972d063/ss_95453a050c2d67d50c3631d7f98de2722972d063.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/aa269f72ca6a73a53f98d44691fe102dfd13d3a4/ss_aa269f72ca6a73a53f98d44691fe102dfd13d3a4.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/d31a9eae9832b4909dd59437cdfa1165698e1432/ss_d31a9eae9832b4909dd59437cdfa1165698e1432.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/27b65dfa9c330453079bf4ae308a5a68d6192a4d/ss_27b65dfa9c330453079bf4ae308a5a68d6192a4d.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/535bf83e0897afd1a6618f3147b079201d7f55d6/ss_535bf83e0897afd1a6618f3147b079201d7f55d6.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/a06f179647e3534dd57a1ad60e59ea320a90f984/ss_a06f179647e3534dd57a1ad60e59ea320a90f984.1920x1080.jpg?t=1770222474",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3642000/d16da9da58ecb9e2214096956e0c353920b97040/ss_d16da9da58ecb9e2214096956e0c353920b97040.1920x1080.jpg?t=1770222474"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "ufophilia",
+    "game": "Ufophilia",
+    "releaseLabel": "29 de Janeiro",
+    "releaseDate": "2026-01-29",
+    "status": "matched",
+    "appId": 3851320,
+    "steamName": "UFOPHILIA",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "k148 Game Studio"
+    ],
+    "publishers": [
+      "JanduSoft"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie",
+      "Simulation"
+    ],
+    "releaseDateSteam": "29 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/5c8e907c8ed2d9f75a41d3141f66c5f34decb750/ss_5c8e907c8ed2d9f75a41d3141f66c5f34decb750.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/24aba3bb97d801e3cf9121fa4a70599e49ac82ab/ss_24aba3bb97d801e3cf9121fa4a70599e49ac82ab.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/bdaf2ce0bde8981d446577f55619cb5d003bf5e0/ss_bdaf2ce0bde8981d446577f55619cb5d003bf5e0.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/80845bcd9b4a7c4d4d96f1117fc73feede7dfb0c/ss_80845bcd9b4a7c4d4d96f1117fc73feede7dfb0c.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/f5aab538fae62b94ee08d93c624dddbe3eab2261/ss_f5aab538fae62b94ee08d93c624dddbe3eab2261.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/89ac485b5a6522e97a5910bbbe68e7d7f4555c09/ss_89ac485b5a6522e97a5910bbbe68e7d7f4555c09.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/e70144665ecc1edcfe7aa6ec992425e13e6d6859/ss_e70144665ecc1edcfe7aa6ec992425e13e6d6859.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/a835dacff1813f4eaab79da6b62d59ecf86fd49d/ss_a835dacff1813f4eaab79da6b62d59ecf86fd49d.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/8c205a528c6a783d355976718504ee336116b687/ss_8c205a528c6a783d355976718504ee336116b687.1920x1080.jpg?t=1777363166",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3851320/b4f056782a8a9c6fbf383b0aa7a3d62bd6324e31/ss_b4f056782a8a9c6fbf383b0aa7a3d62bd6324e31.1920x1080.jpg?t=1777363166"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "code-vein-2",
+    "game": "Code Vein 2",
+    "releaseLabel": "30 de Janeiro",
+    "releaseDate": "2026-01-30",
+    "status": "review-match",
+    "appId": 2362060,
+    "steamName": "CODE VEIN II",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Bandai Namco Studios Inc."
+    ],
+    "publishers": [
+      "Bandai Namco Entertainment Inc."
+    ],
+    "genres": [
+      "Action",
+      "RPG"
+    ],
+    "releaseDateSteam": "29 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/164032cfc179a005dcc601c2ba11e29faa407cf1/ss_164032cfc179a005dcc601c2ba11e29faa407cf1.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/ec1065b1ff496d896979cac644ff64b290ae7f94/ss_ec1065b1ff496d896979cac644ff64b290ae7f94.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/4d2af6716a9183c97ab6cee278b40f52f88bf414/ss_4d2af6716a9183c97ab6cee278b40f52f88bf414.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/1f26a799d2b8aef61f35892b1d62b377b91fd589/ss_1f26a799d2b8aef61f35892b1d62b377b91fd589.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/b4c0b192794636bd3000bd5a0ca3077035737142/ss_b4c0b192794636bd3000bd5a0ca3077035737142.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/f53df962d8bd99bd5afab9b3d424fcd64b13fffb/ss_f53df962d8bd99bd5afab9b3d424fcd64b13fffb.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/d582e82c95e567803bb9c67a4ecbbe44d630d467/ss_d582e82c95e567803bb9c67a4ecbbe44d630d467.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/979bba6e6c6ed7d5510fd1785dc038f1eaf39e39/ss_979bba6e6c6ed7d5510fd1785dc038f1eaf39e39.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/ef45591472092153276fa908d276fe1c3d7812e1/ss_ef45591472092153276fa908d276fe1c3d7812e1.1920x1080.jpg?t=1782293908",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362060/c4214bfa2cbb4c2e2b0c847c9e3d9857e732b454/ss_c4214bfa2cbb4c2e2b0c847c9e3d9857e732b454.1920x1080.jpg?t=1782293908"
+    ],
+    "matchScore": 0.6666666666666666
+  },
+  {
+    "id": "folklore-hunter",
+    "game": "Folklore Hunter",
+    "releaseLabel": "30 de Janeiro",
+    "releaseDate": "2026-01-30",
+    "status": "matched",
+    "appId": 696220,
+    "steamName": "Folklore Hunter",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Liquid Donkey Games"
+    ],
+    "publishers": [
+      "Liquid Donkey Games"
+    ],
+    "genres": [
+      "Action",
+      "Indie"
+    ],
+    "releaseDateSteam": "30 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/86ac125b60c383a2eca7995dced94b9b579758d8/ss_86ac125b60c383a2eca7995dced94b9b579758d8.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/bb649db481809aa5aa38dca264579f50a44852ad/ss_bb649db481809aa5aa38dca264579f50a44852ad.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/9df99173f161e42f2c995656646652ed6d9f7fa9/ss_9df99173f161e42f2c995656646652ed6d9f7fa9.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/0eb48a195c8c1b666be1023adbcf90d256bd5d4e/ss_0eb48a195c8c1b666be1023adbcf90d256bd5d4e.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/d89f9c021ca1905668e13f74ab8258d539600215/ss_d89f9c021ca1905668e13f74ab8258d539600215.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/4abd273f584f254981599978537731c0919d9557/ss_4abd273f584f254981599978537731c0919d9557.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/c1573e9df7cba39503c593b705cedebbe095002e/ss_c1573e9df7cba39503c593b705cedebbe095002e.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/6d3fb79097f481ad83ca924add88a5b876934739/ss_6d3fb79097f481ad83ca924add88a5b876934739.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/daf87677ecbab5dfb82df47b4cb7e0c69c053a18/ss_daf87677ecbab5dfb82df47b4cb7e0c69c053a18.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/8f5e51ea49e31955c1763a8a81d99c8fa64aa81a/ss_8f5e51ea49e31955c1763a8a81d99c8fa64aa81a.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/ss_d8d03613d2b169dd702a5f3561a6d13635e88c66.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/ss_98131ff0a6e4beec078409f1768ebfdb9212b62a.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/73468899d7435e2281ae3c01d43b60d3e6de13cd/ss_73468899d7435e2281ae3c01d43b60d3e6de13cd.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/ss_88ac3230c55bed7da83f4ecaf49e5442df1e76a5.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/5c6e3dd4e1e164d610255f39ba4aa8f4081311ae/ss_5c6e3dd4e1e164d610255f39ba4aa8f4081311ae.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/ss_62e35c5f3509bc2072889a345640c013cc1815db.1920x1080.jpg?t=1771627157",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/696220/ss_8892fef6bfbb18469cb9613236f6aafd885d3f2e.1920x1080.jpg?t=1771627157"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "my-tiny-garden",
+    "game": "My Tiny Garden",
+    "releaseLabel": "30 de Janeiro",
+    "releaseDate": "2026-01-30",
+    "status": "matched",
+    "appId": 3719580,
+    "steamName": "My Tiny Garden",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Frozen Logic Studios"
+    ],
+    "publishers": [
+      "Frozen Logic Studios"
+    ],
+    "genres": [
+      "Casual",
+      "Indie"
+    ],
+    "releaseDateSteam": "30 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/ab8882bc27f1bfdf392d72f863c70dcc621c8bae/ss_ab8882bc27f1bfdf392d72f863c70dcc621c8bae.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/faa06f848cf9d0cc918951c35894b634a5b7d4db/ss_faa06f848cf9d0cc918951c35894b634a5b7d4db.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/13b0057d1602b977e1c94038c0fe385a8529c6a7/ss_13b0057d1602b977e1c94038c0fe385a8529c6a7.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/b95c349d14abea8c6e4af253a8151f5a63965486/ss_b95c349d14abea8c6e4af253a8151f5a63965486.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/ba93c96dda29d28c4bfccf532e1ad74a75525362/ss_ba93c96dda29d28c4bfccf532e1ad74a75525362.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/41b0eb29fc83c2e906207cf22eb7cb6973198618/ss_41b0eb29fc83c2e906207cf22eb7cb6973198618.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/e3c9c7d6b82100df117798222766f63e6c74b003/ss_e3c9c7d6b82100df117798222766f63e6c74b003.1920x1080.jpg?t=1779156159",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3719580/d4413b276f077b130446ebd25beeda8611d4b338/ss_d4413b276f077b130446ebd25beeda8611d4b338.1920x1080.jpg?t=1779156159"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "occupy-mars-the-game",
+    "game": "Occupy Mars: The Game",
+    "releaseLabel": "30 de Janeiro",
+    "releaseDate": "2026-01-30",
+    "status": "matched",
+    "appId": 758690,
+    "steamName": "Occupy Mars: The Game",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "▲ Pyramid Games"
+    ],
+    "publishers": [
+      "▲ Pyramid Games",
+      "PlayWay S.A."
+    ],
+    "genres": [
+      "Adventure",
+      "Indie",
+      "Simulation",
+      "Free To Play"
+    ],
+    "releaseDateSteam": "30 Jan, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_e78b6c974590383d8e92cfd5dd23e07bd1f01b6c.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_6a61a9effc119cce6f57580996d0b90eb8b967f0.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_dc356431a1010089ec5b4a0de3808382ca34b3b7.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_b33b74117a8071df52f2a112a66e2ecd17ff641d.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_8077a334661e0dcca0a3ddceec50052410254e17.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_0badf6235941b23d0085ed6cc146e6803b21110e.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_55265849b7ecd2fbdc8f2e6154d8bdd4b80a8712.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_31f582b25e1a6f0585f7e50197647a39a430d749.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_7e17dc0d2307aa1fb2bcfc267065352f7a2e0bd1.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_25bbeef6cb05a4a4afd54a7b31526e91ddcc3894.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_4eadc2a1d175cae5672a68fb21d9fd28a655f87c.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_1124786d70492e0078d6296779185997c914ff06.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_07f7c1ec92f7008441f03a8e83368349d8b3dd78.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_5d468535361dc9e7d15fc0afd440ff975d06e49a.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_eee26897260f8f4ee223554e14ad849cbeb9034b.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_b42075736e1d5013969f6ed186fb4c811850b13f.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_adbe9baec843402ca36bad997343c2e83f0d64d8.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_8fdfe97943680c13fff4c8d772dbcd9a1485809b.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_3af4fce7a07f9761bae78f35df1ba72d123289c7.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_a8bc7bcfe637f279a80ad27b3b1cc0f2d52a313e.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_02614482d1e2f404d1a99eed1e2f4888954033e6.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_bec23b86b5423121b7302041e715fb42ce0d88c1.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_95709345adb2d5a64c81f6829b33c6573d264173.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_01727aadeb560f737c14661bb6288a20c5ca1ce5.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_d8ff130bee4eae4cab8094e982ae138463312242.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_db50bedefb6bd2c3e7b640fda67f5785f67c1535.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_97c90f1dec3043e07ae9d93576bb62c77ef3548f.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_e2afd684597ffe701ef90501e9fae9d8e90af115.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_70d6400a026edf66b5fe0ffc7112f41d40930b42.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_a2da906eb939ba3b511b2bfab6722a1d76a373c8.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_2351d0a428d82aac85c0e29ece5a6e3c9349f19c.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_b003479b0aadbea28b8efd2f70b610f0dfce32c4.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_428d5116efabc5bbf055547b4c6d5a24d6b6393f.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_d5f0400e750c296c05ddc31e8acb80585d9cfa3e.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_7ddc3f37a07d26327e1ce5dd1f102ba91a57ed64.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_8902a6f8b3beb8257afc0827b704902f8f6d1698.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_85474b2dca1e4de02f950c4948869ddab62a9c51.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_bc1d5294ffcafcb49a8a62b04bc9e0ae1108fe77.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_1df62b72c1809a145cdf00140a74fa27caebdf09.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_04ce4d4d2d757c15653dfbb4a0ffed124a55f30e.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_650663ae9710b2251c596552047348038211ab9c.1920x1080.jpg?t=1782483603",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/758690/ss_86e3fe0060870438823ef4c4714416610b07914d.1920x1080.jpg?t=1782483603"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "the-18th-attic",
+    "game": "The 18th Attic",
+    "releaseLabel": "2 de Fevereiro",
+    "releaseDate": "2026-02-02",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "The 18th Attic - Paranormal Anomaly Hunting Game",
+        "id": 3403660,
+        "price": {
+          "currency": "BRL",
+          "initial": 3299,
+          "final": 3299
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3403660/d8dac7bb12d4d3b7c02f02e949fb1a8749404cf9/capsule_231x87.jpg?t=1777746524",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.3333333333333333
+      },
+      {
+        "type": "app",
+        "name": "The Attic 18th - Paranormal Anomaly Hunting Demo",
+        "id": 3456400,
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3456400/3889ba2aeb29139e581cf3abfdd3d8dc08832fcd/capsule_231x87.jpg?t=1771964014",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.3333333333333333
+      }
+    ]
+  },
+  {
+    "id": "crimson-capes",
+    "game": "Crimson Capes",
+    "releaseLabel": "3 de Fevereiro",
+    "releaseDate": "2026-02-03",
+    "status": "matched",
+    "appId": 2488540,
+    "steamName": "Crimson Capes",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Poor Locke"
+    ],
+    "publishers": [
+      "Poor Locke"
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "12 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2488540/5ab0d40d9a9b85d9e6b39758c1e4b7a5ff075489/ss_5ab0d40d9a9b85d9e6b39758c1e4b7a5ff075489.1920x1080.jpg?t=1773923815",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2488540/39d70295262960397f151588e102032b7fca433f/ss_39d70295262960397f151588e102032b7fca433f.1920x1080.jpg?t=1773923815",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2488540/cd1c8c82e39d8baea7ba6e3613c102833c21aed9/ss_cd1c8c82e39d8baea7ba6e3613c102833c21aed9.1920x1080.jpg?t=1773923815",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2488540/4cb13133ddec45384c11065e6aa19ee5ef2f7e17/ss_4cb13133ddec45384c11065e6aa19ee5ef2f7e17.1920x1080.jpg?t=1773923815",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2488540/50f63229535db7ad94ff66f3f9e148c00d82182b/ss_50f63229535db7ad94ff66f3f9e148c00d82182b.1920x1080.jpg?t=1773923815"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "dragon-quest-vii-reimagined",
+    "game": "Dragon Quest VII Reimagined",
+    "releaseLabel": "5 de Fevereiro",
+    "releaseDate": "2026-02-05",
+    "status": "matched",
+    "appId": 2499860,
+    "steamName": "DRAGON QUEST VII Reimagined",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Square Enix",
+      "HEXADRIVE Inc."
+    ],
+    "publishers": [
+      "Square Enix"
+    ],
+    "genres": [
+      "Adventure",
+      "RPG"
+    ],
+    "releaseDateSteam": "5 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/61ecb8567de5ab0392bd229ffad5dec14eb29279/ss_61ecb8567de5ab0392bd229ffad5dec14eb29279.1920x1080.jpg?t=1772804835",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/c03aa2077121ddeddfc38e0aae8b09fc605ca27d/ss_c03aa2077121ddeddfc38e0aae8b09fc605ca27d.1920x1080.jpg?t=1772804835",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/1bb508b4bcee269585dceab857df7feab4462d87/ss_1bb508b4bcee269585dceab857df7feab4462d87.1920x1080.jpg?t=1772804835",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/cc895dfd164464dc87896ebba30414ac713921cc/ss_cc895dfd164464dc87896ebba30414ac713921cc.1920x1080.jpg?t=1772804835",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/d999a4b94c31d6668e3b9b9e8c33a35a5b43eb37/ss_d999a4b94c31d6668e3b9b9e8c33a35a5b43eb37.1920x1080.jpg?t=1772804835",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2499860/f3b44f04d8210b7c1cbdd172f53f8c191f5cb0a4/ss_f3b44f04d8210b7c1cbdd172f53f8c191f5cb0a4.1920x1080.jpg?t=1772804835"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "unemployment-simulator-2018",
+    "game": "Unemployment Simulator 2018",
+    "releaseLabel": "5 de Fevereiro",
+    "releaseDate": "2026-02-05",
+    "status": "matched",
+    "appId": 3252360,
+    "steamName": "Unemployment Simulator 2018",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Samuel Lehikoinen"
+    ],
+    "publishers": [
+      "turbolento publishing"
+    ],
+    "genres": [
+      "Adventure",
+      "Casual",
+      "Indie",
+      "Simulation"
+    ],
+    "releaseDateSteam": "3 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/b45d8c7ef2e7788a9509d15a086cff8d0a27b512/ss_b45d8c7ef2e7788a9509d15a086cff8d0a27b512.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_14970056cc03a896eec222fbb2eeda525d4489dd.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_d8b984f28a698eda994934b22d5b7ad3e6448358.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_20dada5ead6b80ab230fb46366ad691a8c800468.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/d6a50b2403ffe8b043e34df0e95f96de0a0bb8e3/ss_d6a50b2403ffe8b043e34df0e95f96de0a0bb8e3.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_49608abce881bf77b8d482f8b98a14647c0d9c8e.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_5b04f278a709cfa3bbff5ab9289f405b1ad28eef.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/e0c2cdbbc88de0df8206789bd0fb209573cb9260/ss_e0c2cdbbc88de0df8206789bd0fb209573cb9260.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/1995d973eb59048184ec73dc2a983e507050ca34/ss_1995d973eb59048184ec73dc2a983e507050ca34.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_46426ec5794e4223c7951489146cd55f828ba921.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/7cfbbdeb302ae4677c9f4c54e80a6bea7fba0288/ss_7cfbbdeb302ae4677c9f4c54e80a6bea7fba0288.1920x1080.jpg?t=1782396936",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3252360/ss_fb89b9d22fa81ed59698d5e2c8e02b35202395ca.1920x1080.jpg?t=1782396936"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "dead-pets",
+    "game": "Dead Pets: A Punk Rock Slice Of Life Sim",
+    "releaseLabel": "6 de Fevereiro",
+    "releaseDate": "2026-02-06",
+    "status": "matched",
+    "appId": 1851720,
+    "steamName": "Dead Pets: A Punk Rock Slice of Life Sim",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Triple Topping",
+      "Akupara Games"
+    ],
+    "publishers": [
+      "Akupara Games"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "6 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_8cefc277745f7527a6823101240a25a656da5326.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/6e566543400e404464ca0a72d8be797a65f41d8e/ss_6e566543400e404464ca0a72d8be797a65f41d8e.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_51475d11e91ab3a33f785370b187a822b5767228.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/5247e364bb6a1087724d15a051c80e57170471cd/ss_5247e364bb6a1087724d15a051c80e57170471cd.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_7597230d21d9aa3a353eb161d74d7c9aa2a67d05.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_e533105bd966a27a72f2f12a7313f91237ae047b.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_c1f519c3792e3e7545fcc09127a5e755c0cace1c.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_fe9ff14bbe83383ff2e4624576d2b810e75a5055.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_45d9678302013de561b76d4870e3114558f304bf.1920x1080.jpg?t=1770411636",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1851720/ss_337c1e3d081328062a2819485c9ba83c785f7bbe.1920x1080.jpg?t=1770411636"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "ghost-gunners",
+    "game": "Ghost Gunners",
+    "releaseLabel": "6 de Fevereiro",
+    "releaseDate": "2026-02-06",
+    "status": "matched",
+    "appId": 2883690,
+    "steamName": "Ghost Gunners",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Turtlecode Labs"
+    ],
+    "publishers": [
+      "Turtlecode Labs"
+    ],
+    "genres": [
+      "Action",
+      "Casual",
+      "Indie"
+    ],
+    "releaseDateSteam": "6 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/96e4ba8b48b30330b3d67695ba67733ebe42cea9/ss_96e4ba8b48b30330b3d67695ba67733ebe42cea9.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/5b452a94cc386a5b4abe1413e8187c982f8f69de/ss_5b452a94cc386a5b4abe1413e8187c982f8f69de.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/bdfe2071dafbd27301b6818c5a4dbd92513aa151/ss_bdfe2071dafbd27301b6818c5a4dbd92513aa151.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/d56537f3c7c63fe0811ef6514667b8589c61b606/ss_d56537f3c7c63fe0811ef6514667b8589c61b606.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/570b2802c11f04c42cc4d189b1ac5cd24e8e931d/ss_570b2802c11f04c42cc4d189b1ac5cd24e8e931d.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/115959d263615c5bfd15d3812f1ce02d64b9b955/ss_115959d263615c5bfd15d3812f1ce02d64b9b955.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/487c140024983239547d7ea06e2dec7a7761496c/ss_487c140024983239547d7ea06e2dec7a7761496c.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/8c4528b77e1750fb53e7d272e2040259fe1aa0d9/ss_8c4528b77e1750fb53e7d272e2040259fe1aa0d9.1920x1080.jpg?t=1770980333",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2883690/5a4fb612765369023e6e3cd4cc29036ad2416508/ss_5a4fb612765369023e6e3cd4cc29036ad2416508.1920x1080.jpg?t=1770980333"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "humanityz",
+    "game": "HumanityZ",
+    "releaseLabel": "6 de Fevereiro",
+    "releaseDate": "2026-02-06",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "my-hero-academia-alls-justice",
+    "game": "My Hero Academia: All's Justice",
+    "releaseLabel": "6 de Fevereiro",
+    "releaseDate": "2026-02-06",
+    "status": "matched",
+    "appId": 2362050,
+    "steamName": "MY HERO ACADEMIA: All’s Justice",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Byking Inc."
+    ],
+    "publishers": [
+      "Bandai Namco Entertainment Inc."
+    ],
+    "genres": [
+      "Action"
+    ],
+    "releaseDateSteam": "5 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/39a9719e7f7d214593663ead9925a956340a4e3c/ss_39a9719e7f7d214593663ead9925a956340a4e3c.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/1e6db8be6e8097e803909ab49146639c98dca3ab/ss_1e6db8be6e8097e803909ab49146639c98dca3ab.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/fbccb81b0c0e94a527cf33d24128684ed415a678/ss_fbccb81b0c0e94a527cf33d24128684ed415a678.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/e3c6912c5562afd0304f009a5987cf4a5f24da3a/ss_e3c6912c5562afd0304f009a5987cf4a5f24da3a.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/f5be2eddede8e685c50a36ba70b55c64271221e5/ss_f5be2eddede8e685c50a36ba70b55c64271221e5.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/1c2f8b0075c9dc4c62dbc595dea379baef41e875/ss_1c2f8b0075c9dc4c62dbc595dea379baef41e875.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/b3ef69b7db5b843361d6d3ab1525bbbc2c30d181/ss_b3ef69b7db5b843361d6d3ab1525bbbc2c30d181.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/579964899fe2fe2ff3c8573a921103b7fd95e1c1/ss_579964899fe2fe2ff3c8573a921103b7fd95e1c1.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/d6d51c8fa9a88a1410f5353a0161a0348420e421/ss_d6d51c8fa9a88a1410f5353a0161a0348420e421.1920x1080.jpg?t=1778106131",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2362050/151b63a480171938e03c7eec3624e1633db9a11a/ss_151b63a480171938e03c7eec3624e1633db9a11a.1920x1080.jpg?t=1778106131"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "nioh-3",
+    "game": "Nioh 3",
+    "releaseLabel": "6 de Fevereiro",
+    "releaseDate": "2026-02-06",
+    "status": "matched",
+    "appId": 3681010,
+    "steamName": "Nioh 3",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "KOEI TECMO GAMES CO., LTD."
+    ],
+    "publishers": [
+      "KOEI TECMO GAMES CO., LTD."
+    ],
+    "genres": [
+      "Action",
+      "RPG"
+    ],
+    "releaseDateSteam": "5 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/c65877619b70c51d6be030c20b5c37bcfaf2e248/ss_c65877619b70c51d6be030c20b5c37bcfaf2e248.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8c9333bf3f28194cb8113af455ecaf1aa45a0050/ss_8c9333bf3f28194cb8113af455ecaf1aa45a0050.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/5d02a1bcff9cc74ef4551c9afce91c78881539a1/ss_5d02a1bcff9cc74ef4551c9afce91c78881539a1.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/fe1a9485c46e95c8a899e8cfc645136f303b4fda/ss_fe1a9485c46e95c8a899e8cfc645136f303b4fda.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/9068ef1b3d231d0808ac8ec50ae864483e4374d9/ss_9068ef1b3d231d0808ac8ec50ae864483e4374d9.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/271b11ccc100773992d9e0a1d06a1d3848eaf1c8/ss_271b11ccc100773992d9e0a1d06a1d3848eaf1c8.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/291a1cebda45a0c6cfcf85d2e46e8cd46e1d45a3/ss_291a1cebda45a0c6cfcf85d2e46e8cd46e1d45a3.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/5d034bc651b8b1d5b7b12f9fd8e9f7d2b5fc0d6b/ss_5d034bc651b8b1d5b7b12f9fd8e9f7d2b5fc0d6b.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/76d0ee6c0c0d0605b3e9bdc690b477234e270554/ss_76d0ee6c0c0d0605b3e9bdc690b477234e270554.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/01473e77245640318e652da022a5c379d7fe09aa/ss_01473e77245640318e652da022a5c379d7fe09aa.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/b2cf85ed0b734ad851c42da74c731db3ca2e9502/ss_b2cf85ed0b734ad851c42da74c731db3ca2e9502.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687/ss_8f3e5ec42c6f3e1ed92a76541b4fc1245be4e687.1920x1080.jpg?t=1772090941",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3681010/cdab644c4645c795e44d4b3766bdbd9dcb1613b5/ss_cdab644c4645c795e44d4b3766bdbd9dcb1613b5.1920x1080.jpg?t=1772090941"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "mewgenics",
+    "game": "Mewgenics",
+    "releaseLabel": "10 de Fevereiro",
+    "releaseDate": "2026-02-10",
+    "status": "matched",
+    "appId": 686060,
+    "steamName": "Mewgenics",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Edmund McMillen",
+      "Tyler Glaiel"
+    ],
+    "publishers": [
+      "Edmund McMillen",
+      "Tyler Glaiel"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie",
+      "RPG",
+      "Simulation",
+      "Strategy"
+    ],
+    "releaseDateSteam": "10 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/b76bf94de0b466797f9455a6da347507020a9966/ss_b76bf94de0b466797f9455a6da347507020a9966.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/a49301637adf55a2fad26305272829a0f47b478d/ss_a49301637adf55a2fad26305272829a0f47b478d.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/129c23d40964c3f0a7e766182179333a19f422b9/ss_129c23d40964c3f0a7e766182179333a19f422b9.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/54d33c8cd2e23c2a278367b487449077d5f0bc49/ss_54d33c8cd2e23c2a278367b487449077d5f0bc49.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/99ad52d7d60acd283b9c1dc361324de70ed9f8f1/ss_99ad52d7d60acd283b9c1dc361324de70ed9f8f1.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/4277d9253ea2360418937a3250c8954e2378a510/ss_4277d9253ea2360418937a3250c8954e2378a510.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/8b1fd57290c17bb1e326cc9be4da53a2bb4fa252/ss_8b1fd57290c17bb1e326cc9be4da53a2bb4fa252.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/3ec3dbbe03b62fe1367fb445ab1fc5ba23467da4/ss_3ec3dbbe03b62fe1367fb445ab1fc5ba23467da4.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/2b1f8ec2befd90418edd6d1c154bd494ba066821/ss_2b1f8ec2befd90418edd6d1c154bd494ba066821.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/d8fca4059f3f9494d35c2ae50399a28b303fa3b3/ss_d8fca4059f3f9494d35c2ae50399a28b303fa3b3.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/e22deae60cc21553edcaacca0953aa41128051bb/ss_e22deae60cc21553edcaacca0953aa41128051bb.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/90616f848a23afca914b08c594aa6d57ff0c592e/ss_90616f848a23afca914b08c594aa6d57ff0c592e.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/7042e4e52692045ec4d8293d7accef5139f51949/ss_7042e4e52692045ec4d8293d7accef5139f51949.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/066deee756369d605bb850f16606713119fb1876/ss_066deee756369d605bb850f16606713119fb1876.1920x1080.jpg?t=1771573546",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/686060/551803fdbc7c68d474e065fa9843e541493f64aa/ss_551803fdbc7c68d474e065fa9843e541493f64aa.1920x1080.jpg?t=1771573546"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "relooted",
+    "game": "Relooted",
+    "releaseLabel": "10 de Fevereiro",
+    "releaseDate": "2026-02-10",
+    "status": "matched",
+    "appId": 3255890,
+    "steamName": "Relooted",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Nyamakop"
+    ],
+    "publishers": [
+      "Nyamakop"
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "10 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/11e0c5b57e629b253f35117f42e67e40ac576e5f/ss_11e0c5b57e629b253f35117f42e67e40ac576e5f.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/513ca6b415a9900f412eb1321071b15c940f54c8/ss_513ca6b415a9900f412eb1321071b15c940f54c8.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/a57adab04a3d9aac8798668340a0b1fde5016e4f/ss_a57adab04a3d9aac8798668340a0b1fde5016e4f.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/ce19b352ebdd63d51d6375c24974da28ced35f96/ss_ce19b352ebdd63d51d6375c24974da28ced35f96.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/1d597531b8aa3946fda67f666db29054ad1fe169/ss_1d597531b8aa3946fda67f666db29054ad1fe169.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/ef46ccec647a7c1d01d31c3e5a316c034b16aa4e/ss_ef46ccec647a7c1d01d31c3e5a316c034b16aa4e.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/627ad3ca151ccefec06f634fa7e0a8ffc6bb6c2e/ss_627ad3ca151ccefec06f634fa7e0a8ffc6bb6c2e.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/6c9e7bb82f7554e24b05a1799ee31fa2bd2103bc/ss_6c9e7bb82f7554e24b05a1799ee31fa2bd2103bc.1920x1080.jpg?t=1771833572",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3255890/c564984d449013a0b98ab07ec315cb0b6cf9584a/ss_c564984d449013a0b98ab07ec315cb0b6cf9584a.1920x1080.jpg?t=1771833572"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "the-prisoning-fletchers-quest",
+    "game": "The Prisoning: Fletcher's Quest",
+    "releaseLabel": "10 de Fevereiro",
+    "releaseDate": "2026-02-10",
+    "status": "matched",
+    "appId": 2725470,
+    "steamName": "The Prisoning: Fletcher's Quest",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Elden Pixels"
+    ],
+    "publishers": [
+      "Acclaim, Inc."
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "10 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/635b2af070fe1e8a1f869fd50a08b391f307b518/ss_635b2af070fe1e8a1f869fd50a08b391f307b518.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/06578c146eb6e02f46f8795d48148c641be6d1f8/ss_06578c146eb6e02f46f8795d48148c641be6d1f8.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/bc806917ac64f763e72281115faeeda6a885f538/ss_bc806917ac64f763e72281115faeeda6a885f538.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/cf398d2940f96bf169e4fd08969242825db52cca/ss_cf398d2940f96bf169e4fd08969242825db52cca.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/4caa00ed5882f806ee5397820c0b7c27b9917fd6/ss_4caa00ed5882f806ee5397820c0b7c27b9917fd6.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/634070aa463f7f67ff9ad47302c7fb6138c1d484/ss_634070aa463f7f67ff9ad47302c7fb6138c1d484.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/5568f10598c0d511e4445759438aa5eca3792eca/ss_5568f10598c0d511e4445759438aa5eca3792eca.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/db692ac5d6377fca8fd2baa80aaad1417b1a68bd/ss_db692ac5d6377fca8fd2baa80aaad1417b1a68bd.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/ec5d15e5316ec2c8cfc982c114cf15c66370cdfe/ss_ec5d15e5316ec2c8cfc982c114cf15c66370cdfe.1920x1080.jpg?t=1782412857",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2725470/58118ed22d71795f3aa4bf6465a7a6cb9a7c0772/ss_58118ed22d71795f3aa4bf6465a7a6cb9a7c0772.1920x1080.jpg?t=1782412857"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "romeo-is-a-dead-man",
+    "game": "Romeo is a Dead Man",
+    "releaseLabel": "11 de Fevereiro",
+    "releaseDate": "2026-02-11",
+    "status": "matched",
+    "appId": 3050900,
+    "steamName": "ROMEO IS A DEAD MAN",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "GRASSHOPPER MANUFACTURE INC."
+    ],
+    "publishers": [
+      "GRASSHOPPER MANUFACTURE INC."
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "10 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/c0bfd70d98d6356057d5f34631e086697114b3a0/ss_c0bfd70d98d6356057d5f34631e086697114b3a0.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/1874c4773dc3385efb289f738ece99f720f884bc/ss_1874c4773dc3385efb289f738ece99f720f884bc.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/7b767c96257de46280cc1be622926ad4b49d766a/ss_7b767c96257de46280cc1be622926ad4b49d766a.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/25a3c952bfc85186031455aa43b1ec63b1776b33/ss_25a3c952bfc85186031455aa43b1ec63b1776b33.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/9169123eac43b28def1788839f08277809fe2e51/ss_9169123eac43b28def1788839f08277809fe2e51.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/885b1a96c037174f0672597ae59d65e602b204f8/ss_885b1a96c037174f0672597ae59d65e602b204f8.1920x1080.jpg?t=1775546912",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3050900/0a7d575c7d8c759e9fe8b3daf63b16d90047bed6/ss_0a7d575c7d8c759e9fe8b3daf63b16d90047bed6.1920x1080.jpg?t=1775546912"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "blazblue-entropy-effect-x",
+    "game": "BlazBlue Entropy Effect X",
+    "releaseLabel": "12 de Fevereiro",
+    "releaseDate": "2026-02-12",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "BlazBlue Entropy Effect [X-File] Palette Set",
+        "id": 4372140,
+        "price": {
+          "currency": "BRL",
+          "initial": 2049,
+          "final": 2049
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4372140/feea5ad73868f4b78d7e27f063b1dec7481f1716/capsule_231x87.jpg?t=1775555526",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.5714285714285714
+      }
+    ]
+  },
+  {
+    "id": "disciples-domination",
+    "game": "Disciples: Domination",
+    "releaseLabel": "12 de Fevereiro",
+    "releaseDate": "2026-02-12",
+    "status": "matched",
+    "appId": 2808560,
+    "steamName": "Disciples: Domination",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Artefacts Studio"
+    ],
+    "publishers": [
+      "Kalypso Media"
+    ],
+    "genres": [
+      "RPG",
+      "Strategy"
+    ],
+    "releaseDateSteam": "12 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/21f1bcce0793f0d5a693b270250c30441f865562/ss_21f1bcce0793f0d5a693b270250c30441f865562.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/c48bcfa762140a7d519b7e4102e69098d28e490a/ss_c48bcfa762140a7d519b7e4102e69098d28e490a.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/3a10dd999f97d1a6dffb9df6b7e14a3294d275ba/ss_3a10dd999f97d1a6dffb9df6b7e14a3294d275ba.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/6c0a3e82a0daf32c90958d29158dd90220b6f26c/ss_6c0a3e82a0daf32c90958d29158dd90220b6f26c.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/3abbb5a137597a6f7f32ac60ad5cd51a94d8212a/ss_3abbb5a137597a6f7f32ac60ad5cd51a94d8212a.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/072583dc8530ea28121a1c45c6fb3413b7e0d8fa/ss_072583dc8530ea28121a1c45c6fb3413b7e0d8fa.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/ad74dc3e15f5e97b82cb53e35bbbeed18022c4ce/ss_ad74dc3e15f5e97b82cb53e35bbbeed18022c4ce.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/d90d7f541a4cad17cbc74f8987f66afc9ed48afa/ss_d90d7f541a4cad17cbc74f8987f66afc9ed48afa.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/635becb927a39b14c1c6fb6d248a41355c098d44/ss_635becb927a39b14c1c6fb6d248a41355c098d44.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/428011b73f9ea917d989128fefa333413291525a/ss_428011b73f9ea917d989128fefa333413291525a.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/abeea2395d5b78d6264cffb5411e81cc7f0ae8cf/ss_abeea2395d5b78d6264cffb5411e81cc7f0ae8cf.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/4aa568c88d0b51bcb556d8dacc9724e43fdc0ed0/ss_4aa568c88d0b51bcb556d8dacc9724e43fdc0ed0.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/b37504f44f136633f2e3e0a33355cd08cd277ed7/ss_b37504f44f136633f2e3e0a33355cd08cd277ed7.1920x1080.jpg?t=1776951719",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2808560/f6444cbae82c832b2314e7fa5126bbb77a4e679a/ss_f6444cbae82c832b2314e7fa5126bbb77a4e679a.1920x1080.jpg?t=1776951719"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "mario-tennis-fever",
+    "game": "Mario Tennis Fever",
+    "releaseLabel": "12 de Fevereiro",
+    "releaseDate": "2026-02-12",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "ride-6",
+    "game": "Ride 6",
+    "releaseLabel": "12 de Fevereiro",
+    "releaseDate": "2026-02-12",
+    "status": "matched",
+    "appId": 2815070,
+    "steamName": "RIDE 6",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Milestone S.r.l."
+    ],
+    "publishers": [
+      "Milestone S.r.l."
+    ],
+    "genres": [
+      "Racing",
+      "Simulation",
+      "Sports"
+    ],
+    "releaseDateSteam": "12 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/96bb27494bfe265266b57177cb4e724e1d3217ef/ss_96bb27494bfe265266b57177cb4e724e1d3217ef.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/1b990dda5c0a372d5adcb710318c5ac696a5cf02/ss_1b990dda5c0a372d5adcb710318c5ac696a5cf02.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/80df4e0c603186c608a3ebe701e424013e8ade35/ss_80df4e0c603186c608a3ebe701e424013e8ade35.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/95873ba0c4d13e3553e91c7dd412496fda6d8eaa/ss_95873ba0c4d13e3553e91c7dd412496fda6d8eaa.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/f08c6514e5e6f5148fc7664350510f92705f4234/ss_f08c6514e5e6f5148fc7664350510f92705f4234.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/eedb66dc1c4b9df19a96a12c215de94701e0f0a2/ss_eedb66dc1c4b9df19a96a12c215de94701e0f0a2.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/cd56000b0fcaf253c559c66f438f1a4ceb8999f6/ss_cd56000b0fcaf253c559c66f438f1a4ceb8999f6.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/d218b79340281307fb223581e0b90bd316464187/ss_d218b79340281307fb223581e0b90bd316464187.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/ec8915c3de3bae1d655490c104c13c9222399385/ss_ec8915c3de3bae1d655490c104c13c9222399385.1920x1080.jpg?t=1782975724",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2815070/1c2d42a03fc3a7f78f423b10eddd28d02fd921c1/ss_1c2d42a03fc3a7f78f423b10eddd28d02fd921c1.1920x1080.jpg?t=1782975724"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "clue-murder-by-death",
+    "game": "Clue: Murder by Death",
+    "releaseLabel": "13 de Fevereiro",
+    "releaseDate": "2026-02-13",
+    "status": "matched",
+    "appId": 2608420,
+    "steamName": "Clue: Murder By Death",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Cocodrolo Games"
+    ],
+    "publishers": [
+      "Cocodrolo Games"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "13 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2608420/7dd90fd7a9490e296b76b80717df71a85b6682f7/ss_7dd90fd7a9490e296b76b80717df71a85b6682f7.1920x1080.jpg?t=1780479692",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2608420/ff3279dc3ccb9609570d9d6a7610b29bc894d4d8/ss_ff3279dc3ccb9609570d9d6a7610b29bc894d4d8.1920x1080.jpg?t=1780479692",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2608420/913332f7b43aeeb802422ba9a39be7b12117da23/ss_913332f7b43aeeb802422ba9a39be7b12117da23.1920x1080.jpg?t=1780479692",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2608420/32aeb82393aaa580a446250021cc1a8dba2aeae2/ss_32aeb82393aaa580a446250021cc1a8dba2aeae2.1920x1080.jpg?t=1780479692",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2608420/8ad164b90b4ff48ae8c1cca9339020c95c131135/ss_8ad164b90b4ff48ae8c1cca9339020c95c131135.1920x1080.jpg?t=1780479692"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "high-on-life-2",
+    "game": "High on Life 2",
+    "releaseLabel": "13 de Fevereiro",
+    "releaseDate": "2026-02-13",
+    "status": "matched",
+    "appId": 2069250,
+    "steamName": "High On Life 2",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Squanch Games, Inc."
+    ],
+    "publishers": [
+      "Squanch Games, Inc."
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "13 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/8249c1b12e416ee86fc69bcccfa2faac9555540b/ss_8249c1b12e416ee86fc69bcccfa2faac9555540b.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/b6c9f1dbd057b673d5459b9b4da75d8c1a281f9e/ss_b6c9f1dbd057b673d5459b9b4da75d8c1a281f9e.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/b43503f5d4f3c72d71844b6c0ea5f87538c714c7/ss_b43503f5d4f3c72d71844b6c0ea5f87538c714c7.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/f657640bf18367738ad1fcc936bc81dbfa1d3362/ss_f657640bf18367738ad1fcc936bc81dbfa1d3362.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/46cc3e121aa88413a29840fce576d6a48ad23c14/ss_46cc3e121aa88413a29840fce576d6a48ad23c14.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/7f78760f3c1c3e2b782cc5734992c31888b26a02/ss_7f78760f3c1c3e2b782cc5734992c31888b26a02.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/20c6a400f4eb18340bbc1c1e04ec54d0d36b0788/ss_20c6a400f4eb18340bbc1c1e04ec54d0d36b0788.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/6f4be7097bdc30a303e4ca71a310053e38b481aa/ss_6f4be7097bdc30a303e4ca71a310053e38b481aa.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/bbf0bd1efe434933b5a04839af50b5b92b169c9d/ss_bbf0bd1efe434933b5a04839af50b5b92b169c9d.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/8e4cc5c00b6a3b2c05c15fe195dd5f469c72c622/ss_8e4cc5c00b6a3b2c05c15fe195dd5f469c72c622.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/de7928b9d2f1e500c24be27a0529ee1f8d9b27d9/ss_de7928b9d2f1e500c24be27a0529ee1f8d9b27d9.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/c6647806c0b1ee5492c08dc90b0644ee37dc7792/ss_c6647806c0b1ee5492c08dc90b0644ee37dc7792.1920x1080.jpg?t=1784740206",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2069250/481a085dac0bc9277cb40556b9dcb11ec1a63c51/ss_481a085dac0bc9277cb40556b9dcb11ec1a63c51.1920x1080.jpg?t=1784740206"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "reanimal",
+    "game": "Reanimal",
+    "releaseLabel": "13 de Fevereiro",
+    "releaseDate": "2026-02-13",
+    "status": "matched",
+    "appId": 2129530,
+    "steamName": "REANIMAL",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Tarsier Studios"
+    ],
+    "publishers": [
+      "THQ Nordic",
+      "Amplifier Studios"
+    ],
+    "genres": [
+      "Adventure"
+    ],
+    "releaseDateSteam": "13 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/19a638fbf5e2821fae387f88e492c44801f47885/ss_19a638fbf5e2821fae387f88e492c44801f47885.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/dccf798f7e98af871edc4b625700f2005854e9cb/ss_dccf798f7e98af871edc4b625700f2005854e9cb.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/82ca7105ed03969d014465312fb15050b029fc94/ss_82ca7105ed03969d014465312fb15050b029fc94.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/aab121e5bdaf552e60ed7e7503368fcc4e3bfaab/ss_aab121e5bdaf552e60ed7e7503368fcc4e3bfaab.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/f61e62d193307ea39c7f9efaeb751070bc2b1758/ss_f61e62d193307ea39c7f9efaeb751070bc2b1758.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/7c4e789ddae8dbaaa8705f98ac3e77a58baee2d0/ss_7c4e789ddae8dbaaa8705f98ac3e77a58baee2d0.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/29ada835c47d05899c13a40062cabc127fcef005/ss_29ada835c47d05899c13a40062cabc127fcef005.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/3763aea5b665fada46d2cc4904bd59da97c26f17/ss_3763aea5b665fada46d2cc4904bd59da97c26f17.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/0fb71e936ed9c74819ba5d69a7b07d0a3bb17596/ss_0fb71e936ed9c74819ba5d69a7b07d0a3bb17596.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/70363d3cba70dcfa66f3f9d597a41457fd12e8c1/ss_70363d3cba70dcfa66f3f9d597a41457fd12e8c1.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/92c3eb6156d25e14e027d4ed5ca9d9ddcb842d4b/ss_92c3eb6156d25e14e027d4ed5ca9d9ddcb842d4b.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/0923ddc522f0d2c562f63913ee352ec2bc506127/ss_0923ddc522f0d2c562f63913ee352ec2bc506127.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/fe100219e1f44869953287bed2af7633d665f61c/ss_fe100219e1f44869953287bed2af7633d665f61c.1920x1080.jpg?t=1784646020",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2129530/150a405fce85bcbe3f2170ee5e570c39a6966780/ss_150a405fce85bcbe3f2170ee5e570c39a6966780.1920x1080.jpg?t=1784646020"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "dobbel-dungeon",
+    "game": "Dobbel Dungeon",
+    "releaseLabel": "16 de Fevereiro",
+    "releaseDate": "2026-02-16",
+    "status": "matched",
+    "appId": 2622820,
+    "steamName": "Dobbel Dungeon",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Gamepie"
+    ],
+    "publishers": [
+      "Gamepie"
+    ],
+    "genres": [
+      "Indie",
+      "RPG",
+      "Strategy"
+    ],
+    "releaseDateSteam": "16 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/cbebc53ec99ba7ceff6f54e402e531b051b98b93/ss_cbebc53ec99ba7ceff6f54e402e531b051b98b93.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/539b1af5d30c9a304c21a65336b47cd9ae4c1763/ss_539b1af5d30c9a304c21a65336b47cd9ae4c1763.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/4b3d807d7555246b6a48c6fe84f2087b9cc61b61/ss_4b3d807d7555246b6a48c6fe84f2087b9cc61b61.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/f41e40d207aca8b77cd8f31c648d4b659461a4d0/ss_f41e40d207aca8b77cd8f31c648d4b659461a4d0.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/b0c95c9b2914b42fc18f8388cb388193b211369d/ss_b0c95c9b2914b42fc18f8388cb388193b211369d.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/0ede2b05607d430185b81a911f28c7f3da4cba1b/ss_0ede2b05607d430185b81a911f28c7f3da4cba1b.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/84b613d04406176a30b0202ebb249f829a7c23a7/ss_84b613d04406176a30b0202ebb249f829a7c23a7.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/89efd01066462ff1d4e2c8721c81ad976fb8cb33/ss_89efd01066462ff1d4e2c8721c81ad976fb8cb33.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/f1c886b12fb0ad75f9ce88cd97af8696422498f5/ss_f1c886b12fb0ad75f9ce88cd97af8696422498f5.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/65a6f43870ae7a7e07a31aa644b6aa66760e8769/ss_65a6f43870ae7a7e07a31aa644b6aa66760e8769.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/897a5c79651b1a43fb44064c177ca94973332301/ss_897a5c79651b1a43fb44064c177ca94973332301.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/8318ab75a828a22a2aba4560a151403d5797f45a/ss_8318ab75a828a22a2aba4560a151403d5797f45a.1920x1080.jpg?t=1782386026",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2622820/6d5924ba1803eba4800c7c153dc79009e7b17bb8/ss_6d5924ba1803eba4800c7c153dc79009e7b17bb8.1920x1080.jpg?t=1782386026"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "menherarium",
+    "game": "Menherarium",
+    "releaseLabel": "18 de Fevereiro",
+    "releaseDate": "2026-02-18",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "Menherarium Demo",
+        "id": 3487320,
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3487320/89e5079ac5baf85f52e9910816d840d5c783044c/capsule_231x87.jpg?t=1770627667",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.5
+      },
+      {
+        "type": "app",
+        "name": "Menherarium: Deadly Dice",
+        "id": 3394770,
+        "price": {
+          "currency": "BRL",
+          "initial": 2999,
+          "final": 2999
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3394770/282b58ed8b05ed8e38ec91164c710ffd2b571147/capsule_231x87.jpg?t=1782401223",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.3333333333333333
+      },
+      {
+        "type": "app",
+        "name": "Deadly Dice: Menherarium ORIGINAL SOUNDTRACK",
+        "id": 4507710,
+        "price": {
+          "currency": "BRL",
+          "initial": 2649,
+          "final": 2649
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/4507710/7bbda93737f6b4fb61d76a0e6d049f78d2125631/capsule_231x87.jpg?t=1774346729",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "linux": true
+        },
+        "streamingvideo": false,
+        "matchScore": 0.2
+      }
+    ]
+  },
+  {
+    "id": "strange-brew",
+    "game": "Strange Brew",
+    "releaseLabel": "18 de Fevereiro",
+    "releaseDate": "2026-02-18",
+    "status": "matched",
+    "appId": 3499670,
+    "steamName": "Strange Brew",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Electric Monk Media"
+    ],
+    "publishers": [
+      "Electric Monk Media"
+    ],
+    "genres": [
+      "Action",
+      "Adventure",
+      "Casual",
+      "Indie"
+    ],
+    "releaseDateSteam": "18 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/8aa0fb1b5c1ab41ce2c84244e63c68d0d971c434/ss_8aa0fb1b5c1ab41ce2c84244e63c68d0d971c434.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/b061e05404517a232a75bad8c1c97871a142350e/ss_b061e05404517a232a75bad8c1c97871a142350e.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/c8051bfba38f58740d32304380be9c1694b88f85/ss_c8051bfba38f58740d32304380be9c1694b88f85.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/d8e4ead40647a430f31ce16616ae82fa69417b7d/ss_d8e4ead40647a430f31ce16616ae82fa69417b7d.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/66ac6c745d2f64681d572b057ce611cc1519caf8/ss_66ac6c745d2f64681d572b057ce611cc1519caf8.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/52b2297c0a10a6559f68800449f2d0b41299c4e9/ss_52b2297c0a10a6559f68800449f2d0b41299c4e9.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/576f5994c5a00efeb05d43e32fec7123be949102/ss_576f5994c5a00efeb05d43e32fec7123be949102.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/929ef325f093c79faf30a0e43372c4197cddf37d/ss_929ef325f093c79faf30a0e43372c4197cddf37d.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/f46f2dc49919c0cccad623f50e5a5a27e84cddae/ss_f46f2dc49919c0cccad623f50e5a5a27e84cddae.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/806081a41dcfbb1e496f257cc378f2a240453fa9/ss_806081a41dcfbb1e496f257cc378f2a240453fa9.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/33b22ba415a675d6ce66a3a1beee9f9cc38218c0/ss_33b22ba415a675d6ce66a3a1beee9f9cc38218c0.1920x1080.jpg?t=1781557793",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3499670/e07b6cd409765971fd416b6a7d1c1a194f3757a3/ss_e07b6cd409765971fd416b6a7d1c1a194f3757a3.1920x1080.jpg?t=1781557793"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "the-killing-stone",
+    "game": "The Killing Stone",
+    "releaseLabel": "18 de Fevereiro",
+    "releaseDate": "2026-02-18",
+    "status": "matched",
+    "appId": 2781470,
+    "steamName": "The Killing Stone",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "Question"
+    ],
+    "publishers": [
+      "Question"
+    ],
+    "genres": [
+      "Casual",
+      "Indie",
+      "Strategy",
+      "Early Access"
+    ],
+    "releaseDateSteam": "18 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/50cb3ac5bbe45b0d2c7f4a2e4f41d28f47366684/ss_50cb3ac5bbe45b0d2c7f4a2e4f41d28f47366684.1920x1080.jpg?t=1776360105",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/0191e4121bac844ba67f332197fcf36bdeda39c3/ss_0191e4121bac844ba67f332197fcf36bdeda39c3.1920x1080.jpg?t=1776360105",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/c149a3d0b6e8710abe943c25c5f96cade08c1c96/ss_c149a3d0b6e8710abe943c25c5f96cade08c1c96.1920x1080.jpg?t=1776360105",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/5651b9c6eb8a4ad59adff2ebcb5d00853953c359/ss_5651b9c6eb8a4ad59adff2ebcb5d00853953c359.1920x1080.jpg?t=1776360105",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/1f11d9315d8d59e8ccc58251ea323c6305919381/ss_1f11d9315d8d59e8ccc58251ea323c6305919381.1920x1080.jpg?t=1776360105",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2781470/c020ce78fc3d3361eb9cc79f075455975dc37718/ss_c020ce78fc3d3361eb9cc79f075455975dc37718.1920x1080.jpg?t=1776360105"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "demon-tides",
+    "game": "Demon Tides",
+    "releaseLabel": "19 de Fevereiro",
+    "releaseDate": "2026-02-19",
+    "status": "matched",
+    "appId": 2585890,
+    "steamName": "Demon Tides",
+    "steamType": "game",
+    "isIndie": false,
+    "developers": [
+      "Fabraz"
+    ],
+    "publishers": [
+      "Fabraz"
+    ],
+    "genres": [
+      "Action",
+      "Adventure"
+    ],
+    "releaseDateSteam": "19 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_f64e5b360422d5beb1c525a078b36a5cb2c8ee83.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_27746a84e41bf81788604bfeafca8a2e88ae62be.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_2099fb5d3c2f6ce88688abb74ca70fa7a2329989.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_5d600e2334b6c4d017aee3d06d775db9b7aeb514.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_1b31b09f9ad1157822e701939834cab7a025b6b3.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_cd052f908bfe896274aa3f5f78bb1e0769dc99bd.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_3af2082c780973b7ff9d35e12da860f23c92c37e.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_f5f7261330a39c9a4545785f329812853d69abd0.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_4c6448a52137fa5e07235c6a2e788f6ea428585c.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_44d904b876f49f51f836f8cd5e5057ec7f90ed62.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_351fef5e204ca459d0c72d772501308eeddb076f.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_d2ed49701fd61e305cb5a5fd6c159fa7bfb72243.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_321201653dab3377bbfb9dff959163cd1a70b55e.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_ed007dfb95931223dd0387bd794cdd6a46687831.1920x1080.jpg?t=1778259906",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2585890/ss_9592f4fc605977a25b7b0567d5ca23efcc658745.1920x1080.jpg?t=1778259906"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "love-eternal",
+    "game": "Love Eternal",
+    "releaseLabel": "19 de Fevereiro",
+    "releaseDate": "2026-02-19",
+    "status": "matched",
+    "appId": 3010610,
+    "steamName": "LOVE ETERNAL",
+    "steamType": "game",
+    "isIndie": true,
+    "developers": [
+      "brlka"
+    ],
+    "publishers": [
+      "Ysbryd Games",
+      "PLAYISM"
+    ],
+    "genres": [
+      "Adventure",
+      "Indie"
+    ],
+    "releaseDateSteam": "19 Feb, 2026",
+    "comingSoon": false,
+    "screenshots": [
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3010610/ss_9966a8c785a3d069b461a0c7c80e4af4407764fd.1920x1080.jpg?t=1784187349",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3010610/ss_4d0acdb02f1912586e1969c70d4240b5fe6f50a1.1920x1080.jpg?t=1784187349",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3010610/ss_7920f4038c410c85316c2081f9b93ac735d48b26.1920x1080.jpg?t=1784187349",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3010610/ss_071ed0783d9d8b1b3f52000cf2c38a8673c07021.1920x1080.jpg?t=1784187349",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/3010610/ss_213826673c472b68edf9fde4bb7cbb24116747de.1920x1080.jpg?t=1784187349"
+    ],
+    "matchScore": 1
+  },
+  {
+    "id": "styx-blades-of-greed",
+    "game": "Styx: Blades of Greed",
+    "releaseLabel": "19 de Fevereiro",
+    "releaseDate": "2026-02-19",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3290690&cc=br&l=english"
+  },
+  {
+    "id": "ys-x-proud-nordics",
+    "game": "Ys X: Proud Nordics",
+    "releaseLabel": "20 de Fevereiro",
+    "releaseDate": "2026-02-20",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3949290&cc=br&l=english"
+  },
+  {
+    "id": "rainbow-six-mobile",
+    "game": "Rainbow Six Mobile",
+    "releaseLabel": "23 de Fevereiro",
+    "releaseDate": "2026-02-23",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "tides-of-tomorrow",
+    "game": "Tides of Tomorrow",
+    "releaseLabel": "24 de Fevereiro",
+    "releaseDate": "2026-02-24",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2678080&cc=br&l=english"
+  },
+  {
+    "id": "reigns-the-witcher",
+    "game": "Reigns: The Witcher",
+    "releaseLabel": "25 de Fevereiro",
+    "releaseDate": "2026-02-25",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1651600&cc=br&l=english"
+  },
+  {
+    "id": "tales-of-berseria-remastered",
+    "game": "Tales of Berseria Remastered",
+    "releaseLabel": "26 de Fevereiro",
+    "releaseDate": "2026-02-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2331020&cc=br&l=english"
+  },
+  {
+    "id": "resident-evil-requiem",
+    "game": "Resident Evil Requiem",
+    "releaseLabel": "27 de Fevereiro",
+    "releaseDate": "2026-02-27",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3764200&cc=br&l=english"
+  },
+  {
+    "id": "gnaughty-gnomes",
+    "game": "Gnaughty Gnomes",
+    "releaseLabel": "3 de Março",
+    "releaseDate": "2026-03-03",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3454480&cc=br&l=english"
+  },
+  {
+    "id": "scott-pilgrim-ex",
+    "game": "Scott Pilgrim EX",
+    "releaseLabel": "3 de Março",
+    "releaseDate": "2026-03-03",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2640950&cc=br&l=english"
+  },
+  {
+    "id": "homura-hime",
+    "game": "Homura Hime",
+    "releaseLabel": "4 de Março",
+    "releaseDate": "2026-03-04",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1820000&cc=br&l=english"
+  },
+  {
+    "id": "marathon",
+    "game": "Marathon",
+    "releaseLabel": "5 de Março",
+    "releaseDate": "2026-03-05",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3065800&cc=br&l=english"
+  },
+  {
+    "id": "never-grace",
+    "game": "Never Grace: The Witch and the Curse",
+    "releaseLabel": "5 de Março",
+    "releaseDate": "2026-03-05",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "lost-and-found-co",
+    "game": "Lost and Found Co.",
+    "releaseLabel": "6 de Março",
+    "releaseDate": "2026-03-06",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2101390&cc=br&l=english"
+  },
+  {
+    "id": "1348-ex-voto",
+    "game": "1348 Ex Voto",
+    "releaseLabel": "12 de Março",
+    "releaseDate": "2026-03-12",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1895900&cc=br&l=english"
+  },
+  {
+    "id": "fatal-frame-ii-remake",
+    "game": "Fatal Frame II: Crimson Butterfly Remake",
+    "releaseLabel": "12 de Março",
+    "releaseDate": "2026-03-12",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3920610&cc=br&l=english"
+  },
+  {
+    "id": "monster-hunter-stories-3",
+    "game": "Monster Hunter Stories 3: Twisted Reflection",
+    "releaseLabel": "13 de Março",
+    "releaseDate": "2026-03-13",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2852190&cc=br&l=english"
+  },
+  {
+    "id": "mlb-the-show-26",
+    "game": "MLB The Show 26",
+    "releaseLabel": "17 de Março",
+    "releaseDate": "2026-03-17",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "xploit-zero",
+    "game": "Xploit.zero",
+    "releaseLabel": "17 de Março",
+    "releaseDate": "2026-03-17",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "crimson-desert",
+    "game": "Crimson Desert",
+    "releaseLabel": "19 de Março",
+    "releaseDate": "2026-03-19",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3321460&cc=br&l=english"
+  },
+  {
+    "id": "dynasty-warriors-3-remastered",
+    "game": "Dynasty Warriors 3: Complete Edition Remastered",
+    "releaseLabel": "19 de Março",
+    "releaseDate": "2026-03-19",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3841510&cc=br&l=english"
+  },
+  {
+    "id": "mouse-pi-for-hire",
+    "game": "Mouse: P.I. For Hire",
+    "releaseLabel": "19 de Março",
+    "releaseDate": "2026-03-19",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2416450&cc=br&l=english"
+  },
+  {
+    "id": "ghost-master-resurrection",
+    "game": "Ghost Master: Resurrection",
+    "releaseLabel": "20 de Março",
+    "releaseDate": "2026-03-20",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3289090&cc=br&l=english"
+  },
+  {
+    "id": "rubato",
+    "game": "Rubato",
+    "releaseLabel": "20 de Março",
+    "releaseDate": "2026-03-20",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2244030&cc=br&l=english"
+  },
+  {
+    "id": "ariana-and-the-elder-codex",
+    "game": "Ariana and the Elder Codex",
+    "releaseLabel": "24 de Março",
+    "releaseDate": "2026-03-24",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3986690&cc=br&l=english"
+  },
+  {
+    "id": "copa-city",
+    "game": "Copa City",
+    "releaseLabel": "26 de Março",
+    "releaseDate": "2026-03-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2210520&cc=br&l=english"
+  },
+  {
+    "id": "life-is-strange-reunion",
+    "game": "Life is Strange: Reunion",
+    "releaseLabel": "26 de Março",
+    "releaseDate": "2026-03-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2624870&cc=br&l=english"
+  },
+  {
+    "id": "screamer",
+    "game": "Screamer",
+    "releaseLabel": "26 de Março",
+    "releaseDate": "2026-03-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2814990&cc=br&l=english"
+  },
+  {
+    "id": "pokemon-champions",
+    "game": "Pokémon Champions",
+    "releaseLabel": "8 de Abril",
+    "releaseDate": "2026-04-08",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "before-i-go",
+    "game": "Before I Go",
+    "releaseLabel": "13 de Abril",
+    "releaseDate": "2026-04-13",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2715870&cc=br&l=english"
+  },
+  {
+    "id": "shantytown",
+    "game": "ShantyTown",
+    "releaseLabel": "16 de Abril",
+    "releaseDate": "2026-04-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2434600&cc=br&l=english"
+  },
+  {
+    "id": "tomodachi-life-living-the-dream",
+    "game": "Tomodachi Life: Living the Dream",
+    "releaseLabel": "16 de Abril",
+    "releaseDate": "2026-04-16",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "pragmata",
+    "game": "Pragmata",
+    "releaseLabel": "24 de Abril",
+    "releaseDate": "2026-04-24",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3357650&cc=br&l=english"
+  },
+  {
+    "id": "aphelion",
+    "game": "Aphelion",
+    "releaseLabel": "28 de Abril",
+    "releaseDate": "2026-04-28",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1966410&cc=br&l=english"
+  },
+  {
+    "id": "diablo-iv-lord-of-hatred",
+    "game": "Diablo IV: Lord of Hatred",
+    "releaseLabel": "28 de Abril",
+    "releaseDate": "2026-04-28",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3958690&cc=br&l=english"
+  },
+  {
+    "id": "invincible-vs",
+    "game": "Invincible Vs.",
+    "releaseLabel": "30 de Abril",
+    "releaseDate": "2026-04-30",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2353060&cc=br&l=english"
+  },
+  {
+    "id": "saros",
+    "game": "Saros",
+    "releaseLabel": "30 de Abril",
+    "releaseDate": "2026-04-30",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "dead-as-disco",
+    "game": "Dead as Disco",
+    "releaseLabel": "5 de Maio",
+    "releaseDate": "2026-05-05",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3404260&cc=br&l=english"
+  },
+  {
+    "id": "mixtape",
+    "game": "Mixtape",
+    "releaseLabel": "7 de Maio",
+    "releaseDate": "2026-05-07",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2582320&cc=br&l=english"
+  },
+  {
+    "id": "outbound",
+    "game": "Outbound",
+    "releaseLabel": "11 de Maio",
+    "releaseDate": "2026-05-11",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2681030&cc=br&l=english"
+  },
+  {
+    "id": "battlestar-galactica-scattered-hopes",
+    "game": "Battlestar Galactica: Scattered Hopes",
+    "releaseLabel": "11 de Maio",
+    "releaseDate": "2026-05-11",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2535950&cc=br&l=english"
+  },
+  {
+    "id": "call-of-the-elder-gods",
+    "game": "Call of the Elder Gods",
+    "releaseLabel": "12 de Maio",
+    "releaseDate": "2026-05-12",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2174380&cc=br&l=english"
+  },
+  {
+    "id": "directive-8020",
+    "game": "Directive 8020",
+    "releaseLabel": "12 de Maio",
+    "releaseDate": "2026-05-12",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2255370&cc=br&l=english"
+  },
+  {
+    "id": "subnautica-2",
+    "game": "Subnautica 2",
+    "releaseLabel": "14 de Maio",
+    "releaseDate": "2026-05-14",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1962700&cc=br&l=english"
+  },
+  {
+    "id": "corsairs-battle-of-the-caribbean",
+    "game": "Corsairs: Battle of the Caribbean",
+    "releaseLabel": "18 de Maio",
+    "releaseDate": "2026-05-18",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2397510&cc=br&l=english"
+  },
+  {
+    "id": "farming-simulator-26-switch-edition",
+    "game": "Farming Simulator 26: Nintendo Switch Edition",
+    "releaseLabel": "19 de Maio",
+    "releaseDate": "2026-05-19",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "forza-horizon-6",
+    "game": "Forza Horizon 6",
+    "releaseLabel": "19 de Maio",
+    "releaseDate": "2026-05-19",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2483190&cc=br&l=english"
+  },
+  {
+    "id": "thick-as-thieves",
+    "game": "Thick as Thieves",
+    "releaseLabel": "20 de Maio",
+    "releaseDate": "2026-05-20",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3341000&cc=br&l=english"
+  },
+  {
+    "id": "yoshi-and-the-mysterious-book",
+    "game": "Yoshi and the Mysterious Book",
+    "releaseLabel": "21 de Maio",
+    "releaseDate": "2026-05-21",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "bubsy-4d",
+    "game": "Bubsy 4D",
+    "releaseLabel": "22 de Maio",
+    "releaseDate": "2026-05-22",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3237970&cc=br&l=english"
+  },
+  {
+    "id": "enter-the-chronosphere",
+    "game": "Enter the Chronosphere",
+    "releaseLabel": "25 de Maio",
+    "releaseDate": "2026-05-25",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1969810&cc=br&l=english"
+  },
+  {
+    "id": "paralives",
+    "game": "Paralives",
+    "releaseLabel": "25 de Maio",
+    "releaseDate": "2026-05-25",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1118520&cc=br&l=english"
+  },
+  {
+    "id": "realm-of-ink",
+    "game": "Realm of Ink",
+    "releaseLabel": "26 de Maio",
+    "releaseDate": "2026-05-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2597080&cc=br&l=english"
+  },
+  {
+    "id": "lumentale-memories-of-trey",
+    "game": "LumenTale: Memories of Trey",
+    "releaseLabel": "26 de Maio",
+    "releaseDate": "2026-05-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2261430&cc=br&l=english"
+  },
+  {
+    "id": "yerba-buena",
+    "game": "Yerba Buena",
+    "releaseLabel": "26 de Maio",
+    "releaseDate": "2026-05-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2330110&cc=br&l=english"
+  },
+  {
+    "id": "stonemachia",
+    "game": "Stonemachia",
+    "releaseLabel": "26 de Maio",
+    "releaseDate": "2026-05-26",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2982610&cc=br&l=english"
+  },
+  {
+    "id": "007-first-light",
+    "game": "007 First Light",
+    "releaseLabel": "27 de Maio",
+    "releaseDate": "2026-05-27",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3768760&cc=br&l=english"
+  },
+  {
+    "id": "echo-generation-2",
+    "game": "Echo Generation 2",
+    "releaseLabel": "27 de Maio",
+    "releaseDate": "2026-05-27",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1115990&cc=br&l=english"
+  },
+  {
+    "id": "schrodingers-call",
+    "game": "Schrödinger's Call",
+    "releaseLabel": "27 de Maio",
+    "releaseDate": "2026-05-27",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2090390&cc=br&l=english"
+  },
+  {
+    "id": "crashout-crew",
+    "game": "Crashout Crew",
+    "releaseLabel": "28 de Maio",
+    "releaseDate": "2026-05-28",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3583210&cc=br&l=english"
+  },
+  {
+    "id": "moonsigil-atlas",
+    "game": "Moonsigil Atlas",
+    "releaseLabel": "28 de Maio",
+    "releaseDate": "2026-05-28",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3284290&cc=br&l=english"
+  },
+  {
+    "id": "pictonico",
+    "game": "Pictonico!",
+    "releaseLabel": "28 de Maio",
+    "releaseDate": "2026-05-28",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "lego-batman-legacy-of-the-dark-knight",
+    "game": "LEGO Batman: Legacy of the Dark Knight",
+    "releaseLabel": "29 de Maio",
+    "releaseDate": "2026-05-29",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2215200&cc=br&l=english"
+  },
+  {
+    "id": "efootball-kick-off",
+    "game": "eFootball Kick-Off!",
+    "releaseLabel": "3 de Junho",
+    "releaseDate": "2026-06-03",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "killer-bean",
+    "game": "Killer Bean",
+    "releaseLabel": "8 de Junho",
+    "releaseDate": "2026-06-08",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1597080&cc=br&l=english"
+  },
+  {
+    "id": "nba-the-run",
+    "game": "NBA The Run",
+    "releaseLabel": "9 de Junho",
+    "releaseDate": "2026-06-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2866670&cc=br&l=english"
+  },
+  {
+    "id": "rf-online-next",
+    "game": "RF Online Next",
+    "releaseLabel": "15 de Junho",
+    "releaseDate": "2026-06-15",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "barbie-horse-ride-and-rescue",
+    "game": "Barbie: Horse Ride & Rescue",
+    "releaseLabel": "16 de Junho",
+    "releaseDate": "2026-06-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4436840&cc=br&l=english"
+  },
+  {
+    "id": "adventures-of-elliot",
+    "game": "The Adventures of Elliot: The Millennium Tales",
+    "releaseLabel": "18 de Junho",
+    "releaseDate": "2026-06-18",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3483510&cc=br&l=english"
+  },
+  {
+    "id": "dark-scrolls",
+    "game": "Dark Scrolls",
+    "releaseLabel": "22 de Junho",
+    "releaseDate": "2026-06-22",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2912550&cc=br&l=english"
+  },
+  {
+    "id": "star-fox",
+    "game": "Star Fox",
+    "releaseLabel": "25 de Junho",
+    "releaseDate": "2026-06-25",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "phantom-blade-zero",
+    "game": "Phantom Blade Zero",
+    "releaseLabel": "9 de Setembro",
+    "releaseDate": "2026-09-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4115450&cc=br&l=english"
+  },
+  {
+    "id": "bus-simulator-27",
+    "game": "Bus Simulator 27",
+    "releaseLabel": "8 de Setembro",
+    "releaseDate": "2026-09-08",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2397320&cc=br&l=english"
+  },
+  {
+    "id": "grand-theft-auto-vi",
+    "game": "Grand Theft Auto VI",
+    "releaseLabel": "19 de Novembro",
+    "releaseDate": "2026-11-19",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "Grand Theft Auto: Vice City – The Definitive Edition",
+        "id": 1546990,
+        "price": {
+          "currency": "BRL",
+          "initial": 29990,
+          "final": 29990
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1546990/capsule_231x87.jpg?t=1781138647",
+        "metascore": "",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "controller_support": "full",
+        "matchScore": 0.5
+      }
+    ]
+  },
+  {
+    "id": "ganbare-goemon-daishuugou",
+    "game": "Ganbare Goemon Daishuugou!",
+    "releaseLabel": "2 de Julho",
+    "releaseDate": "2026-07-02",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "rhythm-heaven-groove",
+    "game": "Rhythm Heaven Groove",
+    "releaseLabel": "2 de Julho",
+    "releaseDate": "2026-07-02",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "ao-oni",
+    "game": "Ao Oni",
+    "releaseLabel": "3 de Julho",
+    "releaseDate": "2026-07-03",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "undergrounded",
+    "game": "Undergrounded",
+    "releaseLabel": "3 de Julho",
+    "releaseDate": "2026-07-03",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3076910&cc=br&l=english"
+  },
+  {
+    "id": "doom-dark-ages-revelations",
+    "game": "Doom The Dark Ages Revelations",
+    "releaseLabel": "7 de Julho",
+    "releaseDate": "2026-07-07",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3469450&cc=br&l=english"
+  },
+  {
+    "id": "moonlight-peaks",
+    "game": "Moonlight Peaks",
+    "releaseLabel": "7 de Julho",
+    "releaseDate": "2026-07-07",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2209900&cc=br&l=english"
+  },
+  {
+    "id": "assassins-creed-black-flag-resynced",
+    "game": "Assassin's Creed Black Flag Resynced",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3751950&cc=br&l=english"
+  },
+  {
+    "id": "backyard-baseball",
+    "game": "Backyard Baseball",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3935020&cc=br&l=english"
+  },
+  {
+    "id": "ea-sports-college-football-27",
+    "game": "EA Sports College Football 27",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4032350&cc=br&l=english"
+  },
+  {
+    "id": "granblue-fantasy-relink-endless-ragnarok",
+    "game": "Granblue Fantasy Relink Endless Ragnarok",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1587352&cc=br&l=english"
+  },
+  {
+    "id": "gunvolt-chronicles-dual-collection",
+    "game": "Gunvolt Chronicles Luminous Avenger iX 1+2 Dual Collection",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4282450&cc=br&l=english"
+  },
+  {
+    "id": "tokyo-valkyries",
+    "game": "Tokyo Valkyries",
+    "releaseLabel": "9 de Julho",
+    "releaseDate": "2026-07-09",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4093240&cc=br&l=english"
+  },
+  {
+    "id": "digimon-story-time-stranger",
+    "game": "Digimon Story Time Stranger",
+    "releaseLabel": "10 de Julho",
+    "releaseDate": "2026-07-10",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1984270&cc=br&l=english"
+  },
+  {
+    "id": "echoes-of-aincrad",
+    "game": "Echoes of Aincrad",
+    "releaseLabel": "10 de Julho",
+    "releaseDate": "2026-07-10",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2244210&cc=br&l=english"
+  },
+  {
+    "id": "palworld",
+    "game": "Palworld",
+    "releaseLabel": "10 de Julho",
+    "releaseDate": "2026-07-10",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1623730&cc=br&l=english"
+  },
+  {
+    "id": "wuthering-waves",
+    "game": "Wuthering Waves",
+    "releaseLabel": "10 de Julho",
+    "releaseDate": "2026-07-10",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3513350&cc=br&l=english"
+  },
+  {
+    "id": "the-alters-last-variable",
+    "game": "The Alters Last Variable",
+    "releaseLabel": "13 de Julho",
+    "releaseDate": "2026-07-13",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3237520&cc=br&l=english"
+  },
+  {
+    "id": "hell-clock",
+    "game": "Hell Clock",
+    "releaseLabel": "14 de Julho",
+    "releaseDate": "2026-07-14",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1782460&cc=br&l=english"
+  },
+  {
+    "id": "cozy-grove-camp-spirit",
+    "game": "Cozy Grove Camp Spirit",
+    "releaseLabel": "15 de Julho",
+    "releaseDate": "2026-07-15",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2021960&cc=br&l=english"
+  },
+  {
+    "id": "teeto",
+    "game": "Teeto",
+    "releaseLabel": "15 de Julho",
+    "releaseDate": "2026-07-15",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2783370&cc=br&l=english"
+  },
+  {
+    "id": "culdcept-begins",
+    "game": "Culdcept Begins",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3322630&cc=br&l=english"
+  },
+  {
+    "id": "hell-maiden",
+    "game": "Hell Maiden",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3372060&cc=br&l=english"
+  },
+  {
+    "id": "ebaseball-pro-spirit-2026",
+    "game": "eBaseball Pro Spirit 2026",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "the-guild-europe-1410",
+    "game": "The Guild Europe 1410",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "heave-ho-2",
+    "game": "Heave Ho 2",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2802740&cc=br&l=english"
+  },
+  {
+    "id": "moss-the-forgotten-relic",
+    "game": "Moss The Forgotten Relic",
+    "releaseLabel": "16 de Julho",
+    "releaseDate": "2026-07-16",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3914860&cc=br&l=english"
+  },
+  {
+    "id": "dive-or-die-children-of-rain",
+    "game": "Dive or Die: Children of Rain",
+    "releaseLabel": "21 de Julho",
+    "releaseDate": "2026-07-21",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3590290&cc=br&l=english"
+  },
+  {
+    "id": "fading-echo",
+    "game": "Fading Echo",
+    "releaseLabel": "21 de Julho",
+    "releaseDate": "2026-07-21",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=2467880&cc=br&l=english"
+  },
+  {
+    "id": "tears-of-metal",
+    "game": "Tears of Metal",
+    "releaseLabel": "22 de Julho",
+    "releaseDate": "2026-07-22",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1913120&cc=br&l=english"
+  },
+  {
+    "id": "dragonsword-awakening",
+    "game": "DragonSword: Awakening",
+    "releaseLabel": "23 de Julho",
+    "releaseDate": "2026-07-23",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4570720&cc=br&l=english"
+  },
+  {
+    "id": "cultic",
+    "game": "Cultic",
+    "releaseLabel": "23 de Julho",
+    "releaseDate": "2026-07-23",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1684930&cc=br&l=english"
+  },
+  {
+    "id": "tormentum-ii",
+    "game": "Tormentum II",
+    "releaseLabel": "23 de Julho",
+    "releaseDate": "2026-07-23",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=931060&cc=br&l=english"
+  },
+  {
+    "id": "forever-skies",
+    "game": "Forever Skies",
+    "releaseLabel": "27 de Julho",
+    "releaseDate": "2026-07-27",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=1641960&cc=br&l=english"
+  },
+  {
+    "id": "go-north",
+    "game": "Go North",
+    "releaseLabel": "28 de Julho",
+    "releaseDate": "2026-07-28",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3041730&cc=br&l=english"
+  },
+  {
+    "id": "gothic-classic",
+    "game": "Gothic Classic",
+    "releaseLabel": "28 de Julho",
+    "releaseDate": "2026-07-28",
+    "status": "manual-review",
+    "candidates": [
+      {
+        "type": "app",
+        "name": "Battlefleet Gothic: Armada (Classic)",
+        "id": 363680,
+        "price": {
+          "currency": "BRL",
+          "initial": 5490,
+          "final": 549
+        },
+        "tiny_image": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/363680/79b15cbd453ae047e2677bc8e61d5d000f909818/capsule_231x87.jpg?t=1778836440",
+        "metascore": "77",
+        "platforms": {
+          "windows": true,
+          "mac": false,
+          "linux": false
+        },
+        "streamingvideo": false,
+        "matchScore": 0.5
+      }
+    ]
+  },
+  {
+    "id": "bloodrayne-definitive-collection",
+    "game": "BloodRayne Definitive Collection",
+    "releaseLabel": "29 de Julho",
+    "releaseDate": "2026-07-29",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "exstetra-hd-remastered",
+    "game": "Exstetra HD Remastered",
+    "releaseLabel": "29 de Julho",
+    "releaseDate": "2026-07-29",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "aretha-collection-1993-1995",
+    "game": "Aretha Collection 1993-1995",
+    "releaseLabel": "30 de Julho",
+    "releaseDate": "2026-07-30",
+    "status": "manual-review",
+    "candidates": []
+  },
+  {
+    "id": "blue-reflection-quartet",
+    "game": "Blue Reflection Quartet",
+    "releaseLabel": "30 de Julho",
+    "releaseDate": "2026-07-30",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=3825390&cc=br&l=english"
+  },
+  {
+    "id": "exstetra",
+    "game": "Exstetra",
+    "releaseLabel": "30 de Julho",
+    "releaseDate": "2026-07-30",
+    "status": "request-error",
+    "error": "Error: 429 https://store.steampowered.com/api/appdetails?appids=4251710&cc=br&l=english"
+  },
+  {
+    "id": "xenoblade-chronicles-2-switch-2-edition",
+    "game": "Xenoblade Chronicles 2 Nintendo Switch 2 Edition",
+    "releaseLabel": "30 de Julho",
+    "releaseDate": "2026-07-30",
+    "status": "manual-review",
+    "candidates": []
+  }
+]

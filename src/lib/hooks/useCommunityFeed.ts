@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createDataClient } from "@/lib/supabase/client";
 import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
@@ -18,6 +18,15 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
   const [isLoaded, setIsLoaded] = useState(!load);
+  const isMountedRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const sendCommunityPush = useCallback(async (
     eventType: "reaction" | "comment" | "repost" | "comment_like",
@@ -135,6 +144,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         };
       });
 
+      if (!isMountedRef.current) return;
       setPosts(mappedPosts);
 
       const { data: pollRows } = await supabase
@@ -179,6 +189,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           votes: voteCounts[opt.id] || 0,
         }));
 
+        if (!isMountedRef.current) return;
         setPoll({
           id: pollRow.id,
           question: pollRow.question,
@@ -191,13 +202,16 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     } catch (err) {
       console.error("Failed to load community data:", err);
     } finally {
-      setIsLoaded(true);
+      if (isMountedRef.current) setIsLoaded(true);
     }
   }, [user, supabase]);
 
   useEffect(() => {
     if (!load) return;
-    queueMicrotask(() => void fetchData());
+    const t = setTimeout(() => {
+      void fetchData();
+    }, 0);
+    return () => clearTimeout(t);
   }, [fetchData, load]);
 
   useEffect(() => {
@@ -320,13 +334,58 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     async (optionId: number) => {
       if (!user || !poll) return;
 
-      await supabase.from("community_poll_votes").insert({
-        poll_id: poll.id,
-        user_id: user.id,
-        option_index: optionId,
+      const previousVote = poll.user_voted_option;
+      if (previousVote === optionId) return;
+
+      setPoll((prevPoll) => {
+        if (!prevPoll) return null;
+        const newOptions = prevPoll.options.map((opt) => {
+          if (opt.id === optionId) {
+            return { ...opt, votes: opt.votes + 1 };
+          }
+          if (previousVote !== undefined && previousVote !== null && opt.id === previousVote) {
+            return { ...opt, votes: Math.max(0, opt.votes - 1) };
+          }
+          return opt;
+        });
+
+        const isNewVote = previousVote === undefined || previousVote === null;
+
+        return {
+          ...prevPoll,
+          options: newOptions,
+          total_votes: isNewVote ? prevPoll.total_votes + 1 : prevPoll.total_votes,
+          user_voted_option: optionId,
+        };
       });
+
+      try {
+        const isChangingVote = previousVote !== undefined && previousVote !== null;
+        if (isChangingVote) {
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+          const response = await fetch(`${basePath}/api/community/poll-vote`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pollId: poll.id, optionId }),
+          });
+          if (!response.ok) {
+            const result = await response.json().catch(() => null) as { error?: string } | null;
+            throw new Error(result?.error || "Não foi possível alterar o voto");
+          }
+        } else {
+          const { error } = await supabase.from("community_poll_votes").insert({
+              poll_id: poll.id,
+              user_id: user.id,
+              option_index: optionId,
+            });
+          if (error) throw error;
+        }
+      } catch (err) {
+        console.error("Failed to vote:", err);
+        await fetchData();
+      }
     },
-    [user, poll, supabase]
+    [user, poll, supabase, fetchData]
   );
 
   const sharePost = useCallback(
@@ -370,9 +429,21 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   const deletePost = useCallback(
     async (postId: string) => {
       if (!user) return;
-      await supabase.from("community_posts").delete().eq("id", postId).eq("user_id", user.id);
+
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+      try {
+        const { error } = await supabase.from("community_posts").delete().eq("id", postId).eq("user_id", user.id);
+        if (error) {
+          console.error("Error deleting post:", error.message);
+          fetchData();
+        }
+      } catch (err) {
+        console.error("Failed to delete post:", err);
+        fetchData();
+      }
     },
-    [user, supabase]
+    [user, supabase, fetchData]
   );
 
   const addComment = useCallback(
