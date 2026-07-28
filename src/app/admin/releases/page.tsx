@@ -374,7 +374,7 @@ export default function AdminReleasesPage() {
 
       {draft && (
         <section className="mb-7 border-y border-white/[0.08] py-5">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-col gap-3 xs:flex-row xs:items-center xs:justify-between">
             <h2 className="text-lg font-bold text-white">{items.some((item) => item.id === draft.id) ? "Editar jogo" : "Novo jogo"}</h2>
             <button type="button" onClick={() => void closeDraft()} className="min-h-11 rounded-xl px-3 text-sm text-gray-400 hover:bg-white/5 hover:text-white">
               Cancelar
@@ -528,7 +528,7 @@ export default function AdminReleasesPage() {
               <div className="divide-y divide-white/[0.08] border-t border-white/[0.08] px-4">
           {month.items.map((item) => (
             <article key={item.id} className="grid gap-3 py-4 sm:grid-cols-[128px_minmax(0,1fr)_auto] sm:items-center">
-              <div className="aspect-video w-32 overflow-hidden rounded-lg bg-[#08090C]">
+              <div className="aspect-video w-full overflow-hidden rounded-lg bg-[#08090C] sm:w-32">
                 {item.image_url?.trim() ? (
                   <img src={item.image_url.trim()} alt={`Arte promocional de ${item.game}`} className="h-full w-full object-contain" />
                 ) : (
@@ -545,7 +545,7 @@ export default function AdminReleasesPage() {
                 <p className="mt-1 text-xs text-gray-400">{item.release_label} · {item.platforms.join(" · ")}</p>
                 <p className="mt-1 truncate text-[10px] text-gray-600">{item.image_url || "Imagem ainda não importada"}</p>
               </div>
-              <button type="button" onClick={() => void openDraft(toDraft(item))} className="min-h-11 rounded-xl border border-white/10 px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/40 hover:text-white">
+              <button type="button" onClick={() => void openDraft(toDraft(item))} className="min-h-11 w-full rounded-xl border border-white/10 px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/40 hover:text-white sm:w-auto">
                 Editar
               </button>
             </article>

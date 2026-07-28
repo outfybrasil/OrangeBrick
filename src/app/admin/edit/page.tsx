@@ -308,11 +308,11 @@ function EditForm() {
         </span>
       }
       actions={
-        <div className="flex items-center gap-2">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
           <button
             type="button"
             onClick={() => setShowPreview(true)}
-            className="h-9 rounded-lg border border-white/15 bg-white/[0.04] px-3.5 text-xs font-bold text-gray-200 hover:bg-white/[0.08] transition-colors"
+            className="min-h-11 rounded-lg border border-white/15 bg-white/[0.04] px-3.5 text-xs font-bold text-gray-200 hover:bg-white/[0.08] transition-colors"
           >
             Pré-visualizar
           </button>
@@ -320,7 +320,7 @@ function EditForm() {
             type="button"
             onClick={() => handleSave(false)}
             disabled={isSaving}
-            className="h-9 rounded-lg border border-white/15 bg-white/[0.04] px-3.5 text-xs font-bold text-gray-200 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
+            className="min-h-11 rounded-lg border border-white/15 bg-white/[0.04] px-3.5 text-xs font-bold text-gray-200 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
           >
             Salvar rascunho
           </button>
@@ -331,7 +331,7 @@ function EditForm() {
               type="button"
               onClick={() => handleSave(true)}
               disabled={isSaving}
-              className="h-9 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50"
+              className="col-span-2 min-h-11 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50 sm:col-span-1"
             >
               Publicar matéria
             </button>
@@ -492,35 +492,35 @@ function EditForm() {
               <button
                 type="button"
                 onClick={() => addBlock("text")}
-                className="h-8 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 + Texto
               </button>
               <button
                 type="button"
                 onClick={() => addBlock("image")}
-                className="h-8 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 + Imagem
               </button>
               <button
                 type="button"
                 onClick={() => addBlock("heading")}
-                className="h-8 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 + Título
               </button>
               <button
                 type="button"
                 onClick={() => addBlock("quote")}
-                className="h-8 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 + Citação
               </button>
               <button
                 type="button"
                 onClick={() => addBlock("embed")}
-                className="h-8 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+                className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
                 + Embed
               </button>
@@ -550,7 +550,7 @@ function EditForm() {
           <div className="rounded-b-xl border-x border-b border-white/10 bg-[#0e0f14] p-4 space-y-4">
             <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Publicação</h3>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
               <div>
                 <label className="block text-[10px] font-bold text-gray-500 mb-1">Status</label>
                 <div className="inline-block rounded border border-white/15 bg-background-void px-2.5 py-1.5 text-xs font-bold text-gray-300">
@@ -673,7 +673,7 @@ function EditForm() {
       {/* MODAL DE PREVIEW */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowPreview(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
+          <div role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0f14] p-4 text-white sm:max-h-[90vh] sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="preview-dialog-title" className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
               <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">✕</button>

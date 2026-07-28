@@ -101,8 +101,8 @@ export default function AdminImagesPage() {
           </div>
           <div className="divide-y divide-white/[0.08]">
             {images.map((image) => (
-              <article key={image.id} className="grid gap-3 p-4 md:grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] md:items-center md:gap-4">
-                <a href={image.public_url} target="_blank" rel="noreferrer" className="block aspect-video w-28 overflow-hidden rounded-lg bg-[#08090C]">
+              <article key={image.id} className="grid gap-4 p-4 md:grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] md:items-center md:gap-4">
+                <a href={image.public_url} target="_blank" rel="noreferrer" className="block aspect-video w-full overflow-hidden rounded-lg bg-[#08090C] md:w-28">
                   <img src={image.public_url} alt={image.alt_text || ""} className="h-full w-full object-contain" />
                 </a>
                 <div className="min-w-0">
@@ -131,7 +131,7 @@ export default function AdminImagesPage() {
                   <p className="mt-1 text-xs text-gray-300 md:mt-0">{image.width} × {image.height}</p>
                   <p className="mt-1 text-[10px] text-gray-500">WebP · {formatBytes(image.file_size)}</p>
                 </div>
-                <time className="text-xs text-gray-400" dateTime={image.created_at}>
+                <time className="border-t border-white/[0.08] pt-3 text-xs text-gray-400 md:border-0 md:pt-0" dateTime={image.created_at}>
                   {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(image.created_at))}
                 </time>
               </article>

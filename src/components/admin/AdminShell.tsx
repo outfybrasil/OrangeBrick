@@ -130,7 +130,7 @@ export function AdminShell({
   const formattedDate = todayDateStr.charAt(0).toUpperCase() + todayDateStr.slice(1);
 
   return (
-    <div className="min-h-dvh bg-[#0a0b0e] text-white">
+    <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white">
       {/* SIDEBAR DESKTOP */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] lg:flex">
         {/* LOGO */}
@@ -231,6 +231,7 @@ export function AdminShell({
             >
               <ExitIcon />
             </button>
+            <p className="min-w-0 flex-1 truncate font-heading text-sm font-bold text-white lg:hidden">{title}</p>
           </div>
         </div>
       </aside>
@@ -265,21 +266,21 @@ export function AdminShell({
           </div>
         </header>
 
-        <main className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full px-4 py-6 sm:px-6 lg:px-8`}>
+        <main className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3 py-5 pb-[max(2rem,env(safe-area-inset-bottom))] xs:px-4 sm:px-6 sm:py-6 lg:px-8`}>
           {/* HEADER DA PÁGINA */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
+          <div className="mb-5 flex min-w-0 flex-col gap-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">PAINEL ADMINISTRATIVO</p>
                 {status}
               </div>
-              <h1 className="font-heading text-2xl font-black text-white sm:text-3xl">
+              <h1 className="break-words font-heading text-[clamp(1.5rem,7vw,1.875rem)] font-black leading-tight text-white">
                 {title}
               </h1>
-              <p className="mt-1 text-xs text-gray-400">{description}</p>
+              <p className="mt-1 max-w-3xl text-sm leading-5 text-gray-400">{description}</p>
             </div>
             {/* BOTÃO MOBILE */}
-            {actions && <div className="lg:hidden">{actions}</div>}
+            {actions && <div className="admin-mobile-actions lg:hidden">{actions}</div>}
           </div>
 
           {children}

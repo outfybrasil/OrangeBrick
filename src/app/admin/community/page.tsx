@@ -370,6 +370,7 @@ export default function CommunityAdminPage() {
             </div>
 
             {/* TABELA DE DENÚNCIAS */}
+            <p className="border-b border-white/10 px-4 py-2 text-[11px] text-gray-500 sm:hidden">Deslize para revisar os detalhes e as ações.</p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="border-b border-white/10 text-[10px] uppercase font-bold text-gray-500 bg-white/[0.01]">
@@ -592,12 +593,12 @@ export default function CommunityAdminPage() {
               </tbody>
             </table>
 
-            <div className="flex items-center justify-between border-t border-white/10 pt-2 text-[11px] text-gray-500">
+              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-[11px] text-gray-500">
               <Link href="/admin/releases" className="text-xs text-brand-orange font-semibold hover:underline">Ver todos →</Link>
               <div className="flex items-center gap-1">
-                <button onClick={() => setCurrentPageTopics(p => Math.max(1, p - 1))} disabled={currentPageTopics === 1} className="px-1.5 py-0.5 border border-white/10 rounded disabled:opacity-20">‹</button>
+                <button onClick={() => setCurrentPageTopics(p => Math.max(1, p - 1))} disabled={currentPageTopics === 1} className="min-h-11 min-w-11 border border-white/10 disabled:opacity-20">‹</button>
                 <span className="text-white font-bold">{currentPageTopics}</span>
-                <button onClick={() => setCurrentPageTopics(p => Math.min(totalTopicPages, p + 1))} disabled={currentPageTopics === totalTopicPages} className="px-1.5 py-0.5 border border-white/10 rounded disabled:opacity-20">›</button>
+                <button onClick={() => setCurrentPageTopics(p => Math.min(totalTopicPages, p + 1))} disabled={currentPageTopics === totalTopicPages} className="min-h-11 min-w-11 border border-white/10 disabled:opacity-20">›</button>
               </div>
             </div>
           </div>
@@ -608,7 +609,7 @@ export default function CommunityAdminPage() {
       {/* MODAL DE CRIAR/EDITAR PERGUNTA DO DIA */}
       {showNewPollModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowNewPollModal(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
+          <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md space-y-4 rounded-xl border border-white/10 bg-[#0e0f14] p-4 text-white sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="poll-dialog-title" className="font-heading text-base font-bold">Pergunta do dia</h3>
               <button type="button" onClick={() => setShowNewPollModal(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar">✕</button>

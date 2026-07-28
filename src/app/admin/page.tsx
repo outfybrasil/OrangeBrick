@@ -329,6 +329,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* TABELA DE MATÉRIAS */}
+          <p className="border-b border-white/10 px-4 py-2 text-[11px] text-gray-500 sm:hidden">Deslize a tabela para ver todos os dados.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-white/10 text-[10px] uppercase font-bold text-gray-500 bg-white/[0.01]">
@@ -439,7 +440,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
                 ‹
               </button>
@@ -447,7 +448,7 @@ export default function AdminDashboard() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`flex h-7 w-7 items-center justify-center rounded font-bold transition-colors ${
+                  className={`flex min-h-11 min-w-11 items-center justify-center rounded font-bold transition-colors ${
                     currentPage === page ? "bg-brand-orange text-white" : "border border-white/10 text-gray-400 hover:bg-white/5"
                   }`}
                 >
@@ -457,7 +458,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
+                className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
                 ›
               </button>

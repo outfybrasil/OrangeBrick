@@ -408,3 +408,57 @@ img, video, svg {
   z-index: 50;
   pointer-events: none;
 }
+
+.admin-mobile-actions {
+  display: flex;
+  width: 100%;
+}
+
+.admin-mobile-actions > * {
+  width: 100%;
+}
+
+.admin-mobile-actions > div,
+.admin-mobile-actions > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.admin-mobile-actions a,
+.admin-mobile-actions button {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+@media (max-width: 639px) {
+  .admin-root input:not([type="checkbox"]):not([type="radio"]),
+  .admin-root select {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .admin-root textarea {
+    font-size: 1rem;
+  }
+
+  .admin-root button,
+  .admin-root a {
+    touch-action: manipulation;
+  }
+
+  .admin-root table {
+    min-width: 44rem;
+  }
+
+  .admin-root [class*="overflow-x-auto"] {
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  .admin-root [role="dialog"],
+  .admin-root [role="alertdialog"] {
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+  }
+}

@@ -185,8 +185,8 @@ export default function ProgressionAdminPage() {
                   <h2 className="font-heading text-xl font-bold">Membros</h2>
                   <p className="mt-1 text-xs text-gray-500">Até 100 resultados por consulta.</p>
                 </div>
-                <form onSubmit={applySearch} className="flex gap-2">
-                  <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome ou usuário" className="min-h-11 border border-white/10 bg-background-void px-3 text-sm outline-none focus:border-brand-orange/60" />
+                <form onSubmit={applySearch} className="flex w-full flex-col gap-2 xs:flex-row sm:w-auto">
+                  <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome ou usuário" className="min-h-11 min-w-0 flex-1 border border-white/10 bg-background-void px-3 text-sm outline-none focus:border-brand-orange/60" />
                   <button className="min-h-11 bg-brand-orange px-4 text-xs font-bold">Buscar</button>
                 </form>
               </div>
@@ -199,7 +199,7 @@ export default function ProgressionAdminPage() {
                     </div>
                     <p className="text-xs text-gray-300">Nível <strong className="text-white">{member.level}</strong><br />{formatXp(member.lifetime_xp)} XP</p>
                     <p className="text-xs text-gray-300">Temporada<br /><strong className="text-white">{formatXp(member.season_xp)} XP</strong></p>
-                    <div className="flex flex-wrap justify-end gap-2">
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
                       <button type="button" onClick={() => setSelectedMember(member)} className="min-h-11 border border-white/15 px-3 text-xs font-bold hover:border-brand-orange/50">Ajustar</button>
                       <button type="button" onClick={() => void toggleDisqualification(member)} className={`min-h-11 px-3 text-xs font-bold ${member.is_disqualified ? "bg-emerald-500/15 text-emerald-200" : "bg-red-500/10 text-red-200"}`}>
                         {member.is_disqualified ? "Reintegrar" : "Retirar"}
@@ -222,7 +222,7 @@ export default function ProgressionAdminPage() {
                         <input type="checkbox" checked={rule.enabled} onChange={(event) => updateRule(rule.event_type, { enabled: event.target.checked })} className="h-4 w-4 accent-[#ff5e00]" />
                       </label>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 gap-2 xs:grid-cols-3">
                       <RuleField label="Autor" value={rule.actor_xp} onChange={(value) => updateRule(rule.event_type, { actor_xp: value })} />
                       <RuleField label="Recebe" value={rule.recipient_xp} onChange={(value) => updateRule(rule.event_type, { recipient_xp: value })} />
                       <RuleField label="Limite" value={rule.daily_limit ?? 0} onChange={(value) => updateRule(rule.event_type, { daily_limit: value || null })} />
@@ -238,7 +238,7 @@ export default function ProgressionAdminPage() {
 
       {selectedMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setSelectedMember(null)}>
-          <form role="dialog" aria-modal="true" aria-labelledby="xp-dialog-title" onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+          <form role="dialog" aria-modal="true" aria-labelledby="xp-dialog-title" onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:p-6">
             <h2 id="xp-dialog-title" className="font-heading text-xl font-bold">Ajustar XP</h2>
             <p className="mt-1 text-sm text-gray-400">{selectedMember.display_name} · saldo atual de {formatXp(selectedMember.lifetime_xp)} XP</p>
             <label className="mt-6 block">
@@ -249,7 +249,7 @@ export default function ProgressionAdminPage() {
               <span className="text-xs font-bold text-gray-300">Justificativa</span>
               <textarea value={reason} onChange={(event) => setReason(event.target.value)} minLength={10} maxLength={300} rows={4} required className="mt-2 w-full resize-none border border-white/10 bg-background-void p-3 text-sm outline-none focus:border-brand-orange/60" />
             </label>
-            <div className="mt-6 flex justify-end gap-2 border-t border-white/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse gap-2 border-t border-white/10 pt-4 xs:flex-row xs:justify-end">
               <button type="button" onClick={() => setSelectedMember(null)} className="min-h-11 px-4 text-xs font-bold text-gray-400 hover:text-white">Cancelar</button>
               <button className="min-h-11 bg-brand-orange px-5 text-xs font-bold">Registrar ajuste</button>
             </div>
