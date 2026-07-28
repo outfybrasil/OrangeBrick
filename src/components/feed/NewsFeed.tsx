@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useMemo, type ReactNode } from "react";
+import Link from "next/link";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
 import { NewsFeedEmpty } from "./NewsFeedEmpty";
@@ -8,7 +9,10 @@ import { NewsSidebar } from "./NewsSidebar";
 import { useInfiniteFeed } from "@/lib/hooks/useInfiniteFeed";
 import { usePostStats } from "@/lib/hooks/usePostStats";
 import { CATEGORY_CONFIG, type PostCategory, type PostStats } from "@/lib/types/database";
+import { Tag } from "@/components/ui/Tag";
+import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
+import { normalizeAuthorTag } from "@/lib/content-validation";
 
 interface NewsFeedProps {
   category: PostCategory | null;
@@ -107,7 +111,98 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
 
   const isFiltering = Boolean(category || platformSlug || searchQuery || activeTag);
 
-  const displayPosts = posts;
+  // RENDERIZAÇÃO DO HERO (MATÉRIA DE DESTAQUE GRANDE + 2 LATERAIS)
+  const renderHeroSection = () => {
+    if (isFiltering || rawPosts.length < 3) return null;
+
+    const heroPost = rawPosts[0];
+    const sidePosts = rawPosts.slice(1, 3);
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+        {/* HERO MATÉRIA PRINCIPAL GRANDE */}
+        <Link
+          href={`/posts/${heroPost.slug}`}
+          data-home-event="article"
+          data-home-target={heroPost.slug}
+          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden cursor-pointer border border-white/10 bg-background-void hover:border-brand-orange/40 transition-colors duration-300"
+        >
+          {heroPost.image_url ? (
+            <img
+              src={heroPost.image_url}
+              alt={heroPost.image_alt || ""}
+              className="absolute inset-0 h-full w-full object-cover object-center transform group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
+              <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">Sem mídia</span>
+            </div>
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
+
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 flex flex-col justify-end gap-1 sm:gap-2 z-20">
+            <div className="flex items-center gap-3">
+              <Tag category={heroPost.category} />
+              <Timer date={heroPost.published_at ?? ""} />
+            </div>
+
+            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
+              {heroPost.title}
+            </h2>
+
+            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-200 line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed font-body">
+              {heroPost.summary}
+            </p>
+
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] sm:mt-2 sm:text-xs">
+              <span className="text-gray-400">Por</span>
+              <strong className="font-bold text-white">{heroPost.author_name}</strong>
+              {normalizeAuthorTag(heroPost.author_tag) && (
+                <span className="text-brand-orange">{normalizeAuthorTag(heroPost.author_tag)}</span>
+              )}
+              <span className="ml-auto text-xs font-bold text-brand-orange">Ler matéria →</span>
+            </div>
+          </div>
+        </Link>
+
+        {/* SIDE POSTS DO HERO */}
+        <div className="flex flex-col gap-4">
+          {sidePosts.map((post) => (
+            <Link
+              key={post.id}
+              href={`/posts/${post.slug}`}
+              data-home-event="article"
+              data-home-target={post.slug}
+              className="flex-1 flex flex-col overflow-hidden bg-background-void border border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group relative"
+            >
+              {post.image_url && (
+                <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
+                  <img
+                    src={post.image_url}
+                    alt={post.image_alt || ""}
+                    className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                </div>
+              )}
+              <div className="p-3 flex flex-col justify-between flex-1 relative z-20">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <Tag category={post.category} />
+                  <Timer date={post.published_at ?? ""} />
+                </div>
+                <h4 className="font-heading text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                  {post.title}
+                </h4>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const displayPosts = !isFiltering && rawPosts.length >= 3 ? posts.slice(3) : posts;
   const topPosts = displayPosts.slice(0, 4);
   const lowerPosts = displayPosts.slice(4);
 
@@ -118,6 +213,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
 
         {/* COLUNA PRINCIPAL */}
         <div className="min-w-0 space-y-6">
+          {renderHeroSection()}
+
           <div id="ultimas-noticias" className="scroll-mt-16">
             <div className="mb-4 flex flex-col gap-2 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
