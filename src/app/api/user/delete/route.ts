@@ -25,6 +25,15 @@ export async function DELETE(request: Request) {
     const serviceClient = createServiceRoleClient();
     const rawDeviceId = request.headers.get("x-orange-brick-device") ?? "";
     const deviceId = /^[a-f0-9]{32}$/.test(rawDeviceId) ? rawDeviceId : null;
+    const storagePaths: string[] = [`profiles/${user.id}/banner.webp`];
+    const { data: avatarFiles, error: avatarListError } = await serviceClient.storage
+      .from("post-images")
+      .list(`avatars/${user.id}`, { limit: 100 });
+    if (avatarListError) throw avatarListError;
+    storagePaths.push(...(avatarFiles || []).map((file) => `avatars/${user.id}/${file.name}`));
+    const { error: storageError } = await serviceClient.storage.from("post-images").remove(storagePaths);
+    if (storageError) throw storageError;
+
     const deletions = [
       await serviceClient.from("community_comment_likes").delete().eq("user_id", user.id),
       await serviceClient.from("community_poll_votes").delete().eq("user_id", user.id),

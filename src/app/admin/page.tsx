@@ -64,17 +64,7 @@ export default function AdminDashboard() {
   const [selectedEditor, setSelectedEditor] = useState<string>("all");
   const [sortOrder] = useState<"date" | "title">("date");
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Exemplo de prioridades de hoje para a sidebar
-  const [tasks, setTasks] = useState([
-    { id: "1", text: "Revisar matéria de God of War", time: "vence em 45 min", isOrange: true, done: false },
-    { id: "2", text: "Programar publicação Laufey", time: "18:00", isOrange: false, done: false },
-    { id: "3", text: "Adicionar imagem de capa", time: "sem prazo", isGray: true, done: false },
-  ]);
-
-  const toggleTask = (id: string) => {
-    setTasks(current => current.map(t => t.id === id ? { ...t, done: !t.done } : t));
-  };
+  const [dashboardNow] = useState(() => Date.now());
 
   const checkAdminAndFetchPosts = useCallback(async () => {
     try {
@@ -106,12 +96,35 @@ export default function AdminDashboard() {
     queueMicrotask(() => void checkAdminAndFetchPosts());
   }, [checkAdminAndFetchPosts]);
 
-  // Contagens estatísticas
   const publishedCount = useMemo(() => posts.filter(p => p.is_published).length, [posts]);
   const draftsCount = useMemo(() => posts.filter(p => !p.is_published).length, [posts]);
-  const inProductionCount = Math.max(4, Math.floor(draftsCount * 0.6));
-  const inRevisionCount = Math.max(2, draftsCount - inProductionCount);
-  const scheduledCount = 3;
+  const inProductionCount = draftsCount;
+  const inRevisionCount = 0;
+  const scheduledCount = 0;
+  const recentDrafts = useMemo(() => posts.filter((post) => !post.is_published).slice(0, 3), [posts]);
+  const weeklyPublished = useMemo(() => {
+    const start = dashboardNow - 6 * 24 * 60 * 60 * 1000;
+    return posts.filter((post) => post.is_published && new Date(post.published_at || post.updated_at).getTime() >= start);
+  }, [dashboardNow, posts]);
+  const weeklyRhythm = useMemo(() => Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(dashboardNow);
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (6 - index));
+    const next = new Date(date);
+    next.setDate(next.getDate() + 1);
+    return {
+      day: new Intl.DateTimeFormat("pt-BR", { weekday: "short" }).format(date).replace(".", ""),
+      val: weeklyPublished.filter((post) => {
+        const published = new Date(post.published_at || post.updated_at);
+        return published >= date && published < next;
+      }).length,
+    };
+  }), [dashboardNow, weeklyPublished]);
+  const categoryDistribution = useMemo(() => CATEGORY_OPTIONS.map(([category, label]) => ({
+    category,
+    label,
+    count: posts.filter((post) => post.category === category).length,
+  })).filter((item) => item.count > 0), [posts]);
 
   // Filtragem das matérias
   const filteredPosts = useMemo(() => {
@@ -120,6 +133,7 @@ export default function AdminDashboard() {
       if (filterCategory !== "all" && post.category !== filterCategory) return false;
       if (filterStatus === "published" && !post.is_published) return false;
       if (filterStatus === "production" && post.is_published) return false;
+      if ((filterStatus === "revision" || filterStatus === "scheduled")) return false;
       if (selectedEditor !== "all" && post.author_name !== selectedEditor) return false;
       if (!query) return true;
       return [post.title, post.slug, post.author_name].some(v => v.toLowerCase().includes(query));
@@ -187,9 +201,9 @@ export default function AdminDashboard() {
               <span>Publicadas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{publishedCount}</p>
-            <p className="mt-1 text-[11px] font-semibold text-emerald-400">+6 vs semana passada</p>
+            <p className="mt-1 text-[11px] text-gray-500">Total no banco</p>
           </div>
-          <MiniBarChart values={[3, 5, 2, 8, 4, 9, 6]} color="bg-emerald-500" />
+          <MiniBarChart values={weeklyRhythm.map((day) => day.val)} color="bg-emerald-500" />
         </div>
 
         {/* EM PRODUÇÃO */}
@@ -202,9 +216,9 @@ export default function AdminDashboard() {
               <span>Em produção</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{inProductionCount}</p>
-            <p className="mt-1 text-[11px] font-semibold text-brand-orange">+1 vs ontem</p>
+            <p className="mt-1 text-[11px] text-gray-500">Rascunhos</p>
           </div>
-          <MiniBarChart values={[2, 4, 3, 6, 2, 5, 4]} color="bg-brand-orange" />
+          <MiniBarChart values={[draftsCount]} color="bg-brand-orange" />
         </div>
 
         {/* AGUARDANDO REVISÃO */}
@@ -217,9 +231,9 @@ export default function AdminDashboard() {
               <span>Aguardando revisão</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{inRevisionCount}</p>
-            <p className="mt-1 text-[11px] font-semibold text-amber-400">-1 vs ontem</p>
+            <p className="mt-1 text-[11px] text-gray-500">Fluxo não configurado</p>
           </div>
-          <MiniBarChart values={[1, 2, 1, 3, 2, 4, 2]} color="bg-amber-400" />
+          <MiniBarChart values={[0]} color="bg-amber-400" />
         </div>
 
         {/* AGENDADAS */}
@@ -232,9 +246,9 @@ export default function AdminDashboard() {
               <span>Agendadas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{scheduledCount}</p>
-            <p className="mt-1 text-[11px] font-semibold text-sky-400">+2 vs semana passada</p>
+            <p className="mt-1 text-[11px] text-gray-500">Agendamento não configurado</p>
           </div>
-          <MiniBarChart values={[1, 3, 2, 4, 3, 5, 3]} color="bg-sky-400" />
+          <MiniBarChart values={[0]} color="bg-sky-400" />
         </div>
       </section>
 
@@ -457,33 +471,21 @@ export default function AdminDashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Prioridades de hoje</h3>
-              <span className="text-[10px] font-bold text-brand-orange">3 pendências</span>
+              <span className="text-[10px] font-bold text-brand-orange">{recentDrafts.length} rascunhos</span>
             </div>
             <div className="mt-3 space-y-3">
-              {tasks.map((task) => (
-                <label key={task.id} className="flex items-start justify-between gap-3 text-xs cursor-pointer group">
-                  <div className="flex items-start gap-2.5 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={task.done}
-                      onChange={() => toggleTask(task.id)}
-                      className="mt-0.5 rounded border-white/20 bg-transparent text-brand-orange focus:ring-0"
-                    />
-                    <span className={`leading-tight ${task.done ? "line-through text-gray-600" : "text-gray-300 group-hover:text-white"}`}>
-                      {task.text}
-                    </span>
-                  </div>
-                  <span className={`shrink-0 text-[10px] font-bold whitespace-nowrap ${task.isOrange ? "text-brand-orange" : task.isGray ? "text-gray-500" : "text-red-400"}`}>
-                    {task.time}
-                  </span>
-                </label>
+              {recentDrafts.length === 0 ? (
+                <p className="py-3 text-xs text-gray-500">Nenhum rascunho pendente.</p>
+              ) : recentDrafts.map((post) => (
+                <Link key={post.id} href={`/admin/edit?id=${post.id}`} className="block text-xs font-semibold text-gray-300 hover:text-white">
+                  <span className="line-clamp-2">{post.title}</span>
+                </Link>
               ))}
             </div>
             <div className="mt-4 border-t border-white/10 pt-3">
-              <button type="button" className="flex items-center justify-between w-full text-xs font-semibold text-gray-400 hover:text-white transition-colors">
-                <span>Ver todas as pendências</span>
-                <span>›</span>
-              </button>
+              <Link href="/admin?status=production" className="flex items-center justify-between text-xs font-semibold text-gray-400 hover:text-white">
+                <span>Ver todos os rascunhos</span><span>›</span>
+              </Link>
             </div>
           </div>
 
@@ -494,24 +496,16 @@ export default function AdminDashboard() {
               <span className="text-[10px] text-gray-500">Últimos 7 dias</span>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-black font-heading text-white">{publishedCount + 5}</p>
+              <p className="text-2xl font-black font-heading text-white">{weeklyPublished.length}</p>
               <p className="text-[11px] text-gray-400 mt-0.5">publicações nesta semana</p>
             </div>
             {/* GRÁFICO DE BARRAS DA SEMANA */}
             <div className="mt-4 flex items-end justify-between gap-2 h-20 border-b border-white/10 pb-2">
-              {[
-                { day: "Seg", val: 2 },
-                { day: "Ter", val: 4 },
-                { day: "Qua", val: 5 },
-                { day: "Qui", val: 3 },
-                { day: "Sex", val: 4 },
-                { day: "Sáb", val: 3 },
-                { day: "Dom", val: 2 },
-              ].map((item) => (
+              {weeklyRhythm.map((item) => (
                 <div key={item.day} className="flex flex-col items-center flex-1 h-full justify-end">
                   <span className="text-[9px] font-bold text-gray-400 mb-1">{item.val}</span>
                   <div
-                    style={{ height: `${(item.val / 5) * 100}%` }}
+                    style={{ height: `${weeklyPublished.length > 0 ? Math.max(8, (item.val / Math.max(...weeklyRhythm.map((day) => day.val), 1)) * 100) : 0}%` }}
                     className="w-full bg-brand-orange rounded-t-sm transition-all"
                   />
                   <span className="mt-1 text-[9px] font-semibold text-gray-500">{item.day}</span>
@@ -524,23 +518,19 @@ export default function AdminDashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Distribuição editorial</h3>
-              <span className="text-[10px] text-gray-500">Esta semana</span>
+              <span className="text-[10px] text-gray-500">Todas as matérias</span>
             </div>
             <div className="mt-3 space-y-3">
-              {[
-                { cat: "Plantão", count: 8, pct: 80 },
-                { cat: "Indústria", count: 6, pct: 60 },
-                { cat: "Hardware", count: 4, pct: 40 },
-                { cat: "Review", count: 2, pct: 20 },
-                { cat: "Opinião", count: 2, pct: 20 },
-              ].map((item) => (
-                <div key={item.cat}>
+              {categoryDistribution.length === 0 ? (
+                <p className="py-3 text-xs text-gray-500">Nenhuma matéria cadastrada.</p>
+              ) : categoryDistribution.map((item) => (
+                <div key={item.category}>
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-semibold text-gray-300">{item.cat}</span>
+                    <span className="font-semibold text-gray-300">{item.label}</span>
                     <span className="font-bold text-gray-500">{item.count}</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-orange rounded-full" style={{ width: `${item.pct}%` }} />
+                    <div className="h-full bg-brand-orange rounded-full" style={{ width: `${(item.count / Math.max(posts.length, 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}

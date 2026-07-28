@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
-import { invokeFunction } from "@/lib/supabase/functions";
 import { parseMarkdownToReact } from "@/lib/markdown";
-import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory, Topic } from "@/lib/types/database";
@@ -43,7 +41,7 @@ function EditForm() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [imageUrl, setImageUrl] = useState("");
   const [imageAlt, setImageAlt] = useState("");
-  const [authorName, setAuthorName] = useState("Gustavo");
+  const [authorName, setAuthorName] = useState("Redação");
   const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("publicacao");
@@ -75,9 +73,6 @@ function EditForm() {
       .filter((block): block is Extract<ContentBlock, { type: "text" }> => block.type === "text")
       .map((block) => block.content)
       .join("\n");
-    const imageBlocks = blocks.filter((block): block is Extract<ContentBlock, { type: "image" }> => block.type === "image");
-    const imageUrls = [imageUrl, ...imageBlocks.map((block) => block.url)].filter(Boolean);
-
     return [
       { id: 1, label: "Título dentro do limite", complete: Boolean(title.trim() && title.length <= 100) },
       { id: 2, label: "Resumo preenchido", complete: summary.trim().length >= 20 },
@@ -95,9 +90,27 @@ function EditForm() {
   useEffect(() => {
     if (!hasChanges) return;
     const warnBeforeLeaving = (event: BeforeUnloadEvent) => event.preventDefault();
+    const warnBeforeInternalNavigation = (event: MouseEvent) => {
+      const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>("a[href]");
+      if (!link || link.target === "_blank" || new URL(link.href, window.location.href).origin !== window.location.origin) return;
+      if (window.confirm("Há alterações não salvas. Deseja sair mesmo assim?")) return;
+      event.preventDefault();
+      event.stopPropagation();
+    };
     window.addEventListener("beforeunload", warnBeforeLeaving);
-    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+    document.addEventListener("click", warnBeforeInternalNavigation, true);
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeLeaving);
+      document.removeEventListener("click", warnBeforeInternalNavigation, true);
+    };
   }, [hasChanges]);
+
+  useEffect(() => {
+    if (!showPreview) return;
+    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setShowPreview(false);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [showPreview]);
 
   useEffect(() => {
     async function init() {
@@ -107,7 +120,7 @@ function EditForm() {
 
         const { data: { user } } = await supabase.auth.getUser();
 
-        if (!isAdminUser(user)) {
+        if (!user || !isAdminUser(user)) {
           router.push("/admin/login");
           return;
         }
@@ -120,32 +133,18 @@ function EditForm() {
         setTopics((topicData || []) as Topic[]);
 
         if (!postId) {
-          setAuthorName("Gustavo");
-          setAuthorTag(AUTHOR_TAGS.breaking);
-          setTitle("FINAL FANTASY XIV REVELA BASTION E DATA NO SWITCH 2");
-          setSlug("final-fantasy-xiv-bastion-switch-2");
-          setSummary("Square Enix apresentou Bastion, nova classe tanque de Evercold, e confirmou lançamento de Final Fantasy XIV no Nintendo Switch 2. Veja todos os detalhes revelados.");
-          setImageUrl("https://www.gamereactor.pt/media/25/wreckreation2preview_4952523b.jpg");
-          setImageAlt("Bastion será a nova classe tanque de Evercold");
-          setBlocks([
-            {
-              id: "b1",
-              type: "text",
-              content: "Durante a mais recente *Live Letter*, a Square Enix surpreendeu os fãs de MMORPG ao revelar *Bastion*, a nova classe tanque que chegará na próxima expansão Evercold de Final Fantasy XIV. Além disso, a empresa confirmou que o jogo será lançado oficialmente para o Nintendo Switch 2."
-            },
-            {
-              id: "b2",
-              type: "image",
-              url: "https://www.gamereactor.pt/media/25/wreckreation2preview_4952523b.jpg",
-              alt: "Bastion em ação no FFXIV",
-              caption: "Bastion será a nova classe tanque de Evercold."
-            },
-            {
-              id: "b3",
-              type: "text",
-              content: "## O que sabemos até agora\n\nBastion será uma classe focada em defesa e controle de grupo, trazendo mecânicas inéditas para a função tanque. A expansão *Evercold* está prevista para o inverno de 2025 e promete uma nova área, masmorras, raids e muito mais.\n\n**Principais destaques da revelação:**\n- Nova classe tanque: Bastion\n- Expansão Evercold chega no inverno de 2025\n- Lançamento de Final Fantasy XIV no Nintendo Switch 2\n- Melhorias gráficas e desempenho otimizados\n\n> \"Levar FFXIV para o Switch 2 é um sonho que se torna realidade. Queremos que ainda mais jogadores possam embarcar nesta jornada, onde quer que estejam.\" — *Naoki Yoshida, produtor e diretor de FFXIV*\n\n---\n\n**Fonte:** [Square Enix Official Press](https://finalfantasyxiv.com)"
-            }
-          ]);
+          const { data: preferences } = await supabase
+            .from("admin_preferences")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const storedPreferences = preferences as { default_author?: string; default_category?: PostCategory } | null;
+          const nextCategory = storedPreferences?.default_category && CATEGORY_OPTIONS.some((option) => option.value === storedPreferences.default_category)
+            ? storedPreferences.default_category
+            : "breaking";
+          setAuthorName(storedPreferences?.default_author?.trim() || "Redação");
+          setCategory(nextCategory);
+          setAuthorTag(AUTHOR_TAGS[nextCategory]);
           setIsLoading(false);
           return;
         }
@@ -245,6 +244,10 @@ function EditForm() {
 
       if (!title.trim()) throw new Error("O título é obrigatório");
       if (!slug.trim()) throw new Error("O slug é obrigatório");
+      if (isPublished) {
+        const validationErrors = validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks });
+        if (validationErrors.length > 0) throw new Error(validationErrors[0]);
+      }
 
       const bodyJson = JSON.stringify(blocks);
 
@@ -301,7 +304,7 @@ function EditForm() {
       status={
         <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Salvo agora
+          {hasChanges ? "Alterações não salvas" : postId ? "Matéria carregada" : "Nova matéria vazia"}
         </span>
       }
       actions={
@@ -328,17 +331,9 @@ function EditForm() {
               type="button"
               onClick={() => handleSave(true)}
               disabled={isSaving}
-              className="h-9 rounded-l-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50"
+              className="h-9 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50"
             >
               Publicar matéria
-            </button>
-            <span className="h-4 w-px bg-white/20" />
-            <button
-              type="button"
-              className="h-9 px-2 text-xs text-white hover:bg-[#ff7526] rounded-r-lg"
-              title="Mais opções de publicação"
-            >
-              ▾
             </button>
           </div>
         </div>
@@ -426,26 +421,6 @@ function EditForm() {
                   className="mt-2 h-9 w-full rounded-lg border border-white/10 bg-background-void px-3 text-xs font-mono text-white outline-none focus:border-brand-orange/50"
                 />
               )}
-            </div>
-
-            {/* TOOLBAR DO EDITOR DE BLOCOS */}
-            <div className="flex items-center gap-1.5 overflow-x-auto rounded-lg border border-white/10 bg-white/[0.02] p-1.5 text-xs text-gray-300">
-              <select className="h-8 rounded border border-white/10 bg-[#0e0f14] px-2 text-xs font-semibold text-gray-300 outline-none">
-                <option>Parágrafo</option>
-                <option>Subtítulo (H2)</option>
-                <option>Sub-subtítulo (H3)</option>
-              </select>
-              <span className="h-4 w-px bg-white/10 mx-1" />
-              <button type="button" className="h-8 w-8 rounded font-bold hover:bg-white/10 hover:text-white" title="Negrito">B</button>
-              <button type="button" className="h-8 w-8 rounded italic hover:bg-white/10 hover:text-white" title="Itálico">I</button>
-              <button type="button" className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Link">🔗</button>
-              <button type="button" className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Citação">❝</button>
-              <span className="h-4 w-px bg-white/10 mx-1" />
-              <button type="button" className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Lista sem ordem">≡</button>
-              <button type="button" className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Lista numerada">≡</button>
-              <span className="h-4 w-px bg-white/10 mx-1" />
-              <button type="button" onClick={() => addBlock("image")} className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Inserir imagem">📷</button>
-              <button type="button" onClick={() => addBlock("embed")} className="h-8 w-8 rounded hover:bg-white/10 hover:text-white" title="Inserir embed">🎥</button>
             </div>
 
             {/* LISTA DE BLOCOS DO CORPO */}
@@ -597,23 +572,6 @@ function EditForm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Agendamento</label>
-                <select className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none">
-                  <option>📅 Publicar agora</option>
-                  <option>📅 Agendar data</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Visibilidade</label>
-                <select className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none">
-                  <option>🌐 Público</option>
-                  <option>🔒 Privado</option>
-                </select>
-              </div>
-            </div>
-
             <div>
               <label className="block text-[10px] font-bold text-gray-500 mb-1">Categoria</label>
               <select
@@ -629,13 +587,14 @@ function EditForm() {
 
             <div>
               <label className="block text-[10px] font-bold text-gray-500 mb-1">Tópicos</label>
-              <div className="flex flex-wrap gap-1.5">
-                {["Final Fantasy", "Switch 2", "MMORPG"].map((tag) => (
-                  <span key={tag} className="rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold text-gray-300">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <select
+                value={topicId}
+                onChange={(event) => { setTopicId(event.target.value); setHasChanges(true); }}
+                className="h-9 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
+              >
+                <option value="">Nenhum tópico</option>
+                {topics.map((topic) => <option key={topic.id} value={topic.id}>{topic.name}</option>)}
+              </select>
             </div>
           </div>
 
@@ -665,9 +624,13 @@ function EditForm() {
                 Remover
               </button>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold">
-              <span>✓</span> Texto alternativo preenchido
-            </div>
+            <input
+              type="text"
+              value={imageAlt}
+              onChange={(event) => { setImageAlt(event.target.value); setHasChanges(true); }}
+              placeholder="Descreva a imagem de capa"
+              className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none"
+            />
           </div>
 
           {/* CHECKLIST EDITORIAL */}
@@ -704,36 +667,16 @@ function EditForm() {
             )}
           </div>
 
-          {/* CRÉDITOS E AUTORIA */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Créditos e autoria</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Autor</label>
-                <select className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none">
-                  <option>The Brick</option>
-                  <option>Gustavo</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Fonte</label>
-                <select className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none">
-                  <option>Portal oficial</option>
-                  <option>Comunicado</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </aside>
       </div>
 
       {/* MODAL DE PREVIEW */}
       {showPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowPreview(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
-              <button type="button" onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-white">✕</button>
+              <h3 id="preview-dialog-title" className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
+              <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">✕</button>
             </div>
             <h1 className="font-heading text-2xl font-black">{title}</h1>
             <p className="text-sm text-gray-300 leading-relaxed italic">{summary}</p>

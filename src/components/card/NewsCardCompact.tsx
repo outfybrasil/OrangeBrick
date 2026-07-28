@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
@@ -17,7 +17,6 @@ interface NewsCardCompactProps {
 }
 
 export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
-  const router = useRouter();
   const { user } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -35,27 +34,31 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        role="article"
-        tabIndex={0}
-        onClick={() => router.push(`/posts/${post.slug}`)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(`/posts/${post.slug}`); } }}
-        className="group flex gap-0 bg-background-void border border-white/[0.08] cursor-pointer transition-colors hover:bg-white/[0.025] hover:border-white/15 focus-visible:outline-2 focus-visible:outline-brand-orange overflow-hidden"
+        className="group flex gap-0 overflow-hidden border border-white/[0.08] bg-background-void transition-colors hover:border-white/15 hover:bg-white/[0.025]"
       >
         {/* THUMBNAIL */}
-        <div className="relative min-h-32 w-[132px] shrink-0 overflow-hidden bg-card-slate sm:min-h-40 sm:w-[180px]">
+        <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative min-h-32 w-[140px] shrink-0 overflow-hidden bg-[#08090C] focus-visible:outline-2 focus-visible:outline-brand-orange sm:min-h-36 sm:w-[200px]">
           {post.image_url ? (
-            <img
-              src={post.image_url}
-              alt={post.image_alt || ""}
-              className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-              loading="lazy"
-            />
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-[#08090C]">
+              <img
+                src={post.image_url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-md"
+              />
+              <img
+                src={post.image_url}
+                alt={post.image_alt || ""}
+                className="relative z-10 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                loading="lazy"
+              />
+            </div>
           ) : (
             <div className="flex h-full items-center justify-center bg-card-slate">
               <span className="text-xs text-gray-600">Sem mídia</span>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* CONTEÚDO */}
         <div className="flex min-w-0 flex-1 flex-col justify-between p-3">
@@ -64,8 +67,8 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
               <Tag category={post.category} />
               <Timer date={post.published_at ?? ""} />
             </div>
-            <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug text-white transition-colors group-hover:text-brand-orange sm:text-base">
-              {post.title}
+            <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
+              <Link href={`/posts/${post.slug}`} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
             </h2>
             <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-400 hidden sm:block">
               {post.summary}
@@ -75,9 +78,6 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
           {/* ACTION BAR */}
           <div
             className="mt-1 flex items-center gap-1 text-[11px]"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            role="presentation"
           >
             <button
               type="button"

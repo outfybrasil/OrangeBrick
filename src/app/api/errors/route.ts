@@ -13,10 +13,16 @@ function serviceClient() {
 }
 
 export async function POST(request: Request) {
+  const site = request.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin") {
+    return NextResponse.json({ error: "Origem não permitida" }, { status: 403 });
+  }
   const supabase = serviceClient();
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const secret = process.env.RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
   const identityHash = createHash("sha256")
-    .update(`${process.env.CRON_SECRET || "orange-brick"}:${forwarded}`)
+    .update(`${secret}:${forwarded}`)
     .digest("hex");
   const windowStart = new Date();
   windowStart.setUTCMinutes(0, 0, 0);
@@ -34,13 +40,15 @@ export async function POST(request: Request) {
     route?: unknown;
     reference?: unknown;
   } | null;
-  if (!body || typeof body.message !== "string") return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+  if (!body || typeof body.message !== "string" || body.message.trim().length === 0) {
+    return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+  }
 
   await supabase.rpc("record_app_error", {
-    target_source: typeof body.source === "string" ? body.source : "web",
-    target_message: body.message,
-    target_route: typeof body.route === "string" ? body.route : null,
-    target_reference: typeof body.reference === "string" ? body.reference : null,
+    target_source: typeof body.source === "string" ? body.source.slice(0, 80) : "web",
+    target_message: body.message.trim().slice(0, 1000),
+    target_route: typeof body.route === "string" ? body.route.slice(0, 300) : null,
+    target_reference: typeof body.reference === "string" ? body.reference.slice(0, 100) : null,
     target_metadata: {},
   });
   return new NextResponse(null, { status: 204 });

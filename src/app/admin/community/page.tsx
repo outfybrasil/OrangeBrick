@@ -12,14 +12,22 @@ const todayStr = new Date().toISOString().slice(0, 10);
 
 interface ReportItem {
   id: string;
-  user_name: string;
-  avatar_url?: string;
-  content: string;
+  content_type: "post" | "comment";
+  content_id: string;
   reason: string;
-  reports_count: number;
-  time_ago: string;
-  priority: "Alta" | "Média" | "Baixa";
+  status: "pending" | "reviewed" | "dismissed" | "actioned";
+  created_at: string;
+  content: {
+    id: string;
+    user_id: string;
+    author_name: string;
+    content: string;
+    post_id?: string;
+    created_at: string;
+  } | null;
 }
+
+type ModerationAction = "dismiss" | "delete" | "suspend_7d" | "ban";
 
 function MiniBarChart({ values, color }: { values: number[]; color: string }) {
   const max = Math.max(...values, 1);
@@ -53,48 +61,23 @@ export default function CommunityAdminPage() {
   const [optionsInput, setOptionsInput] = useState(["", "", ""]);
   const [pollDateInput, setPollDateInput] = useState(todayStr);
   const [isSavingPoll, setIsSavingPoll] = useState(false);
-
-  // Mock de denúncias
-  const [reports] = useState<ReportItem[]>([
-    {
-      id: "1",
-      user_name: "NeoWolf",
-      content: '"Playstation é lixo, quem joga isso tem que se matar mesmo kkk"',
-      reason: "Ataque pessoal",
-      reports_count: 3,
-      time_ago: "há 12 min",
-      priority: "Alta",
-    },
-    {
-      id: "2",
-      user_name: "PixelViking",
-      content: '"Confira aqui meu site com gift cards baratos!!! bit.ly/xyz123"',
-      reason: "Spam",
-      reports_count: 2,
-      time_ago: "há 38 min",
-      priority: "Média",
-    },
-    {
-      id: "3",
-      user_name: "LaraCroftBR",
-      content: '"A cena final mostra que o vilão estava vivo o tempo todo.."',
-      reason: "Spoiler",
-      reports_count: 1,
-      time_ago: "há 1 h",
-      priority: "Baixa",
-    },
-  ]);
+  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [activeModerationId, setActiveModerationId] = useState<string | null>(null);
+  const [pendingModeration, setPendingModeration] = useState<{ report: ReportItem; action: ModerationAction } | null>(null);
 
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const { data: { user } } = await supabase.auth.getUser();
       if (!isAdminUser(user)) {
         router.push("/admin/login");
         return;
       }
 
-      const [{ data: topicData }, { data: pollData }] = await Promise.all([
+      const { data: { session } } = await supabase.auth.getSession();
+      const [{ data: topicData, error: topicError }, { data: pollData, error: pollError }, reportResponse] = await Promise.all([
         supabase.from("topics").select("*").order("name", { ascending: true }),
         supabase
           .from("community_polls")
@@ -103,9 +86,16 @@ export default function CommunityAdminPage() {
           .order("prompt_date", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        fetch("/api/admin/community", {
+          headers: { Authorization: `Bearer ${session?.access_token || ""}` },
+          cache: "no-store",
+        }),
       ]);
+      if (topicError || pollError || !reportResponse.ok) throw topicError || pollError || new Error("Não foi possível carregar as denúncias.");
+      const reportPayload = await reportResponse.json() as { reports?: ReportItem[] };
 
       setTopics((topicData || []) as Topic[]);
+      setReports(reportPayload.reports || []);
       const loadedPoll = pollData as CommunityPollRow | null;
       if (loadedPoll) {
         setPoll(loadedPoll);
@@ -113,7 +103,8 @@ export default function CommunityAdminPage() {
         const opts = loadedPoll.options as Array<{ id: number; text: string }>;
         if (opts) setOptionsInput(opts.map(o => o.text));
       }
-    } catch {
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Não foi possível carregar a comunidade.");
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +113,17 @@ export default function CommunityAdminPage() {
   useEffect(() => {
     queueMicrotask(() => void loadData());
   }, [loadData]);
+
+  useEffect(() => {
+    if (!showNewPollModal && !pendingModeration) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setShowNewPollModal(false);
+      setPendingModeration(null);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [pendingModeration, showNewPollModal]);
 
   const handleSavePoll = async () => {
     if (!questionInput.trim() || optionsInput.filter(o => o.trim()).length < 2) return;
@@ -135,16 +137,60 @@ export default function CommunityAdminPage() {
         is_active: true,
       };
 
-      const { error } = await supabase.from("community_polls").insert([payload]);
-      if (!error) {
-        setShowNewPollModal(false);
-        void loadData();
-      }
-    } catch {
+      const { error: deactivateError } = await supabase
+        .from("community_polls")
+        .update({ is_active: false })
+        .eq("is_active", true)
+        .neq("prompt_date", pollDateInput);
+      if (deactivateError) throw deactivateError;
+      const { error: saveError } = await supabase
+        .from("community_polls")
+        .upsert([payload], { onConflict: "prompt_date" });
+      if (saveError) throw saveError;
+      setShowNewPollModal(false);
+      void loadData();
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : "Não foi possível salvar a pergunta.");
     } finally {
       setIsSavingPoll(false);
     }
   };
+
+  const handleModeration = async (reportId: string, action: ModerationAction) => {
+    try {
+      setActiveModerationId(reportId);
+      setError(null);
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch("/api/admin/community", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ reportId, action }),
+      });
+      if (!response.ok) throw new Error("Não foi possível concluir a moderação.");
+      setPendingModeration(null);
+      await loadData();
+    } catch (moderationError) {
+      setError(moderationError instanceof Error ? moderationError.message : "Não foi possível concluir a moderação.");
+    } finally {
+      setActiveModerationId(null);
+    }
+  };
+
+  const filteredReports = useMemo(() => {
+    const query = searchReport.trim().toLowerCase();
+    return reports.filter((report) => {
+      if (moderationTab === "pendentes" && report.status !== "pending") return false;
+      if (moderationTab === "resolvidas" && report.status === "pending") return false;
+      return !query
+        || report.reason.toLowerCase().includes(query)
+        || report.content_id.toLowerCase().includes(query)
+        || report.content?.author_name.toLowerCase().includes(query)
+        || report.content?.content.toLowerCase().includes(query);
+    });
+  }, [moderationTab, reports, searchReport]);
 
   const filteredTopics = useMemo(() => {
     const q = searchTopic.toLowerCase().trim();
@@ -178,7 +224,7 @@ export default function CommunityAdminPage() {
       status={
         <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Comunidade estável
+          Dados reais
         </span>
       }
       actions={
@@ -201,6 +247,12 @@ export default function CommunityAdminPage() {
       }
       wide
     >
+      {error && (
+        <div role="alert" className="mb-5 flex items-center justify-between gap-4 rounded-lg border border-red-500/25 bg-red-500/10 p-4 text-xs text-red-200">
+          <span>{error}</span>
+          <button type="button" onClick={() => setError(null)} className="min-h-11 px-3 font-bold text-red-300 hover:text-white">Fechar</button>
+        </div>
+      )}
       {/* 4 CARDS DE KPIS NO TOPO */}
       <section aria-label="Estatísticas da Comunidade" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* CONVERSAS ATIVAS */}
@@ -212,10 +264,10 @@ export default function CommunityAdminPage() {
               </svg>
               <span>Conversas ativas</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">38</p>
-            <p className="mt-1 text-[11px] font-semibold text-emerald-400">+7 nesta semana</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">0</p>
+            <p className="mt-1 text-[11px] text-gray-500">Sem dados calculados</p>
           </div>
-          <MiniBarChart values={[4, 6, 5, 8, 7, 9, 6]} color="bg-emerald-500" />
+          <MiniBarChart values={[0]} color="bg-emerald-500" />
         </div>
 
         {/* PARTICIPAÇÕES HOJE */}
@@ -227,10 +279,10 @@ export default function CommunityAdminPage() {
               </svg>
               <span>Participações hoje</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">124</p>
-            <p className="mt-1 text-[11px] font-semibold text-brand-orange">+18% vs. ontem</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">0</p>
+            <p className="mt-1 text-[11px] text-gray-500">Sem dados calculados</p>
           </div>
-          <MiniBarChart values={[10, 15, 12, 18, 20, 25, 22]} color="bg-brand-orange" />
+          <MiniBarChart values={[0]} color="bg-brand-orange" />
         </div>
 
         {/* DENÚNCIAS ABERTAS */}
@@ -242,10 +294,10 @@ export default function CommunityAdminPage() {
               </svg>
               <span>Denúncias abertas</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">3</p>
-            <p className="mt-1 text-[11px] font-semibold text-brand-orange">2 prioritárias</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">{reports.length}</p>
+            <p className="mt-1 text-[11px] text-gray-500">Nenhuma denúncia carregada</p>
           </div>
-          <MiniBarChart values={[1, 2, 0, 1, 3, 2, 3]} color="bg-amber-400" />
+          <MiniBarChart values={[0]} color="bg-amber-400" />
         </div>
 
         {/* TAXA DE RESPOSTA */}
@@ -257,10 +309,10 @@ export default function CommunityAdminPage() {
               </svg>
               <span>Taxa de resposta</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">68%</p>
-            <p className="mt-1 text-[11px] font-semibold text-emerald-400">+6 p.p. em 7 dias</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">—</p>
+            <p className="mt-1 text-[11px] text-gray-500">Métrica indisponível</p>
           </div>
-          <MiniBarChart values={[50, 55, 60, 58, 62, 65, 68]} color="bg-emerald-500" />
+          <MiniBarChart values={[0]} color="bg-emerald-500" />
         </div>
       </section>
 
@@ -277,7 +329,7 @@ export default function CommunityAdminPage() {
                 <h2 id="moderation-queue-title" className="font-heading text-base font-bold text-white">
                   Fila de moderação
                 </h2>
-                <span className="text-xs font-bold text-brand-orange">3 denúncias abertas</span>
+                <span className="text-xs font-bold text-brand-orange">{reports.length} denúncias abertas</span>
               </div>
               <div className="flex items-center gap-1 border-b border-white/10 sm:border-b-0 pb-2 sm:pb-0">
                 {(["pendentes", "resolvidas", "todas"] as const).map((t) => (
@@ -331,39 +383,47 @@ export default function CommunityAdminPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {reports.map((rep) => (
+                  {filteredReports.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center text-xs text-gray-500">
+                        Nenhuma denúncia real foi carregada.
+                      </td>
+                    </tr>
+                  ) : filteredReports.map((rep) => (
                     <tr key={rep.id} className="hover:bg-white/[0.02] transition-colors">
                       <td className="py-3 px-4 max-w-xs">
                         <div className="flex items-center gap-3">
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-orange/20 text-xs font-bold text-brand-orange">
-                            {rep.user_name.charAt(0)}
+                            {rep.content_type === "post" ? "P" : "C"}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-white truncate">{rep.user_name}</p>
-                            <p className="text-gray-400 text-[11px] truncate italic">{rep.content}</p>
+                            <p className="font-bold text-white">{rep.content?.author_name || (rep.content_type === "post" ? "Publicação removida" : "Comentário removido")}</p>
+                            <p className="line-clamp-2 max-w-[36rem] break-words text-[11px] leading-5 text-gray-400">{rep.content?.content || rep.content_id}</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-gray-300 font-semibold">{rep.reason}</td>
-                      <td className="py-3 px-4 whitespace-nowrap text-gray-400">{rep.reports_count} denúncias</td>
-                      <td className="py-3 px-4 whitespace-nowrap text-gray-400">{rep.time_ago}</td>
+                      <td className="py-3 px-4 whitespace-nowrap text-gray-400">1 denúncia</td>
+                      <td className="py-3 px-4 whitespace-nowrap text-gray-400">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(rep.created_at))}</td>
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-bold ${
-                          rep.priority === "Alta"
-                            ? "bg-red-500/20 text-red-400 border border-red-500/30"
-                            : rep.priority === "Média"
+                          rep.status === "pending"
                             ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                             : "bg-white/10 text-gray-400"
                         }`}>
-                          {rep.priority}
+                          {rep.status === "pending" ? "Pendente" : "Resolvida"}
                         </span>
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button type="button" className="rounded border border-brand-orange/40 px-2.5 py-1 text-[11px] font-bold text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">
-                            Revisar
-                          </button>
-                          <button type="button" className="text-gray-500 hover:text-white">⋮</button>
+                          {rep.status === "pending" && (
+                            <>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "dismiss" })} className="min-h-11 px-3 text-[11px] font-bold text-gray-400 hover:text-white disabled:opacity-40">Ignorar</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "delete" })} className="min-h-11 border border-red-500/30 px-3 text-[11px] font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Excluir</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "suspend_7d" })} className="min-h-11 border border-amber-500/30 px-3 text-[11px] font-bold text-amber-300 hover:bg-amber-500/10 disabled:opacity-40">Suspender</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "ban" })} className="min-h-11 border border-red-500/30 px-3 text-[11px] font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Banir</button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -372,11 +432,6 @@ export default function CommunityAdminPage() {
               </table>
             </div>
 
-            <div className="border-t border-white/10 p-3">
-              <Link href="/admin/community/moderation" className="text-xs font-bold text-brand-orange hover:underline">
-                Abrir central de moderação →
-              </Link>
-            </div>
           </section>
 
           {/* DOIS CARDS LADO A LADO: ATIVIDADE & DESTQUES */}
@@ -386,33 +441,12 @@ export default function CommunityAdminPage() {
             <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 flex flex-col justify-between">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white">Atividade no Brickboard</h3>
-                <p className="mt-1 text-xs text-gray-400">286 interações nos últimos 7 dias</p>
-                <p className="text-[11px] font-semibold text-emerald-400 mt-0.5">+14% vs. 7 dias anteriores</p>
+                <p className="mt-1 text-xs text-gray-400">Nenhuma série histórica configurada.</p>
               </div>
 
               {/* GRÁFICO DE BARRAS DE ATIVIDADE */}
-              <div className="mt-6 flex items-end justify-between gap-2 h-28 border-b border-white/10 pb-2">
-                {[
-                  { day: "22/07", posts: 40, comments: 60 },
-                  { day: "23/07", posts: 55, comments: 75 },
-                  { day: "24/07", posts: 45, comments: 65 },
-                  { day: "25/07", posts: 60, comments: 80 },
-                  { day: "26/07", posts: 70, comments: 85 },
-                  { day: "27/07", posts: 50, comments: 70 },
-                  { day: "28/07", posts: 65, comments: 90 },
-                ].map((d) => (
-                  <div key={d.day} className="flex flex-col items-center flex-1 h-full justify-end group relative">
-                    <div className="w-full flex items-end justify-center gap-0.5 h-full">
-                      <span style={{ height: `${d.posts}%` }} className="w-2 bg-brand-orange rounded-t-sm" />
-                      <span style={{ height: `${d.comments}%` }} className="w-2 bg-gray-500 rounded-t-sm" />
-                    </div>
-                    <span className="mt-2 text-[9px] font-semibold text-gray-500">{d.day}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-gray-400">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-brand-orange" /> Posts</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gray-500" /> Respostas</span>
+              <div className="mt-6 border-t border-white/10 pt-4 text-center text-xs text-gray-500">
+                O histórico aparecerá quando a consulta de atividade estiver configurada.
               </div>
             </div>
 
@@ -421,23 +455,7 @@ export default function CommunityAdminPage() {
               <div>
                 <h3 className="font-heading text-sm font-bold text-white mb-3">Conversas em destaque</h3>
                 <div className="space-y-3">
-                  {[
-                    { title: "FINAL FANTASY XIV REVELA BASTION E DATA NO SWITCH 2", author: "Marina Souza", replies: 78, hype: "1.2k" },
-                    { title: "GOD OF WAR: LAUFEY ANÚNCIO FOCADO NA FAYE", author: "Gustavo Lima", replies: 54, hype: "987" },
-                    { title: "XBOX TESTA CLOUD GAMING GRATUITO E SEM GAME PASS COM ANÚNCIOS", author: "Caio Nogueira", replies: 43, hype: "642" },
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between gap-2 border-b border-white/5 pb-2 text-xs">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-bold text-white uppercase text-[11px]">{item.title}</p>
-                        <p className="text-[10px] text-gray-500 mt-0.5">{item.author}</p>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 text-[11px]">
-                        <span className="text-gray-400">{item.replies} resp</span>
-                        <span className="text-brand-orange font-bold">🔥 {item.hype}</span>
-                        <span className="text-emerald-400 font-bold text-[10px]">🟢 Ativa</span>
-                      </div>
-                    </div>
-                  ))}
+                  <p className="py-6 text-center text-xs text-gray-500">Nenhuma conversa em destaque calculada.</p>
                 </div>
               </div>
               <div className="mt-4 pt-2">
@@ -457,35 +475,24 @@ export default function CommunityAdminPage() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Pergunta do dia</h3>
-              <span className="text-[10px] text-gray-500">📅 25/07/2026</span>
+              <span className="text-[10px] text-gray-500">{poll?.prompt_date ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${poll.prompt_date}T12:00:00`)) : "Sem pergunta ativa"}</span>
             </div>
 
             <p className="text-xs font-bold text-white leading-snug">
-              {poll?.question || "O que você achou do anúncio de God of War: Laufey focado na Faye no pós-morte?"}
+              {poll?.question || "Nenhuma pergunta publicada."}
             </p>
 
             <div className="flex items-center justify-between text-[10px] text-gray-400 border-b border-white/10 pb-2">
               <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-400 border border-emerald-500/20">Publicada</span>
-              <span>124 participações</span>
-              <span>🕒 Encerra em 8h</span>
+              <span>Resultados disponíveis no Brickboard</span>
             </div>
 
             {/* OPÇÕES DA PERGUNTA COM PORCENTAGEM */}
             <div className="space-y-2 text-xs">
-              {[
-                { label: "Hype total! Quero ver o combate rúnico e a magia...", pct: 18 },
-                { label: "Gostei, mas preferia um jogo focado no Kratos de cara", pct: 27 },
-                { label: "Interessante ver o pós-morte espiritual (Everywhin)...", pct: 9 },
-                { label: "Ficou perfeito, Faye sempre foi o coração da história.", pct: 46 },
-              ].map((opt, i) => (
-                <div key={i} className="relative overflow-hidden rounded border border-white/10 bg-white/[0.02] p-2">
-                  <div style={{ width: `${opt.pct}%` }} className="absolute inset-y-0 left-0 bg-white/5" />
-                  <div className="relative flex items-center justify-between gap-2 text-[11px]">
-                    <span className="truncate text-gray-300">{opt.label}</span>
-                    <span className="font-bold text-white">{opt.pct}%</span>
-                  </div>
-                </div>
-              ))}
+              {poll && Array.isArray(poll.options) ? poll.options.map((option, index) => {
+                const value = typeof option === "object" && option !== null && "text" in option ? String(option.text) : `Opção ${index + 1}`;
+                return <div key={index} className="rounded border border-white/10 bg-white/[0.02] p-2 text-[11px] text-gray-300">{value}</div>;
+              }) : null}
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-white/10">
@@ -504,37 +511,37 @@ export default function CommunityAdminPage() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Saúde da comunidade</h3>
-              <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">🟢 Saudável</span>
+              <span className="text-[10px] font-bold text-gray-500">Sem cálculo</span>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
                   <span>💬 Denúncias resolvidas em até 1h</span>
-                  <span className="font-bold text-white">92%</span>
+                  <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: "92%" }} />
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: "0%" }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
                   <span>💬 Conversas sem resposta</span>
-                  <span className="font-bold text-white">12%</span>
+                  <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: "12%" }} />
+                  <div className="h-full bg-amber-500 rounded-full" style={{ width: "0%" }} />
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
                   <span>🙂 Sentimento positivo</span>
-                  <span className="font-bold text-white">74%</span>
+                  <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: "74%" }} />
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: "0%" }} />
                 </div>
               </div>
             </div>
@@ -548,9 +555,6 @@ export default function CommunityAdminPage() {
                 <span className="text-[10px] text-gray-500">{topics.length} assuntos</span>
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" className="rounded border border-brand-orange/40 px-2 py-1 text-[10px] font-bold text-brand-orange hover:bg-brand-orange hover:text-white transition-colors">
-                  Gerenciar
-                </button>
               </div>
             </div>
 
@@ -581,7 +585,7 @@ export default function CommunityAdminPage() {
                   <tr key={top.id} className="hover:bg-white/[0.02]">
                     <td className="py-2 px-1 font-bold text-white truncate max-w-[100px]">{top.name}</td>
                     <td className="py-2 px-1 text-gray-400">Radar</td>
-                    <td className="py-2 px-1 text-gray-300 font-semibold">{Math.floor(Math.random() * 40) + 10}</td>
+                    <td className="py-2 px-1 text-gray-300 font-semibold">—</td>
                     <td className="py-2 px-1 font-bold text-emerald-400">🟢 Ativo</td>
                   </tr>
                 ))}
@@ -603,11 +607,11 @@ export default function CommunityAdminPage() {
 
       {/* MODAL DE CRIAR/EDITAR PERGUNTA DO DIA */}
       {showNewPollModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-md rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowNewPollModal(false)}>
+          <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md rounded-xl border border-white/10 bg-[#0e0f14] p-6 space-y-4 text-white">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-heading text-base font-bold">Pergunta do dia</h3>
-              <button type="button" onClick={() => setShowNewPollModal(false)} className="text-gray-400 hover:text-white">✕</button>
+              <h3 id="poll-dialog-title" className="font-heading text-base font-bold">Pergunta do dia</h3>
+              <button type="button" onClick={() => setShowNewPollModal(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar">✕</button>
             </div>
 
             <div>
@@ -673,6 +677,36 @@ export default function CommunityAdminPage() {
                 className="h-9 rounded bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526] disabled:opacity-50"
               >
                 {isSavingPoll ? "Salvando..." : "Salvar Pergunta"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {pendingModeration && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setPendingModeration(null)}>
+          <div role="alertdialog" aria-modal="true" aria-labelledby="moderation-dialog-title" aria-describedby="moderation-dialog-description" className="w-full max-w-lg rounded-xl border border-white/10 bg-[#0e0f14] p-6 text-white">
+            <h3 id="moderation-dialog-title" className="font-heading text-lg font-bold">Confirmar ação de moderação</h3>
+            <p id="moderation-dialog-description" className="mt-2 text-sm leading-6 text-gray-300">
+              {pendingModeration.action === "dismiss" && "A denúncia será encerrada sem alterar o conteúdo."}
+              {pendingModeration.action === "delete" && "O conteúdo será excluído permanentemente."}
+              {pendingModeration.action === "suspend_7d" && "O conteúdo será removido e o autor ficará suspenso por sete dias."}
+              {pendingModeration.action === "ban" && "O conteúdo será removido e o autor ficará banido até uma restauração manual."}
+            </p>
+            <div className="mt-4 border border-white/10 bg-white/[0.03] p-4">
+              <p className="font-bold text-white">{pendingModeration.report.content?.author_name || "Conteúdo indisponível"}</p>
+              <p className="mt-1 max-h-32 overflow-y-auto break-words text-sm leading-6 text-gray-400">{pendingModeration.report.content?.content || pendingModeration.report.content_id}</p>
+              <p className="mt-3 text-xs text-gray-500">Motivo: {pendingModeration.report.reason}</p>
+            </div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button type="button" onClick={() => setPendingModeration(null)} className="min-h-11 px-4 text-sm font-bold text-gray-300 hover:text-white">Cancelar</button>
+              <button
+                type="button"
+                autoFocus
+                disabled={Boolean(activeModerationId)}
+                onClick={() => void handleModeration(pendingModeration.report.id, pendingModeration.action)}
+                className="min-h-11 bg-brand-orange px-4 text-sm font-bold text-white hover:bg-[#ff7526] disabled:opacity-50"
+              >
+                {activeModerationId ? "Processando..." : "Confirmar ação"}
               </button>
             </div>
           </div>

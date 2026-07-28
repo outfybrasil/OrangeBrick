@@ -117,6 +117,24 @@ export interface Database {
         Update: Partial<CommunityPollVoteInsert>;
         Relationships: [];
       };
+      home_engagement_events: {
+        Row: { id: number; event_name: string; target: string | null; created_at: string };
+        Insert: { id?: number; event_name: string; target?: string | null; created_at?: string };
+        Update: { event_name?: string; target?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      community_reports: {
+        Row: { id: string; reporter_id: string; content_type: "post" | "comment"; content_id: string; reason: string; status: "pending" | "reviewed" | "dismissed" | "actioned"; created_at: string };
+        Insert: { id?: string; reporter_id: string; content_type: "post" | "comment"; content_id: string; reason: string; status?: "pending" | "reviewed" | "dismissed" | "actioned"; created_at?: string };
+        Update: { reason?: string; status?: "pending" | "reviewed" | "dismissed" | "actioned" };
+        Relationships: [];
+      };
+      admin_preferences: {
+        Row: { user_id: string; default_author: string; default_category: PostCategory; updated_at: string };
+        Insert: { user_id: string; default_author?: string; default_category?: PostCategory; updated_at?: string };
+        Update: { default_author?: string; default_category?: PostCategory; updated_at?: string };
+        Relationships: [];
+      };
     };
     Functions: {
       consume_rate_limit: {
@@ -135,6 +153,10 @@ export interface Database {
       get_my_release_hype_votes: {
         Args: Record<string, never>;
         Returns: ReleaseHypeVoteSelection[];
+      };
+      admin_resolve_community_report: {
+        Args: { target_report_id: string; target_action: string };
+        Returns: Json;
       };
     };
     Views: Record<string, never>;

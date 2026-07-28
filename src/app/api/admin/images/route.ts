@@ -1,5 +1,3 @@
-import { isIP } from "node:net";
-import { resolve4, resolve6 } from "node:dns/promises";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
@@ -9,6 +7,7 @@ import {
   validateReleaseSourceUrl,
 } from "@/lib/release-images";
 import type { EditorialImage } from "@/lib/types/database";
+import { validateRemoteUrl } from "@/lib/server/network";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,35 +36,8 @@ function serviceClient() {
   );
 }
 
-function isPrivateAddress(address: string) {
-  const normalized = address.toLowerCase();
-  if (isIP(normalized) === 4) {
-    const [first, second] = normalized.split(".").map(Number);
-    return first === 0
-      || first === 10
-      || first === 127
-      || (first === 169 && second === 254)
-      || (first === 172 && second >= 16 && second <= 31)
-      || (first === 192 && second === 168);
-  }
-  return normalized === "::1"
-    || normalized.startsWith("fc")
-    || normalized.startsWith("fd")
-    || normalized.startsWith("fe80:");
-}
-
 async function assertSafeUrl(value: string) {
-  const url = new URL(value);
-  if (!["http:", "https:"].includes(url.protocol)) throw new Error("Use uma URL HTTP ou HTTPS");
-  if (url.username || url.password) throw new Error("A URL não pode conter credenciais");
-  if (url.hostname === "localhost" || url.hostname.endsWith(".local")) throw new Error("Endereço não permitido");
-
-  const directIp = isIP(url.hostname) ? [url.hostname] : [];
-  const resolved = directIp.length > 0
-    ? directIp
-    : [...await resolve4(url.hostname).catch(() => []), ...await resolve6(url.hostname).catch(() => [])];
-  if (resolved.length === 0 || resolved.some(isPrivateAddress)) throw new Error("Endereço não permitido");
-  return url;
+  return validateRemoteUrl(value, false);
 }
 
 async function downloadImage(sourceUrl: string, kind: ImageKind) {
@@ -197,7 +169,11 @@ export async function GET(request: Request) {
 
   if (error) return NextResponse.json({ error: "Falha ao carregar a biblioteca" }, { status: 500 });
 
-  const images = (data || []) as EditorialImage[];
+  const images = ((data || []) as EditorialImage[]).filter((image) =>
+    !image.storage_path.startsWith("avatars/")
+    && !image.storage_path.startsWith("archive/avatar/")
+    && !image.storage_path.startsWith("archive/community/")
+  );
   const postIds = [...new Set(images.map((image) => image.post_id).filter((id): id is string => Boolean(id)))];
   const { data: posts } = postIds.length
     ? await supabase.from("posts").select("*").in("id", postIds)

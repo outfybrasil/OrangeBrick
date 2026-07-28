@@ -1,11 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression";
+type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -98,6 +98,14 @@ export function AdminShell({
 }: AdminShellProps) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setMobileMenuOpen(false);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -180,13 +188,13 @@ export function AdminShell({
               Administração
             </p>
             <div className="space-y-1">
-              <Link href="/admin/team" className="flex min-h-10 items-center gap-3 rounded-lg px-3 text-xs font-semibold text-gray-400 hover:bg-white/[0.04] hover:text-white transition-colors">
+              <Link href="/admin/team" className={navClass("team")} aria-current={active === "team" ? "page" : undefined}>
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Equipe
               </Link>
-              <Link href="/admin/settings" className="flex min-h-10 items-center gap-3 rounded-lg px-3 text-xs font-semibold text-gray-400 hover:bg-white/[0.04] hover:text-white transition-colors">
+              <Link href="/admin/settings" className={navClass("settings")} aria-current={active === "settings" ? "page" : undefined}>
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -232,6 +240,17 @@ export function AdminShell({
         {/* HEADER TOP STATUS BAR */}
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0b0e]/95 backdrop-blur-xl">
           <div className="flex min-h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center text-gray-300 hover:text-white lg:hidden"
+              aria-label="Abrir navegação administrativa"
+              aria-expanded={mobileMenuOpen}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M4 7h16M4 12h16M4 17h16" />
+              </svg>
+            </button>
             <div className="hidden lg:flex items-center gap-3 text-xs">
               <span className="inline-flex items-center gap-1.5 text-gray-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -266,6 +285,30 @@ export function AdminShell({
           {children}
         </main>
       </div>
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 lg:hidden" onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}>
+          <aside role="dialog" aria-modal="true" aria-label="Navegação administrativa" className="flex h-full w-[min(20rem,88vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4">
+            <div className="flex min-h-14 items-center justify-between border-b border-white/10">
+              <p className="font-heading text-sm font-black">ORANGE<span className="text-brand-orange">_</span>BRICK</p>
+              <button type="button" onClick={() => setMobileMenuOpen(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar navegação">✕</button>
+            </div>
+            <nav className="flex-1 space-y-1 overflow-y-auto py-4" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/admin" className={navClass("overview")}><OverviewIcon />Visão geral</Link>
+              <Link href="/admin/edit" className={navClass("editor")}><ComposeIcon />Nova matéria</Link>
+              <Link href="/admin/images" className={navClass("images")}><ImagesIcon />Biblioteca de imagens</Link>
+              <Link href="/admin/releases" className={navClass("releases")}><ReleasesIcon />Radar de lançamentos</Link>
+              <Link href="/admin/community" className={navClass("community")}><CommunityIcon />Comunidade</Link>
+              <Link href="/admin/progression" className={navClass("progression")}><ProgressionIcon />Progressão</Link>
+              <Link href="/admin/team" className={navClass("team")}>Equipe</Link>
+              <Link href="/admin/settings" className={navClass("settings")}>Configurações</Link>
+            </nav>
+            <div className="space-y-2 border-t border-white/10 pt-4">
+              <Link href="/" target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center gap-3 px-3 text-sm font-bold text-gray-300"><ExternalIcon />Abrir site</Link>
+              <button type="button" onClick={handleLogout} className="flex min-h-11 w-full items-center gap-3 px-3 text-sm font-bold text-red-300"><ExitIcon />Encerrar sessão</button>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

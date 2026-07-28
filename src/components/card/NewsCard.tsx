@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { NewsCardHeader } from "./NewsCardHeader";
 import { NewsCardMedia } from "./NewsCardMedia";
@@ -38,10 +39,6 @@ export function NewsCard({ post, stats }: NewsCardProps) {
     initial: stats.reactions,
     initialUserReaction: stats.userReaction,
   });
-
-  const handleClick = () => {
-    router.push(`/posts/${post.slug}`);
-  };
 
   const handleCommentClick = () => {
     if (!user) {
@@ -102,21 +99,11 @@ export function NewsCard({ post, stats }: NewsCardProps) {
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        role="article"
-        tabIndex={0}
-        onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
         className={`
           group bg-background-void border-b border-r border-white/10
-          overflow-hidden cursor-pointer
+          overflow-hidden
           transition-colors duration-200
           hover:bg-white/[0.025] hover:border-white/20
-          focus-visible:outline-2 focus-visible:outline-brand-orange
         `}
       >
         <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-3 sm:px-4">
@@ -140,7 +127,7 @@ export function NewsCard({ post, stats }: NewsCardProps) {
           </button>
         </div>
 
-        <h2 
+        <h2
           style={{
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -149,7 +136,7 @@ export function NewsCard({ post, stats }: NewsCardProps) {
           }}
           className="mb-3 min-h-[40px] break-words px-3 font-heading text-base font-extrabold leading-snug tracking-tight text-white transition-colors duration-300 group-hover:text-brand-orange xs:min-h-[48px] xs:text-lg sm:px-4 md:min-h-[56px] md:text-xl"
         >
-          {post.title}
+          <Link href={`/posts/${post.slug}`} className="focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
         </h2>
 
         <NewsCardMedia src={post.image_url} alt={post.image_alt} category={post.category} />
@@ -157,9 +144,6 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         <NewsCardSummary summary={post.summary} author={post.author_name} tag={post.author_tag} />
 
         <div
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          role="presentation"
         >
           <ReactionBar
             hype={counts.hype}

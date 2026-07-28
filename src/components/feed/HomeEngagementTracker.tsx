@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { getConsent } from "@/lib/consent";
-import { createDataClient } from "@/lib/supabase/client";
 
 export function HomeEngagementTracker() {
-  const supabase = useMemo(() => createDataClient(), []);
-
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       if (getConsent() !== "accepted") return;
@@ -14,15 +11,20 @@ export function HomeEngagementTracker() {
       if (!element) return;
       const eventName = element.dataset.homeEvent;
       if (!eventName) return;
-      void supabase.from("home_engagement_events").insert({
-        event_name: eventName,
-        target: element.dataset.homeTarget?.slice(0, 180) || null,
+      void fetch("/api/home-engagement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName,
+          target: element.dataset.homeTarget?.slice(0, 180) || null,
+        }),
+        keepalive: true,
       });
     };
 
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
-  }, [supabase]);
+  }, []);
 
   return null;
 }

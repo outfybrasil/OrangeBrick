@@ -237,9 +237,9 @@ export default function ProgressionAdminPage() {
       )}
 
       {selectedMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <form onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
-            <h2 className="font-heading text-xl font-bold">Ajustar XP</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setSelectedMember(null)}>
+          <form role="dialog" aria-modal="true" aria-labelledby="xp-dialog-title" onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+            <h2 id="xp-dialog-title" className="font-heading text-xl font-bold">Ajustar XP</h2>
             <p className="mt-1 text-sm text-gray-400">{selectedMember.display_name} · saldo atual de {formatXp(selectedMember.lifetime_xp)} XP</p>
             <label className="mt-6 block">
               <span className="text-xs font-bold text-gray-300">Quantidade</span>

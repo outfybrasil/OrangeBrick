@@ -1,8 +1,7 @@
-import { isIP } from "node:net";
-import { resolve4, resolve6 } from "node:dns/promises";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
+import { validateRemoteUrl } from "@/lib/server/network";
 
 export const runtime = "nodejs";
 
@@ -14,32 +13,8 @@ function serviceClient() {
   );
 }
 
-function isPrivateAddress(address: string) {
-  const normalized = address.toLowerCase();
-  if (isIP(normalized) === 4) {
-    const [first, second] = normalized.split(".").map(Number);
-    return first === 0
-      || first === 10
-      || first === 127
-      || (first === 169 && second === 254)
-      || (first === 172 && second >= 16 && second <= 31)
-      || (first === 192 && second === 168);
-  }
-  return normalized === "::1"
-    || normalized.startsWith("fc")
-    || normalized.startsWith("fd")
-    || normalized.startsWith("fe80:");
-}
-
 async function safeUrl(value: string) {
-  const url = new URL(value);
-  if (url.protocol !== "https:" || url.username || url.password) throw new Error("Use uma URL HTTPS válida");
-  if (url.hostname === "localhost" || url.hostname.endsWith(".local")) throw new Error("Endereço não permitido");
-  const addresses = isIP(url.hostname)
-    ? [url.hostname]
-    : [...await resolve4(url.hostname).catch(() => []), ...await resolve6(url.hostname).catch(() => [])];
-  if (!addresses.length || addresses.some(isPrivateAddress)) throw new Error("Endereço não permitido");
-  return url;
+  return validateRemoteUrl(value);
 }
 
 export async function POST(request: Request) {
@@ -98,31 +73,14 @@ export async function POST(request: Request) {
       .resize(512, 512, { fit: "cover" })
       .webp({ quality: 86, effort: 5 })
       .toBuffer();
-    const path = `avatars/${user.id}/${crypto.randomUUID()}.webp`;
+    const path = `avatars/${user.id}/avatar.webp`;
     const { error: uploadError } = await supabase.storage.from("post-images").upload(path, output, {
       contentType: "image/webp",
       cacheControl: "31536000",
-      upsert: false,
+      upsert: true,
     });
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from("post-images").getPublicUrl(path);
-    const { error: recordError } = await supabase.from("editorial_images").insert({
-      post_id: null,
-      kind: "cover",
-      source_url: sourceUrl,
-      storage_path: path,
-      public_url: data.publicUrl,
-      alt_text: "Avatar de usuário",
-      width: 512,
-      height: 512,
-      file_size: output.byteLength,
-      mime_type: "image/webp",
-      created_by: user.id,
-    });
-    if (recordError) {
-      await supabase.storage.from("post-images").remove([path]);
-      throw recordError;
-    }
     return NextResponse.json({ publicUrl: data.publicUrl });
   } catch (error) {
     return NextResponse.json(
