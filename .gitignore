@@ -44,4 +44,6 @@ next-env.d.ts
 # temp artifacts
 .impeccable/
 *.png
+!public/icons/achievements/
+!public/icons/achievements/*.png
 

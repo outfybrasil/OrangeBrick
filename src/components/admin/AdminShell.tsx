@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminSection = "overview" | "editor" | "images" | "releases" | "community";
+type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -57,6 +57,15 @@ function CommunityIcon() {
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M5 6h14v9H9l-4 3z" />
       <path d="M8 10h8M8 13h5" />
+    </svg>
+  );
+}
+
+function ProgressionIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <path d="M5 19V9M12 19V5M19 19v-7" />
+      <path d="M3 19h18" />
     </svg>
   );
 }
@@ -146,6 +155,10 @@ export function AdminShell({
           <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}>
             <CommunityIcon />
             Comunidade
+          </Link>
+          <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}>
+            <ProgressionIcon />
+            Progressão
           </Link>
         </nav>
 
@@ -248,6 +261,15 @@ export function AdminShell({
             >
               <CommunityIcon />
               Comunidade
+            </Link>
+            <Link
+              href="/admin/progression"
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-3 text-xs font-bold ${
+                active === "progression" ? "bg-brand-orange text-white" : "text-gray-400"
+              }`}
+            >
+              <ProgressionIcon />
+              Progressão
             </Link>
           </nav>
         </header>

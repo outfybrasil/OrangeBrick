@@ -25,6 +25,8 @@ add column if not exists show_activity_stats boolean not null default true,
 add column if not exists show_season_history boolean not null default true,
 add column if not exists show_in_leaderboard boolean not null default true;
 
+alter table public.profiles disable trigger profiles_enforce_identity;
+
 update public.profiles
 set display_name = coalesce(nullif(btrim(display_name), ''), nickname)
 where display_name is null or btrim(display_name) = '';
@@ -98,6 +100,8 @@ begin
   return new;
 end;
 $$;
+
+alter table public.profiles enable trigger profiles_enforce_identity;
 
 create table if not exists public.xp_rules (
   event_type text primary key,
@@ -945,6 +949,161 @@ begin
 end;
 $$;
 
+create or replace function public.admin_progression_overview(target_query text default '')
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  result jsonb;
+begin
+  if not public.current_user_is_admin() then
+    raise exception 'Acesso administrativo necessário';
+  end if;
+
+  select jsonb_build_object(
+    'summary', jsonb_build_object(
+      'members', (select count(*) from public.profiles where not is_official),
+      'xp_issued', (select coalesce(sum(xp_amount), 0) from public.xp_events where status = 'valid'),
+      'qualified', (select count(*) from public.season_progress progress join public.seasons season on season.id = progress.season_id where season.status in ('active', 'calibration') and progress.is_qualified and not progress.is_disqualified),
+      'revoked_events', (select count(*) from public.xp_events where status = 'revoked')
+    ),
+    'season', (
+      select jsonb_build_object('id', id, 'name', name, 'status', status, 'starts_at', starts_at, 'ends_at', ends_at)
+      from public.seasons
+      where status in ('active', 'calibration', 'draft')
+      order by starts_at desc
+      limit 1
+    ),
+    'rules', (
+      select coalesce(jsonb_agg(to_jsonb(rule) order by rule.event_type), '[]'::jsonb)
+      from public.xp_rules rule
+    ),
+    'members', (
+      select coalesce(jsonb_agg(to_jsonb(member) order by member.lifetime_xp desc), '[]'::jsonb)
+      from (
+        select
+          profile.user_id,
+          profile.username,
+          profile.display_name,
+          profile.avatar_url,
+          coalesce(progress.lifetime_xp, 0) as lifetime_xp,
+          coalesce(progress.level, 1) as level,
+          coalesce(season_progress.eligible_xp, 0) as season_xp,
+          coalesce(season_progress.is_disqualified, false) as is_disqualified,
+          (select count(*) from public.xp_events event where event.user_id = profile.user_id and event.status = 'revoked') as revoked_events
+        from public.profiles profile
+        left join public.user_progress progress on progress.user_id = profile.user_id
+        left join public.season_progress season_progress
+          on season_progress.user_id = profile.user_id
+          and season_progress.season_id = (select id from public.seasons where status in ('active', 'calibration') order by starts_at desc limit 1)
+        where not profile.is_official
+          and (
+            coalesce(btrim(target_query), '') = ''
+            or profile.display_name ilike '%' || target_query || '%'
+            or profile.username ilike '%' || target_query || '%'
+          )
+        order by coalesce(progress.lifetime_xp, 0) desc
+        limit 100
+      ) member
+    )
+  ) into result;
+
+  return result;
+end;
+$$;
+
+create or replace function public.admin_adjust_xp(target_user_id uuid, target_amount integer, target_reason text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.current_user_is_admin() then
+    raise exception 'Acesso administrativo necessário';
+  end if;
+  if target_amount = 0 or abs(target_amount) > 10000 then
+    raise exception 'Ajuste deve estar entre -10.000 e 10.000 XP';
+  end if;
+  if char_length(btrim(target_reason)) < 10 then
+    raise exception 'Informe uma justificativa com pelo menos 10 caracteres';
+  end if;
+
+  insert into public.xp_events (
+    user_id, event_type, source_type, source_id, actor_id, xp_amount,
+    event_key, metadata
+  )
+  values (
+    target_user_id,
+    'admin_adjustment',
+    'admin',
+    gen_random_uuid()::text,
+    auth.uid(),
+    target_amount,
+    'admin:adjustment:' || gen_random_uuid(),
+    jsonb_build_object('reason', btrim(target_reason), 'admin_id', auth.uid())
+  );
+  perform public.refresh_progress(target_user_id);
+end;
+$$;
+
+create or replace function public.admin_update_xp_rule(
+  target_event_type text,
+  target_actor_xp integer,
+  target_recipient_xp integer,
+  target_daily_limit integer,
+  target_enabled boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.current_user_is_admin() then
+    raise exception 'Acesso administrativo necessário';
+  end if;
+  if greatest(abs(target_actor_xp), abs(target_recipient_xp)) > 100 then
+    raise exception 'Valor de XP fora do limite administrativo';
+  end if;
+  if target_daily_limit is not null and (target_daily_limit < 1 or target_daily_limit > 100) then
+    raise exception 'Limite diário inválido';
+  end if;
+
+  update public.xp_rules
+  set actor_xp = target_actor_xp,
+      recipient_xp = target_recipient_xp,
+      daily_limit = target_daily_limit,
+      enabled = target_enabled,
+      updated_at = now()
+  where event_type = target_event_type;
+end;
+$$;
+
+create or replace function public.admin_set_season_disqualification(target_user_id uuid, target_disqualified boolean)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  active_season_id uuid;
+begin
+  if not public.current_user_is_admin() then
+    raise exception 'Acesso administrativo necessário';
+  end if;
+  select id into active_season_id from public.seasons where status in ('active', 'calibration') order by starts_at desc limit 1;
+  if active_season_id is null then raise exception 'Nenhuma temporada ativa'; end if;
+
+  update public.season_progress
+  set is_disqualified = target_disqualified, updated_at = now()
+  where season_id = active_season_id and user_id = target_user_id;
+  perform public.refresh_season_ranks(active_season_id);
+end;
+$$;
+
 alter table public.user_progress enable row level security;
 alter table public.xp_events enable row level security;
 alter table public.xp_rules enable row level security;
@@ -969,6 +1128,10 @@ grant execute on function public.public_profile(text) to anon, authenticated;
 grant execute on function public.current_user_progress() to authenticated;
 grant execute on function public.season_leaderboard(text, integer) to anon, authenticated;
 grant execute on function public.set_achievement_showcase(text[]) to authenticated;
+grant execute on function public.admin_progression_overview(text) to authenticated;
+grant execute on function public.admin_adjust_xp(uuid, integer, text) to authenticated;
+grant execute on function public.admin_update_xp_rule(text, integer, integer, integer, boolean) to authenticated;
+grant execute on function public.admin_set_season_disqualification(uuid, boolean) to authenticated;
 
 revoke insert, update, delete on public.user_progress, public.xp_events, public.season_progress, public.user_achievements, public.user_rewards from anon, authenticated;
 revoke execute on function public.award_xp(uuid, text, text, text, uuid, text, integer, jsonb) from public, anon, authenticated;

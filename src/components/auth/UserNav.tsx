@@ -10,6 +10,7 @@ import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import { isAdminUser } from "@/lib/auth";
 
 export function UserNav() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const { user, profile, signOut, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -113,7 +114,13 @@ export function UserNav() {
               onClick={() => setIsDropdownOpen(false)}
               className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white"
             >
-              <span aria-hidden="true" className="flex h-4 w-4 rotate-45 border border-brand-orange" />
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden="true">
+                <img
+                  src={`${basePath}/icons/achievements/menu-conquistas.png`}
+                  alt=""
+                  className="h-8 w-8 max-w-none object-contain"
+                />
+              </span>
               <span>Conquistas</span>
             </Link>
 

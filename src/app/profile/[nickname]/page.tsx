@@ -123,6 +123,16 @@ function ProfilePageContent() {
     { id: "achievements", label: "Conquistas" },
     ...(isOwner ? [{ id: "history" as const, label: "Histórico" }] : []),
   ];
+  const themeClass = profile.profile_theme === "fornalha"
+    ? "bg-[#1b0e08]"
+    : profile.profile_theme === "carvao"
+      ? "bg-[#111216]"
+      : "bg-background-void";
+  const frameClass = profile.equipped_frame === "aco-prensado"
+    ? "border-4 border-[#cbd0d6] outline outline-1 outline-white/30"
+    : profile.equipped_frame === "encaixe-basico"
+      ? "border-4 border-brand-orange"
+      : "border border-white/15";
 
   return (
     <>
@@ -138,14 +148,25 @@ function ProfilePageContent() {
       </header>
 
       <main className="min-h-dvh bg-background-void">
-        <section className="border-b border-white/10">
+        <section className={`border-b border-white/10 ${themeClass}`}>
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
-              <div className="flex min-w-0 flex-col gap-6 sm:flex-row sm:items-start">
-                <div className={`relative h-24 w-24 shrink-0 overflow-hidden bg-card-slate ${profile.equipped_frame ? "ring-2 ring-brand-orange ring-offset-4 ring-offset-background-void" : ""}`}>
-                  <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+              <div className="flex min-w-0 flex-col gap-7 sm:flex-row sm:items-start">
+                <div className="relative w-fit shrink-0 pb-4 pr-4">
+                  <div className={`h-28 w-28 overflow-hidden bg-card-slate sm:h-32 sm:w-32 ${frameClass}`}>
+                    <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                  </div>
+                  {!profile.is_official && profile.progress && (
+                    <div className="absolute bottom-0 right-0 min-w-16 border-4 border-background-void bg-brand-orange px-3 py-2 text-center text-white">
+                      <span className="block text-[9px] font-black uppercase tracking-[0.16em]">Nível</span>
+                      <strong className="font-heading text-xl leading-none">{profile.progress.level}</strong>
+                    </div>
+                  )}
                 </div>
                 <div className="min-w-0">
+                  {profile.equipped_title && (
+                    <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-brand-orange">{profile.equipped_title}</p>
+                  )}
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="break-words font-heading text-[clamp(2rem,7vw,4.5rem)] font-black leading-[0.95] tracking-[-0.03em] text-white">
                       {profile.display_name}
@@ -154,7 +175,6 @@ function ProfilePageContent() {
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-400">
                     <span>@{profile.username}</span>
-                    {profile.equipped_title && <span className="font-bold text-brand-orange">{profile.equipped_title}</span>}
                     <span>Membro desde {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(profile.created_at))}</span>
                   </div>
                   <p className="mt-4 max-w-[68ch] text-sm leading-6 text-gray-300">
@@ -169,9 +189,14 @@ function ProfilePageContent() {
               </div>
               <div className="flex flex-wrap gap-2 lg:justify-end">
                 {isOwner ? (
-                  <Link href="/configuracoes/perfil" className="inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#ff7526]">
-                    Editar perfil
-                  </Link>
+                  <>
+                    <Link href="/configuracoes/perfil#vitrine" className="inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#ff7526]">
+                      Personalizar vitrine
+                    </Link>
+                    <Link href="/configuracoes/perfil" className="inline-flex min-h-11 items-center justify-center border border-white/15 px-5 text-xs font-bold text-white hover:border-brand-orange/50">
+                      Editar perfil
+                    </Link>
+                  </>
                 ) : (
                   <button
                     type="button"

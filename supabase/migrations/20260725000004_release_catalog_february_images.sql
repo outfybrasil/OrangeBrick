@@ -249,7 +249,7 @@ where id = 'love-eternal';
 
 update public.release_radar_items
 set game = 'Styx: Blades of Greed',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -258,7 +258,7 @@ where id = 'styx-blades-of-greed';
 
 update public.release_radar_items
 set game = 'Ys X: Proud Nordics',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -276,7 +276,7 @@ where id = 'rainbow-six-mobile';
 
 update public.release_radar_items
 set game = 'Tides of Tomorrow',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -287,7 +287,7 @@ where id = 'tides-of-tomorrow';
 
 update public.release_radar_items
 set game = 'Reigns: The Witcher',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -296,7 +296,7 @@ where id = 'reigns-the-witcher';
 
 update public.release_radar_items
 set game = 'Tales of Berseria Remastered',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -305,7 +305,7 @@ where id = 'tales-of-berseria-remastered';
 
 update public.release_radar_items
 set game = 'Resident Evil Requiem',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',

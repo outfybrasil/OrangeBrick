@@ -18,7 +18,7 @@ where id = 'seven-deadly-sins-origin';
 
 update public.release_radar_items
 set game = 'Tides of Tomorrow',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -27,7 +27,7 @@ where id = 'tides-of-tomorrow';
 
 update public.release_radar_items
 set game = 'Gnaughty Gnomes',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -36,7 +36,7 @@ where id = 'gnaughty-gnomes';
 
 update public.release_radar_items
 set game = 'Scott Pilgrim EX',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -45,7 +45,7 @@ where id = 'scott-pilgrim-ex';
 
 update public.release_radar_items
 set game = 'Homura Hime',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -54,7 +54,7 @@ where id = 'homura-hime';
 
 update public.release_radar_items
 set game = 'Marathon',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -74,7 +74,7 @@ where id = 'never-grace';
 
 update public.release_radar_items
 set game = 'Lost and Found Co.',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -83,7 +83,7 @@ where id = 'lost-and-found-co';
 
 update public.release_radar_items
 set game = '1348 Ex Voto',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -92,7 +92,7 @@ where id = '1348-ex-voto';
 
 update public.release_radar_items
 set game = 'Fatal Frame II: Crimson Butterfly Remake',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -101,7 +101,7 @@ where id = 'fatal-frame-ii-remake';
 
 update public.release_radar_items
 set game = 'Monster Hunter Stories 3: Twisted Reflection',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -128,7 +128,7 @@ where id = 'xploit-zero';
 
 update public.release_radar_items
 set game = 'Crimson Desert',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -137,7 +137,7 @@ where id = 'crimson-desert';
 
 update public.release_radar_items
 set game = 'Dynasty Warriors 3: Complete Edition Remastered',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -148,7 +148,7 @@ where id = 'dynasty-warriors-3-remastered';
 
 update public.release_radar_items
 set game = 'Mouse: P.I. For Hire',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -159,7 +159,7 @@ where id = 'mouse-pi-for-hire';
 
 update public.release_radar_items
 set game = 'Ghost Master: Resurrection',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -168,7 +168,7 @@ where id = 'ghost-master-resurrection';
 
 update public.release_radar_items
 set game = 'Rubato',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -177,7 +177,7 @@ where id = 'rubato';
 
 update public.release_radar_items
 set game = 'Ariana and the Elder Codex',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -186,7 +186,7 @@ where id = 'ariana-and-the-elder-codex';
 
 update public.release_radar_items
 set game = 'Copa City',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -197,7 +197,7 @@ where id = 'copa-city';
 
 update public.release_radar_items
 set game = 'Life is Strange: Reunion',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -206,7 +206,7 @@ where id = 'life-is-strange-reunion';
 
 update public.release_radar_items
 set game = 'Screamer',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -224,7 +224,7 @@ where id = 'pokemon-champions';
 
 update public.release_radar_items
 set game = 'Before I Go',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -233,7 +233,7 @@ where id = 'before-i-go';
 
 update public.release_radar_items
 set game = 'ShantyTown',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -251,7 +251,7 @@ where id = 'tomodachi-life-living-the-dream';
 
 update public.release_radar_items
 set game = 'Pragmata',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -262,7 +262,7 @@ where id = 'pragmata';
 
 update public.release_radar_items
 set game = 'Aphelion',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -271,7 +271,7 @@ where id = 'aphelion';
 
 update public.release_radar_items
 set game = 'Diablo IV: Lord of Hatred',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',
@@ -280,7 +280,7 @@ where id = 'diablo-iv-lord-of-hatred';
 
 update public.release_radar_items
 set game = 'Invincible Vs.',
-  image_url = 'undefined',
+  image_url = null,
   product_type = 'game',
   is_indie = false,
   badge = 'Lançamento',

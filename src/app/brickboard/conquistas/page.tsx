@@ -8,26 +8,33 @@ import { AchievementMark } from "@/components/community/ProgressionUI";
 import type { AchievementProgress, PublicProfileData } from "@/lib/types/progression";
 
 export default function AchievementsPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading: isAuthLoading } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [achievements, setAchievements] = useState<AchievementProgress[]>([]);
   const [equipped, setEquipped] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+
     async function load() {
-      if (profile?.username) {
-        const { data } = await supabase.rpc("public_profile", { target_username: profile.username });
-        const loaded = data as PublicProfileData | null;
-        if (loaded) {
-          setAchievements(loaded.achievements);
-          setEquipped(loaded.achievements.filter((item) => item.is_equipped).map((item) => item.slug));
-          return;
-        }
+      setLoadError(null);
+      const { data: catalog, error: catalogError } = await supabase
+        .from("achievements")
+        .select("slug, name, description, category, rarity, criteria, is_hidden")
+        .eq("is_active", true)
+        .order("sort_order");
+
+      if (!isActive) return;
+      if (catalogError) {
+        setLoadError("Não foi possível carregar as conquistas.");
+        setIsLoading(false);
+        return;
       }
 
-      const { data } = await supabase.from("achievements").select("slug, name, description, category, rarity, criteria, is_hidden").eq("is_active", true).order("sort_order");
-      setAchievements(((data || []) as Array<Record<string, unknown>>).map((item) => ({
+      const catalogAchievements = ((catalog || []) as Array<Record<string, unknown>>).map((item) => ({
         slug: item.slug as string,
         name: item.name as string,
         description: item.description as string,
@@ -37,10 +44,32 @@ export default function AchievementsPage() {
         target: Number((item.criteria as { target?: number })?.target || 1),
         unlocked_at: null,
         is_equipped: false,
-      })));
+      }));
+
+      if (profile?.username) {
+        const { data } = await supabase.rpc("public_profile", { target_username: profile.username });
+        const loaded = data as PublicProfileData | null;
+        if (!isActive) return;
+        if (loaded?.achievements.length) {
+          const progressBySlug = new Map(loaded.achievements.map((item) => [item.slug, item]));
+          const mergedAchievements = catalogAchievements.map((item) => progressBySlug.get(item.slug) || item);
+          setAchievements(mergedAchievements);
+          setEquipped(mergedAchievements.filter((item) => item.is_equipped).map((item) => item.slug));
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      setAchievements(catalogAchievements);
+      setEquipped([]);
+      setIsLoading(false);
     }
+
     void load();
-  }, [profile?.username, supabase]);
+    return () => {
+      isActive = false;
+    };
+  }, [profile?.is_official, profile?.username, supabase]);
 
   function toggleShowcase(slug: string) {
     const achievement = achievements.find((item) => item.slug === slug);
@@ -71,7 +100,7 @@ export default function AchievementsPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        {user && (
+        {user && !isAuthLoading && (
           <div className="mb-10 flex flex-col gap-4 border-y border-white/10 py-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-gray-300">Selecione até três conquistas desbloqueadas para exibir no perfil.</p>
             <div className="flex items-center gap-3">
@@ -80,20 +109,26 @@ export default function AchievementsPage() {
             </div>
           </div>
         )}
-        <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          {achievements.map((achievement) => (
-            <button
-              key={achievement.slug}
-              type="button"
-              onClick={() => toggleShowcase(achievement.slug)}
-              disabled={!achievement.unlocked_at}
-              aria-pressed={equipped.includes(achievement.slug)}
-              className={`min-w-0 text-left disabled:cursor-default ${equipped.includes(achievement.slug) ? "bg-brand-orange/[0.06] px-4 pb-4" : ""}`}
-            >
-              <AchievementMark achievement={achievement} />
-            </button>
-          ))}
-        </div>
+        {loadError ? (
+          <p role="alert" className="border-y border-red-400/30 py-8 text-sm text-red-200">{loadError}</p>
+        ) : isLoading && achievements.length === 0 ? (
+          <p className="border-y border-white/10 py-12 text-sm text-gray-400">Carregando conquistas…</p>
+        ) : (
+          <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {achievements.map((achievement) => (
+              <button
+                key={achievement.slug}
+                type="button"
+                onClick={() => toggleShowcase(achievement.slug)}
+                disabled={!achievement.unlocked_at}
+                aria-pressed={equipped.includes(achievement.slug)}
+                className={`min-w-0 text-left disabled:cursor-default ${equipped.includes(achievement.slug) ? "bg-brand-orange/[0.06] px-4 pb-4" : ""}`}
+              >
+                <AchievementMark achievement={achievement} />
+              </button>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
