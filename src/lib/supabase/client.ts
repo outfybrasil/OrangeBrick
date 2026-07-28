@@ -19,7 +19,10 @@ interface FlexibleDatabase {
   public: {
     Tables: Record<string, FlexibleTable>;
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: Record<string, {
+      Args: Record<string, unknown>;
+      Returns: unknown;
+    }>;
   };
 }
 

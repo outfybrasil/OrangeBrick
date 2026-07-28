@@ -97,6 +97,26 @@ export function UserNav() {
               <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
             </div>
 
+            <Link
+              href={`/profile/${encodeURIComponent(profile?.username || displayName)}`}
+              onClick={() => setIsDropdownOpen(false)}
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white"
+            >
+              <svg aria-hidden="true" className="h-4 w-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+              </svg>
+              <span>Meu perfil</span>
+            </Link>
+
+            <Link
+              href="/brickboard/conquistas"
+              onClick={() => setIsDropdownOpen(false)}
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white"
+            >
+              <span aria-hidden="true" className="flex h-4 w-4 rotate-45 border border-brand-orange" />
+              <span>Conquistas</span>
+            </Link>
+
             {/* ITEM: MATÉRIAS SALVAS */}
             <button
               onClick={() => {

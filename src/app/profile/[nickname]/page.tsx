@@ -1,420 +1,390 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
-import { UserBadge } from "@/components/ui/UserBadge";
-import { BrickCard } from "@/components/community/BrickCard";
-import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Footer } from "@/components/ui/Footer";
-import type { Profile } from "@/lib/types/database";
-import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
+import { UserBadge } from "@/components/ui/UserBadge";
+import { AchievementMark, LevelProgress, SeasonStanding } from "@/components/community/ProgressionUI";
+import { formatXp } from "@/lib/progression";
+import { resolveAvatarUrl } from "@/lib/avatar";
+import type { PrivateProgressData, PublicProfileData } from "@/lib/types/progression";
 
-function ProfileContent() {
-  const params = useParams();
-  const rawNickname = params?.nickname as string;
-  const decodedNickname = decodeURIComponent(rawNickname || "");
+type ProfileTab = "overview" | "bricks" | "achievements" | "history";
+
+interface ProfilePost {
+  id: string;
+  content: string;
+  platform_tag: string | null;
+  created_at: string;
+  attached_article: {
+    slug?: string;
+    title?: string;
+  } | null;
+}
+
+const eventLabels: Record<string, string> = {
+  post_created: "Brick publicado",
+  comment_created: "Comentário publicado",
+  reaction_given: "Participação em uma reação",
+  comment_liked: "Curtida recebida em comentário",
+  poll_voted: "Voto na pergunta do dia",
+  post_shared: "Brick compartilhado",
+  editorial_highlight: "Destaque editorial",
+  admin_adjustment: "Ajuste administrativo",
+};
+
+function ProfilePageContent() {
+  const params = useParams<{ nickname: string }>();
+  const username = decodeURIComponent(params.nickname || "");
   const supabase = useMemo(() => createDataClient(), []);
-
-  const { posts, deletePost, sharePost, toggleReaction, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
-
-  const [profileData, setProfileData] = useState<{
-    user_id?: string;
-    nickname: string;
-    avatar_url: string;
-    bio?: string;
-    created_at?: string;
-    is_official?: boolean;
-  } | null>(null);
-
   const { user } = useAuth();
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
+  const [profile, setProfile] = useState<PublicProfileData | null>(null);
+  const [privateProgress, setPrivateProgress] = useState<PrivateProgressData | null>(null);
+  const [posts, setPosts] = useState<ProfilePost[]>([]);
+  const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editAvatarUrl, setEditAvatarUrl] = useState("");
-  const [editBio, setEditBio] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-
-  const isOfficialProfile =
-    decodedNickname.toLowerCase().trim() === "orange brick" ||
-    decodedNickname.toLowerCase().trim() === "orangebrick" ||
-    decodedNickname.toLowerCase().trim() === "orange_brick";
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+
     async function loadProfile() {
       setIsLoading(true);
-      try {
-        const googleAvatar = getGoogleAvatarUrl(user);
+      setError(null);
+      const { data, error: profileError } = await supabase.rpc("public_profile", {
+        target_username: username,
+      });
+      const loadedProfile = data as PublicProfileData | null;
 
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .ilike("nickname", decodedNickname)
-          .maybeSingle();
-
-        const profileRow = data as Profile | null;
-
-        if (profileRow) {
-          const validProfileAvatar =
-            profileRow.avatar_url &&
-            (profileRow.avatar_url.startsWith("https://") || profileRow.avatar_url.startsWith("/"))
-              ? profileRow.avatar_url
-              : null;
-
-          const finalAvatar = isOfficialProfile
-            ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
-            : resolveAvatarUrl(validProfileAvatar || googleAvatar, profileRow.nickname);
-
-          const finalBio = profileRow.bio || "Leitor do Orange Brick e entusiasta de games.";
-          setProfileData({
-            user_id: profileRow.user_id,
-            nickname: profileRow.nickname,
-            avatar_url: finalAvatar,
-            bio: finalBio,
-            created_at: profileRow.created_at,
-            is_official: profileRow.is_official,
-          });
-          setEditAvatarUrl(finalAvatar);
-          setEditBio(profileRow.bio || "");
-        } else {
-          const userPosts = posts.filter(
-            (p) => p.author_name.toLowerCase().trim() === decodedNickname.toLowerCase().trim()
-          );
-          const rawAvatar = userPosts[0]?.author_avatar;
-          const validPostAvatar =
-            rawAvatar &&
-            (rawAvatar.startsWith("https://") || rawAvatar.startsWith("/"))
-              ? rawAvatar
-              : null;
-
-          const avatar = isOfficialProfile
-            ? `${basePath}/logos/Logo Tijolo Quebrado.PNG`
-            : resolveAvatarUrl(validPostAvatar || googleAvatar, decodedNickname);
-
-          setProfileData({
-            nickname: decodedNickname,
-            avatar_url: avatar,
-            bio: "Leitor e participante ativo da comunidade Orange Brick.",
-          });
-          setEditAvatarUrl(avatar);
-          setEditBio("Leitor e participante ativo da comunidade Orange Brick.");
-        }
-      } catch {
-        setProfileData({
-          nickname: decodedNickname,
-          avatar_url: isOfficialProfile ? `${basePath}/logos/Logo Tijolo Quebrado.PNG` : resolveAvatarUrl(null, decodedNickname),
-          bio: "Leitor do Orange Brick.",
-        });
-      } finally {
+      if (!isActive) return;
+      if (profileError) {
+        setError("Não foi possível carregar este perfil.");
         setIsLoading(false);
+        return;
       }
+      if (!loadedProfile) {
+        setProfile(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setProfile(loadedProfile);
+      const { data: userPosts } = await supabase
+        .from("community_posts")
+        .select("id, content, platform_tag, created_at, attached_article")
+        .eq("user_id", loadedProfile.user_id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (!isActive) return;
+      setPosts((userPosts || []) as unknown as ProfilePost[]);
+
+      if (user?.id === loadedProfile.user_id && !loadedProfile.is_official) {
+        const { data: ownProgress } = await supabase.rpc("current_user_progress", {});
+        if (isActive) setPrivateProgress(ownProgress as PrivateProgressData | null);
+      } else {
+        setPrivateProgress(null);
+      }
+      setIsLoading(false);
     }
 
-    if (decodedNickname) {
-      loadProfile();
-    }
-  }, [decodedNickname, supabase, posts, isOfficialProfile, basePath, user]);
-
-  const userPosts = useMemo(() => {
-    return posts.filter(
-      (p) => p.author_name.toLowerCase().trim() === decodedNickname.toLowerCase().trim()
-    );
-  }, [posts, decodedNickname]);
-
-  const profileSignals = useMemo(() => {
-    const platformCounts = new Map<string, number>();
-    const subjectCounts = new Map<string, number>();
-
-    for (const post of userPosts) {
-      if (post.platform_tag) {
-        const platform = post.platform_tag.replaceAll("[", "").replaceAll("]", "");
-        platformCounts.set(platform, (platformCounts.get(platform) || 0) + 1);
-      }
-      if (post.attached_article?.category) {
-        const subject = post.attached_article.category;
-        subjectCounts.set(subject, (subjectCounts.get(subject) || 0) + 1);
-      }
-    }
-
-    const rank = (entries: Map<string, number>) =>
-      [...entries.entries()]
-        .sort((first, second) => second[1] - first[1])
-        .slice(0, 3)
-        .map(([label]) => label);
-
-    return {
-      platforms: rank(platformCounts),
-      subjects: rank(subjectCounts),
+    if (username) void loadProfile();
+    return () => {
+      isActive = false;
     };
-  }, [userPosts]);
+  }, [supabase, user?.id, username]);
 
-  const isProfileOwner =
-    user && profileData &&
-    profileData.user_id === user.id;
-
-  const handleSaveProfile = async () => {
-    if (!user || !profileData) return;
-    setIsSaving(true);
-    try {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .upsert({
-          user_id: user.id,
-          nickname: profileData.nickname,
-          avatar_url: editAvatarUrl.trim() || null,
-          bio: editBio.trim() || null,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (!updateError) {
-        setProfileData((prev) =>
-          prev
-            ? {
-                ...prev,
-                avatar_url: editAvatarUrl.trim() || prev.avatar_url,
-                bio: editBio.trim() || prev.bio,
-              }
-            : prev
-        );
-        setIsEditModalOpen(false);
-      }
-    } catch {
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleResetGoogleAvatar = () => {
-    const googlePic = getGoogleAvatarUrl(user) || "";
-    setEditAvatarUrl(googlePic);
-  };
+  const isOwner = Boolean(user && profile?.user_id === user.id);
+  const showcasedAchievements = profile?.achievements.filter((achievement) => achievement.is_equipped).slice(0, 3) || [];
+  const avatarUrl = profile ? resolveAvatarUrl(profile.avatar_url, profile.display_name) : "";
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-background-void">
-        <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
+      <div className="flex min-h-dvh items-center justify-center bg-background-void">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-orange/30 border-t-brand-orange" />
       </div>
     );
   }
 
+  if (error) {
+    return <ProfileUnavailable title="Não foi possível abrir o perfil" description={error} />;
+  }
+
+  if (!profile) {
+    return <ProfileUnavailable title="Perfil não encontrado" description="Este endereço não pertence a um leitor do Brickboard." />;
+  }
+
+  const tabs: Array<{ id: ProfileTab; label: string }> = [
+    { id: "overview", label: "Visão geral" },
+    { id: "bricks", label: "Bricks" },
+    { id: "achievements", label: "Conquistas" },
+    ...(isOwner ? [{ id: "history" as const, label: "Histórico" }] : []),
+  ];
+
   return (
     <>
-      <header className="sticky top-0 z-30 bg-background-void/90 backdrop-blur-md border-b border-brand-orange-muted/10 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/brickboard" className="flex items-center gap-2 text-xs font-subtitle font-bold text-gray-400 hover:text-white transition-colors">
-            ← Voltar ao Brickboard
+      <header className="border-b border-white/10 bg-background-void">
+        <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <Link href="/brickboard" className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">
+            ← Brickboard
           </Link>
-          <Link href="/" className="text-sm font-heading font-extrabold text-white uppercase tracking-wider">
+          <Link href="/" className="font-heading text-sm font-black uppercase tracking-wide text-white">
             Orange<span className="text-brand-orange">_</span>Brick
           </Link>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 min-h-dvh">
-        <div className="bg-card-slate/70 border border-brand-orange-muted/20 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-6">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand-orange/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left relative z-10">
-            <div className="relative group/avatar">
-              <img
-                src={profileData?.avatar_url}
-                alt={profileData?.nickname}
-                referrerPolicy="no-referrer"
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-orange/40 shadow-xl shrink-0 aspect-square"
-              />
-              {isProfileOwner && (
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity text-xs font-bold text-white cursor-pointer"
-                >
-                  Alterar
-                </button>
-              )}
-            </div>
-            <div className="space-y-2 flex-1 min-w-0">
-              <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-heading font-black text-white">
-                  {profileData?.nickname}
-                </h1>
-                <UserBadge nickname={profileData?.nickname} isOfficial={profileData?.is_official} />
-                {isProfileOwner && (
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="text-xs font-subtitle text-brand-orange hover:underline ml-2"
-                  >
+      <main className="min-h-dvh bg-background-void">
+        <section className="border-b border-white/10">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+              <div className="flex min-w-0 flex-col gap-6 sm:flex-row sm:items-start">
+                <div className={`relative h-24 w-24 shrink-0 overflow-hidden bg-card-slate ${profile.equipped_frame ? "ring-2 ring-brand-orange ring-offset-4 ring-offset-background-void" : ""}`}>
+                  <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="break-words font-heading text-[clamp(2rem,7vw,4.5rem)] font-black leading-[0.95] tracking-[-0.03em] text-white">
+                      {profile.display_name}
+                    </h1>
+                    <UserBadge nickname={profile.display_name} isOfficial={profile.is_official} />
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-400">
+                    <span>@{profile.username}</span>
+                    {profile.equipped_title && <span className="font-bold text-brand-orange">{profile.equipped_title}</span>}
+                    <span>Membro desde {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(profile.created_at))}</span>
+                  </div>
+                  <p className="mt-4 max-w-[68ch] text-sm leading-6 text-gray-300">
+                    {profile.bio || (isOwner ? "Conte à comunidade quais jogos, plataformas e assuntos movem você." : "Este leitor ainda não escreveu uma apresentação.")}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {[...profile.favorite_platforms, ...profile.favorite_categories].map((interest) => (
+                      <span key={interest} className="border border-white/15 px-2.5 py-1 text-[11px] font-semibold text-gray-300">{interest}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                {isOwner ? (
+                  <Link href="/configuracoes/perfil" className="inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#ff7526]">
                     Editar perfil
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => void navigator.clipboard?.writeText(window.location.href)}
+                    className="min-h-11 border border-white/15 px-5 text-xs font-bold text-white hover:border-brand-orange/50"
+                  >
+                    Copiar link
                   </button>
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-gray-300 font-body leading-relaxed max-w-xl">
-                {profileData?.bio}
-              </p>
-              {(profileSignals.platforms.length > 0 || profileSignals.subjects.length > 0) && (
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {profileSignals.platforms.map((platform) => (
-                    <span key={platform} className="rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[10px] font-bold uppercase text-brand-orange">
-                      {platform}
-                    </span>
-                  ))}
-                  {profileSignals.subjects.map((subject) => (
-                    <span key={subject} className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-bold uppercase text-gray-300">
-                      {subject}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
+        </section>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-brand-orange-muted/15 text-center">
-            <div className="bg-background-void/50 p-3 rounded-xl border border-brand-orange-muted/10">
-              <span className="block text-xl font-heading font-black text-brand-orange">
-                {userPosts.length}
-              </span>
-              <span className="text-[10px] font-subtitle uppercase text-gray-400 tracking-wider">
-                Bricks Publicados
-              </span>
+        {!profile.is_official && profile.progress && (
+          <section className="border-b border-white/10">
+            <div className="mx-auto grid max-w-7xl divide-y divide-white/10 px-4 sm:px-6 lg:grid-cols-2 lg:divide-x lg:divide-y-0 lg:px-8">
+              <div className="py-7 lg:pr-10">
+                <LevelProgress progress={profile.progress} />
+                {isOwner && privateProgress && (
+                  <details className="mt-5 border-t border-white/10 pt-4">
+                    <summary className="min-h-11 cursor-pointer content-center text-xs font-bold text-brand-orange">
+                      Ver atividade elegível hoje
+                    </summary>
+                    <div className="grid grid-cols-3 gap-3 pt-3 text-center">
+                      <DailyLimit value={privateProgress.daily.post_created} label="Bricks" />
+                      <DailyLimit value={privateProgress.daily.comment_created} label="Comentários" />
+                      <DailyLimit value={privateProgress.daily.reaction_given} label="Reações" />
+                    </div>
+                  </details>
+                )}
+              </div>
+              <div className="py-7 lg:pl-10">
+                <SeasonStanding season={profile.season} />
+              </div>
             </div>
-            <div className="bg-background-void/50 p-3 rounded-xl border border-brand-orange-muted/10">
-              <span className="block text-xl font-heading font-black text-white">
-                {userPosts.reduce((acc, curr) => acc + (curr.reactions?.hype || 0), 0)}
-              </span>
-              <span className="text-[10px] font-subtitle uppercase text-gray-400 tracking-wider">
-                Hypes Recebidos
-              </span>
-            </div>
-            <div className="bg-background-void/50 p-3 rounded-xl border border-brand-orange-muted/10 col-span-2 sm:col-span-1">
-              <span className="block text-xl font-heading font-black text-emerald-400">
-                {userPosts.reduce((acc, curr) => acc + (curr.comments_count || 0), 0)}
-              </span>
-              <span className="text-[10px] font-subtitle uppercase text-gray-400 tracking-wider">
-                Respostas nos Bricks
-              </span>
-            </div>
-          </div>
+          </section>
+        )}
+
+        <div className="sticky top-0 z-20 border-b border-white/10 bg-background-void/95">
+          <nav className="mx-auto flex max-w-7xl overflow-x-auto px-4 sm:px-6 lg:px-8" aria-label="Seções do perfil">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                aria-pressed={activeTab === tab.id}
+                className={`relative min-h-14 shrink-0 px-4 text-sm font-bold ${activeTab === tab.id ? "text-white" : "text-gray-500 hover:text-gray-200"}`}
+              >
+                {tab.label}
+                {activeTab === tab.id && <span className="absolute inset-x-4 bottom-0 h-0.5 bg-brand-orange" />}
+              </button>
+            ))}
+          </nav>
         </div>
 
-        <div className="space-y-4">
-          <h3 className="font-heading text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            Bricks de {profileData?.nickname} ({userPosts.length})
-          </h3>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+          {activeTab === "overview" && (
+            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
+              <div className="space-y-12">
+                <section>
+                  <SectionHeading title="Conquistas em destaque" href="/brickboard/conquistas" />
+                  {showcasedAchievements.length > 0 ? (
+                    <div className="mt-5 grid gap-6 sm:grid-cols-3">
+                      {showcasedAchievements.map((achievement) => <AchievementMark key={achievement.slug} achievement={achievement} />)}
+                    </div>
+                  ) : (
+                    <EmptyState text={isOwner ? "Escolha conquistas desbloqueadas para montar sua vitrine." : "Este leitor ainda não montou uma vitrine."} />
+                  )}
+                </section>
+                <section>
+                  <SectionHeading title="Bricks recentes" />
+                  <ProfilePostList posts={posts.slice(0, 5)} ownProfile={isOwner} />
+                </section>
+              </div>
+              {profile.stats && (
+                <aside>
+                  <h2 className="font-heading text-lg font-bold text-white">Contribuição</h2>
+                  <dl className="mt-5 divide-y divide-white/10 border-y border-white/10">
+                    <Stat label="Bricks publicados" value={profile.stats.posts} />
+                    <Stat label="Comentários" value={profile.stats.comments} />
+                    <Stat label="Reações recebidas" value={profile.stats.reactions_received} />
+                    <Stat label="Respostas geradas" value={profile.stats.replies_received} />
+                    <Stat label="Conquistas" value={profile.stats.achievements} />
+                  </dl>
+                </aside>
+              )}
+            </div>
+          )}
 
-          {userPosts.length === 0 ? (
-            <div className="bg-card-slate/40 border border-brand-orange-muted/15 rounded-2xl p-12 text-center text-gray-400 space-y-2">
-              <p className="text-sm font-subtitle">Este leitor ainda não fez publicações no Brickboard.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {userPosts.map((post) => (
-                <BrickCard
-                  key={post.id}
-                  post={post}
-                  onReaction={toggleReaction}
-                  onDeletePost={deletePost}
-                  onSharePost={sharePost}
-                  onAddComment={addComment}
-                  onDeleteComment={deleteComment}
-                  onToggleCommentLike={toggleCommentLike}
-                  getComments={getComments}
-                />
-              ))}
-            </div>
+          {activeTab === "bricks" && (
+            <section>
+              <SectionHeading title={`Bricks de ${profile.display_name}`} />
+              <ProfilePostList posts={posts} ownProfile={isOwner} />
+            </section>
+          )}
+
+          {activeTab === "achievements" && (
+            <section>
+              <SectionHeading title="Coleção de conquistas" href={isOwner ? "/brickboard/conquistas" : undefined} />
+              <div className="mt-6 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                {profile.achievements.map((achievement) => <AchievementMark key={achievement.slug} achievement={achievement} />)}
+              </div>
+            </section>
+          )}
+
+          {activeTab === "history" && isOwner && (
+            <section className="max-w-3xl">
+              <SectionHeading title="Histórico de XP" />
+              {privateProgress?.events.length ? (
+                <ol className="mt-6 divide-y divide-white/10 border-y border-white/10">
+                  {privateProgress.events.map((event, index) => (
+                    <li key={`${event.occurred_at}-${index}`} className="grid grid-cols-[1fr_auto] gap-4 py-4">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{eventLabels[event.event_type] || event.event_type}</p>
+                        <p className="mt-1 text-xs text-gray-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurred_at))}</p>
+                        {event.revocation_reason && <p className="mt-1 text-xs text-red-300">{event.revocation_reason}</p>}
+                      </div>
+                      <span className={event.status === "revoked" ? "text-sm font-bold text-gray-500 line-through" : "text-sm font-bold text-brand-orange"}>
+                        {event.xp_amount > 0 ? "+" : ""}{formatXp(event.xp_amount)} XP
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <EmptyState text="Seu histórico começará a aparecer quando você participar do Brickboard." />
+              )}
+            </section>
           )}
         </div>
       </main>
-
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background-void/80 backdrop-blur-md animate-fade-in">
-          <div className="max-w-md w-full bg-card-slate border border-brand-orange-muted/20 rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-brand-orange-muted/15">
-              <h3 className="font-heading text-base font-bold text-white uppercase tracking-wider">
-                Editar foto e perfil
-              </h3>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-400 hover:text-white p-1 text-xs"
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
-                  URL da Foto de Perfil (Avatar)
-                </label>
-                <input
-                  type="url"
-                  value={editAvatarUrl}
-                  onChange={(e) => setEditAvatarUrl(e.target.value)}
-                  placeholder="https://sua-foto.com/imagem.png"
-                  className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl p-2.5 outline-none focus:border-brand-orange/50 text-xs font-mono"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleResetGoogleAvatar}
-                  className="text-[11px] font-subtitle font-bold text-brand-orange hover:underline bg-brand-orange/10 px-2.5 py-1.5 rounded-lg border border-brand-orange/30 transition-all"
-                >
-                  Restaurar Foto do Google
-                </button>
-              </div>
-
-              <div>
-                <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
-                  Bio / Apresentação
-                </label>
-                <textarea
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  rows={3}
-                  placeholder="Conte um pouco sobre quais consoles e jogos você curte..."
-                  className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl p-2.5 outline-none focus:border-brand-orange/50 text-xs font-body"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-brand-orange-muted/15">
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-subtitle text-gray-400 hover:text-white transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveProfile}
-                disabled={isSaving}
-                className="px-5 py-2 rounded-xl bg-brand-orange hover:bg-brand-orange/90 text-white font-subtitle text-xs font-bold uppercase tracking-wider shadow-lg transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSaving ? "Salvando..." : "Salvar Alterações"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <Footer />
     </>
   );
 }
 
+function ProfilePostList({ posts, ownProfile }: { posts: ProfilePost[]; ownProfile: boolean }) {
+  if (!posts.length) {
+    return <EmptyState text={ownProfile ? "Sua parede ainda está vazia. Abra a primeira conversa." : "Este leitor ainda não publicou nenhum Brick."} />;
+  }
+
+  return (
+    <div className="mt-5 divide-y divide-white/10 border-y border-white/10">
+      {posts.map((post) => (
+        <article key={post.id} className="py-5">
+          <div className="mb-3 flex flex-wrap items-center gap-3 text-[11px] text-gray-500">
+            {post.platform_tag && <span className="font-bold text-brand-orange">{post.platform_tag}</span>}
+            <time dateTime={post.created_at}>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(post.created_at))}</time>
+          </div>
+          <p className="max-w-[70ch] whitespace-pre-wrap text-sm leading-6 text-gray-200">{post.content}</p>
+          {post.attached_article?.slug && (
+            <Link href={`/posts/${post.attached_article.slug}`} className="mt-3 inline-flex min-h-11 items-center text-xs font-bold text-brand-orange hover:text-white">
+              {post.attached_article.title || "Abrir matéria relacionada"}
+            </Link>
+          )}
+          <Link href={`/brickboard?post=${post.id}`} className="mt-2 inline-flex min-h-11 items-center text-xs font-bold text-gray-400 hover:text-white">
+            Abrir conversa
+          </Link>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProfileUnavailable({ title, description }: { title: string; description: string }) {
+  return (
+    <main className="flex min-h-dvh items-center justify-center bg-background-void px-4 text-center">
+      <div className="max-w-md">
+        <h1 className="font-heading text-3xl font-black text-white">{title}</h1>
+        <p className="mt-3 text-sm leading-6 text-gray-400">{description}</p>
+        <Link href="/brickboard" className="mt-6 inline-flex min-h-11 items-center bg-brand-orange px-5 text-xs font-bold text-white">
+          Voltar ao Brickboard
+        </Link>
+      </div>
+    </main>
+  );
+}
+
+function DailyLimit({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="border-t border-white/15 pt-3">
+      <strong className="block font-heading text-xl text-white">{value}</strong>
+      <span className="text-[11px] text-gray-400">{label}</span>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3">
+      <dt className="text-xs text-gray-400">{label}</dt>
+      <dd className="font-heading text-lg font-bold text-white">{formatXp(value)}</dd>
+    </div>
+  );
+}
+
+function SectionHeading({ title, href }: { title: string; href?: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-3">
+      <h2 className="font-heading text-xl font-bold text-white">{title}</h2>
+      {href && <Link href={href} className="min-h-11 content-center text-xs font-bold text-brand-orange hover:text-white">Ver tudo</Link>}
+    </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return <p className="mt-5 border-y border-white/10 py-10 text-sm leading-6 text-gray-400">{text}</p>;
+}
+
 export default function ProfilePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-dvh flex items-center justify-center bg-background-void">
-          <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-        </div>
-      }
-    >
-      <ProfileContent />
+    <Suspense fallback={<div className="min-h-dvh bg-background-void" />}>
+      <ProfilePageContent />
     </Suspense>
   );
 }

@@ -305,6 +305,21 @@ function BrickboardContent() {
             <aside className="sticky top-6 hidden space-y-6 lg:block">
               {poll && <GamerPollWidget poll={poll} onVote={votePoll} />}
 
+              <nav className="border-t border-brand-orange/40 pt-4" aria-label="Progressão do Brickboard">
+                <h2 className="font-heading text-base font-bold text-white">Sua marca no Brickboard</h2>
+                <div className="mt-3 divide-y divide-white/10 border-y border-white/10">
+                  <Link href="/brickboard/ranking" className="flex min-h-12 items-center justify-between text-xs font-bold text-gray-300 hover:text-white">
+                    Ranking <span className="text-brand-orange">→</span>
+                  </Link>
+                  <Link href="/brickboard/conquistas" className="flex min-h-12 items-center justify-between text-xs font-bold text-gray-300 hover:text-white">
+                    Conquistas <span className="text-brand-orange">→</span>
+                  </Link>
+                  <Link href="/brickboard/como-funciona" className="flex min-h-12 items-center justify-between text-xs font-bold text-gray-300 hover:text-white">
+                    Como funciona <span className="text-brand-orange">→</span>
+                  </Link>
+                </div>
+              </nav>
+
               <div className="border-t border-brand-orange/40 pt-4">
                 <div className="border-b border-white/10 pb-3">
                   <h4 className="font-heading text-base font-bold text-white">

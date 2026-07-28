@@ -108,7 +108,7 @@ function NotificationItem({
 }
 
 export function NotificationCenter() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const {
     notifications,
@@ -159,6 +159,18 @@ export function NotificationCenter() {
   const handleOpen = (notification: AppNotification) => {
     void markAsRead(notification.id);
     setOpen(false);
+    if (notification.reference_type === "profile" && profile?.username) {
+      router.push(`/profile/${profile.username}`);
+      return;
+    }
+    if (notification.reference_type === "achievement") {
+      router.push("/brickboard/conquistas");
+      return;
+    }
+    if (notification.reference_type === "ranking") {
+      router.push("/brickboard/ranking");
+      return;
+    }
     router.push("/brickboard");
   };
 

@@ -51,6 +51,7 @@ export const metadata: Metadata = {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
     shortcut: "/favicon.ico",
@@ -90,6 +91,18 @@ export default function RootLayout({
       className={`${headingFont.variable} ${subtitleFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Orange Brick",
+              "alternateName": ["Orange Brick Portal", "Portal Orange Brick"],
+              "url": process.env.NEXT_PUBLIC_SITE_URL || "https://orange-brick.vercel.app",
+            }),
+          }}
+        />
         <AuthProvider>{children}</AuthProvider>
         <PwaInstallBanner />
         <CookieConsent />

@@ -13,6 +13,7 @@ export default function ProfileSetup() {
   const supabase = createDataClient();
 
   const [nickname, setNickname] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,8 +38,13 @@ export default function ProfileSetup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = nickname.trim();
+    const normalizedUsername = username.trim().toLowerCase();
     if (trimmed.length < 2 || trimmed.length > 30) {
       setError("Nickname precisa ter entre 2 e 30 caracteres.");
+      return;
+    }
+    if (!/^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/.test(normalizedUsername)) {
+      setError("O usuário deve ter de 3 a 30 caracteres, usando letras, números ou hífen.");
       return;
     }
     setSaving(true);
@@ -47,11 +53,11 @@ export default function ProfileSetup() {
       const { data: existing } = await supabase
         .from("profiles")
         .select("id, user_id")
-        .ilike("nickname", trimmed)
+        .ilike("username", normalizedUsername)
         .maybeSingle();
 
       if (existing && existing.user_id !== user!.id) {
-        setError("Este apelido já está em uso por outro usuário. Escolha outro!");
+        setError("Este nome de usuário já está em uso.");
         setSaving(false);
         return;
       }
@@ -59,6 +65,8 @@ export default function ProfileSetup() {
       const { error: insertError } = await supabase.from("profiles").insert({
         user_id: user!.id,
         nickname: trimmed,
+        display_name: trimmed,
+        username: normalizedUsername,
         avatar_url: avatarUrl.trim() || null,
       });
       if (insertError) throw insertError;
@@ -93,7 +101,7 @@ export default function ProfileSetup() {
             Bem-vindo ao <span className="text-brand-orange">Orange Brick</span>
           </h1>
           <p className="text-xs text-gray-400 font-body mt-1">
-            Escolha seu apelido público para comentar nas matérias.
+            Escolha como você será conhecido dentro da comunidade.
           </p>
         </div>
 
@@ -114,6 +122,24 @@ export default function ProfileSetup() {
           </div>
 
           <div>
+            <label className="mb-1 block text-[10px] font-bold uppercase text-gray-400">
+              Usuário *
+            </label>
+            <div className="flex min-h-11 items-center rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 focus-within:border-brand-orange/50">
+              <span className="text-sm text-gray-500">@</span>
+              <input
+                type="text"
+                value={username}
+                onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                placeholder="seu-usuario"
+                maxLength={30}
+                className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm text-white outline-none"
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-gray-500">Este será o endereço permanente do seu perfil.</p>
+          </div>
+
+          <div>
             <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
               URL do Avatar (opcional)
             </label>
@@ -125,7 +151,7 @@ export default function ProfileSetup() {
               className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm"
             />
             <p className="text-[9px] text-gray-500 mt-1">
-              Cole o link de uma imagem sua. Não fazemos upload.
+              Use apenas uma imagem hospedada em endereço seguro.
             </p>
           </div>
 

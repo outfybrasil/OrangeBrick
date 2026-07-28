@@ -382,9 +382,20 @@ export interface Profile {
   id: string;
   user_id: string;
   nickname: string;
+  username: string;
+  display_name: string;
   avatar_url: string | null;
   bio?: string | null;
   is_official: boolean;
+  favorite_platforms: string[];
+  favorite_categories: string[];
+  equipped_title?: string | null;
+  equipped_frame?: string | null;
+  profile_theme: string;
+  show_lifetime_xp: boolean;
+  show_activity_stats: boolean;
+  show_season_history: boolean;
+  show_in_leaderboard: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -393,9 +404,20 @@ export interface ProfileInsert {
   id?: string;
   user_id: string;
   nickname: string;
+  username?: string;
+  display_name?: string;
   avatar_url?: string | null;
   bio?: string | null;
   is_official?: boolean;
+  favorite_platforms?: string[];
+  favorite_categories?: string[];
+  equipped_title?: string | null;
+  equipped_frame?: string | null;
+  profile_theme?: string;
+  show_lifetime_xp?: boolean;
+  show_activity_stats?: boolean;
+  show_season_history?: boolean;
+  show_in_leaderboard?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -441,7 +463,7 @@ export interface AppNotification {
   user_id: string;
   type: "reaction" | "comment" | "reply" | "system";
   message: string;
-  reference_type: "post" | "comment";
+  reference_type: "post" | "comment" | "profile" | "achievement" | "ranking";
   reference_id: string;
   actor_id: string | null;
   is_read: boolean;
