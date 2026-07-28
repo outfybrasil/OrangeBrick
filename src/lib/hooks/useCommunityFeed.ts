@@ -199,6 +199,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           total_votes: allVotes?.length || 0,
           user_voted_option: userVotedOption ?? null,
           created_at: pollRow.created_at,
+          ends_at: pollRow.expires_at,
         });
       }
     } catch (err) {

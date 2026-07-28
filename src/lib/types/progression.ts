@@ -35,6 +35,7 @@ export interface PublicProfileData {
   username: string;
   display_name: string;
   avatar_url: string | null;
+  banner_url: string | null;
   bio: string | null;
   is_official: boolean;
   created_at: string;

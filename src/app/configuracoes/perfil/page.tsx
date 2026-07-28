@@ -20,6 +20,8 @@ export default function ProfileSettingsPage() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [isBannerUploading, setIsBannerUploading] = useState(false);
   const [favoritePlatforms, setFavoritePlatforms] = useState<string[]>([]);
   const [favoriteCategories, setFavoriteCategories] = useState<string[]>([]);
   const [showLifetimeXp, setShowLifetimeXp] = useState(true);
@@ -43,6 +45,7 @@ export default function ProfileSettingsPage() {
       setUsernameStatus("available");
       setBio(profile.bio || "");
       setAvatarUrl(profile.avatar_url || "");
+      setBannerUrl(profile.banner_url || "");
       setFavoritePlatforms(profile.favorite_platforms || []);
       setFavoriteCategories(profile.favorite_categories || []);
       setShowLifetimeXp(profile.show_lifetime_xp);
@@ -103,6 +106,34 @@ export default function ProfileSettingsPage() {
       window.clearTimeout(timer);
     };
   }, [profile, supabase, username]);
+
+  async function uploadBanner(file: File) {
+    if (!user) return;
+    setIsBannerUploading(true);
+    setMessage(null);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setMessage("Sua sessão expirou. Entre novamente para continuar.");
+      setIsBannerUploading(false);
+      return;
+    }
+    const formData = new FormData();
+    formData.set("banner", file);
+    const response = await fetch("/api/user/banner", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: formData,
+    });
+    const result = await response.json() as { publicUrl?: string; error?: string };
+    if (!response.ok || !result.publicUrl) {
+      setMessage(result.error || "Não foi possível salvar o banner.");
+    } else {
+      setBannerUrl(result.publicUrl);
+      await refreshProfile();
+      setMessage("Banner atualizado.");
+    }
+    setIsBannerUploading(false);
+  }
 
   async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
@@ -212,6 +243,13 @@ export default function ProfileSettingsPage() {
               className="mt-7 h-24 w-24 object-cover"
               referrerPolicy="no-referrer"
             />
+            <div className="mt-6 overflow-hidden border border-white/10 bg-card-slate">
+              {bannerUrl ? (
+                <img src={bannerUrl} alt="Prévia do banner" className="aspect-[16/5] w-full object-cover" />
+              ) : (
+                <div className="flex aspect-[16/5] items-center justify-center text-xs text-gray-500">Sem banner</div>
+              )}
+            </div>
           </aside>
 
           <div className="space-y-12">
@@ -255,6 +293,26 @@ export default function ProfileSettingsPage() {
               </Field>
               <Field label="Avatar" hint="Use uma imagem HTTPS. O upload próprio será adicionado em uma etapa posterior.">
                 <input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} className="min-h-12 w-full border border-white/15 bg-black/20 px-4 text-sm outline-none focus:border-brand-orange/60" />
+              </Field>
+              <Field label="Banner do perfil" hint="JPG, PNG, WebP ou AVIF. Até 8 MB.">
+                <div className="overflow-hidden border border-white/15 bg-black/20">
+                  {bannerUrl && <img src={bannerUrl} alt="" className="aspect-[16/5] w-full object-cover" />}
+                  <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-sm font-semibold text-gray-200 hover:bg-white/[0.04]">
+                    <span>{isBannerUploading ? "Processando imagem…" : bannerUrl ? "Trocar banner" : "Escolher banner"}</span>
+                    <span className="text-xs text-brand-orange">1600 × 500</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      disabled={isBannerUploading}
+                      className="sr-only"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) void uploadBanner(file);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
               </Field>
             </SettingsSection>
 
@@ -307,7 +365,7 @@ export default function ProfileSettingsPage() {
               <PrivacyToggle label="Participar do ranking público" description="Seu XP sazonal continua sendo calculado mesmo com o perfil oculto do ranking." checked={showInLeaderboard} onChange={setShowInLeaderboard} />
             </SettingsSection>
 
-            {message && <p role="status" className={`border-y py-3 text-sm ${message === "Perfil atualizado." ? "border-emerald-400/30 text-emerald-200" : "border-red-400/30 text-red-200"}`}>{message}</p>}
+            {message && <p role="status" className={`border-y py-3 text-sm ${message === "Perfil atualizado." || message === "Banner atualizado." ? "border-emerald-400/30 text-emerald-200" : "border-red-400/30 text-red-200"}`}>{message}</p>}
 
             <div className="flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-6">
               <Link href={`/profile/${profile.username}`} className="inline-flex min-h-11 items-center px-4 text-xs font-bold text-gray-300 hover:text-white">Cancelar</Link>

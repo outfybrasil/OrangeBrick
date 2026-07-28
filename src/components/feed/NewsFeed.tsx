@@ -229,116 +229,103 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   const lowerPosts = displayPosts.slice(4);
 
   return (
-    <div className="min-w-0 space-y-8 sm:space-y-10">
-      {renderHeroSection()}
-      {!isFiltering && homeHighlights}
+    <div className="min-w-0">
+      {/* 2 colunas: feed principal + sidebar */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
 
-      <div className="grid min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-3">
-        <div className="min-w-0 space-y-6 lg:col-span-2">
-          <div id="ultimas-noticias" className="scroll-mt-24 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-orange/20">
-            <div className="flex items-center gap-3">
-              <span className="h-8 w-1 bg-brand-orange" />
-              <h2 className="font-heading text-[clamp(1.5rem,8vw,2.25rem)] font-black leading-tight text-white">
-                {category ? (
-                  <>
-                    Notícias em <span className="text-brand-orange">{category}</span>
-                  </>
-                ) : (
-                  <>
-                    Últimas <span className="text-brand-orange">notícias</span>
-                  </>
-                )}
-              </h2>
+        {/* COLUNA PRINCIPAL */}
+        <div className="min-w-0 space-y-6">
+          {renderHeroSection()}
+          {!isFiltering && homeHighlights}
+
+          <div id="ultimas-noticias" className="scroll-mt-16">
+            <div className="mb-4 flex flex-col gap-2 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="h-6 w-1 bg-brand-orange" />
+                <h2 className="font-heading text-xl font-black text-white">
+                  {category ? (
+                    <>Notícias em <span className="text-brand-orange">{category}</span></>
+                  ) : (
+                    <>Últimas <span className="text-brand-orange">notícias</span></>
+                  )}
+                </h2>
+              </div>
+
+              {onSelectCategory && (
+                <nav className="-mx-1 flex max-w-full items-center overflow-x-auto px-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
+                  {CATEGORIES.map((cat) => {
+                    const isActive = category === cat.value;
+                    return (
+                      <button
+                        key={cat.label}
+                        onClick={() => onSelectCategory(cat.value)}
+                        className={`relative min-h-9 shrink-0 border-b border-white/10 px-3 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                          isActive ? "text-white" : "text-gray-500 hover:text-gray-200"
+                        }`}
+                      >
+                        {cat.label}
+                        {isActive && <span aria-hidden="true" className="absolute inset-x-3 -bottom-px h-0.5 bg-brand-orange" />}
+                      </button>
+                    );
+                  })}
+                </nav>
+              )}
             </div>
 
-            {onSelectCategory && (
-              <nav className="-mx-1 flex max-w-full items-center overflow-x-auto px-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
-                {CATEGORIES.map((cat) => {
-                  const isActive = category === cat.value;
-                  return (
-                    <button
-                      key={cat.label}
-                      onClick={() => onSelectCategory(cat.value)}
-                      className={`
-                        relative min-h-11 shrink-0 border-b border-white/10 px-3 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap
-                        ${
-                          isActive
-                            ? "text-white"
-                            : "text-gray-500 hover:text-gray-200"
-                        }
-                      `}
-                    >
-                      {cat.label}
-                      {isActive && <span aria-hidden="true" className="absolute inset-x-3 -bottom-px h-0.5 bg-brand-orange" />}
-                    </button>
-                  );
-                })}
-              </nav>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {topPosts.map((post) => (
-              <NewsCard
-                key={post.id}
-                post={post}
-                stats={stats[post.id] || EMPTY_STATS}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* DIREITA: Sidebar com Widgets (1 coluna, Sticky) */}
-        <div className="hidden lg:block sticky top-20">
-          <NewsSidebar posts={rawPosts} stats={stats} />
-        </div>
-      </div>
-
-      {/* SEÇÃO INFERIOR: Notificações seguintes ocupando a LARGURA TOTAL (3 colunas) */}
-      {lowerPosts.length > 0 && (
-        <div className="space-y-6 pt-4 border-t border-brand-orange-muted/10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lowerPosts.map((post) => {
-              const cardComponent = (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {topPosts.map((post) => (
                 <NewsCard
                   key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
                 />
-              );
-
-              return cardComponent;
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {isLoadingMore && (
-        <div className="py-8 flex justify-center">
-          <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-        </div>
-      )}
+          {lowerPosts.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06]">
+              {lowerPosts.map((post) => (
+                <NewsCard
+                  key={post.id}
+                  post={post}
+                  stats={stats[post.id] || EMPTY_STATS}
+                />
+              ))}
+            </div>
+          )}
 
-      {hasMore && !isLoadingMore && (
-        <div className="py-8 flex justify-center">
-          <button
-            onClick={loadMore}
-            className="font-subtitle text-xs text-brand-orange border border-brand-orange/30 px-6 py-3 rounded-xl hover:bg-brand-orange/10 hover:border-brand-orange/50 transition-all duration-200 cursor-pointer font-bold tracking-wider uppercase shadow-md"
-          >
-            Carregar mais notícias
-          </button>
-        </div>
-      )}
+          {isLoadingMore && (
+            <div className="py-8 flex justify-center">
+              <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
+            </div>
+          )}
 
-      <div ref={sentinelRef} className="h-1" />
+          {hasMore && !isLoadingMore && (
+            <div className="py-6 flex justify-center">
+              <button
+                onClick={loadMore}
+                className="text-xs text-brand-orange border border-brand-orange/30 px-6 py-2.5 hover:bg-brand-orange/10 hover:border-brand-orange/50 transition-all cursor-pointer font-bold tracking-wider uppercase"
+              >
+                Carregar mais notícias
+              </button>
+            </div>
+          )}
 
-      {!hasMore && posts.length > 0 && (
-        <div className="py-8 text-center border-t border-brand-orange-muted/10 mt-8">
-          <p className="text-xs font-subtitle text-brand-orange-muted/50 uppercase tracking-widest">
-            — Você chegou ao fim do feed —
-          </p>
+          <div ref={sentinelRef} className="h-1" />
+
+          {!hasMore && posts.length > 0 && (
+            <div className="py-8 text-center border-t border-white/[0.06]">
+              <p className="text-xs text-gray-600 uppercase tracking-widest">— Você chegou ao fim do feed —</p>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* SIDEBAR DIREITA */}
+        <div className="hidden lg:block sticky top-16">
+          <NewsSidebar posts={rawPosts} stats={stats} />
+        </div>
+      </div>
     </div>
   );
 }

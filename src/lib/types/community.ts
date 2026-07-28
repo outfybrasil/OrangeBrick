@@ -70,4 +70,5 @@ export interface CommunityPoll {
   total_votes: number;
   user_voted_option?: number | null;
   created_at: string;
+  ends_at?: string | null;
 }

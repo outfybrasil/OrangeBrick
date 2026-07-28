@@ -8,6 +8,7 @@ import { timeAgo } from "@/lib/utils/time-ago";
 interface PulsePost {
   id: string;
   author_name: string;
+  author_avatar_url: string | null;
   content: string;
   created_at: string;
   comments_count: number;
@@ -24,7 +25,7 @@ export function CommunityPulse() {
     try {
       const { data, error } = await supabase
         .from("community_posts")
-        .select("id, author_name, content, created_at")
+        .select("id, author_name, author_avatar_url, content, created_at")
         .or("is_pinned.is.null,is_pinned.eq.false")
         .order("created_at", { ascending: false })
         .limit(3);
@@ -78,17 +79,17 @@ export function CommunityPulse() {
   }
 
   return (
-    <section aria-labelledby="community-pulse-title" className="border-y border-white/10 py-5 sm:py-6">
+    <section aria-labelledby="community-pulse-title" className="border-y border-white/10 py-4">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-semibold text-brand-orange">Conversas recentes</p>
-          <h2 id="community-pulse-title" className="font-heading text-xl font-black text-white sm:text-2xl">
+          <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-orange">Conversas recentes</p>
+          <h2 id="community-pulse-title" className="font-heading text-lg font-black text-white">
             Agora no Brickboard
           </h2>
         </div>
         <Link
           href="/brickboard"
-          className="min-h-11 shrink-0 content-center text-xs font-bold text-gray-300 transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
+          className="shrink-0 text-xs font-bold text-gray-400 transition-colors hover:text-brand-orange"
         >
           Ver todas
         </Link>
@@ -117,26 +118,47 @@ export function CommunityPulse() {
               href={`/brickboard?post=${post.id}`}
               data-home-event="brickboard"
               data-home-target={post.id}
-              className="group flex min-h-36 flex-col justify-between bg-background-void p-4 transition-colors hover:bg-white/[0.035] focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="group flex min-h-36 flex-col bg-background-void p-4 transition-colors hover:bg-white/[0.035]"
             >
-              <p className="line-clamp-3 text-sm leading-relaxed text-gray-200 group-hover:text-white">
+              <div className="mb-3 flex items-center gap-2.5">
+                {post.author_avatar_url ? (
+                  <img
+                    src={post.author_avatar_url}
+                    alt={post.author_name}
+                    referrerPolicy="no-referrer"
+                    className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-orange/20 text-xs font-bold text-brand-orange">
+                    {post.author_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-white">{post.author_name}</p>
+                  <p className="text-[10px] text-gray-500">{timeAgo(post.created_at)}</p>
+                </div>
+              </div>
+              <p className="flex-1 line-clamp-3 text-sm leading-relaxed text-gray-300 group-hover:text-white">
                 {post.content}
               </p>
-              <div className="mt-4 flex items-end justify-between gap-3 text-xs">
-                <div className="min-w-0">
-                  <p className="truncate font-bold text-white">{post.author_name}</p>
-                  <p className="mt-0.5 text-gray-500">{timeAgo(post.created_at)}</p>
-                </div>
-                <span className="shrink-0 text-gray-400">
-                  {post.comments_count} {post.comments_count === 1 ? "resposta" : "respostas"}
-                </span>
+              <div className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-500">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {post.comments_count} {post.comments_count === 1 ? "resposta" : "respostas"}
               </div>
             </Link>
           ) : (
             <div key={index} className="min-h-36 animate-pulse bg-background-void p-4">
+              <div className="mb-3 flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-white/[0.06]" />
+                <div className="space-y-1.5">
+                  <div className="h-2.5 w-20 bg-white/[0.06]" />
+                  <div className="h-2 w-12 bg-white/[0.04]" />
+                </div>
+              </div>
               <div className="h-3 w-full bg-white/[0.06]" />
               <div className="mt-2 h-3 w-4/5 bg-white/[0.06]" />
-              <div className="mt-16 h-3 w-2/5 bg-white/[0.06]" />
             </div>
           )
           )}

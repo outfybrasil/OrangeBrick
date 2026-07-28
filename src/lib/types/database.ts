@@ -385,6 +385,7 @@ export interface Profile {
   username: string;
   display_name: string;
   avatar_url: string | null;
+  banner_url?: string | null;
   bio?: string | null;
   is_official: boolean;
   favorite_platforms: string[];
@@ -407,6 +408,7 @@ export interface ProfileInsert {
   username?: string;
   display_name?: string;
   avatar_url?: string | null;
+  banner_url?: string | null;
   bio?: string | null;
   is_official?: boolean;
   favorite_platforms?: string[];
