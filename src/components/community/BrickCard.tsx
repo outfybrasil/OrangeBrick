@@ -276,27 +276,27 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article block border-y border-white/10 bg-background-void/60 py-3 transition-colors hover:border-brand-orange/40 sm:py-3.5"
+          className="group/article block overflow-hidden rounded-xl border border-white/10 bg-background-void/40 transition-all hover:border-brand-orange/40 hover:bg-background-void/60 mt-3"
         >
-          <div className="flex items-start gap-3">
-            {post.attached_article.image_url && (
+          {post.attached_article.image_url && (
+            <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
               <img
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="h-14 w-20 shrink-0 object-cover sm:h-16 sm:w-24"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
               />
-            )}
-            <div className="min-w-0 flex-1">
-              <span className="text-[9px] font-subtitle font-bold text-brand-orange uppercase tracking-wider">
-                Matéria do Orange Brick
-              </span>
-              <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange sm:text-sm">
-                {post.attached_article.title}
-              </h5>
-              <p className="mt-1 break-words font-body text-[11px] leading-5 text-gray-400 sm:text-xs">
-                {post.attached_article.summary}
-              </p>
             </div>
+          )}
+          <div className="p-4">
+            <span className="text-[9px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+              Matéria do Orange Brick
+            </span>
+            <h5 className="break-words font-subtitle text-sm font-bold leading-6 text-white transition-colors group-hover/article:text-brand-orange sm:text-base">
+              {post.attached_article.title}
+            </h5>
+            <p className="mt-2 break-words font-body text-xs leading-5 text-gray-300 line-clamp-2">
+              {post.attached_article.summary}
+            </p>
           </div>
         </Link>
       )}
@@ -338,24 +338,24 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               {post.shared_post.original_attached_article && (
                 <Link
                   href={`/posts/${post.shared_post.original_attached_article.slug}`}
-                  className="group/article block p-2.5 mt-2 rounded-lg bg-background-void/90 border border-brand-orange-muted/20 hover:border-brand-orange/40 transition-all"
+                  className="group/article block overflow-hidden rounded-xl border border-white/10 bg-background-void/90 hover:border-brand-orange/40 transition-all mt-3"
                 >
-                  <div className="flex items-start gap-2.5">
-                    {post.shared_post.original_attached_article.image_url && (
+                  {post.shared_post.original_attached_article.image_url && (
+                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
                       <img
                         src={post.shared_post.original_attached_article.image_url}
                         alt={post.shared_post.original_attached_article.title}
-                        className="w-12 h-9 rounded object-cover shrink-0"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
                       />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[8px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
-                        Matéria Citada
-                      </span>
-                      <h5 className="break-words font-subtitle text-[11px] font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange">
-                        {post.shared_post.original_attached_article.title}
-                      </h5>
                     </div>
+                  )}
+                  <div className="p-3">
+                    <span className="text-[8px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+                      Matéria Citada
+                    </span>
+                    <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange">
+                      {post.shared_post.original_attached_article.title}
+                    </h5>
                   </div>
                 </Link>
               )}
