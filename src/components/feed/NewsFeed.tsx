@@ -3,6 +3,7 @@
 import { useRef, useMemo, type ReactNode } from "react";
 import Link from "next/link";
 import { NewsCard } from "@/components/card/NewsCard";
+import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
 import { NewsFeedEmpty } from "./NewsFeedEmpty";
 import { NewsSidebar } from "./NewsSidebar";
@@ -128,26 +129,18 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden cursor-pointer border border-white/10 bg-background-void hover:border-brand-orange/40 transition-colors duration-300"
         >
           {heroPost.image_url ? (
-            <div className="absolute inset-0 bg-[#08090C] overflow-hidden">
-              <img
-                src={heroPost.image_url}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover blur-lg opacity-40 transform scale-110"
-              />
-              <img
-                src={heroPost.image_url}
-                alt={heroPost.image_alt || ""}
-                className="absolute inset-0 w-full h-full object-contain transform scale-100 group-hover:scale-[1.02] transition-transform duration-700 ease-out z-0"
-              />
-            </div>
+            <img
+              src={heroPost.image_url}
+              alt={heroPost.image_alt || ""}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+            />
           ) : (
             <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
               <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">Sem mídia</span>
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-background-void/95 via-background-void/30 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
 
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 flex flex-col justify-end gap-1 sm:gap-2 z-20">
             <div className="flex items-center gap-3">
@@ -159,62 +152,48 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               {heroPost.title}
             </h2>
 
-            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-200 line-clamp-2 mt-0.5 sm:mt-1 font-body leading-relaxed">
+            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-200 line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed">
               {heroPost.summary}
             </p>
 
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] font-subtitle sm:mt-2 sm:text-xs">
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] sm:mt-2 sm:text-xs">
               <span className="text-gray-400">Por</span>
               <strong className="font-bold text-white">{heroPost.author_name}</strong>
               {normalizeAuthorTag(heroPost.author_tag) && (
                 <span className="text-brand-orange">{normalizeAuthorTag(heroPost.author_tag)}</span>
               )}
+              <span className="ml-auto text-xs font-bold text-brand-orange">Ler matéria →</span>
             </div>
           </div>
         </Link>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 pb-3 border-b border-brand-orange/30">
-            <span className="h-6 w-1 bg-brand-orange" />
-            <h3 className="text-base font-heading font-bold text-white sm:text-lg">
-              Últimas <span className="text-brand-orange">notícias</span>
-            </h3>
-          </div>
-
+        <div className="flex flex-col gap-0">
           {sidePosts.map((post) => (
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
               data-home-event="article"
               data-home-target={post.slug}
-              className="flex-1 flex flex-col overflow-hidden bg-background-void border border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group"
+              className="flex-1 flex flex-col overflow-hidden bg-background-void border-b border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group relative"
             >
               {post.image_url && (
-                <div className="relative h-24 xs:h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
-                  <img
-                    src={post.image_url}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-md"
-                  />
+                <div className="relative h-32 sm:h-[calc(50%-0px)] w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
                   <img
                     src={post.image_url}
                     alt={post.image_alt || ""}
-                    className="relative h-full w-full object-contain transform scale-100 group-hover:scale-[1.02] transition-transform duration-500"
+                    className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card-slate/90 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 </div>
               )}
-              <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1">
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <Tag category={post.category} />
-                    <Timer date={post.published_at ?? ""} />
-                  </div>
-                  <h4 className="font-heading text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
-                    {post.title}
-                  </h4>
+              <div className="p-3 flex flex-col justify-between flex-1">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <Tag category={post.category} />
+                  <Timer date={post.published_at ?? ""} />
                 </div>
+                <h4 className="font-heading text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                  {post.title}
+                </h4>
               </div>
             </Link>
           ))}
@@ -272,9 +251,9 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-0">
               {topPosts.map((post) => (
-                <NewsCard
+                <NewsCardCompact
                   key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
@@ -284,9 +263,9 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           </div>
 
           {lowerPosts.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/[0.06]">
+            <div className="space-y-0 pt-0 border-t border-white/[0.06]">
               {lowerPosts.map((post) => (
-                <NewsCard
+                <NewsCardCompact
                   key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}

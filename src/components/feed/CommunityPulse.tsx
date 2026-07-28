@@ -8,7 +8,7 @@ import { timeAgo } from "@/lib/utils/time-ago";
 interface PulsePost {
   id: string;
   author_name: string;
-  author_avatar_url: string | null;
+  author_avatar: string | null;
   content: string;
   created_at: string;
   comments_count: number;
@@ -25,13 +25,12 @@ export function CommunityPulse() {
     try {
       const { data, error } = await supabase
         .from("community_posts")
-        .select("id, author_name, author_avatar_url, content, created_at")
+        .select("id, author_name, author_avatar, content, created_at")
         .or("is_pinned.is.null,is_pinned.eq.false")
         .order("created_at", { ascending: false })
         .limit(3);
 
       if (error) {
-        console.error("Error fetching community posts:", error);
         setHasError(true);
         setIsLoaded(true);
         return;
@@ -48,7 +47,7 @@ export function CommunityPulse() {
           .in("post_id", ids);
 
         if (commentsError) {
-          console.error("Error fetching community comments:", commentsError);
+          setHasError(false);
         } else {
           for (const comment of (comments || []) as Array<{ post_id: string }>) {
             if (comment && comment.post_id) {
@@ -59,8 +58,7 @@ export function CommunityPulse() {
       }
 
       setPosts(rows.map((post) => ({ ...post, comments_count: commentCounts.get(post.id) || 0 })));
-    } catch (err) {
-      console.error("Unexpected error in loadPosts:", err);
+    } catch {
       setHasError(true);
     } finally {
       setIsLoaded(true);
@@ -121,9 +119,9 @@ export function CommunityPulse() {
               className="group flex min-h-36 flex-col bg-background-void p-4 transition-colors hover:bg-white/[0.035]"
             >
               <div className="mb-3 flex items-center gap-2.5">
-                {post.author_avatar_url ? (
+                {post.author_avatar ? (
                   <img
-                    src={post.author_avatar_url}
+                    src={post.author_avatar}
                     alt={post.author_name}
                     referrerPolicy="no-referrer"
                     className="h-8 w-8 shrink-0 rounded-full object-cover"
