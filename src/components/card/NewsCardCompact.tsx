@@ -42,9 +42,14 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
         className="group flex gap-0 bg-background-void border border-white/[0.08] cursor-pointer transition-colors hover:bg-white/[0.025] hover:border-white/15 focus-visible:outline-2 focus-visible:outline-brand-orange overflow-hidden"
       >
         {/* THUMBNAIL */}
-        <div className="relative w-[160px] shrink-0 self-stretch overflow-hidden bg-[#08090C]">
+        <div className="relative min-h-32 w-[132px] shrink-0 overflow-hidden bg-card-slate sm:min-h-40 sm:w-[180px]">
           {post.image_url ? (
-            <img src={post.image_url} alt={post.image_alt || ""} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+            <img
+              src={post.image_url}
+              alt={post.image_alt || ""}
+              className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
           ) : (
             <div className="flex h-full items-center justify-center bg-card-slate">
               <span className="text-xs text-gray-600">Sem mídia</span>
