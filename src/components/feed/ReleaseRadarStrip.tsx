@@ -45,6 +45,7 @@ export function ReleaseRadarStrip() {
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasPositionedRadar = useRef(false);
 
   useEffect(() => {
     queueMicrotask(async () => {
@@ -82,6 +83,26 @@ export function ReleaseRadarStrip() {
         && date.getUTCMonth() === currentDate.getMonth();
     });
   }, [releases]);
+
+  useEffect(() => {
+    if (hasPositionedRadar.current || currentMonthReleases.length === 0) return;
+    const now = new Date();
+    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = currentMonthReleases.find((item) => {
+      const date = releaseDateValue(item);
+      return date !== null && Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) >= today;
+    }) || currentMonthReleases.at(-1);
+    if (!target) return;
+
+    hasPositionedRadar.current = true;
+    const frame = window.requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      const element = container?.querySelector<HTMLElement>(`[data-release-id="${target.id}"]`);
+      if (!container || !element) return;
+      container.scrollTo({ left: Math.max(0, element.offsetLeft - container.offsetLeft), behavior: "auto" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentMonthReleases]);
 
   const handleScroll = (direction: "left" | "right") => {
     if (!scrollContainerRef.current) return;
@@ -149,8 +170,14 @@ export function ReleaseRadarStrip() {
           className="-mx-3 flex snap-x snap-mandatory overflow-x-auto border-y border-white/10 px-3 scrollbar-none sm:mx-0 sm:px-0"
         >
           {currentMonthReleases.map((item) => {
+            const itemDate = releaseDateValue(item);
+            const now = new Date();
+            const isToday = itemDate !== null
+              && itemDate.getUTCFullYear() === now.getFullYear()
+              && itemDate.getUTCMonth() === now.getMonth()
+              && itemDate.getUTCDate() === now.getDate();
             const CardContent = (
-                  <article className="group flex h-full w-[260px] xs:w-[280px] sm:w-[300px] shrink-0 snap-start flex-col border-r border-white/10 bg-background-void transition-colors hover:bg-white/[0.025]">
+                  <article className={`group flex h-full w-[260px] xs:w-[280px] sm:w-[300px] shrink-0 snap-start flex-col border-r bg-background-void transition-colors hover:bg-white/[0.025] ${isToday ? "border-brand-orange/70" : "border-white/10"}`}>
                     <div className="relative aspect-video w-full overflow-hidden bg-[#0C0D11]">
                       {isAllowedReleaseImageUrl(item.image) ? (
                         <img
@@ -171,7 +198,9 @@ export function ReleaseRadarStrip() {
                     <div className="flex flex-1 flex-col justify-between p-4">
                       <div>
                         <div className="mb-2 flex items-baseline justify-between gap-2">
-                          <time className="text-xs font-black uppercase text-brand-orange">{item.releaseDate}</time>
+                          <time dateTime={item.releaseDateIso} className="text-xs font-black uppercase text-brand-orange">
+                            {isToday ? `Hoje · ${item.releaseDate}` : item.releaseDate}
+                          </time>
                           <span className="text-[10px] font-semibold text-gray-500">{item.dayOfWeek}</span>
                         </div>
                         <h3 className="font-heading text-sm sm:text-base font-extrabold leading-tight text-white transition-colors group-hover:text-brand-orange line-clamp-2">
@@ -202,6 +231,7 @@ export function ReleaseRadarStrip() {
                     <Link
                       key={item.id}
                       href={`/posts/${item.slug}`}
+                      data-release-id={item.id}
                       className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
                     >
                       {CardContent}
@@ -209,7 +239,7 @@ export function ReleaseRadarStrip() {
                   );
                 }
 
-                return <div key={item.id} className="shrink-0">{CardContent}</div>;
+                return <div key={item.id} data-release-id={item.id} className="shrink-0">{CardContent}</div>;
           })}
         </div>
       </div>
