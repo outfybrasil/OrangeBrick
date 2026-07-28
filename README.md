@@ -36,7 +36,7 @@ npx supabase link --project-ref PROJECT_REF
 npx supabase db push
 ```
 
-Ative login anônimo em Authentication para permitir comentários sem cadastro. Depois configure os segredos das Functions:
+Configure os provedores de autenticação usados pelo site. Bricks, comentários, votos e reações exigem uma conta autenticada. Depois configure os segredos das Functions:
 
 ```bash
 npx supabase secrets set SITE_URL=https://seu-dominio.com RATE_LIMIT_SALT=valor-aleatorio VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:contato@seu-dominio.com
@@ -59,3 +59,15 @@ npm run admin:create
 ## Produção
 
 Configure no provedor do Next.js as variáveis públicas, `SUPABASE_SERVICE_ROLE_KEY` somente no servidor e o domínio definitivo em `NEXT_PUBLIC_SITE_URL`. Nunca exponha a service role no navegador ou em variáveis com prefixo `NEXT_PUBLIC_`.
+
+Também configure `CRON_SECRET` com um valor aleatório forte para autorizar a limpeza mensal do Radar.
+
+Antes da divulgação pública:
+
+1. Vincule o domínio definitivo e confirme `NEXT_PUBLIC_SITE_URL`.
+2. Cadastre o domínio no Google Search Console.
+3. Envie `/sitemap.xml` e `/news-sitemap.xml` no Search Console.
+4. Verifique `/robots.txt`, `/feed.xml` e os dados estruturados das matérias.
+5. Teste cadastro, login, perfil, Brick, comentário, denúncia, ranking e exclusão de conta.
+6. Revise a fila de denúncias em `/admin/community`.
+7. Execute `npm run check` e `npx supabase db lint --linked --level warning`.

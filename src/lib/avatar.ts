@@ -20,7 +20,7 @@ export function getGoogleAvatarUrl(user?: User | null): string | null {
   return avatarUrl?.trim() || null;
 }
 
-export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string | null, isOfficial = false): string {
+export function resolveAvatarUrl(avatarUrl?: string | null, _authorName?: string | null, isOfficial = false): string {
   const raw = (avatarUrl || "").trim();
 
   if (isOfficial) {
@@ -34,6 +34,5 @@ export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string 
     return raw;
   }
 
-  const displayName = authorName || "Leitor";
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=12141C&color=FF5E00&bold=true`;
+  return "/icons/default-avatar.png";
 }

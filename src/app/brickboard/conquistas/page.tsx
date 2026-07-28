@@ -52,7 +52,13 @@ export default function AchievementsPage() {
         if (!isActive) return;
         if (loaded?.achievements.length) {
           const progressBySlug = new Map(loaded.achievements.map((item) => [item.slug, item]));
-          const mergedAchievements = catalogAchievements.map((item) => progressBySlug.get(item.slug) || item);
+          const mergedAchievements = catalogAchievements
+            .map((item) => progressBySlug.get(item.slug) || item)
+            .sort((a, b) => {
+              if (a.is_equipped !== b.is_equipped) return a.is_equipped ? -1 : 1;
+              if (Boolean(a.unlocked_at) !== Boolean(b.unlocked_at)) return a.unlocked_at ? -1 : 1;
+              return 0;
+            });
           setAchievements(mergedAchievements);
           setEquipped(mergedAchievements.filter((item) => item.is_equipped).map((item) => item.slug));
           setIsLoading(false);

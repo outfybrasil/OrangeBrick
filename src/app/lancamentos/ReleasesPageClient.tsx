@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/ui/Footer";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
-import { ALL_RELEASES_DATA, type ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
+import type { ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
 import { isAllowedReleaseImageUrl } from "@/lib/release-images";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type {
@@ -72,7 +72,7 @@ function ReleaseHypeMeter({
               disabled={isVoting}
               aria-pressed={isSelected}
               aria-label={`${option.label}: ${counts[option.type]} votos`}
-              className={`min-h-9 border px-1.5 text-[9px] font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
+              className={`min-h-11 border px-1.5 text-[9px] font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
                 isSelected
                   ? "border-brand-orange bg-brand-orange text-white"
                   : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/25 hover:text-white"
@@ -90,224 +90,6 @@ function ReleaseHypeMeter({
     </div>
   );
 }
-
-const LEGACY_RELEASES: ReleaseItem[] = [
-  // --- JULHO 2026 ---
-  {
-    id: "splatoon-raiders",
-    game: "Splatoon Raiders",
-    releaseDate: "23 de Julho",
-    dayOfWeek: "Quinta-feira",
-    platforms: ["SWITCH 2"],
-    image: "https://assets.nintendo.com/image/upload/ar_16:9,c_lpad,w_1240/b_white/f_auto/q_auto/store/software/switch2/70010000122824/cf587e01f6f115398f411f280dba21e025795eb69f234a41722341ea999d170d",
-    badge: "Ação",
-    category: "week",
-  },
-  {
-    id: "avatar-legends-fighting-game",
-    game: "Avatar Legends: The Fighting Game",
-    releaseDate: "23 de Julho",
-    dayOfWeek: "Quinta-feira",
-    platforms: ["Switch", "Switch 2", "PC", "PS5", "XSX"],
-    image: "https://assets.nintendo.com/image/upload/ar_16:9,c_lpad,w_1240/b_white/f_auto/q_auto/store/software/switch/70010000124322/9ececef2d8606f8aef67554fb23afc72dd5a505dd341eb1bc4d54011769e39be",
-    badge: "Luta",
-    category: "week",
-  },
-  {
-    id: "dinoblade",
-    game: "Dinoblade",
-    releaseDate: "23 de Julho",
-    dayOfWeek: "Quinta-feira",
-    platforms: ["PC"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2521940/header.jpg",
-    badge: "Ação",
-    category: "week",
-  },
-  {
-    id: "an-eggstremely-hard-game",
-    game: "An Eggstremely Hard Game",
-    releaseDate: "24 de Julho",
-    dayOfWeek: "Sexta-feira",
-    platforms: ["PC"],
-    image: "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/editorial/releases/an-eggstremely-hard-game/2af7ccda-5e85-4fcb-893d-be206c327870.webp",
-    badge: "Indie",
-    category: "week",
-  },
-  {
-    id: "unbeatable",
-    game: "Unbeatable",
-    releaseDate: "27 de Julho",
-    dayOfWeek: "Segunda-feira",
-    platforms: ["SWITCH 2"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2240620/header.jpg",
-    badge: "Ritmo",
-    category: "week",
-  },
-  {
-    id: "halo-campaign-evolved",
-    game: "Halo: Campaign Evolved",
-    releaseDate: "28 de Julho",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PC", "PS5", "XSX"],
-    image: "https://rollingstone.com.br/wp-content/uploads/2025/10/halo-halo-studios-rolling-stone.jpg",
-    badge: "FPS",
-    category: "week",
-    slug: "halo-campaign-evolved-faltam-5-dias-o-que-esperar-do-remake",
-  },
-  {
-    id: "everquest-legends",
-    game: "EverQuest Legends",
-    releaseDate: "28 de Julho",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PC"],
-    image: "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/editorial/releases/everquest-legends/3d61430b-ac02-4d4e-94ec-26c699eeb419.webp",
-    badge: "MMORPG",
-    category: "week",
-  },
-  {
-    id: "dispatch",
-    game: "Dispatch",
-    releaseDate: "29 de Julho",
-    dayOfWeek: "Quarta-feira",
-    platforms: ["XSX"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2592160/header.jpg",
-    badge: "Ação",
-    category: "week",
-  },
-  {
-    id: "mistfall-hunter",
-    game: "Mistfall Hunter",
-    releaseDate: "29 de Julho",
-    dayOfWeek: "Quarta-feira",
-    platforms: ["PC", "PS5", "XSX"],
-    image: "https://lf16-fe-tos.bytedgame.com/obj/g-marketing-assets-sg/2025_09_02_03_42_26/196038060061_s1652719.png",
-    badge: "RPG de ação",
-    category: "week",
-  },
-  {
-    id: "the-relic-first-guardian",
-    game: "The Relic: First Guardian",
-    releaseDate: "31 de Julho",
-    dayOfWeek: "Sexta-feira",
-    platforms: ["PC", "PS5"],
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBlWYgmnst8CVRT7TsgL_CHwfWYXaSDcqiLZaOPsm5qklWlZkq5U2sb3g&s=10",
-    badge: "RPG de ação",
-    category: "week",
-  },
-
-  // --- AGOSTO 2026 ---
-  {
-    id: "beast-of-reincarnation",
-    game: "Beast of Reincarnation",
-    releaseDate: "04 de Agosto",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PC", "PS5", "XSX"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2904320/header.jpg",
-    badge: "Ação",
-    category: "upcoming",
-  },
-  {
-    id: "big-walk",
-    game: "Big Walk",
-    releaseDate: "04 de Agosto",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PC", "Switch 2", "PS5"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1315800/header.jpg",
-    badge: "Aventura",
-    category: "upcoming",
-  },
-  {
-    id: "marvel-tokon-fighting-souls",
-    game: "Marvel Tokon: Fighting Souls",
-    releaseDate: "06 de Agosto",
-    dayOfWeek: "Quinta-feira",
-    platforms: ["PC", "PS5"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2635900/header.jpg",
-    badge: "Luta",
-    category: "upcoming",
-  },
-  {
-    id: "grounded-2",
-    game: "Grounded 2",
-    releaseDate: "11 de Agosto",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PS5"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/962130/header.jpg",
-    badge: "Sobrevivência",
-    category: "upcoming",
-  },
-  {
-    id: "oblivion-remastered",
-    game: "The Elder Scrolls IV: Oblivion Remastered",
-    releaseDate: "11 de Agosto",
-    dayOfWeek: "Terça-feira",
-    platforms: ["SWITCH 2"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/22330/header.jpg",
-    badge: "RPG",
-    category: "upcoming",
-  },
-
-  // --- SETEMBRO 2026 ---
-  {
-    id: "wolverine",
-    game: "Marvel's Wolverine",
-    releaseDate: "15 de Setembro",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PS5"],
-    image: "https://gameverse.com.ua/uploads/games/marvel-s-wolverine/qda4.jpg",
-    badge: "Ação",
-    category: "upcoming",
-  },
-  {
-    id: "dune-awakening",
-    game: "Dune: Awakening",
-    releaseDate: "22 de Setembro",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PS5", "XSX"],
-    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1172620/header.jpg",
-    badge: "Sobrevivência",
-    category: "upcoming",
-  },
-
-  // --- OUTUBRO 2026 ---
-  {
-    id: "gears-eday",
-    game: "Gears of War: E-Day",
-    releaseDate: "06 de Outubro",
-    dayOfWeek: "Terça-feira",
-    platforms: ["PC", "XSX"],
-    image: "https://www.notebookcheck.info/fileadmin/Notebooks/News/_nc5/Gears-of-War-E-Day-Gamescom.jpg",
-    badge: "Tiro",
-    category: "upcoming",
-  },
-  {
-    id: "cod-mw4",
-    game: "Call of Duty: Modern Warfare 4",
-    releaseDate: "23 de Outubro",
-    dayOfWeek: "Sexta-feira",
-    platforms: ["Switch 2", "PC", "PS5", "XSX"],
-    image: "https://cdn.box.co.uk/magefan_blog/modern-warfare-4-main.jpg",
-    badge: "FPS",
-    category: "upcoming",
-    slug: "call-of-duty-modern-warfare-4-beta-nintendo-switch-2-data-outubro",
-  },
-
-  // --- NOVEMBRO 2026 ---
-  {
-    id: "gta-6",
-    game: "Grand Theft Auto VI",
-    releaseDate: "19 de Novembro",
-    dayOfWeek: "Quinta-feira",
-    platforms: ["PS5", "XSX"],
-    image: "https://th.bing.com/th/id/OIP.CzMibmTT8C1XveJ-BJTOAQHaEK?w=328&h=184&c=7&r=0&o=7&dpr=1.1&pid=1.7&rm=3",
-    badge: "Ação",
-    category: "upcoming",
-  },
-];
-
-const INITIAL_RELEASES = [...new Map(
-  [...LEGACY_RELEASES, ...ALL_RELEASES_DATA].map((item) => [item.id, item])
-).values()];
 
 function getMonthGroupKey(dateStr: string): { key: string; label: string } {
   const lower = dateStr.toLowerCase();
@@ -346,7 +128,7 @@ export function ReleasesPageClient() {
   const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
-  const [releases, setReleases] = useState<ReleaseItem[]>(INITIAL_RELEASES);
+  const [releases, setReleases] = useState<ReleaseItem[]>([]);
   const [search, setSearch] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>({});
@@ -355,6 +137,14 @@ export function ReleasesPageClient() {
   const [pendingVote, setPendingVote] = useState<{ releaseId: string; vote: HypeVoteType } | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hypeError, setHypeError] = useState("");
+  const hasPositionedCalendar = useRef(false);
+  const todayIso = useMemo(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
 
   useEffect(() => {
     queueMicrotask(async () => {
@@ -364,9 +154,7 @@ export function ReleasesPageClient() {
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error || !data || data.length === 0) return;
-      const merged = new Map(INITIAL_RELEASES.map((item) => [item.id, item]));
-      for (const item of data as ReleaseRadarItem[]) {
-        const release: ReleaseItem = {
+      const databaseReleases = (data as ReleaseRadarItem[]).map((item): ReleaseItem => ({
           id: item.id,
           game: item.game,
           releaseDate: item.release_label,
@@ -377,10 +165,8 @@ export function ReleasesPageClient() {
           badge: item.badge,
           category: item.category,
           slug: item.post_slug || undefined,
-        };
-        merged.set(item.id, release);
-      }
-      setReleases([...merged.values()]);
+      }));
+      setReleases(databaseReleases);
     });
   }, [supabase]);
 
@@ -516,6 +302,21 @@ export function ReleasesPageClient() {
         return first.key.localeCompare(second.key);
       });
   }, [filteredReleases]);
+
+  useEffect(() => {
+    if (hasPositionedCalendar.current || releases.length === 0 || search || selectedPlatform !== "all") return;
+    const datedReleases = releases
+      .filter((item) => item.releaseDateIso)
+      .sort((first, second) => first.releaseDateIso!.localeCompare(second.releaseDateIso!));
+    const target = datedReleases.find((item) => item.releaseDateIso! >= todayIso) || datedReleases.at(-1);
+    if (!target) return;
+
+    hasPositionedCalendar.current = true;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`release-${target.id}`)?.scrollIntoView({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [releases, search, selectedPlatform, todayIso]);
 
   const weeklyHypeRanking = useMemo(() => {
     return releases
@@ -694,7 +495,13 @@ export function ReleasesPageClient() {
                   {group.items.map((item) => (
                     <article
                       key={item.id}
-                      className="group flex flex-col overflow-hidden border border-white/10 bg-background-void transition-colors hover:border-brand-orange/40 hover:bg-white/[0.025]"
+                      id={`release-${item.id}`}
+                      data-current-release={item.releaseDateIso === todayIso ? "true" : undefined}
+                      className={`group scroll-mt-20 flex flex-col overflow-hidden bg-background-void transition-colors hover:border-brand-orange/40 hover:bg-white/[0.025] ${
+                        item.releaseDateIso === todayIso
+                          ? "border border-brand-orange/70"
+                          : "border border-white/10"
+                      }`}
                     >
                       <div className="relative aspect-video w-full overflow-hidden bg-[#0C0D11]">
                         {isAllowedReleaseImageUrl(item.image) ? (
@@ -716,8 +523,8 @@ export function ReleasesPageClient() {
                       <div className="flex flex-1 flex-col justify-between p-4">
                         <div>
                           <div className="mb-2 flex items-baseline justify-between gap-2">
-                            <time className="text-xs font-black uppercase text-brand-orange">
-                              {item.releaseDate}
+                            <time dateTime={item.releaseDateIso} className="text-xs font-black uppercase text-brand-orange">
+                              {item.releaseDateIso === todayIso ? `Hoje · ${item.releaseDate}` : item.releaseDate}
                             </time>
                             <span className="text-[10px] font-semibold text-gray-500">
                               {item.dayOfWeek}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { CommunityPost, CommunityComment } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { UserBadge } from "@/components/ui/UserBadge";
 import { resolveAvatarUrl } from "@/lib/avatar";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
+import { createDataClient } from "@/lib/supabase/client";
 
 interface BrickCardProps {
   post: CommunityPost;
@@ -23,9 +24,18 @@ interface BrickCardProps {
   getComments: (postId: string) => Promise<CommunityComment[]>;
 }
 
+const reportReasons = [
+  "Spam ou publicidade",
+  "Assédio ou ataque pessoal",
+  "Discurso de ódio",
+  "Spoiler sem aviso",
+  "Informação enganosa",
+  "Outro conteúdo inadequado",
+];
 
 export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments }: BrickCardProps) {
   const { user } = useAuth();
+  const supabase = useMemo(() => createDataClient(), []);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareText, setShareText] = useState("");
@@ -36,6 +46,15 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
   const [commentPendingDelete, setCommentPendingDelete] = useState<string | null>(null);
   const [isDeletingComment, setIsDeletingComment] = useState(false);
+  const [reportedContent, setReportedContent] = useState<string[]>([]);
+  const [reportMessage, setReportMessage] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<{ type: "post" | "comment"; id: string } | null>(null);
+  const [reportReason, setReportReason] = useState(reportReasons[0]);
+  const [isReporting, setIsReporting] = useState(false);
+  const reportDialogRef = useModalDialog<HTMLDivElement>(
+    reportTarget !== null,
+    () => setReportTarget(null)
+  );
   const deleteDialogRef = useModalDialog<HTMLDivElement>(
     commentPendingDelete !== null,
     () => setCommentPendingDelete(null)
@@ -150,6 +169,36 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     }
   };
 
+  const openReport = (contentType: "post" | "comment", contentId: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setReportMessage(null);
+    setReportReason(reportReasons[0]);
+    setReportTarget({ type: contentType, id: contentId });
+  };
+
+  const handleReport = async () => {
+    if (!user || !reportTarget) return;
+    setIsReporting(true);
+    const reportKey = `${reportTarget.type}:${reportTarget.id}`;
+    const { error } = await supabase.rpc("report_community_content", {
+      target_type: reportTarget.type,
+      target_id: reportTarget.id,
+      target_reason: reportReason,
+    });
+    if (error) {
+      setReportMessage(error.message.includes("duplicate") ? "Você já denunciou este conteúdo." : "Não foi possível enviar a denúncia. Tente novamente.");
+      setIsReporting(false);
+      return;
+    }
+    setReportedContent((current) => [...current, reportKey]);
+    setReportMessage("Denúncia enviada para análise.");
+    setReportTarget(null);
+    setIsReporting(false);
+  };
+
   const totalCommentCount = comments.length || post.comments_count || 0;
   const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name, post.is_official);
 
@@ -187,19 +236,31 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           </div>
         </Link>
 
-        {isPostOwner && onDeletePost && (
-          <button
-            onClick={() => setIsDeletePostOpen(true)}
-            aria-label="Apagar este post"
-            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs text-red-300/75 transition-all hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200"
-            title="Apagar este post"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            <span className="hidden xs:inline">Apagar</span>
-          </button>
-        )}
+        <div className="flex shrink-0 items-center">
+          {!isPostOwner && user && (
+            <button
+              type="button"
+              onClick={() => openReport("post", post.id)}
+              disabled={reportedContent.includes(`post:${post.id}`)}
+              className="min-h-11 px-3 text-[11px] font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
+            >
+              {reportedContent.includes(`post:${post.id}`) ? "Denunciado" : "Denunciar"}
+            </button>
+          )}
+          {isPostOwner && onDeletePost && (
+            <button
+              onClick={() => setIsDeletePostOpen(true)}
+              aria-label="Apagar este post"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs text-red-300/75 transition-all hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200"
+              title="Apagar este post"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span className="hidden xs:inline">Apagar</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-[15px]">
@@ -254,7 +315,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             <img
               src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name, post.shared_post.original_is_official)}
               alt={post.shared_post.original_author_name}
-              onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "/icons/default-avatar.png"; }}
               style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", borderRadius: "9999px", objectFit: "cover" }}
               className="border border-emerald-500/30 shrink-0 mt-0.5 bg-[#08090C]"
             />
@@ -316,6 +377,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           onRepostClick={handleShareClick}
         />
       </div>
+      {reportMessage && <p role="status" className="text-xs text-gray-400">{reportMessage}</p>}
 
       {isShareOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-2.5">
@@ -368,7 +430,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                         <img
                           src={resolveAvatarUrl(c.author_avatar, c.author_name, c.is_official)}
                           alt={c.author_name}
-                          onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"; }}
+                          onError={(e) => { (e.target as HTMLImageElement).src = "/icons/default-avatar.png"; }}
                           style={{ width: "30px", height: "30px", minWidth: "30px", minHeight: "30px", maxWidth: "30px", maxHeight: "30px", borderRadius: "9999px", objectFit: "cover" }}
                           className="border border-brand-orange/20 shrink-0 group-hover/cauthor:scale-105 transition-transform bg-[#08090C]"
                         />
@@ -385,6 +447,16 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                             </span>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
+                            {!canDeleteComment && user && (
+                              <button
+                                type="button"
+                                onClick={() => openReport("comment", c.id)}
+                                disabled={reportedContent.includes(`comment:${c.id}`)}
+                                className="min-h-9 px-2 text-[10px] font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
+                              >
+                                {reportedContent.includes(`comment:${c.id}`) ? "Enviado" : "Denunciar"}
+                              </button>
+                            )}
                             {canDeleteComment && (
                               <button
                                 onClick={() => setCommentPendingDelete(c.id)}
@@ -449,6 +521,51 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {reportTarget && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background-void/90 p-3 sm:p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isReporting) setReportTarget(null);
+          }}
+        >
+          <div
+            ref={reportDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`report-title-${reportTarget.id}`}
+            tabIndex={-1}
+            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+          >
+            <h3 id={`report-title-${reportTarget.id}`} className="text-lg font-bold text-white">Por que você está denunciando?</h3>
+            <p className="mt-2 text-sm leading-6 text-[#b8bac2]">A denúncia vai para a moderação. O autor não verá quem enviou.</p>
+            <fieldset className="mt-5 space-y-2">
+              <legend className="sr-only">Motivo da denúncia</legend>
+              {reportReasons.map((reason) => (
+                <label key={reason} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-white/10 px-3 text-sm text-gray-200 transition-colors hover:border-brand-orange/40">
+                  <input
+                    type="radio"
+                    name={`report-reason-${reportTarget.id}`}
+                    value={reason}
+                    checked={reportReason === reason}
+                    onChange={() => setReportReason(reason)}
+                    className="accent-brand-orange"
+                  />
+                  {reason}
+                </label>
+              ))}
+            </fieldset>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setReportTarget(null)} disabled={isReporting} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] hover:bg-white/5 hover:text-white disabled:opacity-50">
+                Cancelar
+              </button>
+              <button type="button" onClick={() => void handleReport()} disabled={isReporting} className="min-h-11 rounded-xl bg-brand-orange px-4 text-sm font-bold text-white hover:bg-brand-orange/90 disabled:opacity-50">
+                {isReporting ? "Enviando…" : "Enviar denúncia"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {commentPendingDelete && (
         <div

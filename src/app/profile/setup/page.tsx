@@ -50,13 +50,29 @@ export default function ProfileSetup() {
     setSaving(true);
     setError(null);
     try {
-      const { data: existing } = await supabase
-        .from("profiles")
-        .select("id, user_id")
-        .ilike("username", normalizedUsername)
-        .maybeSingle();
+      let durableAvatarUrl = avatarUrl.trim() || null;
+      const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/`;
+      if (durableAvatarUrl && !durableAvatarUrl.startsWith(storagePrefix) && !durableAvatarUrl.startsWith("/")) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Sua sessão expirou. Entre novamente.");
+        const response = await fetch("/api/user/avatar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ sourceUrl: durableAvatarUrl }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Não foi possível salvar o avatar.");
+        durableAvatarUrl = result.publicUrl;
+      }
 
-      if (existing && existing.user_id !== user!.id) {
+      const { data: usernameIsAvailable, error: availabilityError } = await supabase.rpc("username_available", {
+        candidate_username: normalizedUsername,
+      });
+      if (availabilityError) throw availabilityError;
+      if (!usernameIsAvailable) {
         setError("Este nome de usuário já está em uso.");
         setSaving(false);
         return;
@@ -67,7 +83,7 @@ export default function ProfileSetup() {
         nickname: trimmed,
         display_name: trimmed,
         username: normalizedUsername,
-        avatar_url: avatarUrl.trim() || null,
+        avatar_url: durableAvatarUrl,
       });
       if (insertError) throw insertError;
       router.push("/");

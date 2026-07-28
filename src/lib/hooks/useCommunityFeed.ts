@@ -7,6 +7,7 @@ import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCom
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { invokeFunction } from "@/lib/supabase/functions";
+import { getCommunityErrorMessage } from "@/lib/community-errors";
 
 interface UseCommunityFeedOptions {
   load?: boolean;
@@ -18,6 +19,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
   const [isLoaded, setIsLoaded] = useState(!load);
+  const [operationError, setOperationError] = useState<string | null>(null);
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -255,7 +257,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         getGoogleAvatarUrl(user) ||
         "";
 
-      await supabase.from("community_posts").insert({
+      setOperationError(null);
+      const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
         author_avatar: authorAvatar,
@@ -265,6 +268,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         media_url: mediaUrl || null,
         topic_id: attachedArticle?.topic_id || null,
       });
+      if (error) setOperationError(getCommunityErrorMessage(error));
     },
     [user, profile, supabase]
   );
@@ -404,6 +408,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         getGoogleAvatarUrl(user) ||
         "";
 
+      setOperationError(null);
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
@@ -421,7 +426,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         },
         topic_id: originalPost.topic_id || null,
       });
-      if (!error) await sendCommunityPush("repost", originalPost.id);
+      if (error) setOperationError(getCommunityErrorMessage(error));
+      else await sendCommunityPush("repost", originalPost.id);
     },
     [user, profile, supabase, sendCommunityPush]
   );
@@ -462,6 +468,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         getGoogleAvatarUrl(user) ||
         "";
 
+      setOperationError(null);
       const { error } = await supabase.from("community_comments").insert({
         post_id: postId,
         user_id: user.id,
@@ -469,7 +476,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         author_avatar: authorAvatar,
         content,
       });
-      if (!error) await sendCommunityPush("comment", postId);
+      if (error) setOperationError(getCommunityErrorMessage(error));
+      else await sendCommunityPush("comment", postId);
     },
     [user, profile, supabase, sendCommunityPush]
   );
@@ -477,7 +485,9 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   const deleteComment = useCallback(
     async (commentId: string) => {
       if (!user) return;
-      await supabase.from("community_comments").delete().eq("id", commentId).eq("user_id", user.id);
+      setOperationError(null);
+      const { error } = await supabase.from("community_comments").delete().eq("id", commentId).eq("user_id", user.id);
+      if (error) setOperationError(getCommunityErrorMessage(error));
     },
     [user, supabase]
   );
@@ -548,7 +558,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         post_id: row.post_id,
         user_id: row.user_id,
         author_name: row.author_name,
-        author_avatar: row.author_avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+        author_avatar: row.author_avatar || "/icons/default-avatar.png",
         is_official: row.is_official,
         content: row.content,
         created_at: row.created_at,
@@ -563,6 +573,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     posts,
     poll,
     isLoaded,
+    operationError,
+    clearOperationError: () => setOperationError(null),
     addPost,
     deletePost,
     sharePost,

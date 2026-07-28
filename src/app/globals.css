@@ -95,6 +95,26 @@ body {
   overflow-x: clip;
 }
 
+@media (max-width: 639px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  main {
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (pointer: coarse) {
+  button,
+  a,
+  summary {
+    -webkit-tap-highlight-color: rgba(255, 94, 0, 0.14);
+  }
+}
+
 img, video, svg {
   max-width: 100%;
   height: auto;

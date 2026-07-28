@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, PostStats, ReactionType } from "@/lib/types/database";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +73,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const post = await getPost(slug);
   if (!post) notFound();
   const stats = await getStats(post.id);
+  const siteUrl = getSiteUrl();
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -80,9 +82,19 @@ export default async function PostPage({ params }: PostPageProps) {
     image: post.image_url ? [post.image_url] : [],
     datePublished: post.published_at,
     dateModified: post.updated_at,
-    author: { "@type": "Person", name: post.author_name },
-    publisher: { "@type": "Organization", name: "Orange Brick" },
-    mainEntityOfPage: `/posts/${post.slug}`,
+    author: { "@type": "Person", name: post.author_name, url: `${siteUrl}/sobre` },
+    publisher: {
+      "@type": "Organization",
+      name: "Orange Brick",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/icons/icon-512.png`,
+        width: 512,
+        height: 512,
+      },
+    },
+    mainEntityOfPage: `${siteUrl}/posts/${post.slug}`,
+    isAccessibleForFree: true,
   };
   return (
     <>

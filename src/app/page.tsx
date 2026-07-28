@@ -48,7 +48,7 @@ function HomeContent() {
 
   return (
     <>
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/10 py-3 sm:py-4">
+      <header className="sticky top-0 z-30 border-b border-brand-orange-muted/10 bg-[#0d0e12]/95 py-2 backdrop-blur-md sm:static sm:bg-card-slate/10 sm:py-4 sm:backdrop-blur-none">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
           {/* LOGO */}
           <button
@@ -81,7 +81,7 @@ function HomeContent() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar matérias, jogos, hardware..."
+                placeholder="Buscar no Orange Brick"
                 className="min-h-11 w-full rounded-xl border border-brand-orange-muted/20 bg-background-void/90 px-3 pl-9 text-xs text-white outline-none transition-all placeholder:text-gray-500 focus:border-brand-orange/60 focus:ring-1 focus:ring-brand-orange/30 sm:px-4 sm:pl-10 sm:text-sm shadow-inner"
               />
               <svg

@@ -1,0 +1,47 @@
+import { createHash } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+
+function serviceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } },
+  );
+}
+
+export async function POST(request: Request) {
+  const supabase = serviceClient();
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const identityHash = createHash("sha256")
+    .update(`${process.env.CRON_SECRET || "orange-brick"}:${forwarded}`)
+    .digest("hex");
+  const windowStart = new Date();
+  windowStart.setUTCMinutes(0, 0, 0);
+  const { data: withinLimit } = await supabase.rpc("consume_rate_limit", {
+    p_action: "client_error",
+    p_identity_hash: identityHash,
+    p_window_start: windowStart.toISOString(),
+    p_limit: 20,
+  });
+  if (!withinLimit) return new NextResponse(null, { status: 204 });
+
+  const body = await request.json().catch(() => null) as {
+    source?: unknown;
+    message?: unknown;
+    route?: unknown;
+    reference?: unknown;
+  } | null;
+  if (!body || typeof body.message !== "string") return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+
+  await supabase.rpc("record_app_error", {
+    target_source: typeof body.source === "string" ? body.source : "web",
+    target_message: body.message,
+    target_route: typeof body.route === "string" ? body.route : null,
+    target_reference: typeof body.reference === "string" ? body.reference : null,
+    target_metadata: {},
+  });
+  return new NextResponse(null, { status: 204 });
+}

@@ -1,5 +1,6 @@
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 1800;
 
@@ -12,7 +13,7 @@ const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, (character) => (
 }[character] || character));
 
 export async function GET() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("posts")

@@ -122,6 +122,33 @@ export default function ProfileSettingsPage() {
       return;
     }
 
+    let durableAvatarUrl = avatarUrl.trim() || null;
+    const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/`;
+    if (durableAvatarUrl && !durableAvatarUrl.startsWith(storagePrefix) && !durableAvatarUrl.startsWith("/")) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setMessage("Sua sessão expirou. Entre novamente para salvar.");
+        setIsSaving(false);
+        return;
+      }
+      const response = await fetch("/api/user/avatar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ sourceUrl: durableAvatarUrl }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage(result.error || "Não foi possível salvar o avatar no Orange Brick.");
+        setIsSaving(false);
+        return;
+      }
+      durableAvatarUrl = result.publicUrl;
+      setAvatarUrl(durableAvatarUrl || "");
+    }
+
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -129,7 +156,7 @@ export default function ProfileSettingsPage() {
         nickname: displayName.trim(),
         username: normalizedUsername,
         bio: bio.trim() || null,
-        avatar_url: avatarUrl.trim() || null,
+        avatar_url: durableAvatarUrl,
         favorite_platforms: favoritePlatforms,
         favorite_categories: favoriteCategories,
         show_lifetime_xp: showLifetimeXp,

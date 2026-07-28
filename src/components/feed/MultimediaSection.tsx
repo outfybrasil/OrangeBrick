@@ -13,7 +13,7 @@ const MULTIMEDIA_ITEMS: MediaItem[] = [
     title: "Orange Brick Podcast #45 — O futuro dos consoles de nova geração vale a pena?",
     type: "podcast",
     duration: "1h 24m",
-    thumbnail: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600",
+    thumbnail: "/icons/default-avatar.png",
     series: "BrickCast",
   },
   {
@@ -21,7 +21,7 @@ const MULTIMEDIA_ITEMS: MediaItem[] = [
     title: "Por que GTA 6 adiado pode salvar o ano de 2027 dos games?",
     type: "video",
     duration: "14:20",
-    thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600",
+    thumbnail: "/icons/default-avatar.png",
     series: "Análise Especial",
   },
   {
@@ -29,7 +29,7 @@ const MULTIMEDIA_ITEMS: MediaItem[] = [
     title: "Elden Ring: Shadow of the Erdtree ainda é o melhor DLC de todos os tempos?",
     type: "video",
     duration: "18:45",
-    thumbnail: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=600",
+    thumbnail: "/icons/default-avatar.png",
     series: "Review & Debate",
   },
 ];

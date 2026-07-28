@@ -9,6 +9,17 @@ interface TimerProps {
 
 export function Timer({ date }: TimerProps) {
   const [, refresh] = useReducer((value: number) => value + 1, 0);
+  const parsedDate = new Date(date);
+  const exactDate = Number.isNaN(parsedDate.getTime())
+    ? ""
+    : new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "America/Sao_Paulo",
+      }).format(parsedDate);
 
   useEffect(() => {
     const interval = setInterval(refresh, 60_000);
@@ -17,8 +28,8 @@ export function Timer({ date }: TimerProps) {
   }, [date]);
 
   return (
-    <span className="text-[11px] font-subtitle font-medium text-gray-400 shrink-0 whitespace-nowrap">
-      {timeAgo(date)}
-    </span>
+    <time dateTime={date} className="shrink-0 whitespace-nowrap text-[11px] font-medium text-gray-400">
+      {exactDate}{exactDate ? " · " : ""}{timeAgo(date)}
+    </time>
   );
 }

@@ -46,6 +46,9 @@ export function Footer() {
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Institucional</h4>
           <div className="flex flex-col text-[11px]">
+            <Link href="/sobre" className="flex min-h-11 items-center transition-colors hover:text-white">
+              Sobre e política editorial
+            </Link>
             <Link href="/termos" className="flex min-h-11 items-center transition-colors hover:text-white">
               Termos de Uso
             </Link>

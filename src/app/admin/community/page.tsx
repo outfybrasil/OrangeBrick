@@ -1,13 +1,40 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { isAdminUser } from "@/lib/auth";
 import { createDataClient } from "@/lib/supabase/client";
 import type { CommunityPollRow, Topic } from "@/lib/types/database";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 const today = new Date().toISOString().slice(0, 10);
+interface CommunityReport {
+  id: string;
+  content_type: "post" | "comment";
+  content_id: string;
+  reason: string;
+  created_at: string;
+  post_id?: string;
+}
+
+interface AppErrorEvent {
+  id: string;
+  source: string;
+  message: string;
+  route: string | null;
+  created_at: string;
+}
+
+type ModerationAction = "dismiss" | "delete" | "suspend_7d" | "ban";
+
+const moderationActionCopy: Record<ModerationAction, { label: string; description: string; button: string }> = {
+  dismiss: { label: "Descartar denúncia?", description: "O conteúdo continuará no ar e a denúncia será encerrada.", button: "Descartar" },
+  delete: { label: "Remover conteúdo?", description: "O conteúdo denunciado será apagado permanentemente.", button: "Remover" },
+  suspend_7d: { label: "Suspender por 7 dias?", description: "O conteúdo será removido e o autor não poderá publicar, comentar ou reagir por sete dias.", button: "Suspender" },
+  ban: { label: "Bloquear participação?", description: "O conteúdo será removido e o autor ficará impedido de participar do Brickboard até a conta ser restaurada.", button: "Bloquear" },
+};
 
 export default function CommunityAdminPage() {
   const router = useRouter();
@@ -21,6 +48,11 @@ export default function CommunityAdminPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [engagement, setEngagement] = useState<Record<string, number>>({});
+  const [reports, setReports] = useState<CommunityReport[]>([]);
+  const [appErrors, setAppErrors] = useState<AppErrorEvent[]>([]);
+  const [moderationTarget, setModerationTarget] = useState<{ report: CommunityReport; action: ModerationAction } | null>(null);
+  const [isModerating, setIsModerating] = useState(false);
+  const moderationDialogRef = useModalDialog<HTMLDivElement>(moderationTarget !== null, () => setModerationTarget(null));
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -32,7 +64,7 @@ export default function CommunityAdminPage() {
     }
 
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const [{ data: topicData }, { data: pollData }, { data: eventData }] = await Promise.all([
+    const [{ data: topicData }, { data: pollData }, { data: eventData }, { data: reportData }, { data: appErrorData }] = await Promise.all([
       supabase.from("topics").select("*").order("name", { ascending: true }),
       supabase
         .from("community_polls")
@@ -45,6 +77,17 @@ export default function CommunityAdminPage() {
         .from("home_engagement_events")
         .select("event_name")
         .gte("created_at", sevenDaysAgo),
+      supabase
+        .from("community_reports")
+        .select("id, content_type, content_id, reason, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabase
+        .from("app_error_events")
+        .select("id, source, message, route, created_at")
+        .order("created_at", { ascending: false })
+        .limit(10),
     ]);
 
     setTopics((topicData || []) as Topic[]);
@@ -60,6 +103,17 @@ export default function CommunityAdminPage() {
       eventCounts[event.event_name] = (eventCounts[event.event_name] || 0) + 1;
     }
     setEngagement(eventCounts);
+    const pendingReports = (reportData || []) as CommunityReport[];
+    const commentIds = pendingReports.filter((report) => report.content_type === "comment").map((report) => report.content_id);
+    const { data: reportedComments } = commentIds.length
+      ? await supabase.from("community_comments").select("id, post_id").in("id", commentIds)
+      : { data: [] };
+    const commentPostMap = new Map(((reportedComments || []) as Array<{ id: string; post_id: string }>).map((comment) => [comment.id, comment.post_id]));
+    setReports(pendingReports.map((report) => ({
+      ...report,
+      post_id: report.content_type === "post" ? report.content_id : commentPostMap.get(report.content_id),
+    })));
+    setAppErrors((appErrorData || []) as AppErrorEvent[]);
     setIsLoading(false);
   }, [router, supabase]);
 
@@ -117,6 +171,25 @@ export default function CommunityAdminPage() {
     }
   };
 
+  const reviewReport = async () => {
+    if (!moderationTarget) return;
+    setIsModerating(true);
+    setError("");
+    const { error: reviewError } = await supabase.rpc("admin_resolve_community_report", {
+      target_report_id: moderationTarget.report.id,
+      target_action: moderationTarget.action,
+    });
+    if (reviewError) {
+      setError("A denúncia não pôde ser resolvida. Recarregue a página e tente novamente.");
+      setIsModerating(false);
+      return;
+    }
+    setReports((current) => current.filter((report) => report.id !== moderationTarget.report.id));
+    setMessage("Ação de moderação registrada.");
+    setModerationTarget(null);
+    setIsModerating(false);
+  };
+
   return (
     <AdminShell
       active="community"
@@ -128,6 +201,53 @@ export default function CommunityAdminPage() {
         <div className="py-16 text-center text-sm text-gray-400">Carregando comunidade...</div>
       ) : (
         <div className="space-y-6">
+          <section aria-labelledby="reports-title" className="rounded-2xl bg-[#15161d]">
+            <div className="border-b border-white/10 p-5 sm:p-6">
+              <h2 id="reports-title" className="font-heading text-xl font-black">Denúncias pendentes</h2>
+              <p className="mt-1 text-sm text-gray-400">{reports.length ? `${reports.length} itens aguardando análise.` : "Nenhuma denúncia pendente."}</p>
+            </div>
+            {reports.length > 0 && (
+              <div className="divide-y divide-white/[0.07]">
+                {reports.map((report) => (
+                  <article key={report.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div>
+                      <p className="text-sm font-bold text-white">{report.content_type === "post" ? "Brick denunciado" : "Comentário denunciado"}</p>
+                      <p className="mt-1 text-xs text-gray-400">{report.reason} · {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(report.created_at))}</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/brickboard?post=${report.post_id || report.content_id}`} className="inline-flex min-h-11 items-center px-3 text-xs font-bold text-brand-orange hover:text-white">Abrir conteúdo</Link>
+                      <button type="button" onClick={() => setModerationTarget({ report, action: "dismiss" })} className="min-h-11 px-3 text-xs font-bold text-gray-300 hover:text-white">Descartar</button>
+                      <button type="button" onClick={() => setModerationTarget({ report, action: "delete" })} className="min-h-11 rounded-xl border border-red-400/30 px-3 text-xs font-bold text-red-200 hover:bg-red-500/10">Remover</button>
+                      <button type="button" onClick={() => setModerationTarget({ report, action: "suspend_7d" })} className="min-h-11 rounded-xl bg-amber-600 px-3 text-xs font-bold text-white hover:bg-amber-500">Suspender 7 dias</button>
+                      <button type="button" onClick={() => setModerationTarget({ report, action: "ban" })} className="min-h-11 rounded-xl bg-red-700 px-3 text-xs font-bold text-white hover:bg-red-600">Bloquear</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="errors-title" className="rounded-2xl bg-[#15161d]">
+            <div className="border-b border-white/10 p-5 sm:p-6">
+              <h2 id="errors-title" className="font-heading text-xl font-black">Falhas recentes</h2>
+              <p className="mt-1 text-sm text-gray-400">{appErrors.length ? "Erros inesperados registrados pelo site." : "Nenhuma falha inesperada registrada."}</p>
+            </div>
+            {appErrors.length > 0 && (
+              <div className="divide-y divide-white/[0.07]">
+                {appErrors.map((item) => (
+                  <article key={item.id} className="p-4 sm:px-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-white">{item.source}</p>
+                      <time className="text-xs text-gray-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(item.created_at))}</time>
+                    </div>
+                    <p className="mt-1 break-words text-xs leading-5 text-gray-400">{item.message}</p>
+                    {item.route && <p className="mt-1 text-[11px] text-brand-orange">{item.route}</p>}
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
           <section aria-labelledby="engagement-title" className="rounded-2xl bg-[#15161d] p-5 sm:p-6">
             <div>
               <h2 id="engagement-title" className="font-heading text-xl font-black">Cliques da Home</h2>
@@ -246,6 +366,23 @@ export default function CommunityAdminPage() {
               ))}
             </div>
           </section>
+          </div>
+        </div>
+      )}
+      {moderationTarget && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background-void/90 p-4" onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !isModerating) setModerationTarget(null);
+        }}>
+          <div ref={moderationDialogRef} role="alertdialog" aria-modal="true" aria-labelledby="moderation-dialog-title" tabIndex={-1} className="w-full max-w-md rounded-2xl border border-red-400/25 bg-[#191b21] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+            <h2 id="moderation-dialog-title" className="text-xl font-black text-white">{moderationActionCopy[moderationTarget.action].label}</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-300">{moderationActionCopy[moderationTarget.action].description}</p>
+            <p className="mt-3 rounded-xl bg-white/5 p-3 text-xs text-gray-400">Motivo informado: {moderationTarget.report.reason}</p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setModerationTarget(null)} disabled={isModerating} className="min-h-11 rounded-xl px-4 text-sm font-bold text-gray-300 hover:bg-white/5 disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => void reviewReport()} disabled={isModerating} className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white hover:bg-red-500 disabled:opacity-50">
+                {isModerating ? "Aplicando…" : moderationActionCopy[moderationTarget.action].button}
+              </button>
+            </div>
           </div>
         </div>
       )}

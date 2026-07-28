@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { CookieConsent } from "@/components/ui/CookieConsent";
+import { getSiteUrl } from "@/lib/site-url";
+import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
 import "./globals.css";
 
 const headingFont = Outfit({
@@ -40,7 +42,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Orange Brick",
     template: "%s | Orange Brick",
@@ -99,11 +101,14 @@ export default function RootLayout({
               "@type": "WebSite",
               "name": "Orange Brick",
               "alternateName": ["Orange Brick Portal", "Portal Orange Brick"],
-              "url": process.env.NEXT_PUBLIC_SITE_URL || "https://orange-brick.vercel.app",
+              "url": getSiteUrl(),
             }),
           }}
         />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <MobileBottomNav />
+        </AuthProvider>
         <PwaInstallBanner />
         <CookieConsent />
       </body>

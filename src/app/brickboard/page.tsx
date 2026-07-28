@@ -16,7 +16,7 @@ function BrickboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const { posts, poll, isLoaded, addPost, deletePost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
+  const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
   const [activeTab, setActiveTab] = useState<"latest" | "polls">("latest");
   const articleSlug = searchParams.get("article");
@@ -78,7 +78,7 @@ function BrickboardContent() {
 
   return (
     <>
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/10 py-3 sm:py-4">
+      <header className="sticky top-0 z-30 border-b border-brand-orange-muted/10 bg-[#0d0e12]/95 py-2 backdrop-blur-md sm:static sm:bg-card-slate/10 sm:py-4 sm:backdrop-blur-none">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
           <Link href="/" className="group flex min-h-11 min-w-0 shrink-0 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange sm:gap-3">
             <img
@@ -134,6 +134,12 @@ function BrickboardContent() {
       </header>
 
       <main className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
+        {operationError && (
+          <div role="alert" className="mb-5 flex items-start justify-between gap-4 rounded-xl border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
+            <p>{operationError}</p>
+            <button type="button" onClick={clearOperationError} className="min-h-8 shrink-0 px-2 font-bold text-red-200 hover:text-white" aria-label="Fechar aviso">Fechar</button>
+          </div>
+        )}
         <section className="mb-8 grid gap-5 border-b border-brand-orange/20 pb-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="max-w-3xl">
             <div className="mb-3 flex items-center gap-3">
@@ -340,7 +346,7 @@ function BrickboardContent() {
 
       <button
         onClick={() => setIsComposeOpen(true)}
-        className="mobile-overlay-sensitive fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
+        className="mobile-overlay-sensitive fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
         title="Criar novo Brick"
         aria-label="Criar novo Brick"
       >

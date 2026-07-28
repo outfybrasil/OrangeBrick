@@ -187,13 +187,13 @@ function ProfilePageContent() {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 lg:justify-end">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap lg:justify-end">
                 {isOwner ? (
                   <>
-                    <Link href="/configuracoes/perfil#vitrine" className="inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-bold text-white hover:bg-[#ff7526]">
+                    <Link href="/configuracoes/perfil#vitrine" className="inline-flex min-h-11 items-center justify-center bg-brand-orange px-3 text-center text-xs font-bold text-white hover:bg-[#ff7526] sm:px-5">
                       Personalizar vitrine
                     </Link>
-                    <Link href="/configuracoes/perfil" className="inline-flex min-h-11 items-center justify-center border border-white/15 px-5 text-xs font-bold text-white hover:border-brand-orange/50">
+                    <Link href="/configuracoes/perfil" className="inline-flex min-h-11 items-center justify-center border border-white/15 px-3 text-center text-xs font-bold text-white hover:border-brand-orange/50 sm:px-5">
                       Editar perfil
                     </Link>
                   </>

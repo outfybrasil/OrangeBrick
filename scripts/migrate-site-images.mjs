@@ -108,5 +108,7 @@ for (const profile of profiles || []) {
   const { error: commentsError } = await supabase.from("community_comments").update({ author_avatar: profile.avatar_url }).eq("user_id", profile.user_id);
   if (commentsError) failures += 1;
 }
+failures += await migrateRows("community_posts", "author_avatar", "avatar", "Avatar do autor");
+failures += await migrateRows("community_comments", "author_avatar", "avatar", "Avatar do autor");
 
 if (failures > 0) process.exitCode = 1;

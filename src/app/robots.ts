@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-url";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://orange-brick.vercel.app");
+  const siteUrl = getSiteUrl();
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/post"] },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/admin", "/api", "/auth", "/configuracoes", "/post", "/profile/setup"],
+    },
+    sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/news-sitemap.xml`],
   };
 }
