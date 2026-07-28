@@ -2,14 +2,13 @@
 
 import { useRef, useMemo, type ReactNode } from "react";
 import Link from "next/link";
-import { NewsCard } from "@/components/card/NewsCard";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
 import { NewsFeedEmpty } from "./NewsFeedEmpty";
 import { NewsSidebar } from "./NewsSidebar";
 import { useInfiniteFeed } from "@/lib/hooks/useInfiniteFeed";
 import { usePostStats } from "@/lib/hooks/usePostStats";
-import type { PostCategory, PostStats } from "@/lib/types/database";
+import { CATEGORY_CONFIG, type PostCategory, type PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
@@ -26,12 +25,10 @@ interface NewsFeedProps {
 
 const CATEGORIES: { label: string; value: PostCategory | null }[] = [
   { label: "Tudo", value: null },
-  { label: "Plantão", value: "breaking" },
-  { label: "Review", value: "review" },
-  { label: "Hard News", value: "hardware" },
-  { label: "Opinião", value: "opinion" },
-  { label: "Radar", value: "industry" },
-  { label: "Gambiarra", value: "modding" },
+  ...(["breaking", "review", "hardware", "opinion", "industry", "modding"] as PostCategory[]).map((value) => ({
+    label: CATEGORY_CONFIG[value].label,
+    value,
+  })),
 ];
 
 const EMPTY_STATS: PostStats = {
@@ -215,15 +212,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
         {/* COLUNA PRINCIPAL */}
         <div className="min-w-0 space-y-6">
           {renderHeroSection()}
-          {!isFiltering && homeHighlights}
-
           <div id="ultimas-noticias" className="scroll-mt-16">
             <div className="mb-4 flex flex-col gap-2 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-6 w-1 bg-brand-orange" />
                 <h2 className="font-heading text-xl font-black text-white">
                   {category ? (
-                    <>Notícias em <span className="text-brand-orange">{category}</span></>
+                    <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
                   ) : (
                     <>Últimas <span className="text-brand-orange">notícias</span></>
                   )}
@@ -238,7 +233,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                       <button
                         key={cat.label}
                         onClick={() => onSelectCategory(cat.value)}
-                        className={`relative min-h-9 shrink-0 border-b border-white/10 px-3 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                        className={`relative min-h-11 shrink-0 border-b border-white/10 px-3 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
                           isActive ? "text-white" : "text-gray-500 hover:text-gray-200"
                         }`}
                       >
@@ -261,6 +256,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               ))}
             </div>
           </div>
+
+          {!isFiltering && homeHighlights}
 
           {lowerPosts.length > 0 && (
             <div className="space-y-0 pt-0 border-t border-white/[0.06]">

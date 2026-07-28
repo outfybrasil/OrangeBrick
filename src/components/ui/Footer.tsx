@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import PushSetup from "@/components/PushSetup";
+import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
+
+const FOOTER_CATEGORIES: PostCategory[] = ["breaking", "review", "hardware", "opinion", "industry", "modding"];
 
 export function Footer() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -28,18 +31,11 @@ export function Footer() {
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Categorias</h4>
           <div className="flex flex-col text-[11px]">
-            <Link href="/?category=breaking" className="flex min-h-11 items-center transition-colors hover:text-white">
-              Breaking News
-            </Link>
-            <Link href="/?category=review" className="flex min-h-11 items-center transition-colors hover:text-white">
-              Reviews Detalhadas
-            </Link>
-            <Link href="/?category=hardware" className="flex min-h-11 items-center transition-colors hover:text-white">
-              Hardware & Consoles
-            </Link>
-            <Link href="/?category=opinion" className="flex min-h-11 items-center transition-colors hover:text-white">
-              Opinião & Debates
-            </Link>
+            {FOOTER_CATEGORIES.map((category) => (
+              <Link key={category} href={`/?category=${category}`} className="flex min-h-11 items-center transition-colors hover:text-white">
+                {CATEGORY_CONFIG[category].label}
+              </Link>
+            ))}
           </div>
         </div>
 

@@ -15,9 +15,8 @@ export function PlatformBar({ activePlatform }: PlatformBarProps) {
           <h2 id="platform-index-title" className="font-heading text-sm font-extrabold text-white sm:text-base">
             Plataformas & ecossistemas
           </h2>
-          <p className="mt-0.5 text-[11px] text-gray-500">Escolha uma cobertura</p>
+          <p className="mt-0.5 text-[11px] text-gray-500">Notícias separadas por plataforma</p>
         </div>
-        <span className="hidden text-[10px] font-semibold text-gray-600 sm:inline">Navegue por plataforma</span>
       </div>
 
       <nav aria-label="Cobertura por plataforma" className="-mx-3 flex overflow-x-auto border-t border-white/10 px-3 scrollbar-none sm:mx-0 sm:grid sm:grid-cols-5 sm:px-0">
@@ -51,9 +50,6 @@ export function PlatformBar({ activePlatform }: PlatformBarProps) {
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-xs font-extrabold">{config.shortName}</span>
-                <span className="mt-0.5 block whitespace-nowrap text-[9px] font-semibold uppercase text-gray-600 transition-colors group-hover:text-gray-500">
-                  Ver cobertura
-                </span>
               </span>
             </Link>
           );
