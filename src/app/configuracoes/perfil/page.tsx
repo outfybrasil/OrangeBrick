@@ -12,73 +12,6 @@ const platforms = ["PS5", "Xbox Series", "Switch 2", "PC", "Mobile"];
 const categories = ["breaking", "hardware", "industry", "modding", "review", "opinion"];
 type UsernameStatus = "idle" | "checking" | "available" | "unavailable" | "error";
 
-function getCroppedBannerBlob(
-  imageSrc: string,
-  posX: number,
-  posY: number,
-  zoom: number
-): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const targetWidth = 1600;
-      const targetHeight = 500;
-      const canvas = document.createElement("canvas");
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas failure"));
-
-      const imgAspect = img.naturalWidth / img.naturalHeight;
-      const targetAspect = targetWidth / targetHeight;
-
-      let drawWidth = img.naturalWidth;
-      let drawHeight = img.naturalHeight;
-
-      if (imgAspect > targetAspect) {
-        drawWidth = img.naturalHeight * targetAspect;
-      } else {
-        drawHeight = img.naturalWidth / targetAspect;
-      }
-
-      const effectiveZoom = Math.max(1, zoom);
-      drawWidth /= effectiveZoom;
-      drawHeight /= effectiveZoom;
-
-      const maxOffsetX = img.naturalWidth - drawWidth;
-      const maxOffsetY = img.naturalHeight - drawHeight;
-
-      const sourceX = (maxOffsetX * posX) / 100;
-      const sourceY = (maxOffsetY * posY) / 100;
-
-      ctx.drawImage(
-        img,
-        Math.max(0, sourceX),
-        Math.max(0, sourceY),
-        drawWidth,
-        drawHeight,
-        0,
-        0,
-        targetWidth,
-        targetHeight
-      );
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return reject(new Error("Blob creation failed"));
-          const file = new File([blob], "banner.webp", { type: "image/webp" });
-          resolve(file);
-        },
-        "image/webp",
-        0.92
-      );
-    };
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = imageSrc;
-  });
-}
-
 interface BannerCropperModalProps {
   imageSrc: string;
   onCancel: () => void;
@@ -87,151 +20,194 @@ interface BannerCropperModalProps {
 }
 
 function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: BannerCropperModalProps) {
-  const [posY, setPosY] = useState(50);
-  const [posX, setPosX] = useState(50);
-  const [zoom, setZoom] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  const [boxY, setBoxY] = useState(30);
+  const [boxX, setBoxX] = useState(5);
+  const [boxHeightPct, setBoxHeightPct] = useState(35);
+
   const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
+  const dragRef = useRef<{ startY: number; startX: number; startBoxY: number; startBoxX: number } | null>(null);
+
+  const aspect = 16 / 5; // 3.2
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
     setIsDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY, startX: posX, startY: posY };
+    dragRef.current = {
+      startY: e.clientY,
+      startX: e.clientX,
+      startBoxY: boxY,
+      startBoxX: boxX,
+    };
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !dragStart.current) return;
-    const deltaX = (e.clientX - dragStart.current.x) * 0.35;
-    const deltaY = (e.clientY - dragStart.current.y) * 0.35;
-    setPosX(Math.max(0, Math.min(100, dragStart.current.startX - deltaX)));
-    setPosY(Math.max(0, Math.min(100, dragStart.current.startY - deltaY)));
+    if (!isDragging || !dragRef.current || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const deltaYPct = ((e.clientY - dragRef.current.startY) / rect.height) * 100;
+    const deltaXPct = ((e.clientX - dragRef.current.startX) / rect.width) * 100;
+
+    const maxBoxY = Math.max(0, 100 - boxHeightPct);
+    const boxWidthPct = Math.min(100, (boxHeightPct * aspect * rect.height) / rect.width);
+    const maxBoxX = Math.max(0, 100 - boxWidthPct);
+
+    setBoxY(Math.max(0, Math.min(maxBoxY, dragRef.current.startBoxY + deltaYPct)));
+    setBoxX(Math.max(0, Math.min(maxBoxX, dragRef.current.startBoxX + deltaXPct)));
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    dragStart.current = null;
+    dragRef.current = null;
   };
 
-  const handleApply = async () => {
-    try {
-      const croppedFile = await getCroppedBannerBlob(imageSrc, posX, posY, zoom);
-      onConfirm(croppedFile);
-    } catch {
-      // fallback
-    }
+  const handleConfirm = async () => {
+    if (!imgRef.current) return;
+    const img = imgRef.current;
+
+    const realImgWidth = img.naturalWidth;
+    const realImgHeight = img.naturalHeight;
+
+    const cropYPx = (boxY / 100) * realImgHeight;
+    const cropXPx = (boxX / 100) * realImgWidth;
+    const cropHPx = (boxHeightPct / 100) * realImgHeight;
+    const cropWPx = cropHPx * aspect;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 1600;
+    canvas.height = 500;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(
+      img,
+      Math.max(0, cropXPx),
+      Math.max(0, cropYPx),
+      Math.min(realImgWidth - cropXPx, cropWPx),
+      Math.min(realImgHeight - cropYPx, cropHPx),
+      0,
+      0,
+      1600,
+      500
+    );
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const file = new File([blob], "banner.webp", { type: "image/webp" });
+          onConfirm(file);
+        }
+      },
+      "image/webp",
+      0.92
+    );
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
-      <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/20 bg-[#16181E] shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-3 sm:p-6 backdrop-blur-md">
+      <div className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-[#16181E] shadow-2xl">
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-          <div>
-            <h2 className="font-heading text-lg font-black text-white">Ajustar Enquadramento do Banner</h2>
-            <p className="text-xs text-gray-400">Arraste com o mouse na prévia ou use os seletores para escolher a posição exata.</p>
-          </div>
-          <button type="button" onClick={onCancel} disabled={isUploading} className="text-gray-400 hover:text-white p-2 text-lg">✕</button>
+          <h2 className="font-heading text-xl font-black text-white">Personalizar arte do banner</h2>
+          <button type="button" onClick={onCancel} disabled={isUploading} className="rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white">✕</button>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Interactive Live Preview Box */}
+        {/* Info Banner */}
+        <div className="flex items-center gap-3 border-b border-white/10 bg-white/[0.03] px-6 py-3 text-xs text-gray-300">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-orange/20 text-brand-orange font-bold text-xs">i</span>
+          <span>Para garantir os melhores resultados, arraste a área de seleção sobre a imagem para definir o que vai aparecer no seu banner.</span>
+        </div>
+
+        {/* Main Crop Area */}
+        <div className="p-6 space-y-4">
           <div
-            onMouseDown={handleMouseDown}
+            ref={containerRef}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className="relative aspect-[16/5] w-full cursor-grab overflow-hidden rounded-xl border-2 border-brand-orange bg-black active:cursor-grabbing select-none"
+            className="relative flex items-center justify-center overflow-hidden rounded-xl bg-[#0a0b0e] select-none min-h-[300px] max-h-[440px]"
           >
+            {/* Full Image */}
             <img
+              ref={imgRef}
               src={imageSrc}
-              alt="Prévia do recorte do banner"
+              alt="Imagem completa do banner"
               draggable={false}
-              className="h-full w-full object-cover pointer-events-none"
-              style={{
-                objectPosition: `${posX}% ${posY}%`,
-                transform: `scale(${zoom})`,
-              }}
+              className="max-h-[440px] w-auto max-w-full object-contain pointer-events-none"
             />
-            <div className="absolute inset-0 border border-white/10 pointer-events-none" />
-            <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2.5 py-1 text-[10px] font-bold text-gray-300 backdrop-blur-sm pointer-events-none">
-              Proporção do perfil (1600 × 500)
+
+            {/* Darkened Overlay outside Crop Box */}
+            <div className="absolute inset-0 bg-black/60 pointer-events-none" />
+
+            {/* Highlighted Crop Frame Box */}
+            <div
+              onMouseDown={handleMouseDown}
+              style={{
+                top: `${boxY}%`,
+                left: `${boxX}%`,
+                height: `${boxHeightPct}%`,
+                aspectRatio: `${aspect}`,
+              }}
+              className="absolute cursor-move border-2 border-brand-orange bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]"
+            >
+              {/* Labels inside Crop Box */}
+              <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 pointer-events-none">
+                <span className="rounded bg-brand-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white shadow-sm">
+                  Todos os dispositivos
+                </span>
+                <span className="rounded bg-black/80 px-2 py-0.5 text-[10px] font-bold text-gray-300 backdrop-blur-sm shadow-sm">
+                  1600 × 500
+                </span>
+              </div>
+
+              {/* Corner Handles */}
+              <span className="absolute -top-1.5 -left-1.5 h-3 w-3 border border-black bg-white" />
+              <span className="absolute -top-1.5 -right-1.5 h-3 w-3 border border-black bg-white" />
+              <span className="absolute -bottom-1.5 -left-1.5 h-3 w-3 border border-black bg-white" />
+              <span className="absolute -bottom-1.5 -right-1.5 h-3 w-3 border border-black bg-white" />
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="grid gap-5 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
-              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
-                <span>Posição Vertical (Y)</span>
-                <span className="text-brand-orange font-mono">{Math.round(posY)}%</span>
-              </label>
+          {/* Quick Adjust Controls */}
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-gray-300">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white">Tamanho da seleção:</span>
               <input
                 type="range"
-                min={0}
-                max={100}
-                value={posY}
-                onChange={(e) => setPosY(Number(e.target.value))}
-                className="w-full accent-brand-orange cursor-pointer"
+                min={15}
+                max={80}
+                value={boxHeightPct}
+                onChange={(e) => setBoxHeightPct(Number(e.target.value))}
+                className="accent-brand-orange cursor-pointer w-32"
               />
-              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
-                <button type="button" onClick={() => setPosY(0)} className="hover:text-brand-orange">Topo</button>
-                <button type="button" onClick={() => setPosY(50)} className="hover:text-brand-orange">Centro</button>
-                <button type="button" onClick={() => setPosY(100)} className="hover:text-brand-orange">Base</button>
-              </div>
             </div>
-
-            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
-              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
-                <span>Posição Horizontal (X)</span>
-                <span className="text-brand-orange font-mono">{Math.round(posX)}%</span>
-              </label>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={posX}
-                onChange={(e) => setPosX(Number(e.target.value))}
-                className="w-full accent-brand-orange cursor-pointer"
-              />
-              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
-                <button type="button" onClick={() => setPosX(0)} className="hover:text-brand-orange">Esquerda</button>
-                <button type="button" onClick={() => setPosX(50)} className="hover:text-brand-orange">Centro</button>
-                <button type="button" onClick={() => setPosX(100)} className="hover:text-brand-orange">Direita</button>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
-              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
-                <span>Zoom</span>
-                <span className="text-brand-orange font-mono">{zoom.toFixed(1)}x</span>
-              </label>
-              <input
-                type="range"
-                min={1}
-                max={2.2}
-                step={0.05}
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                className="w-full accent-brand-orange cursor-pointer"
-              />
-              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
-                <button type="button" onClick={() => setZoom(1)} className="hover:text-brand-orange">1.0x</button>
-                <button type="button" onClick={() => setZoom(1.4)} className="hover:text-brand-orange">1.4x</button>
-                <button type="button" onClick={() => setZoom(1.8)} className="hover:text-brand-orange">1.8x</button>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white font-subtitle">Posição rápida:</span>
+              <button type="button" onClick={() => { setBoxY(0); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Topo</button>
+              <button type="button" onClick={() => { setBoxY(30); setBoxX(5); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Centro</button>
+              <button type="button" onClick={() => { setBoxY(65); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Base</button>
             </div>
           </div>
         </div>
 
+        {/* Footer Action Buttons */}
         <div className="flex items-center justify-end gap-3 border-t border-white/10 px-6 py-4 bg-[#111318]">
-          <button type="button" onClick={onCancel} disabled={isUploading} className="min-h-11 px-4 text-xs font-bold text-gray-300 hover:text-white">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isUploading}
+            className="min-h-11 rounded-full border border-white/20 bg-white/5 px-6 text-xs font-bold text-white transition-colors hover:bg-white/10"
+          >
             Cancelar
           </button>
           <button
             type="button"
-            onClick={handleApply}
+            onClick={handleConfirm}
             disabled={isUploading}
-            className="min-h-11 rounded-lg bg-brand-orange px-6 text-xs font-bold text-white hover:bg-[#ff7526] transition-colors disabled:opacity-50"
+            className="min-h-11 rounded-full bg-white px-8 text-xs font-bold text-black transition-colors hover:bg-brand-orange hover:text-white disabled:opacity-50"
           >
-            {isUploading ? "Processando e enviando..." : "Aplicar e Salvar Banner"}
+            {isUploading ? "Salvando banner..." : "Pronto"}
           </button>
         </div>
       </div>
@@ -435,7 +411,7 @@ export default function ProfileSettingsPage() {
           })).error;
 
       if (cosmeticsError) {
-        setMessage("O perfil foi salvo, mas a personalização não pôde ser aplicada.");
+        setMessage("O perfil foi salvo, mas a personalização não pôde ser applied.");
       } else {
         await refreshProfile();
         setMessage("Perfil atualizado.");
@@ -473,11 +449,11 @@ export default function ProfileSettingsPage() {
             <h1 className="font-heading text-3xl font-black">Seu perfil</h1>
             <p className="mt-3 text-sm leading-6 text-gray-400">Controle sua identidade, sua vitrine e o que aparece publicamente.</p>
             <img
-              src={resolveAvatarUrl(avatarUrl, displayName)}
+              src={resolveAvatarUrl(avatarUrl, displayName, profile.is_official)}
               alt="Prévia do avatar"
               className="mt-7 h-24 w-24 rounded-full border-2 border-brand-orange/40 object-cover"
               referrerPolicy="no-referrer"
-              onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, displayName); }}
+              onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, displayName, profile.is_official); }}
             />
             <div className="mt-6 overflow-hidden rounded-xl border border-white/10 bg-card-slate">
               {bannerUrl ? (
@@ -536,7 +512,7 @@ export default function ProfileSettingsPage() {
                   <button type="button" onClick={() => setAvatarUrl(getGoogleAvatarUrl(user) || "")} className="min-h-11 px-3 text-xs font-bold text-gray-300 hover:text-white">Usar foto do Google</button>
                 </div>
               </Field>
-              <Field label="Banner do perfil" hint="Escolha uma imagem e ajuste a posição ideal. JPG, PNG, WebP ou AVIF (até 8 MB).">
+              <Field label="Banner do perfil" hint="Escolha uma imagem e ajuste a seleção desejada.">
                 <div className="overflow-hidden border border-white/15 bg-black/20 rounded-xl">
                   {bannerUrl && <img src={bannerUrl} alt="Banner atual" className="aspect-[16/5] w-full object-cover" />}
                   <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 px-4 py-2 text-sm font-semibold text-gray-200">
