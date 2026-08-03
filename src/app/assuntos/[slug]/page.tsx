@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/ui/Footer";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { CommunityPostRow, Post, ReleaseRadarItem, Topic } from "@/lib/types/database";
+import { FollowButton } from "@/components/topics/FollowButton";
 
 export const revalidate = 300;
 
@@ -59,8 +60,14 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
 
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <section className="border-y border-brand-orange/30 py-8">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Assunto</p>
-          <h1 className="mt-2 font-heading text-3xl font-black uppercase sm:text-5xl">{topic.name}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Central do assunto</p>
+              <h1 className="mt-2 font-heading text-3xl font-black uppercase sm:text-5xl">{topic.name}</h1>
+              {topic.description && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">{topic.description}</p>}
+            </div>
+            <FollowButton type="topic" value={topic.id} />
+          </div>
           <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-300">
             {release && <span>{release.release_label}</span>}
             {release && <span>{release.platforms.join(", ")}</span>}
@@ -70,6 +77,12 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
               </Link>
             )}
           </div>
+        </section>
+
+        <section className="mt-6 grid gap-px bg-white/10 border border-white/10 sm:grid-cols-3">
+          <div className="bg-background-void p-4"><p className="text-2xl font-black text-white">{articles.length}</p><p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Matérias publicadas</p></div>
+          <div className="bg-background-void p-4"><p className="text-2xl font-black text-white">{bricks.length}</p><p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Conversas recentes</p></div>
+          <div className="bg-background-void p-4"><p className="text-2xl font-black text-brand-orange">{release ? "No radar" : "Em cobertura"}</p><p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Estado do assunto</p></div>
         </section>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">

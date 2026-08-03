@@ -14,6 +14,7 @@ export interface SharedPostData {
   _type: "shared_post";
   original_post_id: string;
   original_author_name: string;
+  original_author_username?: string | null;
   original_author_avatar: string;
   original_is_official?: boolean;
   original_content: string;
@@ -26,6 +27,7 @@ export interface CommunityPost {
   id: string;
   user_id?: string;
   author_name: string;
+  author_username?: string | null;
   author_avatar: string;
   content: string;
   media_url?: string | null;
@@ -55,6 +57,7 @@ export interface CommunityComment {
   post_id: string;
   user_id: string;
   author_name: string;
+  author_username?: string | null;
   author_avatar: string;
   is_official?: boolean;
   content: string;

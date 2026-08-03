@@ -52,21 +52,25 @@ export async function POST(request: Request) {
         .toBuffer();
     }
     if (output.byteLength > 450 * 1024) return NextResponse.json({ error: "Esta imagem tem detalhes demais. Escolha outra foto" }, { status: 413 });
-    const path = `profiles/${user.id}/banner.webp`;
-    const { error: uploadError } = await supabase.storage.from("post-images").upload(path, output, {
+    const path = `${user.id}/banner-${crypto.randomUUID()}.webp`;
+    const { error: uploadError } = await supabase.storage.from("profile-images").upload(path, output, {
       contentType: "image/webp",
-      cacheControl: "3600",
-      upsert: true,
+      cacheControl: "31536000",
+      upsert: false,
     });
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from("post-images").getPublicUrl(path);
-    const publicUrl = `${data.publicUrl}?v=${Date.now()}`;
+    const { data } = supabase.storage.from("profile-images").getPublicUrl(path);
+    const publicUrl = data.publicUrl;
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ banner_url: publicUrl, updated_at: new Date().toISOString() })
       .eq("user_id", user.id);
     if (updateError) throw updateError;
+
+    const { data: storedFiles } = await supabase.storage.from("profile-images").list(user.id, { limit: 100 });
+    const obsoleteBanners = (storedFiles || []).filter((item) => item.name.startsWith("banner-") && `${user.id}/${item.name}` !== path).map((item) => `${user.id}/${item.name}`);
+    if (obsoleteBanners.length) await supabase.storage.from("profile-images").remove(obsoleteBanners);
 
     return NextResponse.json({ publicUrl, bytes: output.byteLength });
   } catch {

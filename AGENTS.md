@@ -2,6 +2,12 @@
 
 ## 🖼️ Post Images
 
+- A **imagem de capa** deve identificar imediatamente a empresa, jogo, console ou evento da notícia.
+- Priorizar na capa, nesta ordem: **arte oficial de capa do jogo**, screenshot ou arte promocional oficial, foto oficial do hardware, logo oficial da empresa ou logo oficial do evento.
+- IA generativa pode ser usada na capa apenas quando não existir material oficial adequado ou quando a pauta for um conceito sem referência visual oficial.
+- Se a capa for gerada por IA, ela ainda deve mostrar de forma inequívoca o produto ou assunto correto; uma cena corporativa genérica não substitui a logo ou o hardware real da empresa citada.
+- Antes de escolher a capa, comparar com as matérias recentes. **Não repetir nem reaproveitar a mesma imagem, enquadramento ou arte em notícias publicadas próximas**, mesmo quando tratam da mesma empresa.
+- Para empresas e aquisições, usar preferencialmente a **logo oficial**, sede oficial ou material corporativo fornecido pela própria companhia.
 - Cada post deve ter uma imagem que **reflete diretamente o conteúdo do resumo** (summary)
 - O resumo descreve UMA cena/conceito — a imagem DEVE mostrar essa cena
 - O alt text DEVE descrever a imagem E conectar com o contexto do resumo
@@ -24,6 +30,9 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 
 ### Checklist de verificação
 
+- [ ] A capa identifica imediatamente a empresa, jogo, console ou evento citado?
+- [ ] Foi priorizada uma arte, screenshot, foto de produto ou logo oficial antes de recorrer à IA?
+- [ ] A capa foi comparada com as matérias recentes e não repete imagem ou enquadramento?
 - [ ] A imagem mostra a **cena descrita no resumo**?
 - [ ] É da **geração atual** do assunto?
 - [ ] Mostra o **objeto certo**, não só um controle genérico?
@@ -67,6 +76,15 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Ex: `"O Switch 2 trouxe dois tipos de mídia física: o cartucho clássico e o Game-Key Card, que funciona como chave de download. Entenda a diferença e por que os colecionadores estão em guerra com o formato."`
 
 ### Body (estrutura de blocos)
+
+- A matéria deve ter desenvolvimento suficiente para explicar fato, contexto e impacto, normalmente entre **700 e 1.000 palavras**.
+- Notícias simples podem ser mais curtas, mas não devem parecer apenas uma nota ou repetição do resumo.
+- Sempre que houver uma declaração pública relevante, incluir ao menos **uma fala de uma pessoa diretamente ligada ao caso**: executivo, desenvolvedor, porta-voz, analista identificado ou autoridade responsável.
+- Exemplo: em uma notícia importante do Xbox, procurar declarações de **Asha Sharma** ou da liderança diretamente responsável pelo assunto.
+- A fala deve acrescentar informação, posição oficial ou contexto. Não usar citação apenas para aumentar o texto.
+- Confirmar a declaração na fonte original sempre que possível. Informar **quem falou, cargo, onde e em qual contexto**.
+- Traduzir a fala para o português com fidelidade e deixar claro quando for uma tradução. Nunca inventar, completar ou atribuir uma declaração sem fonte verificável.
+- Se nenhuma fala pública relevante estiver disponível, registrar a ausência durante a apuração e seguir sem fabricar citação.
 
 ```
 [text]  → Parágrafo de introdução (contexto + gancho)
@@ -116,6 +134,10 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - [ ] **Bold `**texto**` funciona** — verificar que o parse de markdown está rodando no preview
 - [ ] **Links internos** usam `/posts/slug-da-materia` (não URL absoluta)
 - [ ] **Fonte citada** no final com `**Fonte:** [Nome](url)`
+- [ ] **Sem caracteres corrompidos** (`?` ou `�` dentro de palavras) em título, resumo, alt text, captions e corpo
+- [ ] **Título conferido após salvar no banco** — reler o valor retornado pelo Supabase e comparar com o texto original
+- [ ] **Matéria desenvolvida** — normalmente entre 700 e 1.000 palavras, com fato, contexto e impacto
+- [ ] **Fala relevante pesquisada** — declaração verificada e contextualizada, ou ausência confirmada sem inventar citação
 
 ### Regra de ouro 2: NUNCA copiar texto fonte
 
@@ -171,6 +193,9 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 3. Se for anúncio oficial, linkar direto pro comunicado
 4. **Nunca** publicar com base em uma fonte só (a menos que seja comunicado oficial)
 5. Cruzar informações: se uma fonte diz X e outra diz Y, investigar antes de publicar
+6. Buscar declarações de pessoas diretamente envolvidas e priorizar entrevista, comunicado, reunião de resultados ou postagem oficial
+7. Verificar a frase na fonte original, identificar cargo e contexto e traduzir com fidelidade para o português
+8. Depois de salvar, reler no banco título, resumo e corpo para detectar `?`, `�` ou qualquer perda de acentuação
 
 ---
 

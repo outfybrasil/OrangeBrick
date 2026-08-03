@@ -46,3 +46,18 @@ test("mantém as tags de autoria definidas por categoria", () => {
   assert.equal(AUTHOR_TAGS.breaking, "Plantão");
   assert.equal(AUTHOR_TAGS.opinion, "Opinião");
 });
+
+test("bloqueia metadados editoriais incompletos", () => {
+  const rumorSemFonte = validateEditorialContent({ ...validContent, editorialMetadata: { informationStatus: "rumor", sources: [] } });
+  assert.ok(rumorSemFonte.some((error) => error.includes("rumor")));
+
+  const citacaoSemOrigem = validateEditorialContent({
+    ...validContent,
+    editorialMetadata: {
+      informationStatus: "confirmed",
+      sources: [{ name: "Fonte oficial", url: "https://example.com/source" }],
+      quote: { text: "Declaração importante", author: "Asha Sharma", role: "", sourceUrl: "" },
+    },
+  });
+  assert.ok(citacaoSemOrigem.some((error) => error.includes("fala em destaque")));
+});

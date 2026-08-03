@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { UserBadge } from "@/components/ui/UserBadge";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { SpoilerText } from "@/components/community/SpoilerText";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { createDataClient } from "@/lib/supabase/client";
 
@@ -205,7 +206,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   return (
     <article className="group/card relative space-y-4 border-b border-white/10 bg-card-slate/20 px-1 pb-6 pt-2 transition-colors hover:bg-white/[0.025] sm:px-5 sm:pb-7 sm:pt-5">
       <div className="flex items-start justify-between gap-3">
-        <Link href={`/profile/${encodeURIComponent(post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
+        <Link href={`/profile/${encodeURIComponent(post.author_username || post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
           <img
             src={avatarSrc}
             alt={post.author_name}
@@ -264,7 +265,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       </div>
 
       <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-[15px]">
-        {post.content}
+        <SpoilerText>{post.content}</SpoilerText>
       </p>
 
       {post.media_url && (
@@ -426,7 +427,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 return (
                   <div key={c.id} className="group/comm border-t border-white/[0.07] py-3 first:border-t-0">
                     <div className="flex items-start gap-2.5">
-                      <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="shrink-0 group/cauthor">
+                      <Link href={`/profile/${encodeURIComponent(c.author_username || c.author_name)}`} className="shrink-0 group/cauthor">
                         <img
                           src={resolveAvatarUrl(c.author_avatar, c.author_name, c.is_official)}
                           alt={c.author_name}
@@ -438,7 +439,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-                            <Link href={`/profile/${encodeURIComponent(c.author_name)}`} className="truncate text-xs font-bold text-white transition-colors hover:text-brand-orange">
+                            <Link href={`/profile/${encodeURIComponent(c.author_username || c.author_name)}`} className="truncate text-xs font-bold text-white transition-colors hover:text-brand-orange">
                               {c.author_name}
                             </Link>
                             <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
@@ -487,7 +488,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                           </div>
                         </div>
                         <p className="mt-1.5 whitespace-pre-line break-words text-xs leading-relaxed text-gray-300">
-                          {c.content}
+                          <SpoilerText>{c.content}</SpoilerText>
                         </p>
                       </div>
                     </div>

@@ -166,6 +166,11 @@ Deno.serve(async (request) => {
       kind = "community";
     }
 
+    if (recipientId) {
+      const { data: preferences } = await supabase.from("notification_preferences").select("brickboard_replies").eq("user_id", recipientId).maybeSingle();
+      if (preferences && preferences.brickboard_replies === false) return json({ sent: 0, total: 0, skipped: "preference" });
+    }
+
     webpush.setVapidDetails(
       Deno.env.get("VAPID_SUBJECT") || "mailto:contato@orangebrick.com",
       publicKey,
@@ -174,7 +179,7 @@ Deno.serve(async (request) => {
 
     let subscriptionQuery = supabase
       .from("push_subscriptions")
-      .select("endpoint, p256dh_key, auth_key");
+      .select("endpoint, p256dh_key, auth_key, user_id");
     if (recipientId) subscriptionQuery = subscriptionQuery.eq("user_id", recipientId);
 
     const { data: subscriptions, error } = await subscriptionQuery;
@@ -191,7 +196,14 @@ Deno.serve(async (request) => {
       timestamp: Date.now(),
     });
 
-    const results = await Promise.all((subscriptions || []).map(async (subscription) => {
+    let eligibleSubscriptions = subscriptions || [];
+    if (kind === "news" && !recipientId) {
+      const { data: optedOut } = await supabase.from("notification_preferences").select("user_id").eq("breaking_news", false);
+      const optedOutIds = new Set((optedOut || []).map((row) => row.user_id));
+      eligibleSubscriptions = eligibleSubscriptions.filter((subscription) => !subscription.user_id || !optedOutIds.has(subscription.user_id));
+    }
+
+    const results = await Promise.all(eligibleSubscriptions.map(async (subscription) => {
       try {
         await webpush.sendNotification({
           endpoint: subscription.endpoint,
@@ -216,7 +228,7 @@ Deno.serve(async (request) => {
     const sent = results.filter((result) => result === "sent").length;
     const expired = results.filter((result) => result === "expired").length;
     const failed = results.filter((result) => result === "failed").length;
-    const total = subscriptions?.length || 0;
+    const total = eligibleSubscriptions.length;
 
     if (total > 0 && sent === 0 && failed > 0) {
       return json({

@@ -96,6 +96,13 @@ function HomeContent() {
             <Link href="/assuntos" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white sm:flex">
               Assuntos
             </Link>
+            <Link href="/em-alta" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">
+              Em alta
+            </Link>
+            <Link href="/minha-orange" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">
+              Minha Orange
+            </Link>
+            <Link href="/busca" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">Buscar</Link>
             <Link
               href="/brickboard"
               data-home-event="brickboard"

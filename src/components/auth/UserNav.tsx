@@ -138,6 +138,11 @@ export function UserNav() {
               <span>Matérias Salvas</span>
             </button>
 
+            <Link href="/configuracoes/notificacoes" onClick={() => setIsDropdownOpen(false)} className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white">
+              <svg className="h-4 w-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0" /></svg>
+              <span>Preferências de alertas</span>
+            </Link>
+
             {isAdmin && (
               <Link
                 href="/admin"

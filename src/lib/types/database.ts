@@ -135,6 +135,72 @@ export interface Database {
         Update: { default_author?: string; default_category?: PostCategory; updated_at?: string };
         Relationships: [];
       };
+      user_follows: {
+        Row: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; created_at: string };
+        Insert: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; created_at?: string };
+        Update: { follow_type?: "topic" | "platform" | "profile"; follow_value?: string };
+        Relationships: [];
+      };
+      notification_preferences: {
+        Row: { user_id: string; breaking_news: boolean; followed_topics: boolean; brickboard_replies: boolean; weekly_digest: boolean; updated_at: string };
+        Insert: { user_id: string; breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; weekly_digest?: boolean; updated_at?: string };
+        Update: { breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; weekly_digest?: boolean; updated_at?: string };
+        Relationships: [];
+      };
+      community_notes: {
+        Row: { id: string; post_id: string; user_id: string; content: string; source_url: string; status: "pending" | "helpful" | "rejected"; helpful_count: number; created_at: string };
+        Insert: { id?: string; post_id: string; user_id: string; content: string; source_url: string; status?: "pending" | "helpful" | "rejected"; helpful_count?: number; created_at?: string };
+        Update: { content?: string; source_url?: string; status?: "pending" | "helpful" | "rejected"; helpful_count?: number };
+        Relationships: [];
+      };
+      game_clubs: {
+        Row: { id: string; topic_id: string; name: string; description: string | null; created_by: string; created_at: string };
+        Insert: { id?: string; topic_id: string; name: string; description?: string | null; created_by: string; created_at?: string };
+        Update: { name?: string; description?: string | null };
+        Relationships: [];
+      };
+      game_club_members: {
+        Row: { club_id: string; user_id: string; joined_at: string };
+        Insert: { club_id: string; user_id: string; joined_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      editorial_revisions: {
+        Row: { id: string; post_id: string; editor_id: string | null; change_type: string; previous_status: string | null; next_status: string | null; correction_note: string | null; created_at: string };
+        Insert: { id?: string; post_id: string; editor_id?: string | null; change_type: string; previous_status?: string | null; next_status?: string | null; correction_note?: string | null; created_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      admin_trash: {
+        Row: { id: string; content_type: string; content_id: string; snapshot: Json; deleted_by: string | null; deleted_at: string; expires_at: string; restored_at: string | null };
+        Insert: { id?: string; content_type: string; content_id: string; snapshot: Json; deleted_by?: string | null; deleted_at?: string; expires_at?: string; restored_at?: string | null };
+        Update: { restored_at?: string | null };
+        Relationships: [];
+      };
+      admin_audit_log: {
+        Row: { id: number; actor_id: string | null; action: string; target_type: string; target_id: string | null; details: Json; created_at: string };
+        Insert: { actor_id?: string | null; action: string; target_type: string; target_id?: string | null; details?: Json; created_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      community_note_votes: {
+        Row: { note_id: string; user_id: string; created_at: string };
+        Insert: { note_id: string; user_id: string; created_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      backup_runs: {
+        Row: { id: string; status: "started" | "verified" | "failed"; manifest: Json; created_at: string; verified_at: string | null };
+        Insert: { id?: string; status: "started" | "verified" | "failed"; manifest?: Json; created_at?: string; verified_at?: string | null };
+        Update: { status?: "started" | "verified" | "failed"; manifest?: Json; verified_at?: string | null };
+        Relationships: [];
+      };
+      app_error_events: {
+        Row: { id: string; source: string; severity: "warning" | "error"; reference: string | null; route: string | null; message: string; metadata: Json; created_at: string };
+        Insert: { id?: string; source: string; severity?: "warning" | "error"; reference?: string | null; route?: string | null; message: string; metadata?: Json; created_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
     };
     Functions: {
       consume_rate_limit: {
@@ -158,6 +224,9 @@ export interface Database {
         Args: { target_report_id: string; target_action: string };
         Returns: Json;
       };
+      admin_archive_post: { Args: { target_post_id: string }; Returns: undefined };
+      admin_restore_post: { Args: { target_trash_id: string }; Returns: undefined };
+      apply_retention_policy: { Args: Record<string, never>; Returns: Json };
     };
     Views: Record<string, never>;
     Enums: Record<string, never>;
@@ -181,6 +250,10 @@ export interface Post {
   created_at: string;
   updated_at: string;
   topic_id: string | null;
+  information_status: "confirmed" | "developing" | "rumor" | "updated" | "corrected";
+  featured_quote: Json | null;
+  editorial_sources: Json;
+  correction_note: string | null;
 }
 
 export interface PostInsert {
@@ -199,6 +272,10 @@ export interface PostInsert {
   created_at?: string;
   updated_at?: string;
   topic_id?: string | null;
+  information_status?: Post["information_status"];
+  featured_quote?: Json | null;
+  editorial_sources?: Json;
+  correction_note?: string | null;
 }
 
 export interface EditorialImage {
@@ -510,6 +587,7 @@ export interface CommunityPostRow {
   id: string;
   user_id: string;
   author_name: string;
+  author_username: string | null;
   author_avatar: string;
   content: string;
   media_url: string | null;
@@ -528,6 +606,7 @@ export interface CommunityPostInsert {
   id?: string;
   user_id: string;
   author_name: string;
+  author_username?: string | null;
   author_avatar: string;
   content: string;
   media_url?: string | null;
@@ -563,6 +642,7 @@ export interface CommunityCommentRow {
   post_id: string;
   user_id: string;
   author_name: string;
+  author_username: string | null;
   author_avatar: string;
   is_official: boolean;
   content: string;
@@ -574,6 +654,7 @@ export interface CommunityCommentInsert {
   post_id: string;
   user_id: string;
   author_name: string;
+  author_username?: string | null;
   author_avatar: string;
   is_official?: boolean;
   content: string;

@@ -36,6 +36,13 @@ const tables = [
   "rewards",
   "user_rewards",
   "push_subscriptions",
+  "notification_preferences",
+  "user_follows",
+  "community_notes",
+  "community_note_votes",
+  "editorial_revisions",
+  "admin_trash",
+  "admin_audit_log",
 ];
 
 await mkdir(outputDirectory, { recursive: true });

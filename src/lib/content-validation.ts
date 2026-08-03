@@ -26,6 +26,12 @@ interface EditorialContent {
   imageUrl: string;
   imageAlt: string;
   blocks: EditorialBlock[];
+  editorialMetadata?: {
+    informationStatus: "confirmed" | "developing" | "rumor" | "updated" | "corrected";
+    quote?: { text: string; author: string; role: string; sourceUrl: string } | null;
+    sources: Array<{ name: string; url: string }>;
+    correctionNote?: string | null;
+  };
 }
 
 const hasCjk = (value: string) => /[\u3400-\u4dbf\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/u.test(value);
@@ -71,6 +77,14 @@ export function validateEditorialContent(content: EditorialContent): string[] {
 
   if (hasCjk(text)) {
     errors.push("O conteúdo contém caracteres CJK (chinês/japonês/coreano) e precisa ser traduzido.");
+  }
+
+  const metadata = content.editorialMetadata;
+  if (metadata) {
+    if (metadata.quote?.text && (!metadata.quote.author.trim() || !metadata.quote.role.trim() || !isValidImageUrl(metadata.quote.sourceUrl))) errors.push("A fala em destaque precisa de nome, cargo e URL HTTPS da fonte.");
+    if (metadata.sources.some((source) => !source.name.trim() || !isValidImageUrl(source.url))) errors.push("Todas as fontes estruturadas precisam de nome e URL HTTPS.");
+    if (metadata.informationStatus === "rumor" && metadata.sources.length === 0) errors.push("Uma matéria marcada como rumor precisa ter ao menos uma fonte estruturada.");
+    if (metadata.informationStatus === "corrected" && !metadata.correctionNote?.trim()) errors.push("Explique a correção antes de publicar a matéria como corrigida.");
   }
 
   return errors;

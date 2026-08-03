@@ -12,6 +12,7 @@ import type { Post, PostCategory, Topic } from "@/lib/types/database";
 
 type ContentBlock = EditorialBlock;
 type SidebarTab = "publicacao" | "seo" | "midia" | "historico";
+type InformationStatus = Post["information_status"];
 
 function errorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback;
@@ -44,6 +45,13 @@ function EditForm() {
   const [authorName, setAuthorName] = useState("Redação");
   const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [informationStatus, setInformationStatus] = useState<InformationStatus>("confirmed");
+  const [quoteText, setQuoteText] = useState("");
+  const [quoteAuthor, setQuoteAuthor] = useState("");
+  const [quoteRole, setQuoteRole] = useState("");
+  const [quoteSourceUrl, setQuoteSourceUrl] = useState("");
+  const [sourcesText, setSourcesText] = useState("");
+  const [correctionNote, setCorrectionNote] = useState("");
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("publicacao");
 
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
@@ -81,8 +89,11 @@ function EditForm() {
       { id: 5, label: "Categoria selecionada", complete: Boolean(category) },
       { id: 6, label: "Revisar links externos", complete: /\*\*Fonte:\*\*/i.test(textContent) || textContent.includes("http") },
       { id: 7, label: "Definir SEO description", complete: summary.trim().length >= 50 },
+      { id: 8, label: "Estado da informação definido", complete: Boolean(informationStatus) },
+      { id: 9, label: "Citação com autoria e fonte", complete: !quoteText.trim() || Boolean(quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim())) },
+      { id: 10, label: "Fontes estruturadas", complete: sourcesText.split("\n").filter(Boolean).every((line) => /^.+\|https:\/\//.test(line.trim())) },
     ];
-  }, [blocks, category, imageAlt, imageUrl, summary, title]);
+  }, [blocks, category, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteSourceUrl, quoteText, sourcesText, summary, title]);
 
   const completedChecklistCount = editorialChecklist.filter((item) => item.complete).length;
   const pendingChecklistCount = editorialChecklist.length - completedChecklistCount;
@@ -169,6 +180,15 @@ function EditForm() {
           setAuthorName(typedPost.author_name);
           setAuthorTag(normalizeAuthorTag(typedPost.author_tag));
           setPublishedAt(typedPost.published_at || null);
+          setInformationStatus(typedPost.information_status || "confirmed");
+          const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string } | null;
+          setQuoteText(storedQuote?.text || "");
+          setQuoteAuthor(storedQuote?.author || "");
+          setQuoteRole(storedQuote?.role || "");
+          setQuoteSourceUrl(storedQuote?.source_url || "");
+          const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string }> : [];
+          setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"));
+          setCorrectionNote(typedPost.correction_note || "");
 
           try {
             const parsedBlocks = JSON.parse(typedPost.body);
@@ -245,11 +265,24 @@ function EditForm() {
       if (!title.trim()) throw new Error("O título é obrigatório");
       if (!slug.trim()) throw new Error("O slug é obrigatório");
       if (isPublished) {
-        const validationErrors = validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks });
+        const parsedSources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
+          const separator = line.indexOf("|");
+          return { name: separator >= 0 ? line.slice(0, separator).trim() : "", url: separator >= 0 ? line.slice(separator + 1).trim() : "" };
+        });
+        const validationErrors = validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks, editorialMetadata: {
+          informationStatus,
+          quote: quoteText.trim() ? { text: quoteText, author: quoteAuthor, role: quoteRole, sourceUrl: quoteSourceUrl } : null,
+          sources: parsedSources,
+          correctionNote,
+        } });
         if (validationErrors.length > 0) throw new Error(validationErrors[0]);
       }
 
       const bodyJson = JSON.stringify(blocks);
+      const editorialSources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
+        const separator = line.indexOf("|");
+        return { name: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
+      });
 
       const postData = {
         title: title.trim(),
@@ -265,6 +298,10 @@ function EditForm() {
         is_published: isPublished,
         published_at: isPublished ? (publishedAt || new Date().toISOString()) : null,
         updated_at: new Date().toISOString(),
+        information_status: informationStatus,
+        featured_quote: quoteText.trim() ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim() } : null,
+        editorial_sources: editorialSources,
+        correction_note: correctionNote.trim() || null,
       };
 
       if (postId) {
@@ -596,6 +633,34 @@ function EditForm() {
                 {topics.map((topic) => <option key={topic.id} value={topic.id}>{topic.name}</option>)}
               </select>
             </div>
+
+            <div>
+              <label htmlFor="information-status" className="mb-1 block text-[10px] font-bold text-gray-500">Estado da informação</label>
+              <select id="information-status" value={informationStatus} onChange={(event) => { setInformationStatus(event.target.value as InformationStatus); setHasChanges(true); }} className="h-9 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none focus:border-brand-orange/50">
+                <option value="confirmed">Confirmada</option>
+                <option value="developing">Em desenvolvimento</option>
+                <option value="rumor">Rumor não confirmado</option>
+                <option value="updated">Atualizada</option>
+                <option value="corrected">Corrigida</option>
+              </select>
+            </div>
+
+            {(informationStatus === "corrected" || correctionNote) && <div>
+              <label htmlFor="correction-note" className="mb-1 block text-[10px] font-bold text-gray-500">Nota de correção</label>
+              <textarea id="correction-note" value={correctionNote} onChange={(event) => { setCorrectionNote(event.target.value); setHasChanges(true); }} rows={3} maxLength={500} placeholder="Explique com clareza o que foi corrigido." className="w-full rounded border border-white/10 bg-background-void p-2 text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            </div>}
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-[10px] leading-relaxed text-gray-500">A fala só será exibida com autoria e URL da fonte.</p></div>
+            <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
+            <div className="grid gap-2 xs:grid-cols-2"><input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Nome da pessoa" className="h-9 rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" /><input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Cargo ou função" className="h-9 rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" /></div>
+            <input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="h-9 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" />
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-[10px] leading-relaxed text-gray-500">Uma por linha no formato Nome|https://endereco.com</p></div>
+            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-[11px] leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}

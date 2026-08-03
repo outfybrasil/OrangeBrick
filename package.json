@@ -10,10 +10,12 @@
     "lint": "eslint --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
-    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "textcheck": "node scripts/check-text-integrity.mjs",
+    "check": "npm run textcheck && npm run lint && npm run typecheck && npm test && npm run build",
     "admin:create": "node scripts/create-admin.mjs",
     "images:migrate": "node --env-file=.env.local scripts/migrate-editorial-images.mjs && node --env-file=.env.local scripts/migrate-site-images.mjs",
     "backup:create": "node --env-file=.env.local scripts/backup-supabase.mjs",
+    "backup:verify": "node scripts/verify-backup.mjs",
     "scan-news": "node scripts/scan-news.mjs"
   },
   "dependencies": {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings";
+type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -180,6 +180,7 @@ export function AdminShell({
                 <ProgressionIcon />
                 Progressão
               </Link>
+              <Link href="/admin/health" className={navClass("health")}><OverviewIcon />Saúde e auditoria</Link>
             </div>
           </div>
 

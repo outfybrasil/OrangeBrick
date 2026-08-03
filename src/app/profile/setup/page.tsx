@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
-import { getGoogleAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 
 export default function ProfileSetup() {
   const { user, profile, isLoading } = useAuth();
@@ -15,6 +15,7 @@ export default function ProfileSetup() {
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,17 +52,15 @@ export default function ProfileSetup() {
     setError(null);
     try {
       let durableAvatarUrl = avatarUrl.trim() || null;
-      const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/`;
-      if (durableAvatarUrl && !durableAvatarUrl.startsWith(storagePrefix) && !durableAvatarUrl.startsWith("/")) {
+      if (avatarFile) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error("Sua sessão expirou. Entre novamente.");
+        const formData = new FormData();
+        formData.set("avatar", avatarFile);
         const response = await fetch("/api/user/avatar", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ sourceUrl: durableAvatarUrl }),
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: formData,
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Não foi possível salvar o avatar.");
@@ -108,7 +107,7 @@ export default function ProfileSetup() {
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-2xl mx-auto mb-3">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              <img src={avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, nickname || user.email); }} />
             ) : (
               <span>{user.email?.[0].toUpperCase() || "?"}</span>
             )}
@@ -156,19 +155,17 @@ export default function ProfileSetup() {
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
-              URL do Avatar (opcional)
+            <label className="mb-1 block text-[10px] font-bold uppercase text-gray-400">Foto de perfil (opcional)</label>
+            <label className="flex min-h-12 cursor-pointer items-center justify-between rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/50">
+              <span>{avatarFile ? avatarFile.name : "Escolher uma foto"}</span>
+              <span className="text-xs text-brand-orange">Até 8 MB</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => {
+                const file = event.target.files?.[0] || null;
+                setAvatarFile(file);
+                if (file) setAvatarUrl(URL.createObjectURL(file));
+              }} />
             </label>
-            <input
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://exemplo.com/minha-foto.jpg"
-              className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm"
-            />
-            <p className="text-[9px] text-gray-500 mt-1">
-              Use apenas uma imagem hospedada em endereço seguro.
-            </p>
+            <p className="mt-1 text-[9px] text-gray-500">Se não escolher outra imagem, usaremos sua foto do Google.</p>
           </div>
 
           {error && (

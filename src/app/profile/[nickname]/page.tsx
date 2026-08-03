@@ -10,6 +10,7 @@ import { UserBadge } from "@/components/ui/UserBadge";
 import { AchievementMark, LevelProgress, SeasonStanding } from "@/components/community/ProgressionUI";
 import { formatXp } from "@/lib/progression";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { FollowButton } from "@/components/topics/FollowButton";
 import type { PrivateProgressData, PublicProfileData } from "@/lib/types/progression";
 
 type ProfileTab = "overview" | "bricks" | "achievements" | "history";
@@ -60,8 +61,11 @@ function PlatformIcon({ platform }: { platform: string }) {
   const lower = platform.toLowerCase();
   if (lower.includes("xbox"))
     return (
-      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4.663 3.09c1.942-1.282 4.254-2.023 6.741-2.023 2.484 0 4.796.74 6.737 2.022-2.148 2.378-4.717 4.966-6.737 7.026-2.021-2.06-4.59-4.648-6.741-7.025zm-2.025 2.025C1.356 7.057.616 9.369.616 11.853c0 2.484.74 4.796 2.022 6.737 2.378-2.148 4.966-4.717 7.026-6.737-2.06-2.021-4.648-4.59-7.026-6.738zm18.127 0c-2.378 2.147-4.965 4.716-7.026 6.737 2.061 2.02 4.648 4.589 7.026 6.737 1.282-1.941 2.022-4.253 2.022-6.737 0-2.484-.74-4.796-2.022-6.737zm-9.062 9.062c2.06 2.061 4.648 4.629 7.026 6.737-1.941 1.282-4.253 2.022-6.737 2.022-2.487 0-4.799-.74-6.741-2.022 2.378-2.108 4.947-4.676 7.008-6.737z" />
+      <svg aria-hidden="true" className="h-3.5 w-3.5 shrink-0" viewBox="0 0 512 512" fill="currentColor">
+        <path d="M126.8 248.3c39.7-58.6 77.9-92.8 77.9-92.8s-42.1-48.9-92.8-67.4l-3.3-.8A224.13 224.13 0 0 0 77.2 391c0-4.4.6-70.3 49.6-142.7Z" />
+        <path d="M480 256a223.71 223.71 0 0 0-76.6-168.7l-3.2.9c-50.7 18.5-92.9 67.4-92.9 67.4s38.2 34.2 77.9 92.8c49 72.4 49.6 138.3 49.5 142.7A222.8 222.8 0 0 0 480 256Z" />
+        <path d="M201.2 80.9c29.3 13.1 54.6 34.6 54.6 34.6s25.5-21.4 54.8-34.6c36.8-16.5 64.9-11.3 72.3-9.5a224.06 224.06 0 0 0-253.8 0c7.2-1.8 35.2-7.1 72.1 9.5Z" />
+        <path d="M358.7 292.9C312.4 236 255.8 199 255.8 199s-56.3 37-102.7 93.9c-39.8 48.9-54.6 84.8-62.6 107.8l-1.3 4.8a224 224 0 0 0 333.6 0l-1.4-4.8c-8-23-22.9-58.9-62.7-107.8Z" />
       </svg>
     );
   if (lower.includes("pc") || lower.includes("window"))
@@ -294,7 +298,7 @@ function ProfilePageContent() {
                       <Link href="/configuracoes/perfil" className="inline-flex min-h-10 items-center justify-center border border-white/20 px-4 text-xs font-bold text-white hover:border-brand-orange/50 transition-colors">Editar perfil</Link>
                     </>
                   ) : (
-                    <button type="button" onClick={() => void navigator.clipboard?.writeText(window.location.href)} className="min-h-10 border border-white/20 px-4 text-xs font-bold text-white hover:border-brand-orange/50 transition-colors">Copiar link</button>
+                    <><FollowButton type="profile" value={profile.user_id} label="Seguir leitor" /><button type="button" onClick={() => void navigator.clipboard?.writeText(window.location.href)} className="min-h-10 border border-white/20 px-4 text-xs font-bold text-white hover:border-brand-orange/50 transition-colors">Copiar link</button></>
                   )}
                 </div>
               </div>

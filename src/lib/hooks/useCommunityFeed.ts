@@ -127,6 +127,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           id: row.id,
           user_id: row.user_id,
           author_name: row.author_name,
+          author_username: row.author_username,
           author_avatar: row.author_avatar,
           content: row.content,
           media_url: row.media_url,
@@ -262,6 +263,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
+        author_username: profile?.username || null,
         author_avatar: authorAvatar,
         content,
         platform_tag: platformTag || null,
@@ -413,12 +415,14 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
+        author_username: profile?.username || null,
         author_avatar: authorAvatar,
         content: comment,
         attached_article: {
           _type: "shared_post",
           original_post_id: originalPost.id,
           original_author_name: originalPost.author_name,
+          original_author_username: originalPost.author_username,
           original_author_avatar: originalPost.author_avatar,
           original_content: originalPost.content,
           original_created_at: originalPost.created_at,
@@ -474,6 +478,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         post_id: postId,
         user_id: user.id,
         author_name: authorName,
+        author_username: profile?.username || null,
         author_avatar: authorAvatar,
         content,
       });
@@ -559,6 +564,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         post_id: row.post_id,
         user_id: row.user_id,
         author_name: row.author_name,
+        author_username: row.author_username,
         author_avatar: row.author_avatar || "/icons/default-avatar.png",
         is_official: row.is_official,
         content: row.content,

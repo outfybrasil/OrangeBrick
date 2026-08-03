@@ -8,5 +8,9 @@
       "path": "/api/cron/release-radar-cleanup",
       "schedule": "0 6 1 * *"
     }
+    ,{
+      "path": "/api/cron/retention",
+      "schedule": "0 5 * * *"
+    }
   ]
 }
