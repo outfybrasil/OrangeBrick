@@ -5,7 +5,17 @@ import { getSiteUrl } from "@/lib/site-url";
 export const revalidate = 3600;
 
 function esc(s: string) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+}
+
+function formatDateISO(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  } catch {
+    return null;
+  }
 }
 
 export async function GET() {
@@ -73,8 +83,9 @@ export async function GET() {
   for (const post of posts) {
     lines.push("  <url>",
       `    <loc>${esc(`${siteUrl}/posts/${post.slug}`)}</loc>`);
-    if (post.updated_at) {
-      lines.push(`    <lastmod>${post.updated_at}</lastmod>`);
+    const formattedLastMod = formatDateISO(post.updated_at);
+    if (formattedLastMod) {
+      lines.push(`    <lastmod>${formattedLastMod}</lastmod>`);
     }
     lines.push(
       `    <changefreq>weekly</changefreq>`,
@@ -85,7 +96,10 @@ export async function GET() {
   for (const topic of topics) {
     lines.push("  <url>",
       `    <loc>${esc(`${siteUrl}/assuntos/${topic.id}`)}</loc>`);
-    if (topic.updated_at) lines.push(`    <lastmod>${topic.updated_at}</lastmod>`);
+    const formattedTopicLastMod = formatDateISO(topic.updated_at);
+    if (formattedTopicLastMod) {
+      lines.push(`    <lastmod>${formattedTopicLastMod}</lastmod>`);
+    }
     lines.push(
       `    <changefreq>daily</changefreq>`,
       `    <priority>0.6</priority>`,
