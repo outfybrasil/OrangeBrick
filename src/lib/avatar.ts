@@ -20,7 +20,19 @@ export function getGoogleAvatarUrl(user?: User | null): string | null {
   return avatarUrl?.trim() || null;
 }
 
-export function resolveAvatarUrl(avatarUrl?: string | null, _authorName?: string | null, isOfficial = false): string {
+function fallbackAvatar(authorName?: string | null): string {
+  const initials = (authorName || "?")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] || "")
+    .join("")
+    .toUpperCase() || "?";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="#1C1E24"/><circle cx="64" cy="64" r="60" fill="none" stroke="#FF5E00" stroke-width="5"/><text x="64" y="73" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="42" font-weight="700">${initials.replace(/[<>&"']/g, "")}</text></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string | null, isOfficial = false): string {
   const raw = (avatarUrl || "").trim();
 
   if (isOfficial) {
@@ -34,5 +46,5 @@ export function resolveAvatarUrl(avatarUrl?: string | null, _authorName?: string
     return raw;
   }
 
-  return "/icons/default-avatar.png";
+  return fallbackAvatar(authorName);
 }

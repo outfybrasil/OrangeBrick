@@ -1,16 +1,243 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { resolveAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 
 const platforms = ["PS5", "Xbox Series", "Switch 2", "PC", "Mobile"];
 const categories = ["breaking", "hardware", "industry", "modding", "review", "opinion"];
 type UsernameStatus = "idle" | "checking" | "available" | "unavailable" | "error";
+
+function getCroppedBannerBlob(
+  imageSrc: string,
+  posX: number,
+  posY: number,
+  zoom: number
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const targetWidth = 1600;
+      const targetHeight = 500;
+      const canvas = document.createElement("canvas");
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("Canvas failure"));
+
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      const targetAspect = targetWidth / targetHeight;
+
+      let drawWidth = img.naturalWidth;
+      let drawHeight = img.naturalHeight;
+
+      if (imgAspect > targetAspect) {
+        drawWidth = img.naturalHeight * targetAspect;
+      } else {
+        drawHeight = img.naturalWidth / targetAspect;
+      }
+
+      const effectiveZoom = Math.max(1, zoom);
+      drawWidth /= effectiveZoom;
+      drawHeight /= effectiveZoom;
+
+      const maxOffsetX = img.naturalWidth - drawWidth;
+      const maxOffsetY = img.naturalHeight - drawHeight;
+
+      const sourceX = (maxOffsetX * posX) / 100;
+      const sourceY = (maxOffsetY * posY) / 100;
+
+      ctx.drawImage(
+        img,
+        Math.max(0, sourceX),
+        Math.max(0, sourceY),
+        drawWidth,
+        drawHeight,
+        0,
+        0,
+        targetWidth,
+        targetHeight
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("Blob creation failed"));
+          const file = new File([blob], "banner.webp", { type: "image/webp" });
+          resolve(file);
+        },
+        "image/webp",
+        0.92
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = imageSrc;
+  });
+}
+
+interface BannerCropperModalProps {
+  imageSrc: string;
+  onCancel: () => void;
+  onConfirm: (croppedFile: File) => void;
+  isUploading: boolean;
+}
+
+function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: BannerCropperModalProps) {
+  const [posY, setPosY] = useState(50);
+  const [posX, setPosX] = useState(50);
+  const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY, startX: posX, startY: posY };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !dragStart.current) return;
+    const deltaX = (e.clientX - dragStart.current.x) * 0.35;
+    const deltaY = (e.clientY - dragStart.current.y) * 0.35;
+    setPosX(Math.max(0, Math.min(100, dragStart.current.startX - deltaX)));
+    setPosY(Math.max(0, Math.min(100, dragStart.current.startY - deltaY)));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    dragStart.current = null;
+  };
+
+  const handleApply = async () => {
+    try {
+      const croppedFile = await getCroppedBannerBlob(imageSrc, posX, posY, zoom);
+      onConfirm(croppedFile);
+    } catch {
+      // fallback
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+      <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/20 bg-[#16181E] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <div>
+            <h2 className="font-heading text-lg font-black text-white">Ajustar Enquadramento do Banner</h2>
+            <p className="text-xs text-gray-400">Arraste com o mouse na prévia ou use os seletores para escolher a posição exata.</p>
+          </div>
+          <button type="button" onClick={onCancel} disabled={isUploading} className="text-gray-400 hover:text-white p-2 text-lg">✕</button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Interactive Live Preview Box */}
+          <div
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            className="relative aspect-[16/5] w-full cursor-grab overflow-hidden rounded-xl border-2 border-brand-orange bg-black active:cursor-grabbing select-none"
+          >
+            <img
+              src={imageSrc}
+              alt="Prévia do recorte do banner"
+              draggable={false}
+              className="h-full w-full object-cover pointer-events-none"
+              style={{
+                objectPosition: `${posX}% ${posY}%`,
+                transform: `scale(${zoom})`,
+              }}
+            />
+            <div className="absolute inset-0 border border-white/10 pointer-events-none" />
+            <div className="absolute bottom-2 left-2 rounded bg-black/70 px-2.5 py-1 text-[10px] font-bold text-gray-300 backdrop-blur-sm pointer-events-none">
+              Proporção do perfil (1600 × 500)
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
+              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
+                <span>Posição Vertical (Y)</span>
+                <span className="text-brand-orange font-mono">{Math.round(posY)}%</span>
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={posY}
+                onChange={(e) => setPosY(Number(e.target.value))}
+                className="w-full accent-brand-orange cursor-pointer"
+              />
+              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
+                <button type="button" onClick={() => setPosY(0)} className="hover:text-brand-orange">Topo</button>
+                <button type="button" onClick={() => setPosY(50)} className="hover:text-brand-orange">Centro</button>
+                <button type="button" onClick={() => setPosY(100)} className="hover:text-brand-orange">Base</button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
+              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
+                <span>Posição Horizontal (X)</span>
+                <span className="text-brand-orange font-mono">{Math.round(posX)}%</span>
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={posX}
+                onChange={(e) => setPosX(Number(e.target.value))}
+                className="w-full accent-brand-orange cursor-pointer"
+              />
+              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
+                <button type="button" onClick={() => setPosX(0)} className="hover:text-brand-orange">Esquerda</button>
+                <button type="button" onClick={() => setPosX(50)} className="hover:text-brand-orange">Centro</button>
+                <button type="button" onClick={() => setPosX(100)} className="hover:text-brand-orange">Direita</button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-black/20 p-3.5">
+              <label className="mb-2 flex items-center justify-between text-xs font-bold text-gray-200">
+                <span>Zoom</span>
+                <span className="text-brand-orange font-mono">{zoom.toFixed(1)}x</span>
+              </label>
+              <input
+                type="range"
+                min={1}
+                max={2.2}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-full accent-brand-orange cursor-pointer"
+              />
+              <div className="mt-2 flex justify-between text-[11px] text-gray-400">
+                <button type="button" onClick={() => setZoom(1)} className="hover:text-brand-orange">1.0x</button>
+                <button type="button" onClick={() => setZoom(1.4)} className="hover:text-brand-orange">1.4x</button>
+                <button type="button" onClick={() => setZoom(1.8)} className="hover:text-brand-orange">1.8x</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-white/10 px-6 py-4 bg-[#111318]">
+          <button type="button" onClick={onCancel} disabled={isUploading} className="min-h-11 px-4 text-xs font-bold text-gray-300 hover:text-white">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleApply}
+            disabled={isUploading}
+            className="min-h-11 rounded-lg bg-brand-orange px-6 text-xs font-bold text-white hover:bg-[#ff7526] transition-colors disabled:opacity-50"
+          >
+            {isUploading ? "Processando e enviando..." : "Aplicar e Salvar Banner"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfileSettingsPage() {
   const { user, profile, isLoading, refreshProfile } = useAuth();
@@ -20,8 +247,10 @@ export default function ProfileSettingsPage() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [bannerUrl, setBannerUrl] = useState("");
   const [isBannerUploading, setIsBannerUploading] = useState(false);
+  const [bannerCropSrc, setBannerCropSrc] = useState<string | null>(null);
   const [favoritePlatforms, setFavoritePlatforms] = useState<string[]>([]);
   const [favoriteCategories, setFavoriteCategories] = useState<string[]>([]);
   const [showLifetimeXp, setShowLifetimeXp] = useState(true);
@@ -129,10 +358,33 @@ export default function ProfileSettingsPage() {
       setMessage(result.error || "Não foi possível salvar o banner.");
     } else {
       setBannerUrl(result.publicUrl);
+      setBannerCropSrc(null);
       await refreshProfile();
-      setMessage("Banner atualizado.");
+      setMessage("Banner atualizado com sucesso!");
     }
     setIsBannerUploading(false);
+  }
+
+  async function uploadAvatar(file: File) {
+    setIsAvatarUploading(true);
+    setMessage(null);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setMessage("Sua sessão expirou. Entre novamente para continuar.");
+      setIsAvatarUploading(false);
+      return;
+    }
+    const formData = new FormData();
+    formData.set("avatar", file);
+    const response = await fetch("/api/user/avatar", { method: "POST", headers: { Authorization: `Bearer ${session.access_token}` }, body: formData });
+    const result = await response.json() as { publicUrl?: string; error?: string };
+    if (!response.ok || !result.publicUrl) setMessage(result.error || "Não foi possível salvar a foto.");
+    else {
+      setAvatarUrl(result.publicUrl);
+      await refreshProfile();
+      setMessage("Foto de perfil atualizada.");
+    }
+    setIsAvatarUploading(false);
   }
 
   async function saveProfile(event: React.FormEvent) {
@@ -153,38 +405,12 @@ export default function ProfileSettingsPage() {
       return;
     }
 
-    let durableAvatarUrl = avatarUrl.trim() || null;
-    const storagePrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/`;
-    if (durableAvatarUrl && !durableAvatarUrl.startsWith(storagePrefix) && !durableAvatarUrl.startsWith("/")) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setMessage("Sua sessão expirou. Entre novamente para salvar.");
-        setIsSaving(false);
-        return;
-      }
-      const response = await fetch("/api/user/avatar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ sourceUrl: durableAvatarUrl }),
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        setMessage(result.error || "Não foi possível salvar o avatar no Orange Brick.");
-        setIsSaving(false);
-        return;
-      }
-      durableAvatarUrl = result.publicUrl;
-      setAvatarUrl(durableAvatarUrl || "");
-    }
+    const durableAvatarUrl = avatarUrl.trim() || getGoogleAvatarUrl(user) || null;
 
     const { error } = await supabase
       .from("profiles")
       .update({
         display_name: displayName.trim(),
-        nickname: displayName.trim(),
         username: normalizedUsername,
         bio: bio.trim() || null,
         avatar_url: durableAvatarUrl,
@@ -194,7 +420,6 @@ export default function ProfileSettingsPage() {
         show_activity_stats: showActivityStats,
         show_season_history: showSeasonHistory,
         show_in_leaderboard: showInLeaderboard,
-        updated_at: new Date().toISOString(),
       })
       .eq("user_id", user.id);
 
@@ -225,6 +450,16 @@ export default function ProfileSettingsPage() {
 
   return (
     <main className="min-h-dvh bg-background-void text-white">
+      {/* Banner Cropper Modal */}
+      {bannerCropSrc && (
+        <BannerCropperModal
+          imageSrc={bannerCropSrc}
+          onCancel={() => setBannerCropSrc(null)}
+          onConfirm={(file) => void uploadBanner(file)}
+          isUploading={isBannerUploading}
+        />
+      )}
+
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href={`/profile/${profile.username}`} className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Meu perfil</Link>
@@ -240,10 +475,11 @@ export default function ProfileSettingsPage() {
             <img
               src={resolveAvatarUrl(avatarUrl, displayName)}
               alt="Prévia do avatar"
-              className="mt-7 h-24 w-24 object-cover"
+              className="mt-7 h-24 w-24 rounded-full border-2 border-brand-orange/40 object-cover"
               referrerPolicy="no-referrer"
+              onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, displayName); }}
             />
-            <div className="mt-6 overflow-hidden border border-white/10 bg-card-slate">
+            <div className="mt-6 overflow-hidden rounded-xl border border-white/10 bg-card-slate">
               {bannerUrl ? (
                 <img src={bannerUrl} alt="Prévia do banner" className="aspect-[16/5] w-full object-cover" />
               ) : (
@@ -291,27 +527,46 @@ export default function ProfileSettingsPage() {
               <Field label="Biografia" hint={`${bio.length}/160 caracteres`}>
                 <textarea value={bio} onChange={(event) => setBio(event.target.value)} maxLength={160} rows={4} className="w-full resize-none border border-white/15 bg-black/20 px-4 py-3 text-sm outline-none focus:border-brand-orange/60" />
               </Field>
-              <Field label="Avatar" hint="Use uma imagem HTTPS. O upload próprio será adicionado em uma etapa posterior.">
-                <input type="url" value={avatarUrl} onChange={(event) => setAvatarUrl(event.target.value)} className="min-h-12 w-full border border-white/15 bg-black/20 px-4 text-sm outline-none focus:border-brand-orange/60" />
-              </Field>
-              <Field label="Banner do perfil" hint="JPG, PNG, WebP ou AVIF. Até 8 MB.">
-                <div className="overflow-hidden border border-white/15 bg-black/20">
-                  {bannerUrl && <img src={bannerUrl} alt="" className="aspect-[16/5] w-full object-cover" />}
-                  <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-sm font-semibold text-gray-200 hover:bg-white/[0.04]">
-                    <span>{isBannerUploading ? "Processando imagem…" : bannerUrl ? "Trocar banner" : "Escolher banner"}</span>
-                    <span className="text-xs text-brand-orange">1600 × 500</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/avif"
-                      disabled={isBannerUploading}
-                      className="sr-only"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) void uploadBanner(file);
-                        event.target.value = "";
-                      }}
-                    />
+              <Field label="Foto de perfil" hint="JPG, PNG, WebP ou AVIF. Até 8 MB.">
+                <div className="flex flex-wrap items-center gap-3 border border-white/15 bg-black/20 p-3">
+                  <label className="inline-flex min-h-11 cursor-pointer items-center bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526]">
+                    {isAvatarUploading ? "Processando…" : "Escolher foto"}
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={isAvatarUploading} className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ""; }} />
                   </label>
+                  <button type="button" onClick={() => setAvatarUrl(getGoogleAvatarUrl(user) || "")} className="min-h-11 px-3 text-xs font-bold text-gray-300 hover:text-white">Usar foto do Google</button>
+                </div>
+              </Field>
+              <Field label="Banner do perfil" hint="Escolha uma imagem e ajuste a posição ideal. JPG, PNG, WebP ou AVIF (até 8 MB).">
+                <div className="overflow-hidden border border-white/15 bg-black/20 rounded-xl">
+                  {bannerUrl && <img src={bannerUrl} alt="Banner atual" className="aspect-[16/5] w-full object-cover" />}
+                  <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 px-4 py-2 text-sm font-semibold text-gray-200">
+                    <label className="flex cursor-pointer items-center gap-2 hover:text-brand-orange transition-colors">
+                      <span>{isBannerUploading ? "Processando imagem…" : bannerUrl ? "Trocar banner" : "Escolher banner"}</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/avif"
+                        disabled={isBannerUploading}
+                        className="sr-only"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) {
+                            const url = URL.createObjectURL(file);
+                            setBannerCropSrc(url);
+                          }
+                          event.target.value = "";
+                        }}
+                      />
+                    </label>
+                    {bannerUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setBannerCropSrc(bannerUrl)}
+                        className="text-xs font-bold text-brand-orange hover:underline"
+                      >
+                        Ajustar enquadramento do banner atual
+                      </button>
+                    )}
+                  </div>
                 </div>
               </Field>
             </SettingsSection>
@@ -328,49 +583,82 @@ export default function ProfileSettingsPage() {
                 <>
                   <CosmeticChoice
                     title="Título"
-                    description="A assinatura exibida junto ao seu nome."
+                    description="Escolha o título exibido no topo do seu perfil."
                     options={rewards.filter((reward) => reward.type === "title")}
                     value={selectedTitle}
                     onChange={setSelectedTitle}
                     emptyLabel="Sem título"
                   />
                   <CosmeticChoice
-                    title="Moldura"
-                    description="O acabamento visual do seu avatar."
-                    options={rewards.filter((reward) => reward.type === "avatar_frame")}
+                    title="Moldura do avatar"
+                    description="Personalize o contorno do seu avatar no perfil."
+                    options={rewards.filter((reward) => reward.type === "frame")}
                     value={selectedFrame}
                     onChange={setSelectedFrame}
-                    emptyLabel="Sem moldura"
-                  />
-                  <CosmeticChoice
-                    title="Tema"
-                    description="Muda o tratamento visual do cabeçalho do perfil."
-                    options={rewards.filter((reward) => reward.type === "profile_theme")}
-                    value={selectedTheme}
-                    onChange={setSelectedTheme}
                     emptyLabel="Padrão"
-                    emptyValue="default"
                   />
-                  <Link href="/brickboard/conquistas" className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange hover:text-white">
-                    Ver conquistas e próximos desbloqueios →
-                  </Link>
+                  <fieldset>
+                    <legend className="text-xs font-bold text-gray-200">Tema visual</legend>
+                    <p className="mt-1 text-xs leading-5 text-gray-500">Mude a atmosfera da sua página pública de leitor.</p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        { slug: "default", name: "Orange Standard" },
+                        ...rewards.filter((reward) => reward.type === "theme"),
+                      ].map((option) => {
+                        const active = selectedTheme === option.slug;
+                        return (
+                          <button
+                            key={option.slug}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => setSelectedTheme(option.slug)}
+                            className={`min-h-11 border px-4 text-xs font-semibold transition-colors ${active ? "border-brand-orange bg-brand-orange/10 text-white" : "border-white/15 text-gray-400 hover:border-white/30 hover:text-white"}`}
+                          >
+                            {option.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                 </>
               )}
             </SettingsSection>
 
-            <SettingsSection title="Privacidade">
-              <PrivacyToggle label="Exibir XP vitalício" description="O nível continua público, mas o total exato pode ficar privado." checked={showLifetimeXp} onChange={setShowLifetimeXp} />
-              <PrivacyToggle label="Exibir estatísticas" description="Mostra Bricks, comentários e interações recebidas." checked={showActivityStats} onChange={setShowActivityStats} />
-              <PrivacyToggle label="Exibir temporadas anteriores" description="Permite mostrar seu histórico competitivo." checked={showSeasonHistory} onChange={setShowSeasonHistory} />
-              <PrivacyToggle label="Participar do ranking público" description="Seu XP sazonal continua sendo calculado mesmo com o perfil oculto do ranking." checked={showInLeaderboard} onChange={setShowInLeaderboard} />
+            <SettingsSection title="Privacidade da conta">
+              <PrivacyToggle
+                label="Exibir XP total acumulado no perfil"
+                description="Mostra o histórico global de XP mesmo após o fechamento da temporada."
+                checked={showLifetimeXp}
+                onChange={setShowLifetimeXp}
+              />
+              <PrivacyToggle
+                label="Exibir contador de contribuições comunitárias"
+                description="Mostra o total de bricks criados, comentários e reações recebidas."
+                checked={showActivityStats}
+                onChange={setShowActivityStats}
+              />
+              <PrivacyToggle
+                label="Exibir histórico de temporadas passadas"
+                description="Permite que leitores vejam seu nível final em edições anteriores do Brickboard."
+                checked={showSeasonHistory}
+                onChange={setShowSeasonHistory}
+              />
+              <PrivacyToggle
+                label="Aparecer no ranking público da temporada"
+                description="Seu usuário será listado no leaderboard geral do Brickboard."
+                checked={showInLeaderboard}
+                onChange={setShowInLeaderboard}
+              />
             </SettingsSection>
 
-            {message && <p role="status" className={`border-y py-3 text-sm ${message === "Perfil atualizado." || message === "Banner atualizado." ? "border-emerald-400/30 text-emerald-200" : "border-red-400/30 text-red-200"}`}>{message}</p>}
-
-            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-white/10 pt-6">
-              <Link href={`/profile/${profile.username}`} className="inline-flex min-h-11 items-center px-4 text-xs font-bold text-gray-300 hover:text-white">Cancelar</Link>
-              <button type="submit" disabled={isSaving || usernameStatus !== "available"} className="min-h-11 bg-brand-orange px-6 text-xs font-bold text-white hover:bg-[#ff7526] disabled:cursor-not-allowed disabled:opacity-50">
-                {isSaving ? "Salvando…" : "Salvar perfil"}
+            <div className="flex items-center justify-between border-t border-white/10 pt-6">
+              {message && <p className="text-xs text-brand-orange">{message}</p>}
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="ml-auto inline-flex min-h-11 items-center bg-brand-orange px-6 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50"
+              >
+                {isSaving ? "Salvando…" : "Salvar alterações"}
               </button>
             </div>
           </div>
@@ -382,9 +670,9 @@ export default function ProfileSettingsPage() {
 
 function SettingsSection({ title, id, children }: { title: string; id?: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-20">
-      <h2 className="border-b border-white/10 pb-3 font-heading text-xl font-bold">{title}</h2>
-      <div className="mt-6 space-y-6">{children}</div>
+    <section id={id} className="space-y-6 border-b border-white/10 pb-10">
+      <h2 className="font-heading text-lg font-black uppercase tracking-wider text-white">{title}</h2>
+      {children}
     </section>
   );
 }

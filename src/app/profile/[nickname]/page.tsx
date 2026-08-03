@@ -189,10 +189,10 @@ function ProfilePageContent() {
   ];
   const frameClass =
     profile.equipped_frame === "aco-prensado"
-      ? "border-4 border-[#cbd0d6] outline outline-1 outline-white/30"
+      ? "border-4 border-[#cbd0d6] outline outline-1 outline-white/30 rounded-full"
       : profile.equipped_frame === "encaixe-basico"
-        ? "border-4 border-brand-orange"
-        : "border-2 border-white/20";
+        ? "border-4 border-brand-orange rounded-full"
+        : "border-2 border-brand-orange/40 rounded-full";
   const statsMax = profile.stats
     ? Math.max(profile.stats.posts, profile.stats.comments, profile.stats.reactions_received, profile.stats.replies_received, profile.stats.achievements, 1)
     : 1;
@@ -229,13 +229,13 @@ function ProfilePageContent() {
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div className={`h-28 w-28 overflow-hidden sm:h-32 sm:w-32 ${frameClass}`}>
-                  <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                <div className={`h-28 w-28 overflow-hidden rounded-full sm:h-32 sm:w-32 ${frameClass}`}>
+                  <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full rounded-full object-cover" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, profile.display_name); }} />
                 </div>
                 {!profile.is_official && profile.progress && (
-                  <div className="absolute -bottom-2 -right-2 min-w-10 border-2 border-[#0E0F14] bg-brand-orange px-2 py-1 text-center text-white">
+                  <div className="absolute -bottom-1 -right-1 min-w-9 rounded-full border-2 border-[#0E0F14] bg-brand-orange px-2 py-0.5 text-center text-white shadow-md">
                     <span className="block text-[8px] font-black uppercase tracking-wider">Nv.</span>
-                    <strong className="font-heading text-sm leading-none">{profile.progress.level}</strong>
+                    <strong className="font-heading text-xs leading-none">{profile.progress.level}</strong>
                   </div>
                 )}
               </div>
