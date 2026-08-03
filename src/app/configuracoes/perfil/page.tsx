@@ -64,10 +64,28 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
 
   const handleConfirm = async () => {
     if (!imgRef.current) return;
-    const img = imgRef.current;
+    let imgToDraw: HTMLImageElement = imgRef.current;
+    let createdBlobUrl: string | null = null;
 
-    const realImgWidth = img.naturalWidth;
-    const realImgHeight = img.naturalHeight;
+    try {
+      if (imageSrc.startsWith("http://") || imageSrc.startsWith("https://")) {
+        const res = await fetch(imageSrc, { mode: "cors" });
+        const blob = await res.blob();
+        createdBlobUrl = URL.createObjectURL(blob);
+        const loadedImg = new Image();
+        await new Promise((resolve, reject) => {
+          loadedImg.onload = resolve;
+          loadedImg.onerror = reject;
+          loadedImg.src = createdBlobUrl!;
+        });
+        imgToDraw = loadedImg;
+      }
+    } catch {
+      // If fetch fails or CORS issue occurs, fallback to loaded imgRef.current
+    }
+
+    const realImgWidth = imgToDraw.naturalWidth || imgRef.current.naturalWidth;
+    const realImgHeight = imgToDraw.naturalHeight || imgRef.current.naturalHeight;
 
     const cropYPx = (boxY / 100) * realImgHeight;
     const cropXPx = (boxX / 100) * realImgWidth;
@@ -81,7 +99,7 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
     if (!ctx) return;
 
     ctx.drawImage(
-      img,
+      imgToDraw,
       Math.max(0, cropXPx),
       Math.max(0, cropYPx),
       Math.min(realImgWidth - cropXPx, cropWPx),
@@ -94,6 +112,9 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
 
     canvas.toBlob(
       (blob) => {
+        if (createdBlobUrl) {
+          URL.revokeObjectURL(createdBlobUrl);
+        }
         if (blob) {
           const file = new File([blob], "banner.webp", { type: "image/webp" });
           onConfirm(file);
@@ -132,6 +153,7 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
             <img
               ref={imgRef}
               src={imageSrc}
+              crossOrigin="anonymous"
               alt="Imagem completa do banner"
               draggable={false}
               className="max-h-[440px] w-auto max-w-full object-contain pointer-events-none"
