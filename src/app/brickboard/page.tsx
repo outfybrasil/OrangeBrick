@@ -13,7 +13,7 @@ import { Footer } from "@/components/ui/Footer";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
 import { formatXp, levelProgress } from "@/lib/progression";
-import { resolveAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 
 const PLATFORM_TABS = [
@@ -29,7 +29,7 @@ function BrickboardContent() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [userProgress, setUserProgress] = useState<PrivateProgressData | null>(null);
   const [renderTimestamp] = useState(() => Date.now());
@@ -116,7 +116,13 @@ function BrickboardContent() {
 
   const xpProgress = userProgress ? levelProgress(userProgress.progress.lifetime_xp, userProgress.progress.level) : 0;
   const nextLevelXp = userProgress ? Math.ceil(userProgress.progress.lifetime_xp / xpProgress * 100) : 500;
-  const avatarUrl = user ? resolveAvatarUrl(user.user_metadata?.avatar_url || null, user.user_metadata?.full_name || "?") : "";
+  const avatarUrl = user
+    ? resolveAvatarUrl(
+        profile?.avatar_url || getGoogleAvatarUrl(user),
+        profile?.display_name || profile?.nickname || user.user_metadata?.full_name || user.email,
+        profile?.is_official
+      )
+    : "";
 
   return (
     <>
@@ -284,11 +290,11 @@ function BrickboardContent() {
             <div className="space-y-0">
               {/* Composer embutido */}
               <div className="mb-4 border border-white/10 bg-white/[0.02] p-4">
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
                   {avatarUrl && user ? (
-                    <img src={avatarUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={avatarUrl} alt="" className="h-9 w-9 shrink-0 aspect-square rounded-full object-cover border border-white/15 bg-[#08090C]" referrerPolicy="no-referrer" onError={(e) => { (e.target as HTMLImageElement).src = resolveAvatarUrl(null, user.email); }} />
                   ) : (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-brand-orange/20 text-brand-orange">
+                    <div className="flex h-9 w-9 shrink-0 aspect-square items-center justify-center rounded-full border border-brand-orange/30 bg-brand-orange/20 text-brand-orange">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     </div>
                   )}
@@ -299,7 +305,7 @@ function BrickboardContent() {
                     Compartilhe uma opinião, pergunta ou descoberta...
                   </button>
                 </div>
-                <div className="mt-3 flex items-center gap-2 pl-11">
+                <div className="mt-3 flex flex-wrap items-center gap-2 sm:pl-[48px]">
                   <button onClick={() => setIsComposeOpen(true)} className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-white/20 hover:text-white">
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     Imagem
