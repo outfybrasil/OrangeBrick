@@ -5,8 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
-import { PlatformBar } from "@/components/feed/PlatformBar";
-import { CommunityPulse } from "@/components/feed/CommunityPulse";
 import { SinceLastVisit } from "@/components/feed/SinceLastVisit";
 import { HomeEngagementTracker } from "@/components/feed/HomeEngagementTracker";
 import { UserNav } from "@/components/auth/UserNav";
@@ -49,7 +47,7 @@ function HomeContent() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d0e12]/98 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0d0e12]/98 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center h-14 px-4 sm:px-6 lg:px-8 gap-3">
           <Link
             href="/"
@@ -77,7 +75,7 @@ function HomeContent() {
                 type="text"
                 defaultValue={qParam}
                 key={`desktop-${qParam}`}
-                placeholder="Buscar no OrangeBrick"
+                placeholder="Buscar no Orange Brick"
                 className="h-9 w-full border border-white/10 bg-white/[0.04] px-3 pl-9 text-xs text-white outline-none transition-all placeholder:text-gray-500 focus:border-brand-orange/40 focus:bg-white/[0.06]"
               />
               <svg className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -93,14 +91,8 @@ function HomeContent() {
             >
               Notícias
             </button>
-            <Link href="/assuntos" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white sm:flex">
-              Assuntos
-            </Link>
             <Link href="/em-alta" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">
               Em alta
-            </Link>
-            <Link href="/minha-orange" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">
-              Minha Orange
             </Link>
             <Link href="/busca" className="hidden min-h-11 items-center px-3 text-xs font-semibold text-gray-400 transition-colors hover:text-white lg:flex">Buscar</Link>
             <Link
@@ -108,56 +100,27 @@ function HomeContent() {
               data-home-event="brickboard"
               data-home-target="header"
               aria-label="Abrir Brickboard"
-              className="mx-1 flex min-h-11 items-center gap-1.5 whitespace-nowrap border border-brand-orange bg-brand-orange/10 px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
+              className="mx-1 hidden min-h-11 items-center gap-1.5 whitespace-nowrap border border-brand-orange bg-brand-orange/10 px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white sm:flex"
             >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <span className="hidden sm:inline">Brickboard</span>
+              <span className="font-mono text-sm font-black">#</span>
+              <span>Brickboard</span>
             </Link>
             <UserNav />
           </nav>
         </div>
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 pb-3 md:hidden">
-          <form onSubmit={handleSearchSubmit} className="relative min-w-0 flex-1">
-            <label htmlFor="site-search-mobile" className="sr-only">Buscar notícias</label>
-            <input
-              id="site-search-mobile"
-              name="q"
-              type="search"
-              defaultValue={qParam}
-              key={`mobile-${qParam}`}
-              placeholder="Buscar notícias"
-              className="h-11 w-full border border-white/10 bg-white/[0.04] pl-10 pr-3 text-white outline-none placeholder:text-gray-500 focus:border-brand-orange/50 focus:bg-white/[0.06]"
-            />
-            <svg aria-hidden="true" className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </form>
-          <Link href="/assuntos" className="flex min-h-11 shrink-0 items-center border border-white/10 px-3 text-xs font-bold text-gray-300 transition-colors hover:border-white/20 hover:text-white">
-            Assuntos
-          </Link>
-        </div>
       </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-7xl flex-1 px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <HomeEngagementTracker />
-        <h1 className="sr-only">Orange Brick — notícias de games, hardware e indústria</h1>
+        <SinceLastVisit />
+
+        <ReleaseRadarStrip />
+
         <NewsFeed
           category={activeCategory}
-          searchQuery={qParam}
           activeTag={activeTag}
+          searchQuery={qParam}
           onSelectCategory={handleCategoryClick}
-          homeHighlights={
-            <>
-              <SinceLastVisit />
-              <CommunityPulse />
-              <div data-home-event="radar" data-home-target="home">
-                <ReleaseRadarStrip />
-              </div>
-              <PlatformBar />
-            </>
-          }
         />
       </main>
 
@@ -166,19 +129,16 @@ function HomeContent() {
   );
 }
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-dvh flex items-center justify-center bg-background-void text-mono text-sm">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-            <span className="text-gray-400 font-mono">Carregando portal...</span>
-          </div>
+    <div className="min-h-dvh bg-background-void text-white">
+      <Suspense fallback={
+        <div className="flex items-center justify-center min-h-dvh">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-orange border-t-transparent" />
         </div>
-      }
-    >
-      <HomeContent />
-    </Suspense>
+      }>
+        <HomeContent />
+      </Suspense>
+    </div>
   );
 }

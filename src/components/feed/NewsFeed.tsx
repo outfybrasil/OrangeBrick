@@ -20,6 +20,7 @@ interface NewsFeedProps {
   searchQuery?: string;
   activeTag?: string | null;
   onSelectCategory?: (category: PostCategory | null) => void;
+  onClearFilters?: () => void;
   homeHighlights?: ReactNode;
 }
 
@@ -38,9 +39,10 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, homeHighlights }: NewsFeedProps) {
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category);
+  const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
 
   const posts = useMemo(() => {
     let result = rawPosts;
@@ -72,17 +74,31 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       });
     }
 
-    const term = (searchQuery || activeTag || "").trim().toLowerCase();
-    if (term) {
+    const queryTerm = searchQuery.trim().toLowerCase();
+    if (queryTerm) {
       result = result.filter(
         (post) =>
-          post.title.toLowerCase().includes(term) ||
-          post.summary.toLowerCase().includes(term) ||
-          post.category.toLowerCase().includes(term)
+          post.title.toLowerCase().includes(queryTerm) ||
+          post.summary.toLowerCase().includes(queryTerm) ||
+          post.category.toLowerCase().includes(queryTerm)
       );
     }
+    const tagTerm = activeTag?.trim().toLowerCase();
+    if (tagTerm) {
+      result = result.filter((post) =>
+        `${post.title} ${post.summary} ${post.author_tag || ""}`.toLowerCase().includes(tagTerm)
+      );
+    }
+    if (!hasRequestedFilters) {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      const daysSinceMonday = (now.getDay() + 6) % 7;
+      startOfWeek.setDate(now.getDate() - daysSinceMonday);
+      startOfWeek.setHours(0, 0, 0, 0);
+      result = result.filter((post) => new Date(post.published_at || post.created_at) >= startOfWeek).slice(0, 5);
+    }
     return result;
-  }, [rawPosts, platformSlug, searchQuery, activeTag]);
+  }, [rawPosts, platformSlug, searchQuery, activeTag, hasRequestedFilters]);
 
   const stats = usePostStats(rawPosts.map((post) => post.id));
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -105,18 +121,25 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     );
   }
 
-  if (posts.length === 0) {
-    return <NewsFeedEmpty onRefresh={refresh} />;
-  }
+  const isFiltering = hasRequestedFilters;
 
-  const isFiltering = Boolean(category || platformSlug || searchQuery || activeTag);
+  if (posts.length === 0) {
+    return isFiltering ? (
+      <NewsFeedEmpty
+        title="Nenhuma matéria encontrada"
+        description="Os filtros atuais não correspondem a nenhuma matéria. Limpe os filtros para voltar ao feed completo."
+        actionLabel="Limpar filtros"
+        onRefresh={onClearFilters}
+      />
+    ) : <NewsFeedEmpty onRefresh={refresh} />;
+  }
 
   // RENDERIZAÇÃO DO HERO (MATÉRIA DE DESTAQUE GRANDE + 2 LATERAIS)
   const renderHeroSection = () => {
-    if (isFiltering || rawPosts.length < 3) return null;
+    if (isFiltering || posts.length < 3) return null;
 
-    const heroPost = rawPosts[0];
-    const sidePosts = rawPosts.slice(1, 3);
+    const heroPost = posts[0];
+    const sidePosts = posts.slice(1, 3);
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
@@ -125,7 +148,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
-          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden cursor-pointer border border-white/10 bg-background-void hover:border-brand-orange/40 transition-colors duration-300"
+          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden rounded-[20px] bg-background-void shadow-[0_18px_48px_rgba(0,0,0,0.3)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_rgba(0,0,0,0.38)] focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
           {heroPost.image_url ? (
             <img
@@ -141,6 +164,12 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
 
+          <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5 shadow-md">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-black">Matéria do dia</span>
+            <span aria-hidden="true" className="absolute -right-4 top-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
+            <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
+          </div>
+
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 flex flex-col justify-end gap-1 sm:gap-2 z-20">
             <div className="flex items-center gap-3">
               <Tag category={heroPost.category} />
@@ -151,12 +180,12 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               {heroPost.title}
             </h2>
 
-            <p className="hidden xs:block text-[11px] sm:text-xs text-gray-200 line-clamp-2 mt-0.5 sm:mt-1 leading-relaxed font-body">
+            <p className="mt-1 hidden text-sm leading-6 text-gray-200 xs:line-clamp-2">
               {heroPost.summary}
             </p>
 
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[10px] sm:mt-2 sm:text-xs">
-              <span className="text-gray-400">Por</span>
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs">
+              <span className="text-gray-300">Por</span>
               <strong className="font-bold text-white">{heroPost.author_name}</strong>
               {normalizeAuthorTag(heroPost.author_tag) && (
                 <span className="text-brand-orange">{normalizeAuthorTag(heroPost.author_tag)}</span>
@@ -174,7 +203,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               href={`/posts/${post.slug}`}
               data-home-event="article"
               data-home-target={post.slug}
-              className="flex-1 flex flex-col overflow-hidden bg-background-void border border-white/10 hover:border-brand-orange/40 hover:bg-white/[0.025] transition-colors duration-300 group relative"
+              className="group relative flex flex-1 flex-col overflow-hidden rounded-[20px] bg-[#111217] shadow-[0_12px_30px_rgba(0,0,0,0.24)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(0,0,0,0.34)] focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
                 <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
@@ -184,14 +213,19 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                     className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-[11px] font-black uppercase tracking-[0.06em] text-black shadow-md">
+                    {CATEGORY_CONFIG[post.category].label}
+                    <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+                    <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+                  </span>
                 </div>
               )}
               <div className="p-3 flex flex-col justify-between flex-1 relative z-20">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <Tag category={post.category} />
+                  {!post.image_url && <Tag category={post.category} />}
                   <Timer date={post.published_at ?? ""} />
                 </div>
-                <h4 className="font-heading text-xs sm:text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                <h4 className="line-clamp-2 font-heading text-sm font-bold leading-snug text-white transition-colors duration-200 group-hover:text-brand-orange">
                   {post.title}
                 </h4>
               </div>
@@ -202,7 +236,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     );
   };
 
-  const displayPosts = !isFiltering && rawPosts.length >= 3 ? posts.slice(3) : posts;
+  const displayPosts = !isFiltering && posts.length >= 3 ? posts.slice(3) : posts;
   const topPosts = displayPosts.slice(0, 4);
   const lowerPosts = displayPosts.slice(4);
 
@@ -249,6 +283,24 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               )}
             </div>
 
+            {isFiltering && (
+              <div className="mb-4 flex flex-col gap-3 border-y border-white/10 py-3 sm:flex-row sm:items-center sm:justify-between" aria-live="polite">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white">
+                    {posts.length} {posts.length === 1 ? "matéria encontrada" : "matérias encontradas"}
+                  </p>
+                  <p className="mt-1 text-sm leading-5 text-gray-300">
+                    {[category && CATEGORY_CONFIG[category].label, platformSlug && PLATFORMS_CONFIG[platformSlug].shortName, searchQuery && `Busca: “${searchQuery}”`, activeTag && `Assunto: ${activeTag}`].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+                {onClearFilters && (
+                  <button type="button" onClick={onClearFilters} className="min-h-11 shrink-0 self-start border border-white/15 px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange hover:text-brand-orange sm:self-auto">
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="space-y-0">
               {topPosts.map((post) => (
                 <NewsCardCompact
@@ -258,11 +310,29 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                 />
               ))}
             </div>
+
+            {!isFiltering && (
+              <div className="mt-5 flex flex-col gap-3 border-y border-white/10 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-6 text-gray-400">Acompanhe a cobertura completa, organizada por período.</p>
+                <div className="grid grid-cols-2 bg-gradient-to-r from-brand-orange via-amber-400 to-brand-orange p-px sm:hidden">
+                  <Link href="/noticias?periodo=mes" className="inline-flex min-h-12 items-center justify-center bg-brand-orange px-3 text-center text-xs font-black uppercase text-white transition-colors active:bg-[#d94f00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">
+                    Notícias do mês
+                  </Link>
+                  <Link href="/noticias" className="inline-flex min-h-12 items-center justify-center bg-[#111217] px-3 text-center text-xs font-black uppercase text-white transition-colors active:bg-card-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">
+                    Todas as notícias
+                  </Link>
+                </div>
+                <div className="hidden gap-2 sm:flex">
+                  <Link href="/noticias?periodo=mes" className="inline-flex min-h-11 items-center justify-center border border-brand-orange bg-brand-orange px-4 text-xs font-black uppercase text-white transition-colors hover:bg-[#d94f00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">Notícias do mês</Link>
+                  <Link href="/noticias" className="inline-flex min-h-11 items-center justify-center border border-white/15 px-4 text-xs font-black uppercase text-white transition-colors hover:border-brand-orange hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">Todas as notícias</Link>
+                </div>
+              </div>
+            )}
           </div>
 
           {!isFiltering && homeHighlights}
 
-          {lowerPosts.length > 0 && (
+          {isFiltering && lowerPosts.length > 0 && (
             <div className="space-y-0 pt-0 border-t border-white/[0.06]">
               {lowerPosts.map((post) => (
                 <NewsCardCompact
@@ -274,13 +344,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             </div>
           )}
 
-          {isLoadingMore && (
+          {isFiltering && isLoadingMore && (
             <div className="py-8 flex justify-center">
               <div className="w-5 h-5 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
             </div>
           )}
 
-          {hasMore && !isLoadingMore && (
+          {isFiltering && hasMore && !isLoadingMore && (
             <div className="py-6 flex justify-center">
               <button
                 onClick={loadMore}
@@ -293,9 +363,9 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
 
           <div ref={sentinelRef} className="h-1" />
 
-          {!hasMore && posts.length > 0 && (
+          {isFiltering && !hasMore && posts.length > 0 && (
             <div className="py-8 text-center border-t border-white/[0.06]">
-              <p className="text-xs text-gray-600 uppercase tracking-widest">— Você chegou ao fim do feed —</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Você chegou ao fim do feed</p>
             </div>
           )}
         </div>

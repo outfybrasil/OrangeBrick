@@ -102,12 +102,22 @@ async function createStandardImage(source: Buffer, kind: ImageKind): Promise<Pro
     const dimensionError = validateReleaseSourceDimensions(metadata.width, metadata.height);
     if (dimensionError) throw new Error(dimensionError);
     const dimensions = releaseOutputDimensions(metadata.width, metadata.height);
-    const output = await sharp(normalized)
+    const background = await sharp(normalized)
+      .resize(dimensions.width, dimensions.height, { fit: "cover" })
+      .blur(28)
+      .modulate({ brightness: 0.42, saturation: 0.78 })
+      .webp({ quality: 78 })
+      .toBuffer();
+    const foreground = await sharp(normalized)
       .resize(dimensions.width, dimensions.height, {
-        fit: "cover",
-        position: "centre",
+        fit: "contain",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
         withoutEnlargement: true,
       })
+      .png()
+      .toBuffer();
+    const output = await sharp(background)
+      .composite([{ input: foreground, gravity: "center" }])
       .webp({ quality: 88, effort: 5 })
       .toBuffer();
     return {

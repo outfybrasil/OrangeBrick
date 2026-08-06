@@ -11,67 +11,67 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
   const hasVoted = poll.user_voted_option !== undefined && poll.user_voted_option !== null;
 
   return (
-    <div className="bg-gradient-to-br from-brand-orange/10 via-card-slate/70 to-background-void border border-brand-orange/30 rounded-2xl p-5 shadow-xl relative overflow-hidden space-y-4">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 min-w-0">
-          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-brand-orange shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider bg-brand-orange/15 px-2.5 py-1 rounded-lg border border-brand-orange/30 whitespace-nowrap shrink-0">
-            Pergunta do dia
-          </span>
-        </div>
-        <span className="text-[11px] font-subtitle text-gray-400 font-medium whitespace-nowrap">
-          {poll.total_votes} participações
+    <section className="overflow-hidden rounded-xl bg-[#111217] shadow-[0_12px_36px_rgba(0,0,0,0.34)] ring-1 ring-white/10" aria-labelledby="daily-poll-title" aria-describedby="daily-poll-description">
+      <header className="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-brand-orange/20 via-brand-orange/[0.06] to-transparent px-3.5 py-2.5">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-brand-orange">
+          <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-[10px] text-black font-black" aria-hidden="true">?</span>
+          Pergunta do dia
         </span>
-      </div>
+        <span className="rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-[10px] font-bold tabular-nums text-gray-400">{poll.total_votes} votos</span>
+      </header>
 
-      <h3 className="font-heading text-sm sm:text-base font-bold text-white leading-snug">
-        {poll.question}
-      </h3>
+      <div className="p-3.5">
+        <h2 id="daily-poll-title" className="font-heading text-sm font-extrabold uppercase leading-snug text-white sm:text-base">
+          {poll.question}
+        </h2>
+        <p id="daily-poll-description" className="mt-1 text-xs leading-normal text-gray-400">
+          {hasVoted ? "Resultado da comunidade:" : "Escolha uma alternativa:"}
+        </p>
 
-      <div className="space-y-2.5">
-        {poll.options.map((option) => {
-          const percentage = poll.total_votes > 0 ? Math.round((option.votes / poll.total_votes) * 100) : 0;
-          const isSelected = poll.user_voted_option === option.id;
+        <div className="mt-3 space-y-1.5" role="radiogroup" aria-label={poll.question}>
+          {poll.options.map((option) => {
+            const percentage = poll.total_votes > 0 ? Math.round((option.votes / poll.total_votes) * 100) : 0;
+            const isSelected = poll.user_voted_option === option.id;
 
-          return (
-            <button
-              key={option.id}
-              onClick={() => onVote(option.id)}
-              disabled={isSelected}
-              className={`group relative w-full text-left p-3 rounded-xl border transition-all duration-200 overflow-hidden cursor-pointer ${
-                isSelected
-                  ? "bg-brand-orange/20 border-brand-orange text-white shadow-[0_0_15px_rgba(255,94,0,0.2)]"
-                  : "bg-background-void/70 border-brand-orange-muted/20 text-gray-200 hover:border-brand-orange/50 hover:bg-card-slate"
-              }`}
-            >
-              {/* BARRA DE PORCENTAGEM (EXIBIDA APÓS VOTAR) */}
-              {hasVoted && (
-                <div
-                  style={{ width: `${percentage}%` }}
-                  className={`absolute inset-y-0 left-0 transition-all duration-700 ease-out ${
-                    isSelected ? "bg-brand-orange/30" : "bg-card-slate/80"
-                  }`}
-                />
-              )}
-
-              <div className="relative z-10 flex items-center justify-between gap-3 text-xs font-subtitle">
-                <span className="font-semibold">{option.text}</span>
-                {hasVoted ? (
-                  <span className="font-bold tabular-nums shrink-0">
-                    {percentage}% {isSelected && "Selecionada"}
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                onClick={() => onVote(option.id)}
+                disabled={hasVoted}
+                className={`group relative w-full overflow-hidden rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-default ${
+                  isSelected
+                    ? "border-brand-orange bg-brand-orange/10 text-white"
+                    : "border-white/10 bg-[#08090c]/70 text-gray-300 hover:border-brand-orange/60 hover:text-white"
+                }`}
+              >
+                <span className="relative flex items-center gap-2.5">
+                  <span className={`grid size-4 shrink-0 place-items-center rounded-full border-2 transition-colors ${isSelected ? "border-brand-orange" : "border-gray-600 group-hover:border-brand-orange/70"}`} aria-hidden="true">
+                    {isSelected && <span className="size-2 rounded-full bg-brand-orange" />}
                   </span>
-                ) : (
-                  <span className="text-[10px] uppercase font-bold text-brand-orange opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    Votar →
+                  <span className="min-w-0 flex-1 text-xs font-bold leading-tight">{option.text}</span>
+                  {hasVoted && <span className={`shrink-0 text-xs font-extrabold tabular-nums ${isSelected ? "text-brand-orange" : "text-gray-400"}`}>{percentage}%</span>}
+                </span>
+                {hasVoted && (
+                  <span className="mt-1.5 block h-1 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden="true">
+                    <span
+                      className={`block h-full rounded-full transition-[width] duration-500 ease-out ${isSelected ? "bg-brand-orange" : "bg-gray-500"}`}
+                      style={{ width: `${percentage}%` }}
+                    />
                   </span>
                 )}
-              </div>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
+
+        <footer className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2.5 text-[11px] font-medium text-gray-400" aria-live="polite">
+          <span className={`size-1.5 rounded-full ${hasVoted ? "bg-emerald-400" : "bg-brand-orange"}`} aria-hidden="true" />
+          {hasVoted ? "Voto registrado." : "Voto anônimo e rápido."}
+        </footer>
       </div>
-    </div>
+    </section>
   );
 }

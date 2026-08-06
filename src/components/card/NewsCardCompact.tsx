@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { AuthModal } from "@/components/auth/AuthModal";
-import type { Post, PostStats } from "@/lib/types/database";
+import { CATEGORY_CONFIG, type Post, type PostStats } from "@/lib/types/database";
 
 interface NewsCardCompactProps {
   post: Post;
@@ -34,54 +34,61 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        className="group flex gap-0 overflow-hidden border border-white/[0.08] bg-background-void transition-colors hover:border-white/15 hover:bg-white/[0.025]"
+        className="group relative mb-3 grid h-[148px] grid-cols-[130px_minmax(0,1fr)] overflow-hidden rounded-[20px] bg-[#111217] shadow-[0_12px_30px_rgba(0,0,0,0.24)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(0,0,0,0.34)] xs:grid-cols-[150px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
       >
-        {/* THUMBNAIL (Ocupa 100% da imagem sem barra preta) */}
-        <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative w-[130px] sm:w-[190px] shrink-0 overflow-hidden bg-[#08090C] focus-visible:outline-2 focus-visible:outline-brand-orange self-stretch">
+        <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block h-full overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange">
           {post.image_url ? (
-            <img
-              src={post.image_url}
-              alt={post.image_alt || ""}
-              className="absolute inset-0 block h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-              loading="lazy"
-            />
+            <>
+              <img
+                src={post.image_url}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-45 blur-xl"
+                loading="lazy"
+              />
+              <img
+                src={post.image_url}
+                alt={post.image_alt || ""}
+                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center bg-card-slate">
               <span className="text-xs text-gray-600">Sem mídia</span>
             </div>
           )}
+          <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-[11px] font-black uppercase tracking-[0.06em] text-black shadow-md">
+            {CATEGORY_CONFIG[post.category].label}
+            <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+            <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+          </span>
         </Link>
 
-        {/* CONTEÚDO */}
-        <div className="flex min-w-0 flex-1 flex-col justify-between p-3.5">
+        <div className="flex min-w-0 flex-1 flex-col justify-between p-2.5 sm:p-3">
           <div>
-            <div className="mb-1.5 flex items-center gap-2">
-              <Tag category={post.category} />
+            <div className="mb-1.5 flex items-center justify-between gap-2">
               <Timer date={post.published_at ?? ""} />
+              <span className="h-px min-w-5 flex-1 bg-white/10" aria-hidden="true" />
             </div>
             <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
               <Link href={`/posts/${post.slug}`} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
             </h2>
-            <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-gray-400 hidden sm:block font-body">
-              {post.summary}
-            </p>
           </div>
-
-          {/* ACTION BAR */}
-          <div className="mt-2 flex items-center gap-1 text-[11px]">
+          <div className="mt-2 flex items-center gap-1 text-xs">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); toggleReaction("hype"); }}
               disabled={isPending}
-              className={`flex items-center gap-1 px-1 font-bold transition-colors ${userReaction === "hype" ? "text-brand-orange" : "text-gray-500 hover:text-brand-orange"}`}
+              className={`flex min-h-11 items-center gap-1 px-2 font-bold transition-colors ${userReaction === "hype" ? "text-brand-orange" : "text-gray-400 hover:text-brand-orange"}`}
               aria-label={`Marcar como hype. ${counts.hype} reações`}
             >
-              🔥 {counts.hype}
+              Hype {counts.hype}
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); if (!user) { setIsAuthModalOpen(true); return; } setIsCommentOpen(true); }}
-              className="flex items-center gap-1 px-2 text-gray-500 transition-colors hover:text-white"
+              className="flex min-h-11 items-center gap-1 px-2 text-gray-400 transition-colors hover:text-white"
               aria-label={`Abrir comentários. ${stats.comments} comentários`}
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -95,7 +102,7 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
               onClick={(e) => { e.stopPropagation(); toggleBookmark(post); }}
               aria-pressed={bookmarked}
               aria-label={bookmarked ? "Remover matéria dos itens salvos" : "Salvar matéria"}
-              className={`ml-auto flex items-center gap-1 px-2 font-bold transition-colors ${bookmarked ? "text-brand-orange" : "text-gray-500 hover:text-white"}`}
+              className={`ml-auto flex min-h-11 items-center gap-1 px-2 font-bold transition-colors ${bookmarked ? "text-brand-orange" : "text-gray-400 hover:text-white"}`}
             >
               <svg className="h-3.5 w-3.5" fill={bookmarked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />

@@ -21,14 +21,14 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
     .slice(0, 4);
 
   return (
-    <aside className="space-y-0 border border-white/10">
+    <aside className="overflow-hidden rounded-2xl bg-[#111217] shadow-[0_12px_36px_rgba(0,0,0,0.34)] ring-1 ring-white/10">
       {/* MAIS HYPADAS */}
       <section aria-labelledby="most-hyped-title">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-          <h3 id="most-hyped-title" className="font-heading text-sm font-black text-white">
+        <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-brand-orange/15 via-brand-orange/[0.04] to-transparent px-4 py-3.5">
+          <h3 id="most-hyped-title" className="font-heading text-sm font-black uppercase text-white">
             Mais hypadas
           </h3>
-          <span className="text-[10px] font-bold uppercase text-gray-600">Top 4</span>
+          <span className="rounded-full border border-white/10 bg-black/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-brand-orange">Top 4</span>
         </div>
 
         {topHypePosts.length === 0 ? (
@@ -43,7 +43,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                 <li key={post.id}>
                   <Link
                     href={`/posts/${post.slug}`}
-                    className="group grid min-h-20 grid-cols-[28px_minmax(0,1fr)_72px] items-center gap-2.5 px-4 py-3 transition-colors hover:bg-white/[0.025]"
+                    className="group grid min-h-20 grid-cols-[28px_minmax(0,1fr)_76px] items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.04]"
                   >
                     <span className="font-heading text-xl font-black tracking-[-0.04em] text-brand-orange">
                       {index + 1}
@@ -53,24 +53,29 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                       <div className="mb-1 flex items-center gap-1.5">
                         <Tag category={post.category} />
                       </div>
-                      <h4 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-200 transition-colors group-hover:text-white">
+                      <h4 className="line-clamp-2 text-xs font-bold leading-snug text-gray-200 transition-colors group-hover:text-white">
                         {post.title}
                       </h4>
                       {hypeCount > 0 && (
-                        <p className="mt-1 text-[10px] text-brand-orange">🔥 {hypeCount}</p>
+                        <p className="mt-1 flex items-center gap-1 text-[10px] font-bold text-brand-orange">
+                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                          </svg>
+                          {hypeCount}
+                        </p>
                       )}
                     </div>
 
                     {post.image_url ? (
-                      <div className="relative aspect-video w-[72px] overflow-hidden bg-[#08090C]">
+                      <div className="relative aspect-video w-[76px] overflow-hidden rounded-lg bg-[#08090C] ring-1 ring-white/10">
                         <img
                           src={post.image_url}
                           alt={post.image_alt || ""}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                         />
                       </div>
                     ) : (
-                      <span className="aspect-video w-[72px] bg-card-slate" aria-hidden="true" />
+                      <span className="aspect-video w-[76px] rounded-lg bg-card-slate" aria-hidden="true" />
                     )}
                   </Link>
                 </li>

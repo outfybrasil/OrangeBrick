@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import CoverflowGallery from "@/components/originkit/ui/coverflowgallery-custom-style";
 import { createDataClient } from "@/lib/supabase/client";
 import { isAllowedReleaseImageUrl } from "@/lib/release-images";
 import type { ReleaseRadarItem } from "@/lib/types/database";
@@ -44,18 +45,24 @@ function releaseDateValue(item: ReleaseItem) {
 export function ReleaseRadarStrip() {
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const hasPositionedRadar = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
-  useEffect(() => {
-    queueMicrotask(async () => {
-      const { data, error } = await supabase
-        .from("release_radar_items")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error || !data || data.length === 0) return;
-      const databaseItems = (data as ReleaseRadarItem[]).map((item) => ({
+  const loadReleases = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+    const { data, error } = await supabase
+      .from("release_radar_items")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      setLoadError("Não foi possível carregar os lançamentos.");
+      setIsLoading(false);
+      return;
+    }
+    const databaseItems = ((data || []) as ReleaseRadarItem[]).map((item) => ({
         id: item.id,
         game: item.game,
         releaseDate: item.release_label,
@@ -66,14 +73,32 @@ export function ReleaseRadarStrip() {
         badge: item.badge,
         category: item.category,
         slug: item.post_slug || undefined,
-      }));
-      setReleases(databaseItems.sort((a, b) => {
-        const first = releaseDateValue(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-        const second = releaseDateValue(b)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-        return first - second || a.game.localeCompare(b.game, "pt-BR");
-      }));
-    });
+    }));
+    setReleases(databaseItems.sort((a, b) => {
+      const first = releaseDateValue(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const second = releaseDateValue(b)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return first - second || a.game.localeCompare(b.game, "pt-BR");
+    }));
+    setIsLoading(false);
   }, [supabase]);
+
+  useEffect(() => {
+    queueMicrotask(loadReleases);
+  }, [loadReleases]);
+
+  const monthOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    map.set("all", "Todos os meses");
+    for (const item of releases) {
+      const match = item.releaseDate.toLowerCase().match(/^(\d{1,2}) de ([a-zç]+)/);
+      if (match) {
+        const monthKey = match[2];
+        const capitalized = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
+        map.set(monthKey, `${capitalized} 2026`);
+      }
+    }
+    return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+  }, [releases]);
 
   const currentMonthReleases = useMemo(() => {
     const currentDate = new Date();
@@ -84,31 +109,33 @@ export function ReleaseRadarStrip() {
     });
   }, [releases]);
 
-  useEffect(() => {
-    if (hasPositionedRadar.current || currentMonthReleases.length === 0) return;
+  const displayedReleases = useMemo(() => {
+    if (selectedMonth !== "all") {
+      return releases.filter((item) => {
+        const match = item.releaseDate.toLowerCase().match(/^(\d{1,2}) de ([a-zç]+)/);
+        return match && match[2] === selectedMonth;
+      });
+    }
     const now = new Date();
     const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const target = currentMonthReleases.find((item) => {
+    const upcoming = releases.filter((item) => {
       const date = releaseDateValue(item);
-      return date !== null && Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) >= today;
-    }) || currentMonthReleases.at(-1);
-    if (!target) return;
-
-    hasPositionedRadar.current = true;
-    const frame = window.requestAnimationFrame(() => {
-      const container = scrollContainerRef.current;
-      const element = container?.querySelector<HTMLElement>(`[data-release-id="${target.id}"]`);
-      if (!container || !element) return;
-      container.scrollTo({ left: Math.max(0, element.offsetLeft - container.offsetLeft), behavior: "auto" });
+      return date !== null && date.getTime() >= today;
     });
-    return () => window.cancelAnimationFrame(frame);
-  }, [currentMonthReleases]);
+    const currentMonthIds = new Set(currentMonthReleases.map((item) => item.id));
+    const nextReleases = upcoming.filter((item) => !currentMonthIds.has(item.id));
+    const calendarWindow = [...currentMonthReleases, ...nextReleases].slice(0, 14);
+    if (calendarWindow.length > 0) return calendarWindow;
+    return releases.filter((item) => releaseDateValue(item) !== null).slice(-8);
+  }, [currentMonthReleases, releases, selectedMonth]);
 
-  const handleScroll = (direction: "left" | "right") => {
-    if (!scrollContainerRef.current) return;
-    const scrollAmount = direction === "left" ? -360 : 360;
-    scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  };
+  const coverflowSlides = useMemo(() => displayedReleases.map((item) => ({
+    image: {
+      src: isAllowedReleaseImageUrl(item.image) ? item.image : undefined,
+      alt: `Arte oficial de ${item.game}`,
+    },
+    title: `${item.game}\n${item.releaseDate} · ${item.platforms.join(" · ")}`,
+  })), [displayedReleases]);
 
   return (
     <section className="mb-8 w-full" aria-labelledby="release-radar-title">
@@ -127,121 +154,87 @@ export function ReleaseRadarStrip() {
             Radar de lançamentos
           </h2>
           <p className="mt-1 text-xs leading-5 text-gray-400 sm:text-sm">
-            Todos os jogos previstos para este mês.
+            {selectedMonth === "all"
+              ? "Jogos organizados por mês de lançamento."
+              : `Lançamentos confirmados para ${monthOptions.find((m) => m.key === selectedMonth)?.label || ""}.`}
           </p>
         </div>
 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
           <Link
             href="/lancamentos"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-brand-orange/30 bg-brand-orange/10 px-3.5 py-2 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
+            className="inline-flex min-h-11 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-3.5 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
           >
             Ver calendário completo <span aria-hidden="true">→</span>
           </Link>
-
-          <div className="hidden items-center sm:flex">
-            <button
-              type="button"
-              onClick={() => handleScroll("left")}
-              className="flex min-h-11 min-w-11 items-center justify-center border-l border-y border-white/10 text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-white"
-              aria-label="Ver lançamentos anteriores"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleScroll("right")}
-              className="flex min-h-11 min-w-11 items-center justify-center border border-white/10 text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-white"
-              aria-label="Ver próximos lançamentos"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          </div>
         </div>
       </div>
 
-      <div className="pt-4">
-        <div
-          ref={scrollContainerRef}
-          className="-mx-3 flex snap-x snap-mandatory overflow-x-auto border-y border-white/10 px-3 scrollbar-none sm:mx-0 sm:px-0"
-        >
-          {currentMonthReleases.map((item) => {
-            const itemDate = releaseDateValue(item);
-            const now = new Date();
-            const isToday = itemDate !== null
-              && itemDate.getUTCFullYear() === now.getFullYear()
-              && itemDate.getUTCMonth() === now.getMonth()
-              && itemDate.getUTCDate() === now.getDate();
-            const CardContent = (
-                  <article className={`group flex h-full w-[260px] xs:w-[280px] sm:w-[300px] shrink-0 snap-start flex-col border-r bg-background-void transition-colors hover:bg-white/[0.025] ${isToday ? "border-brand-orange/70" : "border-white/10"}`}>
-                    <div className="relative aspect-video w-full overflow-hidden bg-[#0C0D11]">
-                      {isAllowedReleaseImageUrl(item.image) ? (
-                        <img
-                          src={item.image}
-                          alt={item.game}
-                          className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center px-6 text-center">
-                          <span className="text-xs font-semibold text-gray-400">Capa pendente</span>
-                        </div>
-                      )}
-                      <span className="absolute right-2 top-2 z-10 border-b-2 border-brand-orange bg-black/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-md">
-                        {item.badge}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-1 flex-col justify-between p-4">
-                      <div>
-                        <div className="mb-2 flex items-baseline justify-between gap-2">
-                          <time dateTime={item.releaseDateIso} className="text-xs font-black uppercase text-brand-orange">
-                            {isToday ? `Hoje · ${item.releaseDate}` : item.releaseDate}
-                          </time>
-                          <span className="text-[10px] font-semibold text-gray-500">{item.dayOfWeek}</span>
-                        </div>
-                        <h3 className="font-heading text-sm sm:text-base font-extrabold leading-tight text-white transition-colors group-hover:text-brand-orange line-clamp-2">
-                          {item.game}
-                        </h3>
-                      </div>
-
-                      <div className="mt-4 flex items-end justify-between gap-2 border-t border-white/[0.08] pt-3">
-                        <p className="text-[10px] font-bold uppercase text-gray-500 truncate">
-                          {item.platforms.join(" · ")}
-                        </p>
-                        {item.slug ? (
-                          <span className="shrink-0 text-[10px] font-bold text-gray-300 transition-colors group-hover:text-white">
-                            Ler matéria <span aria-hidden="true">→</span>
-                          </span>
-                        ) : (
-                          <span className="shrink-0 text-[10px] font-bold text-gray-500">
-                            Detalhes
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-
-                if (item.slug) {
-                  return (
-                    <Link
-                      key={item.id}
-                      href={`/posts/${item.slug}`}
-                      data-release-id={item.id}
-                      className="shrink-0 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
-                    >
-                      {CardContent}
-                    </Link>
-                  );
-                }
-
-                return <div key={item.id} data-release-id={item.id} className="shrink-0">{CardContent}</div>;
-          })}
+      {!isLoading && monthOptions.length > 1 && (
+        <div className="mt-3 flex max-w-full items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
+          <span className="shrink-0 font-bold uppercase tracking-wider text-gray-400">Filtrar mês:</span>
+          {monthOptions.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => setSelectedMonth(option.key)}
+              className={`min-h-11 shrink-0 rounded-sm border px-3 text-xs font-bold transition-all ${
+                selectedMonth === option.key
+                  ? "border-brand-orange bg-brand-orange text-black font-black"
+                  : "border-white/10 bg-white/[0.03] text-gray-300 hover:border-white/20 hover:text-white"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
+      )}
+
+      <div className="pt-3" aria-live="polite">
+        {isLoading && (
+          <div className="grid grid-cols-1 gap-px overflow-hidden border-y border-white/10 bg-white/10 sm:grid-cols-3">
+            {[0, 1, 2].map((item) => <div key={item} className="h-80 animate-pulse bg-background-void" />)}
+          </div>
+        )}
+        {!isLoading && loadError && (
+          <div className="flex min-h-32 flex-col items-start justify-center gap-3 border-y border-white/10 py-5">
+            <p className="text-sm text-gray-300">{loadError}</p>
+            <button type="button" onClick={() => void loadReleases()} className="min-h-11 border border-brand-orange/40 px-4 text-xs font-bold text-brand-orange hover:bg-brand-orange/10">
+              Tentar novamente
+            </button>
+          </div>
+        )}
+        {!isLoading && !loadError && displayedReleases.length === 0 && (
+          <div className="flex min-h-32 items-center border-y border-white/10 py-5">
+            <p className="text-sm text-gray-300">Nenhum lançamento encontrado para o mês selecionado.</p>
+          </div>
+        )}
+        {!isLoading && !loadError && displayedReleases.length > 0 && (
+          <div className="relative -mx-3 h-[340px] overflow-hidden border-y border-white/10 bg-[#08090c] sm:mx-0 sm:h-[375px] md:h-[390px]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px bg-brand-orange/70" />
+            <CoverflowGallery
+              slides={coverflowSlides}
+              cardWidth={560}
+              cardHeight={315}
+              radius={2}
+              tilt={11}
+              sideTilt={3}
+              gap={7}
+              opacity={52}
+              autoplay={false}
+              showTitle
+              titleColor="#ffffff"
+              titleFont={{ fontFamily: "var(--font-heading)", fontSize: "20px", fontWeight: 900, lineHeight: "1.25em" }}
+              titlePosition={{ position: "bottomLeft", paddingLeft: 22, paddingRight: 22, paddingBottom: 22 }}
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            />
+            <span className="pointer-events-none absolute bottom-2 left-1/2 z-10 -translate-x-1/2 rounded-full border border-brand-orange/30 bg-black/90 px-4 py-1 text-xs font-bold text-brand-orange shadow-lg">
+              {selectedMonth === "all"
+                ? `${displayedReleases.length} jogos no radar`
+                : `${displayedReleases.length} jogos em ${monthOptions.find((m) => m.key === selectedMonth)?.label}`}
+            </span>
+          </div>
+        )}
       </div>
     </section>
   );

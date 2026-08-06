@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, Suspense, useMemo } from "react";
+import { useEffect, useState, Suspense, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { BrickCard } from "@/components/community/BrickCard";
 import { GamerPollWidget } from "@/components/community/GamerPollWidget";
 import { ComposeBrickModal } from "@/components/community/ComposeBrickModal";
+import { CreatePollModal } from "@/components/community/CreatePollModal";
 import type { AttachedArticle } from "@/lib/types/community";
 import { UserNav } from "@/components/auth/UserNav";
 import { Footer } from "@/components/ui/Footer";
@@ -43,6 +44,9 @@ function BrickboardContent() {
   const attachSlug = searchParams.get("attach");
   const attachTitle = searchParams.get("title");
   const [isComposeOpen, setIsComposeOpen] = useState(Boolean(attachSlug && attachTitle));
+  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
+  const [inlineMediaUrl, setInlineMediaUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedPlatform, setSelectedPlatform] = useState<string>("TODOS");
   const [preAttachedArticle, setPreAttachedArticle] = useState<AttachedArticle | null>(() => {
@@ -128,17 +132,28 @@ function BrickboardContent() {
     <>
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d0e12]/95 py-2 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5">
-            <img
-              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-              alt="Orange Brick Logo Icon"
-              style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }}
-              className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
-            />
-            <span className="hidden whitespace-nowrap font-heading text-lg font-extrabold uppercase tracking-wider text-white transition-colors group-hover:text-brand-orange sm:inline">
-              Orange<span className="text-brand-orange">_</span>Brick
-            </span>
-          </Link>
+          <div className="flex shrink-0 items-center gap-4">
+            {user && userProgress && (
+              <Link href={profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange"} className="group hidden min-h-11 items-center gap-2.5 border-r border-white/10 pr-4 lg:flex" aria-label={`Abrir Meu Brick, nível ${userProgress.progress.level}`}>
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="size-8 shrink-0 rounded-full border border-brand-orange/40 object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-orange/15 font-heading text-xs font-black text-brand-orange">{(profile?.display_name || user.email || "B").charAt(0).toUpperCase()}</span>
+                )}
+                <span className="w-24">
+                  <span className="flex items-center justify-between gap-2 text-xs font-bold">
+                    <span className="text-gray-400 group-hover:text-white">Progresso</span>
+                    <span className="text-brand-orange">Nv. {userProgress.progress.level}</span>
+                  </span>
+                  <span className="mt-1 block h-1 overflow-hidden bg-white/10"><span className="block h-full bg-brand-orange" style={{ width: `${xpProgress}%` }} /></span>
+                </span>
+              </Link>
+            )}
+            <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5">
+              <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick Logo Icon" style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }} className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105" />
+              <span className="hidden whitespace-nowrap font-heading text-lg font-extrabold uppercase tracking-wider text-white transition-colors group-hover:text-brand-orange sm:inline">Orange<span className="text-brand-orange">_</span>Brick</span>
+            </Link>
+          </div>
 
           <div className="flex-1 max-w-md hidden md:block">
             <label htmlFor="brickboard-search" className="sr-only">Buscar conversas</label>
@@ -170,6 +185,33 @@ function BrickboardContent() {
       </header>
 
       <main className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        {user && userProgress && (
+          <Link
+            href={profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange"}
+            className="mb-5 flex min-h-16 items-center gap-3 border-y border-white/10 bg-white/[0.025] px-3 py-2.5 transition-colors active:bg-white/[0.06] lg:hidden"
+            aria-label={`Abrir Meu Brick. Nível ${userProgress.progress.level}, ${Math.round(xpProgress)}% de progresso`}
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="size-10 shrink-0 rounded-full border border-brand-orange/40 object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-orange/15 font-heading text-sm font-black text-brand-orange" aria-hidden="true">
+                {(profile?.display_name || user.email || "B").charAt(0).toUpperCase()}
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center justify-between gap-3">
+                <strong className="truncate font-heading text-sm font-bold text-white">Meu progresso</strong>
+                <span className="shrink-0 text-xs font-bold text-brand-orange">Nível {userProgress.progress.level}</span>
+              </span>
+              <span className="mt-2 block h-1.5 overflow-hidden bg-white/10">
+                <span className="block h-full bg-brand-orange transition-[width] duration-700" style={{ width: `${xpProgress}%` }} />
+              </span>
+            </span>
+            <svg aria-hidden="true" className="size-4 shrink-0 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
+            </svg>
+          </Link>
+        )}
         {operationError && (
           <div role="alert" className="mb-5 flex items-start justify-between gap-4 border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
             <p>{operationError}</p>
@@ -305,20 +347,59 @@ function BrickboardContent() {
                     Compartilhe uma opinião, pergunta ou descoberta...
                   </button>
                 </div>
+                {inlineMediaUrl && (
+                  <div className="relative mt-3 overflow-hidden rounded-xl border border-white/10 sm:ml-[48px]">
+                    <img src={inlineMediaUrl} alt="Anexo" className="max-h-48 w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setInlineMediaUrl(null)}
+                      className="absolute right-2 top-2 rounded-full bg-black/80 p-1 text-white hover:bg-brand-orange"
+                      title="Remover imagem"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                )}
                 <div className="mt-3 flex flex-wrap items-center gap-2 sm:pl-[48px]">
-                  <button onClick={() => setIsComposeOpen(true)} className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-white/20 hover:text-white">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    Imagem
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setInlineMediaUrl(reader.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
+                  >
+                    <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    <span>{inlineMediaUrl ? "Alterar Imagem" : "Anexo"}</span>
                   </button>
-                  <button onClick={() => setIsComposeOpen(true)} className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-white/20 hover:text-white">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                    Link
+                  <button
+                    type="button"
+                    onClick={() => setIsPollModalOpen(true)}
+                    className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
+                  >
+                    <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span>Enquete</span>
                   </button>
-                  <button onClick={() => setIsComposeOpen(true)} className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-[11px] font-semibold text-gray-400 transition-colors hover:border-white/20 hover:text-white">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                    Enquete
-                  </button>
-                  <button onClick={() => setIsComposeOpen(true)} className="ml-auto bg-brand-orange px-4 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#ff7526]">
+                  <button
+                    type="button"
+                    onClick={() => setIsComposeOpen(true)}
+                    className="ml-auto bg-brand-orange px-4 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-[#ff7526]"
+                  >
                     Publicar
                   </button>
                 </div>
@@ -361,18 +442,17 @@ function BrickboardContent() {
 
               {/* PERGUNTA DO DIA */}
               {poll && (
-                <div className="border border-white/10 bg-white/[0.02]">
-                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101116]">
+                  <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
                     <div className="flex items-center gap-2">
-                      <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-orange">Pergunta do dia</span>
+                      <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-xs font-black text-black">?</span>
+                      <span className="text-xs font-black uppercase text-brand-orange">Pergunta do dia</span>
                     </div>
-                    <span className="text-[11px] text-gray-500">{poll.total_votes} participações</span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">{poll.total_votes} voto{poll.total_votes !== 1 ? "s" : ""}</span>
                   </div>
                   <div className="p-4">
-                    <p className="mb-4 text-sm font-bold text-white leading-snug">{poll.question}</p>
+                    <p className="font-heading text-base font-black uppercase leading-snug text-white">{poll.question}</p>
+                    <p className="mb-3 mt-1 text-xs text-gray-400">Resultado da comunidade:</p>
                     <div className="space-y-2">
                       {poll.options.map((option) => {
                         const pct = poll.total_votes > 0 ? Math.round((option.votes / poll.total_votes) * 100) : 0;
@@ -383,17 +463,16 @@ function BrickboardContent() {
                             key={option.id}
                             onClick={() => votePoll(option.id)}
                             disabled={isSelected}
-                            className={`relative w-full overflow-hidden border px-3 py-2.5 text-left transition-colors ${
-                              isSelected ? "border-brand-orange/60 bg-brand-orange/10" : "border-white/10 bg-transparent hover:border-white/20"
+                            className={`relative min-h-11 w-full overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                              isSelected ? "border-brand-orange bg-brand-orange/[0.06]" : "border-white/10 bg-[#0c0d11] hover:border-brand-orange/40"
                             }`}
                           >
-                            {hasVoted && (
-                              <div className="absolute inset-y-0 left-0 bg-white/5 transition-all duration-700" style={{ width: `${pct}%` }} />
-                            )}
-                            <div className="relative flex items-center justify-between gap-2 text-xs">
-                              <span className={isSelected ? "font-semibold text-white" : "text-gray-300"}>{option.text}</span>
-                              {hasVoted && <span className={`font-bold tabular-nums shrink-0 ${isSelected ? "text-brand-orange" : "text-gray-500"}`}>{pct}%</span>}
+                            <div className="relative flex items-start gap-2.5 text-xs">
+                              <span className={`mt-0.5 size-4 shrink-0 rounded-full border-2 ${isSelected ? "border-brand-orange bg-brand-orange shadow-[inset_0_0_0_3px_#0c0d11]" : "border-slate-500"}`} />
+                              <span className="min-w-0 flex-1 font-semibold leading-snug text-gray-100">{option.text}</span>
+                              {hasVoted && <span className={`shrink-0 font-black tabular-nums ${isSelected ? "text-brand-orange" : "text-gray-400"}`}>{pct}%</span>}
                             </div>
+                            {hasVoted && <span className="relative mt-2 block h-1 overflow-hidden rounded-full bg-white/[0.07]"><span className={`block h-full rounded-full ${isSelected ? "bg-brand-orange" : "bg-slate-500"}`} style={{ width: `${pct}%` }} /></span>}
                           </button>
                         );
                       })}
@@ -409,21 +488,20 @@ function BrickboardContent() {
 
               {/* EM ALTA AGORA */}
               {trendingTopics.length > 0 && (
-                <div className="border border-white/10 bg-white/[0.02]">
-                  <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-                    <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-orange">Em alta agora</span>
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#101116]">
+                  <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
+                    <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black">↗</span>Em alta agora</span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">Brickboard</span>
                   </div>
-                  <div className="divide-y divide-white/10 px-4">
+                  <div className="space-y-2 p-3">
                     {trendingTopics.map((topic, i) => (
-                      <div key={topic.name} className="flex items-center gap-3 py-3">
-                        <span className="w-4 shrink-0 text-center text-sm font-black text-brand-orange">{i + 1}</span>
+                      <div key={topic.name} className="group flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-[#0c0d11] p-2.5 transition-colors hover:border-brand-orange/40">
+                        <span className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-slate-600 font-heading text-xs font-black text-gray-300 group-hover:border-brand-orange group-hover:text-brand-orange">{String(i + 1).padStart(2, "0")}</span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-white">{topic.name}</p>
-                          <p className="text-[11px] text-gray-500">{topic.count} resposta{topic.count !== 1 ? "s" : ""}</p>
+                          <p className="truncate font-heading text-sm font-bold text-white group-hover:text-brand-orange">{topic.name}</p>
+                          <p className="mt-1 text-xs text-gray-500">{topic.count} resposta{topic.count !== 1 ? "s" : ""}</p>
                         </div>
+                        <span className="text-gray-600 group-hover:text-brand-orange">→</span>
                       </div>
                     ))}
                   </div>
@@ -431,7 +509,7 @@ function BrickboardContent() {
               )}
 
               {/* SUA MARCA NO BRICKBOARD */}
-              <div className="border border-white/10 bg-white/[0.02]">
+              <div className="hidden">
                 <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
                   <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -515,8 +593,19 @@ function BrickboardContent() {
             router.replace("/brickboard");
           }
         }}
-        onPublish={addPost}
+        onPublish={(content, tag, article, media) => {
+          addPost(content, tag, article, media || inlineMediaUrl || undefined);
+          setInlineMediaUrl(null);
+        }}
         initialArticle={preAttachedArticle}
+      />
+
+      <CreatePollModal
+        isOpen={isPollModalOpen}
+        onClose={() => setIsPollModalOpen(false)}
+        onPublishPoll={(question, options) => {
+          addPost(question, undefined, undefined, undefined, options);
+        }}
       />
 
       <Footer />

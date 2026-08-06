@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Geist } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 import { getSiteUrl } from "@/lib/site-url";
@@ -81,6 +81,10 @@ export const metadata: Metadata = {
 };
 
 import { PwaInstallBanner } from "@/components/PwaInstallBanner";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
 
 export default function RootLayout({
   children,
@@ -90,7 +94,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${headingFont.variable} ${subtitleFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", headingFont.variable, subtitleFont.variable, bodyFont.variable, monoFont.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <script

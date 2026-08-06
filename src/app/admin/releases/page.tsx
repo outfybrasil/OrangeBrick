@@ -66,6 +66,10 @@ function toDraft(item: ReleaseRadarItem): ReleaseDraft {
 
 export default function AdminReleasesPage() {
   const supabase = useMemo(() => createDataClient(), []);
+  const currentMonthKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }, []);
   const [items, setItems] = useState<ReleaseRadarItem[]>([]);
   const [draft, setDraft] = useState<ReleaseDraft | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -517,7 +521,7 @@ export default function AdminReleasesPage() {
             <span><strong className="text-emerald-300">{imageStats.withImage}</strong> com arte <span className="text-white/25">·</span> <strong className="text-amber-200">{imageStats.total - imageStats.withImage}</strong> sem arte</span>
           </div>
           {monthGroups.map((month) => (
-            <details key={month.key} open={month.label.toLocaleLowerCase("pt-BR").startsWith("janeiro")} className="group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02]">
+            <details key={month.key} open={month.key !== "sem-data" && month.key >= currentMonthKey} className="group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02]">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
                 <span className="flex min-w-0 items-center gap-3">
                   <span className="text-brand-orange transition-transform group-open:rotate-90">›</span>

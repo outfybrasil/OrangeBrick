@@ -108,6 +108,17 @@ export function parseMarkdownToReact(text: string) {
       );
     }
 
+    if (trimmed.startsWith("> ")) {
+      const quote = trimmed.slice(2).replace(/^(["“])|(["”])$/g, "");
+      return (
+        <blockquote key={i} className="my-6 border-y border-brand-orange/40 py-6 sm:py-8">
+          <p className="font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
+            “{parseInlineMarkdown(quote)}”
+          </p>
+        </blockquote>
+      );
+    }
+
     if (trimmed === "") {
       return <div key={i} className="h-4" />;
     }

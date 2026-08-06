@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { findOrphanedEditorialFiles } from "@/lib/operations";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
   if (user?.app_metadata?.is_admin !== true) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   const [editorialFiles, profiles, { data: imageRows }] = await Promise.all([bucketFiles(supabase, "post-images"), bucketUsage(supabase, "profile-images"), supabase.from("editorial_images").select("storage_path")]);
   const tracked = new Set((imageRows || []).map((row) => row.storage_path));
-  const orphans = editorialFiles.filter((file) => file.path.startsWith("editorial/") && !tracked.has(file.path));
+  const orphans = findOrphanedEditorialFiles(editorialFiles, tracked);
   return NextResponse.json({ editorial: { files: editorialFiles.length, bytes: editorialFiles.reduce((sum, file) => sum + file.bytes, 0) }, profiles, trackedEditorialFiles: tracked.size, possibleEditorialOrphans: orphans.length, orphans: orphans.slice(0, 200) });
 }
 

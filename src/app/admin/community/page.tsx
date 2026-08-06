@@ -518,7 +518,7 @@ export default function CommunityAdminPage() {
             <div className="space-y-3 text-xs">
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
-                  <span>💬 Denúncias resolvidas em até 1h</span>
+                  <span>Denúncias resolvidas em até 1h</span>
                   <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
@@ -528,7 +528,7 @@ export default function CommunityAdminPage() {
 
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
-                  <span>💬 Conversas sem resposta</span>
+                  <span>Conversas sem resposta</span>
                   <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
@@ -538,7 +538,7 @@ export default function CommunityAdminPage() {
 
               <div>
                 <div className="flex justify-between text-[11px] mb-1 text-gray-300">
-                  <span>🙂 Sentimento positivo</span>
+                  <span>Sentimento positivo</span>
                   <span className="font-bold text-white">—</span>
                 </div>
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
@@ -587,7 +587,12 @@ export default function CommunityAdminPage() {
                     <td className="py-2 px-1 font-bold text-white truncate max-w-[100px]">{top.name}</td>
                     <td className="py-2 px-1 text-gray-400">Radar</td>
                     <td className="py-2 px-1 text-gray-300 font-semibold">—</td>
-                    <td className="py-2 px-1 font-bold text-emerald-400">🟢 Ativo</td>
+                    <td className="py-2 px-1">
+                      <span className="inline-flex items-center gap-1.5 font-bold text-emerald-400">
+                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+                        Ativo
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

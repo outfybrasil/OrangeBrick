@@ -92,7 +92,7 @@ export function UserNav() {
 
         {/* DROPDOWN MENU */}
         {isDropdownOpen && (
-          <div className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-50 space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
+          <div className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
             <div className="px-3 py-2 border-b border-brand-orange-muted/10">
               <p className="font-bold text-white truncate">{displayName}</p>
               <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
@@ -106,7 +106,7 @@ export function UserNav() {
               <svg aria-hidden="true" className="h-4 w-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
               </svg>
-              <span>Meu perfil</span>
+              <span>Meu Brick</span>
             </Link>
 
             <Link

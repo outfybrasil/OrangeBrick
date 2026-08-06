@@ -460,7 +460,7 @@ export default function ProfileSettingsPage() {
 
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link href={`/profile/${profile.username}`} className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Meu perfil</Link>
+          <Link href={`/profile/${profile.username}`} className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Meu Brick</Link>
           <span className="font-heading text-sm font-black">Configurações</span>
         </div>
       </header>

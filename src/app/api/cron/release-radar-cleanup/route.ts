@@ -51,16 +51,16 @@ async function cleanup(request: Request) {
     await supabase.from("editorial_images").delete().in("public_url", rows.map((item) => item.image_url));
   }
 
-  const ids = rows.filter((item) => item.image_url).map((item) => item.id);
+  const ids = rows.map((item) => item.id);
   if (ids.length > 0) {
     const { error: updateError } = await supabase
       .from("release_radar_items")
-      .update({ image_url: null, updated_at: new Date().toISOString() })
+      .update({ image_url: null, is_active: false, updated_at: new Date().toISOString() })
       .in("id", ids);
-    if (updateError) return NextResponse.json({ error: "Falha ao limpar imagens antigas" }, { status: 500 });
+    if (updateError) return NextResponse.json({ error: "Falha ao retirar lançamentos antigos" }, { status: 500 });
   }
 
-  return NextResponse.json({ cleared_images: ids.length, removed_files: paths.length, cutoff: firstDay });
+  return NextResponse.json({ archived_items: ids.length, removed_files: paths.length, cutoff: firstDay });
 }
 
 export async function GET(request: Request) {

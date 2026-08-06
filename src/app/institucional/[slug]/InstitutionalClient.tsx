@@ -52,36 +52,36 @@ function AdvertiseSection() {
   return (
     <div className="max-w-3xl mx-auto space-y-10">
       <div className="text-center space-y-4">
-        <h1 className="text-3xl sm:text-5xl font-black uppercase">Anuncie na <span className="text-brand-orange">Orange_Brick</span></h1>
+        <h1 className="text-3xl sm:text-5xl font-black uppercase">Anuncie na <span className="text-brand-orange">Orange Brick</span></h1>
         <p className="text-sm text-gray-400 font-sans leading-relaxed">Fale com a equipe sobre banners, conteúdo patrocinado identificado, reviews e integrações editoriais.</p>
       </div>
       <form onSubmit={handleSubmit} className="bg-card-slate/30 border border-brand-orange-muted/15 rounded-2xl p-6 sm:p-8 space-y-5">
         <div className="grid sm:grid-cols-2 gap-5">
           <label className="text-xs uppercase text-gray-400">Nome
-            <input required minLength={2} maxLength={100} value={formData.name} onChange={(event) => setFormData({ ...formData, name: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 rounded-lg px-4 py-3 text-white normal-case font-sans" />
+            <input required minLength={2} maxLength={100} value={formData.name} onChange={(event) => setFormData({ ...formData, name: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 px-4 py-3 text-white normal-case font-sans" />
           </label>
           <label className="text-xs uppercase text-gray-400">Empresa
-            <input required minLength={2} maxLength={120} value={formData.company} onChange={(event) => setFormData({ ...formData, company: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 rounded-lg px-4 py-3 text-white normal-case font-sans" />
+            <input required minLength={2} maxLength={120} value={formData.company} onChange={(event) => setFormData({ ...formData, company: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 px-4 py-3 text-white normal-case font-sans" />
           </label>
         </div>
         <label className="block text-xs uppercase text-gray-400">E-mail corporativo
-          <input required type="email" maxLength={180} value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 rounded-lg px-4 py-3 text-white normal-case font-sans" />
+          <input required type="email" maxLength={180} value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 px-4 py-3 text-white normal-case font-sans" />
         </label>
         <label className="block text-xs uppercase text-gray-400">Orçamento estimado
-          <select value={formData.budget} onChange={(event) => setFormData({ ...formData, budget: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 rounded-lg px-4 py-3 text-white normal-case font-sans">
+          <select value={formData.budget} onChange={(event) => setFormData({ ...formData, budget: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 px-4 py-3 text-white normal-case font-sans">
             <option value="up_to_5k">Até R$ 5.000</option>
             <option value="5k_to_20k">R$ 5.000 a R$ 20.000</option>
             <option value="above_20k">Acima de R$ 20.000</option>
           </select>
         </label>
         <label className="block text-xs uppercase text-gray-400">Mensagem
-          <textarea required minLength={20} maxLength={3000} rows={6} value={formData.message} onChange={(event) => setFormData({ ...formData, message: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 rounded-lg px-4 py-3 text-white normal-case font-sans resize-y" />
+          <textarea required minLength={20} maxLength={3000} rows={6} value={formData.message} onChange={(event) => setFormData({ ...formData, message: event.target.value })} className="mt-2 w-full bg-background-void border border-white/10 px-4 py-3 text-white normal-case font-sans resize-y" />
         </label>
         <label className="absolute -left-[9999px]" aria-hidden="true">Website
           <input tabIndex={-1} autoComplete="off" value={formData.website} onChange={(event) => setFormData({ ...formData, website: event.target.value })} />
         </label>
         {submitError && <p role="alert" className="text-xs text-red-400">{submitError}</p>}
-        <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-brand-orange hover:bg-brand-orange/90 rounded-lg font-bold uppercase disabled:opacity-50 cursor-pointer">
+        <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-brand-orange hover:bg-brand-orange/90 font-bold uppercase disabled:opacity-50 cursor-pointer">
           {isSubmitting ? "Enviando..." : "Solicitar proposta"}
         </button>
       </form>

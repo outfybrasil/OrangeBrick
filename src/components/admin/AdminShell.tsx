@@ -222,7 +222,7 @@ export function AdminShell({
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white">
                 OB
               </div>
-              <span className="truncate text-xs font-bold text-gray-200">OrangeBrick</span>
+              <span className="truncate text-xs font-bold text-gray-200">Orange Brick</span>
             </div>
             <button
               type="button"

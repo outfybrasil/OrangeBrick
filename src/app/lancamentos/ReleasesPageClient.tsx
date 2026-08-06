@@ -45,10 +45,10 @@ function ReleaseHypeMeter({
   return (
     <div className="mt-4 border-t border-white/[0.08] pt-3">
       <div className="mb-2.5 flex items-center justify-between gap-3">
-        <span className="text-[9px] font-black uppercase tracking-[0.16em] text-gray-500">
+        <span className="text-xs font-black uppercase tracking-[0.16em] text-gray-400">
           Termômetro da comunidade
         </span>
-        <span className="text-[10px] font-bold tabular-nums text-gray-400">
+        <span className="text-xs font-bold tabular-nums text-gray-300">
           {total === 0 ? "Seja o primeiro" : `${positiveShare}% no hype`}
         </span>
       </div>
@@ -72,7 +72,7 @@ function ReleaseHypeMeter({
               disabled={isVoting}
               aria-pressed={isSelected}
               aria-label={`${option.label}: ${counts[option.type]} votos`}
-              className={`min-h-11 border px-1.5 text-[9px] font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
+              className={`min-h-11 border px-1.5 text-xs font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
                 isSelected
                   ? "border-brand-orange bg-brand-orange text-white"
                   : "border-white/10 bg-white/[0.025] text-gray-400 hover:border-white/25 hover:text-white"
@@ -129,6 +129,8 @@ export function ReleasesPageClient() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
+  const [isLoadingReleases, setIsLoadingReleases] = useState(true);
+  const [releaseError, setReleaseError] = useState("");
   const [search, setSearch] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>({});
@@ -146,15 +148,20 @@ export function ReleasesPageClient() {
     return `${year}-${month}-${day}`;
   }, []);
 
-  useEffect(() => {
-    queueMicrotask(async () => {
-      const { data, error } = await supabase
-        .from("release_radar_items")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error || !data || data.length === 0) return;
-      const databaseReleases = (data as ReleaseRadarItem[]).map((item): ReleaseItem => ({
+  const loadReleases = useCallback(async () => {
+    setIsLoadingReleases(true);
+    setReleaseError("");
+    const { data, error } = await supabase
+      .from("release_radar_items")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      setReleaseError("Não foi possível carregar o calendário de lançamentos.");
+      setIsLoadingReleases(false);
+      return;
+    }
+    const databaseReleases = ((data || []) as ReleaseRadarItem[]).map((item): ReleaseItem => ({
           id: item.id,
           game: item.game,
           releaseDate: item.release_label,
@@ -165,10 +172,16 @@ export function ReleasesPageClient() {
           badge: item.badge,
           category: item.category,
           slug: item.post_slug || undefined,
-      }));
-      setReleases(databaseReleases);
-    });
+    }));
+    const now = new Date();
+    const currentMonthStart = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-01";
+    setReleases(databaseReleases.filter((item) => !item.releaseDateIso || item.releaseDateIso >= currentMonthStart));
+    setIsLoadingReleases(false);
   }, [supabase]);
+
+  useEffect(() => {
+    queueMicrotask(loadReleases);
+  }, [loadReleases]);
 
   const loadHype = useCallback(async () => {
     const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
@@ -381,7 +394,7 @@ export function ReleasesPageClient() {
                 placeholder="Buscar por nome do jogo..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-background-void px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:border-brand-orange focus:outline-none"
+                className="min-h-11 w-full border border-white/10 bg-background-void px-4 text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none"
               />
               {search && (
                 <button
@@ -406,10 +419,10 @@ export function ReleasesPageClient() {
                 <button
                   key={key}
                   onClick={() => setSelectedPlatform(key)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+                  className={`min-h-11 border px-3 text-xs font-bold transition-colors ${
                     selectedPlatform === key
-                      ? "bg-brand-orange text-white"
-                      : "border border-white/10 bg-card-slate/40 text-gray-400 hover:text-white"
+                      ? "border-brand-orange bg-brand-orange text-white"
+                      : "border-white/10 bg-card-slate/40 text-gray-300 hover:border-white/25 hover:text-white"
                   }`}
                 >
                   {label}
@@ -425,7 +438,7 @@ export function ReleasesPageClient() {
         <section className="mb-12 border-y border-white/10" aria-labelledby="weekly-hype-title">
           <div className="grid gap-0 lg:grid-cols-[0.8fr_2.2fr]">
             <div className="border-b border-white/10 py-6 lg:border-b-0 lg:border-r lg:pr-8">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-orange">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-orange">
                 Voto da comunidade
               </p>
               <h2 id="weekly-hype-title" className="mt-2 font-heading text-2xl font-black leading-none text-white sm:text-3xl">
@@ -452,7 +465,7 @@ export function ReleasesPageClient() {
                       </span>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-extrabold text-white">{item.game}</p>
-                        <p className="mt-0.5 text-[10px] uppercase tracking-wide text-gray-500">
+                        <p className="mt-0.5 text-xs uppercase tracking-wide text-gray-400">
                           {counts.buy} garantiram · {counts.watch} no radar
                         </p>
                       </div>
@@ -473,9 +486,25 @@ export function ReleasesPageClient() {
           </div>
         )}
 
-        {groupedReleases.length === 0 ? (
+        {isLoadingReleases ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-label="Carregando lançamentos">
+            {[0, 1, 2, 3].map((item) => <div key={item} className="h-80 animate-pulse border border-white/10 bg-white/[0.025]" />)}
+          </div>
+        ) : releaseError ? (
+          <div className="flex min-h-48 flex-col items-center justify-center gap-4 border-y border-white/10 text-center" role="alert">
+            <p className="text-sm text-gray-300">{releaseError}</p>
+            <button type="button" onClick={() => void loadReleases()} className="min-h-11 border border-brand-orange/40 px-4 text-xs font-bold text-brand-orange hover:bg-brand-orange/10">
+              Tentar novamente
+            </button>
+          </div>
+        ) : groupedReleases.length === 0 ? (
           <div className="py-20 text-center">
-            <p className="text-sm font-mono text-gray-400">Nenhum jogo encontrado para os filtros selecionados.</p>
+            <p className="text-sm text-gray-300">Nenhum jogo corresponde aos filtros selecionados.</p>
+            {(search || selectedPlatform !== "all") && (
+              <button type="button" onClick={() => { setSearch(""); setSelectedPlatform("all"); }} className="mt-4 min-h-11 border border-white/15 px-4 text-xs font-bold text-white hover:border-brand-orange hover:text-brand-orange">
+                Limpar filtros
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-12">
@@ -515,7 +544,7 @@ export function ReleasesPageClient() {
                             <span className="text-xs font-semibold text-gray-500">Capa pendente</span>
                           </div>
                         )}
-                        <span className="absolute right-2 top-2 z-10 border-b-2 border-brand-orange bg-black/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-md">
+                        <span className="absolute right-2 top-2 z-10 border-b-2 border-brand-orange bg-black/80 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white shadow-md">
                           {item.badge}
                         </span>
                       </div>
@@ -526,7 +555,7 @@ export function ReleasesPageClient() {
                             <time dateTime={item.releaseDateIso} className="text-xs font-black uppercase text-brand-orange">
                               {item.releaseDateIso === todayIso ? `Hoje · ${item.releaseDate}` : item.releaseDate}
                             </time>
-                            <span className="text-[10px] font-semibold text-gray-500">
+                            <span className="text-xs font-semibold text-gray-400">
                               {item.dayOfWeek}
                             </span>
                           </div>
@@ -536,18 +565,18 @@ export function ReleasesPageClient() {
                         </div>
 
                         <div className="mt-4 flex items-end justify-between gap-2">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 truncate">
+                          <p className="truncate text-xs font-bold uppercase tracking-wide text-gray-400">
                             {item.platforms.join(" · ")}
                           </p>
                           {item.slug ? (
                             <Link
                               href={`/posts/${item.slug}`}
-                              className="shrink-0 text-[10px] font-bold text-brand-orange hover:underline"
+                              className="shrink-0 text-xs font-bold text-brand-orange hover:underline"
                             >
                               Ver matéria →
                             </Link>
                           ) : (
-                            <span className="shrink-0 text-[10px] font-bold text-gray-500">
+                            <span className="shrink-0 text-xs font-bold text-gray-400">
                               Confirmado
                             </span>
                           )}
@@ -555,7 +584,7 @@ export function ReleasesPageClient() {
 
                         <Link
                           href={`/assuntos/${item.id}`}
-                          className="mt-3 inline-flex min-h-9 items-center text-[10px] font-bold uppercase tracking-wide text-gray-400 transition-colors hover:text-white"
+                          className="mt-3 inline-flex min-h-11 items-center text-xs font-bold uppercase tracking-wide text-gray-300 transition-colors hover:text-white"
                         >
                           Matérias e conversas
                         </Link>

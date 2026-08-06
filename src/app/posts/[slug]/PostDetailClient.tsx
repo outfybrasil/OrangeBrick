@@ -17,6 +17,7 @@ import { Footer } from "@/components/ui/Footer";
 import { BookmarkIcon, RepostIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
 import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
 import { createDataClient } from "@/lib/supabase/client";
+import { normalizeAuthorTag } from "@/lib/content-validation";
 import type { Post, PostStats } from "@/lib/types/database";
 import { ArticleCommunityNotes } from "@/components/community/ArticleCommunityNotes";
 
@@ -82,12 +83,11 @@ function PostContent({ post }: { post: Post }) {
 function getEditorialSignals(post: Post) {
   const plain = post.body.replace(/\\n/g, "\n");
   const structuredQuote = post.featured_quote && typeof post.featured_quote === "object" && !Array.isArray(post.featured_quote) ? post.featured_quote as { text?: string; author?: string; role?: string; source_url?: string } : null;
-  const quote = structuredQuote?.text || plain.match(/[“\"]([^”\"]{45,280})[”\"]/i)?.[1] || plain.match(/(?:afirmou|disse|explicou|declarou|comentou)[^.!?]*[.!?]/i)?.[0] || null;
   const links = [...plain.matchAll(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g)].map((match) => ({ name: match[1], url: match[2] }));
   const structuredSources = Array.isArray(post.editorial_sources) ? post.editorial_sources.filter((source): source is { name: string; url: string } => Boolean(source && typeof source === "object" && "name" in source && "url" in source)) : [];
   const sourcePool = structuredSources.length ? structuredSources : links;
   const uniqueSources = sourcePool.filter((source, index) => sourcePool.findIndex((item) => item.url === source.url) === index).slice(0, 6);
-  return { quote, quoteAuthor: structuredQuote?.author, quoteRole: structuredQuote?.role, quoteSourceUrl: structuredQuote?.source_url, sources: uniqueSources };
+  return { quote: structuredQuote?.text || null, quoteAuthor: structuredQuote?.author, quoteRole: structuredQuote?.role, quoteSourceUrl: structuredQuote?.source_url, sources: uniqueSources };
 }
 
 const INFORMATION_STATUS_LABELS: Record<Post["information_status"], string> = {
@@ -128,7 +128,6 @@ export function PostArticle({ post, stats }: PostArticleProps) {
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [conversationCount, setConversationCount] = useState(0);
-  const [revisionHistory, setRevisionHistory] = useState<Array<{ id: string; change_type: string; next_status: string | null; correction_note: string | null; created_at: string }>>([]);
   const editorialSignals = useMemo(() => getEditorialSignals(post), [post]);
 
   useEffect(() => {
@@ -166,10 +165,6 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
     void loadConversationCount();
   }, [post.slug, supabase]);
-
-  useEffect(() => {
-    supabase.from("editorial_revisions").select("id, change_type, next_status, correction_note, created_at").eq("post_id", post.id).order("created_at", { ascending: false }).limit(10).then(({ data }) => setRevisionHistory((data || []) as Array<{ id: string; change_type: string; next_status: string | null; correction_note: string | null; created_at: string }>));
-  }, [post.id, supabase]);
 
   const handleRepostClick = () => {
     if (!user) {
@@ -295,7 +290,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
               {post.author_tag && (
                 <>
                   <span>•</span>
-                  <span className="text-brand-orange-muted font-bold">{post.author_tag}</span>
+                  <span className="text-brand-orange-muted font-bold">{normalizeAuthorTag(post.author_tag)}</span>
                 </>
               )}
             </div>
@@ -341,15 +336,6 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
           {post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-300">Nota de correção</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}
 
-          <section className="border border-white/10 bg-card-slate/35 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-heading text-lg font-black uppercase">Transparência editorial</h2><span className="text-[10px] font-bold uppercase tracking-wide text-gray-500">Atualizado em {new Date(post.updated_at).toLocaleDateString("pt-BR")}</span></div>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">Esta matéria separa fatos confirmados de rumores e preserva o histórico de atualização. Correções relevantes são identificadas aqui.</p>
-            <div className="mt-4 border-t border-white/10 pt-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Fontes consultadas</p>
-              {editorialSignals.sources.length ? <ul className="mt-2 flex flex-wrap gap-2">{editorialSignals.sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center border border-white/10 px-3 text-xs font-bold text-gray-300 hover:border-brand-orange/50 hover:text-white">{source.name} ↗</a></li>)}</ul> : <p className="mt-2 text-xs text-gray-500">As fontes estão identificadas no corpo da matéria.</p>}
-            </div>
-            {revisionHistory.length > 0 && <div className="mt-4 border-t border-white/10 pt-4"><p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Histórico de atualizações</p><ol className="mt-3 space-y-3">{revisionHistory.map((revision) => <li key={revision.id} className="grid gap-1 text-xs sm:grid-cols-[7rem_1fr]"><time className="text-gray-500">{new Date(revision.created_at).toLocaleDateString("pt-BR")}</time><div><strong className="text-white">{revision.change_type === "correction" ? "Correção editorial" : "Matéria atualizada"}</strong>{revision.correction_note && <p className="mt-1 leading-relaxed text-gray-400">{revision.correction_note}</p>}</div></li>)}</ol></div>}
-          </section>
         </article>
 
         <div className="mt-10 pt-8 border-t border-brand-orange-muted/10">

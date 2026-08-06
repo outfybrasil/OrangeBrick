@@ -488,7 +488,11 @@ function EditForm() {
                             <img src={block.url} alt={block.alt} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full flex-col items-center justify-center gap-1 text-gray-600">
-                              <span className="text-xl">📷</span>
+                              <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                                <rect x="3" y="6" width="18" height="14" rx="2" />
+                                <circle cx="12" cy="13" r="3.5" />
+                                <path d="M8 6l1.5-2.5h5L16 6" />
+                              </svg>
                               <span className="text-[10px]">Insira a URL da imagem abaixo</span>
                             </div>
                           )}
@@ -601,10 +605,10 @@ function EditForm() {
                   onChange={(e) => { setAuthorName(e.target.value); setHasChanges(true); }}
                   className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
                 >
-                  <option value="Gustavo">👤 Gustavo</option>
-                  <option value="Marina">👤 Marina</option>
-                  <option value="Caio">👤 Caio</option>
-                  <option value="Redação">👤 Redação</option>
+                  <option value="Gustavo">Gustavo</option>
+                  <option value="Marina">Marina</option>
+                  <option value="Caio">Caio</option>
+                  <option value="Redação">Redação</option>
                 </select>
               </div>
             </div>
@@ -617,7 +621,7 @@ function EditForm() {
                 className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
               >
                 {CATEGORY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>🏷️ {opt.label}</option>
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
@@ -726,7 +730,9 @@ function EditForm() {
 
             {pendingChecklistCount > 0 && (
               <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] text-amber-200 flex items-center gap-2">
-                <span>⚠️</span>
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z" />
+                </svg>
                 <span>{pendingChecklistCount} itens precisam de atenção antes de publicar</span>
               </div>
             )}

@@ -28,7 +28,7 @@ export function Timer({ date }: TimerProps) {
   }, [date]);
 
   return (
-    <time dateTime={date} className="shrink-0 whitespace-nowrap text-[11px] font-medium text-gray-400">
+    <time dateTime={date} className="shrink-0 whitespace-nowrap text-xs font-medium text-gray-300">
       {exactDate}{exactDate ? " · " : ""}{timeAgo(date)}
     </time>
   );
