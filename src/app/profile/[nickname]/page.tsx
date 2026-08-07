@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { Footer } from "@/components/ui/Footer";
 import { UserBadge } from "@/components/ui/UserBadge";
 import { AchievementMark, LevelProgress, SeasonStanding } from "@/components/community/ProgressionUI";
-import { formatXp } from "@/lib/progression";
+import { divisionLabel, formatXp } from "@/lib/progression";
 import { resolveAvatarUrl } from "@/lib/avatar";
 import { FollowButton } from "@/components/topics/FollowButton";
 import type { PrivateProgressData, PublicProfileData } from "@/lib/types/progression";
@@ -47,6 +47,22 @@ const rarityColors: Record<string, string> = {
   rare: "text-sky-400",
   epic: "text-violet-400",
   legendary: "text-brand-orange",
+};
+
+const rarityCardBorders: Record<string, string> = {
+  common: "border-white/10",
+  uncommon: "border-emerald-400/25",
+  rare: "border-sky-400/30",
+  epic: "border-violet-400/30",
+  legendary: "border-brand-orange/50 shadow-[0_0_24px_rgba(255,94,0,0.14)]",
+};
+
+const rarityIconBgs: Record<string, string> = {
+  common: "bg-white/[0.06]",
+  uncommon: "bg-emerald-400/10",
+  rare: "bg-sky-400/10",
+  epic: "bg-violet-400/10",
+  legendary: "bg-brand-orange/10",
 };
 
 const rarityLabels: Record<string, string> = {
@@ -217,37 +233,37 @@ function ProfilePageContent() {
       <main className="min-h-dvh bg-[#0E0F14]">
         {/* ── HERO BANNER ── */}
         <div className="relative overflow-hidden border-b border-white/10">
-          {profile.banner_url && (
-            <img src={profile.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+          {profile.banner_url ? (
+            <>
+              <img src={profile.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#0E0F14]/95 via-[#0E0F14]/70 to-[#0E0F14]/25" />
+            </>
+          ) : (
+            <div aria-hidden="true" className="profile-brick-pattern absolute inset-0 opacity-50" />
           )}
-          {profile.banner_url && <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#0E0F14]/95 via-[#0E0F14]/70 to-[#0E0F14]/25" />}
           <div
             className="absolute inset-0"
             style={{ background: "radial-gradient(ellipse 80% 60% at 75% 50%, rgba(255,90,20,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 80% at 90% 20%, rgba(255,60,0,0.12) 0%, transparent 60%)" }}
           />
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)", backgroundSize: "40px 40px" }}
-          />
           <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">
               {/* Avatar */}
-              <div className="relative shrink-0">
+              <div className="profile-rise relative shrink-0" style={{ animationDelay: "0ms" }}>
                 <div className={`h-28 w-28 overflow-hidden rounded-full sm:h-32 sm:w-32 ${frameClass}`}>
                   <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full rounded-full object-cover" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, profile.display_name); }} />
                 </div>
                 {!profile.is_official && profile.progress && (
-                  <div className="absolute -bottom-1 -right-1 min-w-9 rounded-full border-2 border-[#0E0F14] bg-brand-orange px-2 py-0.5 text-center text-white shadow-md">
-                    <span className="block text-[8px] font-black uppercase tracking-wider">Nv.</span>
-                    <strong className="font-heading text-xs leading-none">{profile.progress.level}</strong>
+                  <div className="absolute -bottom-1 -right-1 flex min-w-11 items-center justify-center gap-1 rounded-full border-2 border-[#0E0F14] bg-brand-orange px-2.5 py-1 text-center text-white shadow-md">
+                    <span className="text-xs font-black leading-none">Nível</span>
+                    <strong className="font-heading text-sm leading-none">{profile.progress.level}</strong>
                   </div>
                 )}
               </div>
 
               {/* Name + meta + bio + platforms */}
-              <div className="min-w-0 flex-1">
+              <div className="profile-rise min-w-0 flex-1" style={{ animationDelay: "80ms" }}>
                 {profile.equipped_title && (
-                  <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-brand-orange">{profile.equipped_title}</p>
+                  <p className="mb-1.5 text-xs font-black uppercase tracking-[0.18em] text-brand-orange">{profile.equipped_title}</p>
                 )}
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="break-words font-heading text-3xl font-black leading-none tracking-tight text-white sm:text-4xl">{profile.display_name}</h1>
@@ -258,13 +274,30 @@ function ProfilePageContent() {
                   <span className="text-white/20">·</span>
                   <span>Membro desde {new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(new Date(profile.created_at))}</span>
                 </div>
+                {!profile.is_official && profile.season && profile.season.division && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex min-h-8 items-center gap-2 border border-brand-orange/40 bg-brand-orange/10 px-3 text-xs font-bold text-brand-orange">
+                      <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-orange" />
+                      {divisionLabel(profile.season.division)}
+                      {profile.season.rank ? <span className="text-white">#{profile.season.rank}</span> : null}
+                    </span>
+                    <span className="inline-flex min-h-8 items-center border border-white/10 bg-white/[0.03] px-3 text-xs font-semibold text-gray-300">
+                      {formatXp(profile.season.eligible_xp || 0)} XP na temporada
+                    </span>
+                    {!profile.season.is_qualified && (
+                      <span className="hidden text-xs text-gray-500 sm:inline">
+                        Faltam {Math.max(0, 100 - (profile.season.eligible_xp || 0))} XP para entrar no ranking
+                      </span>
+                    )}
+                  </div>
+                )}
                 <p className="mt-3 max-w-[56ch] text-sm leading-6 text-gray-300">
                   {profile.bio || (isOwner ? "Conte à comunidade quais jogos, plataformas e assuntos movem você." : "Este leitor ainda não escreveu uma apresentação.")}
                 </p>
                 {profile.favorite_platforms.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {profile.favorite_platforms.map((p) => (
-                      <span key={p} className="flex items-center gap-1.5 border border-white/15 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-gray-300">
+                      <span key={p} className="flex items-center gap-1.5 border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-gray-300">
                         <PlatformIcon platform={p} />
                         {p}
                       </span>
@@ -274,20 +307,20 @@ function ProfilePageContent() {
               </div>
 
               {/* Stats + CTAs */}
-              <div className="flex shrink-0 flex-col items-end gap-4">
+              <div className="profile-rise flex shrink-0 flex-col items-end gap-4" style={{ animationDelay: "160ms" }}>
                 {profile.stats && (
                   <div className="flex items-center gap-6">
-                    <div className="text-center">
+                    <div className="text-center profile-rise">
                       <strong className="block font-heading text-2xl font-black text-white">{profile.stats.posts}</strong>
-                      <span className="text-[10px] text-gray-400">Bricks</span>
+                      <span className="text-xs text-gray-400">Bricks</span>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center profile-rise">
                       <strong className="block font-heading text-2xl font-black text-white">{profile.stats.comments}</strong>
-                      <span className="text-[10px] text-gray-400">Comentário{profile.stats.comments !== 1 ? "s" : ""}</span>
+                      <span className="text-xs text-gray-400">Comentário{profile.stats.comments !== 1 ? "s" : ""}</span>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center profile-rise">
                       <strong className="block font-heading text-2xl font-black text-white">{profile.stats.achievements}</strong>
-                      <span className="text-[10px] text-gray-400">Conquista{profile.stats.achievements !== 1 ? "s" : ""}</span>
+                      <span className="text-xs text-gray-400">Conquista{profile.stats.achievements !== 1 ? "s" : ""}</span>
                     </div>
                   </div>
                 )}
@@ -332,18 +365,18 @@ function ProfilePageContent() {
                   {showcasedAchievements.length > 0 ? (
                     <div className="grid gap-4 sm:grid-cols-3">
                       {showcasedAchievements.map((achievement) => (
-                        <div key={achievement.slug} className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white/[0.05]">
+                        <div key={achievement.slug} className={`profile-rise flex flex-col gap-3 rounded-lg border bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05] ${rarityCardBorders[achievement.rarity] || "border-white/10"}`}>
+                          <div className={`flex h-14 w-14 items-center justify-center rounded-lg ${rarityIconBgs[achievement.rarity] || "bg-white/[0.05]"}`}>
                             <img src={`/icons/achievements/${achievement.slug}.png`} alt="" className="h-10 w-10 object-contain" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-heading text-sm font-bold text-white">{achievement.name}</p>
-                            <p className="mt-0.5 text-[11px] leading-4 text-gray-400 line-clamp-2">{achievement.description}</p>
+                            <p className="mt-0.5 text-xs leading-4 text-gray-400 line-clamp-2">{achievement.description}</p>
                           </div>
                           <div className="mt-auto flex items-center justify-between gap-2">
-                            <span className={`text-[10px] font-bold ${rarityColors[achievement.rarity] || "text-gray-300"}`}>{rarityLabels[achievement.rarity] || achievement.rarity}</span>
+                            <span className={`text-xs font-bold ${rarityColors[achievement.rarity] || "text-gray-300"}`}>{rarityLabels[achievement.rarity] || achievement.rarity}</span>
                             {achievement.unlocked_at && (
-                              <span className="text-[10px] text-gray-500">Conquistada em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(achievement.unlocked_at))}</span>
+                              <span className="text-xs text-gray-500">Conquistada em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(achievement.unlocked_at))}</span>
                             )}
                           </div>
                         </div>
@@ -435,7 +468,7 @@ function ProfilePageContent() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {[...profile.favorite_platforms, ...profile.favorite_categories].map((interest) => (
-                        <span key={interest} className="border border-white/15 bg-white/[0.03] px-2.5 py-1 text-[11px] font-semibold text-gray-300">{interest}</span>
+                        <span key={interest} className="border border-white/15 bg-white/[0.03] px-2.5 py-1 text-xs font-semibold text-gray-300">{interest}</span>
                       ))}
                     </div>
                   </aside>
@@ -496,36 +529,51 @@ function ProfilePageContent() {
 function ProfilePostList({ posts, ownProfile }: { posts: ProfilePost[]; ownProfile: boolean }) {
   if (!posts.length) {
     return (
-      <p className="rounded-lg border border-white/10 py-12 text-center text-sm text-gray-400">
-        {ownProfile ? "Sua parede ainda está vazia. Abra a primeira conversa." : "Este leitor ainda não publicou nenhum Brick."}
-      </p>
+      <div className="rounded-lg border border-white/10 py-12 text-center">
+        {ownProfile ? (
+          <>
+            <p className="font-heading text-lg font-bold text-white">Sua parede está vazia</p>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-gray-400">
+              Abra a primeira conversa no Brickboard e seus Bricks aparecem aqui.
+            </p>
+            <Link href="/brickboard" className="mt-6 inline-flex min-h-11 items-center gap-2 bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]">
+              Abrir uma conversa
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </Link>
+          </>
+        ) : (
+          <p className="text-sm text-gray-400">Este leitor ainda não publicou nenhum Brick.</p>
+        )}
+      </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="profile-bricks-masonry">
       {posts.map((post) => (
-        <article key={post.id} className="flex gap-4 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+        <article key={post.id} className="group flex flex-col overflow-hidden border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.04]">
           {post.attached_article?.image_url && (
-            <div className="w-32 shrink-0 overflow-hidden sm:w-40">
-              <img src={post.attached_article.image_url} alt={post.attached_article.title || ""} className="h-full w-full object-cover" />
+            <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10">
+              <img src={post.attached_article.image_url} alt={post.attached_article.title || ""} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </div>
           )}
-          <div className="min-w-0 flex-1 py-4 pr-4">
-            <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          <div className="flex min-w-0 flex-1 flex-col p-4">
+            <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
               {post.platform_tag && <span className="font-bold text-brand-orange uppercase tracking-wider">{post.platform_tag}</span>}
               <time dateTime={post.created_at} className="text-gray-500">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(post.created_at))}</time>
             </div>
             {post.attached_article?.title ? (
-              <>
-                <p className="font-heading text-sm font-bold leading-6 text-white line-clamp-2">{post.attached_article.title}</p>
-                <p className="mt-1 text-xs leading-5 text-gray-400 line-clamp-2">{post.content}</p>
-              </>
+              <Link href={`/brickboard?post=${post.id}`}>
+                <p className="font-heading text-sm font-bold leading-6 text-white line-clamp-2 transition-colors group-hover:text-brand-orange">{post.attached_article.title}</p>
+                {post.content && <p className="mt-1 text-xs leading-5 text-gray-400 line-clamp-2">{post.content}</p>}
+              </Link>
             ) : (
-              <p className="max-w-[64ch] whitespace-pre-wrap text-sm leading-6 text-gray-200 line-clamp-3">{post.content}</p>
+              <Link href={`/brickboard?post=${post.id}`}>
+                <p className="max-w-[64ch] whitespace-pre-wrap text-sm leading-6 text-gray-200 line-clamp-4 transition-colors group-hover:text-gray-100">{post.content}</p>
+              </Link>
             )}
-            <div className="mt-3 flex items-center gap-4 text-[11px] text-gray-500">
-              <Link href={`/brickboard?post=${post.id}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
+            <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+              <Link href={`/brickboard?post=${post.id}`} className="flex items-center gap-1.5 transition-colors hover:text-white">
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 {post.comment_count ?? 0}
               </Link>
@@ -559,7 +607,7 @@ function DailyLimit({ value, label }: { value: number; label: string }) {
   return (
     <div className="border-t border-white/15 pt-3">
       <strong className="block font-heading text-xl text-white">{value}</strong>
-      <span className="text-[11px] text-gray-400">{label}</span>
+      <span className="text-xs text-gray-400">{label}</span>
     </div>
   );
 }

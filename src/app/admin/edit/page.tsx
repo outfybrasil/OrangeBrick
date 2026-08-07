@@ -15,6 +15,19 @@ type SidebarTab = "publicacao" | "seo" | "midia" | "historico";
 type InformationStatus = Post["information_status"];
 
 function errorMessage(error: unknown, fallback: string) {
+  if (error && typeof error === "object") {
+    const errObj = error as Record<string, unknown>;
+    if (typeof errObj.message === "string" && errObj.message.trim()) {
+      const msg = errObj.message;
+      if (msg.includes("duplicate key value violates unique constraint")) {
+        return "Já existe uma matéria cadastrada com este slug. Altere o slug nas configurações de SEO.";
+      }
+      if (msg.includes("violates row-level security policy")) {
+        return "Sua conta não tem permissão para salvar matérias ou sua sessão expirou.";
+      }
+      return msg;
+    }
+  }
   return error instanceof Error ? error.message : fallback;
 }
 
@@ -262,54 +275,97 @@ function EditForm() {
       setIsSaving(true);
       setError(null);
 
+      const cleanSlug = slug
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       if (!title.trim()) throw new Error("O título é obrigatório");
-      if (!slug.trim()) throw new Error("O slug é obrigatório");
-      if (isPublished) {
-        const parsedSources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
+      if (!cleanSlug) throw new Error("O slug é obrigatório");
+
+      const parsedSources = sourcesText
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
           const separator = line.indexOf("|");
-          return { name: separator >= 0 ? line.slice(0, separator).trim() : "", url: separator >= 0 ? line.slice(separator + 1).trim() : "" };
+          if (separator >= 0) {
+            return { name: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
+          }
+          return { name: "Fonte", url: line.trim() };
         });
-        const validationErrors = validateEditorialContent({ slug, title, summary, imageUrl, imageAlt, blocks, editorialMetadata: {
-          informationStatus,
-          quote: quoteText.trim() ? { text: quoteText, author: quoteAuthor, role: quoteRole, sourceUrl: quoteSourceUrl } : null,
-          sources: parsedSources,
-          correctionNote,
-        } });
+
+      if (isPublished) {
+        const validationErrors = validateEditorialContent({
+          slug: cleanSlug,
+          title: title.trim(),
+          summary: summary.trim(),
+          imageUrl: imageUrl.trim(),
+          imageAlt: imageAlt.trim(),
+          blocks,
+          editorialMetadata: {
+            informationStatus,
+            quote: quoteText.trim()
+              ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), sourceUrl: quoteSourceUrl.trim() }
+              : null,
+            sources: parsedSources,
+            correctionNote: correctionNote.trim() || null,
+          },
+        });
         if (validationErrors.length > 0) throw new Error(validationErrors[0]);
       }
 
       const bodyJson = JSON.stringify(blocks);
-      const editorialSources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
-        const separator = line.indexOf("|");
-        return { name: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
-      });
 
-      const postData = {
+      const basePostData = {
         title: title.trim(),
-        slug: slug.trim(),
+        slug: cleanSlug,
         summary: summary.trim(),
         body: bodyJson,
         category,
-        topic_id: topicId || null,
+        topic_id: topicId && topicId.trim() !== "" ? topicId.trim() : null,
         image_url: imageUrl.trim() || null,
         image_alt: imageAlt.trim() || null,
-        author_name: authorName,
-        author_tag: authorTag,
+        author_name: authorName.trim() || "Redação",
+        author_tag: authorTag || AUTHOR_TAGS[category] || null,
         is_published: isPublished,
         published_at: isPublished ? (publishedAt || new Date().toISOString()) : null,
         updated_at: new Date().toISOString(),
+      };
+
+      const extendedPostData = {
+        ...basePostData,
         information_status: informationStatus,
-        featured_quote: quoteText.trim() ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim() } : null,
-        editorial_sources: editorialSources,
+        featured_quote: quoteText.trim()
+          ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim() }
+          : null,
+        editorial_sources: parsedSources,
         correction_note: correctionNote.trim() || null,
       };
 
       if (postId) {
-        const { error: updateErr } = await supabase.from("posts").update(postData).eq("id", postId);
-        if (updateErr) throw updateErr;
+        const { error: updateErr } = await supabase.from("posts").update(extendedPostData).eq("id", postId);
+        if (updateErr) {
+          if (updateErr.message?.includes("Could not find the") && updateErr.message?.includes("column")) {
+            const { error: fallbackErr } = await supabase.from("posts").update(basePostData).eq("id", postId);
+            if (fallbackErr) throw fallbackErr;
+          } else {
+            throw updateErr;
+          }
+        }
       } else {
-        const { error: insertErr } = await supabase.from("posts").insert([postData]);
-        if (insertErr) throw insertErr;
+        const { error: insertErr } = await supabase.from("posts").insert([extendedPostData]);
+        if (insertErr) {
+          if (insertErr.message?.includes("Could not find the") && insertErr.message?.includes("column")) {
+            const { error: fallbackErr } = await supabase.from("posts").insert([basePostData]);
+            if (fallbackErr) throw fallbackErr;
+          } else {
+            throw insertErr;
+          }
+        }
       }
 
       setHasChanges(false);

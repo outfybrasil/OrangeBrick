@@ -122,7 +122,7 @@ export default function ProfileSetup() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">
+            <label className="block text-xs uppercase font-bold text-gray-400 mb-1">
               Apelido *
             </label>
             <input
@@ -137,7 +137,7 @@ export default function ProfileSetup() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-bold uppercase text-gray-400">
+            <label className="mb-1 block text-xs font-bold uppercase text-gray-400">
               Usuário *
             </label>
             <div className="flex min-h-11 items-center rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 focus-within:border-brand-orange/50">
@@ -151,11 +151,11 @@ export default function ProfileSetup() {
                 className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm text-white outline-none"
               />
             </div>
-            <p className="mt-1 text-[10px] text-gray-500">Este será o endereço permanente do seu perfil.</p>
+            <p className="mt-1 text-xs text-gray-500">Este será o endereço permanente do seu perfil.</p>
           </div>
 
           <div>
-            <label className="mb-1 block text-[10px] font-bold uppercase text-gray-400">Foto de perfil (opcional)</label>
+            <label className="mb-1 block text-xs font-bold uppercase text-gray-400">Foto de perfil (opcional)</label>
             <label className="flex min-h-12 cursor-pointer items-center justify-between rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/50">
               <span>{avatarFile ? avatarFile.name : "Escolher uma foto"}</span>
               <span className="text-xs text-brand-orange">Até 8 MB</span>
@@ -165,7 +165,7 @@ export default function ProfileSetup() {
                 if (file) setAvatarUrl(URL.createObjectURL(file));
               }} />
             </label>
-            <p className="mt-1 text-[9px] text-gray-500">Se não escolher outra imagem, usaremos sua foto do Google.</p>
+            <p className="mt-1 text-xs text-gray-500">Se não escolher outra imagem, usaremos sua foto do Google.</p>
           </div>
 
           {error && (
@@ -183,7 +183,7 @@ export default function ProfileSetup() {
           </button>
         </form>
 
-        <p className="text-[9px] text-gray-600 text-center mt-4">
+        <p className="text-xs text-gray-600 text-center mt-4">
           Ao criar um perfil, você concorda com nossos{" "}
           <Link href="/termos" className="text-brand-orange hover:text-white transition-colors">
             Termos de Uso

@@ -152,7 +152,7 @@ export function ComposeBrickModal({
               aria-describedby="brick-guidance brick-count"
               className="w-full resize-none rounded-xl border border-white/10 bg-background-void p-3.5 text-sm text-white outline-none transition-colors placeholder:text-[#777982] focus:border-brand-orange/60 focus-visible:outline-2 focus-visible:outline-brand-orange/30"
             />
-            <div className="mt-2 flex items-start justify-between gap-4 text-[11px]">
+            <div className="mt-2 flex items-start justify-between gap-4 text-xs">
               <span id="brick-guidance" className="leading-5 text-[#9698a1]">
                 Debate firme, ataque pessoal não. Avise antes de spoilers.
               </span>
@@ -232,9 +232,10 @@ export function ComposeBrickModal({
                     <button
                       type="button"
                       onClick={() => removePollOption(idx)}
-                      className="text-xs text-gray-500 hover:text-red-400 px-1"
+                      aria-label={`Remover opção ${idx + 1}`}
+                      className="flex min-h-9 min-w-9 items-center justify-center text-gray-500 hover:text-red-400"
                     >
-                      ✕
+                      <Icon name="close" size={12} />
                     </button>
                   )}
                 </div>
@@ -252,7 +253,7 @@ export function ComposeBrickModal({
           )}
 
           <fieldset>
-            <legend className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#aeb0b8]">
+            <legend className="mb-2 text-xs font-bold uppercase tracking-wider text-[#aeb0b8]">
               Plataforma opcional
             </legend>
             <div className="flex flex-wrap gap-2">
@@ -288,7 +289,7 @@ export function ComposeBrickModal({
                 />
               )}
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-orange">
                   Matéria anexada
                 </span>
                 <p className="line-clamp-1 text-xs font-bold text-white">{attachedArticle.title}</p>
@@ -299,7 +300,7 @@ export function ComposeBrickModal({
                 aria-label="Remover matéria anexada"
                 className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white"
               >
-                ×
+                <Icon name="close" size={16} />
               </button>
             </div>
           )}

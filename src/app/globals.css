@@ -91,6 +91,16 @@ body {
   font-family: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
 }
 
+a,
+button,
+[role="button"] {
+  border-radius: var(--radius-2xl);
+}
+
+:is(a, button, [role="button"])[class*="rounded-full"] {
+  border-radius: 9999px;
+}
+
 :where(a, button, input, textarea, select, summary):focus-visible {
   outline: 2px solid #FF5E00;
   outline-offset: 3px;
@@ -417,6 +427,72 @@ img, video, svg {
 
 .brickboard-card-tilt {
   animation: subtle-tilt 6s ease-in-out infinite;
+}
+
+/* ============================================
+   Perfil — padrão de tijolos e vitrine
+   ============================================ */
+.profile-brick-pattern {
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 40px,
+      rgba(255, 105, 40, 0.09) 40px,
+      rgba(255, 105, 40, 0.09) 46px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 96px,
+      rgba(255, 105, 40, 0.07) 96px,
+      rgba(255, 105, 40, 0.07) 102px
+    );
+}
+
+.profile-bricks-masonry {
+  columns: 1;
+  column-gap: 1rem;
+}
+
+.profile-bricks-masonry > * {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.profile-bricks-masonry > :nth-child(2n) {
+  transform: rotate(0.35deg);
+}
+
+.profile-bricks-masonry > :nth-child(3n) {
+  transform: rotate(-0.3deg);
+}
+
+@media (min-width: 640px) {
+  .profile-bricks-masonry {
+    columns: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-bricks-masonry {
+    columns: 3;
+  }
+}
+
+@keyframes profile-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-rise {
+  animation: profile-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Placeholder de imagem com texto mais humano */

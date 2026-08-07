@@ -43,6 +43,13 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 
 ---
 
+## Image sourcing priority
+
+- Always search first for official material tied directly to the subject: game logo or cover art, official screenshot, trailer still, hardware photo, event branding, or a photo of a person directly involved.
+- Use generated images only as a last resort, when no suitable official image exists or the topic is a concept without a visual reference.
+- Body images must add visual context to the article, such as the quoted person, a speech screenshot, gameplay, the product, the event, or a document discussed in the text.
+- Keep cover and body images distinct, test every image URL, and write alt text that connects the image to the article summary.
+
 ## 📅 Game Release Dates & Official Cover Art Standards
 
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**

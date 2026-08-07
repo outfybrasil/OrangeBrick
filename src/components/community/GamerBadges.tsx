@@ -62,7 +62,7 @@ export function GamerBadges({ postCount = 0, reactionsCount = 0, commentsCount =
         <span
           key={badge.id}
           title={badge.description}
-          className={`px-2.5 py-1 rounded-xl text-[11px] font-subtitle font-bold border transition-all select-none ${badge.color}`}
+          className={`px-2.5 py-1 rounded-xl text-xs font-subtitle font-bold border transition-all select-none ${badge.color}`}
         >
           {badge.label}
         </span>

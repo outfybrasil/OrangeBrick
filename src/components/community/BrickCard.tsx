@@ -221,17 +221,17 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               </h4>
               <UserBadge nickname={post.author_name} isOfficial={post.is_official} />
               {post.platform_tag && (
-                <span className="border-b border-brand-orange/60 px-1 py-0.5 font-subtitle text-[9px] font-bold text-brand-orange sm:text-[10px]">
+                <span className="border-b border-brand-orange/60 px-1 py-0.5 font-subtitle text-xs font-bold text-brand-orange">
                   {post.platform_tag}
                 </span>
               )}
               {post.is_pinned && (
-                <span className="border-b border-yellow-400/60 px-1 py-0.5 font-subtitle text-[9px] font-bold text-yellow-300">
+                <span className="border-b border-yellow-400/60 px-1 py-0.5 font-subtitle text-xs font-bold text-yellow-300">
                   Fixo
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-body text-gray-500 block">
+            <span className="text-xs font-body text-gray-500 block">
               {new Date(post.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
@@ -243,7 +243,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               type="button"
               onClick={() => openReport("post", post.id)}
               disabled={reportedContent.includes(`post:${post.id}`)}
-              className="min-h-11 px-3 text-[11px] font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
+              className="min-h-11 px-3 text-xs font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
             >
               {reportedContent.includes(`post:${post.id}`) ? "Denunciado" : "Denunciar"}
             </button>
@@ -264,7 +264,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         </div>
       </div>
 
-      <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-[15px]">
+      <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-base">
         <SpoilerText>{post.content}</SpoilerText>
       </p>
 
@@ -289,7 +289,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             </div>
           )}
           <div className="p-4">
-            <span className="text-[9px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+            <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
               Matéria do Orange Brick
             </span>
             <h5 className="break-words font-subtitle text-sm font-bold leading-6 text-white transition-colors group-hover/article:text-brand-orange sm:text-base">
@@ -308,7 +308,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span className="break-words text-[10px] font-subtitle font-bold uppercase tracking-wider text-emerald-400">
+            <span className="break-words text-xs font-subtitle font-bold uppercase tracking-wider text-emerald-400">
               Republicado de {post.shared_post.original_author_name}
             </span>
           </div>
@@ -322,17 +322,17 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-subtitle font-bold text-white">
+                <span className="text-xs font-subtitle font-bold text-white">
                   {post.shared_post.original_author_name}
                 </span>
                 <UserBadge nickname={post.shared_post.original_author_name} isOfficial={post.shared_post.original_is_official} />
                 {post.shared_post.original_platform_tag && (
-                  <span className="text-[9px] font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20">
+                  <span className="text-xs font-subtitle font-bold text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20">
                     {post.shared_post.original_platform_tag}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-gray-300 font-body leading-relaxed mt-1 whitespace-pre-line break-words">
+              <p className="text-xs text-gray-300 font-body leading-relaxed mt-1 whitespace-pre-line break-words">
                 {post.shared_post.original_content}
               </p>
 
@@ -351,7 +351,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                     </div>
                   )}
                   <div className="p-3">
-                    <span className="text-[8px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+                    <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
                       Matéria Citada
                     </span>
                     <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange">
@@ -382,7 +382,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
 
       {isShareOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-2.5">
-          <p className="text-[11px] font-subtitle text-gray-400">
+          <p className="text-xs font-subtitle text-gray-400">
             Adicione seu comentário ao republicar:
           </p>
           <form onSubmit={handleSubmitShare} className="flex flex-col gap-2 xs:flex-row">
@@ -443,7 +443,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                               {c.author_name}
                             </Link>
                             <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
-                            <span className="text-[10px] text-gray-500">
+                            <span className="text-xs text-gray-500">
                               {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </span>
                           </div>
@@ -453,7 +453,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                                 type="button"
                                 onClick={() => openReport("comment", c.id)}
                                 disabled={reportedContent.includes(`comment:${c.id}`)}
-                                className="min-h-9 px-2 text-[10px] font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
+                                className="min-h-9 px-2 text-xs font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
                               >
                                 {reportedContent.includes(`comment:${c.id}`) ? "Enviado" : "Denunciar"}
                               </button>
@@ -473,7 +473,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                           <button
                             type="button"
                             onClick={() => handleLikeComment(c.id)}
-                            className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold transition-colors ${
+                            className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors ${
                               c.user_has_liked
                                 ? "bg-brand-orange/10 text-brand-orange"
                                 : "text-gray-500 hover:bg-white/5 hover:text-white"

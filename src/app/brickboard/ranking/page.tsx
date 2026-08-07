@@ -71,10 +71,10 @@ export default function RankingPage() {
                   <img src={resolveAvatarUrl(entry.avatar_url, entry.display_name)} alt="" className="h-11 w-11 object-cover" referrerPolicy="no-referrer" />
                   <span className="min-w-0">
                     <strong className="block truncate text-sm">{entry.display_name}</strong>
-                    <span className="mt-1 block text-[11px] text-gray-500">Nível {entry.level} · {entry.active_days} dias ativos</span>
+                    <span className="mt-1 block text-xs text-gray-500">Nível {entry.level} · {entry.active_days} dias ativos</span>
                   </span>
                   <span className="hidden text-xs font-semibold text-gray-300 sm:block">{divisionLabel(entry.division)}</span>
-                  <span className="text-right text-sm font-bold text-white">{formatXp(entry.eligible_xp)} <small className="text-[10px] text-gray-500">XP</small></span>
+                  <span className="text-right text-sm font-bold text-white">{formatXp(entry.eligible_xp)} <small className="text-xs text-gray-500">XP</small></span>
                 </Link>
               </li>
             ))}

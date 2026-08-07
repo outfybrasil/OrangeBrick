@@ -1,6 +1,7 @@
 "use client";
 
 import type { CommunityPoll } from "@/lib/types/community";
+import { Icon } from "@/components/ui/Icon";
 
 interface GamerPollWidgetProps {
   poll: CommunityPoll;
@@ -13,11 +14,11 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
   return (
     <section className="overflow-hidden rounded-xl bg-[#111217] shadow-[0_12px_36px_rgba(0,0,0,0.34)] ring-1 ring-white/10" aria-labelledby="daily-poll-title" aria-describedby="daily-poll-description">
       <header className="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-brand-orange/20 via-brand-orange/[0.06] to-transparent px-3.5 py-2.5">
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-brand-orange">
-          <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-[10px] text-black font-black" aria-hidden="true">?</span>
+        <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-orange">
+          <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black" aria-hidden="true"><Icon name="question" size={13} /></span>
           Pergunta do dia
         </span>
-        <span className="rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-[10px] font-bold tabular-nums text-gray-400">{poll.total_votes} votos</span>
+        <span className="rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-xs font-bold tabular-nums text-gray-400">{poll.total_votes} votos</span>
       </header>
 
       <div className="p-3.5">
@@ -67,7 +68,7 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
           })}
         </div>
 
-        <footer className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2.5 text-[11px] font-medium text-gray-400" aria-live="polite">
+        <footer className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2.5 text-xs font-medium text-gray-400" aria-live="polite">
           <span className={`size-1.5 rounded-full ${hasVoted ? "bg-emerald-400" : "bg-brand-orange"}`} aria-hidden="true" />
           {hasVoted ? "Voto registrado." : "Voto anônimo e rápido."}
         </footer>
