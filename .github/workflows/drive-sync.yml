@@ -1,0 +1,15 @@
+name: drive-sync
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar drive-sync
+        run: |
+          curl -fsS -X GET "https://orange-brick.vercel.app/api/cron/drive-sync" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

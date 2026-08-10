@@ -17,7 +17,8 @@
     "backup:create": "node --env-file=.env.local scripts/backup-supabase.mjs",
     "backup:verify": "node scripts/verify-backup.mjs",
     "production:check": "node --env-file=.env.local scripts/check-production-readiness.mjs",
-    "scan-news": "node scripts/scan-news.mjs"
+    "scan-news": "node scripts/scan-news.mjs",
+    "pull-drive": "node --env-file=.env.local scripts/pull-drive.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
