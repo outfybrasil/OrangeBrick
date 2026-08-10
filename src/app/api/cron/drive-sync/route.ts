@@ -74,7 +74,7 @@ async function reachableImageUrl(value?: string) {
   const url = imageUrl(value);
   if (!url) return null;
   try {
-    const response = await fetch(url, { headers: { Range: "bytes=0-0" }, cache: "no-store" });
+    const response = await fetch(url, { headers: { Range: "bytes=0-0" }, cache: "no-store", signal: AbortSignal.timeout(8000) });
     await response.body?.cancel();
     return response.ok ? url : null;
   } catch {
