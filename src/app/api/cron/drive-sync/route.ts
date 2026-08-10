@@ -64,6 +64,7 @@ function imageUrl(value?: string) {
   if (!url) return null;
   try {
     const parsed = new URL(url);
+    if (/(^|\.)(unsplash\.com|pexels\.com|pixabay\.com)$/i.test(parsed.hostname)) return null;
     return /\.(?:avif|gif|jpe?g|png|webp)$/i.test(parsed.pathname) ? url : null;
   } catch {
     return null;

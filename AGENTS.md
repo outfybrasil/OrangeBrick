@@ -132,6 +132,7 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - **Sempre testar a URL** com fetch/curl antes de salvar — confirmar HTTP 200
 - Preferir imagens com boa resolução (mínimo 1200px de largura)
 - Para logos de eventos: buscar `"[nome do evento] logo"` no Google Imagens
+- O sincronizador do Drive deve rejeitar automaticamente capas do Unsplash, Pexels e Pixabay. Para jogos, consoles e empresas, usar arte oficial, screenshot oficial, foto oficial de hardware ou logo corporativa; se não houver material válido, deixar a capa pendente para revisão manual em vez de usar imagem genérica.
 
 ### Checklist de qualidade (rodar ANTES de salvar)
 
