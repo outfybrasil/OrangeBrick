@@ -116,7 +116,8 @@ function extractMetadata(lines) {
   const metadata = {};
   const kept = [];
   for (const line of lines) {
-    const match = line.match(/^(Categoria|Resumo|Autor|Capa|Alt):\s*(.+)$/i);
+    const cleaned = line.replace(/\*/g, "").replace(/\\([\[\]_])/g, "$1").trim();
+    const match = cleaned.match(/^\[?(Categoria|Resumo|Autor|Capa|Alt|Imagem_HD|Legenda)\]?:\s*(.+)$/i);
     if (match && !metadata[match[1].toLowerCase()]) {
       metadata[match[1].toLowerCase()] = match[2].trim();
     } else {
@@ -124,6 +125,43 @@ function extractMetadata(lines) {
     }
   }
   return { metadata, kept };
+}
+
+function unwrapUrl(value) {
+  if (!value) return null;
+  const markdownLink = value.match(/^\[([^\]]+)\]\([^)]+\)$/);
+  return (markdownLink?.[1] || value).replace(/\\([_])/g, "$1").trim();
+}
+
+function imageUrl(value) {
+  const url = unwrapUrl(value);
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return /\.(?:avif|gif|jpe?g|png|webp)$/i.test(parsed.pathname) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+async function reachableImageUrl(value) {
+  const url = imageUrl(value);
+  if (!url) return null;
+  try {
+    const response = await fetch(url, { headers: { Range: "bytes=0-0" } });
+    await response.body?.cancel();
+    return response.ok ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+async function validatedBlocks(blocks) {
+  const valid = [];
+  for (const block of blocks) {
+    if (block.type !== "image" || await reachableImageUrl(block.url)) valid.push(block);
+  }
+  return valid;
 }
 
 function buildBlocks(content) {
@@ -142,18 +180,31 @@ function buildBlocks(content) {
 
   for (const line of lines) {
     const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+    const htmlImageMatch = line.match(/^\\?<img\s+src="([^"]+)"\s+alt="([^"]*)"\s*\/?>$/i);
     if (imageMatch) {
       flushText();
       blocks.push({
         id: `block-${index++}`,
         type: "image",
-        url: imageMatch[2],
+        url: unwrapUrl(imageMatch[2]),
         alt: imageMatch[1] || "",
         caption: "",
       });
+    } else if (htmlImageMatch) {
+      flushText();
+      blocks.push({
+        id: `block-${index++}`,
+        type: "image",
+        url: unwrapUrl(htmlImageMatch[1]),
+        alt: htmlImageMatch[2],
+        caption: "",
+      });
+    } else if (/^#\s+/.test(line.trim())) {
+      flushText();
+      textBuffer.push(line.replace(/^#\s+/, "## ").replace(/\*\*/g, ""));
     } else if (line.trim().startsWith("## ") || line.trim().startsWith("### ")) {
       flushText();
-      textBuffer.push(line);
+      textBuffer.push(line.replace(/\*\*/g, ""));
     } else {
       textBuffer.push(line);
     }
@@ -200,6 +251,10 @@ async function postExists(slug) {
 
 async function importDocument(file) {
   const { id, name, mimeType } = file;
+  if (/^Matérias Orange Brick\b/i.test(name)) {
+    console.log(`⏭ Documento agregador ignorado (${name})`);
+    return { status: "skipped" };
+  }
   if (syncedByDriveId[id] && !force) {
     console.log(`⏭ Já importado (${name}) — use --force para reimportar`);
     return { status: "skipped" };
@@ -229,7 +284,8 @@ async function importDocument(file) {
     kept.splice(kept.indexOf(authorByLine), 1);
   }
   const summary = metadata.resumo || buildSummary(kept);
-  const blocks = buildBlocks(kept.join("\n"));
+  const blocks = await validatedBlocks(buildBlocks(kept.join("\n")));
+  const coverUrl = await reachableImageUrl(metadata.capa) || await reachableImageUrl(metadata.imagem_hd);
 
   if (await postExists(slug) && !force) {
     console.log(`⏭ Slug já existe (${slug}) — use --force para reimportar`);
@@ -242,8 +298,8 @@ async function importDocument(file) {
     summary,
     body: JSON.stringify(blocks),
     category,
-    image_url: metadata.capa || null,
-    image_alt: metadata.alt || null,
+    image_url: coverUrl,
+    image_alt: metadata.alt || metadata.legenda || null,
     author_name: authorName,
     author_tag: categoryTags[category],
     is_published: false,

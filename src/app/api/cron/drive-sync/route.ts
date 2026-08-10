@@ -42,7 +42,8 @@ function extractMetadata(lines: string[]) {
   const metadata: Record<string, string> = {};
   const kept: string[] = [];
   for (const line of lines) {
-    const match = line.match(/^(Categoria|Resumo|Autor|Capa|Alt):\s*(.+)$/i);
+    const cleaned = line.replace(/\*/g, "").replace(/\\([\[\]_])/g, "$1").trim();
+    const match = cleaned.match(/^\[?(Categoria|Resumo|Autor|Capa|Alt|Imagem_HD|Legenda)\]?:\s*(.+)$/i);
     if (match && !metadata[match[1].toLowerCase()]) {
       metadata[match[1].toLowerCase()] = match[2].trim();
     } else {
@@ -50,6 +51,43 @@ function extractMetadata(lines: string[]) {
     }
   }
   return { metadata, kept };
+}
+
+function unwrapUrl(value?: string) {
+  if (!value) return null;
+  const markdownLink = value.match(/^\[([^\]]+)\]\([^)]+\)$/);
+  return (markdownLink?.[1] || value).replace(/\\([_])/g, "$1").trim();
+}
+
+function imageUrl(value?: string) {
+  const url = unwrapUrl(value);
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    return /\.(?:avif|gif|jpe?g|png|webp)$/i.test(parsed.pathname) ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+async function reachableImageUrl(value?: string) {
+  const url = imageUrl(value);
+  if (!url) return null;
+  try {
+    const response = await fetch(url, { headers: { Range: "bytes=0-0" }, cache: "no-store" });
+    await response.body?.cancel();
+    return response.ok ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+async function validatedBlocks(blocks: ReturnType<typeof buildBlocks>) {
+  const valid: ReturnType<typeof buildBlocks> = [];
+  for (const block of blocks) {
+    if (block.type !== "image" || await reachableImageUrl(block.url)) valid.push(block);
+  }
+  return valid;
 }
 
 function buildBlocks(content: string) {
@@ -68,18 +106,31 @@ function buildBlocks(content: string) {
 
   for (const line of lines) {
     const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+    const htmlImageMatch = line.match(/^\\?<img\s+src="([^"]+)"\s+alt="([^"]*)"\s*\/?>$/i);
     if (imageMatch) {
       flushText();
       blocks.push({
         id: `block-${index++}`,
         type: "image",
-        url: imageMatch[2],
+        url: unwrapUrl(imageMatch[2]) || "",
         alt: imageMatch[1] || "",
         caption: "",
       });
+    } else if (htmlImageMatch) {
+      flushText();
+      blocks.push({
+        id: `block-${index++}`,
+        type: "image",
+        url: unwrapUrl(htmlImageMatch[1]) || "",
+        alt: htmlImageMatch[2],
+        caption: "",
+      });
+    } else if (/^#\s+/.test(line.trim())) {
+      flushText();
+      textBuffer.push(line.replace(/^#\s+/, "## ").replace(/\*\*/g, ""));
     } else if (line.trim().startsWith("## ") || line.trim().startsWith("### ")) {
       flushText();
-      textBuffer.push(line);
+      textBuffer.push(line.replace(/\*\*/g, ""));
     } else {
       textBuffer.push(line);
     }
@@ -154,6 +205,10 @@ export async function GET(request: Request) {
     const files = await driveListFiles(folderId);
     for (const file of files) {
       try {
+        if (/^Matérias Orange Brick\b/i.test(file.name)) {
+          results.skipped++;
+          continue;
+        }
         const markdown = await exportMarkdown(file.id);
         const lines = markdown.split("\n").map((l) => l.replace(/\r$/, ""));
         const { metadata, kept } = extractMetadata(lines);
@@ -179,7 +234,8 @@ export async function GET(request: Request) {
         }
 
         const summary = metadata.resumo || buildSummary(kept);
-        const blocks = buildBlocks(kept.join("\n"));
+        const blocks = await validatedBlocks(buildBlocks(kept.join("\n")));
+        const coverUrl = await reachableImageUrl(metadata.capa) || await reachableImageUrl(metadata.imagem_hd);
 
         const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
         if (existing) {
@@ -194,8 +250,8 @@ export async function GET(request: Request) {
             summary,
             body: JSON.stringify(blocks),
             category,
-            image_url: metadata.capa || null,
-            image_alt: metadata.alt || null,
+            image_url: coverUrl,
+            image_alt: metadata.alt || metadata.legenda || null,
             author_name: authorName,
             author_tag: categoryTags[category],
             is_published: false,
