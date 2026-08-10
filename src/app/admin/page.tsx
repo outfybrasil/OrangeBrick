@@ -23,7 +23,11 @@ const CATEGORY_LABELS: Record<PostCategory, string> = {
 const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABELS) as [PostCategory, string][];
 
 function errorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback;
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return fallback;
 }
 
 function formatDate(value: string) {
@@ -69,10 +73,12 @@ export default function AdminDashboard() {
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const [publishCandidate, setPublishCandidate] = useState<Post | null>(null);
   const [publishOnBrickboard, setPublishOnBrickboard] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const publishPost = async (post: Post) => {
     setPublishingId(post.id);
     setError(null);
+    setPublishError(null);
 
     try {
       const blocks = JSON.parse(post.body) as EditorialBlock[];
@@ -94,7 +100,6 @@ export default function AdminDashboard() {
           is_published: true,
           published_at: publishedAt,
           updated_at: publishedAt,
-          publish_to_brickboard: publishOnBrickboard,
         })
         .eq("id", post.id)
         .select("*")
@@ -145,9 +150,11 @@ export default function AdminDashboard() {
 
       setPublishCandidate(null);
       setPublishOnBrickboard(false);
+      setPublishError(null);
     } catch (err: unknown) {
-      setError(errorMessage(err, "Não foi possível publicar a matéria."));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const message = errorMessage(err, "Não foi possível publicar a matéria.");
+      setError(message);
+      setPublishError(message);
     } finally {
       setPublishingId(null);
     }
@@ -505,6 +512,7 @@ export default function AdminDashboard() {
                                 onClick={() => {
                                   setPublishCandidate(post);
                                   setPublishOnBrickboard(false);
+                                  setPublishError(null);
                                 }}
                                 disabled={publishingId === post.id}
                                 className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 px-3 text-[11px] font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
@@ -592,6 +600,11 @@ export default function AdminDashboard() {
                 {publishCandidate.title}
               </p>
             </div>
+            {publishError && (
+              <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-200">
+                {publishError}
+              </div>
+            )}
             <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/10 px-4 py-3 transition-colors hover:bg-white/[0.03]">
               <input
                 type="checkbox"
@@ -611,6 +624,7 @@ export default function AdminDashboard() {
                 onClick={() => {
                   setPublishCandidate(null);
                   setPublishOnBrickboard(false);
+                  setPublishError(null);
                 }}
                 disabled={publishingId === publishCandidate.id}
                 className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
