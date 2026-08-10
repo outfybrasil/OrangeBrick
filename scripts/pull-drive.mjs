@@ -9,6 +9,9 @@ const dryRun = args.includes("--dry-run");
 const force = args.includes("--force");
 const fileArg = args.find((a) => a.startsWith("--file="))?.split("=")[1];
 const folderArg = args.find((a) => a.startsWith("--folder="))?.split("=")[1];
+const ignoredFileIds = new Set(
+  (process.env.GOOGLE_DRIVE_IGNORED_FILE_IDS || "").split(",").map((id) => id.trim()).filter(Boolean)
+);
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -251,6 +254,10 @@ async function postExists(slug) {
 
 async function importDocument(file) {
   const { id, name, mimeType } = file;
+  if (ignoredFileIds.has(id)) {
+    console.log(`⏭ Documento bloqueado (${name})`);
+    return { status: "skipped" };
+  }
   if (/^Matérias Orange Brick\b/i.test(name)) {
     console.log(`⏭ Documento agregador ignorado (${name})`);
     return { status: "skipped" };

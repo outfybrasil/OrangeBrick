@@ -199,13 +199,16 @@ export async function GET(request: Request) {
   }
 
   const supabase = serviceClient();
+  const ignoredFileIds = new Set(
+    (process.env.GOOGLE_DRIVE_IGNORED_FILE_IDS || "").split(",").map((id) => id.trim()).filter(Boolean),
+  );
   const results = { imported: 0, skipped: 0, failed: 0, failures: [] as { name: string; error: string }[] };
 
   try {
     const files = await driveListFiles(folderId);
     for (const file of files) {
       try {
-        if (/^Matérias Orange Brick\b/i.test(file.name)) {
+        if (/^Matérias Orange Brick\b/i.test(file.name) || ignoredFileIds.has(file.id)) {
           results.skipped++;
           continue;
         }
