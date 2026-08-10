@@ -49,6 +49,10 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Use generated images only as a last resort, when no suitable official image exists or the topic is a concept without a visual reference.
 - Body images must add visual context to the article, such as the quoted person, a speech screenshot, gameplay, the product, the event, or a document discussed in the text.
 - Keep cover and body images distinct, test every image URL, and write alt text that connects the image to the article summary.
+- Every article imported from Google Drive must receive at least two distinct body images before it is handed off for review. The assistant running the import is responsible for sourcing, uploading, inserting, and validating those images; this is not a manual follow-up task for the user.
+- Drive imports must preserve the `text → image → text → image → text` structure. The two body images must use different assets and perspectives, and neither may repeat the cover.
+- If two suitable official or otherwise rule-compliant images cannot be found, keep the article as an incomplete draft and report the missing assets. Never fill the body with generic stock imagery merely to satisfy the image count.
+- Before completing a Drive import, confirm HTTP 200, 16:9 dimensions of at least 1200 × 675, specific alt text and caption, and exactly which subject each body image depicts.
 
 ## 📅 Game Release Dates & Official Cover Art Standards
 
@@ -139,6 +143,7 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - [ ] **Sem caracteres CJK** (chinês/japonês/coreano) — usar `grep -rP "[\x{4e00}-\x{9fff}]"` no conteúdo
 - [ ] **Sem termos em inglês soltos** sem tradução ou explicação (ex: "engine" não vira "引擎" em tradutor automático)
 - [ ] **Imagens carregam** — testar URL com fetch/curl para confirmar HTTP 200
+- [ ] **Duas imagens internas** — toda matéria possui pelo menos 2 blocos de imagem distintos, além da capa, com 16:9 mínimo de 1200 × 675, alt text e caption específicos
 - [ ] **Bold `**texto**` funciona** — verificar que o parse de markdown está rodando no preview
 - [ ] **Links internos** usam `/posts/slug-da-materia` (não URL absoluta)
 - [ ] **Fonte citada** no final com `**Fonte:** [Nome](url)`
@@ -254,8 +259,8 @@ Exemplos:
 
 | Seu pedido | Ação do opencode |
 |---|---|
-| "Cria matéria sobre X" | Pesquisa 2-3 fontes confiáveis → reescreve 100% o conteúdo → busca imagens no Unsplash seguindo regras → monta blocos → salva como rascunho no Supabase |
-| "Qual vai ser a matéria do dia?" / "Materia do dia" | Busca **notícias publicadas HOJE** em fontes confiáveis (Gematsu, IGN Brasil, Eurogamer, VGC, GameSpot) → escolhe a mais relevante → pesquisa 2-3 fontes → reescreve 100% → busca **2 imagens diferentes** (fontes: Unsplash, Pexels, Pixabay) que mostrem **ângulos/conceitos diferentes** → monta blocos → salva como rascunho (`is_published: false`) |
+| "Cria matéria sobre X" | Pesquisa 2-3 fontes confiáveis → reescreve 100% o conteúdo → busca capa e pelo menos 2 imagens internas distintas conforme a prioridade de fontes oficiais → valida URLs, dimensões, alt texts e captions → monta blocos → salva como rascunho no Supabase |
+| "Qual vai ser a matéria do dia?" / "Materia do dia" | Busca **notícias publicadas HOJE** em fontes confiáveis (Gematsu, IGN Brasil, Eurogamer, VGC, GameSpot) → escolhe a mais relevante → pesquisa 2-3 fontes → reescreve 100% → busca capa e **2 imagens internas diferentes**, priorizando material oficial e ângulos complementares → valida todos os arquivos → monta blocos → salva como rascunho (`is_published: false`) |
 | "Corrige Y" | Lê código relevante → diagnostica o problema → propõe solução → edita → build → commit |
 | "O que acha de Z?" | Pesquisa → analisa → responde direto sem firulas |
 | "Quero X no estilo Orange Brick" | Segue todas as regras deste documento |
