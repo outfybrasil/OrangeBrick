@@ -84,15 +84,14 @@ export default function AdminDashboard() {
     setError(null);
 
     try {
-      const { data, error: removeError } = await supabase
-        .from("posts")
-        .delete()
-        .eq("id", post.id)
-        .select("id")
-        .single();
-
-      if (removeError) throw removeError;
-      if (!data) throw new Error("O banco não confirmou a exclusão da matéria.");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sua sessão expirou. Entre novamente para excluir a matéria.");
+      const response = await fetch(`/api/admin/posts/${post.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || "O banco não confirmou a exclusão da matéria.");
 
       setPosts((current) => current.filter((item) => item.id !== post.id));
       setCurrentPage(1);

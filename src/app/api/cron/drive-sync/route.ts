@@ -213,6 +213,15 @@ export async function GET(request: Request) {
           results.skipped++;
           continue;
         }
+        const { data: registryEntry } = await supabase
+          .from("drive_import_registry")
+          .select("drive_file_id")
+          .eq("drive_file_id", file.id)
+          .maybeSingle();
+        if (registryEntry) {
+          results.skipped++;
+          continue;
+        }
         const markdown = await exportMarkdown(file.id);
         const lines = markdown.split("\n").map((l) => l.replace(/\r$/, ""));
         const { metadata, kept } = extractMetadata(lines);
@@ -243,11 +252,17 @@ export async function GET(request: Request) {
 
         const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
         if (existing) {
+          await supabase.from("drive_import_registry").upsert({
+            drive_file_id: file.id,
+            post_id: existing.id,
+            status: "imported",
+            updated_at: new Date().toISOString(),
+          });
           results.skipped++;
           continue;
         }
 
-        const { error: insertError } = await supabase.from("posts").insert([
+        const { data: importedPost, error: insertError } = await supabase.from("posts").insert([
           {
             slug,
             title: title.toUpperCase(),
@@ -267,11 +282,17 @@ export async function GET(request: Request) {
             editorial_sources: [{ name: "Google Drive", url: `https://drive.google.com/file/d/${file.id}/view` }],
             correction_note: null,
           },
-        ]);
+        ]).select("id").single();
         if (insertError) {
           results.failed++;
           results.failures.push({ name: file.name, error: insertError.message });
         } else {
+          await supabase.from("drive_import_registry").upsert({
+            drive_file_id: file.id,
+            post_id: importedPost.id,
+            status: "imported",
+            updated_at: new Date().toISOString(),
+          });
           results.imported++;
         }
       } catch (err) {
