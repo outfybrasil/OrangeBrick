@@ -23,8 +23,19 @@ export function MultimediaSection() {
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-xs font-bold text-brand-orange">Gameplays completas</p>
-          <h2 id="ob-labs-title" className="font-heading text-2xl font-black uppercase leading-none text-white sm:text-3xl">
-            OB Labs no YouTube
+          <h2 id="ob-labs-title" className="flex items-center gap-2 font-heading text-2xl font-black uppercase leading-none text-white sm:text-3xl">
+            <Link
+              href="https://www.youtube.com/@OB-Labs"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Abrir canal OB Labs no YouTube"
+              className="shrink-0 text-[#FF0000] transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+            >
+              <svg className="h-[0.9em] w-[0.9em]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
+              </svg>
+            </Link>
+            <span>OB Labs no YouTube</span>
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-400">
             Campanhas, lançamentos e séries organizadas para acompanhar cada jogo do início ao fim.
