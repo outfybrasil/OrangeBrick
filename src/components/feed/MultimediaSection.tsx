@@ -1,8 +1,11 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { YouTubePlayer } from "@/components/ui/youtube-video-player";
 
-const videos = [
+const fallbackVideos = [
   {
     id: "9oHAB2kelyA",
     title: "HALO: CAMPAIGN EVOLVED – RESGATE DO CAPITÃO! | Gameplay PT-BR #3",
@@ -18,6 +21,19 @@ const videos = [
 ];
 
 export function MultimediaSection() {
+  const [videos, setVideos] = useState(fallbackVideos);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/youtube/latest", { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((result: { videos?: typeof fallbackVideos }) => {
+        if (result.videos?.length === 3) setVideos(result.videos);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
+
   return (
     <section className="mb-10 mt-10 border-y border-white/10 py-6 sm:py-8" aria-labelledby="ob-labs-title">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
