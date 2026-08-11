@@ -74,6 +74,37 @@ export default function AdminDashboard() {
   const [publishCandidate, setPublishCandidate] = useState<Post | null>(null);
   const [publishOnBrickboard, setPublishOnBrickboard] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [deleteCandidate, setDeleteCandidate] = useState<Post | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const deletePost = async (post: Post) => {
+    setDeletingId(post.id);
+    setDeleteError(null);
+    setError(null);
+
+    try {
+      const { data, error: removeError } = await supabase
+        .from("posts")
+        .delete()
+        .eq("id", post.id)
+        .select("id")
+        .single();
+
+      if (removeError) throw removeError;
+      if (!data) throw new Error("O banco não confirmou a exclusão da matéria.");
+
+      setPosts((current) => current.filter((item) => item.id !== post.id));
+      setCurrentPage(1);
+      setDeleteCandidate(null);
+    } catch (err: unknown) {
+      const message = errorMessage(err, "Não foi possível excluir a matéria. Tente novamente.");
+      setDeleteError(message);
+      setError(message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const publishPost = async (post: Post) => {
     setPublishingId(post.id);
@@ -347,7 +378,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* CORPO DA PÁGINA (TABELA + SIDEBAR DE WIDGETS) */}
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_20rem]">
 
         {/* FILA EDITORIAL */}
         <section aria-labelledby="editorial-queue-title" className="rounded-xl border border-white/10 bg-[#0e0f14]">
@@ -524,14 +555,34 @@ export default function AdminDashboard() {
                         </td>
 
                         {/* AÇÕES */}
-                        <td className="py-3 px-2 text-right whitespace-nowrap">
-                          <Link
-                            href={`/admin/edit?id=${post.id}`}
-                            className="p-1.5 text-gray-500 hover:text-white transition-colors"
-                            title="Editar matéria"
-                          >
-                            ⋮
-                          </Link>
+                        <td className="relative py-3 px-2 text-right whitespace-nowrap">
+                          <details className="group/actions relative inline-block text-left">
+                            <summary
+                              className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center text-lg font-bold text-gray-500 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange [&::-webkit-details-marker]:hidden"
+                              aria-label={`Abrir ações de ${post.title}`}
+                            >
+                              ⋮
+                            </summary>
+                            <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#15161b] p-1.5 shadow-xl shadow-black/40">
+                              <Link
+                                href={`/admin/edit?id=${post.id}`}
+                                className="flex min-h-11 items-center px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-brand-orange"
+                              >
+                                Editar matéria
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.currentTarget.closest("details")?.removeAttribute("open");
+                                  setDeleteCandidate(post);
+                                  setDeleteError(null);
+                                }}
+                                className="flex min-h-11 w-full items-center px-3 text-left text-xs font-bold text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200 focus-visible:outline-2 focus-visible:outline-red-400"
+                              >
+                                Excluir matéria
+                              </button>
+                            </div>
+                          </details>
                         </td>
                       </tr>
                     );
@@ -542,9 +593,9 @@ export default function AdminDashboard() {
           </div>
 
           {/* RODAPÉ DA TABELA */}
-          <div className="flex items-center justify-between border-t border-white/10 p-4 text-xs text-gray-500">
-            <span>Mostrando {filteredPosts.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filteredPosts.length)} de {filteredPosts.length} matérias</span>
-            <div className="flex items-center gap-1">
+          <div className="flex flex-col gap-3 border-t border-white/10 p-4 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+            <span className="shrink-0">Mostrando {filteredPosts.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filteredPosts.length)} de {filteredPosts.length} matérias</span>
+            <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
@@ -639,6 +690,65 @@ export default function AdminDashboard() {
                 className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-500 px-4 text-xs font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
               >
                 {publishingId === publishCandidate.id ? "Publicando..." : "Publicar agora"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {deleteCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !deletingId && setDeleteCandidate(null)}>
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-confirmation-title"
+            aria-describedby="delete-confirmation-description"
+            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-300" aria-hidden="true">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+              </svg>
+            </div>
+            <h2 id="delete-confirmation-title" className="mt-5 font-heading text-xl font-black text-white">
+              Excluir matéria?
+            </h2>
+            <p id="delete-confirmation-description" className="mt-2 text-sm leading-6 text-gray-300">
+              {deleteCandidate.is_published
+                ? "Esta matéria está publicada e será removida imediatamente do site."
+                : "Este rascunho será removido do painel administrativo."} Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-5 rounded-xl bg-white/[0.04] p-4">
+              <p className="text-xs font-bold text-gray-500">Matéria selecionada</p>
+              <p className="mt-1.5 break-words font-heading text-sm font-bold uppercase leading-5 text-white">
+                {deleteCandidate.title}
+              </p>
+            </div>
+            {deleteError && (
+              <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-200">
+                {deleteError}
+              </div>
+            )}
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteCandidate(null);
+                  setDeleteError(null);
+                }}
+                disabled={deletingId === deleteCandidate.id}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => void deletePost(deleteCandidate)}
+                disabled={deletingId === deleteCandidate.id}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-xs font-bold text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 disabled:cursor-wait disabled:opacity-60"
+              >
+                {deletingId === deleteCandidate.id ? "Excluindo..." : "Excluir definitivamente"}
               </button>
             </div>
           </section>

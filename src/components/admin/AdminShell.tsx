@@ -132,7 +132,7 @@ export function AdminShell({
   return (
     <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white">
       {/* SIDEBAR DESKTOP */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] xl:flex">
         {/* LOGO */}
         <div className="flex min-h-16 items-center gap-3 border-b border-white/10 px-5">
           <img
@@ -232,20 +232,20 @@ export function AdminShell({
             >
               <ExitIcon />
             </button>
-            <p className="min-w-0 flex-1 truncate font-heading text-sm font-bold text-white lg:hidden">{title}</p>
+            <p className="min-w-0 flex-1 truncate font-heading text-sm font-bold text-white xl:hidden">{title}</p>
           </div>
         </div>
       </aside>
 
       {/* ÁREA DE CONTEÚDO PRINCIPAL */}
-      <div className="lg:pl-60">
+      <div className="xl:pl-60">
         {/* HEADER TOP STATUS BAR */}
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0b0e]/95 backdrop-blur-xl">
           <div className="flex min-h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center text-gray-300 hover:text-white lg:hidden"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center text-gray-300 hover:text-white xl:hidden"
               aria-label="Abrir navegação administrativa"
               aria-expanded={mobileMenuOpen}
             >
@@ -253,7 +253,7 @@ export function AdminShell({
                 <path d="M4 7h16M4 12h16M4 17h16" />
               </svg>
             </button>
-            <div className="hidden lg:flex items-center gap-3 text-xs">
+            <div className="hidden xl:flex items-center gap-3 text-xs">
               <span className="inline-flex items-center gap-1.5 text-gray-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Dados sincronizados agora
@@ -263,7 +263,7 @@ export function AdminShell({
             </div>
 
             {/* BOTÃO DA DIREITA */}
-            {actions && <div className="hidden lg:block">{actions}</div>}
+            {actions && <div className="hidden xl:block">{actions}</div>}
           </div>
         </header>
 
@@ -281,14 +281,14 @@ export function AdminShell({
               <p className="mt-1 max-w-3xl text-sm leading-5 text-gray-400">{description}</p>
             </div>
             {/* BOTÃO MOBILE */}
-            {actions && <div className="admin-mobile-actions lg:hidden">{actions}</div>}
+            {actions && <div className="admin-mobile-actions xl:hidden">{actions}</div>}
           </div>
 
           {children}
         </main>
       </div>
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 lg:hidden" onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-black/75 xl:hidden" onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}>
           <aside role="dialog" aria-modal="true" aria-label="Navegação administrativa" className="flex h-full w-[min(20rem,88vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4">
             <div className="flex min-h-14 items-center justify-between border-b border-white/10">
               <p className="font-heading text-sm font-black">ORANGE<span className="text-brand-orange">_</span>BRICK</p>

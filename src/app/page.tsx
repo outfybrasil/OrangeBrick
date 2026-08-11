@@ -7,6 +7,7 @@ import { NewsFeed } from "@/components/feed/NewsFeed";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
 import { SinceLastVisit } from "@/components/feed/SinceLastVisit";
 import { HomeEngagementTracker } from "@/components/feed/HomeEngagementTracker";
+import { MultimediaSection } from "@/components/feed/MultimediaSection";
 import { UserNav } from "@/components/auth/UserNav";
 import { Footer } from "@/components/ui/Footer";
 import type { PostCategory } from "@/lib/types/database";
@@ -122,6 +123,8 @@ function HomeContent() {
           searchQuery={qParam}
           onSelectCategory={handleCategoryClick}
         />
+
+        <MultimediaSection />
       </main>
 
       <Footer />
