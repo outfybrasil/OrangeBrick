@@ -35,6 +35,20 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
   const fileIds = driveFileIds(post.editorial_sources);
   if (fileIds.length > 0) {
     const deletedAt = new Date().toISOString();
+    const markerErrors = await Promise.all(fileIds.map(async (driveFileId) => {
+      const marker = new Blob([JSON.stringify({ drive_file_id: driveFileId, post_id: id, deleted_at: deletedAt })], { type: "image/png" });
+      const { error } = await supabase.storage
+        .from("post-images")
+        .upload(`system/drive-import-tombstones/${driveFileId}.png`, marker, {
+          contentType: "image/png",
+          cacheControl: "0",
+          upsert: true,
+        });
+      return error;
+    }));
+    const markerError = markerErrors.find(Boolean);
+    if (markerError) return NextResponse.json({ error: markerError.message }, { status: 500 });
+
     const { error: auditError } = await supabase.from("admin_audit_log").insert(
       fileIds.map((driveFileId) => ({
         actor_id: user.id,
@@ -44,7 +58,9 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
         details: { post_id: id, drive_file_id: driveFileId },
       })),
     );
-    if (auditError) return NextResponse.json({ error: auditError.message }, { status: 500 });
+    if (auditError && auditError.code !== "PGRST205" && !auditError.message.includes("schema cache")) {
+      return NextResponse.json({ error: auditError.message }, { status: 500 });
+    }
 
     const { error: registryError } = await supabase.from("drive_import_registry").upsert(
       fileIds.map((driveFileId) => ({ drive_file_id: driveFileId, post_id: id, status: "deleted", updated_at: deletedAt })),

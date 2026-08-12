@@ -220,6 +220,9 @@ export async function GET(request: Request) {
           .maybeSingle();
         const registryUnavailable = registryError?.code === "PGRST205" || registryError?.message.includes("schema cache");
         if (registryError && !registryUnavailable) throw registryError;
+        const { data: tombstone } = await supabase.storage
+          .from("post-images")
+          .download(`system/drive-import-tombstones/${file.id}.png`);
         const { data: deletedEntry, error: deletedEntryError } = await supabase
           .from("admin_audit_log")
           .select("id")
@@ -228,8 +231,9 @@ export async function GET(request: Request) {
           .eq("target_id", file.id)
           .limit(1)
           .maybeSingle();
-        if (deletedEntryError) throw deletedEntryError;
-        if (registryEntry || deletedEntry) {
+        const auditUnavailable = deletedEntryError?.code === "PGRST205" || deletedEntryError?.message.includes("schema cache");
+        if (deletedEntryError && !auditUnavailable) throw deletedEntryError;
+        if (registryEntry || deletedEntry || tombstone) {
           results.skipped++;
           continue;
         }
