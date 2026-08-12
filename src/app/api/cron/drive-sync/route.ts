@@ -213,12 +213,23 @@ export async function GET(request: Request) {
           results.skipped++;
           continue;
         }
-        const { data: registryEntry } = await supabase
+        const { data: registryEntry, error: registryError } = await supabase
           .from("drive_import_registry")
           .select("drive_file_id")
           .eq("drive_file_id", file.id)
           .maybeSingle();
-        if (registryEntry) {
+        const registryUnavailable = registryError?.code === "PGRST205" || registryError?.message.includes("schema cache");
+        if (registryError && !registryUnavailable) throw registryError;
+        const { data: deletedEntry, error: deletedEntryError } = await supabase
+          .from("admin_audit_log")
+          .select("id")
+          .eq("action", "delete")
+          .eq("target_type", "drive_import")
+          .eq("target_id", file.id)
+          .limit(1)
+          .maybeSingle();
+        if (deletedEntryError) throw deletedEntryError;
+        if (registryEntry || deletedEntry) {
           results.skipped++;
           continue;
         }

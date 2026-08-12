@@ -34,11 +34,25 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
 
   const fileIds = driveFileIds(post.editorial_sources);
   if (fileIds.length > 0) {
+    const deletedAt = new Date().toISOString();
+    const { error: auditError } = await supabase.from("admin_audit_log").insert(
+      fileIds.map((driveFileId) => ({
+        actor_id: user.id,
+        action: "delete",
+        target_type: "drive_import",
+        target_id: driveFileId,
+        details: { post_id: id, drive_file_id: driveFileId },
+      })),
+    );
+    if (auditError) return NextResponse.json({ error: auditError.message }, { status: 500 });
+
     const { error: registryError } = await supabase.from("drive_import_registry").upsert(
-      fileIds.map((driveFileId) => ({ drive_file_id: driveFileId, post_id: id, status: "deleted", updated_at: new Date().toISOString() })),
+      fileIds.map((driveFileId) => ({ drive_file_id: driveFileId, post_id: id, status: "deleted", updated_at: deletedAt })),
       { onConflict: "drive_file_id" },
     );
-    if (registryError) return NextResponse.json({ error: registryError.message }, { status: 500 });
+    if (registryError && registryError.code !== "PGRST205" && !registryError.message.includes("schema cache")) {
+      return NextResponse.json({ error: registryError.message }, { status: 500 });
+    }
   }
 
   const { error: deleteError } = await supabase.from("posts").delete().eq("id", id);
