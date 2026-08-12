@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 import { getSiteUrl } from "@/lib/site-url";
 import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
+import { AccessibilityMenu } from "@/components/ui/AccessibilityMenu";
 import "./globals.css";
 
 const headingFont = Outfit({
@@ -114,6 +115,7 @@ export default function RootLayout({
           <MobileBottomNav />
         </AuthProvider>
         <PwaInstallBanner />
+        <AccessibilityMenu />
         <CookieConsent />
       </body>
     </html>

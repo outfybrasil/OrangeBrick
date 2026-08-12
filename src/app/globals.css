@@ -136,6 +136,7 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 html {
   -webkit-text-size-adjust: 100%;
+  font-size: calc(16px * var(--reader-font-scale, 1));
   max-width: 100%;
   overflow-x: clip;
 }
@@ -169,6 +170,27 @@ body {
 
 img, video, svg {
   max-width: 100%;
+}
+
+html.high-contrast {
+  --color-background-void: #000000;
+  --color-card-slate: #111111;
+  --color-brand-orange-muted: #ff7a2f;
+}
+
+html.high-contrast body {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+html.high-contrast .text-gray-500,
+html.high-contrast .text-gray-400,
+html.high-contrast .text-gray-300 {
+  color: #ffffff;
+}
+
+html.high-contrast :where(a, button, input, textarea, select) {
+  border-color: rgba(255, 255, 255, 0.42);
 }
 
 @media (max-width: 480px) {

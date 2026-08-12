@@ -8,6 +8,7 @@ colors:
   slate: "#1C1E24"
   text: "#E5E5E5"
   white: "#FFFFFF"
+  contrast: "#000000"
 typography:
   display:
     fontFamily: "Outfit, sans-serif"
@@ -91,6 +92,7 @@ A paleta combina um fundo quase preto, superfícies de ardósia e laranja de sin
 - **Ardósia:** superfícies elevadas, menus e estados temporários.
 - **Texto Claro:** corpo e informação funcional.
 - **Branco:** títulos e contraste máximo.
+- **Preto de Contraste:** modo de acessibilidade com separação máxima entre conteúdo e fundo.
 
 **The Signal Rule.** O laranja indica algo; nunca funciona como preenchimento decorativo indiscriminado.
 
