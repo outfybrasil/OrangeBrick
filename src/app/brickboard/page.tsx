@@ -18,6 +18,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { levelProgress } from "@/lib/progression";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
+import { BackToTop } from "@/components/ui/BackToTop";
 
 const PLATFORM_TABS = [
   { id: "TODOS", label: "Todos" },
@@ -448,12 +449,14 @@ function BrickboardContent() {
 
               {displayPosts.length === 0 ? (
                 <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
-                  <svg aria-hidden="true" className="mx-auto h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+                  <svg aria-hidden="true" className="mx-auto h-10 w-10 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5h-6l-4.5 4v-4h-.5A2.5 2.5 0 0 1 4 13.5v-8Z" />
                   </svg>
-                  <p className="text-xs">
+                  <p className="text-sm font-semibold text-white">
                     {targetPostId ? "Esta conversa não está mais disponível." : "Nenhum Brick encontrado para estes filtros."}
                   </p>
+                  {!targetPostId && <p className="text-xs text-gray-400">Seja a primeira lenda a abrir o debate.</p>}
+                  {!targetPostId && <button type="button" onClick={() => requireUser(() => setIsComposeOpen(true))} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">Criar novo Brick</button>}
                   {targetPostId && (
                     <Link href="/brickboard" className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange transition-colors hover:text-white">
                       Voltar para a timeline
@@ -569,7 +572,7 @@ function BrickboardContent() {
 
       <button
         onClick={() => requireUser(() => setIsComposeOpen(true))}
-        className="mobile-overlay-sensitive fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
+        className="mobile-overlay-sensitive fixed right-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
         title="Criar novo Brick"
         aria-label="Criar novo Brick"
       >
@@ -605,6 +608,7 @@ function BrickboardContent() {
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <Footer />
+      <BackToTop />
     </>
   );
 }

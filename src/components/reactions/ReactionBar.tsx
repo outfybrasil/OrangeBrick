@@ -14,6 +14,7 @@ interface ReactionBarProps {
   shareCount?: number;
   onCommentClick?: () => void;
   onRepostClick?: () => void;
+  onShareClick?: () => void;
   viewCount?: number;
   hypePulse?: number;
 }
@@ -30,6 +31,7 @@ export function ReactionBar({
   shareCount,
   onCommentClick,
   onRepostClick,
+  onShareClick,
   viewCount,
   hypePulse = 0,
 }: ReactionBarProps) {
@@ -37,7 +39,7 @@ export function ReactionBar({
 
   return (
     <div>
-      <div className="grid min-w-0 grid-cols-4 rounded-2xl border border-brand-orange-muted/20 bg-[#14161E]/90 px-1.5 py-1.5 shadow-lg sm:flex sm:items-center sm:gap-2 sm:px-4">
+      <div className={`grid min-w-0 ${onShareClick ? "grid-cols-5" : "grid-cols-4"} rounded-2xl border border-brand-orange-muted/20 bg-[#14161E]/90 px-1.5 py-1.5 shadow-lg sm:flex sm:items-center sm:gap-2 sm:px-4`}>
         <button
           type="button"
           onClick={() => onToggle("hype")}
@@ -108,6 +110,13 @@ export function ReactionBar({
             {shareCount ?? 0}
           </span>
         </button>
+
+        {onShareClick && (
+          <button type="button" onClick={onShareClick} className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[11px] font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs" title="Compartilhar link">
+            <span aria-hidden="true" className="text-sm">↗</span>
+            <span className="hidden sm:inline">Compartilhar</span>
+          </button>
+        )}
 
         {viewCount !== undefined && (
           <div className="hidden sm:flex items-center gap-1 text-[11px] sm:text-xs font-subtitle text-gray-400 ml-auto px-1.5 py-0.5">

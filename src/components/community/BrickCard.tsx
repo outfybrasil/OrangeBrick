@@ -50,6 +50,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const [isDeletingComment, setIsDeletingComment] = useState(false);
   const [reportedContent, setReportedContent] = useState<string[]>([]);
   const [reportMessage, setReportMessage] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState("");
   const [reportTarget, setReportTarget] = useState<{ type: "post" | "comment"; id: string } | null>(null);
   const [reportReason, setReportReason] = useState(reportReasons[0]);
   const [isReporting, setIsReporting] = useState(false);
@@ -109,6 +110,17 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     }
     setIsShareOpen(!isShareOpen);
     setShareText("");
+  };
+
+  const handleQuickShare = async () => {
+    const url = `${window.location.origin}/brickboard?post=${encodeURIComponent(post.id)}`;
+    if (navigator.share) {
+      await navigator.share({ title: "Orange Brick", text: post.content.slice(0, 160), url }).catch(() => undefined);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setShareNotice("Link copiado para a área de transferência!");
+    window.setTimeout(() => setShareNotice(""), 3000);
   };
 
   const handleSubmitShare = async (e: React.FormEvent) => {
@@ -387,9 +399,11 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           shareCount={post.shares_count}
           onCommentClick={handleCommentClick}
           onRepostClick={handleShareClick}
+          onShareClick={() => void handleQuickShare()}
         />
       </div>
       {reportMessage && <p role="status" className="text-xs text-gray-400">{reportMessage}</p>}
+      {shareNotice && <p role="status" className="pt-2 text-xs font-semibold text-brand-orange">{shareNotice}</p>}
 
       {isShareOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-2.5">

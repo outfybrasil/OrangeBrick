@@ -149,6 +149,8 @@ export function PostArticle({ post, stats }: PostArticleProps) {
   const { addPost: addCommunityBrick } = useCommunityFeed({ load: false });
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [readerScale, setReaderScale] = useState(1);
+  const [shareNotice, setShareNotice] = useState("");
   const [conversationCount, setConversationCount] = useState(0);
   const editorialSignals = useMemo(() => getEditorialSignals(post), [post]);
 
@@ -198,6 +200,30 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : `/posts/${post.slug}`;
   const shareText = `Confira no Orange Brick: "${post.title}"`;
+  const articleWordCount = useMemo(() => post.body.replace(/<[^>]+>/g, " ").replace(/https?:\/\/\S+/g, " ").trim().split(/\s+/).filter(Boolean).length, [post.body]);
+  const readingMinutes = Math.max(1, Math.ceil(articleWordCount / 200));
+
+  useEffect(() => {
+    const saved = Number(window.localStorage.getItem("orange-reader-scale"));
+    if (saved >= 0.9 && saved <= 1.2) setReaderScale(saved);
+  }, []);
+
+  const adjustReaderScale = (next: number) => {
+    const value = Math.min(1.2, Math.max(0.9, next));
+    setReaderScale(value);
+    window.localStorage.setItem("orange-reader-scale", String(value));
+  };
+
+  const handleQuickShare = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      await navigator.share({ title: post.title, text: post.summary, url }).catch(() => undefined);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    setShareNotice("Link copiado para a área de transferência!");
+    window.setTimeout(() => setShareNotice(""), 3000);
+  };
 
   const handleShareSocial = (platform: "whatsapp" | "twitter" | "telegram") => {
     let url = "";
@@ -287,6 +313,16 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             </button>
           </div>
 
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 text-xs text-gray-400">
+            <span aria-label={`Tempo estimado de leitura: ${readingMinutes} minutos`}>◷ Tempo de leitura: <strong className="text-white">{readingMinutes} min</strong></span>
+            <div className="flex items-center gap-1" aria-label="Ajustar tamanho do texto">
+              <span className="mr-1 text-[11px]">Texto</span>
+              <button type="button" onClick={() => adjustReaderScale(readerScale - 0.1)} disabled={readerScale <= 0.9} className="min-h-11 min-w-11 border border-white/15 text-sm font-bold text-white disabled:opacity-40" aria-label="Diminuir tamanho do texto">A−</button>
+              <button type="button" onClick={() => adjustReaderScale(1)} className="min-h-11 min-w-11 border border-white/15 text-[11px] text-gray-300" aria-label="Restaurar tamanho do texto">A</button>
+              <button type="button" onClick={() => adjustReaderScale(readerScale + 0.1)} disabled={readerScale >= 1.2} className="min-h-11 min-w-11 border border-white/15 text-base font-bold text-white disabled:opacity-40" aria-label="Aumentar tamanho do texto">A+</button>
+            </div>
+          </div>
+
           <h1 className="break-words font-heading text-[clamp(1.5rem,8vw,3rem)] font-black uppercase leading-tight tracking-tight text-white">
             {post.title}
           </h1>
@@ -319,6 +355,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-semibold text-gray-500 mr-1">Compartilhar</span>
+              <button type="button" onClick={() => void handleQuickShare()} aria-label="Compartilhar matéria" className="min-h-11 border border-brand-orange/30 px-3 text-[11px] font-bold text-brand-orange transition-colors hover:bg-brand-orange/10">Compartilhar</button>
               <button
                 onClick={() => handleShareSocial("whatsapp")}
                 aria-label="Compartilhar no WhatsApp"
@@ -346,7 +383,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             </div>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8" style={{ fontSize: `${readerScale}em` }}>
             <PostContent post={post} />
           </div>
 
@@ -447,6 +484,8 @@ export function PostArticle({ post, stats }: PostArticleProps) {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+
+      {shareNotice && <div role="status" className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 border border-brand-orange/50 bg-[#111217] px-4 py-3 text-xs font-bold text-white shadow-xl">{shareNotice}</div>}
 
       <Footer />
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, type ReactNode } from "react";
+import { useEffect, useRef, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
@@ -13,6 +13,7 @@ import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
 import { normalizeAuthorTag } from "@/lib/content-validation";
+import { BackToTop } from "@/components/ui/BackToTop";
 
 interface NewsFeedProps {
   category: PostCategory | null;
@@ -103,8 +104,23 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   const stats = usePostStats(rawPosts.map((post) => post.id));
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const saved = sessionStorage.getItem("orange-feed-scroll");
+    if (!saved) return;
+    const value = Number(saved);
+    sessionStorage.removeItem("orange-feed-scroll");
+    if (!Number.isFinite(value)) return;
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: value, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [isLoading]);
+
+  const rememberFeedPosition = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const target = (event.target as HTMLElement).closest("a");
+    if (target?.getAttribute("href")?.startsWith("/posts/")) sessionStorage.setItem("orange-feed-scroll", String(window.scrollY));
+  };
+
   if (isLoading) {
-    return <NewsFeedSkeleton />;
+    return <><NewsFeedSkeleton /><BackToTop /></>;
   }
 
   if (error && rawPosts.length === 0) {
@@ -241,7 +257,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   const lowerPosts = displayPosts.slice(4);
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0" onClickCapture={rememberFeedPosition}>
       {/* 2 colunas: feed principal + sidebar */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
 
@@ -375,6 +391,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           <NewsSidebar posts={rawPosts} stats={stats} />
         </div>
       </div>
+      <BackToTop />
     </div>
   );
 }
