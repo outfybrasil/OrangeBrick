@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import sharp from "sharp";
+import crypto from "node:crypto";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -83,6 +85,70 @@ async function reachableImageUrl(value?: string) {
   }
 }
 
+async function groqReview(title: string, summary: string, content: string) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return { title, summary, content };
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: process.env.GROQ_MODEL || "llama-3.1-8b-instant",
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: "Você é editor do Orange Brick. Reescreva sem inventar fatos, preserve URLs e citações verificáveis, remova observações sobre IA e devolva JSON com title, summary e content. O título deve ter no máximo 70 caracteres, o resumo uma frase direta e o texto deve preservar a apuração original." },
+        { role: "user", content: JSON.stringify({ title, summary, content }) },
+      ],
+    }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok) throw new Error(`Groq retornou ${response.status}`);
+  const data = await response.json() as { choices?: { message?: { content?: string } }[] };
+  const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+  if (typeof parsed.title !== "string" || typeof parsed.summary !== "string" || typeof parsed.content !== "string") throw new Error("Resposta inválida do Groq");
+  return { title: parsed.title.trim(), summary: parsed.summary.trim(), content: parsed.content.trim() };
+}
+
+async function imageSearch(query: string) {
+  const response = await fetch(`https://www.bing.com/images/search?q=${encodeURIComponent(query)}&form=HDRSC2`, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store", signal: AbortSignal.timeout(15000) });
+  if (!response.ok) return [];
+  const html = await response.text();
+  const urls = [...html.matchAll(/"murl":"(https?:\/\/[^"\\]+)"/g)].map((match) => match[1].replace(/\\u002f/g, "/"));
+  return [...new Set(urls)].filter((url) => !/(unsplash|pexels|pixabay)\.com/i.test(url));
+}
+
+async function downloadEditorialImage(url: string) {
+  const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, cache: "no-store", signal: AbortSignal.timeout(15000) });
+  if (!response.ok) return null;
+  const input = Buffer.from(await response.arrayBuffer());
+  const original = await sharp(input).metadata();
+  if (!original.width || !original.height || original.width < 1200 || original.height < 675 || original.width / original.height < 1.65 || original.width / original.height > 1.95) return null;
+  const output = await sharp(input).resize(1920, 1080, { fit: "cover", position: "centre" }).webp({ quality: 90, effort: 5 }).toBuffer();
+  const metadata = await sharp(output).metadata();
+  return { output, width: metadata.width || 1920, height: metadata.height || 1080 };
+}
+
+async function sourceImages(title: string, existing: string[]) {
+  const candidates = [...new Set(existing.filter(Boolean))];
+  const officialQueries = [
+    `${title} official artwork screenshot`,
+    `${title} official promotional image`,
+    `${title} official logo game`,
+  ];
+  for (const query of officialQueries) {
+    if (candidates.length >= 3) break;
+    candidates.push(...await imageSearch(query));
+  }
+  const assets: { sourceUrl: string; output: Buffer; width: number; height: number }[] = [];
+  for (const candidate of [...new Set(candidates)]) {
+    if (assets.length >= 3) break;
+    const image = await downloadEditorialImage(candidate).catch(() => null);
+    if (image) assets.push({ sourceUrl: candidate, ...image });
+  }
+  if (assets.length < 3) throw new Error(`Não foi possível encontrar capa e duas imagens oficiais para ${title}`);
+  return assets;
+}
+
 async function validatedBlocks(blocks: ReturnType<typeof buildBlocks>) {
   const valid: ReturnType<typeof buildBlocks> = [];
   for (const block of blocks) {
@@ -159,12 +225,12 @@ function buildSummary(lines: string[]) {
   return fallback.length > 150 ? `${fallback.slice(0, 147).trimEnd()}...` : fallback;
 }
 
-async function driveListFiles(folderId: string) {
+async function driveListChildren(folderId: string) {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
   const query = new URLSearchParams({
     q: `'${folderId}' in parents and trashed=false`,
-    fields: "files(id,name,mimeType)",
-    pageSize: "100",
+    fields: "files(id,name,mimeType,modifiedTime)",
+    pageSize: "1000",
     orderBy: "modifiedTime desc",
   });
   if (apiKey) query.set("key", apiKey);
@@ -172,8 +238,39 @@ async function driveListFiles(folderId: string) {
   if (!response.ok) {
     throw new Error(`Falha ao listar pasta do Drive (${response.status})`);
   }
-  const data = (await response.json()) as { files?: { id: string; name: string; mimeType: string }[] };
+  const data = (await response.json()) as { files?: { id: string; name: string; mimeType: string; modifiedTime?: string }[] };
   return data.files ?? [];
+}
+
+function saoPauloDateParts() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+}
+
+async function driveListFiles(folderId: string) {
+  const rootItems = await driveListChildren(folderId);
+  const { year, month, day } = saoPauloDateParts();
+  const todayNames = new Set([`${year}-${month}-${day}`, `${day}-${month}-${year}`]);
+  const files = rootItems.filter((item) => item.mimeType !== "application/vnd.google-apps.folder");
+  const todayFolder = rootItems.find((item) => item.mimeType === "application/vnd.google-apps.folder" && todayNames.has(item.name));
+  if (!todayFolder) return files;
+  const todayItems = await driveListChildren(todayFolder.id);
+  return [...files, ...todayItems.filter((item) => item.mimeType !== "application/vnd.google-apps.folder")];
+}
+
+async function markImported(supabase: ReturnType<typeof serviceClient>, driveFileId: string, postId: string) {
+  const { error } = await supabase.from("drive_import_registry").upsert({
+    drive_file_id: driveFileId,
+    post_id: postId,
+    status: "imported",
+    updated_at: new Date().toISOString(),
+  });
+  if (error && error.code !== "PGRST205" && !error.message.includes("schema cache")) throw error;
 }
 
 async function exportMarkdown(fileId: string) {
@@ -261,18 +358,16 @@ export async function GET(request: Request) {
           kept.splice(kept.indexOf(authorByLine), 1);
         }
 
-        const summary = metadata.resumo || buildSummary(kept);
-        const blocks = await validatedBlocks(buildBlocks(kept.join("\n")));
+        const originalContent = kept.join("\n");
+        const reviewed = await groqReview(title, metadata.resumo || buildSummary(kept), originalContent);
+        title = reviewed.title.replace(/\*\*/g, "").trim();
+        const summary = reviewed.summary;
+        const blocks = await validatedBlocks(buildBlocks(reviewed.content));
         const coverUrl = await reachableImageUrl(metadata.capa) || await reachableImageUrl(metadata.imagem_hd);
 
         const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
         if (existing) {
-          await supabase.from("drive_import_registry").upsert({
-            drive_file_id: file.id,
-            post_id: existing.id,
-            status: "imported",
-            updated_at: new Date().toISOString(),
-          });
+          await markImported(supabase, file.id, existing.id);
           results.skipped++;
           continue;
         }
@@ -282,9 +377,9 @@ export async function GET(request: Request) {
             slug,
             title: title.toUpperCase(),
             summary,
-            body: JSON.stringify(blocks),
+            body: "[]",
             category,
-            image_url: coverUrl,
+            image_url: null,
             image_alt: metadata.alt || metadata.legenda || null,
             author_name: authorName,
             author_tag: categoryTags[category],
@@ -302,13 +397,45 @@ export async function GET(request: Request) {
           results.failed++;
           results.failures.push({ name: file.name, error: insertError.message });
         } else {
-          await supabase.from("drive_import_registry").upsert({
-            drive_file_id: file.id,
-            post_id: importedPost.id,
-            status: "imported",
-            updated_at: new Date().toISOString(),
-          });
-          results.imported++;
+          const existingImages = [coverUrl || "", ...blocks.filter((block) => block.type === "image").map((block) => block.url || "")];
+          try {
+            const assets = await sourceImages(title, existingImages);
+            const publicUrls: string[] = [];
+            for (let index = 0; index < assets.length; index += 1) {
+              const asset = assets[index];
+              const storagePath = `editorial/${importedPost.id}/${index === 0 ? "cover" : `body-${index}`}-${crypto.randomUUID()}.webp`;
+              const { error: uploadError } = await supabase.storage.from("post-images").upload(storagePath, asset.output, { contentType: "image/webp", cacheControl: "31536000", upsert: false });
+              if (uploadError) throw uploadError;
+              const publicUrl = supabase.storage.from("post-images").getPublicUrl(storagePath).data.publicUrl;
+              publicUrls.push(publicUrl);
+              const { error: imageError } = await supabase.from("editorial_images").insert({ post_id: importedPost.id, kind: index === 0 ? "cover" : "body", source_url: asset.sourceUrl, storage_path: storagePath, public_url: publicUrl, alt_text: index === 0 ? (metadata.alt || `Capa oficial de ${title}`) : `Imagem oficial relacionada a ${title}`, width: asset.width, height: asset.height, file_size: asset.output.byteLength, mime_type: "image/webp" });
+              if (imageError) throw imageError;
+            }
+            const textBlocks = blocks.filter((block) => block.type === "text");
+            const textParts = textBlocks.map((block) => block.content || "").filter(Boolean);
+            const first = textParts.slice(0, Math.max(1, Math.ceil(textParts.length / 3))).join("\n\n");
+            const secondStart = Math.max(1, Math.ceil(textParts.length / 3));
+            const secondEnd = Math.max(secondStart + 1, Math.ceil((textParts.length * 2) / 3));
+            const second = textParts.slice(secondStart, secondEnd).join("\n\n");
+            const third = textParts.slice(secondEnd).join("\n\n");
+            const finalBlocks = [
+              { id: crypto.randomUUID(), type: "text", content: first || summary },
+              { id: crypto.randomUUID(), type: "image", url: publicUrls[1], alt: `Imagem oficial relacionada a ${title}`, caption: `Material oficial relacionado a ${title}.` },
+              { id: crypto.randomUUID(), type: "text", content: second || summary },
+              { id: crypto.randomUUID(), type: "image", url: publicUrls[2], alt: `Segunda imagem oficial relacionada a ${title}`, caption: `Segundo ângulo do material oficial de ${title}.` },
+              { id: crypto.randomUUID(), type: "text", content: third || summary },
+            ];
+            const { error: finalizeError } = await supabase.from("posts").update({ title: title.toUpperCase(), summary, body: JSON.stringify(finalBlocks), image_url: publicUrls[0], image_alt: metadata.alt || `Capa oficial de ${title}`, updated_at: new Date().toISOString() }).eq("id", importedPost.id);
+            if (finalizeError) throw finalizeError;
+            await markImported(supabase, file.id, importedPost.id);
+            results.imported++;
+          } catch (imageError) {
+            const uploadedImages = await supabase.from("editorial_images").select("storage_path").eq("post_id", importedPost.id);
+            if (uploadedImages.data?.length) await supabase.storage.from("post-images").remove(uploadedImages.data.map((image) => image.storage_path));
+            await supabase.from("editorial_images").delete().eq("post_id", importedPost.id);
+            await supabase.from("posts").delete().eq("id", importedPost.id);
+            throw imageError;
+          }
         }
       } catch (err) {
         results.failed++;
