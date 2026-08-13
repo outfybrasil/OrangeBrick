@@ -42,6 +42,24 @@ function releaseDateValue(item: ReleaseItem) {
   return new Date(Date.UTC(2026, MONTHS[match[2]], Number(match[1]), 12));
 }
 
+function saoPauloTodayIso() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function releaseDateIso(item: ReleaseItem) {
+  if (item.releaseDateIso) return item.releaseDateIso;
+  const date = releaseDateValue(item);
+  if (!date) return null;
+  return date.toISOString().slice(0, 10);
+}
+
 export function ReleaseRadarStrip() {
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
@@ -100,15 +118,6 @@ export function ReleaseRadarStrip() {
     return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
   }, [releases]);
 
-  const currentMonthReleases = useMemo(() => {
-    const currentDate = new Date();
-    return releases.filter((item) => {
-      const date = releaseDateValue(item);
-      return date?.getUTCFullYear() === currentDate.getFullYear()
-        && date.getUTCMonth() === currentDate.getMonth();
-    });
-  }, [releases]);
-
   const displayedReleases = useMemo(() => {
     if (selectedMonth !== "all") {
       return releases.filter((item) => {
@@ -116,18 +125,20 @@ export function ReleaseRadarStrip() {
         return match && match[2] === selectedMonth;
       });
     }
-    const now = new Date();
-    const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const upcoming = releases.filter((item) => {
-      const date = releaseDateValue(item);
-      return date !== null && date.getTime() >= today;
-    });
-    const currentMonthIds = new Set(currentMonthReleases.map((item) => item.id));
-    const nextReleases = upcoming.filter((item) => !currentMonthIds.has(item.id));
-    const calendarWindow = [...currentMonthReleases, ...nextReleases].slice(0, 14);
-    if (calendarWindow.length > 0) return calendarWindow;
-    return releases.filter((item) => releaseDateValue(item) !== null).slice(-8);
-  }, [currentMonthReleases, releases, selectedMonth]);
+    const today = saoPauloTodayIso();
+    const upcoming = releases
+      .filter((item) => {
+        const iso = releaseDateIso(item);
+        return iso !== null && iso >= today;
+      })
+      .sort((first, second) => {
+        const firstDate = releaseDateIso(first) || "9999-12-31";
+        const secondDate = releaseDateIso(second) || "9999-12-31";
+        return firstDate.localeCompare(secondDate) || first.game.localeCompare(second.game, "pt-BR");
+      });
+    if (upcoming.length > 0) return upcoming.slice(0, 14);
+    return releases.filter((item) => releaseDateIso(item) !== null).slice(-8);
+  }, [releases, selectedMonth]);
 
   const coverflowSlides = useMemo(() => displayedReleases.map((item) => ({
     image: {

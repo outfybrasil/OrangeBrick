@@ -74,6 +74,8 @@ export default function AdminDashboard() {
   const [publishCandidate, setPublishCandidate] = useState<Post | null>(null);
   const [publishOnBrickboard, setPublishOnBrickboard] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [brickboardPostingId, setBrickboardPostingId] = useState<string | null>(null);
+  const [brickboardMessage, setBrickboardMessage] = useState<string | null>(null);
   const [deleteCandidate, setDeleteCandidate] = useState<Post | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -123,6 +125,57 @@ export default function AdminDashboard() {
       setError(message);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const postPublishedArticleOnBrickboard = async (post: Post) => {
+    setBrickboardPostingId(post.id);
+    setBrickboardMessage(null);
+    setError(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sua sessão expirou. Entre novamente para publicar no Brickboard.");
+
+      const { data: existingThread, error: lookupError } = await supabase
+        .from("community_posts")
+        .select("id")
+        .eq("source_post_id", post.id)
+        .eq("is_official_thread", true)
+        .maybeSingle();
+      if (lookupError) throw new Error("Não foi possível verificar se a matéria já está no Brickboard.");
+
+      if (existingThread) {
+        setBrickboardMessage(`“${post.title}” já possui uma publicação oficial no Brickboard.`);
+        return;
+      }
+
+      const { error: threadError } = await supabase.from("community_posts").insert({
+        user_id: user.id,
+        author_name: "Orange Brick",
+        author_avatar: "",
+        content: post.summary.slice(0, 280),
+        media_url: post.image_url,
+        platform_tag: null,
+        attached_article: {
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          summary: post.summary,
+          image_url: post.image_url,
+          category: post.category,
+        },
+        is_official: true,
+        is_pinned: false,
+        topic_id: post.topic_id,
+        source_post_id: post.id,
+        is_official_thread: true,
+      });
+      if (threadError) throw new Error("A publicação no Brickboard falhou. Tente novamente.");
+      setBrickboardMessage(`“${post.title}” foi publicada no Brickboard.`);
+    } catch (postingError) {
+      setError(errorMessage(postingError, "Não foi possível publicar a matéria no Brickboard."));
+    } finally {
+      setBrickboardPostingId(null);
     }
   };
 
@@ -332,6 +385,12 @@ export default function AdminDashboard() {
         <div role="alert" className="mb-5 flex items-start justify-between gap-4 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">
           <span>{error}</span>
           <button type="button" onClick={() => setError(null)} className="font-bold text-red-300 hover:text-white">Fechar</button>
+        </div>
+      )}
+      {brickboardMessage && (
+        <div role="status" aria-live="polite" className="mb-5 flex items-start justify-between gap-4 border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm text-emerald-200">
+          <span>{brickboardMessage}</span>
+          <button type="button" onClick={() => setBrickboardMessage(null)} className="min-h-11 shrink-0 px-2 font-bold text-emerald-300 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange">Fechar</button>
         </div>
       )}
 
@@ -607,6 +666,19 @@ export default function AdminDashboard() {
                               >
                                 Editar matéria
                               </Link>
+                              {post.is_published && (
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.currentTarget.closest("details")?.removeAttribute("open");
+                                    void postPublishedArticleOnBrickboard(post);
+                                  }}
+                                  disabled={brickboardPostingId === post.id}
+                                  className="flex min-h-11 w-full items-center px-3 text-left text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-60"
+                                >
+                                  {brickboardPostingId === post.id ? "Publicando..." : "Publicar no Brickboard"}
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={(event) => {

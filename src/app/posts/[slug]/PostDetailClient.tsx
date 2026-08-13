@@ -356,7 +356,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{editorialSignals.quoteSourceUrl && <a href={editorialSignals.quoteSourceUrl} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">Ver fonte ↗</a>}</footer>}
           </blockquote>}
 
-          {post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-300">Nota de correção</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}
+          {post.information_status === "corrected" && post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-sky-300">Nota de correção</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}
 
         </article>
 
