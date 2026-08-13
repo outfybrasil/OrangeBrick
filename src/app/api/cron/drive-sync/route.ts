@@ -225,6 +225,16 @@ function buildSummary(lines: string[]) {
   return fallback.length > 150 ? `${fallback.slice(0, 147).trimEnd()}...` : fallback;
 }
 
+function validateEditorialText(title: string, summary: string, content: string) {
+  const combined = `${title}\n${summary}\n${content}`;
+  if (/\\&(?:aacute|agrave|atilde|acirc|ccedil|eacute|ecirc|iacute|oacute|ocirc|otilde|uacute|uuml|quot|amp|apos|nbsp);/i.test(combined)) {
+    throw new Error("Texto contém entidade HTML corrompida");
+  }
+  if (/Imagem\s+[12]:\s*\\?\[[^\n]*\\?\]/i.test(combined)) {
+    throw new Error("Texto contém marcador técnico de imagem");
+  }
+}
+
 async function driveListChildren(folderId: string) {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
   const query = new URLSearchParams({
@@ -362,6 +372,7 @@ export async function GET(request: Request) {
         const reviewed = await groqReview(title, metadata.resumo || buildSummary(kept), originalContent);
         title = reviewed.title.replace(/\*\*/g, "").trim();
         const summary = reviewed.summary;
+        validateEditorialText(title, summary, reviewed.content);
         const blocks = await validatedBlocks(buildBlocks(reviewed.content));
         const coverUrl = await reachableImageUrl(metadata.capa) || await reachableImageUrl(metadata.imagem_hd);
 
