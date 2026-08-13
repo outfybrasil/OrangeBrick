@@ -14,6 +14,7 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { signInWithGoogle } = useAuth();
+  const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED === "true";
   const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
   const [mounted, setMounted] = useState(false);
@@ -70,7 +71,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             Entre no Brickboard
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#b8bac2]">
-            Use sua conta Google para comentar, reagir e publicar. O Orange Brick nunca recebe sua senha do Google.
+            Entre com Google ou use uma conta Orange Brick para comentar, reagir e publicar.
           </p>
         </div>
 
@@ -101,7 +102,17 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           Entrar com Google
         </button>
 
-        <p className="mt-4 text-center text-[11px] leading-5 text-[#8f919a]">
+        {emailAuthEnabled && (
+          <>
+            <div className="my-4 flex items-center gap-3 text-xs text-gray-600"><span className="h-px flex-1 bg-white/10" /><span>ou</span><span className="h-px flex-1 bg-white/10" /></div>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/entrar" onClick={onClose} className="flex min-h-11 items-center justify-center rounded-xl border border-white/15 text-sm font-bold text-white transition-colors hover:border-brand-orange/50">Entrar com e-mail</Link>
+              <Link href="/cadastro" onClick={onClose} className="flex min-h-11 items-center justify-center rounded-xl bg-brand-orange text-sm font-bold text-white transition-colors hover:bg-[#ff7526]">Criar conta</Link>
+            </div>
+          </>
+        )}
+
+        <p className="mt-4 text-center text-xs leading-5 text-[#8f919a]">
           Ao entrar, você concorda com os{" "}
           <Link href="/termos" className="text-brand-orange hover:text-white">
             Termos de Uso

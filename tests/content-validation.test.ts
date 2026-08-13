@@ -61,3 +61,23 @@ test("bloqueia metadados editoriais incompletos", () => {
   });
   assert.ok(citacaoSemOrigem.some((error) => error.includes("fala em destaque")));
 });
+
+test("aceita trailer oficial do YouTube e bloqueia embeds inválidos", () => {
+  const withTrailer = {
+    ...validContent,
+    blocks: [{ id: "6", type: "video" as const, url: "https://www.youtube.com/watch?v=aOU7KOPGVYU", title: "Phantom Blade Zero — trailer oficial de pré-venda" }, ...blocks],
+  };
+  assert.deepEqual(validateEditorialContent(withTrailer), []);
+
+  const invalidTrailer = {
+    ...validContent,
+    blocks: [...blocks, { id: "6", type: "video" as const, url: "https://example.com/video", title: "" }],
+  };
+  assert.ok(validateEditorialContent(invalidTrailer).some((error) => error.includes("trailer")));
+
+  const trailerBeforeImage = {
+    ...validContent,
+    blocks: [{ id: "6", type: "video" as const, url: "https://www.youtube.com/watch?v=aOU7KOPGVYU", title: "Trailer oficial" }, blocks[1], blocks[0]],
+  };
+  assert.ok(validateEditorialContent(trailerBeforeImage).some((error) => error.includes("seguido imediatamente")));
+});

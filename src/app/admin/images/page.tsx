@@ -30,6 +30,25 @@ export default function AdminImagesPage() {
   const [images, setImages] = useState<LibraryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const filteredImages = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase("pt-BR");
+    if (!query) return images;
+    return images.filter((image) => [image.alt_text, image.source_url, image.public_url, image.post?.title]
+      .some((value) => value?.toLocaleLowerCase("pt-BR").includes(query)));
+  }, [images, search]);
+
+  const copyUrl = async (image: LibraryImage) => {
+    try {
+      await navigator.clipboard.writeText(image.public_url);
+      setCopiedId(image.id);
+      window.setTimeout(() => setCopiedId((current) => current === image.id ? null : current), 2000);
+    } catch {
+      setError("Não foi possível copiar a URL. Abra a imagem e copie o endereço manualmente.");
+    }
+  };
 
   const loadImages = useCallback(async () => {
     setIsLoading(true);
@@ -70,6 +89,13 @@ export default function AdminImagesPage() {
       )}
       wide
     >
+      <div className="mb-5 flex flex-col gap-3 border-y border-white/[0.08] py-4 sm:flex-row sm:items-center sm:justify-between">
+        <label className="w-full sm:max-w-md">
+          <span className="sr-only">Buscar na biblioteca</span>
+          <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por alt, matéria, origem ou URL" className="min-h-11 w-full rounded-xl border border-white/10 bg-[#111218] px-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-brand-orange" />
+        </label>
+        <span className="text-xs text-gray-500">{filteredImages.length} de {images.length} imagens</span>
+      </div>
       {error && (
         <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">
           <span>{error}</span>
@@ -90,6 +116,11 @@ export default function AdminImagesPage() {
           <h2 className="text-lg font-bold text-white">Nenhuma imagem processada</h2>
           <p className="mt-2 text-sm text-gray-400">Abra uma matéria e use “Baixar e padronizar”.</p>
         </div>
+      ) : filteredImages.length === 0 ? (
+        <div className="border-t border-white/[0.08] py-14 text-center">
+          <h2 className="text-lg font-bold text-white">Nenhuma imagem encontrada</h2>
+          <p className="mt-2 text-sm text-gray-400">Tente outro título, texto alternativo ou endereço.</p>
+        </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-white/[0.08]">
           <div className="hidden grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] gap-4 border-b border-white/[0.08] bg-white/[0.025] px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-gray-500 md:grid">
@@ -100,7 +131,7 @@ export default function AdminImagesPage() {
             <span>Data</span>
           </div>
           <div className="divide-y divide-white/[0.08]">
-            {images.map((image) => (
+            {filteredImages.map((image) => (
               <article key={image.id} className="grid gap-4 p-4 md:grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] md:items-center md:gap-4">
                 <a href={image.public_url} target="_blank" rel="noreferrer" className="block aspect-video w-full overflow-hidden rounded-lg bg-[#08090C] md:w-28">
                   <img src={image.public_url} alt={image.alt_text || ""} className="h-full w-full object-contain" />
@@ -131,9 +162,10 @@ export default function AdminImagesPage() {
                   <p className="mt-1 text-xs text-gray-300 md:mt-0">{image.width} × {image.height}</p>
                   <p className="mt-1 text-[10px] text-gray-500">WebP · {formatBytes(image.file_size)}</p>
                 </div>
-                <time className="border-t border-white/[0.08] pt-3 text-xs text-gray-400 md:border-0 md:pt-0" dateTime={image.created_at}>
-                  {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(image.created_at))}
-                </time>
+                <div className="border-t border-white/[0.08] pt-3 md:border-0 md:pt-0">
+                  <time className="block text-xs text-gray-400" dateTime={image.created_at}>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(image.created_at))}</time>
+                  <button type="button" onClick={() => void copyUrl(image)} className={`mt-2 min-h-9 rounded-lg px-3 text-[11px] font-bold transition-colors ${copiedId === image.id ? "bg-emerald-500 text-white" : "bg-white/[0.06] text-gray-300 hover:bg-white/10 hover:text-white"}`}>{copiedId === image.id ? "URL copiada" : "Copiar URL"}</button>
+                </div>
               </article>
             ))}
           </div>

@@ -77,6 +77,27 @@ export default function AdminDashboard() {
   const [deleteCandidate, setDeleteCandidate] = useState<Post | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batchCategory, setBatchCategory] = useState<PostCategory | "">("");
+  const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+
+  const updateSelectedCategory = async () => {
+    if (!batchCategory || selectedIds.length === 0) return;
+    setIsBatchUpdating(true);
+    setError(null);
+    try {
+      const updatedAt = new Date().toISOString();
+      const { error: updateError } = await supabase.from("posts").update({ category: batchCategory, updated_at: updatedAt }).in("id", selectedIds);
+      if (updateError) throw updateError;
+      setPosts((current) => current.map((post) => selectedIds.includes(post.id) ? { ...post, category: batchCategory, updated_at: updatedAt } : post));
+      setSelectedIds([]);
+      setBatchCategory("");
+    } catch (batchError) {
+      setError(errorMessage(batchError, "Não foi possível alterar a categoria das matérias selecionadas."));
+    } finally {
+      setIsBatchUpdating(false);
+    }
+  };
 
   const deletePost = async (post: Post) => {
     setDeletingId(post.id);
@@ -278,6 +299,7 @@ export default function AdminDashboard() {
     const start = (currentPage - 1) * pageSize;
     return filteredPosts.slice(start, start + pageSize);
   }, [filteredPosts, currentPage]);
+  const allVisibleSelected = paginatedPosts.length > 0 && paginatedPosts.every((post) => selectedIds.includes(post.id));
 
   if (isLoading) {
     return (
@@ -452,12 +474,27 @@ export default function AdminDashboard() {
             </select>
           </div>
 
+          {selectedIds.length > 0 && (
+            <div className="flex flex-col gap-3 border-b border-brand-orange/25 bg-brand-orange/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <strong className="text-xs text-brand-orange">{selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}</strong>
+              <div className="flex flex-col gap-2 xs:flex-row">
+                <select value={batchCategory} onChange={(event) => setBatchCategory(event.target.value as PostCategory | "")} className="min-h-11 rounded-lg border border-white/10 bg-[#111218] px-3 text-xs text-white outline-none focus:border-brand-orange">
+                  <option value="">Trocar categoria…</option>
+                  {CATEGORY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+                <button type="button" onClick={() => void updateSelectedCategory()} disabled={!batchCategory || isBatchUpdating} className="min-h-11 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{isBatchUpdating ? "Atualizando…" : "Aplicar"}</button>
+                <button type="button" onClick={() => setSelectedIds([])} disabled={isBatchUpdating} className="min-h-11 rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 hover:bg-white/5">Cancelar</button>
+              </div>
+            </div>
+          )}
+
           {/* TABELA DE MATÉRIAS */}
           <p className="border-b border-white/10 px-4 py-2 text-[11px] text-gray-500 sm:hidden">Deslize a tabela para ver todos os dados.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-white/10 text-[10px] uppercase font-bold text-gray-500 bg-white/[0.01]">
                 <tr>
+                  <th className="w-12 py-3 pl-4"><input type="checkbox" checked={allVisibleSelected} onChange={() => setSelectedIds((current) => allVisibleSelected ? current.filter((id) => !paginatedPosts.some((post) => post.id === id)) : Array.from(new Set([...current, ...paginatedPosts.map((post) => post.id)])))} aria-label="Selecionar matérias desta página" className="size-4 accent-brand-orange" /></th>
                   <th className="py-3 px-4">Matéria</th>
                   <th className="py-3 px-4">Categoria / Autor</th>
                   <th className="py-3 px-4">Status</th>
@@ -469,7 +506,7 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-white/5">
                 {paginatedPosts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-gray-500">
+                    <td colSpan={7} className="py-12 text-center text-gray-500">
                       Nenhuma matéria encontrada.
                     </td>
                   </tr>
@@ -477,6 +514,7 @@ export default function AdminDashboard() {
                   paginatedPosts.map((post) => {
                     return (
                       <tr key={post.id} className="hover:bg-white/[0.02] transition-colors group">
+                        <td className="py-3 pl-4"><input type="checkbox" checked={selectedIds.includes(post.id)} onChange={() => setSelectedIds((current) => current.includes(post.id) ? current.filter((id) => id !== post.id) : [...current, post.id])} aria-label={`Selecionar ${post.title}`} className="size-4 accent-brand-orange" /></td>
                         {/* MATÉRIA (Capa + Título) */}
                         <td className="py-3 px-4 max-w-xs">
                           <div className="flex items-center gap-3">

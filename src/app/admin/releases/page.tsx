@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { GameRadarAutocomplete } from "@/components/admin/GameRadarAutocomplete";
 import { isAdminUser } from "@/lib/auth";
 import { createDataClient } from "@/lib/supabase/client";
 import { isManagedReleaseImageUrl } from "@/lib/release-images";
@@ -384,6 +385,15 @@ export default function AdminReleasesPage() {
               Cancelar
             </button>
           </div>
+          {!items.some((item) => item.id === draft.id) && (
+            <GameRadarAutocomplete onSelect={(game) => setDraft((current) => current ? {
+              ...current,
+              id: game.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+              game: game.title,
+              release_date: game.releaseDate,
+              platforms: game.platforms.join(", "),
+            } : current)} />
+          )}
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="text-xs font-semibold text-gray-400">
               Identificador

@@ -56,6 +56,15 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - If two suitable official or otherwise rule-compliant images cannot be found, keep the article as an incomplete draft and report the missing assets. Never fill the body with generic stock imagery merely to satisfy the image count.
 - Before completing a Drive import, confirm HTTP 200, 16:9 dimensions of at least 1200 × 675, specific alt text and caption, and exactly which subject each body image depicts.
 
+## Official trailers
+
+- Quando existir um trailer oficial diretamente relacionado à notícia, incluir um bloco `video` no corpo da matéria.
+- Usar somente vídeos publicados pelo estúdio, publisher, fabricante da plataforma ou canal oficial do evento; nunca incorporar reuploads, reações ou canais agregadores.
+- O trailer deve complementar a apuração e não substitui a capa nem as duas imagens internas obrigatórias.
+- Quando houver vídeo, usar a sequência `video → text → image → text → image → text`. O bloco imediatamente posterior ao vídeo deve ser sempre texto; nunca colocar vídeo e imagem em sequência.
+- Cada bloco deve armazenar a URL original do YouTube e um título acessível que identifique jogo e finalidade do vídeo.
+- Validar o ID do vídeo e confirmar título, canal oficial e disponibilidade antes de salvar. A exibição deve usar `youtube-nocookie.com`, proporção 16:9 e carregamento tardio.
+
 ## 📅 Game Release Dates & Official Cover Art Standards
 
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**

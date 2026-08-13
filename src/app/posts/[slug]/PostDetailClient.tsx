@@ -20,10 +20,12 @@ import { createDataClient } from "@/lib/supabase/client";
 import { normalizeAuthorTag } from "@/lib/content-validation";
 import type { Post, PostStats } from "@/lib/types/database";
 import { ArticleCommunityNotes } from "@/components/community/ArticleCommunityNotes";
+import { youtubeEmbedUrl } from "@/lib/youtube";
 
 type ContentBlock =
   | { id: string; type: "text"; content: string }
-  | { id: string; type: "image"; url: string; alt: string; caption?: string };
+  | { id: string; type: "image"; url: string; alt: string; caption?: string }
+  | { id: string; type: "video"; url: string; title: string };
 
 function PostContent({ post }: { post: Post }) {
   const blocks = useMemo<ContentBlock[] | null>(() => {
@@ -69,6 +71,26 @@ function PostContent({ post }: { post: Post }) {
                   </span>
                 )}
               </div>
+            );
+          }
+          if (block.type === "video") {
+            const embedUrl = youtubeEmbedUrl(block.url);
+            if (!embedUrl) return null;
+            return (
+              <figure key={block.id} className="my-8 space-y-2">
+                <div className="aspect-video overflow-hidden border border-white/10 bg-[#08090C]">
+                  <iframe
+                    src={embedUrl}
+                    title={block.title}
+                    className="h-full w-full"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
+                <figcaption className="text-center font-subtitle text-xs text-gray-400">{block.title}</figcaption>
+              </figure>
             );
           }
           return null;

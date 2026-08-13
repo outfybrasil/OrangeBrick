@@ -15,6 +15,7 @@ interface ReactionBarProps {
   onCommentClick?: () => void;
   onRepostClick?: () => void;
   viewCount?: number;
+  hypePulse?: number;
 }
 
 export function ReactionBar({
@@ -30,6 +31,7 @@ export function ReactionBar({
   onCommentClick,
   onRepostClick,
   viewCount,
+  hypePulse = 0,
 }: ReactionBarProps) {
   const combinedFlop = flop + salty;
 
@@ -40,13 +42,20 @@ export function ReactionBar({
           type="button"
           onClick={() => onToggle("hype")}
           disabled={disabled}
-          className={`group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
+          className={`group relative flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
             activeReaction === "hype"
               ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/50 shadow-[0_0_12px_rgba(255,94,0,0.25)]"
               : "text-gray-400 border border-transparent hover:text-brand-orange hover:bg-card-slate/50"
           }`}
           title="Empolgado com essa notícia! (Hype)"
         >
+          {hypePulse > 0 && (
+            <span key={hypePulse} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-visible motion-reduce:hidden">
+              <Icon name="hype" size={12} className="hype-particle absolute left-[32%] top-1/2 text-brand-orange" />
+              <Icon name="hype" size={9} className="hype-particle hype-particle-delay absolute left-1/2 top-1/2 text-amber-300" />
+              <Icon name="hype" size={11} className="hype-particle hype-particle-late absolute left-[66%] top-1/2 text-brand-orange" />
+            </span>
+          )}
           <Icon name="hype" size={14} className={`transition-all ${activeReaction === "hype" ? "scale-110" : "group-hover:scale-125"}`} />
           <span className="hidden sm:inline">Hype</span>
           <span className="text-[10px] sm:text-[11px] font-bold tabular-nums opacity-90">

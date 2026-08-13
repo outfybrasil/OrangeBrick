@@ -1,8 +1,10 @@
 import type { PostCategory } from "@/lib/types/database";
+import { youtubeVideoId } from "./youtube.ts";
 
 export type EditorialBlock =
   | { id: string; type: "text"; content: string }
-  | { id: string; type: "image"; url: string; alt: string; caption?: string };
+  | { id: string; type: "image"; url: string; alt: string; caption?: string }
+  | { id: string; type: "video"; url: string; title: string };
 
 export const AUTHOR_TAGS: Record<PostCategory, string> = {
   breaking: "Plantão",
@@ -50,6 +52,7 @@ export function validateEditorialContent(content: EditorialContent): string[] {
   const text = [title, summary, imageAlt, JSON.stringify(blocks)].join("\n");
   const imageBlocks = blocks.filter((block): block is Extract<EditorialBlock, { type: "image" }> => block.type === "image");
   const textBlocks = blocks.filter((block): block is Extract<EditorialBlock, { type: "text" }> => block.type === "text");
+  const videoBlocks = blocks.filter((block): block is Extract<EditorialBlock, { type: "video" }> => block.type === "video");
 
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) errors.push("O slug deve usar apenas letras minúsculas, números e hífens.");
   if (!title.trim() || title.length > 120) errors.push("O título deve ter entre 1 e 120 caracteres.");
@@ -68,6 +71,14 @@ export function validateEditorialContent(content: EditorialContent): string[] {
 
   if (imageBlocks.some((block) => block.url.trim() && !isValidImageUrl(block.url))) {
     errors.push("Todas as imagens do corpo precisam ter URLs válidas (HTTPS ou caminho interno).");
+  }
+
+  if (videoBlocks.some((block) => !youtubeVideoId(block.url) || block.title.trim().length < 12)) {
+    errors.push("Todo trailer precisa usar uma URL válida do YouTube e informar um título acessível.");
+  }
+
+  if (blocks.some((block, index) => block.type === "video" && blocks[index + 1]?.type !== "text")) {
+    errors.push("Todo trailer precisa ser seguido imediatamente por um bloco de texto.");
   }
 
   const urls = [imageUrl, ...imageBlocks.map((block) => block.url)].filter(Boolean);

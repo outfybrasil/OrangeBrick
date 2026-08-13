@@ -42,6 +42,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
   const [shareText, setShareText] = useState("");
   const [isSharing, setIsSharing] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [hypePulse, setHypePulse] = useState(0);
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
@@ -70,6 +71,15 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
 
   const currentUserId = user?.id;
   const isPostOwner = !!(user && post.user_id && post.user_id === user.id);
+
+  const handleReaction = (type: ReactionType) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    if (type === "hype" && post.user_reaction !== "hype") setHypePulse((value) => value + 1);
+    onReaction(post.id, type);
+  };
 
   const handleCommentClick = async () => {
     if (!user) {
@@ -370,7 +380,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           hype={post.reactions.hype || 0}
           flop={(post.reactions.flop || 0) + (post.reactions.salty || 0)}
           salty={0}
-          onToggle={(type) => onReaction(post.id, type)}
+          onToggle={handleReaction}
+          hypePulse={hypePulse}
           activeReaction={post.user_reaction}
           commentCount={totalCommentCount}
           shareCount={post.shares_count}

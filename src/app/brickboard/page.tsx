@@ -13,6 +13,7 @@ import { UserNav } from "@/components/auth/UserNav";
 import { Icon } from "@/components/ui/Icon";
 import { Footer } from "@/components/ui/Footer";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
 import { levelProgress } from "@/lib/progression";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
@@ -43,7 +44,10 @@ function BrickboardContent() {
 
   const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
-  const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending" | "polls">("latest");
+  const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending">("latest");
+  const [visiblePostCount, setVisiblePostCount] = useState(8);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const articleSlug = searchParams.get("article");
   const topicId = searchParams.get("topic");
   const targetPostId = searchParams.get("post");
@@ -95,9 +99,40 @@ function BrickboardContent() {
         ?.shared_post?.original_attached_article?.title
     : null;
 
-  const displayPosts = [...filteredPosts].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  const platformCounts = useMemo(() => {
+    const counts: Record<string, number> = { TODOS: posts.length };
+    for (const post of posts) {
+      if (post.platform_tag) counts[post.platform_tag] = (counts[post.platform_tag] || 0) + 1;
+    }
+    return counts;
+  }, [posts]);
+
+  const displayPosts = [...filteredPosts].sort((a, b) => {
+    if (activeTab === "trending") {
+      const score = (post: typeof a) => (post.comments_count || 0) * 3 + (post.reactions.hype || 0) + (post.reactions.flop || 0) + (post.shares_count || 0) * 2;
+      return score(b) - score(a) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+  const visiblePosts = displayPosts.slice(0, visiblePostCount);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || visiblePostCount >= displayPosts.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) setVisiblePostCount((count) => Math.min(count + 8, displayPosts.length));
+    }, { rootMargin: "320px" });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [displayPosts.length, visiblePostCount]);
+
+  const requireUser = (action: () => void) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    action();
+  };
 
   useEffect(() => {
     if (!isLoaded || !targetPostId) return;
@@ -169,7 +204,7 @@ function BrickboardContent() {
                 id="brickboard-search"
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => { setSearchQuery(event.target.value); setVisiblePostCount(8); }}
                 placeholder="Buscar conversas e leitores..."
                 className="min-h-9 w-full border border-white/10 bg-white/[0.04] px-9 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange/40 focus:bg-white/[0.06]"
               />
@@ -238,7 +273,7 @@ function BrickboardContent() {
             </p>
           </div>
           <button
-            onClick={() => setIsComposeOpen(true)}
+            onClick={() => requireUser(() => setIsComposeOpen(true))}
             className="hidden min-h-11 items-center justify-center border border-brand-orange bg-brand-orange px-6 text-sm font-bold text-white transition-colors hover:bg-[#ff7526] lg:flex"
           >
             Abrir uma conversa
@@ -252,14 +287,13 @@ function BrickboardContent() {
               {([
                 { id: "latest", label: "Recentes" },
                 { id: "following", label: "Seguindo" },
-                { id: "trending", label: "Em alta" },
-                { id: "polls", label: "Pergunta do dia" },
+                { id: "trending", label: "Top debates" },
               ] as const).map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => { setActiveTab(tab.id); setVisiblePostCount(8); }}
                   aria-pressed={activeTab === tab.id}
-                  className={`${tab.id === "polls" ? "hidden sm:inline-flex" : "inline-flex"} relative min-h-11 items-center px-4 text-sm font-semibold transition-colors ${
+                  className={`relative inline-flex min-h-11 items-center px-4 text-sm font-semibold transition-colors ${
                     activeTab === tab.id ? "text-white" : "text-gray-500 hover:text-gray-300"
                   }`}
                 >
@@ -273,25 +307,11 @@ function BrickboardContent() {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("polls")}
-            aria-pressed={activeTab === "polls"}
-            className={`mt-2 flex min-h-10 w-full items-center justify-between border px-3 text-left text-xs font-bold transition-colors sm:hidden ${
-              activeTab === "polls"
-                ? "border-brand-orange/60 bg-brand-orange/10 text-white"
-                : "border-white/10 bg-white/[0.02] text-gray-400"
-            }`}
-          >
-            <span>Pergunta do dia</span>
-            <span aria-hidden="true" className="text-brand-orange">→</span>
-          </button>
-
           <div className="mt-1 flex items-center gap-0.5 overflow-x-auto border-b border-white/10 pb-2 scrollbar-none">
             {PLATFORM_TABS.map((platform) => (
               <button
                 key={platform.id}
-                onClick={() => setSelectedPlatform(platform.id)}
+                onClick={() => { setSelectedPlatform(platform.id); setVisiblePostCount(8); }}
                 aria-pressed={selectedPlatform === platform.id}
                 className={`min-h-9 shrink-0 px-3 text-xs font-medium transition-colors whitespace-nowrap ${
                   selectedPlatform === platform.id
@@ -299,7 +319,7 @@ function BrickboardContent() {
                     : "text-gray-500 hover:text-gray-300"
                 }`}
               >
-                {platform.label}
+                {platform.label} <span className="ml-1 tabular-nums text-gray-500">({platformCounts[platform.id] || 0})</span>
               </button>
             ))}
           </div>
@@ -341,17 +361,16 @@ function BrickboardContent() {
           </div>
         )}
 
-        {isLoaded && activeTab === "polls" && poll && (
-          <div className="max-w-xl">
-            <GamerPollWidget poll={poll} onVote={votePoll} />
-          </div>
-        )}
-
-        {isLoaded && activeTab !== "polls" && (
+        {isLoaded && (
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
 
             {/* ── FEED ── */}
             <div className="space-y-0">
+              {poll && (
+                <div className="mb-4 lg:hidden">
+                  <GamerPollWidget poll={poll} onVote={(optionId) => requireUser(() => votePoll(optionId))} />
+                </div>
+              )}
               {/* Composer embutido */}
               <div className="mb-4 border border-white/10 bg-white/[0.02] p-4">
                 <div className="flex items-center gap-3">
@@ -363,7 +382,7 @@ function BrickboardContent() {
                     </div>
                   )}
                   <button
-                    onClick={() => setIsComposeOpen(true)}
+                    onClick={() => requireUser(() => setIsComposeOpen(true))}
                     className="flex-1 border border-white/10 bg-transparent px-4 py-2.5 text-left text-sm text-gray-500 transition-colors hover:border-white/20 hover:text-gray-300"
                   >
                     Compartilhe uma opinião, pergunta ou descoberta...
@@ -399,7 +418,7 @@ function BrickboardContent() {
                   />
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => requireUser(() => fileInputRef.current?.click())}
                     className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
                   >
                     <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -409,7 +428,7 @@ function BrickboardContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsPollModalOpen(true)}
+                    onClick={() => requireUser(() => setIsPollModalOpen(true))}
                     className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
                   >
                     <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -419,7 +438,7 @@ function BrickboardContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsComposeOpen(true)}
+                    onClick={() => requireUser(() => setIsComposeOpen(true))}
                     className="ml-auto bg-brand-orange px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
                   >
                     Publicar
@@ -442,20 +461,27 @@ function BrickboardContent() {
                   )}
                 </div>
               ) : (
-                displayPosts.map((post) => (
-                  <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28">
-                    <BrickCard
-                      post={post}
-                      onReaction={toggleReaction}
-                      onDeletePost={deletePost}
-                      onSharePost={sharePost}
-                      onAddComment={addComment}
-                      onDeleteComment={deleteComment}
-                      onToggleCommentLike={toggleCommentLike}
-                      getComments={getComments}
-                    />
-                  </div>
-                ))
+                <>
+                  {visiblePosts.map((post) => (
+                    <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28">
+                      <BrickCard
+                        post={post}
+                        onReaction={toggleReaction}
+                        onDeletePost={deletePost}
+                        onSharePost={sharePost}
+                        onAddComment={addComment}
+                        onDeleteComment={deleteComment}
+                        onToggleCommentLike={toggleCommentLike}
+                        getComments={getComments}
+                      />
+                    </div>
+                  ))}
+                  {visiblePostCount < displayPosts.length && (
+                    <div ref={loadMoreRef} className="flex min-h-20 items-center justify-center border-t border-white/10" aria-label="Carregando mais conversas">
+                      <span className="size-5 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -483,7 +509,7 @@ function BrickboardContent() {
                         return (
                           <button
                             key={option.id}
-                            onClick={() => votePoll(option.id)}
+                            onClick={() => requireUser(() => votePoll(option.id))}
                             disabled={isSelected}
                             className={`relative min-h-11 w-full overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-colors ${
                               isSelected ? "border-brand-orange bg-brand-orange/[0.06]" : "border-white/10 bg-[#0c0d11] hover:border-brand-orange/40"
@@ -520,7 +546,7 @@ function BrickboardContent() {
                       <button
                         key={topic.name}
                         type="button"
-                        onClick={() => setSelectedPlatform(topic.name)}
+                        onClick={() => { setSelectedPlatform(topic.name); setVisiblePostCount(8); }}
                         aria-label={`Filtrar conversas da plataforma ${topic.name}`}
                         className="group flex min-h-14 w-full items-center gap-3 rounded-xl border border-white/10 bg-[#0c0d11] p-2.5 text-left transition-colors hover:border-brand-orange/40"
                       >
@@ -542,7 +568,7 @@ function BrickboardContent() {
       </main>
 
       <button
-        onClick={() => setIsComposeOpen(true)}
+        onClick={() => requireUser(() => setIsComposeOpen(true))}
         className="mobile-overlay-sensitive fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
         title="Criar novo Brick"
         aria-label="Criar novo Brick"
@@ -575,6 +601,8 @@ function BrickboardContent() {
           addPost(question, undefined, undefined, undefined, options);
         }}
       />
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <Footer />
     </>

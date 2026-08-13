@@ -682,3 +682,20 @@ html.high-contrast :where(a, button, input, textarea, select) {
     @apply font-sans;
   }
 }
+@keyframes hype-rise {
+  0% { opacity: 0; transform: translate3d(-50%, 2px, 0) scale(0.65) rotate(-8deg); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(-50%, -32px, 0) scale(1.2) rotate(10deg); }
+}
+
+.hype-particle {
+  animation: hype-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hype-particle-delay {
+  animation-delay: 70ms;
+}
+
+.hype-particle-late {
+  animation-delay: 130ms;
+}

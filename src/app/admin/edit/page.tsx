@@ -7,6 +7,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { youtubeEmbedUrl } from "@/lib/youtube";
 import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory, Topic } from "@/lib/types/database";
 
@@ -73,6 +74,7 @@ function EditForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [autoSavedAt, setAutoSavedAt] = useState<string | null>(null);
 
   // Auto-generate slug from title
   const handleTitleChange = (val: string) => {
@@ -94,22 +96,35 @@ function EditForm() {
       .filter((block): block is Extract<ContentBlock, { type: "text" }> => block.type === "text")
       .map((block) => block.content)
       .join("\n");
+    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
+    const imageBlocks = blocks.filter((block): block is Extract<ContentBlock, { type: "image" }> => block.type === "image");
+    const sources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean);
     return [
-      { id: 1, label: "Título dentro do limite", complete: Boolean(title.trim() && title.length <= 100) },
-      { id: 2, label: "Resumo preenchido", complete: summary.trim().length >= 20 },
-      { id: 3, label: "Imagem de capa com crédito", complete: Boolean(imageUrl.trim()) },
-      { id: 4, label: "Texto alternativo", complete: Boolean(imageAlt.trim().length >= 3) },
-      { id: 5, label: "Categoria selecionada", complete: Boolean(category) },
-      { id: 6, label: "Revisar links externos", complete: /\*\*Fonte:\*\*/i.test(textContent) || textContent.includes("http") },
-      { id: 7, label: "Definir SEO description", complete: summary.trim().length >= 50 },
-      { id: 8, label: "Estado da informação definido", complete: Boolean(informationStatus) },
-      { id: 9, label: "Citação com autoria e fonte", complete: !quoteText.trim() || Boolean(quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim())) },
-      { id: 10, label: "Fontes estruturadas", complete: sourcesText.split("\n").filter(Boolean).every((line) => /^.+\|https:\/\//.test(line.trim())) },
+      { id: 1, label: "Título com até 70 caracteres", complete: Boolean(title.trim() && title.length <= 70) },
+      { id: 2, label: "Resumo entre 80 e 180 caracteres", complete: summary.trim().length >= 80 && summary.trim().length <= 180 },
+      { id: 3, label: "Capa e texto alternativo preenchidos", complete: Boolean(imageUrl.trim() && imageAlt.trim().length >= 3) },
+      { id: 4, label: "Corpo entre 700 e 1.000 palavras", complete: wordCount >= 700 && wordCount <= 1000 },
+      { id: 5, label: "Duas imagens internas distintas", complete: imageBlocks.length >= 2 && new Set(imageBlocks.map((block) => block.url.trim()).filter(Boolean)).size >= 2 },
+      { id: 6, label: "Alt text e legenda nas imagens internas", complete: imageBlocks.length >= 2 && imageBlocks.every((block) => block.alt.trim().length >= 3 && Boolean(block.caption?.trim())) },
+      { id: 7, label: "Pelo menos três fontes estruturadas", complete: sources.length >= 3 && sources.every((line) => /^.+\|https:\/\//.test(line)) },
+      { id: 8, label: "Fonte citada ao final do texto", complete: /\*\*Fonte:\*\*/i.test(textContent) },
+      { id: 9, label: "Estado da informação definido", complete: Boolean(informationStatus) },
+      { id: 10, label: "Fala verificada ou ausência registrada", complete: Boolean(quoteText.trim() ? quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim()) : textContent.toLowerCase().includes("declaração pública")) },
     ];
   }, [blocks, category, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteSourceUrl, quoteText, sourcesText, summary, title]);
 
   const completedChecklistCount = editorialChecklist.filter((item) => item.complete).length;
   const pendingChecklistCount = editorialChecklist.length - completedChecklistCount;
+
+  useEffect(() => {
+    if (isLoading || !hasChanges) return;
+    const storageKey = `orange-brick:article-draft:${postId || "new"}`;
+    const timer = window.setInterval(() => {
+      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, blocks }));
+      setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date()));
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, slug, sourcesText, summary, title, topicId]);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -224,7 +239,7 @@ function EditForm() {
     void init();
   }, [postId, router, supabase]);
 
-  const addBlock = (type: "text" | "image" | "heading" | "quote" | "embed") => {
+  const addBlock = (type: "text" | "image" | "heading" | "quote" | "video") => {
     const id = `block-${Date.now()}`;
     let newBlock: ContentBlock;
 
@@ -234,8 +249,8 @@ function EditForm() {
       newBlock = { id, type: "text", content: "## Novo Subtítulo\n\n" };
     } else if (type === "quote") {
       newBlock = { id, type: "text", content: "> \"Insira sua citação aqui.\"\n\n" };
-    } else if (type === "embed") {
-      newBlock = { id, type: "text", content: "[youtube](https://youtube.com/...)" };
+    } else if (type === "video") {
+      newBlock = { id, type: "video", url: "", title: "" };
     } else {
       newBlock = { id, type: "text", content: "" };
     }
@@ -251,6 +266,11 @@ function EditForm() {
 
   const updateImageBlock = (id: string, field: "url" | "alt" | "caption", value: string) => {
     setBlocks(prev => prev.map(b => b.id === id && b.type === "image" ? { ...b, [field]: value } : b));
+    setHasChanges(true);
+  };
+
+  const updateVideoBlock = (id: string, field: "url" | "title", value: string) => {
+    setBlocks(prev => prev.map(b => b.id === id && b.type === "video" ? { ...b, [field]: value } : b));
     setHasChanges(true);
   };
 
@@ -369,6 +389,7 @@ function EditForm() {
       }
 
       setHasChanges(false);
+      window.localStorage.removeItem(`orange-brick:article-draft:${postId || "new"}`);
       router.push("/admin");
       router.refresh();
     } catch (err: unknown) {
@@ -397,7 +418,7 @@ function EditForm() {
       status={
         <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          {hasChanges ? "Alterações não salvas" : postId ? "Matéria carregada" : "Nova matéria vazia"}
+          {hasChanges ? autoSavedAt ? `Backup local às ${autoSavedAt}` : "Alterações não salvas" : postId ? "Matéria carregada" : "Nova matéria vazia"}
         </span>
       }
       actions={
@@ -456,14 +477,14 @@ function EditForm() {
             <div>
               <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-500 mb-1.5">
                 <label htmlFor="article-title">Título da matéria</label>
-                <span>{title.length} / 100</span>
+                <span>{title.length} / 70</span>
               </div>
               <input
                 id="article-title"
                 type="text"
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                maxLength={100}
+                maxLength={70}
                 placeholder="Insira o título da matéria..."
                 className="h-11 w-full rounded-lg border border-white/10 bg-background-void px-4 font-heading text-sm font-black uppercase text-white outline-none focus:border-brand-orange/50 transition-colors"
               />
@@ -537,7 +558,7 @@ function EditForm() {
                         placeholder="Digite o texto do parágrafo ou markdown..."
                         className="w-full bg-transparent p-2 text-xs leading-relaxed text-gray-200 outline-none font-sans"
                       />
-                    ) : (
+                    ) : block.type === "image" ? (
                       <div className="space-y-2 p-2">
                         <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-background-void border border-white/10">
                           {block.url ? (
@@ -566,6 +587,43 @@ function EditForm() {
                           onChange={(e) => updateImageBlock(block.id, "caption", e.target.value)}
                           placeholder="Legenda da imagem..."
                           className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-gray-300 outline-none"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2 p-2">
+                        <div className="aspect-video w-full overflow-hidden border border-white/10 bg-background-void">
+                          {youtubeEmbedUrl(block.url) ? (
+                            <iframe
+                              src={youtubeEmbedUrl(block.url) || undefined}
+                              title={block.title || "Prévia do trailer"}
+                              className="h-full w-full"
+                              loading="lazy"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center px-4 text-center text-xs text-gray-500">
+                              Insira o endereço do trailer oficial no YouTube
+                            </div>
+                          )}
+                        </div>
+                        <label htmlFor={`video-url-${block.id}`} className="block text-xs font-semibold text-gray-300">URL do trailer oficial</label>
+                        <input
+                          id={`video-url-${block.id}`}
+                          type="url"
+                          value={block.url}
+                          onChange={(e) => updateVideoBlock(block.id, "url", e.target.value)}
+                          placeholder="URL oficial do YouTube"
+                          className="min-h-11 w-full border border-white/10 bg-background-void px-3 text-base font-mono text-white outline-none focus:border-brand-orange/50 sm:text-sm"
+                        />
+                        <label htmlFor={`video-title-${block.id}`} className="block text-xs font-semibold text-gray-300">Título acessível</label>
+                        <input
+                          id={`video-title-${block.id}`}
+                          type="text"
+                          value={block.title}
+                          onChange={(e) => updateVideoBlock(block.id, "title", e.target.value)}
+                          placeholder="Título acessível do trailer"
+                          className="min-h-11 w-full border border-white/10 bg-background-void px-3 text-base text-gray-200 outline-none focus:border-brand-orange/50 sm:text-sm"
                         />
                       </div>
                     )}
@@ -616,10 +674,10 @@ function EditForm() {
               </button>
               <button
                 type="button"
-                onClick={() => addBlock("embed")}
+                onClick={() => addBlock("video")}
                 className="min-h-11 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-bold text-gray-300 hover:bg-white/[0.08] hover:text-white transition-colors"
               >
-                + Embed
+                + Trailer
               </button>
             </div>
           </div>
@@ -811,11 +869,20 @@ function EditForm() {
             <div className="prose prose-invert max-w-none text-sm leading-relaxed space-y-4">
               {blocks.map(b => (
                 <div key={b.id}>
-                  {b.type === "text" ? parseMarkdownToReact(b.content) : (
+                  {b.type === "text" ? parseMarkdownToReact(b.content) : b.type === "image" ? (
                     <div>
                       {b.url && <img src={b.url} alt={b.alt} className="w-full aspect-video object-cover rounded-lg" />}
                       {b.caption && <p className="text-xs text-center text-gray-500 mt-1">{b.caption}</p>}
                     </div>
+                  ) : youtubeEmbedUrl(b.url) ? (
+                    <figure className="space-y-2">
+                      <div className="aspect-video overflow-hidden border border-white/10 bg-background-void">
+                        <iframe src={youtubeEmbedUrl(b.url) || undefined} title={b.title} className="h-full w-full" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+                      </div>
+                      <figcaption className="text-center text-xs text-gray-400">{b.title}</figcaption>
+                    </figure>
+                  ) : (
+                    <p className="text-sm text-red-300">Trailer com URL inválida.</p>
                   )}
                 </div>
               ))}
