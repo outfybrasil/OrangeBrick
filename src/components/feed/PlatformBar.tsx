@@ -15,7 +15,7 @@ export function PlatformBar({ activePlatform }: PlatformBarProps) {
           <h2 id="platform-index-title" className="font-heading text-sm font-extrabold text-white sm:text-base">
             Plataformas & ecossistemas
           </h2>
-          <p className="mt-0.5 text-[11px] text-gray-500">Notícias separadas por plataforma</p>
+          <p className="mt-0.5 text-xs text-gray-500">Notícias separadas por plataforma</p>
         </div>
       </div>
 
@@ -36,14 +36,14 @@ export function PlatformBar({ activePlatform }: PlatformBarProps) {
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center">
                 {config.iconUrl ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={config.iconUrl}
                     alt=""
                     style={{ maxHeight: "20px", maxWidth: "28px", width: "auto", height: "auto" }}
                     className="max-h-5 max-w-7 object-contain opacity-80 transition-opacity group-hover:opacity-100"
                   />
                 ) : (
-                  <span className="text-[10px] font-black tracking-[-0.02em]" style={{ color: config.themeColor }}>
+                  <span className="text-xs font-black tracking-[-0.02em]" style={{ color: config.themeColor }}>
                     {config.shortName.slice(0, 2).toUpperCase()}
                   </span>
                 )}

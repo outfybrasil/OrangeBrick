@@ -66,7 +66,7 @@ export default function AdminLogin() {
       <section className="relative hidden overflow-hidden border-r border-white/[0.07] bg-[#15161d] p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
         <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-orange/10 blur-3xl" />
         <Link href="/" className="relative flex w-fit items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
-          <img
+          <img loading="lazy" decoding="async"
             src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
             alt=""
             style={{ maxHeight: "40px", maxWidth: "56px", width: "auto", height: "auto" }}
@@ -97,7 +97,7 @@ export default function AdminLogin() {
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center justify-between lg:hidden">
             <Link href="/" className="flex min-h-11 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
-              <img
+              <img loading="lazy" decoding="async"
                 src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
                 alt="Orange Brick"
                 style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
@@ -107,7 +107,7 @@ export default function AdminLogin() {
                 Orange<span className="text-brand-orange">_</span>Brick
               </span>
             </Link>
-            <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold text-gray-400">Admin</span>
+            <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-bold text-gray-400">Admin</span>
           </div>
 
           <div className="rounded-2xl bg-[#15161d] p-5 sm:p-8">

@@ -195,7 +195,7 @@ export default function ProgressionAdminPage() {
                   <article key={member.user_id} className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_7rem_7rem_auto] sm:items-center">
                     <div className="min-w-0">
                       <Link href={`/profile/${member.username}`} target="_blank" className="truncate text-sm font-bold hover:text-brand-orange">{member.display_name}</Link>
-                      <p className="mt-1 text-[11px] text-gray-500">@{member.username} · {member.revoked_events} revogações</p>
+                      <p className="mt-1 text-xs text-gray-500">@{member.username} · {member.revoked_events} revogações</p>
                     </div>
                     <p className="text-xs text-gray-300">Nível <strong className="text-white">{member.level}</strong><br />{formatXp(member.lifetime_xp)} XP</p>
                     <p className="text-xs text-gray-300">Temporada<br /><strong className="text-white">{formatXp(member.season_xp)} XP</strong></p>
@@ -217,7 +217,7 @@ export default function ProgressionAdminPage() {
                   <div key={rule.event_type} className="py-4">
                     <div className="mb-3 flex items-center justify-between gap-3">
                       <strong className="text-sm">{ruleLabels[rule.event_type] || rule.event_type}</strong>
-                      <label className="flex items-center gap-2 text-[11px] text-gray-400">
+                      <label className="flex items-center gap-2 text-xs text-gray-400">
                         Ativa
                         <input type="checkbox" checked={rule.enabled} onChange={(event) => updateRule(rule.event_type, { enabled: event.target.checked })} className="h-4 w-4 accent-[#ff5e00]" />
                       </label>
@@ -267,7 +267,7 @@ function Summary({ label, value }: { label: string; value: number }) {
 function RuleField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
   return (
     <label>
-      <span className="mb-1 block text-[10px] text-gray-500">{label}</span>
+      <span className="mb-1 block text-xs text-gray-500">{label}</span>
       <input type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full border border-white/10 bg-background-void px-2 text-sm outline-none focus:border-brand-orange/60" />
     </label>
   );

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
@@ -20,10 +20,12 @@ function authErrorMessage(message: string) {
   return "Não foi possível concluir o acesso. Tente novamente.";
 }
 
-export function CredentialAuthForm({ mode }: CredentialAuthFormProps) {
+function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createDataClient();
   const { signInWithGoogle } = useAuth();
+  const isSignup = mode === "signup";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -31,12 +33,12 @@ export function CredentialAuthForm({ mode }: CredentialAuthFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<"email" | "password" | "confirmation" | "eligibility" | "form" | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const isSignup = mode === "signup";
-
-  useEffect(() => {
-    if (!isSignup && new URLSearchParams(window.location.search).get("senha") === "alterada") setMessage("Senha alterada. Entre novamente com sua nova senha.");
-  }, [isSignup]);
+  const [message, setMessage] = useState<string | null>(() => {
+    if (!isSignup && searchParams.get("senha") === "alterada") {
+      return "Senha alterada. Entre novamente com sua nova senha.";
+    }
+    return null;
+  });
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -133,5 +135,13 @@ export function CredentialAuthForm({ mode }: CredentialAuthFormProps) {
       </p>
       <p className="mt-5 text-center text-xs leading-5 text-gray-500">Ao continuar, você concorda com os <Link href="/termos" className="text-gray-300 hover:text-white">Termos de Uso</Link> e a <Link href="/privacidade" className="text-gray-300 hover:text-white">Política de Privacidade</Link>.</p>
     </div>
+  );
+}
+
+export function CredentialAuthForm(props: CredentialAuthFormProps) {
+  return (
+    <Suspense fallback={<div className="mx-auto w-full max-w-[30rem] min-h-[400px] border border-white/10 bg-[#111217] p-5 sm:p-8 animate-pulse" />}>
+      <CredentialAuthFormInner {...props} />
+    </Suspense>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { useReactions } from "@/lib/hooks/useReactions";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -39,18 +39,20 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
         <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block h-full overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange">
           {post.image_url ? (
             <>
-              <img
+              <Image
                 src={post.image_url}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-45 blur-xl"
-                loading="lazy"
+                fill
+                sizes="(max-width: 639px) 150px, 220px"
+                className="scale-110 object-cover object-center opacity-45 blur-xl"
               />
-              <img
+              <Image
                 src={post.image_url}
                 alt={post.image_alt || ""}
-                className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
+                fill
+                sizes="(max-width: 639px) 150px, 220px"
+                className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
               />
             </>
           ) : (
@@ -58,7 +60,7 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
               <span className="text-xs text-gray-600">Sem mídia</span>
             </div>
           )}
-          <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-[11px] font-black uppercase tracking-[0.06em] text-black shadow-md">
+          <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black shadow-md">
             {CATEGORY_CONFIG[post.category].label}
             <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
             <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />

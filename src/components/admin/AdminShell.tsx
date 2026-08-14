@@ -145,14 +145,14 @@ export function AdminShell({
             <p className="font-heading text-sm font-black uppercase tracking-wider text-white">
               ORANGE<span className="text-brand-orange">_</span>BRICK
             </p>
-            <p className="text-[10px] text-gray-500 font-semibold">Redação</p>
+            <p className="text-xs text-gray-500 font-semibold">Redação</p>
           </div>
         </div>
 
         {/* NAV ITEMS */}
         <nav aria-label="Navegação administrativa" className="flex-1 space-y-5 p-3.5 overflow-y-auto">
           <div>
-            <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+            <p className="px-3 pb-2 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
               Operação Editorial
             </p>
             <div className="space-y-1">
@@ -185,7 +185,7 @@ export function AdminShell({
           </div>
 
           <div>
-            <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+            <p className="px-3 pb-2 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
               Administração
             </p>
             <div className="space-y-1">
@@ -219,7 +219,7 @@ export function AdminShell({
 
           <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-3 px-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-orange text-[10px] font-bold text-white">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white">
                 OB
               </div>
               <span className="truncate text-xs font-bold text-gray-200">Orange Brick</span>
@@ -272,7 +272,7 @@ export function AdminShell({
           <div className="mb-5 flex min-w-0 flex-col gap-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">PAINEL ADMINISTRATIVO</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-500">PAINEL ADMINISTRATIVO</p>
                 {status}
               </div>
               <h1 className="break-words font-heading text-[clamp(1.5rem,7vw,1.875rem)] font-black leading-tight text-white">

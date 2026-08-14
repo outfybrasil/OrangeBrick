@@ -18,6 +18,7 @@ const eslintConfig = defineConfig([
     "scripts/**",
     "supabase/functions/**",
     ".agents/**",
+    "tmp/**",
   ]),
 ]);
 

@@ -150,7 +150,7 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
             className="relative flex items-center justify-center overflow-hidden rounded-xl bg-[#0a0b0e] select-none min-h-[300px] max-h-[440px]"
           >
             {/* Full Image */}
-            <img
+            <img loading="lazy" decoding="async"
               ref={imgRef}
               src={imageSrc}
               crossOrigin="anonymous"
@@ -175,10 +175,10 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
             >
               {/* Labels inside Crop Box */}
               <div className="absolute top-2 left-2 flex flex-wrap gap-1.5 pointer-events-none">
-                <span className="rounded bg-brand-orange px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white shadow-sm">
+                <span className="rounded bg-brand-orange px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white shadow-sm">
                   Todos os dispositivos
                 </span>
-                <span className="rounded bg-black/80 px-2 py-0.5 text-[10px] font-bold text-gray-300 backdrop-blur-sm shadow-sm">
+                <span className="rounded bg-black/80 px-2 py-0.5 text-xs font-bold text-gray-300 backdrop-blur-sm shadow-sm">
                   1600 × 500
                 </span>
               </div>
@@ -206,9 +206,9 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-white font-subtitle">Posição rápida:</span>
-              <button type="button" onClick={() => { setBoxY(0); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Topo</button>
-              <button type="button" onClick={() => { setBoxY(30); setBoxX(5); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Centro</button>
-              <button type="button" onClick={() => { setBoxY(65); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-[11px] hover:bg-brand-orange hover:text-white">Base</button>
+              <button type="button" onClick={() => { setBoxY(0); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-xs hover:bg-brand-orange hover:text-white">Topo</button>
+              <button type="button" onClick={() => { setBoxY(30); setBoxX(5); }} className="rounded bg-white/10 px-2.5 py-1 text-xs hover:bg-brand-orange hover:text-white">Centro</button>
+              <button type="button" onClick={() => { setBoxY(65); setBoxX(0); }} className="rounded bg-white/10 px-2.5 py-1 text-xs hover:bg-brand-orange hover:text-white">Base</button>
             </div>
           </div>
         </div>
@@ -470,7 +470,7 @@ export default function ProfileSettingsPage() {
           <aside>
             <h1 className="font-heading text-3xl font-black">Seu perfil</h1>
             <p className="mt-3 text-sm leading-6 text-gray-400">Controle sua identidade, sua vitrine e o que aparece publicamente.</p>
-            <img
+            <img loading="lazy" decoding="async"
               src={resolveAvatarUrl(avatarUrl, displayName, profile.is_official)}
               alt="Prévia do avatar"
               className="mt-7 h-24 w-24 rounded-full border-2 border-brand-orange/40 object-cover"
@@ -479,7 +479,7 @@ export default function ProfileSettingsPage() {
             />
             <div className="mt-6 overflow-hidden rounded-xl border border-white/10 bg-card-slate">
               {bannerUrl ? (
-                <img src={bannerUrl} alt="Prévia do banner" className="aspect-[16/5] w-full object-cover" />
+                <img loading="lazy" decoding="async" src={bannerUrl} alt="Prévia do banner" className="aspect-[16/5] w-full object-cover" />
               ) : (
                 <div className="flex aspect-[16/5] items-center justify-center text-xs text-gray-500">Sem banner</div>
               )}
@@ -536,7 +536,7 @@ export default function ProfileSettingsPage() {
               </Field>
               <Field label="Banner do perfil" hint="Escolha uma imagem e ajuste a seleção desejada.">
                 <div className="overflow-hidden border border-white/15 bg-black/20 rounded-xl">
-                  {bannerUrl && <img src={bannerUrl} alt="Banner atual" className="aspect-[16/5] w-full object-cover" />}
+                  {bannerUrl && <img loading="lazy" decoding="async" src={bannerUrl} alt="Banner atual" className="aspect-[16/5] w-full object-cover" />}
                   <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 px-4 py-2 text-sm font-semibold text-gray-200">
                     <label className="flex cursor-pointer items-center gap-2 hover:text-brand-orange transition-colors">
                       <span>{isBannerUploading ? "Processando imagem…" : bannerUrl ? "Trocar banner" : "Escolher banner"}</span>

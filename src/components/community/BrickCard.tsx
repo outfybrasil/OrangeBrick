@@ -229,7 +229,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     <article className="group/card relative space-y-4 border-b border-white/10 bg-card-slate/20 px-1 pb-6 pt-2 transition-colors hover:bg-white/[0.025] sm:px-5 sm:pb-7 sm:pt-5">
       <div className="flex items-start justify-between gap-3">
         <Link href={`/profile/${encodeURIComponent(post.author_username || post.author_name)}`} className="flex items-center gap-3 min-w-0 group/author">
-          <img
+          <img loading="lazy" decoding="async"
             src={avatarSrc}
             alt={post.author_name}
             onError={(e) => { (e.target as HTMLImageElement).src = resolveAvatarUrl(null, post.author_name, post.is_official); }}
@@ -292,7 +292,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
 
       {post.media_url && (
         <div className="flex items-center justify-center overflow-hidden border-y border-white/10 bg-background-void/90">
-          <img src={post.media_url} alt="Mídia do post" className="h-auto w-full object-contain" />
+          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto w-full object-contain" />
         </div>
       )}
 
@@ -303,7 +303,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         >
           {post.attached_article.image_url && (
             <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
-              <img
+              <img loading="lazy" decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
@@ -335,7 +335,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
             </span>
           </div>
           <div className="flex gap-2.5 items-start">
-            <img
+            <img loading="lazy" decoding="async"
               src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name, post.shared_post.original_is_official)}
               alt={post.shared_post.original_author_name}
               onError={(e) => { (e.target as HTMLImageElement).src = "/icons/default-avatar.png"; }}
@@ -365,7 +365,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 >
                   {post.shared_post.original_attached_article.image_url && (
                     <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={post.shared_post.original_attached_article.image_url}
                         alt={post.shared_post.original_attached_article.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
@@ -453,7 +453,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                   <div key={c.id} className="group/comm border-t border-white/[0.07] py-3 first:border-t-0">
                     <div className="flex items-start gap-2.5">
                       <Link href={`/profile/${encodeURIComponent(c.author_username || c.author_name)}`} className="shrink-0 group/cauthor">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={resolveAvatarUrl(c.author_avatar, c.author_name, c.is_official)}
                           alt={c.author_name}
                           onError={(e) => { (e.target as HTMLImageElement).src = "/icons/default-avatar.png"; }}

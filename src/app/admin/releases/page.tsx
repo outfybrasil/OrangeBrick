@@ -441,7 +441,7 @@ export default function AdminReleasesPage() {
             <fieldset className="space-y-3 md:col-span-2 xl:col-span-4">
               <legend className="text-xs font-semibold text-gray-300">Arte promocional 16:9</legend>
               <div className="grid gap-3 md:grid-cols-2">
-                <label className="text-[11px] font-semibold text-gray-400">
+                <label className="text-xs font-semibold text-gray-400">
                   URL original
                   <input
                     type="url"
@@ -456,7 +456,7 @@ export default function AdminReleasesPage() {
                     className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-xs text-white outline-none transition-colors placeholder:text-white/35 focus:border-brand-orange disabled:opacity-50"
                   />
                 </label>
-                <label className="text-[11px] font-semibold text-gray-400">
+                <label className="text-xs font-semibold text-gray-400">
                   Ou arquivo do computador
                   <input
                     ref={fileInputRef}
@@ -472,7 +472,7 @@ export default function AdminReleasesPage() {
                 </label>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[11px] leading-relaxed text-gray-400">
+                <p className="text-xs leading-relaxed text-gray-400">
                   Mínimo 1200 × 675. O arquivo é validado, convertido para WebP e salvo no Storage do Orange Brick.
                 </p>
                 <button
@@ -489,7 +489,7 @@ export default function AdminReleasesPage() {
           {draft.image_url.trim() && (
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="aspect-video w-full max-w-xs overflow-hidden rounded-xl bg-[#08090C]">
-                <img src={draft.image_url.trim()} alt={`Prévia da arte de ${draft.game || "novo jogo"}`} className="h-full w-full object-contain" />
+                <img loading="lazy" decoding="async" src={draft.image_url.trim()} alt={`Prévia da arte de ${draft.game || "novo jogo"}`} className="h-full w-full object-contain" />
               </div>
               <div className="space-y-2">
                 {imageInfo && <p className="text-xs font-semibold text-emerald-300">{imageInfo}</p>}
@@ -537,27 +537,27 @@ export default function AdminReleasesPage() {
                   <span className="text-brand-orange transition-transform group-open:rotate-90">›</span>
                   <span className="truncate text-sm font-bold capitalize text-white">{month.label}</span>
                 </span>
-                <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-semibold text-gray-400">{month.items.length} {month.items.length === 1 ? "jogo" : "jogos"}</span>
+                <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-gray-400">{month.items.length} {month.items.length === 1 ? "jogo" : "jogos"}</span>
               </summary>
               <div className="divide-y divide-white/[0.08] border-t border-white/[0.08] px-4">
           {month.items.map((item) => (
             <article key={item.id} className="grid gap-3 py-4 sm:grid-cols-[128px_minmax(0,1fr)_auto] sm:items-center">
               <div className="aspect-video w-full overflow-hidden rounded-lg bg-[#08090C] sm:w-32">
                 {item.image_url?.trim() ? (
-                  <img src={item.image_url.trim()} alt={`Arte promocional de ${item.game}`} className="h-full w-full object-contain" />
+                  <img loading="lazy" decoding="async" src={item.image_url.trim()} alt={`Arte promocional de ${item.game}`} className="h-full w-full object-contain" />
                 ) : (
                   <div className="flex h-full items-center justify-center px-3 text-center">
-                    <span className="text-[10px] font-semibold text-amber-200/80">Sem arte</span>
+                    <span className="text-xs font-semibold text-amber-200/80">Sem arte</span>
                   </div>
                 )}
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="truncate text-sm font-bold text-white">{item.game}</h2>
-                  {!item.is_active && <span className="text-[10px] font-bold uppercase text-gray-500">Oculto</span>}
+                  {!item.is_active && <span className="text-xs font-bold uppercase text-gray-500">Oculto</span>}
                 </div>
                 <p className="mt-1 text-xs text-gray-400">{item.release_label} · {item.platforms.join(" · ")}</p>
-                <p className="mt-1 truncate text-[10px] text-gray-600">{item.image_url || "Imagem ainda não importada"}</p>
+                <p className="mt-1 truncate text-xs text-gray-600">{item.image_url || "Imagem ainda não importada"}</p>
               </div>
               <button type="button" onClick={() => void openDraft(toDraft(item))} className="min-h-11 w-full rounded-xl border border-white/10 px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/40 hover:text-white sm:w-auto">
                 Editar

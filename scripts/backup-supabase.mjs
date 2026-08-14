@@ -104,9 +104,11 @@ await writeFile(resolve(outputDirectory, "auth-users.json"), JSON.stringify(user
 const manifest = {
   created_at: new Date().toISOString(),
   project: new URL(url).hostname,
+  complete: tableResults.every((result) => !result.skipped),
   tables: tableResults,
   users: users.length,
   storage_objects: Object.values(storage).reduce((total, objects) => total + objects.length, 0),
 };
 await writeFile(resolve(outputDirectory, "manifest.json"), JSON.stringify(manifest, null, 2));
 console.log(JSON.stringify({ outputDirectory, ...manifest }, null, 2));
+if (!manifest.complete) process.exitCode = 1;

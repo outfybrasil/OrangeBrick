@@ -123,7 +123,7 @@ export default function AdminImagesPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-white/[0.08]">
-          <div className="hidden grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] gap-4 border-b border-white/[0.08] bg-white/[0.025] px-4 py-3 text-[10px] font-bold uppercase tracking-wide text-gray-500 md:grid">
+          <div className="hidden grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] gap-4 border-b border-white/[0.08] bg-white/[0.025] px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-500 md:grid">
             <span>Imagem</span>
             <span>Origem</span>
             <span>Matéria vinculada</span>
@@ -134,10 +134,10 @@ export default function AdminImagesPage() {
             {filteredImages.map((image) => (
               <article key={image.id} className="grid gap-4 p-4 md:grid-cols-[112px_minmax(220px,1fr)_minmax(220px,1fr)_120px_150px] md:items-center md:gap-4">
                 <a href={image.public_url} target="_blank" rel="noreferrer" className="block aspect-video w-full overflow-hidden rounded-lg bg-[#08090C] md:w-28">
-                  <img src={image.public_url} alt={image.alt_text || ""} className="h-full w-full object-contain" />
+                  <img loading="lazy" decoding="async" src={image.public_url} alt={image.alt_text || ""} className="h-full w-full object-contain" />
                 </a>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase text-gray-500 md:hidden">Origem</p>
+                  <p className="text-xs font-bold uppercase text-gray-500 md:hidden">Origem</p>
                   {isHttpSource(image.source_url) ? (
                     <a href={image.source_url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-gray-300 hover:text-brand-orange md:mt-0">
                       {image.source_url}
@@ -145,10 +145,10 @@ export default function AdminImagesPage() {
                   ) : (
                     <p className="mt-1 truncate text-xs text-gray-300 md:mt-0">{sourceLabel(image.source_url)}</p>
                   )}
-                  <p className="mt-1 text-[10px] text-gray-500">{image.kind === "cover" ? "Capa" : image.kind === "body" ? "Corpo" : "Lançamento"}</p>
+                  <p className="mt-1 text-xs text-gray-500">{image.kind === "cover" ? "Capa" : image.kind === "body" ? "Corpo" : "Lançamento"}</p>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase text-gray-500 md:hidden">Matéria</p>
+                  <p className="text-xs font-bold uppercase text-gray-500 md:hidden">Matéria</p>
                   {image.post ? (
                     <Link href={`/admin/edit?id=${image.post.id}`} className="mt-1 block truncate text-sm font-semibold text-white hover:text-brand-orange md:mt-0">
                       {image.post.title}
@@ -158,13 +158,13 @@ export default function AdminImagesPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-gray-500 md:hidden">Arquivo</p>
+                  <p className="text-xs font-bold uppercase text-gray-500 md:hidden">Arquivo</p>
                   <p className="mt-1 text-xs text-gray-300 md:mt-0">{image.width} × {image.height}</p>
-                  <p className="mt-1 text-[10px] text-gray-500">WebP · {formatBytes(image.file_size)}</p>
+                  <p className="mt-1 text-xs text-gray-500">WebP · {formatBytes(image.file_size)}</p>
                 </div>
                 <div className="border-t border-white/[0.08] pt-3 md:border-0 md:pt-0">
                   <time className="block text-xs text-gray-400" dateTime={image.created_at}>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(image.created_at))}</time>
-                  <button type="button" onClick={() => void copyUrl(image)} className={`mt-2 min-h-9 rounded-lg px-3 text-[11px] font-bold transition-colors ${copiedId === image.id ? "bg-emerald-500 text-white" : "bg-white/[0.06] text-gray-300 hover:bg-white/10 hover:text-white"}`}>{copiedId === image.id ? "URL copiada" : "Copiar URL"}</button>
+                  <button type="button" onClick={() => void copyUrl(image)} className={`mt-2 min-h-11 rounded-lg px-3 text-xs font-bold transition-colors ${copiedId === image.id ? "bg-emerald-500 text-white" : "bg-white/[0.06] text-gray-300 hover:bg-white/10 hover:text-white"}`}>{copiedId === image.id ? "URL copiada" : "Copiar URL"}</button>
                 </div>
               </article>
             ))}

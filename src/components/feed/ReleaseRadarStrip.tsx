@@ -118,6 +118,8 @@ export function ReleaseRadarStrip() {
     return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
   }, [releases]);
 
+  const [todayIso] = useState(() => saoPauloTodayIso());
+
   const displayedReleases = useMemo(() => {
     if (selectedMonth !== "all") {
       return releases.filter((item) => {
@@ -125,11 +127,10 @@ export function ReleaseRadarStrip() {
         return match && match[2] === selectedMonth;
       });
     }
-    const today = saoPauloTodayIso();
     const upcoming = releases
       .filter((item) => {
         const iso = releaseDateIso(item);
-        return iso !== null && iso >= today;
+        return iso !== null && iso >= todayIso;
       })
       .sort((first, second) => {
         const firstDate = releaseDateIso(first) || "9999-12-31";
@@ -138,7 +139,7 @@ export function ReleaseRadarStrip() {
       });
     if (upcoming.length > 0) return upcoming.slice(0, 14);
     return releases.filter((item) => releaseDateIso(item) !== null).slice(-8);
-  }, [releases, selectedMonth]);
+  }, [releases, selectedMonth, todayIso]);
 
   const coverflowSlides = useMemo(() => displayedReleases.map((item) => ({
     image: {

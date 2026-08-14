@@ -51,7 +51,7 @@ export function AccessibilityMenu() {
   };
 
   return (
-    <div ref={panelRef} className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-3 z-[65] sm:bottom-5 sm:right-5">
+    <div ref={panelRef} className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 z-[65] sm:bottom-5 sm:right-5">
       {isOpen && (
         <section
           id="accessibility-panel"

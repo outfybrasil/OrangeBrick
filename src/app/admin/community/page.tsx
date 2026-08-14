@@ -265,7 +265,7 @@ export default function CommunityAdminPage() {
               <span>Conversas ativas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">0</p>
-            <p className="mt-1 text-[11px] text-gray-500">Sem dados calculados</p>
+            <p className="mt-1 text-xs text-gray-500">Sem dados calculados</p>
           </div>
           <MiniBarChart values={[0]} color="bg-emerald-500" />
         </div>
@@ -280,7 +280,7 @@ export default function CommunityAdminPage() {
               <span>Participações hoje</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">0</p>
-            <p className="mt-1 text-[11px] text-gray-500">Sem dados calculados</p>
+            <p className="mt-1 text-xs text-gray-500">Sem dados calculados</p>
           </div>
           <MiniBarChart values={[0]} color="bg-brand-orange" />
         </div>
@@ -295,7 +295,7 @@ export default function CommunityAdminPage() {
               <span>Denúncias abertas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{reports.length}</p>
-            <p className="mt-1 text-[11px] text-gray-500">Nenhuma denúncia carregada</p>
+            <p className="mt-1 text-xs text-gray-500">Nenhuma denúncia carregada</p>
           </div>
           <MiniBarChart values={[0]} color="bg-amber-400" />
         </div>
@@ -310,7 +310,7 @@ export default function CommunityAdminPage() {
               <span>Taxa de resposta</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">—</p>
-            <p className="mt-1 text-[11px] text-gray-500">Métrica indisponível</p>
+            <p className="mt-1 text-xs text-gray-500">Métrica indisponível</p>
           </div>
           <MiniBarChart values={[0]} color="bg-emerald-500" />
         </div>
@@ -370,10 +370,10 @@ export default function CommunityAdminPage() {
             </div>
 
             {/* TABELA DE DENÚNCIAS */}
-            <p className="border-b border-white/10 px-4 py-2 text-[11px] text-gray-500 sm:hidden">Deslize para revisar os detalhes e as ações.</p>
+            <p className="border-b border-white/10 px-4 py-2 text-xs text-gray-500 sm:hidden">Deslize para revisar os detalhes e as ações.</p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="border-b border-white/10 text-[10px] uppercase font-bold text-gray-500 bg-white/[0.01]">
+                <thead className="border-b border-white/10 text-xs uppercase font-bold text-gray-500 bg-white/[0.01]">
                   <tr>
                     <th className="py-3 px-4">Usuário / Conteúdo denunciado</th>
                     <th className="py-3 px-4">Motivo</th>
@@ -399,7 +399,7 @@ export default function CommunityAdminPage() {
                           </div>
                           <div className="min-w-0">
                             <p className="font-bold text-white">{rep.content?.author_name || (rep.content_type === "post" ? "Publicação removida" : "Comentário removido")}</p>
-                            <p className="line-clamp-2 max-w-[36rem] break-words text-[11px] leading-5 text-gray-400">{rep.content?.content || rep.content_id}</p>
+                            <p className="line-clamp-2 max-w-[36rem] break-words text-xs leading-5 text-gray-400">{rep.content?.content || rep.content_id}</p>
                           </div>
                         </div>
                       </td>
@@ -407,7 +407,7 @@ export default function CommunityAdminPage() {
                       <td className="py-3 px-4 whitespace-nowrap text-gray-400">1 denúncia</td>
                       <td className="py-3 px-4 whitespace-nowrap text-gray-400">{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(rep.created_at))}</td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-bold ${
+                        <span className={`inline-block rounded px-2 py-0.5 text-xs font-bold ${
                           rep.status === "pending"
                             ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
                             : "bg-white/10 text-gray-400"
@@ -419,10 +419,10 @@ export default function CommunityAdminPage() {
                         <div className="flex items-center justify-end gap-2">
                           {rep.status === "pending" && (
                             <>
-                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "dismiss" })} className="min-h-11 px-3 text-[11px] font-bold text-gray-400 hover:text-white disabled:opacity-40">Ignorar</button>
-                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "delete" })} className="min-h-11 border border-red-500/30 px-3 text-[11px] font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Excluir</button>
-                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "suspend_7d" })} className="min-h-11 border border-amber-500/30 px-3 text-[11px] font-bold text-amber-300 hover:bg-amber-500/10 disabled:opacity-40">Suspender</button>
-                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "ban" })} className="min-h-11 border border-red-500/30 px-3 text-[11px] font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Banir</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "dismiss" })} className="min-h-11 px-3 text-xs font-bold text-gray-400 hover:text-white disabled:opacity-40">Ignorar</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "delete" })} className="min-h-11 border border-red-500/30 px-3 text-xs font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Excluir</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "suspend_7d" })} className="min-h-11 border border-amber-500/30 px-3 text-xs font-bold text-amber-300 hover:bg-amber-500/10 disabled:opacity-40">Suspender</button>
+                              <button type="button" disabled={activeModerationId === rep.id} onClick={() => setPendingModeration({ report: rep, action: "ban" })} className="min-h-11 border border-red-500/30 px-3 text-xs font-bold text-red-300 hover:bg-red-500/10 disabled:opacity-40">Banir</button>
                             </>
                           )}
                         </div>
@@ -476,14 +476,14 @@ export default function CommunityAdminPage() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Pergunta do dia</h3>
-              <span className="text-[10px] text-gray-500">{poll?.prompt_date ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${poll.prompt_date}T12:00:00`)) : "Sem pergunta ativa"}</span>
+              <span className="text-xs text-gray-500">{poll?.prompt_date ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${poll.prompt_date}T12:00:00`)) : "Sem pergunta ativa"}</span>
             </div>
 
             <p className="text-xs font-bold text-white leading-snug">
               {poll?.question || "Nenhuma pergunta publicada."}
             </p>
 
-            <div className="flex items-center justify-between text-[10px] text-gray-400 border-b border-white/10 pb-2">
+            <div className="flex items-center justify-between text-xs text-gray-400 border-b border-white/10 pb-2">
               <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-bold text-emerald-400 border border-emerald-500/20">Publicada</span>
               <span>Resultados disponíveis no Brickboard</span>
             </div>
@@ -492,7 +492,7 @@ export default function CommunityAdminPage() {
             <div className="space-y-2 text-xs">
               {poll && Array.isArray(poll.options) ? poll.options.map((option, index) => {
                 const value = typeof option === "object" && option !== null && "text" in option ? String(option.text) : `Opção ${index + 1}`;
-                return <div key={index} className="rounded border border-white/10 bg-white/[0.02] p-2 text-[11px] text-gray-300">{value}</div>;
+                return <div key={index} className="rounded border border-white/10 bg-white/[0.02] p-2 text-xs text-gray-300">{value}</div>;
               }) : null}
             </div>
 
@@ -512,12 +512,12 @@ export default function CommunityAdminPage() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Saúde da comunidade</h3>
-              <span className="text-[10px] font-bold text-gray-500">Sem cálculo</span>
+              <span className="text-xs font-bold text-gray-500">Sem cálculo</span>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <div className="flex justify-between text-[11px] mb-1 text-gray-300">
+                <div className="flex justify-between text-xs mb-1 text-gray-300">
                   <span>Denúncias resolvidas em até 1h</span>
                   <span className="font-bold text-white">—</span>
                 </div>
@@ -527,7 +527,7 @@ export default function CommunityAdminPage() {
               </div>
 
               <div>
-                <div className="flex justify-between text-[11px] mb-1 text-gray-300">
+                <div className="flex justify-between text-xs mb-1 text-gray-300">
                   <span>Conversas sem resposta</span>
                   <span className="font-bold text-white">—</span>
                 </div>
@@ -537,7 +537,7 @@ export default function CommunityAdminPage() {
               </div>
 
               <div>
-                <div className="flex justify-between text-[11px] mb-1 text-gray-300">
+                <div className="flex justify-between text-xs mb-1 text-gray-300">
                   <span>Sentimento positivo</span>
                   <span className="font-bold text-white">—</span>
                 </div>
@@ -553,7 +553,7 @@ export default function CommunityAdminPage() {
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white">Assuntos acompanhados</h3>
-                <span className="text-[10px] text-gray-500">{topics.length} assuntos</span>
+                <span className="text-xs text-gray-500">{topics.length} assuntos</span>
               </div>
               <div className="flex items-center gap-1">
               </div>
@@ -573,7 +573,7 @@ export default function CommunityAdminPage() {
             </div>
 
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-white/10 text-[9px] uppercase font-bold text-gray-500">
+              <thead className="border-b border-white/10 text-xs uppercase font-bold text-gray-500">
                 <tr>
                   <th className="py-2 px-1">Assunto</th>
                   <th className="py-2 px-1">Fonte</th>
@@ -581,7 +581,7 @@ export default function CommunityAdminPage() {
                   <th className="py-2 px-1">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-[11px]">
+              <tbody className="divide-y divide-white/5 text-xs">
                 {paginatedTopics.map((top) => (
                   <tr key={top.id} className="hover:bg-white/[0.02]">
                     <td className="py-2 px-1 font-bold text-white truncate max-w-[100px]">{top.name}</td>
@@ -598,7 +598,7 @@ export default function CommunityAdminPage() {
               </tbody>
             </table>
 
-              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-[11px] text-gray-500">
+              <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-xs text-gray-500">
               <Link href="/admin/releases" className="text-xs text-brand-orange font-semibold hover:underline">Ver todos →</Link>
               <div className="flex items-center gap-1">
                 <button onClick={() => setCurrentPageTopics(p => Math.max(1, p - 1))} disabled={currentPageTopics === 1} className="min-h-11 min-w-11 border border-white/10 disabled:opacity-20">‹</button>

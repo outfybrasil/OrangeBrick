@@ -167,7 +167,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden rounded-[20px] bg-background-void shadow-[0_18px_48px_rgba(0,0,0,0.3)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_rgba(0,0,0,0.38)] focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
           {heroPost.image_url ? (
-            <img
+            <img loading="lazy" decoding="async"
               src={heroPost.image_url}
               alt={heroPost.image_alt || ""}
               className="absolute inset-0 h-full w-full object-cover object-center transform group-hover:scale-[1.02] transition-transform duration-700 ease-out"
@@ -223,13 +223,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             >
               {post.image_url && (
                 <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || ""}
                     className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-[11px] font-black uppercase tracking-[0.06em] text-black shadow-md">
+                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black shadow-md">
                     {CATEGORY_CONFIG[post.category].label}
                     <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                     <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />

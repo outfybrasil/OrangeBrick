@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { CommentList } from "./CommentList";
 import { CommentForm } from "./CommentForm";
 import { useComments } from "@/lib/hooks/useComments";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 interface CommentsDrawerProps {
   postId: string;
@@ -14,6 +15,7 @@ interface CommentsDrawerProps {
 
 export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps) {
   const { comments, isLoading, error, addComment, fetchComments } = useComments(postId);
+  const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -48,9 +50,11 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Comentários"
+        tabIndex={-1}
         className="
           fixed bottom-0 left-0 right-0 z-50 max-h-[92dvh]
           md:bottom-auto md:top-0 md:right-0 md:left-auto
@@ -65,9 +69,10 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
             Comentários
           </h3>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="p-1 text-gray-400 hover:text-white transition-colors"
+            className="flex min-h-11 min-w-11 items-center justify-center text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
           >
             <Icon name="close" size={16} />
           </button>

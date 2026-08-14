@@ -12,8 +12,7 @@ export interface ComposeBrickModalProps {
     content: string,
     platformTag?: string,
     attachedArticle?: AttachedArticle,
-    mediaUrl?: string,
-    pollOptions?: string[]
+    mediaUrl?: string
   ) => void;
   initialArticle?: AttachedArticle | null;
   initialMode?: "default" | "attachment" | "poll";
@@ -32,17 +31,15 @@ export function ComposeBrickModal({
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [attachedArticle, setAttachedArticle] = useState<AttachedArticle | null>(initialArticle || null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  const [showPollBuilder, setShowPollBuilder] = useState(false);
+  const [showPollBuilder, setShowPollBuilder] = useState(() => initialMode === "poll");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
 
   useEffect(() => {
-    if (isOpen) {
-      setShowPollBuilder(initialMode === "poll");
-      if (initialMode === "attachment" && fileInputRef.current) {
-        setTimeout(() => fileInputRef.current?.click(), 100);
-      }
+    if (isOpen && initialMode === "attachment" && fileInputRef.current) {
+      const timer = window.setTimeout(() => fileInputRef.current?.click(), 100);
+      return () => window.clearTimeout(timer);
     }
   }, [isOpen, initialMode]);
 
@@ -68,12 +65,16 @@ export function ComposeBrickModal({
     event.preventDefault();
     if (isPublishDisabled) return;
 
+    const finalContent =
+      showPollBuilder && validPollOptions.length >= 2
+        ? `${content.trim()}\n\n${validPollOptions.map((opt) => `• ${opt}`).join("\n")}`
+        : content.trim();
+
     onPublish(
-      content.trim(),
+      finalContent,
       selectedTag || undefined,
       attachedArticle || undefined,
-      mediaUrl || undefined,
-      showPollBuilder && validPollOptions.length >= 2 ? validPollOptions : undefined
+      mediaUrl || undefined
     );
 
     setContent("");
@@ -201,7 +202,7 @@ export function ComposeBrickModal({
           {/* Previsualização da Imagem Anexada */}
           {mediaUrl && (
             <div className="relative rounded-xl border border-white/10 overflow-hidden bg-black/40">
-              <img src={mediaUrl} alt="Anexo" className="max-h-48 w-full object-cover" />
+              <img loading="lazy" decoding="async" src={mediaUrl} alt="Anexo" className="max-h-48 w-full object-cover" />
               <button
                 type="button"
                 onClick={() => setMediaUrl(null)}
@@ -281,7 +282,7 @@ export function ComposeBrickModal({
           {attachedArticle && (
             <div className="flex items-center gap-3 rounded-xl border border-brand-orange/30 bg-background-void/80 p-3">
               {attachedArticle.image_url && (
-                <img
+                <img loading="lazy" decoding="async"
                   src={attachedArticle.image_url}
                   alt=""
                   className="h-12 w-16 shrink-0 rounded-lg object-cover"

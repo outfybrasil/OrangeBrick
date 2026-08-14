@@ -19,8 +19,10 @@ A tarefa já foi **implementada e testada em dry-run**. Faltam apenas passos de 
 
 1. A pasta do Drive está com permissão "qualquer pessoa com o link" (pública), acessível via **API key** do Google Cloud (`GOOGLE_DRIVE_API_KEY`)
 2. O endpoint (ou script local) lista os arquivos da pasta com `files.list`, exporta cada Google Doc como **markdown** e converte para os blocos do post (text/image)
-3. A matéria é inserida na tabela `posts` com `is_published: false`, autor "The Brick" (ou o `Por:`/`Autor:` do doc), categoria a partir do campo `Categoria:`
-4. **Dedupe:** se o slug já existir no banco, pula (sem duplicar). O script local guarda estado em `scripts/.drive-sync-state.json`; o endpoint consulta o slug no Supabase
+3. Assim que o documento é identificado, começa a busca da capa oficial e de duas imagens internas diferentes. A importação só pode ser considerada concluída depois de validar HTTP 200, dimensões mínimas, alt text e legenda e salvar os arquivos no Storage do Orange Brick.
+4. Se a busca de imagens não puder ser concluída, o conteúdo permanece um rascunho incompleto, sem ser entregue para revisão editorial. Nunca deixar a busca de fotos como tarefa manual posterior.
+5. A matéria é inserida na tabela `posts` com `is_published: false`, autor "The Brick" (ou o `Por:`/`Autor:` do doc), categoria a partir do campo `Categoria:`
+6. **Dedupe:** se o slug já existir no banco, pula (sem duplicar). O script local guarda estado em `scripts/.drive-sync-state.json`; o endpoint consulta o slug no Supabase
 
 ## Formato esperado de cada Google Doc
 
@@ -70,6 +72,7 @@ GOOGLE_DRIVE_API_KEY=AIzaSyAhtqCt9M4yCNw_CtE3_h-0j8C18bg72Vg
 - Matéria sempre **rascunho** (`is_published: false`) — nunca publicar direto
 - Nomes de jogos originais, sem tradução; meses traduzidos no texto
 - Capas: arte oficial, screenshot ou IA fotorrealista; testar URL com HTTP 200; sem repetir imagem
+- Toda importação começa imediatamente a procura da capa e de duas imagens internas; sem as três imagens válidas, o rascunho é incompleto e não segue para revisão
 - Corpo entre **700 e 1.000 palavras** com fato, contexto, impacto e fala verificada de alguém ligado ao caso
 - Reescrever 100% o texto das fontes (nunca copiar); citar **Fonte:** no final
 - Sem caracteres CJK, sem `?`/`�` corrompidos

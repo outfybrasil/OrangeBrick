@@ -235,7 +235,7 @@ function ProfilePageContent() {
         <div className="relative overflow-hidden border-b border-white/10">
           {profile.banner_url ? (
             <>
-              <img src={profile.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+              <img loading="lazy" decoding="async" src={profile.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#0E0F14]/95 via-[#0E0F14]/70 to-[#0E0F14]/25" />
             </>
           ) : (
@@ -250,7 +250,7 @@ function ProfilePageContent() {
               {/* Avatar */}
               <div className="profile-rise relative shrink-0" style={{ animationDelay: "0ms" }}>
                 <div className={`h-28 w-28 overflow-hidden rounded-full sm:h-32 sm:w-32 ${frameClass}`}>
-                  <img src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full rounded-full object-cover" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, profile.display_name); }} />
+                  <img loading="lazy" decoding="async" src={avatarUrl} alt={`Avatar de ${profile.display_name}`} className="h-full w-full rounded-full object-cover" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, profile.display_name); }} />
                 </div>
                 {!profile.is_official && profile.progress && (
                   <div className="absolute -bottom-1 -right-1 flex min-w-11 items-center justify-center gap-1 rounded-full border-2 border-[#0E0F14] bg-brand-orange px-2.5 py-1 text-center text-white shadow-md">
@@ -367,7 +367,7 @@ function ProfilePageContent() {
                       {showcasedAchievements.map((achievement) => (
                         <div key={achievement.slug} className={`profile-rise flex flex-col gap-3 rounded-lg border bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.05] ${rarityCardBorders[achievement.rarity] || "border-white/10"}`}>
                           <div className={`flex h-14 w-14 items-center justify-center rounded-lg ${rarityIconBgs[achievement.rarity] || "bg-white/[0.05]"}`}>
-                            <img src={`/icons/achievements/${achievement.slug}.png`} alt="" className="h-10 w-10 object-contain" />
+                            <img loading="lazy" decoding="async" src={`/icons/achievements/${achievement.slug}.png`} alt="" className="h-10 w-10 object-contain" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-heading text-sm font-bold text-white">{achievement.name}</p>
@@ -554,7 +554,7 @@ function ProfilePostList({ posts, ownProfile }: { posts: ProfilePost[]; ownProfi
         <article key={post.id} className="group flex flex-col overflow-hidden border border-white/10 bg-white/[0.02] transition-colors hover:bg-white/[0.04]">
           {post.attached_article?.image_url && (
             <div className="relative aspect-[16/9] overflow-hidden border-b border-white/10">
-              <img src={post.attached_article.image_url} alt={post.attached_article.title || ""} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+              <img loading="lazy" decoding="async" src={post.attached_article.image_url} alt={post.attached_article.title || ""} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             </div>
           )}
           <div className="flex min-w-0 flex-1 flex-col p-4">

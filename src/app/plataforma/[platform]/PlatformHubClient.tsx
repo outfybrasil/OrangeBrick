@@ -96,7 +96,7 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
                 ← Todos os Conteúdos
               </Link>
 
-              <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider xs:text-xs ${config.badgeBg} ${config.badgeText}`}>
+              <span className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider xs:text-xs ${config.badgeBg} ${config.badgeText}`}>
                 Hub Oficial {config.shortName}
               </span>
             </div>

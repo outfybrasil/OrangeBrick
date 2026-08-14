@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Geist } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
+import { ToastProvider } from "@/lib/contexts/ToastContext";
+import { ToastContainer } from "@/components/ui/ToastContainer";
+import { GlobalSearchShortcut } from "@/components/ui/GlobalSearchShortcut";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 import { getSiteUrl } from "@/lib/site-url";
 import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
 import { AccessibilityMenu } from "@/components/ui/AccessibilityMenu";
+import { PwaInstallBanner } from "@/components/PwaInstallBanner";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
 const headingFont = Outfit({
@@ -35,6 +41,11 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
 export const viewport: Viewport = {
   themeColor: "#FF5E00",
   width: "device-width",
@@ -49,7 +60,7 @@ export const metadata: Metadata = {
     template: "%s | Orange Brick",
   },
   description: "Portal de notícias de games — rápido, direto e sem frescura.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -81,17 +92,12 @@ export const metadata: Metadata = {
   verification: { google: "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs" },
 };
 
-import { PwaInstallBanner } from "@/components/PwaInstallBanner";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") || undefined;
   return (
     <html
       lang="pt-BR"
@@ -99,20 +105,31 @@ export default function RootLayout({
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <script
+          nonce={nonce}
+          suppressHydrationWarning
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              "name": "Orange Brick",
-              "alternateName": ["Orange Brick Portal", "Portal Orange Brick"],
-              "url": getSiteUrl(),
+              name: "Orange Brick",
+              alternateName: ["Orange Brick Portal", "Portal Orange Brick"],
+              url: getSiteUrl(),
+              potentialAction: {
+                "@type": "SearchAction",
+                target: `${getSiteUrl()}/busca?q={search_term_string}`,
+                "query-input": "required name=search_term_string",
+              },
             }),
           }}
         />
         <AuthProvider>
-          {children}
-          <MobileBottomNav />
+          <ToastProvider>
+            {children}
+            <ToastContainer />
+            <GlobalSearchShortcut />
+            <MobileBottomNav />
+          </ToastProvider>
         </AuthProvider>
         <PwaInstallBanner />
         <AccessibilityMenu />

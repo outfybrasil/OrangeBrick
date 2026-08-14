@@ -16,7 +16,7 @@ function NotificationIcon({ type }: { type: AppNotification["type"] }) {
   };
 
   return (
-    <span className="text-[9px] font-semibold uppercase tracking-wide text-brand-orange">
+    <span className="text-xs font-semibold uppercase tracking-wide text-brand-orange">
       {labels[type]}
     </span>
   );
@@ -83,7 +83,7 @@ function NotificationItem({
           }`}>
             {notification.message}
           </span>
-          <span className="mt-1 block text-[10px] text-gray-400">
+          <span className="mt-1 block text-xs text-gray-400">
             {formatNotificationTime(notification.created_at)}
           </span>
         </span>
@@ -189,7 +189,7 @@ export function NotificationCenter() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-brand-orange text-[9px] font-bold text-white px-1 shadow-[0_0_6px_#FF5E00]">
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-brand-orange text-xs font-bold text-white px-1 shadow-[0_0_6px_#FF5E00]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -204,7 +204,7 @@ export function NotificationCenter() {
           <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
             <div>
               <h3 className="text-sm font-bold text-white">Notificações</h3>
-              <p className="mt-0.5 text-[10px] text-gray-400">
+              <p className="mt-0.5 text-xs text-gray-400">
                 {unreadCount > 0 ? `${unreadCount} ${unreadCount === 1 ? "nova" : "novas"}` : "Tudo em dia"}
               </p>
             </div>
@@ -213,7 +213,7 @@ export function NotificationCenter() {
                 <button
                   type="button"
                   onClick={() => void markAllAsRead()}
-                  className="min-h-11 rounded-xl px-2.5 text-[10px] font-semibold text-brand-orange transition-colors hover:bg-brand-orange/10"
+                  className="min-h-11 rounded-xl px-2.5 text-xs font-semibold text-brand-orange transition-colors hover:bg-brand-orange/10"
                 >
                   Marcar lidas
                 </button>
@@ -222,7 +222,7 @@ export function NotificationCenter() {
                 <button
                   type="button"
                   onClick={() => setConfirmClear(true)}
-                  className="min-h-11 rounded-xl px-2.5 text-[10px] font-semibold text-white transition-colors hover:bg-red-500/10"
+                  className="min-h-11 rounded-xl px-2.5 text-xs font-semibold text-white transition-colors hover:bg-red-500/10"
                 >
                   Limpar
                 </button>
@@ -232,13 +232,13 @@ export function NotificationCenter() {
 
           {confirmClear && (
             <div role="alert" className="flex items-center justify-between gap-3 border-b border-red-500/20 bg-red-500/[0.08] px-4 py-2.5">
-              <p className="text-[11px] text-red-100">Apagar todos os alertas?</p>
+              <p className="text-xs text-red-100">Apagar todos os alertas?</p>
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setConfirmClear(false)}
                   disabled={isClearing}
-                  className="min-h-11 rounded-xl px-3 text-[10px] font-semibold text-red-100/80 hover:bg-white/5 disabled:opacity-50"
+                  className="min-h-11 rounded-xl px-3 text-xs font-semibold text-red-100/80 hover:bg-white/5 disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -246,7 +246,7 @@ export function NotificationCenter() {
                   type="button"
                   onClick={() => void handleClear()}
                   disabled={isClearing}
-                  className="min-h-11 rounded-xl bg-red-500/15 px-3 text-[10px] font-bold text-red-200 hover:bg-red-500/25 disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-red-500/15 px-3 text-xs font-bold text-red-200 hover:bg-red-500/25 disabled:opacity-50"
                 >
                   {isClearing ? "Apagando…" : "Apagar tudo"}
                 </button>
@@ -256,11 +256,11 @@ export function NotificationCenter() {
 
           {error && (
             <div role="alert" className="flex items-center justify-between gap-3 border-b border-amber-400/20 bg-amber-400/[0.08] px-4 py-2.5">
-              <p className="text-[11px] leading-relaxed text-amber-100">{error}</p>
+              <p className="text-xs leading-relaxed text-amber-100">{error}</p>
               <button
                 type="button"
                 onClick={() => void fetchNotifications()}
-                className="min-h-11 shrink-0 rounded-xl px-3 text-[10px] font-bold text-amber-100 hover:bg-amber-400/10"
+                className="min-h-11 shrink-0 rounded-xl px-3 text-xs font-bold text-amber-100 hover:bg-amber-400/10"
               >
                 Tentar de novo
               </button>

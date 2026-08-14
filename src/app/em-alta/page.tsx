@@ -27,7 +27,7 @@ export default async function TrendingPage() {
         {posts.map((post, index) => <Link key={post.id} href={`/posts/${post.slug}`} className="group grid gap-4 py-5 sm:grid-cols-[3rem_10rem_1fr] sm:items-center">
           <span className="font-heading text-3xl font-black text-brand-orange">{String(index + 1).padStart(2, "0")}</span>
           {post.image_url ? <img src={post.image_url} alt={post.image_alt || post.title} className="aspect-video w-full object-cover" /> : <div className="aspect-video bg-card-slate" />}
-          <div><p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{scores[post.id] || 0} pontos de interesse</p><h2 className="mt-1 font-heading text-lg font-black uppercase group-hover:text-brand-orange">{post.title}</h2><p className="mt-2 line-clamp-2 text-sm text-gray-400">{post.summary}</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-wide text-gray-500">{scores[post.id] || 0} pontos de interesse</p><h2 className="mt-1 font-heading text-lg font-black uppercase group-hover:text-brand-orange">{post.title}</h2><p className="mt-2 line-clamp-2 text-sm text-gray-400">{post.summary}</p></div>
         </Link>)}
       </div>
     </main><Footer />

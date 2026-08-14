@@ -28,7 +28,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
           <h3 id="most-hyped-title" className="font-heading text-sm font-black uppercase text-white">
             Mais hypadas
           </h3>
-          <span className="rounded-full border border-white/10 bg-black/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-brand-orange">Top 4</span>
+          <span className="rounded-full border border-white/10 bg-black/30 px-2.5 py-0.5 text-xs font-extrabold uppercase text-brand-orange">Top 4</span>
         </div>
 
         {topHypePosts.length === 0 ? (
@@ -57,7 +57,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                         {post.title}
                       </h4>
                       {hypeCount > 0 && (
-                        <p className="mt-1 flex items-center gap-1 text-[10px] font-bold text-brand-orange">
+                        <p className="mt-1 flex items-center gap-1 text-xs font-bold text-brand-orange">
                           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                           </svg>
@@ -68,7 +68,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
 
                     {post.image_url ? (
                       <div className="relative aspect-video w-[76px] overflow-hidden rounded-lg bg-[#08090C] ring-1 ring-white/10">
-                        <img
+                        <img loading="lazy" decoding="async"
                           src={post.image_url}
                           alt={post.image_alt || ""}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"

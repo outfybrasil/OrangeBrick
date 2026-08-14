@@ -406,7 +406,7 @@ export default function AdminDashboard() {
               <span>Publicadas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{publishedCount}</p>
-            <p className="mt-1 text-[11px] text-gray-500">Total no banco</p>
+            <p className="mt-1 text-xs text-gray-500">Total no banco</p>
           </div>
           <MiniBarChart values={weeklyRhythm.map((day) => day.val)} color="bg-emerald-500" />
         </div>
@@ -421,7 +421,7 @@ export default function AdminDashboard() {
               <span>Em produção</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{inProductionCount}</p>
-            <p className="mt-1 text-[11px] text-gray-500">Rascunhos</p>
+            <p className="mt-1 text-xs text-gray-500">Rascunhos</p>
           </div>
           <MiniBarChart values={[draftsCount]} color="bg-brand-orange" />
         </div>
@@ -436,7 +436,7 @@ export default function AdminDashboard() {
               <span>Aguardando revisão</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{inRevisionCount}</p>
-            <p className="mt-1 text-[11px] text-gray-500">Fluxo não configurado</p>
+            <p className="mt-1 text-xs text-gray-500">Fluxo não configurado</p>
           </div>
           <MiniBarChart values={[0]} color="bg-amber-400" />
         </div>
@@ -451,7 +451,7 @@ export default function AdminDashboard() {
               <span>Agendadas</span>
             </div>
             <p className="mt-2 font-heading text-3xl font-black text-white">{scheduledCount}</p>
-            <p className="mt-1 text-[11px] text-gray-500">Agendamento não configurado</p>
+            <p className="mt-1 text-xs text-gray-500">Agendamento não configurado</p>
           </div>
           <MiniBarChart values={[0]} color="bg-sky-400" />
         </div>
@@ -548,10 +548,10 @@ export default function AdminDashboard() {
           )}
 
           {/* TABELA DE MATÉRIAS */}
-          <p className="border-b border-white/10 px-4 py-2 text-[11px] text-gray-500 sm:hidden">Deslize a tabela para ver todos os dados.</p>
+          <p className="border-b border-white/10 px-4 py-2 text-xs text-gray-500 sm:hidden">Deslize a tabela para ver todos os dados.</p>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-white/10 text-[10px] uppercase font-bold text-gray-500 bg-white/[0.01]">
+              <thead className="border-b border-white/10 text-xs uppercase font-bold text-gray-500 bg-white/[0.01]">
                 <tr>
                   <th className="w-12 py-3 pl-4"><input type="checkbox" checked={allVisibleSelected} onChange={() => setSelectedIds((current) => allVisibleSelected ? current.filter((id) => !paginatedPosts.some((post) => post.id === id)) : Array.from(new Set([...current, ...paginatedPosts.map((post) => post.id)])))} aria-label="Selecionar matérias desta página" className="size-4 accent-brand-orange" /></th>
                   <th className="py-3 px-4">Matéria</th>
@@ -579,9 +579,9 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-3">
                             <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-md bg-[#08090C]">
                               {post.image_url ? (
-                                <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+                                <img loading="lazy" decoding="async" src={post.image_url} alt="" className="h-full w-full object-cover" />
                               ) : (
-                                <div className="flex h-full items-center justify-center text-[9px] text-gray-600">Sem capa</div>
+                                <div className="flex h-full items-center justify-center text-xs text-gray-600">Sem capa</div>
                               )}
                             </div>
                             <span className="font-bold text-white leading-snug line-clamp-2 uppercase">
@@ -602,11 +602,11 @@ export default function AdminDashboard() {
                         {/* STATUS */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           {post.is_published ? (
-                            <span className="inline-block rounded px-2 py-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                            <span className="inline-block rounded px-2 py-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
                               Publicada
                             </span>
                           ) : (
-                            <span className="inline-block rounded px-2 py-1 text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                            <span className="inline-block rounded px-2 py-1 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
                               Em revisão
                             </span>
                           )}
@@ -615,7 +615,7 @@ export default function AdminDashboard() {
                         {/* RESPONSÁVEL */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange/20 text-[10px] font-bold text-brand-orange">
+                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-orange/20 text-xs font-bold text-brand-orange">
                               {post.author_name.charAt(0)}
                             </div>
                             <span className="font-semibold text-gray-300">{post.author_name.split(" ")[0]}</span>
@@ -630,7 +630,7 @@ export default function AdminDashboard() {
                             <div className="flex items-center gap-2">
                               <Link
                                 href={`/admin/edit?id=${post.id}`}
-                                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-brand-orange px-3 text-[11px] font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/60"
+                                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-brand-orange px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/60"
                               >
                                 Continuar edição
                               </Link>
@@ -642,7 +642,7 @@ export default function AdminDashboard() {
                                   setPublishError(null);
                                 }}
                                 disabled={publishingId === post.id}
-                                className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 px-3 text-[11px] font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
+                                className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 px-3 text-xs font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
                               >
                                 {publishingId === post.id ? "Publicando..." : "Publicar"}
                               </button>
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
               A matéria ficará disponível imediatamente no site. Confira o título antes de continuar.
             </p>
             <div className="mt-5 rounded-xl bg-white/[0.04] p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">Matéria</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Matéria</p>
               <p className="mt-1.5 font-heading text-sm font-bold uppercase leading-5 text-white">
                 {publishCandidate.title}
               </p>
@@ -775,7 +775,7 @@ export default function AdminDashboard() {
               />
               <span>
                 <span className="block text-xs font-bold text-white">Publicar também no Brickboard</span>
-                <span className="mt-0.5 block text-[11px] leading-4 text-gray-500">Cria uma publicação oficial vinculada a esta matéria.</span>
+                <span className="mt-0.5 block text-xs leading-4 text-gray-500">Cria uma publicação oficial vinculada a esta matéria.</span>
               </span>
             </label>
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Prioridades de hoje</h3>
-              <span className="text-[10px] font-bold text-brand-orange">{recentDrafts.length} rascunhos</span>
+              <span className="text-xs font-bold text-brand-orange">{recentDrafts.length} rascunhos</span>
             </div>
             <div className="mt-3 space-y-3">
               {recentDrafts.length === 0 ? (
@@ -892,22 +892,22 @@ export default function AdminDashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Ritmo da redação</h3>
-              <span className="text-[10px] text-gray-500">Últimos 7 dias</span>
+              <span className="text-xs text-gray-500">Últimos 7 dias</span>
             </div>
             <div className="mt-4">
               <p className="text-2xl font-black font-heading text-white">{weeklyPublished.length}</p>
-              <p className="text-[11px] text-gray-400 mt-0.5">publicações nesta semana</p>
+              <p className="text-xs text-gray-400 mt-0.5">publicações nesta semana</p>
             </div>
             {/* GRÁFICO DE BARRAS DA SEMANA */}
             <div className="mt-4 flex items-end justify-between gap-2 h-20 border-b border-white/10 pb-2">
               {weeklyRhythm.map((item) => (
                 <div key={item.day} className="flex flex-col items-center flex-1 h-full justify-end">
-                  <span className="text-[9px] font-bold text-gray-400 mb-1">{item.val}</span>
+                  <span className="text-xs font-bold text-gray-400 mb-1">{item.val}</span>
                   <div
                     style={{ height: `${weeklyPublished.length > 0 ? Math.max(8, (item.val / Math.max(...weeklyRhythm.map((day) => day.val), 1)) * 100) : 0}%` }}
                     className="w-full bg-brand-orange rounded-t-sm transition-all"
                   />
-                  <span className="mt-1 text-[9px] font-semibold text-gray-500">{item.day}</span>
+                  <span className="mt-1 text-xs font-semibold text-gray-500">{item.day}</span>
                 </div>
               ))}
             </div>
@@ -917,7 +917,7 @@ export default function AdminDashboard() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Distribuição editorial</h3>
-              <span className="text-[10px] text-gray-500">Todas as matérias</span>
+              <span className="text-xs text-gray-500">Todas as matérias</span>
             </div>
             <div className="mt-3 space-y-3">
               {categoryDistribution.length === 0 ? (

@@ -466,7 +466,7 @@ function BrickboardContent() {
               ) : (
                 <>
                   {visiblePosts.map((post) => (
-                    <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28">
+                    <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28 content-visibility-auto">
                       <BrickCard
                         post={post}
                         onReaction={toggleReaction}
@@ -601,7 +601,8 @@ function BrickboardContent() {
         isOpen={isPollModalOpen}
         onClose={() => setIsPollModalOpen(false)}
         onPublishPoll={(question, options) => {
-          addPost(question, undefined, undefined, undefined, options);
+          const formattedContent = `${question}\n\n${options.map((opt) => `• ${opt}`).join("\n")}`;
+          addPost(formattedContent);
         }}
       />
 

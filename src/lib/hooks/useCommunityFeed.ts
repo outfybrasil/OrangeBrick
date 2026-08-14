@@ -244,7 +244,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   }, [supabase, fetchData, load]);
 
   const addPost = useCallback(
-    async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string, pollOptions?: string[]) => {
+    async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
       if (!user) return;
 
       const authorName =

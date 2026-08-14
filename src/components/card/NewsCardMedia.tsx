@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
 import type { PostCategory } from "@/lib/types/database";
 
@@ -18,7 +19,7 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
       <div className="aspect-video w-full bg-card-slate flex items-center justify-center border-y border-brand-orange-muted/10">
         <div className="flex flex-col items-center gap-1 opacity-40">
           <Icon name="brick" size={32} className="text-brand-orange-muted" />
-          <span className="text-[10px] font-mono text-brand-orange-muted uppercase tracking-widest">
+          <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">
             Sem mídia
           </span>
         </div>
@@ -35,11 +36,13 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
         ${isBreaking ? "glitch-container" : ""}
       `}
     >
-      <img
+      <Image
         src={src}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover blur-md opacity-25 transform scale-110"
+        fill
+        sizes="(max-width: 767px) 100vw, 50vw"
+        className="object-cover blur-md opacity-25 transform scale-110"
       />
 
       <div className="absolute inset-0 bg-gradient-to-t from-background-void/80 via-transparent to-transparent z-10 pointer-events-none" />
@@ -52,15 +55,16 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
           <div className="glitch-chromatic glitch-chromatic--b" aria-hidden="true" />
         </>
       )}
-      <img
+      <Image
         src={src}
         alt={alt || ""}
+        fill
+        sizes="(max-width: 767px) 100vw, 50vw"
         className={`
-          relative z-0 h-full w-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500
+          z-0 object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500
           ${isBreaking ? "glitch-img" : ""}
         `}
         onError={() => setHasError(true)}
-        loading="lazy"
       />
     </div>
   );

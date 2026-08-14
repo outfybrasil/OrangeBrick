@@ -204,7 +204,7 @@ export default function NotificationBell() {
   if (!supported || requiresInstall) {
     if (!requiresInstall) return null;
     return (
-      <p className="max-w-64 text-[11px] leading-relaxed text-gray-300">
+      <p className="max-w-64 text-xs leading-relaxed text-gray-300">
         No iPhone, adicione o Orange Brick à Tela de Início para receber alertas mesmo com o app fechado.
       </p>
     );

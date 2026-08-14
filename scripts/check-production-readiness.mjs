@@ -20,6 +20,8 @@ const requiredTables = [
   "notification_preferences",
   "user_follows",
 ];
+const maximumBackupAgeMs = 24 * 60 * 60 * 1000;
+const externalChecksConfirmed = process.env.PRODUCTION_EXTERNAL_CHECKS_CONFIRMED === "true";
 
 const environment = Object.fromEntries(requiredEnvironment.map((name) => [name, Boolean(process.env[name]?.trim())]));
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,7 +31,7 @@ const database = {};
 if (url && serviceRoleKey) {
   const supabase = createClient(url, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
   for (const table of requiredTables) {
-    const { error } = await supabase.from(table).select("*", { count: "exact", head: true });
+    const { error } = await supabase.from(table).select("*").limit(1);
     database[table] = error ? { ready: false, reason: error.code || "query_failed" } : { ready: true };
   }
 }
@@ -46,7 +48,12 @@ try {
     const directory = resolve(backupRoot, entries[0]);
     const manifest = JSON.parse(await readFile(resolve(directory, "manifest.json"), "utf8"));
     await access(resolve(directory, "storage-manifest.json"));
-    backup = { ready: true, created_at: manifest.created_at || entries[0], directory };
+    if (manifest.complete !== true) throw Object.assign(new Error("partial_backup"), { code: "partial_backup" });
+    const createdAt = manifest.created_at || entries[0];
+    const ageMs = Date.now() - new Date(createdAt).getTime();
+    backup = Number.isFinite(ageMs) && ageMs <= maximumBackupAgeMs
+      ? { ready: true, created_at: createdAt, directory, age_hours: Math.round(ageMs / 360000) / 10 }
+      : { ready: false, reason: "stale", created_at: createdAt, directory, age_hours: Math.round(ageMs / 360000) / 10 };
   }
 } catch (error) {
   backup = { ready: false, reason: error instanceof Error ? error.code || "invalid" : "invalid" };
@@ -54,14 +61,23 @@ try {
 
 const missingEnvironment = Object.entries(environment).filter(([, ready]) => !ready).map(([name]) => name);
 const missingTables = Object.entries(database).filter(([, result]) => !result.ready).map(([name]) => name);
-const ready = missingEnvironment.length === 0 && missingTables.length === 0 && backup.ready;
+const ready = missingEnvironment.length === 0 && missingTables.length === 0 && backup.ready && externalChecksConfirmed;
 const report = {
   ready,
   environment,
   database,
   backup,
-  external_checks: ["Edge Function send-push-notification publicada", "VAPID_PRIVATE_KEY configurada nos secrets do Supabase"],
-  blockers: { missing_environment: missingEnvironment, missing_tables: missingTables },
+  external_checks: {
+    ready: externalChecksConfirmed,
+    required: ["Edge Function send-push-notification publicada", "VAPID_PRIVATE_KEY configurada nos secrets do Supabase"],
+    confirmation_variable: "PRODUCTION_EXTERNAL_CHECKS_CONFIRMED",
+  },
+  blockers: {
+    missing_environment: missingEnvironment,
+    missing_tables: missingTables,
+    backup: backup.ready ? null : backup.reason,
+    external_checks: externalChecksConfirmed ? null : "not_confirmed",
+  },
 };
 
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);

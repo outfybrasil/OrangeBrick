@@ -60,8 +60,8 @@ export function ReactionButton({ type, icon, count, disabled, active, onClick }:
         size={14}
         className={`transition-all duration-200 ${active ? "scale-110" : currentMeta.hoverIcon}`}
       />
-      <span className="text-[11px] font-semibold tracking-tight">{currentMeta.label}</span>
-      <span className="text-[11px] font-bold tabular-nums opacity-80 bg-black/20 px-1.5 py-0.5 rounded-md">
+      <span className="text-xs font-semibold tracking-tight">{currentMeta.label}</span>
+      <span className="text-xs font-bold tabular-nums opacity-80 bg-black/20 px-1.5 py-0.5 rounded-md">
         {count}
       </span>
     </button>

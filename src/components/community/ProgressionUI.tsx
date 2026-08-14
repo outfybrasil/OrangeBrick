@@ -67,7 +67,7 @@ export function AchievementMark({ achievement }: { achievement: AchievementProgr
   return (
     <article className={`min-w-0 border-t pt-4 ${isUnlocked ? rarityClasses[achievement.rarity] : "border-white/10 text-gray-500"}`}>
       <div className="mb-4 flex h-16 w-16 items-center justify-center bg-white/[0.03]" aria-hidden="true">
-        <img
+        <img loading="lazy" decoding="async"
           src={`/icons/achievements/${achievement.slug}.png`}
           alt=""
           className={`h-14 w-14 object-contain ${isUnlocked ? "" : "grayscale opacity-35"}`}

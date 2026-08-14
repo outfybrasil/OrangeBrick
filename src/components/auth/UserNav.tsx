@@ -84,7 +84,7 @@ export function UserNav() {
           <span className="text-xs font-subtitle font-bold text-white max-w-[100px] truncate hidden sm:inline-block">
             {displayName}
           </span>
-          <span className="hidden text-[10px] text-gray-400 xs:inline">▼</span>
+          <span className="hidden text-xs text-gray-400 xs:inline">▼</span>
         </button>
 
         {/* NOTIFICATION BELL ON THE RIGHT SIDE OF PROFILE */}
@@ -95,7 +95,12 @@ export function UserNav() {
           <div className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
             <div className="px-3 py-2 border-b border-brand-orange-muted/10">
               <p className="font-bold text-white truncate">{displayName}</p>
-              <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+              {profile?.equipped_title && (
+                <span className="mt-1 inline-block rounded bg-brand-orange/15 px-1.5 py-0.5 text-xs font-bold text-brand-orange">
+                  {profile.equipped_title}
+                </span>
+              )}
             </div>
 
             <Link

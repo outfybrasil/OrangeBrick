@@ -74,7 +74,7 @@ export default async function PostPage({ params }: PostPageProps) {
   if (!post) notFound();
   const stats = await getStats(post.id);
   const siteUrl = getSiteUrl();
-  const structuredData = {
+  const newsArticleJsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: post.title,
@@ -82,10 +82,13 @@ export default async function PostPage({ params }: PostPageProps) {
     image: post.image_url ? [post.image_url] : [],
     datePublished: post.published_at,
     dateModified: post.updated_at,
+    inLanguage: "pt-BR",
+    articleSection: post.category,
     author: { "@type": "Person", name: post.author_name, url: `${siteUrl}/sobre` },
     publisher: {
       "@type": "Organization",
       name: "Orange Brick",
+      url: siteUrl,
       logo: {
         "@type": "ImageObject",
         url: `${siteUrl}/icons/icon-512.png`,
@@ -96,9 +99,36 @@ export default async function PostPage({ params }: PostPageProps) {
     mainEntityOfPage: `${siteUrl}/posts/${post.slug}`,
     isAccessibleForFree: true,
   };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Início",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Notícias",
+        item: `${siteUrl}/noticias`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `${siteUrl}/posts/${post.slug}`,
+      },
+    ],
+  };
+
   return (
     <>
-      <script type="application/ld+json">{JSON.stringify(structuredData).replace(/</g, "\\u003c")}</script>
+      <script type="application/ld+json">{JSON.stringify(newsArticleJsonLd).replace(/</g, "\\u003c")}</script>
+      <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c")}</script>
       <PostArticle post={post} stats={stats} />
     </>
   );

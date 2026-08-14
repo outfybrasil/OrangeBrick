@@ -46,7 +46,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
       <div className="flex items-start gap-2.5">
         <div className="shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-full border border-brand-orange/30 bg-[#08090C]">
-            <img
+            <img loading="lazy" decoding="async"
               src={resolveAvatarUrl(comment.author_avatar, comment.author_nickname)}
               alt={comment.author_nickname}
               style={{ width: "30px", height: "30px", minWidth: "30px", minHeight: "30px", maxWidth: "30px", maxHeight: "30px", borderRadius: "9999px", objectFit: "cover" }}
@@ -66,7 +66,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
                 {comment.author_nickname}
                 </span>
                 <UserBadge nickname={comment.author_nickname} />
-                <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                <span className="text-xs text-gray-500">{timeAgo(comment.created_at)}</span>
               </div>
             </div>
 
@@ -86,7 +86,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
 
               <button
                 onClick={handleLike}
-                className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-semibold transition-colors ${
+                className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors ${
                   hasLiked
                     ? "bg-brand-orange/10 text-brand-orange"
                     : "text-gray-500 hover:bg-white/5 hover:text-white"

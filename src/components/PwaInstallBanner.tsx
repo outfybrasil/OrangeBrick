@@ -79,7 +79,7 @@ export function PwaInstallBanner() {
             <h4 id="pwa-title" className="font-subtitle text-sm font-bold text-white">
               Instalar App Orange Brick
             </h4>
-            <p className="text-[11px] text-gray-300 font-body mt-0.5">
+            <p className="text-xs text-gray-300 font-body mt-0.5">
               Acesse notícias e a comunidade direto da sua tela inicial.
             </p>
           </div>

@@ -107,7 +107,7 @@ export default function ProfileSetup() {
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-2xl mx-auto mb-3">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, nickname || user.email); }} />
+              <img loading="lazy" decoding="async" src={avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, nickname || user.email); }} />
             ) : (
               <span>{user.email?.[0].toUpperCase() || "?"}</span>
             )}

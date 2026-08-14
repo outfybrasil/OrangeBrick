@@ -32,7 +32,7 @@ export function TrendingTicker({ activeTag, onSelectTag }: TrendingTickerProps) 
                 key={tag.id}
                 onClick={() => onSelectTag(isSelected ? null : tag.id)}
                 className={`
-                  px-3 py-1 rounded-full border text-[11px] font-medium transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center gap-1
+                  px-3 py-1 rounded-full border text-xs font-medium transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center gap-1
                   ${
                     isSelected
                       ? "bg-brand-orange text-white border-brand-orange shadow-[0_0_12px_rgba(255,94,0,0.3)] font-bold"
@@ -49,7 +49,7 @@ export function TrendingTicker({ activeTag, onSelectTag }: TrendingTickerProps) 
         {activeTag && (
           <button
             onClick={() => onSelectTag(null)}
-            className="text-[10px] text-gray-400 hover:text-white underline ml-auto shrink-0 cursor-pointer"
+            className="text-xs text-gray-400 hover:text-white underline ml-auto shrink-0 cursor-pointer"
           >
             Limpar filtro
           </button>

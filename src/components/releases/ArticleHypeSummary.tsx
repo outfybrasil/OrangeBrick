@@ -44,7 +44,7 @@ export function ArticleHypeSummary({ postSlug }: { postSlug: string }) {
     <section className="mt-10 border-y border-white/10 py-5">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-orange">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">
             Hype Meter
           </p>
           <h2 className="mt-1 font-heading text-lg font-black text-white">{release.game}</h2>

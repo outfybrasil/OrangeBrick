@@ -112,13 +112,33 @@ button,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:focus-within {
     scroll-behavior: auto !important;
+  }
+
+  .animate-spin,
+  .animate-pulse,
+  .skeleton-shimmer,
+  .glitch-skew,
+  .brick-loader,
+  .profile-entrance,
+  .hype-rise {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  [class*="transition-"] {
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (pointer: coarse) {
+  :where(button, a, summary, input:not([type="checkbox"]):not([type="radio"]), select) {
+    min-height: 44px;
+  }
+
+  :where(button, a, summary)[aria-label] {
+    min-width: 44px;
   }
 }
 
@@ -286,17 +306,17 @@ html.high-contrast :where(a, button, input, textarea, select) {
 }
 
 .glitch-chromatic--r {
-  background: rgba(255, 0, 0, 0.08);
+  background: rgba(255, 94, 0, 0.08);
   transform: translateX(2px);
 }
 
 .glitch-chromatic--g {
-  background: rgba(0, 255, 0, 0.06);
+  background: rgba(168, 67, 0, 0.06);
   transform: translateX(-1px);
 }
 
 .glitch-chromatic--b {
-  background: rgba(0, 100, 255, 0.08);
+  background: rgba(255, 94, 0, 0.04);
   transform: translateX(3px);
 }
 
@@ -362,7 +382,7 @@ html.high-contrast :where(a, button, input, textarea, select) {
   width: 100%;
   height: 2px;
   background: #FF5E00;
-  border-radius: 2px;
+  border-radius: 0;
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -519,7 +539,7 @@ html.high-contrast :where(a, button, input, textarea, select) {
 
 /* Placeholder de imagem com texto mais humano */
 .empty-media-text {
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 3px;
   text-transform: uppercase;
   opacity: 0.3;
@@ -540,8 +560,8 @@ html.high-contrast :where(a, button, input, textarea, select) {
   padding: 4px 8px;
   background: #1C1E24;
   color: #FF5E00;
-  font-size: 10px;
-  font-family: "Fira Code", monospace;
+  font-size: 12px;
+  font-family: var(--font-mono-var), monospace;
   white-space: nowrap;
   border: 1px solid rgba(168, 67, 0, 0.3);
   z-index: 50;
@@ -698,4 +718,9 @@ html.high-contrast :where(a, button, input, textarea, select) {
 
 .hype-particle-late {
   animation-delay: 130ms;
+}
+
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 350px;
 }

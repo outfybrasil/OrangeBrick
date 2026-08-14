@@ -80,7 +80,7 @@ export function CommunityPulse() {
     <section aria-labelledby="community-pulse-title" className="border-y border-white/10 py-4">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-orange">Conversas recentes</p>
+          <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">Conversas recentes</p>
           <h2 id="community-pulse-title" className="font-heading text-lg font-black text-white">
             Agora no Brickboard
           </h2>
@@ -120,7 +120,7 @@ export function CommunityPulse() {
             >
               <div className="mb-3 flex items-center gap-2.5">
                 {post.author_avatar ? (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={post.author_avatar}
                     alt={post.author_name}
                     referrerPolicy="no-referrer"
@@ -133,13 +133,13 @@ export function CommunityPulse() {
                 )}
                 <div className="min-w-0">
                   <p className="truncate text-xs font-bold text-white">{post.author_name}</p>
-                  <p className="text-[10px] text-gray-500">{timeAgo(post.created_at)}</p>
+                  <p className="text-xs text-gray-500">{timeAgo(post.created_at)}</p>
                 </div>
               </div>
               <p className="flex-1 line-clamp-3 text-sm leading-relaxed text-gray-300 group-hover:text-white">
                 {post.content}
               </p>
-              <div className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-500">
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>

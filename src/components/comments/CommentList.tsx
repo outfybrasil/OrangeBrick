@@ -39,9 +39,11 @@ export function CommentList({ comments, isLoading, error, onRetry, onDelete }: C
     );
   }
   return (
-    <div>
+    <div className="space-y-1">
       {comments.map((comment) => (
-        <CommentItem key={comment.id} comment={comment} onDelete={onDelete} />
+        <div key={comment.id} className="content-visibility-auto">
+          <CommentItem comment={comment} onDelete={onDelete} />
+        </div>
       ))}
     </div>
   );

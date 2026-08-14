@@ -111,7 +111,7 @@ function EditForm() {
       { id: 9, label: "Estado da informação definido", complete: Boolean(informationStatus) },
       { id: 10, label: "Fala verificada ou ausência registrada", complete: Boolean(quoteText.trim() ? quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim()) : textContent.toLowerCase().includes("declaração pública")) },
     ];
-  }, [blocks, category, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteSourceUrl, quoteText, sourcesText, summary, title]);
+  }, [blocks, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteSourceUrl, quoteText, sourcesText, summary, title]);
 
   const completedChecklistCount = editorialChecklist.filter((item) => item.complete).length;
   const pendingChecklistCount = editorialChecklist.length - completedChecklistCount;
@@ -475,7 +475,7 @@ function EditForm() {
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-5 space-y-5">
             {/* TÍTULO DA MATÉRIA */}
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-500 mb-1.5">
+              <div className="flex items-center justify-between text-xs font-bold uppercase text-gray-500 mb-1.5">
                 <label htmlFor="article-title">Título da matéria</label>
                 <span>{title.length} / 70</span>
               </div>
@@ -492,7 +492,7 @@ function EditForm() {
 
             {/* RESUMO EDITORIAL */}
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-500 mb-1.5">
+              <div className="flex items-center justify-between text-xs font-bold uppercase text-gray-500 mb-1.5">
                 <label htmlFor="article-summary">Resumo editorial</label>
                 <div className="flex items-center gap-1.5">
                   <span>{summary.length} / 200</span>
@@ -512,7 +512,7 @@ function EditForm() {
 
             {/* SLUG */}
             <div>
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-500 mb-1">
+              <div className="flex items-center justify-between text-xs font-bold uppercase text-gray-500 mb-1">
                 <span>Slug</span>
               </div>
               <div className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-background-void px-3 py-2 text-xs">
@@ -543,9 +543,9 @@ function EditForm() {
                 <div key={block.id} className="group relative flex items-start gap-2 rounded-lg border border-white/5 bg-white/[0.01] p-2 hover:border-white/10 transition-colors">
                   {/* ALÇA DE ARRASTAR */}
                   <div className="flex flex-col items-center gap-1 pt-2 text-gray-600 opacity-50 group-hover:opacity-100 cursor-grab">
-                    <button type="button" onClick={() => moveBlock(index, "up")} disabled={index === 0} className="hover:text-white disabled:opacity-20 text-[10px]">▲</button>
+                    <button type="button" onClick={() => moveBlock(index, "up")} disabled={index === 0} className="hover:text-white disabled:opacity-20 text-xs">▲</button>
                     <span className="text-xs">⋮⋮</span>
-                    <button type="button" onClick={() => moveBlock(index, "down")} disabled={index === blocks.length - 1} className="hover:text-white disabled:opacity-20 text-[10px]">▼</button>
+                    <button type="button" onClick={() => moveBlock(index, "down")} disabled={index === blocks.length - 1} className="hover:text-white disabled:opacity-20 text-xs">▼</button>
                   </div>
 
                   {/* CONTEÚDO DO BLOCO */}
@@ -562,7 +562,7 @@ function EditForm() {
                       <div className="space-y-2 p-2">
                         <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-background-void border border-white/10">
                           {block.url ? (
-                            <img src={block.url} alt={block.alt} className="h-full w-full object-cover" />
+                            <img loading="lazy" decoding="async" src={block.url} alt={block.alt} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full flex-col items-center justify-center gap-1 text-gray-600">
                               <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -570,7 +570,7 @@ function EditForm() {
                                 <circle cx="12" cy="13" r="3.5" />
                                 <path d="M8 6l1.5-2.5h5L16 6" />
                               </svg>
-                              <span className="text-[10px]">Insira a URL da imagem abaixo</span>
+                              <span className="text-xs">Insira a URL da imagem abaixo</span>
                             </div>
                           )}
                         </div>
@@ -707,13 +707,13 @@ function EditForm() {
 
             <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Status</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1">Status</label>
                 <div className="inline-block rounded border border-white/15 bg-background-void px-2.5 py-1.5 text-xs font-bold text-gray-300">
                   {publishedAt ? "Publicada" : "Rascunho"}
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-gray-500 mb-1">Responsável</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1">Responsável</label>
                 <select
                   value={authorName}
                   onChange={(e) => { setAuthorName(e.target.value); setHasChanges(true); }}
@@ -728,7 +728,7 @@ function EditForm() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 mb-1">Categoria</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Categoria</label>
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value as PostCategory); setHasChanges(true); }}
@@ -741,7 +741,7 @@ function EditForm() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-500 mb-1">Tópicos</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Tópicos</label>
               <select
                 value={topicId}
                 onChange={(event) => { setTopicId(event.target.value); setHasChanges(true); }}
@@ -753,7 +753,7 @@ function EditForm() {
             </div>
 
             <div>
-              <label htmlFor="information-status" className="mb-1 block text-[10px] font-bold text-gray-500">Estado da informação</label>
+              <label htmlFor="information-status" className="mb-1 block text-xs font-bold text-gray-500">Estado da informação</label>
               <select id="information-status" value={informationStatus} onChange={(event) => { setInformationStatus(event.target.value as InformationStatus); setHasChanges(true); }} className="h-9 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none focus:border-brand-orange/50">
                 <option value="confirmed">Confirmada</option>
                 <option value="developing">Em desenvolvimento</option>
@@ -764,21 +764,21 @@ function EditForm() {
             </div>
 
             {(informationStatus === "corrected" || correctionNote) && <div>
-              <label htmlFor="correction-note" className="mb-1 block text-[10px] font-bold text-gray-500">Nota de correção</label>
+              <label htmlFor="correction-note" className="mb-1 block text-xs font-bold text-gray-500">Nota de correção</label>
               <textarea id="correction-note" value={correctionNote} onChange={(event) => { setCorrectionNote(event.target.value); setHasChanges(true); }} rows={3} maxLength={500} placeholder="Explique com clareza o que foi corrigido." className="w-full rounded border border-white/10 bg-background-void p-2 text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
             </div>}
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-[10px] leading-relaxed text-gray-500">A fala só será exibida com autoria e URL da fonte.</p></div>
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">A fala só será exibida com autoria e URL da fonte.</p></div>
             <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
-            <div className="grid gap-2 xs:grid-cols-2"><input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Nome da pessoa" className="h-9 rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" /><input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Cargo ou função" className="h-9 rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" /></div>
-            <input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="h-9 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none" />
+            <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
+            <label className="space-y-1 text-xs font-bold text-gray-300">URL da declaração<input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-[10px] leading-relaxed text-gray-500">Uma por linha no formato Nome|https://endereco.com</p></div>
-            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-[11px] leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha no formato Nome|https://endereco.com</p></div>
+            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}
@@ -786,7 +786,7 @@ function EditForm() {
             <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Imagem de capa</h3>
             <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-background-void border border-white/10">
               {imageUrl ? (
-                <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={imageUrl} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center text-xs text-gray-600">Sem imagem de capa</div>
               )}
@@ -802,7 +802,7 @@ function EditForm() {
               <button
                 type="button"
                 onClick={() => setImageUrl("")}
-                className="h-8 px-2.5 text-[11px] font-bold text-red-400 hover:bg-red-500/10 rounded border border-red-500/20"
+                className="h-8 px-2.5 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded border border-red-500/20"
               >
                 Remover
               </button>
@@ -843,7 +843,7 @@ function EditForm() {
             </div>
 
             {pendingChecklistCount > 0 && (
-              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] text-amber-200 flex items-center gap-2">
+              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 flex items-center gap-2">
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z" />
                 </svg>
@@ -865,13 +865,13 @@ function EditForm() {
             </div>
             <h1 className="font-heading text-2xl font-black">{title}</h1>
             <p className="text-sm text-gray-300 leading-relaxed italic">{summary}</p>
-            {imageUrl && <img src={imageUrl} alt="" className="w-full aspect-video object-cover rounded-lg" />}
+            {imageUrl && <img loading="lazy" decoding="async" src={imageUrl} alt="" className="w-full aspect-video object-cover rounded-lg" />}
             <div className="prose prose-invert max-w-none text-sm leading-relaxed space-y-4">
               {blocks.map(b => (
                 <div key={b.id}>
                   {b.type === "text" ? parseMarkdownToReact(b.content) : b.type === "image" ? (
                     <div>
-                      {b.url && <img src={b.url} alt={b.alt} className="w-full aspect-video object-cover rounded-lg" />}
+                      {b.url && <img loading="lazy" decoding="async" src={b.url} alt={b.alt} className="w-full aspect-video object-cover rounded-lg" />}
                       {b.caption && <p className="text-xs text-center text-gray-500 mt-1">{b.caption}</p>}
                     </div>
                   ) : youtubeEmbedUrl(b.url) ? (

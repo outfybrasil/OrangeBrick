@@ -68,9 +68,14 @@ export default function CoverflowGallery({
   const isTop = corner.startsWith("top");
   const isRight = corner.endsWith("Right");
 
+  const safeActive = slides.length === 0 ? 0 : Math.min(active, slides.length - 1);
+
   const step = useCallback((direction: number) => {
     if (slides.length < 2) return;
-    setActive((current) => (current + direction + slides.length) % slides.length);
+    setActive((current) => {
+      const validCurrent = Math.min(current, slides.length - 1);
+      return (validCurrent + direction + slides.length) % slides.length;
+    });
   }, [slides.length]);
 
   useEffect(() => {
@@ -80,10 +85,6 @@ export default function CoverflowGallery({
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    setActive((current) => Math.min(current, Math.max(0, slides.length - 1)));
-  }, [slides.length]);
 
   useEffect(() => {
     if (!autoplay || slides.length < 2) return;
@@ -140,7 +141,7 @@ export default function CoverflowGallery({
     >
       <div className="relative" style={{ width: effectiveWidth, height: effectiveHeight, transformStyle: "preserve-3d" }}>
         {slides.map((slide, index) => {
-          let relativeIndex = index - active;
+          let relativeIndex = index - safeActive;
           if (relativeIndex > slides.length / 2) relativeIndex -= slides.length;
           if (relativeIndex < -slides.length / 2) relativeIndex += slides.length;
           const distance = Math.abs(relativeIndex);

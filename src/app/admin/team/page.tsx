@@ -67,7 +67,7 @@ export default function AdminTeamPage() {
                   <p>Entrou em {new Intl.DateTimeFormat("pt-BR").format(new Date(member.createdAt))}</p>
                   <p className="mt-1">{member.lastSignInAt ? `Último acesso em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(member.lastSignInAt))}` : "Ainda não acessou"}</p>
                 </div>
-                <span className="w-fit border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-300">Administrador</span>
+                <span className="w-fit border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-300">Administrador</span>
               </article>
             ))}
           </div>

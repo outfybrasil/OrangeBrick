@@ -80,7 +80,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
       <div className="flex items-center justify-between text-xs font-subtitle">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-orange to-amber-500 p-[1px] flex items-center justify-center shadow-md">
-            <img
+            <img loading="lazy" decoding="async"
               src={avatarUrl}
               alt=""
               referrerPolicy="no-referrer"
@@ -99,7 +99,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
         <button
           type="button"
           onClick={signOut}
-          className="min-h-11 rounded-xl px-3 text-[11px] font-semibold text-red-300/75 transition-colors hover:bg-red-500/15 hover:text-red-200"
+          className="min-h-11 rounded-xl px-3 text-xs font-semibold text-red-300/75 transition-colors hover:bg-red-500/15 hover:text-red-200"
         >
           Sair
         </button>
@@ -122,7 +122,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
         />
 
         <div className="flex flex-col gap-2 xs:flex-row xs:items-center xs:justify-between">
-          <span className="text-[11px] font-subtitle text-gray-500">
+          <span className="text-xs font-subtitle text-gray-500">
             {content.length} / 500 caracteres
           </span>
 

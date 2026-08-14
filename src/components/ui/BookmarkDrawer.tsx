@@ -73,7 +73,7 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
                     >
                       {post.title}
                     </Link>
-                    <span className="text-[10px] font-body text-gray-400 block mt-1">
+                    <span className="text-xs font-body text-gray-400 block mt-1">
                       {new Date(post.created_at).toLocaleDateString("pt-BR")}
                     </span>
                   </div>

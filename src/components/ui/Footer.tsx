@@ -23,14 +23,14 @@ export function Footer() {
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
           </div>
-          <p className="text-[10px] sm:text-[11px] text-gray-400 font-sans max-w-sm leading-relaxed">
+          <p className="text-xs sm:text-xs text-gray-400 font-sans max-w-sm leading-relaxed">
             Notícias de games, indústria e hardware com apuração direta, contexto e espaço para debate.
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Categorias</h4>
-          <div className="flex flex-col text-[11px]">
+          <div className="flex flex-col text-xs">
             {FOOTER_CATEGORIES.map((category) => (
               <Link key={category} href={`/?category=${category}`} className="flex min-h-11 items-center transition-colors hover:text-white">
                 {CATEGORY_CONFIG[category].label}
@@ -41,7 +41,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-bold text-white uppercase tracking-wider">Institucional</h4>
-          <div className="flex flex-col text-[11px]">
+          <div className="flex flex-col text-xs">
             <Link href="/sobre" className="flex min-h-11 items-center transition-colors hover:text-white">
               Sobre e política editorial
             </Link>
@@ -60,7 +60,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-brand-orange-muted/5 mt-10 pt-6 text-center text-[10px] text-gray-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-brand-orange-muted/5 mt-10 pt-6 text-center text-xs text-gray-600">
         <p suppressHydrationWarning>
           © 2026 Orange Brick. Conteúdo editorial protegido nos termos da legislação aplicável.
         </p>

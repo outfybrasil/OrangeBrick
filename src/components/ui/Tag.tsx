@@ -12,7 +12,7 @@ export function Tag({ category }: TagProps) {
     <span
       className={`
         inline-flex shrink-0 items-center border-b pb-1
-        text-[11px] font-subtitle font-bold uppercase tracking-[0.06em]
+        text-xs font-subtitle font-bold uppercase tracking-[0.06em]
         ${config.color}
       `}
     >

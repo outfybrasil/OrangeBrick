@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Post } from "@/lib/types/database";
+import { useToast } from "@/lib/contexts/ToastContext";
 
 const BOOKMARKS_KEY = "ob_saved_bookmarks";
 const EVENT_NAME = "ob_bookmarks_updated";
 
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<Post[]>([]);
+  const toast = useToast();
 
   const loadBookmarks = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -44,15 +46,18 @@ export function useBookmarks() {
       const exists = list.some((item) => item.id === post.id);
       if (exists) {
         list = list.filter((item) => item.id !== post.id);
+        toast.info("Matéria removida dos favoritos");
       } else {
         list = [post, ...list];
+        toast.success("Matéria salva nos seus favoritos");
       }
 
       localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(list));
       window.dispatchEvent(new Event(EVENT_NAME));
     } catch {
+      toast.error("Não foi possível atualizar os favoritos");
     }
-  }, []);
+  }, [toast]);
 
   const isBookmarked = useCallback(
     (postId: string) => {
