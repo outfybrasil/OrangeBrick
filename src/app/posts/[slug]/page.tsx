@@ -9,9 +9,19 @@ export const dynamic = "force-dynamic";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ preview?: string }>;
 }
 
-async function getPost(slug: string): Promise<Post | null> {
+async function getPost(slug: string, isPreview = false): Promise<Post | null> {
+  if (isPreview) {
+    const serviceClient = createServiceRoleClient();
+    const { data } = await serviceClient
+      .from("posts")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+    return data as Post | null;
+  }
   const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("posts")
@@ -41,9 +51,11 @@ async function getStats(postId: string): Promise<PostStats> {
   };
 }
 
-export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const sParams = searchParams ? await searchParams : {};
+  const isPreview = sParams.preview === "true" || sParams.preview === "1";
+  const post = await getPost(slug, isPreview);
   if (!post) return { title: "Matéria não encontrada" };
   const canonical = `/posts/${post.slug}`;
   return {
@@ -68,9 +80,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   };
 }
 
-export default async function PostPage({ params }: PostPageProps) {
+export default async function PostPage({ params, searchParams }: PostPageProps) {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const sParams = searchParams ? await searchParams : {};
+  const isPreview = sParams.preview === "true" || sParams.preview === "1";
+  const post = await getPost(slug, isPreview);
   if (!post) notFound();
   const stats = await getStats(post.id);
   const siteUrl = getSiteUrl();
@@ -129,6 +143,11 @@ export default async function PostPage({ params }: PostPageProps) {
     <>
       <script type="application/ld+json">{JSON.stringify(newsArticleJsonLd).replace(/</g, "\\u003c")}</script>
       <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c")}</script>
+      {!post.is_published && (
+        <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-300 py-2.5 px-4 text-center text-xs font-mono font-semibold tracking-wider sticky top-0 z-50 backdrop-blur-md">
+          ⚠️ MODO DE PRÉ-VISUALIZAÇÃO — Este rascunho ainda não foi publicado no portal
+        </div>
+      )}
       <PostArticle post={post} stats={stats} />
     </>
   );

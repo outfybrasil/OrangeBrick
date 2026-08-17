@@ -73,7 +73,7 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
   }
 
   const siteUrl = getSiteUrl();
-  const previewUrl = `${siteUrl}/posts/${post.slug}`;
+  const previewUrl = `${siteUrl}/posts/${post.slug}?preview=true`;
   const countText = wordCount ? ` | 📊 ${wordCount} palavras` : "";
 
   const caption = `🔥 *NOVO RASCUNHO GERADO PELO GEMINI 2.0*\n\n` +
