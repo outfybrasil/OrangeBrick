@@ -1,0 +1,16 @@
+name: daily-news-generator
+
+on:
+  schedule:
+    # Roda a cada 3 horas (09h, 12h, 15h, 18h, 21h, 00h no fuso de Brasília)
+    - cron: "0 0,3,12,15,18,21 * * *"
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Executar gerador de notícias editorial Orange Brick
+        run: |
+          curl -fsS -X GET "https://orange-brick.vercel.app/api/cron/generate-daily" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
