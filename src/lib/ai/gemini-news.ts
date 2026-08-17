@@ -158,57 +158,56 @@ async function uploadToSupabaseStorage(
 }
 
 const EDITORIAL_SYSTEM_INSTRUCTION = `
-Você é o editor sênior do portal Orange Brick (portal brasileiro de jornalismo de games, hardware e cultura pop).
-Seu objetivo é apurar, investigar e redigir uma matéria completa, 100% autoral e altamente qualificada.
+Você é o editor-chefe do portal Orange Brick (portal brasileiro de notícias sobre videogames, cultura gamer, lançamentos e hardware).
+Seu objetivo é redigir matérias empolgantes, aprofundadas e 100% autorais sobre JOGOS, trailers, mecânicas de gameplay, revelações e grandes lançamentos.
 
-DIRETRIZES EDITORIAIS OBRIGATÓRIAS (ESTRITAS):
-1. IDIOMA & LOCALIZAÇÃO:
+DIRETRIZES EDITORIAIS OBRIGATÓRIAS (FOCO TOTAL EM JOGOS):
+1. FOCO NO JOGADOR (GAMER FIRST):
+   - Priorize sempre o JOGO: combate, história, gráficos, mecânicas, novidades de jogabilidade, estúdios de desenvolvimento, plataformas e datas de lançamento.
+   - Evite matérias corporativas secas sobre balanços financeiros ou reuniões de acionistas a menos que tragam anúncios diretos de jogos.
+   - O tom deve ser direto, empolgante, bem-informado e apaixonado por games. Sem clichês genéricos de IA (evite frases prontas como "no vasto universo dos games", "uma reviravolta emocionante").
+   - Use negrito com moderação, destacando nomes de estúdios, termos de mecânicas e personagens.
+
+2. IDIOMA & NOMES:
    - Português do Brasil (PT-BR) impecável.
-   - Nomes de jogos e marcas SEMPRE no original em inglês (ex: Marvel's Wolverine, Starfield, Grand Theft Auto VI, Xbox Cloud Gaming). NUNCA traduza nomes de jogos.
-   - Datas e meses em português (ex: "15 de Outubro", "28 de Julho").
-   - NUNCA use caracteres CJK (chinês/japonês/coreano).
-   - NUNCA use entidades HTML corrompidas ou caracteres especiais estranhos.
+   - Nomes de jogos e marcas SEMPRE no original em inglês (ex: Phantom Blade Zero, Kingdom Hearts 4, Fatal Fury: City of the Wolves, Grand Theft Auto VI, Monster Hunter Wilds, Doom: The Dark Ages). NUNCA traduza nomes de jogos.
+   - Datas e meses em português (ex: "27 de Agosto", "15 de Outubro").
+   - NUNCA use caracteres CJK (chinês/japonês/coreano) nem caracteres especiais corrompidos.
 
-2. TOM DE VOZ:
-   - Direto, seco, jornalístico, sem firulas e sem clichês de IA (evite "no vasto mundo dos games", "uma reviravolta emocionante", etc.).
-   - Negrito com moderação: use **apenas** para nomes próprios essenciais e termos técnicos cruciais.
+3. DIRETRIZES ESTRITAS DE IMAGENS:
+   - IMAGENS 100% OFICIAIS DE JOGOS:
+     * Capa: Arte oficial de capa (Key Art 4K), pôster principal oficial ou arte de divulgação oficial do jogo.
+     * Imagem 1: Screenshot real de gameplay / combate / ação in-game capturada direto do jogo.
+     * Imagem 2: Screenshot de cenário, exploração, vilão, chefe ou cena cinematográfica oficial diferente da primeira.
+   - AVISO NA LEGENDA:
+     * Para imagens oficiais de divulgação/gameplay da desenvolvedora: termine a legenda com '(Foto: Divulgação/Oficial)'.
+     * Caso alguma imagem seja conceitual ou gerada por IA: inclua '(Imagem meramente ilustrativa)'.
 
-3. DIRETRIZES DE IMAGENS E CAPAS (RIGOROSO):
-   - PRIORIDADE OFICIAL: A imagem de capa e imagens internas DEVEM priorizar artes oficiais da publisher/estúdio (Key Art 4K oficial, screenshots reais de gameplay, foto oficial de hardware ou foto oficial do executivo).
-   - LIDERANÇA XBOX: Para matérias corporativas e de negócios da divisão Xbox / Microsoft Gaming, a líder e CEO atual de referência é Asha Sharma (use foto oficial de Asha Sharma quando o foco for liderança do Xbox).
-   - AVISO DE IMAGEM ILUSTRATIVA: Sempre que uma imagem for conceitual, mock-up ou gerada por IA (por ausência de foto oficial de produto ainda não anunciado), a legenda (caption) DEVE obrigatoriamente conter a frase '(Imagem meramente ilustrativa)'. Quando for material oficial fornecido pela empresa/estúdio, use '(Foto: Divulgação/Oficial)'.
-   - DIVERSIDADE VISUAL: A capa, a Imagem 1 e a Imagem 2 DEVEM retratar conceitos e ângulos diferentes (ex: capa mostra o produto/executivo, imagem 1 mostra a interface/ecossistema, imagem 2 mostra o mercado/concorrência).
+4. ESTRUTURA DO ARTIGO (700 A 1.000 PALAVRAS):
+   - [Bloco 1 - text]: Gancho forte, revelação principal do jogo, o que foi mostrado no trailer ou anúncio e por que os jogadores estão empolgados.
+   - [Bloco 2 - image_query]: Termo em inglês para a 1ª imagem de gameplay oficial (ex: "Phantom Blade Zero official in-game gameplay combat screenshot 4k").
+   - [Bloco 3 - text]: Desenvolvimento profundo com subtítulo ## (detalhes de jogabilidade, mecânicas, combate, história, declarações de diretores/produtores do estúdio).
+   - [Bloco 4 - image_query]: Termo em inglês para a 2ª imagem oficial de cenário/boss (ex: "Phantom Blade Zero official boss fight environment screenshot 4k").
+   - [Bloco 5 - text]: Plataformas confirmadas (PS5, Xbox, PC, Switch 2), janela de lançamento, impacto na comunidade e citação da fonte: **Fonte:** [Nome da Fonte](URL da fonte).
 
-4. ESTRUTURA E EXTENSÃO:
-   - O corpo da matéria deve ser desenvolvido e aprofundado, contendo entre 700 e 1.000 palavras.
-   - Sempre inclua ao menos UMA declaração pública real e verificável de alguém diretamente ligado ao caso (executivo, dev, porta-voz, analista), citando nome, cargo, onde foi dito e o contexto.
-   - Estrutura de blocos rigorosa:
-     [Bloco 1 - text]: Introdução com gancho forte e fatos essenciais.
-     [Bloco 2 - image_query]: Termo exato de busca para a 1ª imagem oficial de contexto (ex: "Asha Sharma Microsoft Gaming official photo").
-     [Bloco 3 - text]: Desenvolvimento com subtítulo ## (fatos, dados, citações reais de executivos).
-     [Bloco 4 - image_query]: Termo exato de busca para a 2ª imagem oficial (ângulo/conceito diferente da primeira).
-     [Bloco 5 - text]: Impacto na indústria, conclusão e citação da fonte no final no formato exato: **Fonte:** [Nome da Fonte](URL da fonte).
-
-5. FORMATO DE SAÍDA:
-   - Responda EXCLUSIVAMENTE em formato JSON puro (sem markdown em volta do JSON, sem \`\`\`json).
-   - O schema JSON deve conter:
+5. SCHEMA JSON DE SAÍDA (RESPONDA APENAS O JSON PURO):
    {
      "title": "TÍTULO EM CAIXA ALTA COM GANCHO FORTE (MÁX 70 CARACTERES)",
-     "summary": "Uma frase de ~140 caracteres que responde: o que aconteceu + por que importa.",
-     "category": "breaking | hardware | industry | modding | review | opinion",
-     "source_name": "Nome da fonte primária (ex: Gematsu, VGC, IGN, PlayStation Blog)",
+     "summary": "Uma frase de ~140 caracteres: o que foi revelado sobre o jogo + por que importa para os gamers.",
+     "category": "breaking | hardware | industry | review | opinion",
+     "source_name": "Nome da fonte (ex: Gematsu, IGN, VGC, PlayStation Blog)",
      "source_url": "URL original da notícia",
-     "cover_image_query": "Termo de busca para a arte oficial de capa do jogo/hardware em 4K ou executivo",
-     "cover_alt": "Texto alternativo descritivo para a capa",
-     "image_1_query": "Termo de busca para a 1ª imagem interna oficial",
-     "image_1_alt": "Alt text da imagem 1",
-     "image_1_caption": "Legenda curta para a imagem 1 com aviso (Foto: Divulgação/Oficial) ou (Imagem meramente ilustrativa)",
-     "image_2_query": "Termo de busca para a 2ª imagem interna oficial",
-     "image_2_alt": "Alt text da imagem 2",
-     "image_2_caption": "Legenda curta para a imagem 2 com aviso (Foto: Divulgação/Oficial) ou (Imagem meramente ilustrativa)",
-     "intro_text": "Texto do primeiro bloco...",
-     "development_text": "## Subtítulo\\n\\nTexto de desenvolvimento com citações e fatos...",
-     "conclusion_text": "Texto do bloco final contextualizando o impacto...\\n\\n**Fonte:** [Nome](URL)"
+     "cover_image_query": "Termo de busca para a arte oficial de capa/Key Art 4K em 16:9 (ex: 'Phantom Blade Zero official key art 4k')",
+     "cover_alt": "Alt text descritivo da arte de capa",
+     "image_1_query": "Termo de busca para screenshot oficial de combate/gameplay (ex: 'Phantom Blade Zero in-game combat gameplay screenshot 4k')",
+     "image_1_alt": "Alt text descrevendo a cena de gameplay",
+     "image_1_caption": "Legenda detalhando o combate/ação do jogo. (Foto: Divulgação/Oficial)",
+     "image_2_query": "Termo de busca para screenshot oficial de cenário/chefe (ex: 'Phantom Blade Zero boss fight environment 4k')",
+     "image_2_alt": "Alt text descrevendo o cenário ou chefe",
+     "image_2_caption": "Legenda detalhando o mundo ou inimigo. (Foto: Divulgação/Oficial)",
+     "intro_text": "Texto do bloco 1...",
+     "development_text": "## Subtítulo\\n\\nTexto de desenvolvimento técnico e jogabilidade...",
+     "conclusion_text": "Texto do bloco final...\\n\\n**Fonte:** [Nome](URL)"
    }
 `;
 
@@ -232,45 +231,59 @@ async function fetchNewsArticleText(url: string): Promise<string> {
   }
 }
 
-const NEWS_SOURCES = [
-  { name: "Gematsu", url: "https://www.gematsu.com/feed" },
-  { name: "IGN Brasil", url: "https://br.ign.com/feed.xml" },
-  { name: "VGC", url: "https://www.videogameschronicle.com/feed/" },
-  { name: "Eurogamer", url: "https://www.eurogamer.net/feed" },
-  { name: "GameSpot", url: "https://www.gamespot.com/feeds/mashup/" },
-  { name: "Push Square", url: "https://www.pushsquare.com/feeds/latest" },
-  { name: "Pure Xbox", url: "https://www.purexbox.com/feeds/latest" },
-  { name: "Nintendo Life", url: "https://www.nintendolife.com/feeds/latest" },
+const GAMING_FEEDS = [
+  { name: "Gematsu Google", url: "https://news.google.com/rss/search?q=site:gematsu.com+when:1d&hl=en-US&gl=US&ceid=US:en" },
+  { name: "Google Games BR", url: "https://news.google.com/rss/search?q=(game+OR+jogo)+AND+(gameplay+OR+trailer+OR+anuncio+OR+lancamento+OR+revela)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419" },
+  { name: "IGN / VGC Gaming", url: "https://news.google.com/rss/search?q=(site:ign.com+OR+site:videogameschronicle.com+OR+site:eurogamer.net)+AND+(gameplay+OR+trailer+OR+announced+OR+reveal+OR+release+date)+when:1d&hl=en-US&gl=US&ceid=US:en" },
 ];
 
-const STOPWORDS_REGEX = /(deal|sale|discount|price|guide|walkthrough|promoção|desconto|podcast|where to buy|review:)/i;
+const STOPWORDS_REGEX = /(deal|sale|discount|price|guide|walkthrough|promoção|desconto|podcast|where to buy|review:|opinions|analise|review)/i;
 
 function scoreNewsItem(title: string, summary: string): number {
   let s = 0;
   const t = `${title} ${summary}`.toLowerCase();
-  if (t.includes("anuncia") || t.includes("announce")) s += 4;
-  if (t.includes("confirma") || t.includes("confirm")) s += 3;
-  if (t.includes("reveal") || t.includes("revela")) s += 3;
-  if (t.includes("trailer") || t.includes("gameplay")) s += 2;
-  if (t.includes("release") || t.includes("lança")) s += 2;
-  if (t.includes("adquire") || t.includes("acquire") || t.includes("comprar")) s += 3;
-  if (t.includes("playstation") || t.includes("sony") || t.includes("ps5") || t.includes("ps6")) s += 2;
-  if (t.includes("xbox") || t.includes("microsoft") || t.includes("game pass")) s += 2;
-  if (t.includes("nintendo") || t.includes("switch")) s += 2;
-  if (t.includes("gta") || t.includes("rockstar")) s += 4;
-  if (STOPWORDS_REGEX.test(t)) s -= 5;
+
+  // Prioridade MASSIVA para matérias sobre JOGOS REAIS, GAMEPLAY, TRAILERS E LANÇAMENTOS
+  if (t.includes("gameplay")) s += 10;
+  if (t.includes("trailer")) s += 8;
+  if (t.includes("anuncia") || t.includes("announce")) s += 7;
+  if (t.includes("revela") || t.includes("reveal")) s += 7;
+  if (t.includes("demo") || t.includes("demonstração")) s += 8;
+  if (t.includes("remake") || t.includes("remaster")) s += 6;
+  if (t.includes("release date") || t.includes("data de lançamento") || t.includes("lança")) s += 6;
+  if (t.includes("combate") || t.includes("combat") || t.includes("boss")) s += 5;
+  if (t.includes("beta") || t.includes("closed beta")) s += 6;
+
+  // Franquias e títulos de grande apelo
+  const HYPE_GAMES = [
+    "phantom blade", "kingdom hearts", "fatal fury", "gta", "grand theft auto", "wolverine",
+    "monster hunter", "elden ring", "death stranding", "resident evil", "silent hill",
+    "metal gear", "witcher", "cyberpunk", "doom", "final fantasy", "zelda", "mario",
+    "pokemon", "god of war", "ghost of yotei", "spider-man", "fortnite", "mortal shell",
+    "diablo", "crimson desert", "borderlands", "fable", "halo", "metroid", "silksong",
+    "dragon quest", "persona", "sega", "capcom", "square enix", "fromsoftware", "bandai namco"
+  ];
+
+  for (const game of HYPE_GAMES) {
+    if (t.includes(game)) s += 10;
+  }
+
+  // Penaliza matérias corporativas sem anúncio de jogo e guias comerciais
+  if (t.includes("quarterly") || t.includes("earnings") || t.includes("shareholder") || t.includes("relatório financeiro")) s -= 8;
+  if (STOPWORDS_REGEX.test(t)) s -= 12;
+
   return s;
 }
 
 async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<{ title: string; link: string; summary: string } | null> {
   const now = Date.now();
-  const maxAgeMs = 28 * 60 * 60 * 1000; // Máximo 28 horas atrás (notícias de hoje e últimas horas)
+  const maxAgeMs = 28 * 60 * 60 * 1000;
   const items: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
 
-  for (const src of NEWS_SOURCES) {
+  for (const src of GAMING_FEEDS) {
     try {
       const res = await fetch(src.url, {
-        headers: { "User-Agent": "OrangeBrick/1.0" },
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) continue;
@@ -289,13 +302,12 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
           const pubDate = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
           const age = now - pubDate.getTime();
 
-          // Filtra estritamente apenas notícias recentes (do dia / últimas 28h)
           if (age <= maxAgeMs) {
-            const title = titleMatch[1].replace(/<[^>]+>/g, "").trim();
+            const title = titleMatch[1].replace(/<[^>]+>/g, "").replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer).*$/i, "").trim();
             const link = linkMatch[1].replace(/<[^>]+>/g, "").trim();
             const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
             const score = scoreNewsItem(title, summary);
-            if (score >= 0) {
+            if (score > 0) {
               items.push({ title, link, summary, score, pubDate });
             }
           }
@@ -308,10 +320,10 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
 
   if (items.length === 0) return null;
 
-  // Ordena pelas notícias mais quentes e mais recentes
+  // Ordena pelas notícias de jogos com maior pontuação de gameplay/hype
   items.sort((a, b) => b.score - a.score || b.pubDate.getTime() - a.pubDate.getTime());
 
-  // Deduplicação contra o banco do Supabase: pega a primeira que ainda não foi coberta
+  // Deduplicação contra posts já criados no Supabase
   for (const item of items) {
     const slug = buildSlug(item.title);
     const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
@@ -429,30 +441,45 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const newPostId = crypto.randomUUID();
 
+  const cleanSubject = rawTitle
+    .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
+    .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA).*$/i, "")
+    .trim();
+
   const coverQueries: string[] = [
     parsed.cover_image_query,
-    `${rawTitle} official key art 16:9`,
-    `${rawTitle} official wallpaper 4k`,
+    `${cleanSubject} official key art 4k wallpaper`,
+    `${cleanSubject} official game cover art 16:9`,
+    `${cleanSubject} promotional artwork 4k`,
   ].filter((q): q is string => Boolean(q));
 
   const img1Queries: string[] = [
     parsed.image_1_query,
-    `${rawTitle} official screenshot gameplay`,
+    `${cleanSubject} official in-game gameplay combat screenshot 4k`,
+    `${cleanSubject} gameplay screenshot 1080p`,
+    `${cleanSubject} action combat screenshot`,
   ].filter((q): q is string => Boolean(q));
 
   const img2Queries: string[] = [
     parsed.image_2_query,
-    `${rawTitle} official promo`,
+    `${cleanSubject} official world environment scenery screenshot 4k`,
+    `${cleanSubject} boss fight scene screenshot 4k`,
+    `${cleanSubject} cinematic scene official 4k`,
   ].filter((q): q is string => Boolean(q));
+
+  const usedImageUrls = new Set<string>();
 
   async function findAndUpload(queries: string[], prefix: string): Promise<string | null> {
     for (const q of queries) {
       const candidates = await searchDuckDuckGoImages(q);
       for (const url of candidates) {
+        if (usedImageUrls.has(url)) continue;
         const processed = await downloadAndProcessImage(url);
         if (processed) {
           try {
-            return await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer);
+            const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer);
+            usedImageUrls.add(url);
+            return uploadedUrl;
           } catch {
             continue;
           }
