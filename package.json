@@ -18,10 +18,14 @@
     "backup:verify": "node scripts/verify-backup.mjs",
     "production:check": "node --env-file=.env.local scripts/check-production-readiness.mjs",
     "scan-news": "node scripts/scan-news.mjs",
-    "pull-drive": "node --env-file=.env.local scripts/pull-drive.mjs"
+    "pull-drive": "node --env-file=.env.local scripts/pull-drive.mjs",
+    "news:generate": "node --experimental-strip-types --env-file=.env.local scripts/generate-news.mjs",
+    "news:daily": "node --experimental-strip-types --env-file=.env.local scripts/generate-news.mjs",
+    "telegram:setup": "node --env-file=.env.local scripts/setup-telegram-webhook.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@google/genai": "^2.17.1",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "class-variance-authority": "^0.7.1",
