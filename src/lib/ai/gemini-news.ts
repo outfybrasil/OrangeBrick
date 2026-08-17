@@ -173,17 +173,23 @@ DIRETRIZES EDITORIAIS OBRIGATÓRIAS (ESTRITAS):
    - Direto, seco, jornalístico, sem firulas e sem clichês de IA (evite "no vasto mundo dos games", "uma reviravolta emocionante", etc.).
    - Negrito com moderação: use **apenas** para nomes próprios essenciais e termos técnicos cruciais.
 
-3. ESTRUTURA E EXTENSÃO:
+3. DIRETRIZES DE IMAGENS E CAPAS (RIGOROSO):
+   - PRIORIDADE OFICIAL: A imagem de capa e imagens internas DEVEM priorizar artes oficiais da publisher/estúdio (Key Art 4K oficial, screenshots reais de gameplay, foto oficial de hardware ou foto oficial do executivo).
+   - LIDERANÇA XBOX: Para matérias corporativas e de negócios da divisão Xbox / Microsoft Gaming, a líder e CEO atual de referência é Asha Sharma (use foto oficial de Asha Sharma quando o foco for liderança do Xbox).
+   - AVISO DE IMAGEM ILUSTRATIVA: Sempre que uma imagem for conceitual, mock-up ou gerada por IA (por ausência de foto oficial de produto ainda não anunciado), a legenda (caption) DEVE obrigatoriamente conter a frase '(Imagem meramente ilustrativa)'. Quando for material oficial fornecido pela empresa/estúdio, use '(Foto: Divulgação/Oficial)'.
+   - DIVERSIDADE VISUAL: A capa, a Imagem 1 e a Imagem 2 DEVEM retratar conceitos e ângulos diferentes (ex: capa mostra o produto/executivo, imagem 1 mostra a interface/ecossistema, imagem 2 mostra o mercado/concorrência).
+
+4. ESTRUTURA E EXTENSÃO:
    - O corpo da matéria deve ser desenvolvido e aprofundado, contendo entre 700 e 1.000 palavras.
    - Sempre inclua ao menos UMA declaração pública real e verificável de alguém diretamente ligado ao caso (executivo, dev, porta-voz, analista), citando nome, cargo, onde foi dito e o contexto.
    - Estrutura de blocos rigorosa:
      [Bloco 1 - text]: Introdução com gancho forte e fatos essenciais.
-     [Bloco 2 - image_query]: Termo exato de busca para a 1ª imagem de contexto (ex: "Asha Sharma Microsoft Gaming photo").
+     [Bloco 2 - image_query]: Termo exato de busca para a 1ª imagem oficial de contexto (ex: "Asha Sharma Microsoft Gaming official photo").
      [Bloco 3 - text]: Desenvolvimento com subtítulo ## (fatos, dados, citações reais de executivos).
-     [Bloco 4 - image_query]: Termo exato de busca para a 2ª imagem (ângulo/conceito diferente da primeira).
+     [Bloco 4 - image_query]: Termo exato de busca para a 2ª imagem oficial (ângulo/conceito diferente da primeira).
      [Bloco 5 - text]: Impacto na indústria, conclusão e citação da fonte no final no formato exato: **Fonte:** [Nome da Fonte](URL da fonte).
 
-4. FORMATO DE SAÍDA:
+5. FORMATO DE SAÍDA:
    - Responda EXCLUSIVAMENTE em formato JSON puro (sem markdown em volta do JSON, sem \`\`\`json).
    - O schema JSON deve conter:
    {
@@ -192,14 +198,14 @@ DIRETRIZES EDITORIAIS OBRIGATÓRIAS (ESTRITAS):
      "category": "breaking | hardware | industry | modding | review | opinion",
      "source_name": "Nome da fonte primária (ex: Gematsu, VGC, IGN, PlayStation Blog)",
      "source_url": "URL original da notícia",
-     "cover_image_query": "Termo de busca para a arte oficial de capa do jogo/hardware em 4K",
+     "cover_image_query": "Termo de busca para a arte oficial de capa do jogo/hardware em 4K ou executivo",
      "cover_alt": "Texto alternativo descritivo para a capa",
      "image_1_query": "Termo de busca para a 1ª imagem interna oficial",
      "image_1_alt": "Alt text da imagem 1",
-     "image_1_caption": "Legenda curta para a imagem 1",
+     "image_1_caption": "Legenda curta para a imagem 1 com aviso (Foto: Divulgação/Oficial) ou (Imagem meramente ilustrativa)",
      "image_2_query": "Termo de busca para a 2ª imagem interna oficial",
      "image_2_alt": "Alt text da imagem 2",
-     "image_2_caption": "Legenda curta para a imagem 2",
+     "image_2_caption": "Legenda curta para a imagem 2 com aviso (Foto: Divulgação/Oficial) ou (Imagem meramente ilustrativa)",
      "intro_text": "Texto do primeiro bloco...",
      "development_text": "## Subtítulo\\n\\nTexto de desenvolvimento com citações e fatos...",
      "conclusion_text": "Texto do bloco final contextualizando o impacto...\\n\\n**Fonte:** [Nome](URL)"
