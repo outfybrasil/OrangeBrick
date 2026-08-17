@@ -19,7 +19,7 @@ interface AdminShellProps {
 
 function OverviewIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M4 4h6v6H4zM14 4h6v10h-6zM4 14h6v6H4zM14 18h6v2h-6z" />
     </svg>
   );
@@ -27,7 +27,7 @@ function OverviewIcon() {
 
 function ComposeIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z" />
     </svg>
   );
@@ -35,7 +35,7 @@ function ComposeIcon() {
 
 function ImagesIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
       <circle cx="9" cy="10" r="1.5" />
       <path d="m5.5 17 4.5-4 3 2.5 2.5-2 3 3.5" />
@@ -45,7 +45,7 @@ function ImagesIcon() {
 
 function ReleasesIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M6 3v3M18 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z" />
       <path d="M8 13h3v3H8z" />
     </svg>
@@ -54,7 +54,7 @@ function ReleasesIcon() {
 
 function CommunityIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M5 6h14v9H9l-4 3z" />
       <path d="M8 10h8M8 13h5" />
     </svg>
@@ -63,7 +63,7 @@ function CommunityIcon() {
 
 function ProgressionIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M5 19V9M12 19V5M19 19v-7" />
       <path d="M3 19h18" />
     </svg>
@@ -72,7 +72,7 @@ function ProgressionIcon() {
 
 function ExternalIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M14 5h5v5M19 5l-9 9" />
       <path d="M18 13v6H5V6h6" />
     </svg>
@@ -81,7 +81,7 @@ function ExternalIcon() {
 
 function ExitIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9" />
     </svg>
   );
@@ -130,7 +130,7 @@ export function AdminShell({
   const formattedDate = todayDateStr.charAt(0).toUpperCase() + todayDateStr.slice(1);
 
   return (
-    <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white">
+    <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white selection:bg-brand-orange selection:text-white">
       {/* SIDEBAR DESKTOP */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] xl:flex">
         {/* LOGO */}
@@ -180,7 +180,10 @@ export function AdminShell({
                 <ProgressionIcon />
                 Progressão
               </Link>
-              <Link href="/admin/health" className={navClass("health")}><OverviewIcon />Saúde e auditoria</Link>
+              <Link href="/admin/health" className={navClass("health")}>
+                <OverviewIcon />
+                Saúde e auditoria
+              </Link>
             </div>
           </div>
 
@@ -190,16 +193,11 @@ export function AdminShell({
             </p>
             <div className="space-y-1">
               <Link href="/admin/team" className={navClass("team")} aria-current={active === "team" ? "page" : undefined}>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <CommunityIcon />
                 Equipe
               </Link>
               <Link href="/admin/settings" className={navClass("settings")} aria-current={active === "settings" ? "page" : undefined}>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <OverviewIcon />
                 Configurações
               </Link>
             </div>
@@ -232,81 +230,241 @@ export function AdminShell({
             >
               <ExitIcon />
             </button>
-            <p className="min-w-0 flex-1 truncate font-heading text-sm font-bold text-white xl:hidden">{title}</p>
           </div>
         </div>
       </aside>
 
       {/* ÁREA DE CONTEÚDO PRINCIPAL */}
       <div className="xl:pl-60">
-        {/* HEADER TOP STATUS BAR */}
+        {/* HEADER TOP STATUS BAR (DESKTOP & MOBILE) */}
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0b0e]/95 backdrop-blur-xl">
-          <div className="flex min-h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center text-gray-300 hover:text-white xl:hidden"
-              aria-label="Abrir navegação administrativa"
-              aria-expanded={mobileMenuOpen}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              </svg>
-            </button>
+          <div className="flex min-h-14 items-center justify-between gap-3 px-3.5 sm:px-6 lg:px-8">
+            {/* MOBILE LOGO & TOGGLE */}
+            <div className="flex items-center gap-2.5 xl:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-gray-300 transition-colors hover:text-white active:scale-95"
+                aria-label="Abrir menu administrativo"
+                aria-expanded={mobileMenuOpen}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              </button>
+              <Link href="/admin" className="flex items-center gap-2">
+                <img
+                  src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
+                  alt=""
+                  style={{ maxHeight: "22px", maxWidth: "28px", width: "auto", height: "auto" }}
+                  className="h-6 w-auto object-contain"
+                />
+                <span className="font-heading text-xs font-black uppercase tracking-wider text-white">
+                  ADMIN<span className="text-brand-orange">_</span>OB
+                </span>
+              </Link>
+            </div>
+
+            {/* DESKTOP STATUS & DATE */}
             <div className="hidden xl:flex items-center gap-3 text-xs">
               <span className="inline-flex items-center gap-1.5 text-gray-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Dados sincronizados agora
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Redação sincronizada
               </span>
               <span className="text-gray-600">•</span>
               <span className="text-gray-400">{formattedDate}</span>
             </div>
 
-            {/* BOTÃO DA DIREITA */}
-            {actions && <div className="hidden xl:block">{actions}</div>}
+            {/* BOTÃO DE AÇÃO NO TOPO */}
+            <div className="flex items-center gap-2">
+              {actions}
+              <Link
+                href="/"
+                target="_blank"
+                className="hidden sm:inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+                title="Visualizar portal ao vivo"
+              >
+                <ExternalIcon />
+                Site
+              </Link>
+            </div>
           </div>
         </header>
 
-        <main className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3 py-5 pb-[max(2rem,env(safe-area-inset-bottom))] xs:px-4 sm:px-6 sm:py-6 lg:px-8`}>
+        {/* CONTEÚDO PRINCIPAL COM SAFE-AREA E PADDING PARA BOTTOM DOCK */}
+        <main className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3.5 py-4 pb-28 xs:px-4 sm:px-6 sm:py-6 sm:pb-12 lg:px-8`}>
           {/* HEADER DA PÁGINA */}
-          <div className="mb-5 flex min-w-0 flex-col gap-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-500">PAINEL ADMINISTRATIVO</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brand-orange">
+                  PAINEL ADMINISTRATIVO
+                </p>
                 {status}
               </div>
-              <h1 className="break-words font-heading text-[clamp(1.5rem,7vw,1.875rem)] font-black leading-tight text-white">
+              <h1 className="break-words font-heading text-xl font-black leading-tight text-white xs:text-2xl sm:text-3xl">
                 {title}
               </h1>
-              <p className="mt-1 max-w-3xl text-sm leading-5 text-gray-400">{description}</p>
+              <p className="mt-0.5 max-w-3xl text-xs leading-relaxed text-gray-400 sm:text-sm">{description}</p>
             </div>
-            {/* BOTÃO MOBILE */}
-            {actions && <div className="admin-mobile-actions xl:hidden">{actions}</div>}
           </div>
 
           {children}
         </main>
       </div>
+
+      {/* MOBILE BOTTOM NAVIGATION DOCK */}
+      <nav
+        aria-label="Navegação rápida mobile"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0b0e]/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-2xl xl:hidden"
+      >
+        <div className="grid grid-cols-5 items-center gap-1">
+          <Link
+            href="/admin"
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+              active === "overview"
+                ? "bg-brand-orange/15 text-brand-orange"
+                : "text-gray-400 hover:text-white active:scale-95"
+            }`}
+          >
+            <OverviewIcon />
+            <span>Início</span>
+          </Link>
+
+          <Link
+            href="/admin/edit"
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+              active === "editor"
+                ? "bg-brand-orange/15 text-brand-orange"
+                : "text-gray-400 hover:text-white active:scale-95"
+            }`}
+          >
+            <ComposeIcon />
+            <span>Escrever</span>
+          </Link>
+
+          <Link
+            href="/admin/images"
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+              active === "images"
+                ? "bg-brand-orange/15 text-brand-orange"
+                : "text-gray-400 hover:text-white active:scale-95"
+            }`}
+          >
+            <ImagesIcon />
+            <span>Mídias</span>
+          </Link>
+
+          <Link
+            href="/admin/releases"
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+              active === "releases"
+                ? "bg-brand-orange/15 text-brand-orange"
+                : "text-gray-400 hover:text-white active:scale-95"
+            }`}
+          >
+            <ReleasesIcon />
+            <span>Radar</span>
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold text-gray-400 transition-all hover:text-white active:scale-95"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <span>Menu</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* MOBILE FULL DRAWER MODAL */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 xl:hidden" onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}>
-          <aside role="dialog" aria-modal="true" aria-label="Navegação administrativa" className="flex h-full w-[min(20rem,88vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4">
-            <div className="flex min-h-14 items-center justify-between border-b border-white/10">
-              <p className="font-heading text-sm font-black">ORANGE<span className="text-brand-orange">_</span>BRICK</p>
-              <button type="button" onClick={() => setMobileMenuOpen(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar navegação">✕</button>
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 xl:hidden"
+          onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}
+        >
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navegação administrativa"
+            className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4 shadow-2xl animate-in slide-in-from-left duration-200"
+          >
+            {/* DRAWER HEADER */}
+            <div className="flex min-h-14 items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
+                  alt=""
+                  style={{ maxHeight: "26px", maxWidth: "34px", width: "auto", height: "auto" }}
+                  className="h-6 w-auto object-contain"
+                />
+                <div>
+                  <p className="font-heading text-xs font-black uppercase tracking-wider text-white">
+                    ORANGE<span className="text-brand-orange">_</span>BRICK
+                  </p>
+                  <p className="text-[10px] text-gray-500 font-semibold">Painel Administrativo</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-white"
+                aria-label="Fechar navegação"
+              >
+                ✕
+              </button>
             </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto py-4" onClick={() => setMobileMenuOpen(false)}>
-              <Link href="/admin" className={navClass("overview")}><OverviewIcon />Visão geral</Link>
-              <Link href="/admin/edit" className={navClass("editor")}><ComposeIcon />Nova matéria</Link>
-              <Link href="/admin/images" className={navClass("images")}><ImagesIcon />Biblioteca de imagens</Link>
-              <Link href="/admin/releases" className={navClass("releases")}><ReleasesIcon />Radar de lançamentos</Link>
-              <Link href="/admin/community" className={navClass("community")}><CommunityIcon />Comunidade</Link>
-              <Link href="/admin/progression" className={navClass("progression")}><ProgressionIcon />Progressão</Link>
-              <Link href="/admin/team" className={navClass("team")}>Equipe</Link>
-              <Link href="/admin/settings" className={navClass("settings")}>Configurações</Link>
+
+            {/* DRAWER NAV LINKS */}
+            <nav className="flex-1 space-y-4 overflow-y-auto py-4" onClick={() => setMobileMenuOpen(false)}>
+              <div>
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                  Operação Editorial
+                </p>
+                <div className="space-y-1">
+                  <Link href="/admin" className={navClass("overview")}><OverviewIcon />Visão geral</Link>
+                  <Link href="/admin/edit" className={navClass("editor")}><ComposeIcon />Nova matéria</Link>
+                  <Link href="/admin/images" className={navClass("images")}><ImagesIcon />Biblioteca de imagens</Link>
+                  <Link href="/admin/releases" className={navClass("releases")}><ReleasesIcon />Radar de lançamentos</Link>
+                  <Link href="/admin/community" className={navClass("community")}><CommunityIcon />Comunidade</Link>
+                  <Link href="/admin/progression" className={navClass("progression")}><ProgressionIcon />Progressão</Link>
+                  <Link href="/admin/health" className={navClass("health")}><OverviewIcon />Saúde e auditoria</Link>
+                </div>
+              </div>
+
+              <div>
+                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                  Administração
+                </p>
+                <div className="space-y-1">
+                  <Link href="/admin/team" className={navClass("team")}><CommunityIcon />Equipe</Link>
+                  <Link href="/admin/settings" className={navClass("settings")}><OverviewIcon />Configurações</Link>
+                </div>
+              </div>
             </nav>
-            <div className="space-y-2 border-t border-white/10 pt-4">
-              <Link href="/" target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center gap-3 px-3 text-sm font-bold text-gray-300"><ExternalIcon />Abrir site</Link>
-              <button type="button" onClick={handleLogout} className="flex min-h-11 w-full items-center gap-3 px-3 text-sm font-bold text-red-300"><ExitIcon />Encerrar sessão</button>
+
+            {/* DRAWER FOOTER */}
+            <div className="space-y-2 border-t border-white/10 pt-3 pb-[env(safe-area-inset-bottom)]">
+              <Link
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-10 items-center gap-3 rounded-lg px-3 text-xs font-bold text-gray-300 hover:bg-white/5 hover:text-white"
+              >
+                <ExternalIcon />
+                Abrir portal público
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              >
+                <ExitIcon />
+                Encerrar sessão
+              </button>
             </div>
           </aside>
         </div>

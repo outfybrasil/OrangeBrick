@@ -547,9 +547,163 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* TABELA DE MATÉRIAS */}
-          <p className="border-b border-white/10 px-4 py-2 text-xs text-gray-500 sm:hidden">Deslize a tabela para ver todos os dados.</p>
-          <div className="overflow-x-auto">
+          {/* VISUALIZAÇÃO ADAPTATIVA: CARDS NO MOBILE (sm:hidden) */}
+          <div className="divide-y divide-white/10 sm:hidden">
+            {paginatedPosts.length === 0 ? (
+              <div className="py-12 text-center text-xs text-gray-500">
+                Nenhuma matéria encontrada.
+              </div>
+            ) : (
+              paginatedPosts.map((post) => {
+                return (
+                  <article key={post.id} className="p-3.5 space-y-3 transition-colors hover:bg-white/[0.02]">
+                    {/* TOPO DO CARD: STATUS, CATEGORIA E MENU */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(post.id)}
+                          onChange={() => setSelectedIds((current) => current.includes(post.id) ? current.filter((id) => id !== post.id) : [...current, post.id])}
+                          aria-label={`Selecionar ${post.title}`}
+                          className="size-4 shrink-0 accent-brand-orange"
+                        />
+                        <span className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 text-[11px] font-bold text-gray-300">
+                          <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" />
+                          {CATEGORY_LABELS[post.category] || post.category}
+                        </span>
+                        {post.is_published ? (
+                          <span className="inline-block rounded px-2 py-0.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                            Publicada
+                          </span>
+                        ) : (
+                          <span className="inline-block rounded px-2 py-0.5 text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                            Em revisão
+                          </span>
+                        )}
+                      </div>
+
+                      {/* MENU DE AÇÕES MOBILE */}
+                      <details className="group/actions relative inline-block text-left">
+                        <summary
+                          className="flex min-h-9 min-w-9 cursor-pointer list-none items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-sm font-bold text-gray-400 hover:text-white [&::-webkit-details-marker]:hidden"
+                          aria-label={`Abrir ações de ${post.title}`}
+                        >
+                          ⋮
+                        </summary>
+                        <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#15161b] p-1.5 shadow-xl shadow-black/60">
+                          <Link
+                            href={`/admin/edit?id=${post.id}`}
+                            className="flex min-h-10 items-center px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.06]"
+                          >
+                            Editar matéria
+                          </Link>
+                          {post.is_published && (
+                            <>
+                              <Link
+                                href={`/posts/${post.slug}`}
+                                target="_blank"
+                                className="flex min-h-10 items-center px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.06]"
+                              >
+                                Ver no portal ↗
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.currentTarget.closest("details")?.removeAttribute("open");
+                                  void postPublishedArticleOnBrickboard(post);
+                                }}
+                                disabled={brickboardPostingId === post.id}
+                                className="flex min-h-10 w-full items-center px-3 text-left text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10 disabled:opacity-60"
+                              >
+                                {brickboardPostingId === post.id ? "Publicando..." : "Publicar no Brickboard"}
+                              </button>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.currentTarget.closest("details")?.removeAttribute("open");
+                              setDeleteCandidate(post);
+                              setDeleteError(null);
+                            }}
+                            className="flex min-h-10 w-full items-center px-3 text-left text-xs font-bold text-red-400 transition-colors hover:bg-red-500/10"
+                          >
+                            Excluir matéria
+                          </button>
+                        </div>
+                      </details>
+                    </div>
+
+                    {/* CORPO DO CARD: CAPA + TÍTULO */}
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-[#08090C] border border-white/5">
+                        {post.image_url ? (
+                          <img loading="lazy" decoding="async" src={post.image_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[10px] text-gray-600 font-semibold">Sem capa</div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/admin/edit?id=${post.id}`} className="block">
+                          <h3 className="font-heading text-xs font-bold uppercase leading-snug text-white line-clamp-2 hover:text-brand-orange transition-colors">
+                            {post.title}
+                          </h3>
+                        </Link>
+                        <p className="mt-1 text-[11px] text-gray-500">
+                          {post.author_name.split(" ")[0]} • {formatDate(post.published_at || post.updated_at)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* BOTÕES DE AÇÃO RÁPIDA NO MOBILE */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      {post.is_published ? (
+                        <>
+                          <Link
+                            href={`/posts/${post.slug}`}
+                            target="_blank"
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-xs font-bold text-gray-200 transition-colors hover:bg-white/10 active:scale-95"
+                          >
+                            Ver ao vivo ↗
+                          </Link>
+                          <Link
+                            href={`/admin/edit?id=${post.id}`}
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-orange/15 text-xs font-bold text-brand-orange border border-brand-orange/30 transition-colors hover:bg-brand-orange hover:text-white active:scale-95"
+                          >
+                            Editar
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href={`/admin/edit?id=${post.id}`}
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg border border-brand-orange/50 bg-brand-orange/10 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white active:scale-95"
+                          >
+                            Continuar edição
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPublishCandidate(post);
+                              setPublishOnBrickboard(false);
+                              setPublishError(null);
+                            }}
+                            disabled={publishingId === post.id}
+                            className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white transition-colors hover:bg-emerald-400 disabled:opacity-60 active:scale-95"
+                          >
+                            {publishingId === post.id ? "Publicando..." : "Publicar"}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+
+          {/* TABELA DE MATÉRIAS NO DESKTOP (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-white/10 text-xs uppercase font-bold text-gray-500 bg-white/[0.01]">
                 <tr>
@@ -706,7 +860,8 @@ export default function AdminDashboard() {
             <span className="shrink-0">Mostrando {filteredPosts.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filteredPosts.length)} de {filteredPosts.length} matérias</span>
             <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
               <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
                 className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
@@ -715,6 +870,7 @@ export default function AdminDashboard() {
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
                   key={page}
+                  type="button"
                   onClick={() => setCurrentPage(page)}
                   className={`flex min-h-11 min-w-11 items-center justify-center rounded font-bold transition-colors ${
                     currentPage === page ? "bg-brand-orange text-white" : "border border-white/10 text-gray-400 hover:bg-white/5"
@@ -724,7 +880,8 @@ export default function AdminDashboard() {
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
