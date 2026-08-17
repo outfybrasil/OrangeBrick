@@ -47,6 +47,9 @@ next-env.d.ts
 .impeccable/
 /tmp/backups/
 *.png
+!public/*.png
+!public/**/*.png
+!src/app/*.png
 !public/icons/achievements/
 !public/icons/achievements/*.png
 /public/editorial/2026-08-10/drive-covers/*.jpg
