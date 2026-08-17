@@ -4,6 +4,7 @@ import { sendPostForApproval } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 function authorized(request: Request): boolean {
   const cronSecret = process.env.CRON_SECRET;

@@ -3,6 +3,7 @@ import { handleTelegramWebhook } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const secretHeader = request.headers.get("x-telegram-bot-api-secret-token");
