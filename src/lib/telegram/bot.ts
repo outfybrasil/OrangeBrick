@@ -189,29 +189,46 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
     }
 
     if (action === "discard" && postId) {
-      await supabase.from("posts").delete().eq("id", postId);
+      try {
+        const { error } = await supabase.from("posts").delete().eq("id", postId);
+        if (error) {
+          await sendTelegramApi("answerCallbackQuery", {
+            callback_query_id: cq.id,
+            text: `❌ Erro ao descartar: ${error.message}`,
+            show_alert: true,
+          });
+          return;
+        }
 
-      await sendTelegramApi("answerCallbackQuery", {
-        callback_query_id: cq.id,
-        text: "🗑️ Rascunho descartado com sucesso.",
-        show_alert: true,
-      });
-
-      if (cq.message?.photo) {
-        await sendTelegramApi("editMessageCaption", {
-          chat_id: cq.message.chat.id,
-          message_id: cq.message.message_id,
-          caption: `${cq.message.caption || ""}\n\n❌ *RASCUNHO DESCARTADO*`,
-          parse_mode: "Markdown",
-          reply_markup: { inline_keyboard: [] },
+        await sendTelegramApi("answerCallbackQuery", {
+          callback_query_id: cq.id,
+          text: "🗑️ Rascunho descartado com sucesso!",
+          show_alert: true,
         });
-      } else if (cq.message) {
-        await sendTelegramApi("editMessageText", {
-          chat_id: cq.message.chat.id,
-          message_id: cq.message.message_id,
-          text: `${cq.message.text || ""}\n\n❌ *RASCUNHO DESCARTADO*`,
-          parse_mode: "Markdown",
-          reply_markup: { inline_keyboard: [] },
+
+        if (cq.message?.photo) {
+          await sendTelegramApi("editMessageCaption", {
+            chat_id: cq.message.chat.id,
+            message_id: cq.message.message_id,
+            caption: `${cq.message.caption || ""}\n\n🗑️ *RASCUNHO DESCARTADO*`,
+            parse_mode: "Markdown",
+            reply_markup: { inline_keyboard: [] },
+          });
+        } else if (cq.message) {
+          await sendTelegramApi("editMessageText", {
+            chat_id: cq.message.chat.id,
+            message_id: cq.message.message_id,
+            text: `${cq.message.text || ""}\n\n🗑️ *RASCUNHO DESCARTADO*`,
+            parse_mode: "Markdown",
+            reply_markup: { inline_keyboard: [] },
+          });
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Erro ao processar descarte";
+        await sendTelegramApi("answerCallbackQuery", {
+          callback_query_id: cq.id,
+          text: `❌ Falha: ${msg}`,
+          show_alert: true,
         });
       }
       return;
