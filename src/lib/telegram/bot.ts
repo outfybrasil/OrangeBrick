@@ -157,7 +157,8 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
       await sendTelegramApi("answerCallbackQuery", {
         callback_query_id: cq.id,
-        text: "✅ Publicado com sucesso!",
+        text: "🎉 Matéria publicada com sucesso no Orange Brick!",
+        show_alert: true,
       });
 
       const siteUrl = getSiteUrl();
@@ -192,7 +193,8 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
       await sendTelegramApi("answerCallbackQuery", {
         callback_query_id: cq.id,
-        text: "🗑️ Rascunho descartado.",
+        text: "🗑️ Rascunho descartado com sucesso.",
+        show_alert: true,
       });
 
       if (cq.message?.photo) {
