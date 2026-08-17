@@ -226,38 +226,95 @@ async function fetchNewsArticleText(url: string): Promise<string> {
   }
 }
 
-async function fetchTopDailyGamingNews(): Promise<{ title: string; link: string; summary: string } | null> {
-  const feeds = [
-    "https://www.gematsu.com/feed",
-    "https://br.ign.com/feed.xml",
-    "https://www.videogameschronicle.com/feed/",
-    "https://www.eurogamer.net/feed",
-    "https://www.gamespot.com/feeds/mashup/",
-  ];
-  for (const feedUrl of feeds) {
+const NEWS_SOURCES = [
+  { name: "Gematsu", url: "https://www.gematsu.com/feed" },
+  { name: "IGN Brasil", url: "https://br.ign.com/feed.xml" },
+  { name: "VGC", url: "https://www.videogameschronicle.com/feed/" },
+  { name: "Eurogamer", url: "https://www.eurogamer.net/feed" },
+  { name: "GameSpot", url: "https://www.gamespot.com/feeds/mashup/" },
+  { name: "Push Square", url: "https://www.pushsquare.com/feeds/latest" },
+  { name: "Pure Xbox", url: "https://www.purexbox.com/feeds/latest" },
+  { name: "Nintendo Life", url: "https://www.nintendolife.com/feeds/latest" },
+];
+
+const STOPWORDS_REGEX = /(deal|sale|discount|price|guide|walkthrough|promoção|desconto|podcast|where to buy|review:)/i;
+
+function scoreNewsItem(title: string, summary: string): number {
+  let s = 0;
+  const t = `${title} ${summary}`.toLowerCase();
+  if (t.includes("anuncia") || t.includes("announce")) s += 4;
+  if (t.includes("confirma") || t.includes("confirm")) s += 3;
+  if (t.includes("reveal") || t.includes("revela")) s += 3;
+  if (t.includes("trailer") || t.includes("gameplay")) s += 2;
+  if (t.includes("release") || t.includes("lança")) s += 2;
+  if (t.includes("adquire") || t.includes("acquire") || t.includes("comprar")) s += 3;
+  if (t.includes("playstation") || t.includes("sony") || t.includes("ps5") || t.includes("ps6")) s += 2;
+  if (t.includes("xbox") || t.includes("microsoft") || t.includes("game pass")) s += 2;
+  if (t.includes("nintendo") || t.includes("switch")) s += 2;
+  if (t.includes("gta") || t.includes("rockstar")) s += 4;
+  if (STOPWORDS_REGEX.test(t)) s -= 5;
+  return s;
+}
+
+async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<{ title: string; link: string; summary: string } | null> {
+  const now = Date.now();
+  const maxAgeMs = 28 * 60 * 60 * 1000; // Máximo 28 horas atrás (notícias de hoje e últimas horas)
+  const items: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
+
+  for (const src of NEWS_SOURCES) {
     try {
-      const res = await fetch(feedUrl, { signal: AbortSignal.timeout(8000) });
+      const res = await fetch(src.url, {
+        headers: { "User-Agent": "OrangeBrick/1.0" },
+        signal: AbortSignal.timeout(8000),
+      });
       if (!res.ok) continue;
       const xml = await res.text();
-      const itemMatch = xml.match(/<item>([\s\S]*?)<\/item>/i);
-      if (itemMatch) {
-        const block = itemMatch[1];
+      const itemMatches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)];
+
+      for (const match of itemMatches) {
+        const block = match[1];
         const titleMatch = block.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i);
         const linkMatch = block.match(/<link>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/i);
         const descMatch = block.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/i);
+        const dateMatch = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
+
         if (titleMatch && linkMatch) {
-          return {
-            title: titleMatch[1].trim(),
-            link: linkMatch[1].trim(),
-            summary: descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "",
-          };
+          const rawDate = dateMatch ? new Date(dateMatch[1].trim()) : null;
+          const pubDate = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
+          const age = now - pubDate.getTime();
+
+          // Filtra estritamente apenas notícias recentes (do dia / últimas 28h)
+          if (age <= maxAgeMs) {
+            const title = titleMatch[1].replace(/<[^>]+>/g, "").trim();
+            const link = linkMatch[1].replace(/<[^>]+>/g, "").trim();
+            const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
+            const score = scoreNewsItem(title, summary);
+            if (score >= 0) {
+              items.push({ title, link, summary, score, pubDate });
+            }
+          }
         }
       }
     } catch {
       continue;
     }
   }
-  return null;
+
+  if (items.length === 0) return null;
+
+  // Ordena pelas notícias mais quentes e mais recentes
+  items.sort((a, b) => b.score - a.score || b.pubDate.getTime() - a.pubDate.getTime());
+
+  // Deduplicação contra o banco do Supabase: pega a primeira que ainda não foi coberta
+  for (const item of items) {
+    const slug = buildSlug(item.title);
+    const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
+    if (!existing) {
+      return item;
+    }
+  }
+
+  return items[0] || null;
 }
 
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
@@ -271,7 +328,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   } else if (options.topic) {
     userPrompt = `Pesquise a fundo e redija uma matéria jornalística completa para o Orange Brick sobre o seguinte tema:\n"${options.topic}".`;
   } else {
-    const topNews = await fetchTopDailyGamingNews();
+    const topNews = await fetchTopDailyGamingNews(supabase);
     if (topNews) {
       const articleText = await fetchNewsArticleText(topNews.link);
       userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${topNews.link}\nResumo/Conteúdo:\n${articleText || topNews.summary}`;
