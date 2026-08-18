@@ -1,6 +1,5 @@
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://orange-brick.vercel.app";
-const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET;
 
 if (!botToken) {
   console.error("❌ Erro: TELEGRAM_BOT_TOKEN não encontrado nas variáveis de ambiente");
@@ -13,12 +12,8 @@ console.log(`Configurando Webhook do Telegram para:\n${webhookUrl}\n`);
 const payload = {
   url: webhookUrl,
   allowed_updates: ["message", "callback_query"],
-  drop_pending_updates: false,
+  drop_pending_updates: true,
 };
-
-if (secretToken) {
-  payload.secret_token = secretToken.trim().replace(/^["']|["']$/g, "");
-}
 
 async function configureWebhook(retries = 3) {
   for (let i = 1; i <= retries; i++) {

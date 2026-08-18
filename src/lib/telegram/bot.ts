@@ -40,7 +40,7 @@ function getBotToken(): string {
 }
 
 function getAdminChatId(): string | null {
-  return process.env.TELEGRAM_ADMIN_CHAT_ID || null;
+  return process.env.TELEGRAM_ADMIN_CHAT_ID || "6057845516";
 }
 
 function getSiteUrl(): string {
