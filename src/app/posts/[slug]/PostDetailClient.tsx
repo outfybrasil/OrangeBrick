@@ -47,6 +47,9 @@ function PostContent({ post }: { post: Post }) {
 
   if (blocks) {
     const renderedUrls = new Set<string>();
+    if (post.image_url) {
+      renderedUrls.add(post.image_url);
+    }
 
     return (
       <div className="space-y-6">
@@ -388,6 +391,17 @@ export function PostArticle({ post, stats }: PostArticleProps) {
               </button>
             </div>
           </div>
+
+          {post.image_url && (
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-2xl bg-[#08090C] my-6">
+              <img
+                src={post.image_url}
+                alt={post.image_alt || post.title}
+                className="h-full w-full object-cover"
+                loading="eager"
+              />
+            </div>
+          )}
 
           <div className="mt-8" style={{ fontSize: `${readerScale}em` }}>
             <PostContent post={post} />
