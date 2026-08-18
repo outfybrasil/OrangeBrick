@@ -24,6 +24,13 @@ export interface TelegramUpdate {
   };
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function getBotToken(): string {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) {
@@ -76,13 +83,18 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
   const previewUrl = `${siteUrl}/posts/${post.slug}?preview=true`;
   const countText = wordCount ? ` | 📊 ${wordCount} palavras` : "";
 
-  const caption = `🔥 *NOVO RASCUNHO GERADO PELO GEMINI 2.0*\n\n` +
-    `📰 *${post.title}*\n\n` +
-    `🏷️ *Categoria:* #${post.category.toUpperCase()}${countText}\n` +
-    `✍️ *Autor:* ${post.author_name}\n\n` +
-    `📝 *Resumo:*\n${post.summary}\n\n` +
-    `🔗 [Abrir Pré-visualização](${previewUrl})\n\n` +
-    `Toque no botão abaixo para publicar no Orange Brick:`;
+  const safeTitle = escapeHtml(post.title);
+  const safeCategory = escapeHtml(post.category.toUpperCase());
+  const safeAuthor = escapeHtml(post.author_name || "The Brick");
+  const safeSummary = escapeHtml(post.summary || "");
+
+  const caption = `🔥 <b>NOVO RASCUNHO GERADO PELO GEMINI</b>\n\n` +
+    `📰 <b>${safeTitle}</b>\n\n` +
+    `🏷️ <b>Categoria:</b> #${safeCategory}${countText}\n` +
+    `✍️ <b>Autor:</b> ${safeAuthor}\n\n` +
+    `📝 <b>Resumo:</b>\n${safeSummary}\n\n` +
+    `🔗 <a href="${previewUrl}">Abrir Pré-visualização no Site</a>\n\n` +
+    `Toque no botão abaixo para publicar ou descartar:`;
 
   const inlineKeyboard = [
     [
@@ -95,19 +107,23 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
   ];
 
   if (post.image_url) {
-    return sendTelegramApi("sendPhoto", {
+    const photoRes = await sendTelegramApi("sendPhoto", {
       chat_id: adminChatId,
       photo: post.image_url,
       caption,
-      parse_mode: "Markdown",
+      parse_mode: "HTML",
       reply_markup: { inline_keyboard: inlineKeyboard },
     });
+
+    if (photoRes.ok) {
+      return photoRes;
+    }
   }
 
   return sendTelegramApi("sendMessage", {
     chat_id: adminChatId,
     text: caption,
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
     reply_markup: { inline_keyboard: inlineKeyboard },
   });
 }
@@ -115,7 +131,6 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
 export async function handleTelegramWebhook(update: TelegramUpdate) {
   const adminChatId = getAdminChatId();
 
-  // 1. Tratamento de clique nos botões (callback_query)
   if (update.callback_query) {
     const cq = update.callback_query;
     const fromId = String(cq.from?.id);
@@ -168,8 +183,8 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         await sendTelegramApi("editMessageCaption", {
           chat_id: cq.message.chat.id,
           message_id: cq.message.message_id,
-          caption: `${cq.message.caption || ""}\n\n✅ *PUBLICADO NO ORANGE BRICK!*\n🔗 ${liveUrl}`,
-          parse_mode: "Markdown",
+          caption: `${cq.message.caption || ""}\n\n✅ <b>PUBLICADO NO ORANGE BRICK!</b>\n🔗 <a href="${liveUrl}">${liveUrl}</a>`,
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [[{ text: "🎉 Ver Post ao Vivo", url: liveUrl }]],
           },
@@ -178,8 +193,8 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         await sendTelegramApi("editMessageText", {
           chat_id: cq.message.chat.id,
           message_id: cq.message.message_id,
-          text: `${cq.message.text || ""}\n\n✅ *PUBLICADO NO ORANGE BRICK!*\n🔗 ${liveUrl}`,
-          parse_mode: "Markdown",
+          text: `${cq.message.text || ""}\n\n✅ <b>PUBLICADO NO ORANGE BRICK!</b>\n🔗 <a href="${liveUrl}">${liveUrl}</a>`,
+          parse_mode: "HTML",
           reply_markup: {
             inline_keyboard: [[{ text: "🎉 Ver Post ao Vivo", url: liveUrl }]],
           },
@@ -210,16 +225,16 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
           await sendTelegramApi("editMessageCaption", {
             chat_id: cq.message.chat.id,
             message_id: cq.message.message_id,
-            caption: `${cq.message.caption || ""}\n\n🗑️ *RASCUNHO DESCARTADO*`,
-            parse_mode: "Markdown",
+            caption: `${cq.message.caption || ""}\n\n🗑️ <b>RASCUNHO DESCARTADO</b>`,
+            parse_mode: "HTML",
             reply_markup: { inline_keyboard: [] },
           });
         } else if (cq.message) {
           await sendTelegramApi("editMessageText", {
             chat_id: cq.message.chat.id,
             message_id: cq.message.message_id,
-            text: `${cq.message.text || ""}\n\n🗑️ *RASCUNHO DESCARTADO*`,
-            parse_mode: "Markdown",
+            text: `${cq.message.text || ""}\n\n🗑️ <b>RASCUNHO DESCARTADO</b>`,
+            parse_mode: "HTML",
             reply_markup: { inline_keyboard: [] },
           });
         }
@@ -235,27 +250,32 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
     }
   }
 
-  // 2. Tratamento de mensagens de texto e comandos
   if (update.message?.text) {
     const msg = update.message;
     const chatId = msg.chat.id;
     const fromId = String(msg.from?.id);
-    const text = msg.text?.trim() || "";
-    if (!text) return;
+    const rawText = msg.text?.trim() || "";
+    if (!rawText) return;
 
-    if (text === "/start" || text === "/ajuda") {
-      const welcome = `🧱 *Bot Editorial Orange Brick*\n\n` +
-        `Seu Chat ID: \`${fromId}\`\n\n` +
-        `📋 *Comandos disponíveis:*\n` +
-        `• Envie qualquer *link de notícia* para redigir a matéria automaticamente.\n` +
-        `• \`/gerar <tema>\` — Cria uma matéria completa sobre um jogo ou assunto específico.\n` +
-        `• \`/hoje\` — Apura a notícia mais importante do dia e cria o rascunho.\n\n` +
-        `💡 *Dica:* Copie o Chat ID acima e cole na variável \`TELEGRAM_ADMIN_CHAT_ID\` no seu \`.env.local\`.`;
+    const commandMatch = rawText.match(/^\/([a-zA-Z0-9_]+)(?:@\w+)?(?:\s+([\s\S]*))?$/);
+    const command = commandMatch ? commandMatch[1].toLowerCase() : "";
+    const commandArgs = commandMatch && commandMatch[2] ? commandMatch[2].trim() : "";
+
+    if (command === "start" || command === "ajuda" || command === "help") {
+      const welcome = `🧱 <b>Bot Editorial Orange Brick</b>\n\n` +
+        `Seu Chat ID: <code>${escapeHtml(fromId)}</code>\n\n` +
+        `📋 <b>Comandos disponíveis:</b>\n` +
+        `• <code>/hoje</code> — Apura e redige a principal matéria de games do dia.\n` +
+        `• <code>/gerar &lt;tema&gt;</code> — Redige matéria sobre um jogo ou assunto específico.\n` +
+        `• <code>/rascunhos</code> — Lista os últimos rascunhos pendentes de publicação.\n` +
+        `• <code>/status</code> — Verifica a conexão com a IA, Supabase e o site.\n` +
+        `• Envie qualquer <b>link de notícia</b> para redigir a matéria automaticamente.\n\n` +
+        `💡 <i>Para autorizar seu usuário, certifique-se que o Chat ID acima está configurado na variável <code>TELEGRAM_ADMIN_CHAT_ID</code>.</i>`;
 
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
         text: welcome,
-        parse_mode: "Markdown",
+        parse_mode: "HTML",
       });
       return;
     }
@@ -263,17 +283,93 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
     if (!adminChatId || fromId !== adminChatId) {
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: "⛔ *Acesso restrito.*\nEste bot é de uso privado do administrador do Orange Brick.",
-        parse_mode: "Markdown",
+        text: `⛔ <b>Acesso restrito.</b>\nEste bot é de uso privado do administrador do Orange Brick.\n\nSeu Chat ID: <code>${escapeHtml(fromId)}</code>`,
+        parse_mode: "HTML",
       });
       return;
     }
 
-    if (text === "/hoje" || text === "/radar") {
+    if (command === "status" || command === "ping") {
+      const geminiOk = Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_DRIVE_API_KEY);
+      let supabaseOk = false;
+      let pendingCount = 0;
+
+      try {
+        const supabase = getSupabaseAdmin();
+        const { count, error } = await supabase
+          .from("posts")
+          .select("id", { count: "exact", head: true })
+          .eq("is_published", false);
+        if (!error) {
+          supabaseOk = true;
+          pendingCount = count || 0;
+        }
+      } catch {
+        supabaseOk = false;
+      }
+
+      const statusMsg = `🧱 <b>Status do Sistema — Orange Brick</b>\n\n` +
+        `🤖 <b>Gemini IA:</b> ${geminiOk ? "✅ Conectado" : "❌ Chave ausente"}\n` +
+        `🗄️ <b>Supabase DB:</b> ${supabaseOk ? "✅ Operacional" : "❌ Erro de conexão"}\n` +
+        `📝 <b>Rascunhos pendentes:</b> ${pendingCount}\n` +
+        `🌐 <b>Site:</b> <a href="${getSiteUrl()}">${getSiteUrl()}</a>\n` +
+        `👤 <b>Admin ID:</b> <code>${adminChatId}</code>`;
+
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: "🤖 *Gemini 2.0 pesquisando as notícias mais importantes do dia...*\nAguarde cerca de 20 a 30 segundos enquanto busco fontes e imagens.",
-        parse_mode: "Markdown",
+        text: statusMsg,
+        parse_mode: "HTML",
+      });
+      return;
+    }
+
+    if (command === "rascunhos" || command === "pendentes" || command === "drafts") {
+      try {
+        const supabase = getSupabaseAdmin();
+        const { data: drafts, error } = await supabase
+          .from("posts")
+          .select("id, title, slug, category, created_at")
+          .eq("is_published", false)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (error || !drafts || drafts.length === 0) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: "📝 Não há rascunhos pendentes de aprovação no momento.",
+            parse_mode: "HTML",
+          });
+          return;
+        }
+
+        const siteUrl = getSiteUrl();
+        let listText = `📋 <b>Últimos rascunhos pendentes (${drafts.length}):</b>\n\n`;
+        drafts.forEach((d, idx) => {
+          const previewUrl = `${siteUrl}/posts/${d.slug}?preview=true`;
+          listText += `${idx + 1}. <b>${escapeHtml(d.title)}</b>\n   🏷️ #${escapeHtml(d.category.toUpperCase())} | <a href="${previewUrl}">Ver Prévia</a>\n\n`;
+        });
+
+        await sendTelegramApi("sendMessage", {
+          chat_id: chatId,
+          text: listText,
+          parse_mode: "HTML",
+        });
+      } catch (err: unknown) {
+        const msgErr = err instanceof Error ? err.message : "Erro ao listar rascunhos";
+        await sendTelegramApi("sendMessage", {
+          chat_id: chatId,
+          text: `❌ Falha ao buscar rascunhos: ${escapeHtml(msgErr)}`,
+          parse_mode: "HTML",
+        });
+      }
+      return;
+    }
+
+    if (command === "hoje" || command === "radar") {
+      await sendTelegramApi("sendMessage", {
+        chat_id: chatId,
+        text: "🤖 <b>Gemini pesquisando as notícias mais importantes do dia...</b>\nAguarde cerca de 20 a 30 segundos enquanto busco fontes e imagens.",
+        parse_mode: "HTML",
       });
 
       try {
@@ -283,58 +379,59 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: `❌ Falha ao gerar matéria do dia: ${msgErr}`,
+          text: `❌ Falha ao gerar matéria do dia:\n<code>${escapeHtml(msgErr)}</code>`,
+          parse_mode: "HTML",
         });
       }
       return;
     }
 
-    if (text.startsWith("/gerar ")) {
-      const topic = text.replace(/^\/gerar\s+/, "").trim();
-      if (!topic) {
+    if (command === "gerar") {
+      if (!commandArgs) {
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: "⚠️ Informe o tema. Exemplo: `/gerar GTA 6 trailer 2 adiado`",
-          parse_mode: "Markdown",
+          text: "⚠️ <b>Informe o tema ou jogo.</b>\n\nExemplo:\n<code>/gerar Trailer de revelação do GTA 6</code>\n<code>/gerar PlayStation 6 especificações e lançamento</code>",
+          parse_mode: "HTML",
         });
         return;
       }
 
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `🤖 *Gemini 2.0 redigindo matéria sobre:*\n"${topic}"...\nAguarde um instante.`,
-        parse_mode: "Markdown",
+        text: `🤖 <b>Gemini redigindo matéria sobre:</b>\n"<i>${escapeHtml(commandArgs)}</i>"...\nAguarde um instante.`,
+        parse_mode: "HTML",
       });
 
       try {
-        const result = await generateNewsDraft({ topic });
+        const result = await generateNewsDraft({ topic: commandArgs });
         await sendPostForApproval(result.post, result.wordCount);
       } catch (err: unknown) {
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: `❌ Falha ao gerar matéria: ${msgErr}`,
+          text: `❌ Falha ao gerar matéria:\n<code>${escapeHtml(msgErr)}</code>`,
+          parse_mode: "HTML",
         });
       }
       return;
     }
 
-    // Se o usuário apenas enviou um link de notícia
-    if (/^https?:\/\//i.test(text)) {
+    if (/^https?:\/\//i.test(rawText)) {
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: `🤖 *Gemini 2.0 analisando a URL e gerando a matéria com fotos oficiais...*\nAguarde cerca de 20 segundos.`,
-        parse_mode: "Markdown",
+        text: `🤖 <b>Gemini analisando a URL e gerando a matéria com fotos oficiais...</b>\nAguarde cerca de 20 segundos.`,
+        parse_mode: "HTML",
       });
 
       try {
-        const result = await generateNewsDraft({ sourceUrl: text });
+        const result = await generateNewsDraft({ sourceUrl: rawText });
         await sendPostForApproval(result.post, result.wordCount);
       } catch (err: unknown) {
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: `❌ Falha ao gerar notícia a partir do link: ${msgErr}`,
+          text: `❌ Falha ao gerar notícia a partir do link:\n<code>${escapeHtml(msgErr)}</code>`,
+          parse_mode: "HTML",
         });
       }
       return;
@@ -342,7 +439,8 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
-      text: `Envie um link de notícia ou use \`/gerar <tema>\` ou \`/hoje\`.`,
+      text: "Envie um link de notícia ou use os comandos:\n• <code>/hoje</code> — Notícia do dia\n• <code>/gerar &lt;tema&gt;</code> — Criar matéria\n• <code>/rascunhos</code> — Ver rascunhos\n• <code>/status</code> — Verificar sistema",
+      parse_mode: "HTML",
     });
   }
 }

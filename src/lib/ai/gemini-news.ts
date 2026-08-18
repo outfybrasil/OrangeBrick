@@ -359,7 +359,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     userPrompt += ` A categoria desejada é '${options.category}'.`;
   }
 
-  const candidateModels = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash"];
+  const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
   let responseText = "";
   let lastError: Error | null = null;
 

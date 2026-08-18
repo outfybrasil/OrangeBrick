@@ -6,16 +6,15 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const secretHeader = request.headers.get("x-telegram-bot-api-secret-token");
-  const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  const secretHeader = request.headers.get("x-telegram-bot-api-secret-token")?.trim();
+  const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim().replace(/^["']|["']$/g, "");
 
-  if (expectedSecret && secretHeader !== expectedSecret) {
+  if (expectedSecret && secretHeader && secretHeader !== expectedSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const update = await request.json();
-    // Executa o processamento do webhook
     await handleTelegramWebhook(update);
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {
@@ -26,5 +25,8 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ status: "Orange Brick Telegram Bot Webhook Active" });
+  return NextResponse.json({
+    status: "Orange Brick Telegram Bot Webhook Active",
+    timestamp: new Date().toISOString(),
+  });
 }
