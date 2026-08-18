@@ -81,13 +81,113 @@ function validateNoCorruptedCharacters(text: string) {
   }
 }
 
+const CURATED_GAMING_ASSETS: Record<string, string[]> = {
+  playstation: [
+    "https://upload.wikimedia.org/wikipedia/commons/8/88/Immagine_Playstation_5.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/f/f4/PlayStation_5_and_DualSense_%282%29.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_5_and_DualSense.jpg",
+    "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1920&q=80",
+  ],
+  xbox: [
+    "https://upload.wikimedia.org/wikipedia/commons/4/43/Xbox-Series-S-Set.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/e/eb/Xbox-Series-X-Set.jpg",
+    "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?auto=format&fit=crop&w=1920&q=80",
+  ],
+  nintendo: [
+    "https://upload.wikimedia.org/wikipedia/commons/8/88/Nintendo-Switch-wJoyCons-BlRd-Standing-FL.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/5/5e/Nintendo_Switch_OLED_model.jpg",
+    "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1612287232230-08f376cf7446?auto=format&fit=crop&w=1920&q=80",
+  ],
+  pc: [
+    "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80",
+  ],
+  action: [
+    "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1552824722-ddab1374e622?auto=format&fit=crop&w=1920&q=80",
+  ],
+  future: [
+    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1920&q=80",
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80",
+  ],
+};
+
+function getCuratedGamingFallback(subject: string): string[] {
+  const s = subject.toLowerCase();
+  if (s.includes("playstation") || s.includes("ps5") || s.includes("sony") || s.includes("dual")) {
+    return CURATED_GAMING_ASSETS.playstation;
+  }
+  if (s.includes("xbox") || s.includes("microsoft") || s.includes("game pass") || s.includes("series x")) {
+    return CURATED_GAMING_ASSETS.xbox;
+  }
+  if (s.includes("nintendo") || s.includes("switch") || s.includes("mario") || s.includes("zelda")) {
+    return CURATED_GAMING_ASSETS.nintendo;
+  }
+  if (s.includes("pc") || s.includes("nvidia") || s.includes("rtx") || s.includes("hardware") || s.includes("geforce")) {
+    return CURATED_GAMING_ASSETS.pc;
+  }
+  if (s.includes("cyberpunk") || s.includes("sci-fi") || s.includes("gta") || s.includes("futur")) {
+    return [...CURATED_GAMING_ASSETS.future, ...CURATED_GAMING_ASSETS.action];
+  }
+  return [...CURATED_GAMING_ASSETS.action, ...CURATED_GAMING_ASSETS.playstation, ...CURATED_GAMING_ASSETS.xbox];
+}
+
+async function searchWikimediaImages(query: string): Promise<string[]> {
+  try {
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url|mime|dimensions&format=json`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "OrangeBrickEditorialBot/1.0 (contact@orangebrick.com.br)" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const pages = Object.values(data.query?.pages || {});
+    return pages
+      .map((p: unknown) => {
+        const page = p as { imageinfo?: Array<{ url?: string; mime?: string; width?: number }> };
+        const info = page.imageinfo?.[0];
+        if (!info || !info.url) return null;
+        if (info.mime && !/^(image\/(jpeg|png|webp|jpg))$/i.test(info.mime)) return null;
+        if (info.width && info.width < 500) return null;
+        return info.url;
+      })
+      .filter((u): u is string => Boolean(u));
+  } catch {
+    return [];
+  }
+}
+
+async function searchOpenverseImages(query: string): Promise<string[]> {
+  try {
+    const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&page_size=6`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "OrangeBrickEditorialBot/1.0" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || [])
+      .map((r: { url?: string }) => r.url)
+      .filter((u: unknown): u is string => typeof u === "string" && !/\.(svg|pdf|webm|mp4)$/i.test(u));
+  } catch {
+    return [];
+  }
+}
+
 async function searchDuckDuckGoImages(query: string): Promise<string[]> {
   try {
     const tokenRes = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&t=h_&iax=images&ia=images`, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(6000),
     });
     if (!tokenRes.ok) return [];
     const tokenHtml = await tokenRes.text();
@@ -100,29 +200,44 @@ async function searchDuckDuckGoImages(query: string): Promise<string[]> {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Referer": "https://duckduckgo.com/",
       },
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(8000),
     });
     if (!apiRes.ok) return [];
     const data = (await apiRes.json()) as { results?: { image?: string }[] };
     return (data.results || [])
       .map((r) => r.image)
-      .filter((u): u is string => typeof u === "string" && !/(unsplash|pexels|pixabay)\.com/i.test(u));
+      .filter((u): u is string => typeof u === "string" && !/\.(svg|pdf|webm|mp4)$/i.test(u));
   } catch {
     return [];
   }
 }
 
+async function fetchMultiSourceCandidates(query: string): Promise<string[]> {
+  const results: string[] = [];
+  const [wiki, openverse, ddg] = await Promise.allSettled([
+    searchWikimediaImages(query),
+    searchOpenverseImages(query),
+    searchDuckDuckGoImages(query),
+  ]);
+
+  if (wiki.status === "fulfilled") results.push(...wiki.value);
+  if (openverse.status === "fulfilled") results.push(...openverse.value);
+  if (ddg.status === "fulfilled") results.push(...ddg.value);
+
+  return [...new Set(results)];
+}
+
 async function downloadAndProcessImage(url: string): Promise<{ buffer: Buffer; width: number; height: number } | null> {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
       cache: "no-store",
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(12000),
     });
     if (!res.ok) return null;
     const input = Buffer.from(await res.arrayBuffer());
     const original = await sharp(input).metadata();
-    if (!original.width || !original.height || original.width < 800 || original.height < 450) {
+    if (!original.width || !original.height || original.width < 500 || original.height < 300) {
       return null;
     }
     const output = await sharp(input)
@@ -158,57 +273,58 @@ async function uploadToSupabaseStorage(
 }
 
 const EDITORIAL_SYSTEM_INSTRUCTION = `
-Você é o editor-chefe do portal Orange Brick (portal brasileiro de notícias sobre videogames, cultura gamer, lançamentos e hardware).
-Seu objetivo é redigir matérias empolgantes, aprofundadas e 100% autorais sobre JOGOS, trailers, mecânicas de gameplay, revelações e grandes lançamentos.
+Você é o editor-chefe do portal Orange Brick (portal brasileiro de notícias sobre videogames, lançamentos, hardware e cultura gamer).
+Seu objetivo é redigir matérias completas, aprofundadas, 100% autorais e envolventes sobre jogos, trailers, mecânicas de gameplay e lançamentos.
 
-DIRETRIZES EDITORIAIS OBRIGATÓRIAS (FOCO TOTAL EM JOGOS):
-1. FOCO NO JOGADOR (GAMER FIRST):
-   - Priorize sempre o JOGO: combate, história, gráficos, mecânicas, novidades de jogabilidade, estúdios de desenvolvimento, plataformas e datas de lançamento.
-   - Evite matérias corporativas secas sobre balanços financeiros ou reuniões de acionistas a menos que tragam anúncios diretos de jogos.
-   - O tom deve ser direto, empolgante, bem-informado e apaixonado por games. Sem clichês genéricos de IA (evite frases prontas como "no vasto universo dos games", "uma reviravolta emocionante").
-   - Use negrito com moderação, destacando nomes de estúdios, termos de mecânicas e personagens.
+DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
+1. IDENTIDADE E AUTORIA:
+   - Pseudônimo do autor: "The Brick"
+   - Tag de autor: "Editor-Chefe"
+   - Tom de voz: direto, ágil, técnico e empolgante. Sem frases prontas clichês de IA (evite "no vasto universo dos games", "uma reviravolta emocionante").
+   - USO MODERADO DE NEGRITOS: use negrito apenas para termos ou dados realmente importantes de forma natural e humana. Nunca coloque negritos artificiais repetitivos em palavras soltas.
 
-2. IDIOMA & NOMES:
+2. ESTRUTURA MODULAR DE BLOCOS:
+   - Bloco 1 (Introdução): Fato principal curto, objetivo e instigante nas primeiras 3 a 5 linhas.
+   - Bloco 2 (Imagem 1): Ilustração de meio após a introdução com legenda detalhada e coerente com a cena.
+   - Bloco 3 (Desenvolvimento Técnico): Fatos, números, jogabilidade, mecânicas, combate, história e detalhes do estúdio estruturados com subtítulo "## Subtítulo".
+   - Bloco 4 (Imagem 2): Ilustração secundária (ângulo complementar, cenário, chefe ou tecnologia) com legenda.
+   - Bloco 5 (Conclusão e Debate): Encerramento do artigo com convite direto para os leitores debaterem nos comentários e reações, seguido de linha divisória "---" e atribuição da fonte:
+     "Fonte: [Nome do Veículo](https://link-da-fonte.com)"
+
+3. COERÊNCIA E DIRETRIZES DE IMAGENS:
+   - As imagens devem fazer pleno sentido com a notícia e OBRIGATORIAMENTE com a legenda descritiva.
+   - Forneça termos de busca precisos em inglês para capa, imagem 1 e imagem 2.
+   - Capa: Arte oficial de divulgação, Key Art 4K ou pôster oficial do jogo.
+   - Imagem 1: Screenshot real de gameplay / combate / ação do jogo.
+   - Imagem 2: Screenshot de cenário, chefe, vilão ou detalhe complementar do jogo.
+   - Todas as 3 imagens devem ser distintas entre si.
+   - As legendas devem terminar com "(Foto: Divulgação/Oficial)" ou "(Imagem ilustrativa)".
+
+4. IDIOMA E NOMES:
    - Português do Brasil (PT-BR) impecável.
-   - Nomes de jogos e marcas SEMPRE no original em inglês (ex: Phantom Blade Zero, Kingdom Hearts 4, Fatal Fury: City of the Wolves, Grand Theft Auto VI, Monster Hunter Wilds, Doom: The Dark Ages). NUNCA traduza nomes de jogos.
+   - Nomes de jogos e marcas SEMPRE no original em inglês (ex: Phantom Blade Zero, Grand Theft Auto VI, Monster Hunter Wilds, Doom: The Dark Ages). NUNCA traduza nomes de jogos.
    - Datas e meses em português (ex: "27 de Agosto", "15 de Outubro").
-   - NUNCA use caracteres CJK (chinês/japonês/coreano) nem caracteres especiais corrompidos.
+   - NUNCA utilize caracteres CJK (chinês/japonês/coreano) nem entidades corrompidas.
 
-3. DIRETRIZES ESTRITAS DE IMAGENS:
-   - IMAGENS 100% OFICIAIS DE JOGOS:
-     * Capa: Arte oficial de capa (Key Art 4K), pôster principal oficial ou arte de divulgação oficial do jogo.
-     * Imagem 1: Screenshot real de gameplay / combate / ação in-game capturada direto do jogo.
-     * Imagem 2: Screenshot de cenário, exploração, vilão, chefe ou cena cinematográfica oficial diferente da primeira.
-   - AVISO NA LEGENDA:
-     * Para imagens oficiais de divulgação/gameplay da desenvolvedora: termine a legenda com '(Foto: Divulgação/Oficial)'.
-     * Caso alguma imagem seja conceitual ou gerada por IA: inclua '(Imagem meramente ilustrativa)'.
-
-4. ESTRUTURA DO ARTIGO (700 A 1.000 PALAVRAS):
-   - [Bloco 1 - text]: Gancho forte, revelação principal do jogo, o que foi mostrado no trailer ou anúncio e por que os jogadores estão empolgados.
-   - [Bloco 2 - image_query]: Termo em inglês para a 1ª imagem de gameplay oficial (ex: "Phantom Blade Zero official in-game gameplay combat screenshot 4k").
-   - [Bloco 3 - text]: Desenvolvimento profundo com subtítulo ## (detalhes de jogabilidade, mecânicas, combate, história, declarações de diretores/produtores do estúdio).
-   - [Bloco 4 - image_query]: Termo em inglês para a 2ª imagem oficial de cenário/boss (ex: "Phantom Blade Zero official boss fight environment screenshot 4k").
-   - [Bloco 5 - text]: Plataformas confirmadas (PS5, Xbox, PC, Switch 2), janela de lançamento, impacto na comunidade e citação da fonte: **Fonte:** [Nome da Fonte](URL da fonte).
-
-5. SCHEMA JSON DE SAÍDA (RESPONDA APENAS O JSON PURO):
-   {
-     "title": "TÍTULO EM CAIXA ALTA COM GANCHO FORTE (MÁX 70 CARACTERES)",
-     "summary": "Uma frase de ~140 caracteres: o que foi revelado sobre o jogo + por que importa para os gamers.",
-     "category": "breaking | hardware | industry | review | opinion",
-     "source_name": "Nome da fonte (ex: Gematsu, IGN, VGC, PlayStation Blog)",
-     "source_url": "URL original da notícia",
-     "cover_image_query": "Termo de busca para a arte oficial de capa/Key Art 4K em 16:9 (ex: 'Phantom Blade Zero official key art 4k')",
-     "cover_alt": "Alt text descritivo da arte de capa",
-     "image_1_query": "Termo de busca para screenshot oficial de combate/gameplay (ex: 'Phantom Blade Zero in-game combat gameplay screenshot 4k')",
-     "image_1_alt": "Alt text descrevendo a cena de gameplay",
-     "image_1_caption": "Legenda detalhando o combate/ação do jogo. (Foto: Divulgação/Oficial)",
-     "image_2_query": "Termo de busca para screenshot oficial de cenário/chefe (ex: 'Phantom Blade Zero boss fight environment 4k')",
-     "image_2_alt": "Alt text descrevendo o cenário ou chefe",
-     "image_2_caption": "Legenda detalhando o mundo ou inimigo. (Foto: Divulgação/Oficial)",
-     "intro_text": "Texto do bloco 1...",
-     "development_text": "## Subtítulo\\n\\nTexto de desenvolvimento técnico e jogabilidade...",
-     "conclusion_text": "Texto do bloco final...\\n\\n**Fonte:** [Nome](URL)"
-   }
+5. SCHEMA JSON DE SAÍDA (RESPONDA EXCLUSIVAMENTE O JSON PURO):
+{
+  "title": "TÍTULO EM CAIXA ALTA COM GANCHO FORTE (MÁX 70 CARACTERES)",
+  "summary": "Uma frase de ~140 caracteres: o que foi revelado sobre o jogo + por que importa.",
+  "category": "breaking | hardware | industry | review | opinion",
+  "source_name": "Nome da fonte original (ex: Gematsu, IGN, VGC, PlayStation Blog)",
+  "source_url": "URL original da notícia",
+  "cover_image_query": "Termo de busca em inglês para a arte de capa/Key Art 4K (ex: 'The Witcher 4 official key art 4k')",
+  "cover_alt": "Alt text descritivo da arte de capa para acessibilidade e SEO",
+  "image_1_query": "Termo de busca em inglês para screenshot de gameplay/combate (ex: 'The Witcher 4 gameplay combat screenshot')",
+  "image_1_alt": "Alt text descrevendo a cena de gameplay",
+  "image_1_caption": "Legenda descritiva conectada com a cena de ação. (Foto: Divulgação/Oficial)",
+  "image_2_query": "Termo de busca em inglês para screenshot de cenário/mundo/boss (ex: 'The Witcher 4 environment world scenery')",
+  "image_2_alt": "Alt text descrevendo o cenário ou chefe",
+  "image_2_caption": "Legenda descritiva conectada com o mundo do jogo. (Foto: Divulgação/Oficial)",
+  "intro_text": "Texto da introdução (3 a 5 linhas)...",
+  "development_text": "## Subtítulo Principal\\n\\nTexto de desenvolvimento técnico com fatos, jogabilidade e detalhes...",
+  "conclusion_text": "Texto de conclusão e debate com a comunidade...\\n\\n---\\n\\nFonte: [Nome](URL)"
+}
 `;
 
 async function fetchNewsArticleText(url: string): Promise<string> {
@@ -243,7 +359,6 @@ function scoreNewsItem(title: string, summary: string): number {
   let s = 0;
   const t = `${title} ${summary}`.toLowerCase();
 
-  // Prioridade MASSIVA para matérias sobre JOGOS REAIS, GAMEPLAY, TRAILERS E LANÇAMENTOS
   if (t.includes("gameplay")) s += 10;
   if (t.includes("trailer")) s += 8;
   if (t.includes("anuncia") || t.includes("announce")) s += 7;
@@ -254,7 +369,6 @@ function scoreNewsItem(title: string, summary: string): number {
   if (t.includes("combate") || t.includes("combat") || t.includes("boss")) s += 5;
   if (t.includes("beta") || t.includes("closed beta")) s += 6;
 
-  // Franquias e títulos de grande apelo
   const HYPE_GAMES = [
     "phantom blade", "kingdom hearts", "fatal fury", "gta", "grand theft auto", "wolverine",
     "monster hunter", "elden ring", "death stranding", "resident evil", "silent hill",
@@ -268,7 +382,6 @@ function scoreNewsItem(title: string, summary: string): number {
     if (t.includes(game)) s += 10;
   }
 
-  // Penaliza matérias corporativas sem anúncio de jogo e guias comerciais
   if (t.includes("quarterly") || t.includes("earnings") || t.includes("shareholder") || t.includes("relatório financeiro")) s -= 8;
   if (STOPWORDS_REGEX.test(t)) s -= 12;
 
@@ -320,10 +433,8 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
 
   if (items.length === 0) return null;
 
-  // Ordena pelas notícias de jogos com maior pontuação de gameplay/hype
   items.sort((a, b) => b.score - a.score || b.pubDate.getTime() - a.pubDate.getTime());
 
-  // Deduplicação contra posts já criados no Supabase
   for (const item of items) {
     const slug = buildSlug(item.title);
     const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
@@ -351,7 +462,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       const articleText = await fetchNewsArticleText(topNews.link);
       userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${topNews.link}\nResumo/Conteúdo:\n${articleText || topNews.summary}`;
     } else {
-      userPrompt = `Apure e redija a matéria mais importante de games e indústria de hoje para o Orange Brick.`;
+      userPrompt = `Apure e redija a matéria mais importante de games e lançamentos de hoje para o Orange Brick.`;
     }
   }
 
@@ -425,7 +536,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     ? (parsed.category as PostCategory)
     : "industry";
   const authorName = options.authorName || "The Brick";
-  const authorTag = CATEGORY_TAGS[category];
+  const authorTag = "Editor-Chefe";
   const slug = buildSlug(rawTitle);
 
   validateNoCorruptedCharacters(rawTitle);
@@ -448,30 +559,31 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const coverQueries: string[] = [
     parsed.cover_image_query,
-    `${cleanSubject} official key art 4k wallpaper`,
-    `${cleanSubject} official game cover art 16:9`,
-    `${cleanSubject} promotional artwork 4k`,
+    `${cleanSubject} official game cover art`,
+    `${cleanSubject} official key art 4k`,
+    cleanSubject,
   ].filter((q): q is string => Boolean(q));
 
   const img1Queries: string[] = [
     parsed.image_1_query,
-    `${cleanSubject} official in-game gameplay combat screenshot 4k`,
-    `${cleanSubject} gameplay screenshot 1080p`,
-    `${cleanSubject} action combat screenshot`,
+    `${cleanSubject} gameplay screenshot`,
+    `${cleanSubject} action combat`,
+    `${cleanSubject} screenshot`,
   ].filter((q): q is string => Boolean(q));
 
   const img2Queries: string[] = [
     parsed.image_2_query,
-    `${cleanSubject} official world environment scenery screenshot 4k`,
-    `${cleanSubject} boss fight scene screenshot 4k`,
-    `${cleanSubject} cinematic scene official 4k`,
+    `${cleanSubject} environment world scenery`,
+    `${cleanSubject} boss cinematic scene`,
+    `${cleanSubject} character trailer`,
   ].filter((q): q is string => Boolean(q));
 
   const usedImageUrls = new Set<string>();
+  const fallbackPool = getCuratedGamingFallback(cleanSubject);
 
-  async function findAndUpload(queries: string[], prefix: string): Promise<string | null> {
+  async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
     for (const q of queries) {
-      const candidates = await searchDuckDuckGoImages(q);
+      const candidates = await fetchMultiSourceCandidates(q);
       for (const url of candidates) {
         if (usedImageUrls.has(url)) continue;
         const processed = await downloadAndProcessImage(url);
@@ -486,52 +598,65 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
         }
       }
     }
-    return null;
+
+    for (let i = 0; i < fallbackPool.length; i++) {
+      const idx = (fallbackIndex + i) % fallbackPool.length;
+      const url = fallbackPool[idx];
+      if (usedImageUrls.has(url)) continue;
+      const processed = await downloadAndProcessImage(url);
+      if (processed) {
+        try {
+          const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer);
+          usedImageUrls.add(url);
+          return uploadedUrl;
+        } catch {
+          continue;
+        }
+      }
+    }
+
+    return `https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80`;
   }
 
   const [coverUrl, img1Url, img2Url] = await Promise.all([
-    findAndUpload(coverQueries, "cover"),
-    findAndUpload(img1Queries, "body-1"),
-    findAndUpload(img2Queries, "body-2"),
+    findAndUpload(coverQueries, "cover", 0),
+    findAndUpload(img1Queries, "body-1", 1),
+    findAndUpload(img2Queries, "body-2", 2),
   ]);
+
+  const introText = (parsed.intro_text || "").trim();
+  const devText = (parsed.development_text || "").trim();
+  const conclusionText = (parsed.conclusion_text || "").trim();
 
   const blocks = [
     {
       id: "block-0",
       type: "text",
-      content: parsed.intro_text || "",
+      content: introText,
     },
-    ...(img1Url
-      ? [
-          {
-            id: "block-1",
-            type: "image",
-            url: img1Url,
-            alt: parsed.image_1_alt || rawTitle,
-            caption: parsed.image_1_caption || "",
-          },
-        ]
-      : []),
+    {
+      id: "block-1",
+      type: "image",
+      url: img1Url,
+      alt: parsed.image_1_alt || `${rawTitle} - Gameplay e Ação`,
+      caption: parsed.image_1_caption || `Cena de ação e jogabilidade. (Foto: Divulgação/Oficial)`,
+    },
     {
       id: "block-2",
       type: "text",
-      content: parsed.development_text || "",
+      content: devText,
     },
-    ...(img2Url
-      ? [
-          {
-            id: "block-3",
-            type: "image",
-            url: img2Url,
-            alt: parsed.image_2_alt || rawTitle,
-            caption: parsed.image_2_caption || "",
-          },
-        ]
-      : []),
+    {
+      id: "block-3",
+      type: "image",
+      url: img2Url,
+      alt: parsed.image_2_alt || `${rawTitle} - Detalhes e Ambientação`,
+      caption: parsed.image_2_caption || `Ambientação e detalhes visuais. (Foto: Divulgação/Oficial)`,
+    },
     {
       id: "block-4",
       type: "text",
-      content: parsed.conclusion_text || "",
+      content: conclusionText,
     },
   ];
 
@@ -550,7 +675,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
         summary,
         body: JSON.stringify(blocks),
         category,
-        image_url: coverUrl || img1Url || null,
+        image_url: coverUrl,
         image_alt: parsed.cover_alt || rawTitle,
         author_name: authorName,
         author_tag: authorTag,
