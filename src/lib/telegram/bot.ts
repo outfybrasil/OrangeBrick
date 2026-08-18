@@ -267,6 +267,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         `📋 <b>Comandos disponíveis:</b>\n` +
         `• <code>/hoje</code> — Apura e redige a principal matéria de games do dia.\n` +
         `• <code>/gerar &lt;tema&gt;</code> — Redige matéria sobre um jogo ou assunto específico.\n` +
+        `• <code>/corrigir [tema | todas]</code> — Corrige e insere 3 imagens 16:9 em matérias sem foto.\n` +
         `• <code>/rascunhos</code> — Lista os últimos rascunhos pendentes de publicação.\n` +
         `• <code>/status</code> — Verifica a conexão com a IA, Supabase e o site.\n` +
         `• Envie qualquer <b>link de notícia</b> para redigir a matéria automaticamente.\n\n` +
@@ -365,6 +366,46 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
       return;
     }
 
+    if (command === "corrigir" || command === "fix") {
+      await sendTelegramApi("sendMessage", {
+        chat_id: chatId,
+        text: "🛠️ <b>Iniciando correção e busca de imagens em alta definição...</b>\nAguarde alguns instantes enquanto processo as fotos.",
+        parse_mode: "HTML",
+      });
+
+      try {
+        const { fixPostImages } = await import("../ai/gemini-news.ts");
+        const fixedPosts = await fixPostImages(commandArgs || undefined);
+
+        if (fixedPosts.length === 0) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: "✅ Nenhuma matéria pendente de correção foi encontrada. Todas já possuem imagens válidas!",
+            parse_mode: "HTML",
+          });
+          return;
+        }
+
+        for (const post of fixedPosts) {
+          await sendPostForApproval(post);
+        }
+
+        await sendTelegramApi("sendMessage", {
+          chat_id: chatId,
+          text: `🎉 <b>Correção concluída com sucesso!</b>\nForam corrigidas <b>${fixedPosts.length}</b> matéria(s) com capa e 2 imagens internas em 16:9.`,
+          parse_mode: "HTML",
+        });
+      } catch (err: unknown) {
+        const msgErr = err instanceof Error ? err.message : "Erro ao corrigir imagens";
+        await sendTelegramApi("sendMessage", {
+          chat_id: chatId,
+          text: `❌ Falha ao corrigir imagens:\n<code>${escapeHtml(msgErr)}</code>`,
+          parse_mode: "HTML",
+        });
+      }
+      return;
+    }
+
     if (command === "hoje" || command === "radar") {
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
@@ -439,7 +480,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
-      text: "Envie um link de notícia ou use os comandos:\n• <code>/hoje</code> — Notícia do dia\n• <code>/gerar &lt;tema&gt;</code> — Criar matéria\n• <code>/rascunhos</code> — Ver rascunhos\n• <code>/status</code> — Verificar sistema",
+      text: "Envie um link de notícia ou use os comandos:\n• <code>/hoje</code> — Notícia do dia\n• <code>/gerar &lt;tema&gt;</code> — Criar matéria\n• <code>/corrigir [tema | todas]</code> — Corrigir imagens\n• <code>/rascunhos</code> — Ver rascunhos\n• <code>/status</code> — Verificar sistema",
       parse_mode: "HTML",
     });
   }

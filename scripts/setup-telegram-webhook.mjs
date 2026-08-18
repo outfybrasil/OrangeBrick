@@ -44,6 +44,7 @@ async function configureWebhook(retries = 3) {
   const commands = [
     { command: "hoje", description: "Apura e redige a principal matéria de games do dia" },
     { command: "gerar", description: "Cria matéria completa sobre um jogo ou tema específico" },
+    { command: "corrigir", description: "Corrige e insere 3 imagens 16:9 em matérias sem foto" },
     { command: "rascunhos", description: "Lista os últimos rascunhos pendentes" },
     { command: "status", description: "Verifica status da IA, banco de dados e site" },
     { command: "ajuda", description: "Mostra os comandos e instruções do bot" },

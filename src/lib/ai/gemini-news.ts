@@ -704,3 +704,186 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     sources,
   };
 }
+
+export async function fixPostImages(target?: string): Promise<Post[]> {
+  const supabase = getSupabaseAdmin();
+  let postsToFix: Post[] = [];
+
+  if (target && target.toLowerCase() !== "todas" && target.toLowerCase() !== "all" && target.toLowerCase() !== "ultimo" && target.toLowerCase() !== "recent") {
+    const { data: byIdOrSlug } = await supabase
+      .from("posts")
+      .select("*")
+      .or(`id.eq.${target},slug.eq.${target},title.ilike.%${target}%`)
+      .limit(1);
+    if (byIdOrSlug && byIdOrSlug.length > 0) {
+      postsToFix = byIdOrSlug as Post[];
+    }
+  } else if (target && (target.toLowerCase() === "todas" || target.toLowerCase() === "all")) {
+    const { data: allDrafts } = await supabase
+      .from("posts")
+      .select("*")
+      .or("image_url.is.null,image_url.eq.''")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (allDrafts && allDrafts.length > 0) {
+      postsToFix = allDrafts as Post[];
+    }
+  } else {
+    const { data: latest } = await supabase
+      .from("posts")
+      .select("*")
+      .or("image_url.is.null,image_url.eq.''")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (latest && latest.length > 0) {
+      postsToFix = latest as Post[];
+    } else {
+      const { data: anyLatest } = await supabase
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (anyLatest && anyLatest.length > 0) {
+        postsToFix = anyLatest as Post[];
+      }
+    }
+  }
+
+  if (postsToFix.length === 0) {
+    return [];
+  }
+
+  const updatedPosts: Post[] = [];
+
+  for (const post of postsToFix) {
+    const cleanSubject = post.title
+      .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
+      .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA).*$/i, "")
+      .trim();
+
+    const coverQueries = [
+      `${cleanSubject} official game cover art`,
+      `${cleanSubject} official key art 4k`,
+      cleanSubject,
+    ];
+    const img1Queries = [
+      `${cleanSubject} gameplay screenshot`,
+      `${cleanSubject} action combat`,
+      `${cleanSubject} screenshot`,
+    ];
+    const img2Queries = [
+      `${cleanSubject} environment world scenery`,
+      `${cleanSubject} boss cinematic scene`,
+      `${cleanSubject} character trailer`,
+    ];
+
+    const usedImageUrls = new Set<string>();
+    const fallbackPool = getCuratedGamingFallback(cleanSubject);
+
+    async function findAndUploadSingle(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
+      for (const q of queries) {
+        const candidates = await fetchMultiSourceCandidates(q);
+        for (const url of candidates) {
+          if (usedImageUrls.has(url)) continue;
+          const processed = await downloadAndProcessImage(url);
+          if (processed) {
+            try {
+              const uploadedUrl = await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer);
+              usedImageUrls.add(url);
+              return uploadedUrl;
+            } catch {
+              continue;
+            }
+          }
+        }
+      }
+
+      for (let i = 0; i < fallbackPool.length; i++) {
+        const idx = (fallbackIndex + i) % fallbackPool.length;
+        const url = fallbackPool[idx];
+        if (usedImageUrls.has(url)) continue;
+        const processed = await downloadAndProcessImage(url);
+        if (processed) {
+          try {
+            const uploadedUrl = await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer);
+            usedImageUrls.add(url);
+            return uploadedUrl;
+          } catch {
+            continue;
+          }
+        }
+      }
+
+      return "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80";
+    }
+
+    const [coverUrl, img1Url, img2Url] = await Promise.all([
+      findAndUploadSingle(coverQueries, "cover", 0),
+      findAndUploadSingle(img1Queries, "body-1", 1),
+      findAndUploadSingle(img2Queries, "body-2", 2),
+    ]);
+
+    let parsedBlocks: Array<{ id?: string; type: string; content?: string; url?: string; alt?: string; caption?: string }> = [];
+    try {
+      parsedBlocks = typeof post.body === "string" ? JSON.parse(post.body) : post.body || [];
+    } catch {
+      parsedBlocks = [];
+    }
+
+    const textBlocks = parsedBlocks.filter((b) => b.type === "text");
+    const introText = textBlocks[0]?.content || post.summary || "";
+    const devText = textBlocks[1]?.content || `## Detalhes e Novidades de ${cleanSubject}\n\nA matéria foi atualizada com detalhes completos e novas imagens oficiais de jogabilidade.`;
+    const conclusionText = textBlocks[2]?.content || textBlocks[textBlocks.length - 1]?.content || `O que você achou dessa novidade? Participe do debate deixando sua opinião nos comentários abaixo!\n\n---\n\nFonte: [Orange Brick News](https://orange-brick.vercel.app)`;
+
+    const newBlocks = [
+      {
+        id: "block-0",
+        type: "text",
+        content: introText,
+      },
+      {
+        id: "block-1",
+        type: "image",
+        url: img1Url,
+        alt: `${post.title} - Gameplay e Ação`,
+        caption: `Cena de ação e jogabilidade. (Foto: Divulgação/Oficial)`,
+      },
+      {
+        id: "block-2",
+        type: "text",
+        content: devText,
+      },
+      {
+        id: "block-3",
+        type: "image",
+        url: img2Url,
+        alt: `${post.title} - Detalhes e Ambientação`,
+        caption: `Ambientação e detalhes visuais. (Foto: Divulgação/Oficial)`,
+      },
+      {
+        id: "block-4",
+        type: "text",
+        content: conclusionText,
+      },
+    ];
+
+    const now = new Date().toISOString();
+    const { data: updated, error } = await supabase
+      .from("posts")
+      .update({
+        image_url: coverUrl,
+        image_alt: `${post.title} - Arte Oficial`,
+        body: JSON.stringify(newBlocks),
+        updated_at: now,
+      })
+      .eq("id", post.id)
+      .select("*")
+      .single();
+
+    if (!error && updated) {
+      updatedPosts.push(updated as Post);
+    }
+  }
+
+  return updatedPosts;
+}
