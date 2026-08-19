@@ -81,62 +81,85 @@ function validateNoCorruptedCharacters(text: string) {
   }
 }
 
-const CURATED_GAMING_ASSETS: Record<string, string[]> = {
+const OFFICIAL_HARDWARE_ASSETS: Record<string, string[]> = {
   playstation: [
     "https://upload.wikimedia.org/wikipedia/commons/8/88/Immagine_Playstation_5.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/f/f4/PlayStation_5_and_DualSense_%282%29.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_5_and_DualSense.jpg",
-    "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1920&q=80",
+    "https://upload.wikimedia.org/wikipedia/commons/7/77/Black_and_white_Playstation_5_base_edition_with_controller.png",
   ],
   xbox: [
     "https://upload.wikimedia.org/wikipedia/commons/4/43/Xbox-Series-S-Set.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/e/eb/Xbox-Series-X-Set.jpg",
-    "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?auto=format&fit=crop&w=1920&q=80",
+    "https://upload.wikimedia.org/wikipedia/commons/2/2b/Microsoft-Xbox-One-Console-Set.jpg",
   ],
   nintendo: [
     "https://upload.wikimedia.org/wikipedia/commons/8/88/Nintendo-Switch-wJoyCons-BlRd-Standing-FL.jpg",
     "https://upload.wikimedia.org/wikipedia/commons/5/5e/Nintendo_Switch_OLED_model.jpg",
-    "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1612287232230-08f376cf7446?auto=format&fit=crop&w=1920&q=80",
+    "https://upload.wikimedia.org/wikipedia/commons/0/07/Nintendo-Switch-wJoyCons-BlRd-Handheld-FL.jpg",
   ],
   pc: [
-    "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80",
-  ],
-  action: [
-    "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1552824722-ddab1374e622?auto=format&fit=crop&w=1920&q=80",
-  ],
-  future: [
-    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1920&q=80",
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80",
+    "https://upload.wikimedia.org/wikipedia/commons/a/a4/Custom-built_computer_with_GeForce_RTX_3080.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/3/30/NVIDIA_GeForce_RTX_4090_Founders_Edition.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/7/74/Custom_PC_with_transparent_side_panel.jpg",
   ],
 };
 
-function getCuratedGamingFallback(subject: string): string[] {
+function getHardwareFallback(subject: string): string[] {
   const s = subject.toLowerCase();
-  if (s.includes("playstation") || s.includes("ps5") || s.includes("sony") || s.includes("dual")) {
-    return CURATED_GAMING_ASSETS.playstation;
+  if (s.includes("playstation") || s.includes("ps5") || s.includes("sony") || s.includes("dualsense")) {
+    return OFFICIAL_HARDWARE_ASSETS.playstation;
   }
-  if (s.includes("xbox") || s.includes("microsoft") || s.includes("game pass") || s.includes("series x")) {
-    return CURATED_GAMING_ASSETS.xbox;
+  if (s.includes("xbox") || s.includes("microsoft") || s.includes("game pass") || s.includes("series x") || s.includes("series s")) {
+    return OFFICIAL_HARDWARE_ASSETS.xbox;
   }
   if (s.includes("nintendo") || s.includes("switch") || s.includes("mario") || s.includes("zelda")) {
-    return CURATED_GAMING_ASSETS.nintendo;
+    return OFFICIAL_HARDWARE_ASSETS.nintendo;
   }
-  if (s.includes("pc") || s.includes("nvidia") || s.includes("rtx") || s.includes("hardware") || s.includes("geforce")) {
-    return CURATED_GAMING_ASSETS.pc;
+  return OFFICIAL_HARDWARE_ASSETS.pc;
+}
+
+export async function fetchSteamGameImages(gameName: string): Promise<string[]> {
+  try {
+    const cleanName = gameName
+      .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
+      .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA|ANUNCIA).*$/i, "")
+      .replace(/[:\-].*$/, "")
+      .trim();
+
+    if (!cleanName || cleanName.length < 3) return [];
+
+    const searchUrl = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(cleanName)}&l=english&cc=US`;
+    const searchRes = await fetch(searchUrl, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!searchRes.ok) return [];
+    const searchData = (await searchRes.json()) as { items?: Array<{ id: number; name: string }> };
+    const firstItem = searchData.items?.[0];
+    if (!firstItem || !firstItem.id) return [];
+
+    const detailsUrl = `https://store.steampowered.com/api/appdetails?appids=${firstItem.id}&l=english`;
+    const detailsRes = await fetch(detailsUrl, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!detailsRes.ok) return [];
+    const detailsData = (await detailsRes.json()) as Record<string, { success: boolean; data?: { header_image?: string; screenshots?: Array<{ path_full?: string }> } }>;
+    const appInfo = detailsData[String(firstItem.id)]?.data;
+    if (!appInfo) return [];
+
+    const results: string[] = [];
+    if (appInfo.header_image) results.push(appInfo.header_image);
+    if (Array.isArray(appInfo.screenshots)) {
+      for (const ss of appInfo.screenshots) {
+        if (ss.path_full) results.push(ss.path_full);
+      }
+    }
+    return results;
+  } catch {
+    return [];
   }
-  if (s.includes("cyberpunk") || s.includes("sci-fi") || s.includes("gta") || s.includes("futur")) {
-    return [...CURATED_GAMING_ASSETS.future, ...CURATED_GAMING_ASSETS.action];
-  }
-  return [...CURATED_GAMING_ASSETS.action, ...CURATED_GAMING_ASSETS.playstation, ...CURATED_GAMING_ASSETS.xbox];
 }
 
 async function searchWikimediaImages(query: string): Promise<string[]> {
@@ -185,7 +208,7 @@ async function searchDuckDuckGoImages(query: string): Promise<string[]> {
   try {
     const tokenRes = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&t=h_&iax=images&ia=images`, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
       },
       signal: AbortSignal.timeout(6000),
     });
@@ -197,7 +220,7 @@ async function searchDuckDuckGoImages(query: string): Promise<string[]> {
     const apiUrl = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${vqd}&f=,,,size:wallpaper,,,&p=1`;
     const apiRes = await fetch(apiUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Referer": "https://duckduckgo.com/",
       },
       signal: AbortSignal.timeout(8000),
@@ -212,8 +235,12 @@ async function searchDuckDuckGoImages(query: string): Promise<string[]> {
   }
 }
 
-async function fetchMultiSourceCandidates(query: string): Promise<string[]> {
-  const results: string[] = [];
+async function fetchMultiSourceCandidates(query: string, sourceImages: string[] = []): Promise<string[]> {
+  const results: string[] = [...sourceImages];
+
+  const steam = await fetchSteamGameImages(query);
+  results.push(...steam);
+
   const [wiki, openverse, ddg] = await Promise.allSettled([
     searchWikimediaImages(query),
     searchOpenverseImages(query),
@@ -224,20 +251,23 @@ async function fetchMultiSourceCandidates(query: string): Promise<string[]> {
   if (openverse.status === "fulfilled") results.push(...openverse.value);
   if (ddg.status === "fulfilled") results.push(...ddg.value);
 
-  return [...new Set(results)];
+  return [...new Set(results.filter((u): u is string => typeof u === "string" && Boolean(u)))];
 }
 
 async function downloadAndProcessImage(url: string): Promise<{ buffer: Buffer; width: number; height: number } | null> {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      },
       cache: "no-store",
       signal: AbortSignal.timeout(12000),
     });
     if (!res.ok) return null;
     const input = Buffer.from(await res.arrayBuffer());
     const original = await sharp(input).metadata();
-    if (!original.width || !original.height || original.width < 500 || original.height < 300) {
+    if (!original.width || !original.height || original.width < 350 || original.height < 200) {
       return null;
     }
     const output = await sharp(input)
@@ -327,30 +357,75 @@ DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
 }
 `;
 
-async function fetchNewsArticleText(url: string): Promise<string> {
+interface ScrapedArticleData {
+  text: string;
+  images: string[];
+}
+
+async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
   try {
     const res = await fetch(url, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
       signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok) return "";
+    if (!res.ok) return { text: "", images: [] };
     const html = await res.text();
+
+    const images: string[] = [];
+
+    const ogMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i)
+      || html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i);
+    if (ogMatch && ogMatch[1]) {
+      images.push(ogMatch[1]);
+    }
+
+    const twMatch = html.match(/<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']/i)
+      || html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:image["']/i);
+    if (twMatch && twMatch[1] && !images.includes(twMatch[1])) {
+      images.push(twMatch[1]);
+    }
+
+    const imgMatches = [...html.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))(?:\?[^"']*)?["'][^>]*>/gi)];
+    for (const m of imgMatches) {
+      const src = m[1];
+      if (
+        !images.includes(src) &&
+        !/(logo|avatar|icon|badge|author|tracking|pixel|banner-ad|ads|sponsor|footer)/i.test(src)
+      ) {
+        images.push(src);
+      }
+    }
+
     const clean = html
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
       .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, "")
+      .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, "")
+      .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, "")
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-    return clean.slice(0, 4000);
+
+    return { text: clean.slice(0, 4500), images: images.slice(0, 10) };
   } catch {
-    return "";
+    return { text: "", images: [] };
   }
 }
 
 const GAMING_FEEDS = [
-  { name: "Gematsu Google", url: "https://news.google.com/rss/search?q=site:gematsu.com+when:1d&hl=en-US&gl=US&ceid=US:en" },
-  { name: "Google Games BR", url: "https://news.google.com/rss/search?q=(game+OR+jogo)+AND+(gameplay+OR+trailer+OR+anuncio+OR+lancamento+OR+revela)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419" },
-  { name: "IGN / VGC Gaming", url: "https://news.google.com/rss/search?q=(site:ign.com+OR+site:videogameschronicle.com+OR+site:eurogamer.net)+AND+(gameplay+OR+trailer+OR+announced+OR+reveal+OR+release+date)+when:1d&hl=en-US&gl=US&ceid=US:en" },
+  { name: "Gematsu", url: "https://www.gematsu.com/feed", lang: "en" },
+  { name: "IGN Brasil", url: "https://br.ign.com/feed.xml", lang: "pt" },
+  { name: "Eurogamer", url: "https://www.eurogamer.net/feed", lang: "en" },
+  { name: "VGC", url: "https://www.videogameschronicle.com/feed/", lang: "en" },
+  { name: "GameSpot", url: "https://www.gamespot.com/feeds/mashup/", lang: "en" },
+  { name: "Push Square", url: "https://www.pushsquare.com/feeds/latest", lang: "en" },
+  { name: "Pure Xbox", url: "https://www.purexbox.com/feeds/latest", lang: "en" },
+  { name: "Nintendo Life", url: "https://www.nintendolife.com/feeds/latest", lang: "en" },
+  { name: "Gematsu Google", url: "https://news.google.com/rss/search?q=site:gematsu.com+when:1d&hl=en-US&gl=US&ceid=US:en", lang: "en" },
+  { name: "Google Games BR", url: "https://news.google.com/rss/search?q=(game+OR+jogo)+AND+(gameplay+OR+trailer+OR+anuncio+OR+lancamento+OR+revela)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419", lang: "pt" },
 ];
 
 const STOPWORDS_REGEX = /(deal|sale|discount|price|guide|walkthrough|promoção|desconto|podcast|where to buy|review:|opinions|analise|review)/i;
@@ -375,7 +450,8 @@ function scoreNewsItem(title: string, summary: string): number {
     "metal gear", "witcher", "cyberpunk", "doom", "final fantasy", "zelda", "mario",
     "pokemon", "god of war", "ghost of yotei", "spider-man", "fortnite", "mortal shell",
     "diablo", "crimson desert", "borderlands", "fable", "halo", "metroid", "silksong",
-    "dragon quest", "persona", "sega", "capcom", "square enix", "fromsoftware", "bandai namco"
+    "dragon quest", "persona", "sega", "capcom", "square enix", "fromsoftware", "bandai namco",
+    "playstation", "xbox", "nintendo switch"
   ];
 
   for (const game of HYPE_GAMES) {
@@ -388,15 +464,82 @@ function scoreNewsItem(title: string, summary: string): number {
   return s;
 }
 
-async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<{ title: string; link: string; summary: string } | null> {
+interface RecentPostContext {
+  recentTitles: string[];
+  recentSlugs: string[];
+  recentSourceUrls: string[];
+}
+
+async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<RecentPostContext> {
+  const { data: recentPosts } = await supabase
+    .from("posts")
+    .select("title, slug, editorial_sources, summary")
+    .order("created_at", { ascending: false })
+    .limit(40);
+
+  const titles: string[] = [];
+  const slugs: string[] = [];
+  const sourceUrls: string[] = [];
+
+  if (recentPosts) {
+    for (const p of recentPosts) {
+      if (p.title) titles.push(p.title);
+      if (p.slug) slugs.push(p.slug);
+      if (Array.isArray(p.editorial_sources)) {
+        for (const s of p.editorial_sources) {
+          if (s && typeof s === "object" && "url" in s && typeof s.url === "string") {
+            sourceUrls.push(s.url.toLowerCase().split("?")[0].replace(/\/$/, ""));
+          }
+        }
+      }
+    }
+  }
+
+  return { recentTitles: titles, recentSlugs: slugs, recentSourceUrls: sourceUrls };
+}
+
+function isItemAlreadyCovered(item: { title: string; link: string }, context: RecentPostContext): boolean {
+  const cleanLink = item.link.toLowerCase().split("?")[0].replace(/\/$/, "");
+  if (context.recentSourceUrls.some((u) => u === cleanLink || cleanLink.includes(u) || u.includes(cleanLink))) {
+    return true;
+  }
+
+  const rawWords = item.title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 4 && !["anuncia", "revela", "confirma", "lancamento", "trailer", "gameplay", "update", "novo", "nova", "jogo", "games", "primeiro", "oficial"].includes(w));
+
+  if (rawWords.length >= 2) {
+    for (const recentTitle of context.recentTitles) {
+      const rtLower = recentTitle.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      let matchCount = 0;
+      for (const rw of rawWords) {
+        if (rtLower.includes(rw)) matchCount++;
+      }
+      if (matchCount >= 2) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>, context: RecentPostContext): Promise<{ title: string; link: string; summary: string } | null> {
   const now = Date.now();
-  const maxAgeMs = 28 * 60 * 60 * 1000;
+  const maxAgeMs = 36 * 60 * 60 * 1000;
   const items: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
 
   for (const src of GAMING_FEEDS) {
     try {
       const res = await fetch(src.url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept": "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+        },
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) continue;
@@ -416,7 +559,10 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
           const age = now - pubDate.getTime();
 
           if (age <= maxAgeMs) {
-            const title = titleMatch[1].replace(/<[^>]+>/g, "").replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer).*$/i, "").trim();
+            const title = titleMatch[1]
+              .replace(/<[^>]+>/g, "")
+              .replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer|GameSpot|Push Square|Pure Xbox|Nintendo Life).*$/i, "")
+              .trim();
             const link = linkMatch[1].replace(/<[^>]+>/g, "").trim();
             const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
             const score = scoreNewsItem(title, summary);
@@ -436,9 +582,7 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
   items.sort((a, b) => b.score - a.score || b.pubDate.getTime() - a.pubDate.getTime());
 
   for (const item of items) {
-    const slug = buildSlug(item.title);
-    const { data: existing } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
-    if (!existing) {
+    if (!isItemAlreadyCovered(item, context)) {
       return item;
     }
   }
@@ -449,20 +593,25 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
   const gemini = getGeminiClient();
   const supabase = getSupabaseAdmin();
+  const recentContext = await fetchRecentPostContext(supabase);
 
   let userPrompt = "";
+  let sourceImages: string[] = [];
+
   if (options.sourceUrl) {
-    const rawContent = await fetchNewsArticleText(options.sourceUrl);
-    userPrompt = `Apure e redija uma matéria jornalística completa para o Orange Brick baseada nesta notícia:\nURL: ${options.sourceUrl}\nConteúdo da fonte:\n${rawContent || options.sourceUrl}`;
+    const articleData = await fetchNewsArticleData(options.sourceUrl);
+    sourceImages = articleData.images;
+    userPrompt = `Apure e redija uma matéria jornalística completa para o Orange Brick baseada nesta notícia:\nURL: ${options.sourceUrl}\nConteúdo da fonte:\n${articleData.text || options.sourceUrl}`;
   } else if (options.topic) {
     userPrompt = `Pesquise a fundo e redija uma matéria jornalística completa para o Orange Brick sobre o seguinte tema:\n"${options.topic}".`;
   } else {
-    const topNews = await fetchTopDailyGamingNews(supabase);
+    const topNews = await fetchTopDailyGamingNews(supabase, recentContext);
     if (topNews) {
-      const articleText = await fetchNewsArticleText(topNews.link);
-      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${topNews.link}\nResumo/Conteúdo:\n${articleText || topNews.summary}`;
+      const articleData = await fetchNewsArticleData(topNews.link);
+      sourceImages = articleData.images;
+      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${topNews.link}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}`;
     } else {
-      userPrompt = `Apure e redija a matéria mais importante de games e lançamentos de hoje para o Orange Brick.`;
+      userPrompt = `Apure e redija a matéria mais importante de games, trailers e anúncios de hoje para o Orange Brick.`;
     }
   }
 
@@ -470,7 +619,12 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     userPrompt += ` A categoria desejada é '${options.category}'.`;
   }
 
-  const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+  if (recentContext.recentTitles.length > 0) {
+    const excludedList = recentContext.recentTitles.slice(0, 15).map((t) => `- ${t}`).join("\n");
+    userPrompt += `\n\nIMPORTANTE (NÃO REPETIR TEMAS RECENTES): O portal já publicou recentemente os seguintes assuntos abaixo. NÃO repita nem cubra novamente os mesmos fatos destes títulos:\n${excludedList}`;
+  }
+
+  const candidateModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
   let responseText = "";
   let lastError: Error | null = null;
 
@@ -497,6 +651,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   if (!responseText) {
     throw lastError || new Error("Falha ao obter resposta dos modelos do Gemini.");
   }
+
   let jsonString = responseText.trim();
   if (jsonString.startsWith("```json")) {
     jsonString = jsonString.replace(/^```json\s*/, "").replace(/\s*```$/, "");
@@ -537,7 +692,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     : "industry";
   const authorName = options.authorName || "The Brick";
   const authorTag = "Editor-Chefe";
-  const slug = buildSlug(rawTitle);
+  let slug = buildSlug(rawTitle);
 
   validateNoCorruptedCharacters(rawTitle);
   validateNoCorruptedCharacters(summary);
@@ -547,14 +702,14 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const { data: existingPost } = await supabase.from("posts").select("id, slug").eq("slug", slug).maybeSingle();
   if (existingPost) {
-    throw new Error(`Já existe um post com o slug '${slug}' no banco de dados.`);
+    slug = `${slug}-${Date.now().toString().slice(-4)}`;
   }
 
   const newPostId = crypto.randomUUID();
 
   const cleanSubject = rawTitle
     .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
-    .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA).*$/i, "")
+    .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA|ANUNCIA).*$/i, "")
     .trim();
 
   const coverQueries: string[] = [
@@ -579,11 +734,25 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   ].filter((q): q is string => Boolean(q));
 
   const usedImageUrls = new Set<string>();
-  const fallbackPool = getCuratedGamingFallback(cleanSubject);
+  const fallbackPool = getHardwareFallback(cleanSubject);
 
-  async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
+  async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number, extraSources: string[] = []): Promise<string> {
+    for (const url of extraSources) {
+      if (usedImageUrls.has(url)) continue;
+      const processed = await downloadAndProcessImage(url);
+      if (processed) {
+        try {
+          const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer);
+          usedImageUrls.add(url);
+          return uploadedUrl;
+        } catch {
+          continue;
+        }
+      }
+    }
+
     for (const q of queries) {
-      const candidates = await fetchMultiSourceCandidates(q);
+      const candidates = await fetchMultiSourceCandidates(q, sourceImages);
       for (const url of candidates) {
         if (usedImageUrls.has(url)) continue;
         const processed = await downloadAndProcessImage(url);
@@ -615,13 +784,13 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       }
     }
 
-    return `https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80`;
+    return fallbackPool[0];
   }
 
   const [coverUrl, img1Url, img2Url] = await Promise.all([
-    findAndUpload(coverQueries, "cover", 0),
-    findAndUpload(img1Queries, "body-1", 1),
-    findAndUpload(img2Queries, "body-2", 2),
+    findAndUpload(coverQueries, "cover", 0, sourceImages.slice(0, 1)),
+    findAndUpload(img1Queries, "body-1", 1, sourceImages.slice(1, 2)),
+    findAndUpload(img2Queries, "body-2", 2, sourceImages.slice(2, 4)),
   ]);
 
   const introText = (parsed.intro_text || "").trim();
@@ -758,7 +927,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
   for (const post of postsToFix) {
     const cleanSubject = post.title
       .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
-      .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA).*$/i, "")
+      .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA|ANUNCIA).*$/i, "")
       .trim();
 
     const coverQueries = [
@@ -778,7 +947,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
     ];
 
     const usedImageUrls = new Set<string>();
-    const fallbackPool = getCuratedGamingFallback(cleanSubject);
+    const fallbackPool = getHardwareFallback(cleanSubject);
 
     async function findAndUploadSingle(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
       for (const q of queries) {
@@ -814,7 +983,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
         }
       }
 
-      return "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80";
+      return fallbackPool[0];
     }
 
     const [coverUrl, img1Url, img2Url] = await Promise.all([

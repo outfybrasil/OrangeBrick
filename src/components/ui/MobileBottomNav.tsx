@@ -47,9 +47,9 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] sm:hidden" />
+      <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] sm:hidden watch-hidden" />
       <div
-        className="mobile-overlay-sensitive fixed inset-x-0 bottom-0 z-40 px-[max(0.75rem,env(safe-area-inset-left))] pb-[max(0.65rem,env(safe-area-inset-bottom))] sm:hidden"
+        className="mobile-overlay-sensitive fixed inset-x-0 bottom-0 z-40 px-[max(0.75rem,env(safe-area-inset-left))] pb-[max(0.65rem,env(safe-area-inset-bottom))] sm:hidden watch-hidden"
       >
         <GradientButtonGroup
           ariaLabel="Navegação principal"

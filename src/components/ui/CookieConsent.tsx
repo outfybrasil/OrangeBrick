@@ -25,7 +25,7 @@ export function CookieConsent() {
       aria-labelledby="consent-title"
       aria-describedby="consent-description"
       data-mobile-bottom-overlay
-      className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5"
+      className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5 watch-hidden"
     >
       <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#17191f] shadow-[0_18px_60px_rgba(0,0,0,0.55)]">
         <div className="h-1 bg-brand-orange" />

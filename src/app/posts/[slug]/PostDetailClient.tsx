@@ -278,8 +278,8 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
   return (
     <div className="min-h-dvh min-w-0 bg-background-void pb-16 text-white sm:pb-24">
-      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-3 sm:py-4 sticky top-0 z-30 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-3 sm:px-4">
+      <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-2 sm:py-4 sticky top-0 z-30 backdrop-blur-md watch-compact">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-2 sm:px-4">
           <button
             onClick={() => router.push("/")}
             className="flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:gap-2 sm:text-xs"
@@ -292,7 +292,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
             onClick={() => router.push("/")}
           >
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }} className="h-7 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" style={{ maxHeight: "28px", maxWidth: "38px", width: "auto", height: "auto" }} className="h-6 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
             <span className="hidden sm:inline text-base font-heading font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
@@ -300,10 +300,10 @@ export function PostArticle({ post, stats }: PostArticleProps) {
         </div>
       </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-3xl px-3 py-6 sm:px-4 sm:py-10">
-        <article className="space-y-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-2 py-4 sm:px-4 sm:py-10 watch-container">
+        <article className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Tag category={post.category} />
               <Timer date={post.published_at ?? ""} />
             </div>
@@ -318,12 +318,12 @@ export function PostArticle({ post, stats }: PostArticleProps) {
               }`}
             >
               <BookmarkIcon filled={bookmarked} />
-              <span>{bookmarked ? "Matéria salva" : "Salvar matéria"}</span>
+              <span>{bookmarked ? "Salva" : "Salvar"}</span>
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 text-xs text-gray-400">
-            <span aria-label={`Tempo estimado de leitura: ${readingMinutes} minutos`}>◷ Tempo de leitura: <strong className="text-white">{readingMinutes} min</strong></span>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 text-xs text-gray-400">
+            <span aria-label={`Tempo estimado de leitura: ${readingMinutes} minutos`}>◷ Leitura: <strong className="text-white">{readingMinutes} min</strong></span>
             <div className="flex items-center gap-1" aria-label="Ajustar tamanho do texto">
               <span className="mr-1 text-xs">Texto</span>
               <button type="button" onClick={() => adjustReaderScale(readerScale - 0.1)} disabled={readerScale <= 0.9} className="min-h-11 min-w-11 border border-white/15 text-sm font-bold text-white disabled:opacity-40" aria-label="Diminuir tamanho do texto">A−</button>
@@ -332,10 +332,10 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             </div>
           </div>
 
-          <h1 className="break-words font-heading text-[clamp(1.5rem,8vw,3rem)] font-black uppercase leading-tight tracking-tight text-white">
+          <h1 className="break-words font-heading text-[clamp(1.2rem,6vw,2.75rem)] font-black uppercase leading-tight tracking-tight text-white watch-title">
             {post.title}
           </h1>
-          <p className="text-sm xs:text-base text-gray-200 font-body border-l-2 border-brand-orange pl-3 sm:pl-4 py-1 leading-relaxed">
+          <p className="text-sm xs:text-base text-gray-200 font-body border-l-2 border-brand-orange pl-2.5 sm:pl-4 py-1 leading-relaxed">
             {post.summary}
           </p>
 

@@ -209,10 +209,6 @@ html.high-contrast .text-gray-300 {
   color: #ffffff;
 }
 
-html.high-contrast :where(a, button, input, textarea, select) {
-  border-color: rgba(255, 255, 255, 0.42);
-}
-
 @media (max-width: 480px) {
   .hide-xs { display: none !important; }
 
@@ -230,9 +226,62 @@ html.high-contrast :where(a, button, input, textarea, select) {
   }
 }
 
-/* ============================================
-   Shimmer Skeleton
-   ============================================ */
+@media (max-width: 340px), (max-height: 380px), (shape: round) {
+  :root {
+    --reader-font-scale: 0.92;
+  }
+
+  html, body {
+    background-color: #000000 !important;
+    font-size: 14px !important;
+    overflow-x: clip !important;
+    width: 100vw !important;
+  }
+
+  .watch-hidden {
+    display: none !important;
+  }
+
+  .watch-compact {
+    padding-left: max(8px, env(safe-area-inset-left)) !important;
+    padding-right: max(8px, env(safe-area-inset-right)) !important;
+    padding-top: max(8px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .watch-container {
+    padding-left: max(10px, env(safe-area-inset-left)) !important;
+    padding-right: max(10px, env(safe-area-inset-right)) !important;
+  }
+
+  .watch-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .watch-title {
+    font-size: clamp(1.15rem, 5vw, 1.45rem) !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .watch-btn {
+    min-height: 44px !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (shape: round) {
+  main, header, article {
+    padding-left: max(18px, env(safe-area-inset-left)) !important;
+    padding-right: max(18px, env(safe-area-inset-right)) !important;
+    padding-top: max(20px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }

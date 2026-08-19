@@ -65,7 +65,7 @@ export function PwaInstallBanner() {
     <section
       aria-labelledby="pwa-title"
       data-mobile-bottom-overlay
-      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 space-y-3 rounded-2xl border border-white/10 bg-[#191b21] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.55)] sm:left-auto sm:right-4 sm:max-w-sm"
+      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 space-y-3 rounded-2xl border border-white/10 bg-[#191b21] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.55)] sm:left-auto sm:right-4 sm:max-w-sm watch-hidden"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
