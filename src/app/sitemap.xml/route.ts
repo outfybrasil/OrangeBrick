@@ -21,7 +21,7 @@ function formatDateISO(dateStr: string | null | undefined): string | null {
 export async function GET() {
   const siteUrl = getSiteUrl();
 
-  let posts: { slug: string; updated_at: string | null }[] = [];
+  let posts: { slug: string; updated_at: string | null; topic_id: string | null }[] = [];
   let topics: { id: string; updated_at: string | null }[] = [];
 
   try {
@@ -29,7 +29,7 @@ export async function GET() {
     const [{ data }, { data: topicData }] = await Promise.all([
       supabase
         .from("posts")
-        .select("slug, updated_at")
+        .select("slug, updated_at, topic_id")
         .eq("is_published", true)
         .order("published_at", { ascending: false }),
       supabase
@@ -39,10 +39,13 @@ export async function GET() {
     ]);
 
     if (data) {
-      posts = data as { slug: string; updated_at: string | null }[];
+      posts = data as { slug: string; updated_at: string | null; topic_id: string | null }[];
     }
     if (topicData) {
-      topics = topicData as { id: string; updated_at: string | null }[];
+      const publishedTopicIds = new Set(posts.map((p) => p.topic_id).filter(Boolean));
+      topics = (topicData as { id: string; updated_at: string | null }[]).filter(
+        (t) => !t.id.startsWith("catalog-") && publishedTopicIds.has(t.id)
+      );
     }
   } catch {
     // serve static entries only
@@ -55,11 +58,13 @@ export async function GET() {
 
   const staticEntries = [
     { loc: siteUrl, priority: "1.0", changefreq: "hourly" },
+    { loc: `${siteUrl}/noticias`, priority: "0.9", changefreq: "hourly" },
+    { loc: `${siteUrl}/em-alta`, priority: "0.8", changefreq: "hourly" },
+    { loc: `${siteUrl}/lancamentos`, priority: "0.8", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard`, priority: "0.8", changefreq: "hourly" },
     { loc: `${siteUrl}/brickboard/ranking`, priority: "0.5", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard/conquistas`, priority: "0.5", changefreq: "weekly" },
     { loc: `${siteUrl}/brickboard/como-funciona`, priority: "0.5", changefreq: "monthly" },
-    { loc: `${siteUrl}/lancamentos`, priority: "0.8", changefreq: "daily" },
     { loc: `${siteUrl}/assuntos`, priority: "0.7", changefreq: "daily" },
     { loc: `${siteUrl}/sobre`, priority: "0.5", changefreq: "monthly" },
     { loc: `${siteUrl}/plataforma/playstation`, priority: "0.6", changefreq: "daily" },

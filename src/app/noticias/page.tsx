@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
 import { Tag } from "@/components/ui/Tag";
@@ -5,6 +6,20 @@ import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Arquivo Editorial de Notícias — Orange Brick",
+  description: "Explore todas as matérias, furos jornalísticos, análises da indústria e notícias de games publicadas no Orange Brick.",
+  alternates: {
+    canonical: "/noticias",
+  },
+  openGraph: {
+    title: "Arquivo Editorial de Notícias | Orange Brick",
+    description: "Todas as matérias e notícias publicadas no Orange Brick.",
+    url: "/noticias",
+    type: "website",
+  },
+};
 
 export default async function NewsArchivePage({ searchParams }: { searchParams: Promise<{ periodo?: string; q?: string }> }) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";

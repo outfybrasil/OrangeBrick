@@ -1,15 +1,62 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/ui/Footer";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { CommunityPostRow, Post, ReleaseRadarItem, Topic } from "@/lib/types/database";
 import { FollowButton } from "@/components/topics/FollowButton";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 300;
 
-export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
+interface TopicPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
   const { slug } = await params;
   const supabase = createPublicServerClient();
+  const { data: topicData } = await supabase
+    .from("topics")
+    .select("*")
+    .eq("id", slug)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  const topic = topicData as Topic | null;
+  if (!topic) return { title: "Assunto não encontrado" };
+
+  const [{ count: articlesCount }, { count: bricksCount }, { count: releaseCount }] = await Promise.all([
+    supabase.from("posts").select("id", { count: "exact", head: true }).eq("is_published", true).eq("topic_id", topic.id),
+    supabase.from("community_posts").select("id", { count: "exact", head: true }).eq("topic_id", topic.id),
+    supabase.from("release_radar_items").select("id", { count: "exact", head: true }).eq("is_active", true).eq("topic_id", topic.id),
+  ]);
+
+  const hasContent = (articlesCount || 0) > 0 || (bricksCount || 0) > 0 || (releaseCount || 0) > 0;
+  const isCatalog = topic.id.startsWith("catalog-");
+
+  const title = `${topic.name} — Notícias, Lançamentos e Comunidade`;
+  const description = topic.description || `Acompanhe notícias, matérias e discussões da comunidade sobre ${topic.name} no Orange Brick.`;
+  const canonical = `/assuntos/${topic.id}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    robots: !hasContent || isCatalog ? { index: false, follow: true } : { index: true, follow: true },
+    openGraph: {
+      title: `${topic.name} | Orange Brick`,
+      description,
+      url: canonical,
+      type: "website",
+    },
+  };
+}
+
+export default async function TopicPage({ params }: TopicPageProps) {
+  const { slug } = await params;
+  const supabase = createPublicServerClient();
+  const siteUrl = getSiteUrl();
   const { data: topicData } = await supabase
     .from("topics")
     .select("*")
@@ -45,8 +92,33 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
   const articles = (postData || []) as Post[];
   const bricks = (communityData || []) as CommunityPostRow[];
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Assuntos", item: `${siteUrl}/assuntos` },
+      { "@type": "ListItem", position: 3, name: topic.name, item: `${siteUrl}/assuntos/${topic.id}` },
+    ],
+  };
+
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${topic.name} — Notícias e Conversas`,
+    description: topic.description || `Matérias e discussões da comunidade sobre ${topic.name}.`,
+    url: `${siteUrl}/assuntos/${topic.id}`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Orange Brick",
+      url: siteUrl,
+    },
+  };
+
   return (
     <div className="min-h-dvh bg-background-void text-white">
+      <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c")}</script>
+      <script type="application/ld+json">{JSON.stringify(collectionJsonLd).replace(/</g, "\\u003c")}</script>
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/assuntos" className="text-xs font-bold text-gray-300 hover:text-white">

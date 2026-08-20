@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { CommunityPostRow, Post, Profile, ReleaseRadarItem, Topic } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Busca — Orange Brick",
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const query = (await searchParams).q?.trim().slice(0, 80) || "";

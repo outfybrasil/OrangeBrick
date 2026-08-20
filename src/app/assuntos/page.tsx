@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
 import { createPublicServerClient } from "@/lib/supabase/server";
@@ -5,14 +6,29 @@ import type { Topic } from "@/lib/types/database";
 
 export const revalidate = 300;
 
+export const metadata: Metadata = {
+  title: "Assuntos e Centrais de Jogos — Orange Brick",
+  description: "Matérias, notícias, lançamentos e conversas da comunidade reunidos pelos principais jogos e assuntos do universo gamer.",
+  alternates: {
+    canonical: "/assuntos",
+  },
+  openGraph: {
+    title: "Assuntos e Centrais de Jogos — Orange Brick",
+    description: "Matérias, notícias, lançamentos e conversas da comunidade reunidos por jogo.",
+    url: "/assuntos",
+    type: "website",
+  },
+};
+
 export default async function TopicsPage() {
   const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("topics")
     .select("*")
     .eq("is_active", true)
+    .not("id", "like", "catalog-%")
     .order("name", { ascending: true })
-    .limit(48);
+    .limit(60);
   const topics = (data || []) as Topic[];
 
   return (

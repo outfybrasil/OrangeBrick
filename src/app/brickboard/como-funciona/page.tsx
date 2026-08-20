@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Como Funciona o XP e a Progressão do Brickboard",
+  description: "Entenda o sistema de experiência (XP), ligas, temporadas e regras de progressão da comunidade gamer do Orange Brick.",
+  alternates: {
+    canonical: "/brickboard/como-funciona",
+  },
+};
 
 const actions = [
   ["Publicar um Brick", "+10 XP", "3 por dia"],

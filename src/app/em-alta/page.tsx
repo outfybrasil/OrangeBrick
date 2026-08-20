@@ -1,9 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, Reaction } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Matérias em Alta no Momento — Orange Brick",
+  description: "As notícias e matérias de games mais lidas e debatidas pela comunidade no Orange Brick.",
+  alternates: {
+    canonical: "/em-alta",
+  },
+  openGraph: {
+    title: "Matérias em Alta no Momento | Orange Brick",
+    description: "As matérias mais lidas e comentadas pelos gamers no Orange Brick.",
+    url: "/em-alta",
+    type: "website",
+  },
+};
 
 export default async function TrendingPage() {
   const supabase = createServiceRoleClient();
