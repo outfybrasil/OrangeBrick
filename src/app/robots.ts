@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
         "/profile/setup",
         "/minha-orange",
         "/busca",
-        "/assuntos/catalog-*",
+        "/assuntos",
       ],
     },
     sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/news-sitemap.xml`],

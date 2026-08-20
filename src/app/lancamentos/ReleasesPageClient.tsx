@@ -582,13 +582,6 @@ export function ReleasesPageClient() {
                           )}
                         </div>
 
-                        <Link
-                          href={`/assuntos/${item.id}`}
-                          className="mt-3 inline-flex min-h-11 items-center text-xs font-bold uppercase tracking-wide text-gray-300 transition-colors hover:text-white"
-                        >
-                          Matérias e conversas
-                        </Link>
-
                         <ReleaseHypeMeter
                           releaseId={item.id}
                           counts={hypeCounts[item.id] || EMPTY_HYPE_COUNTS}

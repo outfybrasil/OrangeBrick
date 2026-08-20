@@ -21,31 +21,18 @@ function formatDateISO(dateStr: string | null | undefined): string | null {
 export async function GET() {
   const siteUrl = getSiteUrl();
 
-  let posts: { slug: string; updated_at: string | null; topic_id: string | null }[] = [];
-  let topics: { id: string; updated_at: string | null }[] = [];
+  let posts: { slug: string; updated_at: string | null }[] = [];
 
   try {
     const supabase = createPublicServerClient();
-    const [{ data }, { data: topicData }] = await Promise.all([
-      supabase
-        .from("posts")
-        .select("slug, updated_at, topic_id")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false }),
-      supabase
-        .from("topics")
-        .select("id, updated_at")
-        .eq("is_active", true),
-    ]);
+    const { data } = await supabase
+      .from("posts")
+      .select("slug, updated_at")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false });
 
     if (data) {
-      posts = data as { slug: string; updated_at: string | null; topic_id: string | null }[];
-    }
-    if (topicData) {
-      const publishedTopicIds = new Set(posts.map((p) => p.topic_id).filter(Boolean));
-      topics = (topicData as { id: string; updated_at: string | null }[]).filter(
-        (t) => !t.id.startsWith("catalog-") && publishedTopicIds.has(t.id)
-      );
+      posts = data as { slug: string; updated_at: string | null }[];
     }
   } catch {
     // serve static entries only
@@ -65,7 +52,6 @@ export async function GET() {
     { loc: `${siteUrl}/brickboard/ranking`, priority: "0.5", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard/conquistas`, priority: "0.5", changefreq: "weekly" },
     { loc: `${siteUrl}/brickboard/como-funciona`, priority: "0.5", changefreq: "monthly" },
-    { loc: `${siteUrl}/assuntos`, priority: "0.7", changefreq: "daily" },
     { loc: `${siteUrl}/sobre`, priority: "0.5", changefreq: "monthly" },
     { loc: `${siteUrl}/plataforma/playstation`, priority: "0.6", changefreq: "daily" },
     { loc: `${siteUrl}/plataforma/xbox`, priority: "0.6", changefreq: "daily" },
@@ -95,19 +81,6 @@ export async function GET() {
     lines.push(
       `    <changefreq>weekly</changefreq>`,
       `    <priority>0.8</priority>`,
-      "  </url>");
-  }
-
-  for (const topic of topics) {
-    lines.push("  <url>",
-      `    <loc>${esc(`${siteUrl}/assuntos/${topic.id}`)}</loc>`);
-    const formattedTopicLastMod = formatDateISO(topic.updated_at);
-    if (formattedTopicLastMod) {
-      lines.push(`    <lastmod>${formattedTopicLastMod}</lastmod>`);
-    }
-    lines.push(
-      `    <changefreq>daily</changefreq>`,
-      `    <priority>0.6</priority>`,
       "  </url>");
   }
 
