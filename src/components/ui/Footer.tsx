@@ -54,7 +54,9 @@ export function Footer() {
             <Link href="/institucional/anuncie" className="flex min-h-11 items-center transition-colors hover:text-white">
               Anuncie
             </Link>
-            <span className="text-brand-orange-muted font-bold">Versão Beta v2.0</span>
+            <Link href="/contato" className="flex min-h-11 items-center transition-colors hover:text-white">
+              Contato
+            </Link>
             <PushSetup />
           </div>
         </div>

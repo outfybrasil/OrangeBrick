@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { Post, PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 
@@ -68,9 +69,11 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
 
                     {post.image_url ? (
                       <div className="relative aspect-video w-[76px] overflow-hidden rounded-lg bg-[#08090C] ring-1 ring-white/10">
-                        <img loading="lazy" decoding="async"
+                        <Image loading="lazy" decoding="async"
                           src={post.image_url}
-                          alt={post.image_alt || ""}
+                          alt={post.image_alt || post.title}
+                          fill
+                          sizes="76px"
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                         />
                       </div>

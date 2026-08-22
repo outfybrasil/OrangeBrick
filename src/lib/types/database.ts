@@ -212,6 +212,10 @@ export interface Database {
         };
         Returns: boolean;
       };
+      get_post_interest_scores: {
+        Args: Record<string, never>;
+        Returns: { post_id: string; interest_score: number }[];
+      };
       get_release_hype_counts: {
         Args: Record<string, never>;
         Returns: ReleaseHypeCount[];
@@ -233,6 +237,9 @@ export interface Database {
     CompositeTypes: Record<string, never>;
   };
 }
+
+export const POST_LIST_COLUMNS =
+  "id, slug, title, summary, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at";
 
 export interface Post {
   id: string;

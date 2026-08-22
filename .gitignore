@@ -46,6 +46,9 @@ next-env.d.ts
 # temp artifacts
 .impeccable/
 /tmp/backups/
+/tmp/
+supabase/.temp/
+*.docx
 *.png
 !public/*.png
 !public/**/*.png

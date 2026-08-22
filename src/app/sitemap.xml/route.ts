@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
+import { PLATFORM_SLUGS } from "@/lib/types/platform";
 
 export const revalidate = 3600;
 
@@ -53,11 +54,11 @@ export async function GET() {
     { loc: `${siteUrl}/brickboard/conquistas`, priority: "0.5", changefreq: "weekly" },
     { loc: `${siteUrl}/brickboard/como-funciona`, priority: "0.5", changefreq: "monthly" },
     { loc: `${siteUrl}/sobre`, priority: "0.5", changefreq: "monthly" },
-    { loc: `${siteUrl}/plataforma/playstation`, priority: "0.6", changefreq: "daily" },
-    { loc: `${siteUrl}/plataforma/xbox`, priority: "0.6", changefreq: "daily" },
-    { loc: `${siteUrl}/plataforma/nintendo`, priority: "0.6", changefreq: "daily" },
-    { loc: `${siteUrl}/plataforma/pc`, priority: "0.6", changefreq: "daily" },
-    { loc: `${siteUrl}/plataforma/mobile`, priority: "0.6", changefreq: "daily" },
+    ...PLATFORM_SLUGS.map((platform) => ({
+      loc: `${siteUrl}/plataforma/${platform}`,
+      priority: "0.6",
+      changefreq: "daily",
+    })),
     { loc: `${siteUrl}/termos`, priority: "0.2", changefreq: "yearly" },
     { loc: `${siteUrl}/privacidade`, priority: "0.2", changefreq: "yearly" },
     { loc: `${siteUrl}/institucional/anuncie`, priority: "0.4", changefreq: "monthly" },

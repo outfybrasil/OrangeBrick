@@ -3,9 +3,10 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
+import { POST_LIST_COLUMNS } from "@/lib/types/database";
 
 const PAGE_SIZE = 50;
-const REFRESH_INTERVAL = 30_000;
+const REFRESH_INTERVAL = 120_000;
 
 interface UseInfiniteFeedReturn {
   posts: Post[];
@@ -17,15 +18,18 @@ interface UseInfiniteFeedReturn {
   refresh: () => void;
 }
 
-export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeedReturn {
+export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Post[] = []): UseInfiniteFeedReturn {
   const supabase = useMemo(() => createClient(), []);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [isLoading, setIsLoading] = useState(initialPosts.length === 0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(initialPosts.length === PAGE_SIZE);
   const [error, setError] = useState<string | null>(null);
-  const cursorRef = useRef<string | null>(null);
+  const cursorRef = useRef<string | null>(
+    initialPosts.length === PAGE_SIZE ? initialPosts[initialPosts.length - 1].created_at : null
+  );
   const loadingRef = useRef(false);
+  const hydratedRef = useRef(false);
 
   const fetchPosts = useCallback(
     async (isRefresh = false) => {
@@ -42,7 +46,7 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
 
         let query = supabase
           .from("posts")
-          .select("*")
+          .select(POST_LIST_COLUMNS)
           .eq("is_published", true)
           .order("created_at", { ascending: false })
           .limit(PAGE_SIZE);
@@ -90,6 +94,20 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
   );
 
   useEffect(() => {
+    const firstRun = !hydratedRef.current;
+    hydratedRef.current = true;
+
+    if (firstRun && initialPosts.length > 0) {
+      const interval = setInterval(() => {
+        if (!loadingRef.current) {
+          cursorRef.current = null;
+          setHasMore(true);
+          fetchPosts(true);
+        }
+      }, REFRESH_INTERVAL);
+      return () => clearInterval(interval);
+    }
+
     queueMicrotask(() => {
       cursorRef.current = null;
       setHasMore(true);
@@ -105,7 +123,7 @@ export function useInfiniteFeed(category?: PostCategory | null): UseInfiniteFeed
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [fetchPosts]);
+  }, [fetchPosts, initialPosts]);
 
   const loadMore = useCallback(() => {
     if (!hasMore || isLoadingMore || isLoading) return;

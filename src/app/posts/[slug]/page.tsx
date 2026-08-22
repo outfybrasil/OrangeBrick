@@ -4,6 +4,7 @@ import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, PostStats, ReactionType } from "@/lib/types/database";
 import { getSiteUrl } from "@/lib/site-url";
+import { verifyPreviewToken } from "@/lib/preview-token";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,7 @@ async function getStats(postId: string): Promise<PostStats> {
 export async function generateMetadata({ params, searchParams }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const sParams = searchParams ? await searchParams : {};
-  const isPreview = sParams.preview === "true" || sParams.preview === "1";
+  const isPreview = typeof sParams.preview === "string" && verifyPreviewToken(slug, sParams.preview);
   const post = await getPost(slug, isPreview);
   if (!post) return { title: "Matéria não encontrada" };
   const canonical = `/posts/${post.slug}`;
@@ -62,6 +63,7 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
     title: post.title,
     description: post.summary,
     alternates: { canonical },
+    robots: isPreview ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "article",
       title: post.title,
@@ -83,7 +85,7 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
 export default async function PostPage({ params, searchParams }: PostPageProps) {
   const { slug } = await params;
   const sParams = searchParams ? await searchParams : {};
-  const isPreview = sParams.preview === "true" || sParams.preview === "1";
+  const isPreview = typeof sParams.preview === "string" && verifyPreviewToken(slug, sParams.preview);
   const post = await getPost(slug, isPreview);
   if (!post) notFound();
   const stats = await getStats(post.id);

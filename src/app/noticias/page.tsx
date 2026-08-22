@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
 import { Tag } from "@/components/ui/Tag";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
+import { POST_LIST_COLUMNS } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +29,7 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
   const period = params.periodo === "mes" ? "mes" : "todas";
   const search = params.q?.trim().slice(0, 80) || "";
   const supabase = createPublicServerClient();
-  let query = supabase.from("posts").select("*").eq("is_published", true).order("published_at", { ascending: false }).limit(100);
+  let query = supabase.from("posts").select(POST_LIST_COLUMNS).eq("is_published", true).order("published_at", { ascending: false }).limit(100);
   if (period === "mes") {
     const start = new Date();
     start.setDate(1);
@@ -46,7 +48,7 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="group flex min-h-11 items-center gap-2.5" aria-label="Ir para a página inicial do Orange Brick">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="" className="h-8 w-auto max-w-[42px] object-contain transition-transform duration-300 group-hover:scale-105" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" className="h-8 w-auto max-w-[42px] object-contain transition-transform duration-300 group-hover:scale-105" />
             <span className="font-heading text-lg font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</span>
           </Link>
           <Link href="/" className="text-xs font-bold text-gray-300 transition-colors hover:text-brand-orange">Voltar à home</Link>
@@ -75,8 +77,8 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
           <div className="divide-y divide-white/10">
             {posts.map((post) => (
               <article key={post.id} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr] sm:items-center">
-                <Link href={`/posts/${post.slug}`} className="aspect-video overflow-hidden bg-card-slate focus-visible:outline-2 focus-visible:outline-brand-orange">
-                  {post.image_url && <img src={post.image_url} alt={post.image_alt || ""} className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]" />}
+                <Link href={`/posts/${post.slug}`} className="relative aspect-video overflow-hidden bg-card-slate focus-visible:outline-2 focus-visible:outline-brand-orange">
+                  {post.image_url && <Image src={post.image_url} alt={post.image_alt || post.title} fill sizes="(max-width: 640px) 100vw, 12rem" className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]" />}
                 </Link>
                 <div className="min-w-0">
                   <div className="flex items-center gap-3"><Tag category={post.category} /><time className="text-xs text-gray-500">{new Date(post.published_at || post.created_at).toLocaleDateString("pt-BR")}</time></div>

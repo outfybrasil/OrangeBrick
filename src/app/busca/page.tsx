@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
 import { createPublicServerClient } from "@/lib/supabase/server";
-import type { CommunityPostRow, Post, Profile, ReleaseRadarItem, Topic } from "@/lib/types/database";
+import type { CommunityPostRow, Post, Profile, ReleaseRadarItem } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 

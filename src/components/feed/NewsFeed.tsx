@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
 import { NewsFeedEmpty } from "./NewsFeedEmpty";
 import { NewsSidebar } from "./NewsSidebar";
 import { useInfiniteFeed } from "@/lib/hooks/useInfiniteFeed";
 import { usePostStats } from "@/lib/hooks/usePostStats";
-import { CATEGORY_CONFIG, type PostCategory, type PostStats } from "@/lib/types/database";
+import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
@@ -23,6 +24,7 @@ interface NewsFeedProps {
   onSelectCategory?: (category: PostCategory | null) => void;
   onClearFilters?: () => void;
   homeHighlights?: ReactNode;
+  initialPosts?: Post[];
 }
 
 const CATEGORIES: { label: string; value: PostCategory | null }[] = [
@@ -40,9 +42,9 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights }: NewsFeedProps) {
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
-    useInfiniteFeed(category);
+    useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
 
   const posts = useMemo(() => {
@@ -166,10 +168,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           data-home-target={heroPost.slug}
           className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden rounded-[20px] bg-background-void shadow-[0_18px_48px_rgba(0,0,0,0.3)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_rgba(0,0,0,0.38)] focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
-          {heroPost.image_url ? (
-            <img loading="lazy" decoding="async"
+{heroPost.image_url ? (
+            <Image
+              priority
               src={heroPost.image_url}
-              alt={heroPost.image_alt || ""}
+              alt={heroPost.image_alt || heroPost.title}
+              fill
+              sizes="(max-width: 1024px) 100vw, 66vw"
               className="absolute inset-0 h-full w-full object-cover object-center transform group-hover:scale-[1.02] transition-transform duration-700 ease-out"
             />
           ) : (
@@ -221,11 +226,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               data-home-target={post.slug}
               className="group relative flex flex-1 flex-col overflow-hidden rounded-[20px] bg-[#111217] shadow-[0_12px_30px_rgba(0,0,0,0.24)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(0,0,0,0.34)] focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
-              {post.image_url && (
+{post.image_url && (
                 <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
-                  <img loading="lazy" decoding="async"
+                  <Image loading="lazy" decoding="async"
                     src={post.image_url}
-                    alt={post.image_alt || ""}
+                    alt={post.image_alt || post.title}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 22vw"
                     className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />

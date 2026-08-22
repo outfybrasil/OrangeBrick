@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentList } from "@/components/comments/CommentList";
@@ -67,14 +68,16 @@ function PostContent({ post }: { post: Post }) {
             }
             renderedUrls.add(block.url);
 
-            return (
+return (
               <div key={block.id} className="my-8 flex flex-col gap-2 content-visibility-auto">
-                <div className="relative overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-xl bg-[#08090C] flex items-center justify-center p-1 sm:p-2">
-                  <img
+                <div className="relative aspect-video overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-xl bg-[#08090C] flex items-center justify-center sm:p-2">
+                  <Image
                     src={block.url}
                     alt={block.alt || post.title}
-                    className="w-full h-auto max-h-[650px] object-contain rounded-xl"
+                    fill
+                    sizes="(max-width: 1280px) 100vw, 1000px"
                     loading="lazy"
+                    className="object-contain rounded-xl"
                   />
                 </div>
                 {block.caption && (
@@ -292,7 +295,7 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
             onClick={() => router.push("/")}
           >
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Logo" style={{ maxHeight: "28px", maxWidth: "38px", width: "auto", height: "auto" }} className="h-6 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
+            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" style={{ maxHeight: "28px", maxWidth: "38px", width: "auto", height: "auto" }} className="h-6 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
             <span className="hidden sm:inline text-base font-heading font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
               Orange<span className="text-brand-orange">_</span>Brick
             </span>
@@ -392,13 +395,15 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             </div>
           </div>
 
-          {post.image_url && (
+{post.image_url && (
             <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-2xl bg-[#08090C] my-6">
-              <img
+              <Image
                 src={post.image_url}
                 alt={post.image_alt || post.title}
-                className="h-full w-full object-cover"
-                loading="eager"
+                fill
+                sizes="(max-width: 1280px) 100vw, 1000px"
+                priority
+                className="object-cover"
               />
             </div>
           )}

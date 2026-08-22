@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Post } from "../types/database.ts";
 import { generateNewsDraft } from "../ai/gemini-news.ts";
+import { getSiteUrl } from "../site-url.ts";
+import { createPreviewToken } from "../preview-token.ts";
 
 export interface TelegramUpdate {
   update_id: number;
@@ -40,11 +42,7 @@ function getBotToken(): string {
 }
 
 function getAdminChatId(): string | null {
-  return process.env.TELEGRAM_ADMIN_CHAT_ID || "6057845516";
-}
-
-function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL || "https://orange-brick.vercel.app";
+  return process.env.TELEGRAM_ADMIN_CHAT_ID || null;
 }
 
 function getSupabaseAdmin() {
@@ -80,7 +78,7 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
   }
 
   const siteUrl = getSiteUrl();
-  const previewUrl = `${siteUrl}/posts/${post.slug}?preview=true`;
+  const previewUrl = `${siteUrl}/posts/${post.slug}?preview=${createPreviewToken(post.slug)}`;
   const countText = wordCount ? ` | 📊 ${wordCount} palavras` : "";
 
   const safeTitle = escapeHtml(post.title);
@@ -314,7 +312,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         `🗄️ <b>Supabase DB:</b> ${supabaseOk ? "✅ Operacional" : "❌ Erro de conexão"}\n` +
         `📝 <b>Rascunhos pendentes:</b> ${pendingCount}\n` +
         `🌐 <b>Site:</b> <a href="${getSiteUrl()}">${getSiteUrl()}</a>\n` +
-        `👤 <b>Admin ID:</b> <code>${adminChatId}</code>`;
+        `👤 <b>Admin ID:</b> <code>${adminChatId || "não configurado"}</code>`;
 
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
@@ -346,7 +344,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         const siteUrl = getSiteUrl();
         let listText = `📋 <b>Últimos rascunhos pendentes (${drafts.length}):</b>\n\n`;
         drafts.forEach((d, idx) => {
-          const previewUrl = `${siteUrl}/posts/${d.slug}?preview=true`;
+          const previewUrl = `${siteUrl}/posts/${d.slug}?preview=${createPreviewToken(d.slug)}`;
           listText += `${idx + 1}. <b>${escapeHtml(d.title)}</b>\n   🏷️ #${escapeHtml(d.category.toUpperCase())} | <a href="${previewUrl}">Ver Prévia</a>\n\n`;
         });
 

@@ -5,14 +5,14 @@ import { createServerClient } from "@supabase/ssr";
 const PROTECTED_PREFIXES = ["/admin"];
 const EMAIL_AUTH_PATHS = new Set(["/cadastro", "/entrar", "/recuperar-senha", "/nova-senha"]);
 
-function contentSecurityPolicy(nonce: string) {
+function contentSecurityPolicy() {
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co",
+    "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://plausible.io https://*.plausible.io",
     "frame-src 'self' https://www.youtube-nocookie.com",
     "media-src 'self'",
     "object-src 'none'",
@@ -35,12 +35,8 @@ function isProtected(pathname: string): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const nonce = btoa(crypto.randomUUID());
-  const policy = contentSecurityPolicy(nonce);
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", policy);
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const policy = contentSecurityPolicy();
+  const response = NextResponse.next();
   response.headers.set("Content-Security-Policy", policy);
 
   if (EMAIL_AUTH_PATHS.has(pathname) && process.env.EMAIL_AUTH_ENABLED !== "true") {

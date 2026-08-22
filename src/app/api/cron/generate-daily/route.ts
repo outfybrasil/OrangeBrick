@@ -8,8 +8,7 @@ export const maxDuration = 60;
 
 function authorized(request: Request): boolean {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) return true;
-  return request.headers.get("authorization") === `Bearer ${cronSecret}`;
+  return Boolean(cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`);
 }
 
 export async function GET(request: Request) {

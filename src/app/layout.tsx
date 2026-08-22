@@ -1,12 +1,13 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { headers } from "next/headers";
+
 import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Geist } from "next/font/google";
 import { AuthProvider } from "@/lib/contexts/AuthContext";
 import { ToastProvider } from "@/lib/contexts/ToastContext";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { GlobalSearchShortcut } from "@/components/ui/GlobalSearchShortcut";
 import { CookieConsent } from "@/components/ui/CookieConsent";
+import { Analytics } from "@/components/ui/Analytics";
 import { getSiteUrl } from "@/lib/site-url";
 import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
 import { AccessibilityMenu } from "@/components/ui/AccessibilityMenu";
@@ -93,20 +94,18 @@ export const metadata: Metadata = {
   verification: { google: "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs" },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const nonce = (await headers()).get("x-nonce") || undefined;
   return (
     <html
       lang="pt-BR"
-      className={cn("h-full", "antialiased", headingFont.variable, subtitleFont.variable, bodyFont.variable, monoFont.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", headingFont.variable, subtitleFont.variable, bodyFont.variable, monoFont.variable, geist.variable)}
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <script
-          nonce={nonce}
           suppressHydrationWarning
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -135,6 +134,7 @@ export default async function RootLayout({
         <PwaInstallBanner />
         <AccessibilityMenu />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );
