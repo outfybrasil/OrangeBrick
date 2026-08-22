@@ -44,6 +44,11 @@ function imageRemotePatterns() {
     "plus.unsplash.com",
     "images.pexels.com",
     "image.pollinations.ai",
+    "assets-prd.ignimgs.com",
+    "gameobserver.com",
+    "blogger.googleusercontent.com",
+    "static.prod.thinkygames.com",
+    "playday.one",
   ]) {
     patterns.push({ protocol: "https", hostname });
   }

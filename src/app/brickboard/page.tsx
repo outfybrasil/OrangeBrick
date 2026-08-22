@@ -230,6 +230,19 @@ function BrickboardContent() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            {user && userProgress && (
+              <Link
+                href={profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange"}
+                aria-label={`Abrir Meu Brick. Nível ${userProgress.progress.level}`}
+                title={`Nível ${userProgress.progress.level} · ${Math.round(xpProgress)}% do caminho`}
+                className="flex min-h-9 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-2.5 text-xs font-black text-brand-orange transition-colors hover:bg-brand-orange hover:text-white lg:hidden"
+              >
+                Nv. {userProgress.progress.level}
+                <span aria-hidden="true" className="h-1 w-8 overflow-hidden bg-white/15">
+                  <span className="block h-full bg-brand-orange" style={{ width: `${xpProgress}%` }} />
+                </span>
+              </Link>
+            )}
             <Link
               href="/"
               className="hidden min-h-9 items-center gap-1.5 border border-white/10 px-3 text-xs font-bold text-gray-300 transition-colors hover:border-white/25 hover:text-white sm:flex"
@@ -523,7 +536,7 @@ function BrickboardContent() {
             </div>
 
             {/* ── SIDEBAR ── */}
-            <aside className="sticky top-20 hidden space-y-4 lg:block">
+            <aside className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] space-y-4 overflow-y-auto lg:block">
 
               {/* PERGUNTA DO DIA */}
               {poll && (
