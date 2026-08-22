@@ -137,7 +137,7 @@ export function ReleaseRadarStrip() {
         const secondDate = releaseDateIso(second) || "9999-12-31";
         return firstDate.localeCompare(secondDate) || first.game.localeCompare(second.game, "pt-BR");
       });
-    if (upcoming.length > 0) return upcoming.slice(0, 14);
+    if (upcoming.length > 0) return upcoming;
     return releases.filter((item) => releaseDateIso(item) !== null).slice(-8);
   }, [releases, selectedMonth, todayIso]);
 

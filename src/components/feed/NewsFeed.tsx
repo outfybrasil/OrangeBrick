@@ -98,7 +98,10 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       const daysSinceMonday = (now.getDay() + 6) % 7;
       startOfWeek.setDate(now.getDate() - daysSinceMonday);
       startOfWeek.setHours(0, 0, 0, 0);
-      result = result.filter((post) => new Date(post.published_at || post.created_at) >= startOfWeek).slice(0, 5);
+      const dated = result.map((post) => ({ post, date: new Date(post.published_at || post.created_at).getTime() }));
+      const weekPosts = dated.filter((entry) => entry.date >= startOfWeek.getTime());
+      const olderPosts = dated.filter((entry) => entry.date < startOfWeek.getTime());
+      result = [...weekPosts, ...olderPosts].slice(0, 5).map((entry) => entry.post);
     }
     return result;
   }, [rawPosts, platformSlug, searchQuery, activeTag, hasRequestedFilters]);

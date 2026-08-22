@@ -8,7 +8,7 @@ const EMAIL_AUTH_PATHS = new Set(["/cadastro", "/entrar", "/recuperar-senha", "/
 function contentSecurityPolicy() {
   return [
     "default-src 'self'",
-    `script-src 'self' https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",

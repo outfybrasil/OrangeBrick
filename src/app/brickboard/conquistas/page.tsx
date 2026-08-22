@@ -7,6 +7,28 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { AchievementMark } from "@/components/community/ProgressionUI";
 import type { AchievementProgress, PublicProfileData } from "@/lib/types/progression";
 
+type AchievementWithMeta = AchievementProgress & { is_hidden?: boolean };
+
+function unlockRatio(item: AchievementProgress): number {
+  return item.target > 0 ? Math.min(item.progress / item.target, 1) : 0;
+}
+
+function prepareAchievements(list: AchievementWithMeta[]): AchievementWithMeta[] {
+  return list
+    .map((item) =>
+      item.is_hidden && !item.unlocked_at
+        ? { ...item, name: "Conquista secreta", description: "Continue contribuindo para revelar.", progress: 0 }
+        : item
+    )
+    .sort((a, b) => {
+      if (a.is_equipped !== b.is_equipped) return a.is_equipped ? -1 : 1;
+      const aUnlocked = Boolean(a.unlocked_at);
+      const bUnlocked = Boolean(b.unlocked_at);
+      if (aUnlocked !== bUnlocked) return aUnlocked ? -1 : 1;
+      return unlockRatio(b) - unlockRatio(a);
+    });
+}
+
 export default function AchievementsPage() {
   const { user, profile, isLoading: isAuthLoading } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
@@ -44,6 +66,7 @@ export default function AchievementsPage() {
         target: Number((item.criteria as { target?: number })?.target || 1),
         unlocked_at: null,
         is_equipped: false,
+        is_hidden: Boolean(item.is_hidden),
       }));
 
       if (profile?.username) {
@@ -52,13 +75,9 @@ export default function AchievementsPage() {
         if (!isActive) return;
         if (loaded?.achievements.length) {
           const progressBySlug = new Map(loaded.achievements.map((item) => [item.slug, item]));
-          const mergedAchievements = catalogAchievements
-            .map((item) => progressBySlug.get(item.slug) || item)
-            .sort((a, b) => {
-              if (a.is_equipped !== b.is_equipped) return a.is_equipped ? -1 : 1;
-              if (Boolean(a.unlocked_at) !== Boolean(b.unlocked_at)) return a.unlocked_at ? -1 : 1;
-              return 0;
-            });
+          const mergedAchievements = prepareAchievements(
+            catalogAchievements.map((item) => ({ ...item, ...(progressBySlug.get(item.slug) || {}) }))
+          );
           setAchievements(mergedAchievements);
           setEquipped(mergedAchievements.filter((item) => item.is_equipped).map((item) => item.slug));
           setIsLoading(false);
@@ -66,7 +85,7 @@ export default function AchievementsPage() {
         }
       }
 
-      setAchievements(catalogAchievements);
+      setAchievements(prepareAchievements(catalogAchievements));
       setEquipped([]);
       setIsLoading(false);
     }

@@ -5,34 +5,28 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { YouTubePlayer } from "@/components/ui/youtube-video-player";
 
-const fallbackVideos = [
-  {
-    id: "9oHAB2kelyA",
-    title: "HALO: CAMPAIGN EVOLVED – RESGATE DO CAPITÃO! | Gameplay PT-BR #3",
-  },
-  {
-    id: "b0O7ZrPWaog",
-    title: "HALO: CAMPAIGN EVOLVED – RESGATE NO ANEL! | Gameplay PT-BR #2",
-  },
-  {
-    id: "ZzE97CIItwI",
-    title: "HALO: CAMPAIGN EVOLVED – A LENDA RECOMEÇA! | Gameplay PT-BR #1",
-  },
-];
+interface VideoItem {
+  id: string;
+  title: string;
+}
 
 export function MultimediaSection() {
-  const [videos, setVideos] = useState(fallbackVideos);
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     fetch("/api/youtube/latest", { signal: controller.signal })
       .then((response) => response.ok ? response.json() : Promise.reject())
-      .then((result: { videos?: typeof fallbackVideos }) => {
+      .then((result: { videos?: VideoItem[] }) => {
         if (result.videos?.length === 3) setVideos(result.videos);
+        else setFailed(true);
       })
       .catch(() => undefined);
     return () => controller.abort();
   }, []);
+
+  if (failed || videos.length < 3) return null;
 
   return (
     <section className="mb-10 mt-10 border-y border-white/10 py-6 sm:py-8" aria-labelledby="ob-labs-title">

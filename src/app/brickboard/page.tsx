@@ -13,6 +13,7 @@ import { UserNav } from "@/components/auth/UserNav";
 import { Icon } from "@/components/ui/Icon";
 import { Footer } from "@/components/ui/Footer";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useFollowPreferences } from "@/lib/hooks/useFollowPreferences";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
 import { levelProgress } from "@/lib/progression";
@@ -34,6 +35,7 @@ function BrickboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, profile } = useAuth();
+  const { follows, toggleFollow } = useFollowPreferences();
   const supabase = useMemo(() => createDataClient(), []);
   const [userProgress, setUserProgress] = useState<PrivateProgressData | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -74,6 +76,14 @@ function BrickboardContent() {
     return null;
   });
 
+  const followedProfileSet = useMemo(
+    () => new Set(follows.profile.map((value) => value.toLowerCase())),
+    [follows.profile]
+  );
+  const followedPlatformSet = useMemo(() => new Set(follows.platform), [follows.platform]);
+  const followedTopicSet = useMemo(() => new Set(follows.topic), [follows.topic]);
+  const followCount = follows.profile.length + follows.platform.length + follows.topic.length;
+
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =
       searchQuery.trim() === "" ||
@@ -90,8 +100,15 @@ function BrickboardContent() {
 
     const matchesTopic = !topicId || post.topic_id === topicId;
     const matchesSelectedPost = !targetPostId || post.id === targetPostId;
+    const matchesFollowing =
+      activeTab !== "following" ||
+      Boolean(
+        (post.author_username && followedProfileSet.has(post.author_username.toLowerCase())) ||
+          (post.platform_tag && followedPlatformSet.has(post.platform_tag)) ||
+          (post.topic_id && followedTopicSet.has(post.topic_id))
+      );
 
-    return matchesSearch && matchesPlatform && matchesArticle && matchesTopic && matchesSelectedPost;
+    return matchesSearch && matchesPlatform && matchesArticle && matchesTopic && matchesSelectedPost && matchesFollowing;
   });
 
   const conversationTitle = articleSlug
@@ -447,7 +464,18 @@ function BrickboardContent() {
                 </div>
               </div>
 
-              {displayPosts.length === 0 ? (
+              {displayPosts.length === 0 && activeTab === "following" && !user ? (
+                <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
+                  <p className="text-sm font-semibold text-white">Entre para acompanhar quem você segue</p>
+                  <p className="text-xs text-gray-400">Siga autores com o botão + nos Bricks e veja as conversas deles aqui.</p>
+                  <button type="button" onClick={() => setIsAuthModalOpen(true)} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">Entrar</button>
+                </div>
+              ) : displayPosts.length === 0 && activeTab === "following" && followCount === 0 ? (
+                <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
+                  <p className="text-sm font-semibold text-white">Você ainda não segue ninguém</p>
+                  <p className="text-xs text-gray-400">Toque no botão + de um Brick para seguir o autor e personalizar seu feed.</p>
+                </div>
+              ) : displayPosts.length === 0 ? (
                 <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
                   <svg aria-hidden="true" className="mx-auto h-10 w-10 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5h-6l-4.5 4v-4h-.5A2.5 2.5 0 0 1 4 13.5v-8Z" />
@@ -476,6 +504,12 @@ function BrickboardContent() {
                         onDeleteComment={deleteComment}
                         onToggleCommentLike={toggleCommentLike}
                         getComments={getComments}
+                        isFollowingAuthor={Boolean(post.author_username && followedProfileSet.has(post.author_username.toLowerCase()))}
+                        onToggleFollowAuthor={
+                          post.author_username
+                            ? () => requireUser(() => { void toggleFollow("profile", post.author_username as string); })
+                            : undefined
+                        }
                       />
                     </div>
                   ))}

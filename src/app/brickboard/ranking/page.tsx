@@ -5,10 +5,13 @@ import Link from "next/link";
 import { createDataClient } from "@/lib/supabase/client";
 import { divisionLabel, formatXp } from "@/lib/progression";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import type { LeaderboardEntry } from "@/lib/types/progression";
 
 export default function RankingPage() {
   const supabase = useMemo(() => createDataClient(), []);
+  const { profile } = useAuth();
+  const username = profile?.username || null;
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,6 +50,7 @@ export default function RankingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+        <MyStandingCard entries={entries} username={username} isLoading={isLoading} />
         <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/10 pb-3">
           <div>
             <h2 className="font-heading text-xl font-bold">Classificação atual</h2>
@@ -64,20 +68,23 @@ export default function RankingPage() {
           </div>
         ) : (
           <ol className="divide-y divide-white/10 border-y border-white/10">
-            {entries.map((entry) => (
-              <li key={entry.username}>
-                <Link href={`/profile/${entry.username}`} className="grid min-h-20 grid-cols-[2.5rem_2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-3 hover:bg-white/[0.03] sm:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_7rem]">
-                  <span className={`font-heading text-lg font-black ${entry.rank <= 3 ? "text-brand-orange" : "text-gray-500"}`}>{entry.rank}</span>
+            {entries.map((entry) => {
+              const isMe = Boolean(username && entry.username === username);
+              return (
+              <li key={entry.username} className={isMe ? "bg-brand-orange/[0.07] ring-1 ring-inset ring-brand-orange/30" : undefined}>
+                <Link href={`/profile/${entry.username}`} className="grid min-h-20 grid-cols-[2.5rem_2.75rem_minmax(0,1fr)_auto] items-center gap-3 py-3 px-2 hover:bg-white/[0.03] sm:grid-cols-[3rem_3rem_minmax(0,1fr)_8rem_7rem]">
+                  <span className={`font-heading text-lg font-black ${entry.rank <= 3 || isMe ? "text-brand-orange" : "text-gray-500"}`}>{entry.rank}</span>
                   <img src={resolveAvatarUrl(entry.avatar_url, entry.display_name)} alt="" className="h-11 w-11 object-cover" referrerPolicy="no-referrer" />
                   <span className="min-w-0">
-                    <strong className="block truncate text-sm">{entry.display_name}</strong>
+                    <strong className="block truncate text-sm">{entry.display_name}{isMe && <span className="ml-2 text-xs font-bold text-brand-orange">(você)</span>}</strong>
                     <span className="mt-1 block text-xs text-gray-500">Nível {entry.level} · {entry.active_days} dias ativos</span>
                   </span>
                   <span className="hidden text-xs font-semibold text-gray-300 sm:block">{divisionLabel(entry.division)}</span>
                   <span className="text-right text-sm font-bold text-white">{formatXp(entry.eligible_xp)} <small className="text-xs text-gray-500">XP</small></span>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ol>
         )}
       </section>
@@ -93,5 +100,56 @@ function PageHeader({ title }: { title: string }) {
         <span className="font-heading text-sm font-black">{title}</span>
       </div>
     </header>
+  );
+}
+
+function MyStandingCard({ entries, username, isLoading }: { entries: LeaderboardEntry[]; username: string | null; isLoading: boolean }) {
+  if (isLoading) return null;
+  const myIndex = username ? entries.findIndex((entry) => entry.username === username) : -1;
+
+  return (
+    <div className="mb-6 border border-brand-orange/25 bg-brand-orange/[0.06] px-4 py-4 sm:px-5">
+      {!username ? (
+        <>
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Sua posição</p>
+          <p className="mt-1 text-sm text-gray-300">
+            Entre na sua conta e acumule XP na temporada para aparecer no ranking.
+          </p>
+        </>
+      ) : myIndex === -1 ? (
+        <>
+          <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Sua posição</p>
+          <p className="mt-1 text-sm text-gray-300">
+            Você ainda não está no top 100. Publique, comente e reaja para entrar na disputa.
+          </p>
+        </>
+      ) : (
+        (() => {
+          const me = entries[myIndex];
+          const ahead = myIndex > 0 ? entries[myIndex - 1] : null;
+          const gap = ahead ? Math.max(ahead.eligible_xp - me.eligible_xp + 1, 1) : null;
+          return (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-brand-orange">Sua posição</p>
+                  <p className="mt-0.5 font-heading text-2xl font-black text-white">
+                    #{me.rank}
+                    <span className="ml-2 text-sm font-bold text-gray-400">{divisionLabel(me.division)}</span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-white">{formatXp(me.eligible_xp)} XP</p>
+                  {gap !== null && (
+                    <p className="mt-0.5 text-xs text-gray-400">Faltam {formatXp(gap)} XP para o #{me.rank - 1}</p>
+                  )}
+                  {gap === null && <p className="mt-0.5 text-xs text-brand-orange">Você é o líder da temporada</p>}
+                </div>
+              </div>
+            </>
+          );
+        })()
+      )}
+    </div>
   );
 }

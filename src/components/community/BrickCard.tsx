@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { UserBadge } from "@/components/ui/UserBadge";
 import { resolveAvatarUrl } from "@/lib/avatar";
 import { SpoilerText } from "@/components/community/SpoilerText";
+import { timeAgo } from "@/lib/utils/time-ago";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { createDataClient } from "@/lib/supabase/client";
 
@@ -23,6 +24,8 @@ interface BrickCardProps {
   onDeleteComment: (commentId: string) => Promise<void>;
   onToggleCommentLike?: (commentId: string) => Promise<void>;
   getComments: (postId: string) => Promise<CommunityComment[]>;
+  isFollowingAuthor?: boolean;
+  onToggleFollowAuthor?: () => void;
 }
 
 const reportReasons = [
@@ -34,7 +37,7 @@ const reportReasons = [
   "Outro conteúdo inadequado",
 ];
 
-export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments }: BrickCardProps) {
+export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
   const { user } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -253,13 +256,37 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 </span>
               )}
             </div>
-            <span className="text-xs font-body text-gray-500 block">
-              {new Date(post.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>
+            <time dateTime={post.created_at} title={new Date(post.created_at).toLocaleString("pt-BR")} className="text-xs font-body text-gray-500 block">
+              {timeAgo(post.created_at)}
+            </time>
           </div>
         </Link>
 
         <div className="flex shrink-0 items-center">
+          {onToggleFollowAuthor && !isPostOwner && (
+            <button
+              type="button"
+              onClick={onToggleFollowAuthor}
+              aria-pressed={isFollowingAuthor}
+              title={isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}
+              className={`mr-1 grid size-8 place-items-center border transition-colors ${
+                isFollowingAuthor
+                  ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
+                  : "border-white/10 text-gray-500 hover:border-white/25 hover:text-white"
+              }`}
+            >
+              {isFollowingAuthor ? (
+                <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+                </svg>
+              )}
+              <span className="sr-only">{isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}</span>
+            </button>
+          )}
           {!isPostOwner && user && (
             <button
               type="button"
@@ -468,9 +495,9 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                               {c.author_name}
                             </Link>
                             <UserBadge nickname={c.author_name} isOfficial={c.is_official} />
-                            <span className="text-xs text-gray-500">
-                              {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </span>
+                            <time dateTime={c.created_at} title={new Date(c.created_at).toLocaleString("pt-BR")} className="text-xs text-gray-500">
+                              {timeAgo(c.created_at)}
+                            </time>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             {!canDeleteComment && user && (
