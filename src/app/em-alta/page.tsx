@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, Reaction } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
@@ -44,7 +45,7 @@ export default async function TrendingPage() {
   const posts = ((postData || []) as unknown as Post[]).sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
 
   return <div className="min-h-dvh bg-background-void text-white">
-    <header className="border-b border-white/10"><div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><Link href="/" className="font-heading text-lg font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</Link><Link href="/brickboard" className="text-xs font-bold text-gray-300 hover:text-white">Brickboard</Link></div></header>
+    <SiteHeader variant="strip" />
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Termômetro das matérias recentes</p>
       <h1 className="mt-2 font-heading text-4xl font-black uppercase sm:text-6xl">Em alta agora</h1>

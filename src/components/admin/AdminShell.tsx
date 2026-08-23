@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health";
 
@@ -99,13 +100,7 @@ export function AdminShell({
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setMobileMenuOpen(false);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [mobileMenuOpen]);
+  const drawerRef = useModalDialog<HTMLElement>(mobileMenuOpen, () => setMobileMenuOpen(false));
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -156,31 +151,31 @@ export function AdminShell({
               Operação Editorial
             </p>
             <div className="space-y-1">
-              <Link href="/admin" className={navClass("overview")}>
+              <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}>
                 <OverviewIcon />
                 Visão geral
               </Link>
-              <Link href="/admin/edit" className={navClass("editor")}>
+              <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}>
                 <ComposeIcon />
                 Nova matéria
               </Link>
-              <Link href="/admin/images" className={navClass("images")}>
+              <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}>
                 <ImagesIcon />
                 Biblioteca de imagens
               </Link>
-              <Link href="/admin/releases" className={navClass("releases")}>
+              <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
                 <ReleasesIcon />
                 Radar de lançamentos
               </Link>
-              <Link href="/admin/community" className={navClass("community")}>
+              <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}>
                 <CommunityIcon />
                 Comunidade
               </Link>
-              <Link href="/admin/progression" className={navClass("progression")}>
+              <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}>
                 <ProgressionIcon />
                 Progressão
               </Link>
-              <Link href="/admin/health" className={navClass("health")}>
+              <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}>
                 <OverviewIcon />
                 Saúde e auditoria
               </Link>
@@ -247,6 +242,8 @@ export function AdminShell({
                 className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-gray-300 transition-colors hover:text-white active:scale-95"
                 aria-label="Abrir menu administrativo"
                 aria-expanded={mobileMenuOpen}
+                aria-controls="admin-mobile-drawer"
+                aria-haspopup="dialog"
               >
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
@@ -370,6 +367,9 @@ export function AdminShell({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="admin-mobile-drawer"
             className="flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold text-gray-400 transition-all hover:text-white active:scale-95"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -383,14 +383,17 @@ export function AdminShell({
       {/* MOBILE FULL DRAWER MODAL */}
       {mobileMenuOpen && (
         <div
+          id="admin-mobile-drawer"
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 xl:hidden"
           onMouseDown={(event) => event.target === event.currentTarget && setMobileMenuOpen(false)}
         >
           <aside
+            ref={drawerRef}
             role="dialog"
             aria-modal="true"
             aria-label="Navegação administrativa"
-            className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4 shadow-2xl animate-in slide-in-from-left duration-200"
+            className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4 shadow-2xl animate-in slide-in-from-left duration-200 focus:outline-none"
+            tabIndex={-1}
           >
             {/* DRAWER HEADER */}
             <div className="flex min-h-14 items-center justify-between border-b border-white/10 pb-3">
@@ -425,13 +428,13 @@ export function AdminShell({
                   Operação Editorial
                 </p>
                 <div className="space-y-1">
-                  <Link href="/admin" className={navClass("overview")}><OverviewIcon />Visão geral</Link>
-                  <Link href="/admin/edit" className={navClass("editor")}><ComposeIcon />Nova matéria</Link>
-                  <Link href="/admin/images" className={navClass("images")}><ImagesIcon />Biblioteca de imagens</Link>
-                  <Link href="/admin/releases" className={navClass("releases")}><ReleasesIcon />Radar de lançamentos</Link>
-                  <Link href="/admin/community" className={navClass("community")}><CommunityIcon />Comunidade</Link>
-                  <Link href="/admin/progression" className={navClass("progression")}><ProgressionIcon />Progressão</Link>
-                  <Link href="/admin/health" className={navClass("health")}><OverviewIcon />Saúde e auditoria</Link>
+                  <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}><OverviewIcon />Visão geral</Link>
+                  <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
+                  <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}><ImagesIcon />Biblioteca de imagens</Link>
+                  <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
+                  <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>
+                  <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}><ProgressionIcon />Progressão</Link>
+                  <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}><OverviewIcon />Saúde e auditoria</Link>
                 </div>
               </div>
 

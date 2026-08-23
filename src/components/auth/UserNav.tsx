@@ -23,9 +23,26 @@ export function UserNav() {
         setIsDropdownOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsDropdownOpen(false);
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const menu = dropdownRef.current?.querySelector<HTMLElement>("#user-nav-menu");
+    menu?.querySelector<HTMLElement>("a[href], button")?.focus();
+    return () => {
+      if (opener && document.contains(opener)) opener.focus();
+    };
+  }, [isDropdownOpen]);
 
   if (isLoading) {
     return (
@@ -66,6 +83,9 @@ export function UserNav() {
         {/* USER PROFILE TRIGGER BUTTON */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          aria-expanded={isDropdownOpen}
+          aria-haspopup="menu"
+          aria-controls="user-nav-menu"
           className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl border border-brand-orange-muted/20 bg-card-slate/80 p-1.5 transition-all hover:border-brand-orange/40 hover:bg-card-slate sm:pr-3"
         >
           {avatarUrl ? (
@@ -84,7 +104,9 @@ export function UserNav() {
           <span className="text-xs font-subtitle font-bold text-white max-w-[100px] truncate hidden sm:inline-block">
             {displayName}
           </span>
-          <span className="hidden text-xs text-gray-400 xs:inline">▼</span>
+          <svg className="hidden h-3 w-3 text-gray-400 transition-transform xs:inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" d={isDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+          </svg>
         </button>
 
         {/* NOTIFICATION BELL ON THE RIGHT SIDE OF PROFILE */}
@@ -92,7 +114,7 @@ export function UserNav() {
 
         {/* DROPDOWN MENU */}
         {isDropdownOpen && (
-          <div className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
+          <div id="user-nav-menu" className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
             <div className="px-3 py-2 border-b border-brand-orange-muted/10">
               <p className="font-bold text-white truncate">{displayName}</p>
               <p className="text-xs text-gray-400 truncate">{user.email}</p>

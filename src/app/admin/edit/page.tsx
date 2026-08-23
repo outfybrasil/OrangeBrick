@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { createDataClient } from "@/lib/supabase/client";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
@@ -41,6 +43,66 @@ const CATEGORY_OPTIONS: { value: PostCategory; label: string }[] = [
   { value: "modding", label: "Modding" },
 ];
 
+type ArticleDraftFields = {
+  slug: string;
+  title: string;
+  summary: string;
+  category: PostCategory;
+  topicId: string;
+  imageUrl: string;
+  imageAlt: string;
+  authorName: string;
+  authorTag: string;
+  informationStatus: InformationStatus;
+  quoteText: string;
+  quoteAuthor: string;
+  quoteRole: string;
+  quoteSourceUrl: string;
+  sourcesText: string;
+  correctionNote: string;
+  blocks: ContentBlock[];
+};
+
+type ArticleDraftPayload = ArticleDraftFields & { savedAt?: string };
+
+function readLocalDraft(key: string): ArticleDraftPayload | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ArticleDraftPayload;
+    if (!parsed || typeof parsed !== "object" || typeof parsed.title !== "string" || !Array.isArray(parsed.blocks)) {
+      window.localStorage.removeItem(key);
+      return null;
+    }
+    return parsed;
+  } catch {
+    window.localStorage.removeItem(key);
+    return null;
+  }
+}
+
+function serializeDraftState(fields: ArticleDraftFields) {
+  return JSON.stringify({
+    slug: fields.slug,
+    title: fields.title,
+    summary: fields.summary,
+    category: fields.category,
+    topicId: fields.topicId,
+    imageUrl: fields.imageUrl,
+    imageAlt: fields.imageAlt,
+    authorName: fields.authorName,
+    authorTag: fields.authorTag,
+    informationStatus: fields.informationStatus,
+    quoteText: fields.quoteText,
+    quoteAuthor: fields.quoteAuthor,
+    quoteRole: fields.quoteRole,
+    quoteSourceUrl: fields.quoteSourceUrl,
+    sourcesText: fields.sourcesText,
+    correctionNote: fields.correctionNote,
+    blocks: fields.blocks,
+  });
+}
+
 function EditForm() {
   const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
@@ -75,6 +137,9 @@ function EditForm() {
   const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [autoSavedAt, setAutoSavedAt] = useState<string | null>(null);
+  const [localDraft, setLocalDraft] = useState<{ savedLabel: string; data: ArticleDraftPayload } | null>(null);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const previewRef = useModalDialog<HTMLDivElement>(showPreview, () => setShowPreview(false));
 
   // Auto-generate slug from title
   const handleTitleChange = (val: string) => {
@@ -120,8 +185,9 @@ function EditForm() {
     if (isLoading || !hasChanges) return;
     const storageKey = `orange-brick:article-draft:${postId || "new"}`;
     const timer = window.setInterval(() => {
-      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, blocks }));
-      setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date()));
+      const savedAt = new Date().toISOString();
+      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, blocks, savedAt }));
+      setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(savedAt)));
     }, 5000);
     return () => window.clearInterval(timer);
   }, [authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, slug, sourcesText, summary, title, topicId]);
@@ -143,13 +209,6 @@ function EditForm() {
       document.removeEventListener("click", warnBeforeInternalNavigation, true);
     };
   }, [hasChanges]);
-
-  useEffect(() => {
-    if (!showPreview) return;
-    const closeOnEscape = (event: KeyboardEvent) => event.key === "Escape" && setShowPreview(false);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [showPreview]);
 
   useEffect(() => {
     async function init() {
@@ -184,6 +243,33 @@ function EditForm() {
           setAuthorName(storedPreferences?.default_author?.trim() || "Redação");
           setCategory(nextCategory);
           setAuthorTag(AUTHOR_TAGS[nextCategory]);
+
+          const loadedState: ArticleDraftFields = {
+            slug: "",
+            title: "",
+            summary: "",
+            category: nextCategory,
+            topicId: "",
+            imageUrl: "",
+            imageAlt: "",
+            authorName: storedPreferences?.default_author?.trim() || "Redação",
+            authorTag: AUTHOR_TAGS[nextCategory],
+            informationStatus: "confirmed",
+            quoteText: "",
+            quoteAuthor: "",
+            quoteRole: "",
+            quoteSourceUrl: "",
+            sourcesText: "",
+            correctionNote: "",
+            blocks: [],
+          };
+          const storedDraft = readLocalDraft(`orange-brick:article-draft:new`);
+          if (storedDraft && serializeDraftState(storedDraft) !== serializeDraftState(loadedState)) {
+            setLocalDraft({
+              savedLabel: storedDraft.savedAt ? new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(storedDraft.savedAt)) : "horário desconhecido",
+              data: storedDraft,
+            });
+          }
           setIsLoading(false);
           return;
         }
@@ -218,15 +304,42 @@ function EditForm() {
           setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"));
           setCorrectionNote(typedPost.correction_note || "");
 
+          let parsedBlocks: ContentBlock[] = [{ id: "legacy-block", type: "text", content: typedPost.body }];
           try {
-            const parsedBlocks = JSON.parse(typedPost.body);
-            if (Array.isArray(parsedBlocks)) {
-              setBlocks(parsedBlocks);
-            } else {
-              setBlocks([{ id: "legacy-block", type: "text", content: typedPost.body }]);
+            const jsonBlocks = JSON.parse(typedPost.body);
+            if (Array.isArray(jsonBlocks)) {
+              parsedBlocks = jsonBlocks;
             }
           } catch {
-            setBlocks([{ id: "legacy-block", type: "text", content: typedPost.body }]);
+            parsedBlocks = [{ id: "legacy-block", type: "text", content: typedPost.body }];
+          }
+          setBlocks(parsedBlocks);
+
+          const loadedState: ArticleDraftFields = {
+            slug: typedPost.slug,
+            title: typedPost.title,
+            summary: typedPost.summary ?? "",
+            category: typedPost.category,
+            topicId: typedPost.topic_id || "",
+            imageUrl: typedPost.image_url || "",
+            imageAlt: typedPost.image_alt || "",
+            authorName: typedPost.author_name,
+            authorTag: normalizeAuthorTag(typedPost.author_tag),
+            informationStatus: typedPost.information_status || "confirmed",
+            quoteText: storedQuote?.text || "",
+            quoteAuthor: storedQuote?.author || "",
+            quoteRole: storedQuote?.role || "",
+            quoteSourceUrl: storedQuote?.source_url || "",
+            sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"),
+            correctionNote: typedPost.correction_note || "",
+            blocks: parsedBlocks,
+          };
+          const storedDraft = readLocalDraft(`orange-brick:article-draft:${postId}`);
+          if (storedDraft && serializeDraftState(storedDraft) !== serializeDraftState(loadedState)) {
+            setLocalDraft({
+              savedLabel: storedDraft.savedAt ? new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(storedDraft.savedAt)) : "horário desconhecido",
+              data: storedDraft,
+            });
           }
         }
       } catch (err: unknown) {
@@ -399,6 +512,36 @@ function EditForm() {
     }
   };
 
+  const discardLocalDraft = () => {
+    window.localStorage.removeItem(`orange-brick:article-draft:${postId || "new"}`);
+    setLocalDraft(null);
+  };
+
+  const restoreLocalDraft = () => {
+    if (!localDraft) return;
+    const draft = localDraft.data;
+    setSlug(draft.slug || "");
+    setTitle(draft.title || "");
+    setSummary(draft.summary || "");
+    setCategory(draft.category || "breaking");
+    setTopicId(draft.topicId || "");
+    setImageUrl(draft.imageUrl || "");
+    setImageAlt(draft.imageAlt || "");
+    setAuthorName(draft.authorName || "Redação");
+    setAuthorTag(normalizeAuthorTag(draft.authorTag || AUTHOR_TAGS.breaking));
+    setInformationStatus(draft.informationStatus || "confirmed");
+    setQuoteText(draft.quoteText || "");
+    setQuoteAuthor(draft.quoteAuthor || "");
+    setQuoteRole(draft.quoteRole || "");
+    setQuoteSourceUrl(draft.quoteSourceUrl || "");
+    setSourcesText(draft.sourcesText || "");
+    setCorrectionNote(draft.correctionNote || "");
+    setBlocks(Array.isArray(draft.blocks) ? draft.blocks : []);
+    setHasChanges(false);
+    setAutoSavedAt(localDraft.savedLabel);
+    setLocalDraft(null);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-[#0a0b0e] text-center">
@@ -418,7 +561,7 @@ function EditForm() {
       status={
         <span className="inline-flex items-center gap-1.5 text-xs text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          {hasChanges ? autoSavedAt ? `Backup local às ${autoSavedAt}` : "Alterações não salvas" : postId ? "Matéria carregada" : "Nova matéria vazia"}
+          {hasChanges ? autoSavedAt ? `Rascunho local salvo às ${autoSavedAt}` : "Alterações não salvas" : postId ? "Matéria carregada" : "Nova matéria vazia"}
         </span>
       }
       actions={
@@ -443,7 +586,7 @@ function EditForm() {
           <div className="flex items-center rounded-lg bg-brand-orange">
             <button
               type="button"
-              onClick={() => handleSave(true)}
+              onClick={() => setShowPublishConfirm(true)}
               disabled={isSaving}
               className="col-span-2 min-h-11 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50 sm:col-span-1"
             >
@@ -457,6 +600,30 @@ function EditForm() {
       {error && (
         <div role="alert" className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-200">
           {error}
+        </div>
+      )}
+
+      {localDraft && (
+        <div className="mb-4 flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between" role="status">
+          <p className="text-xs leading-5 text-amber-200">
+            Rascunho local de {localDraft.savedLabel} encontrado no navegador. Restaurar substitui o conteúdo carregado pelo backup mais recente.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={discardLocalDraft}
+              className="min-h-11 rounded border border-white/15 px-4 text-xs font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              Descartar
+            </button>
+            <button
+              type="button"
+              onClick={restoreLocalDraft}
+              className="min-h-11 rounded bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
+            >
+              Restaurar rascunho
+            </button>
+          </div>
         </div>
       )}
 
@@ -542,10 +709,10 @@ function EditForm() {
               {blocks.map((block, index) => (
                 <div key={block.id} className="group relative flex items-start gap-2 rounded-lg border border-white/5 bg-white/[0.01] p-2 hover:border-white/10 transition-colors">
                   {/* ALÇA DE ARRASTAR */}
-                  <div className="flex flex-col items-center gap-1 pt-2 text-gray-600 opacity-50 group-hover:opacity-100 cursor-grab">
-                    <button type="button" onClick={() => moveBlock(index, "up")} disabled={index === 0} className="hover:text-white disabled:opacity-20 text-xs">▲</button>
-                    <span className="text-xs">⋮⋮</span>
-                    <button type="button" onClick={() => moveBlock(index, "down")} disabled={index === blocks.length - 1} className="hover:text-white disabled:opacity-20 text-xs">▼</button>
+                  <div className="flex flex-col items-center gap-1 pt-2 text-gray-600 opacity-50 group-hover:opacity-100">
+                    <button type="button" onClick={() => moveBlock(index, "up")} disabled={index === 0} aria-label={`Mover bloco ${index + 1} para cima`} className="min-h-6 min-w-6 hover:text-white disabled:opacity-20 text-xs">▲</button>
+                    <span className="text-xs" aria-hidden="true">⋮⋮</span>
+                    <button type="button" onClick={() => moveBlock(index, "down")} disabled={index === blocks.length - 1} aria-label={`Mover bloco ${index + 1} para baixo`} className="min-h-6 min-w-6 hover:text-white disabled:opacity-20 text-xs">▼</button>
                   </div>
 
                   {/* CONTEÚDO DO BLOCO */}
@@ -556,6 +723,7 @@ function EditForm() {
                         onChange={(e) => updateTextBlock(block.id, e.target.value)}
                         rows={Math.max(2, block.content.split("\n").length)}
                         placeholder="Digite o texto do parágrafo ou markdown..."
+                        aria-label={`Conteúdo do bloco ${index + 1}`}
                         className="w-full bg-transparent p-2 text-xs leading-relaxed text-gray-200 outline-none font-sans"
                       />
                     ) : block.type === "image" ? (
@@ -574,14 +742,27 @@ function EditForm() {
                             </div>
                           )}
                         </div>
+                        <label htmlFor={`image-url-${block.id}`} className="sr-only">URL da imagem do bloco {index + 1}</label>
                         <input
+                          id={`image-url-${block.id}`}
                           type="url"
                           value={block.url}
                           onChange={(e) => updateImageBlock(block.id, "url", e.target.value)}
                           placeholder="URL da imagem (https://...)"
                           className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white font-mono outline-none"
                         />
+                        <label htmlFor={`image-alt-${block.id}`} className="block text-xs font-semibold text-gray-300">Texto alternativo (descreva a imagem)</label>
                         <input
+                          id={`image-alt-${block.id}`}
+                          type="text"
+                          value={block.alt}
+                          onChange={(e) => updateImageBlock(block.id, "alt", e.target.value)}
+                          placeholder="Ex.: Console Nintendo Switch 2 sobre mesa"
+                          className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none focus:border-brand-orange/50"
+                        />
+                        <label htmlFor={`image-caption-${block.id}`} className="block text-xs font-semibold text-gray-300">Legenda da imagem</label>
+                        <input
+                          id={`image-caption-${block.id}`}
                           type="text"
                           value={block.caption}
                           onChange={(e) => updateImageBlock(block.id, "caption", e.target.value)}
@@ -771,14 +952,14 @@ function EditForm() {
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">A fala só será exibida com autoria e URL da fonte.</p></div>
-            <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
+            <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" aria-label="Declaração em destaque" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
             <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
             <label className="space-y-1 text-xs font-bold text-gray-300">URL da declaração<input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
             <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha no formato Nome|https://endereco.com</p></div>
-            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}
@@ -797,6 +978,7 @@ function EditForm() {
                 value={imageUrl}
                 onChange={(e) => { setImageUrl(e.target.value); setHasChanges(true); }}
                 placeholder="URL da imagem..."
+                aria-label="URL da imagem de capa"
                 className="h-8 flex-1 rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none font-mono"
               />
               <button
@@ -812,6 +994,7 @@ function EditForm() {
               value={imageAlt}
               onChange={(event) => { setImageAlt(event.target.value); setHasChanges(true); }}
               placeholder="Descreva a imagem de capa"
+              aria-label="Texto alternativo da imagem de capa"
               className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-white outline-none"
             />
           </div>
@@ -858,7 +1041,7 @@ function EditForm() {
       {/* MODAL DE PREVIEW */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowPreview(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-xl border border-white/10 bg-[#0e0f14] p-4 text-white sm:max-h-[90vh] sm:p-6">
+          <div ref={previewRef} role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" tabIndex={-1} className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-white/10 bg-[#0e0f14] p-4 text-white focus:outline-none sm:max-h-[90vh] sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="preview-dialog-title" className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
               <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">✕</button>
@@ -889,6 +1072,17 @@ function EditForm() {
             </div>
           </div>
         </div>
+      )}
+
+      {showPublishConfirm && (
+        <PublishConfirmModal
+          title={title}
+          publishing={isSaving}
+          error={error}
+          pendingChecklist={editorialChecklist.filter((item) => !item.complete).map((item) => item.label)}
+          onConfirm={() => void handleSave(true)}
+          onCancel={() => setShowPublishConfirm(false)}
+        />
       )}
     </AdminShell>
   );

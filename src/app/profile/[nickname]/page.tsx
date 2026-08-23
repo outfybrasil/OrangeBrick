@@ -243,7 +243,7 @@ function ProfilePageContent() {
           )}
           <div
             className="absolute inset-0"
-            style={{ background: "radial-gradient(ellipse 80% 60% at 75% 50%, rgba(255,90,20,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 80% at 90% 20%, rgba(255,60,0,0.12) 0%, transparent 60%)" }}
+            style={{ background: "radial-gradient(ellipse 80% 60% at 75% 50%, rgba(255,94,0,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 80% at 90% 20%, rgba(168,67,0,0.25) 0%, transparent 60%)" }}
           />
           <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-8">

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
 import { isAdminUser } from "@/lib/auth";
 import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
 import { createDataClient } from "@/lib/supabase/client";
@@ -154,7 +155,7 @@ export default function AdminDashboard() {
         author_name: "Orange Brick",
         author_avatar: "",
         content: post.summary.slice(0, 280),
-        media_url: post.image_url,
+        media_url: null,
         platform_tag: null,
         attached_article: {
           id: post.id,
@@ -231,7 +232,7 @@ export default function AdminDashboard() {
             author_name: "Orange Brick",
             author_avatar: "",
             content: post.summary.slice(0, 280),
-            media_url: post.image_url,
+            media_url: null,
             platform_tag: null,
             attached_article: {
               id: post.id,
@@ -892,74 +893,20 @@ export default function AdminDashboard() {
       </section>
 
       {publishCandidate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8" role="presentation">
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="publish-confirmation-title"
-            aria-describedby="publish-confirmation-description"
-            className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400" aria-hidden="true">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 id="publish-confirmation-title" className="mt-5 font-heading text-xl font-black text-white">
-              Confirmar publicação
-            </h2>
-            <p id="publish-confirmation-description" className="mt-2 text-sm leading-6 text-gray-400">
-              A matéria ficará disponível imediatamente no site. Confira o título antes de continuar.
-            </p>
-            <div className="mt-5 rounded-xl bg-white/[0.04] p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Matéria</p>
-              <p className="mt-1.5 font-heading text-sm font-bold uppercase leading-5 text-white">
-                {publishCandidate.title}
-              </p>
-            </div>
-            {publishError && (
-              <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-200">
-                {publishError}
-              </div>
-            )}
-            <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-white/10 px-4 py-3 transition-colors hover:bg-white/[0.03]">
-              <input
-                type="checkbox"
-                checked={publishOnBrickboard}
-                onChange={(event) => setPublishOnBrickboard(event.target.checked)}
-                disabled={publishingId === publishCandidate.id}
-                className="h-4 w-4 shrink-0 accent-brand-orange"
-              />
-              <span>
-                <span className="block text-xs font-bold text-white">Publicar também no Brickboard</span>
-                <span className="mt-0.5 block text-xs leading-4 text-gray-500">Cria uma publicação oficial vinculada a esta matéria.</span>
-              </span>
-            </label>
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  setPublishCandidate(null);
-                  setPublishOnBrickboard(false);
-                  setPublishError(null);
-                }}
-                disabled={publishingId === publishCandidate.id}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                autoFocus
-                onClick={() => void publishPost(publishCandidate)}
-                disabled={publishingId === publishCandidate.id}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-500 px-4 text-xs font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
-              >
-                {publishingId === publishCandidate.id ? "Publicando..." : "Publicar agora"}
-              </button>
-            </div>
-          </section>
-        </div>
+        <PublishConfirmModal
+          title={publishCandidate.title}
+          publishing={publishingId === publishCandidate.id}
+          error={publishError}
+          showCrossPost
+          crossPost={publishOnBrickboard}
+          onCrossPostChange={setPublishOnBrickboard}
+          onConfirm={() => void publishPost(publishCandidate)}
+          onCancel={() => {
+            setPublishCandidate(null);
+            setPublishOnBrickboard(false);
+            setPublishError(null);
+          }}
+        />
       )}
 
       {deleteCandidate && (

@@ -24,7 +24,7 @@ export function GlobalSearchShortcut() {
 
       if (isSearchKey) {
         event.preventDefault();
-        const searchInput = document.querySelector<HTMLInputElement>("input[type='search'], #site-search-input");
+        const searchInput = document.querySelector<HTMLInputElement>("[data-site-search-input], input[type='search']");
         if (searchInput) {
           searchInput.focus();
           searchInput.select();

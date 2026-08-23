@@ -62,7 +62,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-brand-orange-muted/5 mt-10 pt-6 text-center text-xs text-gray-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-brand-orange-muted/5 mt-10 pt-6 text-center text-xs text-gray-400">
         <p suppressHydrationWarning>
           © 2026 Orange Brick. Conteúdo editorial protegido nos termos da legislação aplicável.
         </p>

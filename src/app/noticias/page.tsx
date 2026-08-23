@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Tag } from "@/components/ui/Tag";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
@@ -24,7 +25,6 @@ export const metadata: Metadata = {
 };
 
 export default async function NewsArchivePage({ searchParams }: { searchParams: Promise<{ periodo?: string; q?: string }> }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const params = await searchParams;
   const period = params.periodo === "mes" ? "mes" : "todas";
   const search = params.q?.trim().slice(0, 80) || "";
@@ -45,15 +45,7 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
 
   return (
     <div className="min-h-dvh bg-background-void text-white">
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="group flex min-h-11 items-center gap-2.5" aria-label="Ir para a página inicial do Orange Brick">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" className="h-8 w-auto max-w-[42px] object-contain transition-transform duration-300 group-hover:scale-105" />
-            <span className="font-heading text-lg font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</span>
-          </Link>
-          <Link href="/" className="text-xs font-bold text-gray-300 transition-colors hover:text-brand-orange">Voltar à home</Link>
-        </div>
-      </header>
+      <SiteHeader variant="strip" />
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-6 border-b border-white/10 pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>

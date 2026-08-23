@@ -317,36 +317,42 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
         <SpoilerText>{post.content}</SpoilerText>
       </p>
 
-      {post.media_url && (
-        <div className="flex items-center justify-center overflow-hidden border-y border-white/10 bg-background-void/90">
-          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto w-full object-contain" />
+      {post.media_url && !post.attached_article && (
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-background-void/90 max-h-[340px] sm:max-h-[380px] flex items-center justify-center">
+          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[340px] sm:max-h-[380px] w-full object-contain" />
         </div>
       )}
 
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article block overflow-hidden rounded-xl border border-white/10 bg-background-void/40 transition-all hover:border-brand-orange/40 hover:bg-background-void/60 mt-3"
+          className="group/article mt-3 grid grid-cols-[100px_minmax(0,1fr)] xs:grid-cols-[120px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
         >
-          {post.attached_article.image_url && (
-            <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
+          {post.attached_article.image_url ? (
+            <div className="relative h-full min-h-[90px] w-full overflow-hidden bg-black/40 border-r border-white/10">
               <img loading="lazy" decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-105"
               />
             </div>
+          ) : (
+            <div className="flex h-full min-h-[90px] items-center justify-center bg-card-slate/40 border-r border-white/10">
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Orange Brick</span>
+            </div>
           )}
-          <div className="p-4">
-            <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+          <div className="flex flex-col justify-center p-3 sm:p-3.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
               Matéria do Orange Brick
             </span>
-            <h5 className="break-words font-subtitle text-sm font-bold leading-6 text-white transition-colors group-hover/article:text-brand-orange sm:text-base">
+            <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
               {post.attached_article.title}
             </h5>
-            <p className="mt-2 break-words font-body text-xs leading-5 text-gray-300 line-clamp-2">
-              {post.attached_article.summary}
-            </p>
+            {post.attached_article.summary && (
+              <p className="mt-1 break-words font-body text-[11px] sm:text-xs leading-relaxed text-gray-400 line-clamp-2">
+                {post.attached_article.summary}
+              </p>
+            )}
           </div>
         </Link>
       )}
@@ -388,22 +394,22 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               {post.shared_post.original_attached_article && (
                 <Link
                   href={`/posts/${post.shared_post.original_attached_article.slug}`}
-                  className="group/article block overflow-hidden rounded-xl border border-white/10 bg-background-void/90 hover:border-brand-orange/40 transition-all mt-3"
+                  className="group/article mt-2.5 grid grid-cols-[85px_minmax(0,1fr)] sm:grid-cols-[130px_minmax(0,1fr)] overflow-hidden rounded-xl border border-white/10 bg-background-void/80 hover:border-brand-orange/40 transition-all"
                 >
                   {post.shared_post.original_attached_article.image_url && (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-white/10">
+                    <div className="relative h-full min-h-[75px] w-full overflow-hidden border-r border-white/10">
                       <img loading="lazy" decoding="async"
                         src={post.shared_post.original_attached_article.image_url}
                         alt={post.shared_post.original_attached_article.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-102"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-105"
                       />
                     </div>
                   )}
-                  <div className="p-3">
-                    <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
+                  <div className="flex flex-col justify-center p-2.5 min-w-0">
+                    <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
                       Matéria Citada
                     </span>
-                    <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange">
+                    <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
                       {post.shared_post.original_attached_article.title}
                     </h5>
                   </div>

@@ -34,7 +34,7 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        className="group relative mb-3 grid h-[148px] grid-cols-[130px_minmax(0,1fr)] overflow-hidden rounded-[20px] bg-[#111217] shadow-[0_12px_30px_rgba(0,0,0,0.24)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(0,0,0,0.34)] xs:grid-cols-[150px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
+        className="group relative mb-3 grid h-[148px] grid-cols-[130px_minmax(0,1fr)] overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 xs:grid-cols-[150px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
       >
         <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block h-full overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange">
           {post.image_url ? (
@@ -57,10 +57,10 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
             </>
           ) : (
             <div className="flex h-full items-center justify-center bg-card-slate">
-              <span className="text-xs text-gray-600">Sem mídia</span>
+              <span className="text-xs text-gray-500">Sem mídia</span>
             </div>
           )}
-          <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black shadow-md">
+          <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black">
             {CATEGORY_CONFIG[post.category].label}
             <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
             <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />

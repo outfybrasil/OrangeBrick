@@ -10,10 +10,10 @@
   --color-brand-orange-muted: #A84300;
   --color-card-slate: #1C1E24;
   --color-accent-blue: #00A3FF;
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading-var), "Outfit", sans-serif;
   --font-subtitle: var(--font-subtitle-var), "Space Grotesk", sans-serif;
   --font-body: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
-  --font-mono: var(--font-heading-var), "Outfit", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
   --font-sans: var(--font-sans);
   --breakpoint-xs: 480px;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -69,7 +69,7 @@
 }
 
 .font-mono {
-  font-family: var(--font-heading-var), "Outfit", sans-serif;
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
 }
 
 * {
@@ -94,11 +94,7 @@ body {
 a,
 button,
 [role="button"] {
-  border-radius: var(--radius-2xl);
-}
-
-:is(a, button, [role="button"])[class*="rounded-full"] {
-  border-radius: 9999px;
+  border-radius: 0;
 }
 
 :where(a, button, input, textarea, select, summary):focus-visible {

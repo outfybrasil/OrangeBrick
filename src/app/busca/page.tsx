@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Footer } from "@/components/ui/Footer";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { CommunityPostRow, Post, Profile, ReleaseRadarItem } from "@/lib/types/database";
 
@@ -31,7 +33,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const bricks = (results[3]?.data || []) as CommunityPostRow[];
   const total = posts.length + releases.length + profiles.length + bricks.length;
 
-  return <div className="min-h-dvh bg-background-void text-white"><header className="border-b border-white/10"><div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6"><Link href="/" className="font-heading text-lg font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</Link><Link href="/brickboard" className="text-xs font-bold text-gray-300">Brickboard</Link></div></header><main className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Busca universal</p><h1 className="mt-2 font-heading text-4xl font-black uppercase sm:text-6xl">Encontre tudo.</h1><form className="mt-8 flex max-w-3xl gap-2"><input name="q" defaultValue={query} minLength={2} required autoFocus placeholder="Matéria, jogo, leitor ou conversa" className="min-h-12 min-w-0 flex-1 border border-white/15 bg-card-slate/40 px-4 text-sm outline-none focus:border-brand-orange/60" /><button className="min-h-12 bg-brand-orange px-6 text-xs font-black uppercase">Buscar</button></form>{query && <p className="mt-4 text-sm text-gray-400">{total} resultados para “{query}”</p>}
+  return <div className="min-h-dvh bg-background-void text-white"><SiteHeader variant="strip" /><main className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Busca universal</p><h1 className="mt-2 font-heading text-4xl font-black uppercase sm:text-6xl">Encontre tudo.</h1><form className="mt-8 flex max-w-3xl gap-2"><input name="q" defaultValue={query} minLength={2} required autoFocus placeholder="Matéria, jogo, leitor ou conversa" aria-label="Buscar matérias, jogos, leitores ou conversas" className="min-h-12 min-w-0 flex-1 border border-white/15 bg-card-slate/40 px-4 text-sm outline-none focus:border-brand-orange/60" /><button className="min-h-12 bg-brand-orange px-6 text-xs font-black uppercase">Buscar</button></form>{query && <p className="mt-4 text-sm text-gray-400">{total} resultados para “{query}”</p>}
   <div className="mt-10 grid gap-10 lg:grid-cols-2">
     <ResultSection title="Matérias">{posts.map((post) => <Link key={post.id} href={`/posts/${post.slug}`} className="block border-t border-white/10 py-4"><strong className="font-heading text-sm uppercase hover:text-brand-orange"><Highlight value={post.title} query={query} /></strong><p className="mt-1 line-clamp-2 text-xs text-gray-400"><Highlight value={post.summary} query={query} /></p></Link>)}</ResultSection>
     <ResultSection title="Lançamentos no Radar">{releases.map((release) => <Link key={release.id} href={`/lancamentos#${release.id}`} className="block border-t border-white/10 py-4 text-sm font-bold hover:text-brand-orange">{release.game} <span className="font-normal text-gray-500">· {release.release_label}</span></Link>)}</ResultSection>
@@ -40,7 +42,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   </div></main><Footer /></div>;
 }
 
-function ResultSection({ title, children }: { title: string; children: React.ReactNode }) { return <section><h2 className="mb-2 font-heading text-xl font-black uppercase">{title}</h2>{children}</section>; }
+function ResultSection({ title, children }: { title: string; children: ReactNode }) {
+  if (Array.isArray(children) ? children.length === 0 : children == null || children === false) return null;
+  return <section><h2 className="mb-2 font-heading text-xl font-black uppercase">{title}</h2>{children}</section>;
+}
 
 function Highlight({ value, query }: { value: string; query: string }) {
   if (!query) return value;

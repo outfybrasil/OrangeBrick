@@ -169,7 +169,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
-          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden rounded-[20px] bg-background-void shadow-[0_18px_48px_rgba(0,0,0,0.3)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_56px_rgba(0,0,0,0.38)] focus-visible:outline-2 focus-visible:outline-brand-orange"
+          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
 {heroPost.image_url ? (
             <Image
@@ -182,13 +182,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             />
           ) : (
             <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
-              <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">Sem mídia</span>
+              <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
             </div>
           )}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
 
-          <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5 shadow-md">
+          <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-black">Matéria do dia</span>
             <span aria-hidden="true" className="absolute -right-4 top-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
@@ -227,7 +227,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               href={`/posts/${post.slug}`}
               data-home-event="article"
               data-home-target={post.slug}
-              className="group relative flex flex-1 flex-col overflow-hidden rounded-[20px] bg-[#111217] shadow-[0_12px_30px_rgba(0,0,0,0.24)] ring-1 ring-white/10 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(0,0,0,0.34)] focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="group relative flex flex-1 flex-col overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
 {post.image_url && (
                 <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
@@ -239,7 +239,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                     className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black shadow-md">
+                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black">
                     {CATEGORY_CONFIG[post.category].label}
                     <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                     <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />

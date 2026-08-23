@@ -729,10 +729,10 @@ export interface PostStats {
 }
 
 export const CATEGORY_CONFIG: Record<PostCategory, { label: string; color: string }> = {
-  breaking: { label: "Plantão", color: "text-brand-orange border-brand-orange/50" },
-  hardware: { label: "Hard News", color: "text-brand-orange border-brand-orange/50" },
-  industry: { label: "Radar", color: "text-brand-orange border-brand-orange/50" },
-  modding: { label: "Gambiarra", color: "text-brand-orange border-brand-orange/50" },
-  review: { label: "Review", color: "text-brand-orange border-brand-orange/50" },
-  opinion: { label: "Opinião", color: "text-brand-orange border-brand-orange/50" },
+  breaking: { label: "Plantão", color: "#FF5E00" },
+  hardware: { label: "Hard News", color: "#6EA8D8" },
+  industry: { label: "Radar", color: "#8FBF8F" },
+  modding: { label: "Gambiarra", color: "#56BFB2" },
+  review: { label: "Review", color: "#D9B45B" },
+  opinion: { label: "Opinião", color: "#E5766B" },
 };

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post, PostStats, ReactionType } from "@/lib/types/database";
@@ -33,7 +34,7 @@ async function getPost(slug: string, isPreview = false): Promise<Post | null> {
   return data as Post | null;
 }
 
-async function getStats(postId: string): Promise<PostStats> {
+const getStatsUncached = async (postId: string): Promise<PostStats> => {
   const serviceClient = createServiceRoleClient();
   const [reactions, views, comments] = await Promise.all([
     serviceClient.from("reactions").select("reaction_type").eq("post_id", postId).returns<{ reaction_type: ReactionType }[]>(),
@@ -50,6 +51,12 @@ async function getStats(postId: string): Promise<PostStats> {
     comments: comments.count || 0,
     userReaction: null,
   };
+};
+
+const getStatsCached = unstable_cache(getStatsUncached, ["post-stats"], { revalidate: 60 });
+
+function getStats(postId: string): Promise<PostStats> {
+  return getStatsCached(postId);
 }
 
 export async function generateMetadata({ params, searchParams }: PostPageProps): Promise<Metadata> {
@@ -71,13 +78,11 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
       url: canonical,
       publishedTime: post.published_at || undefined,
       modifiedTime: post.updated_at,
-      images: post.image_url ? [{ url: post.image_url, alt: post.image_alt || post.title }] : [],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.summary,
-      images: post.image_url ? [post.image_url] : [],
     },
   };
 }

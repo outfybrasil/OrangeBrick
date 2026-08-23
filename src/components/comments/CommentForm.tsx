@@ -38,7 +38,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   if (!user) {
     return (
       <>
-        <div className="relative space-y-4 overflow-hidden rounded-2xl border border-brand-orange-muted/20 bg-card-slate/80 p-5 text-center shadow-xl sm:rounded-3xl sm:p-8">
+        <div className="relative space-y-4 overflow-hidden border border-brand-orange-muted/20 bg-card-slate/80 p-5 text-center sm:p-8">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-brand-orange/30 bg-brand-orange/15 text-brand-orange">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
@@ -76,7 +76,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   const avatarUrl = resolveAvatarUrl(profile?.avatar_url || getGoogleAvatarUrl(user), userDisplayName);
 
   return (
-    <div className="bg-[#15171F] border border-brand-orange-muted/20 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+    <div className="bg-[#15171F] border border-brand-orange-muted/20 p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between text-xs font-subtitle">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-brand-orange to-amber-500 p-[1px] flex items-center justify-center shadow-md">

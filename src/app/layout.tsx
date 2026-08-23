@@ -105,6 +105,12 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", headingFont.variable, subtitleFont.variable, bodyFont.variable, monoFont.variable, geist.variable)}
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
+        <a
+          href="#conteudo-principal"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-brand-orange focus:px-4 focus:py-2 focus:text-xs focus:font-black focus:text-black focus:outline-2 focus:outline-offset-2"
+        >
+          Pular para o conteúdo
+        </a>
         <script
           suppressHydrationWarning
           type="application/ld+json"

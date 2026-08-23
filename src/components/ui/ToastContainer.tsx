@@ -49,7 +49,7 @@ export function ToastContainer() {
                   {toast.title}
                 </strong>
               )}
-              <p className="truncate text-xs font-medium text-gray-200">{toast.message}</p>
+              <p className="line-clamp-2 text-xs font-medium text-gray-200">{toast.message}</p>
             </div>
           </div>
           <button

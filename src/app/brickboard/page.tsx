@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useMemo, useRef } from "react";
+import { useEffect, useState, Suspense, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
@@ -16,7 +16,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useFollowPreferences } from "@/lib/hooks/useFollowPreferences";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
-import { levelProgress } from "@/lib/progression";
+import { levelProgress, formatXp } from "@/lib/progression";
+import { useToast } from "@/lib/contexts/ToastContext";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
@@ -157,12 +158,32 @@ function BrickboardContent() {
     document.getElementById(`brick-${targetPostId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [isLoaded, targetPostId]);
 
+  const toast = useToast();
+  const lastXpRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!user) return;
     supabase.rpc("current_user_progress", {}).then(({ data }) => {
-      if (data) setUserProgress(data as PrivateProgressData);
+      if (data) {
+        setUserProgress(data as PrivateProgressData);
+        lastXpRef.current = (data as PrivateProgressData).progress.lifetime_xp;
+      }
     });
   }, [supabase, user]);
+
+  const trackXp = useCallback(async () => {
+    if (!user) return;
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    const { data } = await supabase.rpc("current_user_progress", {});
+    if (!data) return;
+    const next = data as PrivateProgressData;
+    setUserProgress(next);
+    const xp = next.progress.lifetime_xp;
+    if (lastXpRef.current !== null && xp > lastXpRef.current) {
+      toast.success(`+${formatXp(xp - lastXpRef.current)} XP`, "Contribuição registrada");
+    }
+    lastXpRef.current = xp;
+  }, [supabase, toast, user]);
 
   const trendingTopics = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -254,7 +275,7 @@ function BrickboardContent() {
         </div>
       </header>
 
-      <main className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main id="conteudo-principal" className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {user && userProgress && (
           <Link
             href={profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange"}
@@ -510,10 +531,16 @@ function BrickboardContent() {
                     <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28 content-visibility-auto">
                       <BrickCard
                         post={post}
-                        onReaction={toggleReaction}
+                        onReaction={(postId, type) => {
+                          toggleReaction(postId, type);
+                          void trackXp();
+                        }}
                         onDeletePost={deletePost}
                         onSharePost={sharePost}
-                        onAddComment={addComment}
+                        onAddComment={async (postId, content) => {
+                          await addComment(postId, content);
+                          void trackXp();
+                        }}
                         onDeleteComment={deleteComment}
                         onToggleCommentLike={toggleCommentLike}
                         getComments={getComments}
@@ -640,6 +667,7 @@ function BrickboardContent() {
         onPublish={(content, tag, article, media) => {
           addPost(content, tag, article, media || inlineMediaUrl || undefined);
           setInlineMediaUrl(null);
+          void trackXp();
         }}
         initialArticle={preAttachedArticle}
       />

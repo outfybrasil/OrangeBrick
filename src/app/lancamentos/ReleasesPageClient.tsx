@@ -123,17 +123,22 @@ function extractDayNumber(dateStr: string, isoStr?: string): number {
   return 99;
 }
 
-export function ReleasesPageClient() {
+interface ReleasesPageClientProps {
+  initialReleases?: ReleaseItem[];
+  initialHypeCounts?: Record<string, HypeCounts>;
+}
+
+export function ReleasesPageClient({ initialReleases, initialHypeCounts }: ReleasesPageClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
-  const [releases, setReleases] = useState<ReleaseItem[]>([]);
-  const [isLoadingReleases, setIsLoadingReleases] = useState(true);
+  const [releases, setReleases] = useState<ReleaseItem[]>(initialReleases ?? []);
+  const [isLoadingReleases, setIsLoadingReleases] = useState(!initialReleases);
   const [releaseError, setReleaseError] = useState("");
   const [search, setSearch] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
-  const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>({});
+  const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>(initialHypeCounts ?? {});
   const [myVotes, setMyVotes] = useState<Record<string, HypeVoteType>>({});
   const [votingReleaseId, setVotingReleaseId] = useState<string | null>(null);
   const [pendingVote, setPendingVote] = useState<{ releaseId: string; vote: HypeVoteType } | null>(null);
@@ -180,8 +185,9 @@ export function ReleasesPageClient() {
   }, [supabase]);
 
   useEffect(() => {
+    if (initialReleases) return;
     queueMicrotask(loadReleases);
-  }, [loadReleases]);
+  }, [loadReleases, initialReleases]);
 
   const loadHype = useCallback(async () => {
     const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
@@ -212,8 +218,9 @@ export function ReleasesPageClient() {
   }, [supabase, user]);
 
   useEffect(() => {
+    if (initialHypeCounts && !user) return;
     queueMicrotask(loadHype);
-  }, [loadHype]);
+  }, [loadHype, initialHypeCounts, user]);
 
   const commitVote = useCallback(async (releaseId: string, vote: HypeVoteType) => {
     if (!user || votingReleaseId) return;

@@ -10,11 +10,8 @@ export function Tag({ category }: TagProps) {
 
   return (
     <span
-      className={`
-        inline-flex shrink-0 items-center border-b pb-1
-        text-xs font-subtitle font-bold uppercase tracking-[0.06em]
-        ${config.color}
-      `}
+      className="inline-flex shrink-0 items-center border-b pb-1 text-xs font-subtitle font-bold uppercase tracking-[0.06em]"
+      style={{ color: config.color, borderBottomColor: `${config.color}66` }}
     >
       {config.label}
     </span>

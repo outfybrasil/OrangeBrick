@@ -22,7 +22,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
     .slice(0, 4);
 
   return (
-    <aside className="overflow-hidden rounded-2xl bg-[#111217] shadow-[0_12px_36px_rgba(0,0,0,0.34)] ring-1 ring-white/10">
+    <aside className="overflow-hidden bg-[#111217] ring-1 ring-white/10">
       {/* MAIS HYPADAS */}
       <section aria-labelledby="most-hyped-title">
         <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-brand-orange/15 via-brand-orange/[0.04] to-transparent px-4 py-3.5">

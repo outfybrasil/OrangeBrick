@@ -12,10 +12,16 @@ const items = [
     icon: <path strokeLinecap="round" strokeLinejoin="round" d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M9 20v-6h6v6" />,
   },
   {
-    href: "/em-alta",
-    label: "Em alta",
-    active: (pathname: string) => pathname.startsWith("/em-alta"),
-    icon: <path strokeLinecap="round" strokeLinejoin="round" d="m4 17 5-5 3 3 7-8M14 7h5v5" />,
+    href: "/noticias",
+    label: "Notícias",
+    active: (pathname: string) => pathname.startsWith("/noticias") || pathname.startsWith("/posts/"),
+    icon: <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 11h16M4 16h10" />,
+  },
+  {
+    href: "/lancamentos",
+    label: "Lançamentos",
+    active: (pathname: string) => pathname.startsWith("/lancamentos"),
+    icon: <><path strokeLinecap="round" strokeLinejoin="round" d="M8 3v3M16 3v3M4 10h16M5 6h14a1 1 0 0 1 1 1v13H4V7a1 1 0 0 1 1-1Z" /><path strokeLinecap="round" strokeLinejoin="round" d="m10.5 14.5 1.5 1.5 2.5-2.5" /></>,
   },
   {
     href: "/brickboard",
