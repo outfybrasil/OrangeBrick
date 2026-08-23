@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
@@ -107,7 +107,6 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
   }, [rawPosts, platformSlug, searchQuery, activeTag, hasRequestedFilters]);
 
   const stats = usePostStats(rawPosts.map((post) => post.id));
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("orange-feed-scroll");
@@ -386,8 +385,6 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               </button>
             </div>
           )}
-
-          <div ref={sentinelRef} className="h-1" />
 
           {isFiltering && !hasMore && posts.length > 0 && (
             <div className="py-8 text-center border-t border-white/[0.06]">

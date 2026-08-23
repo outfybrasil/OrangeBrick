@@ -326,30 +326,29 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-3 grid grid-cols-[100px_minmax(0,1fr)] xs:grid-cols-[120px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
+          className="group/article mt-3 block overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
         >
-          {post.attached_article.image_url ? (
-            <div className="relative h-full min-h-[90px] w-full overflow-hidden bg-black/40 border-r border-white/10">
-              <img loading="lazy" decoding="async"
+          {post.attached_article.image_url && (
+            <div className="relative aspect-[2/1] sm:aspect-[2.2/1] max-h-[220px] w-full overflow-hidden border-b border-white/10 bg-black/40">
+              <img
+                loading="lazy"
+                decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-105"
               />
-            </div>
-          ) : (
-            <div className="flex h-full min-h-[90px] items-center justify-center bg-card-slate/40 border-r border-white/10">
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Orange Brick</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-background-void/80 via-transparent to-transparent opacity-50 pointer-events-none" />
             </div>
           )}
-          <div className="flex flex-col justify-center p-3 sm:p-3.5 min-w-0">
+          <div className="p-3.5 sm:p-4">
             <span className="text-[10px] sm:text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
               Matéria do Orange Brick
             </span>
-            <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
+            <h5 className="break-words font-subtitle text-sm sm:text-base font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange">
               {post.attached_article.title}
             </h5>
             {post.attached_article.summary && (
-              <p className="mt-1 break-words font-body text-[11px] sm:text-xs leading-relaxed text-gray-400 line-clamp-2">
+              <p className="mt-1.5 break-words font-body text-xs leading-relaxed text-gray-400 line-clamp-2">
                 {post.attached_article.summary}
               </p>
             )}

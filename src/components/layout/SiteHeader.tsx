@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
 import { UserNav } from "@/components/auth/UserNav";
 
 const NAV_LINKS = [
@@ -14,10 +13,9 @@ const NAV_LINKS = [
 interface SiteHeaderProps {
   variant?: "full" | "strip";
   searchQuery?: string;
-  leading?: ReactNode;
 }
 
-export function SiteHeader({ variant = "full", searchQuery = "", leading }: SiteHeaderProps) {
+export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderProps) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const pathname = usePathname();
 
