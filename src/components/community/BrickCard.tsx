@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import type { CommunityPost, CommunityComment } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
@@ -19,6 +19,7 @@ interface BrickCardProps {
   post: CommunityPost;
   onReaction: (postId: string, type: ReactionType) => void;
   onDeletePost?: (postId: string) => void;
+  onEditPost?: (postId: string, newContent: string) => Promise<void> | void;
   onSharePost: (post: CommunityPost, comment: string) => Promise<void>;
   onAddComment: (postId: string, content: string) => Promise<void>;
   onDeleteComment: (commentId: string) => Promise<void>;
@@ -37,7 +38,7 @@ const reportReasons = [
   "Outro conteúdo inadequado",
 ];
 
-export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
+export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
   const { user } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -73,8 +74,50 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
     () => setIsDeletePostOpen(false)
   );
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const editDialogRef = useModalDialog<HTMLDivElement>(
+    isEditOpen,
+    () => setIsEditOpen(false)
+  );
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   const currentUserId = user?.id;
   const isPostOwner = !!(user && post.user_id && post.user_id === user.id);
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onEditPost) return;
+    const trimmed = editContent.trim();
+    if (!trimmed || trimmed.length > 280) return;
+    setIsSavingEdit(true);
+    try {
+      await onEditPost(post.id, trimmed);
+      setIsEditOpen(false);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
 
   const handleReaction = (type: ReactionType) => {
     if (!user) {
@@ -262,14 +305,14 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
           </div>
         </Link>
 
-        <div className="flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center gap-1.5">
           {onToggleFollowAuthor && !isPostOwner && (
             <button
               type="button"
               onClick={onToggleFollowAuthor}
               aria-pressed={isFollowingAuthor}
               title={isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}
-              className={`mr-1 grid size-8 place-items-center border transition-colors ${
+              className={`grid size-8 place-items-center border transition-colors ${
                 isFollowingAuthor
                   ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
                   : "border-white/10 text-gray-500 hover:border-white/25 hover:text-white"
@@ -287,29 +330,99 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
               <span className="sr-only">{isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}</span>
             </button>
           )}
-          {!isPostOwner && user && (
+
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
-              onClick={() => openReport("post", post.id)}
-              disabled={reportedContent.includes(`post:${post.id}`)}
-              className="min-h-11 px-3 text-xs font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              aria-label="Mais opções"
+              aria-expanded={isMenuOpen}
+              className="flex size-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
             >
-              {reportedContent.includes(`post:${post.id}`) ? "Denunciado" : "Denunciar"}
-            </button>
-          )}
-          {isPostOwner && onDeletePost && (
-            <button
-              onClick={() => setIsDeletePostOpen(true)}
-              aria-label="Apagar este post"
-              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-transparent px-2.5 text-xs text-red-300/75 transition-all hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-200"
-              title="Apagar este post"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="5" cy="12" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="19" cy="12" r="2" />
               </svg>
-              <span className="hidden xs:inline">Apagar</span>
             </button>
-          )}
+
+            {isMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-9 z-30 min-w-[190px] rounded-xl border border-white/15 bg-[#14161D] p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100"
+              >
+                {isPostOwner ? (
+                  <>
+                    {onEditPost && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setEditContent(post.content);
+                          setIsEditOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                      >
+                        <svg className="size-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Editar publicação
+                      </button>
+                    )}
+                    {onDeletePost && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setIsDeletePostOpen(true);
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/15 hover:text-red-300"
+                      >
+                        <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Excluir publicação
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        openReport("post", post.id);
+                        setIsMenuOpen(false);
+                      }}
+                      disabled={reportedContent.includes(`post:${post.id}`)}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-200 transition-colors hover:bg-white/10 hover:text-white disabled:text-emerald-400"
+                    >
+                      <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      </svg>
+                      {reportedContent.includes(`post:${post.id}`) ? "Denúncia enviada" : "Denunciar publicação"}
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        void handleQuickShare();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      Copiar link do post
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -702,6 +815,87 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
                 {isDeletingPost ? "Apagando…" : "Apagar"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isEditOpen && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background-void/90 p-3 sm:p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isSavingEdit) setIsEditOpen(false);
+          }}
+        >
+          <div
+            ref={editDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`edit-brick-post-title-${post.id}`}
+            tabIndex={-1}
+            className="w-full max-w-lg rounded-2xl border border-white/15 bg-[#14161D] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.8)] sm:p-6"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 id={`edit-brick-post-title-${post.id}`} className="font-subtitle text-base font-bold text-white">
+                Editar Brick
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditOpen(false)}
+                disabled={isSavingEdit}
+                aria-label="Fechar modal de edição"
+                className="grid size-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="mt-4 space-y-4">
+              <div className="relative">
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  maxLength={280}
+                  rows={4}
+                  placeholder="O que está acontecendo no mundo dos games?"
+                  className="w-full resize-none rounded-xl border border-white/10 bg-[#0B0C10] p-3.5 font-body text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                  autoFocus
+                />
+                <div className="mt-2 flex items-center justify-between text-xs">
+                  <span className="text-gray-400 font-body">Texto limitado a 280 caracteres</span>
+                  <span
+                    className={`font-subtitle font-bold ${
+                      editContent.length > 260
+                        ? editContent.length > 280
+                          ? "text-red-400"
+                          : "text-yellow-400"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {280 - editContent.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 border-t border-white/10 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(false)}
+                  disabled={isSavingEdit}
+                  className="min-h-10 rounded-xl px-4 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingEdit || editContent.trim().length === 0 || editContent.length > 280 || editContent.trim() === post.content.trim()}
+                  className="min-h-10 rounded-xl bg-brand-orange px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isSavingEdit ? "Salvando…" : "Salvar"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

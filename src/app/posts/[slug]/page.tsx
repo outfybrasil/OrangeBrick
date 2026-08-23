@@ -152,7 +152,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
       <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c")}</script>
       {!post.is_published && (
         <div className="bg-amber-500/15 border-b border-amber-500/30 text-amber-300 py-2.5 px-4 text-center text-xs font-mono font-semibold tracking-wider sticky top-0 z-50 backdrop-blur-md">
-          ⚠️ MODO DE PRÉ-VISUALIZAÇÃO — Este rascunho ainda não foi publicado no portal
+          MODO DE PRÉ-VISUALIZAÇÃO — Este rascunho ainda não foi publicado no portal
         </div>
       )}
       <PostArticle post={post} stats={stats} />

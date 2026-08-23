@@ -46,7 +46,7 @@ function BrickboardContent() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
+  const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
   const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending">("latest");
   const [visiblePostCount, setVisiblePostCount] = useState(8);
@@ -536,6 +536,7 @@ function BrickboardContent() {
                           void trackXp();
                         }}
                         onDeletePost={deletePost}
+                        onEditPost={editPost}
                         onSharePost={sharePost}
                         onAddComment={async (postId, content) => {
                           await addComment(postId, content);

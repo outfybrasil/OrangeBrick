@@ -457,6 +457,37 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     [user, supabase, fetchData]
   );
 
+  const editPost = useCallback(
+    async (postId: string, newContent: string) => {
+      if (!user) return;
+      const trimmed = newContent.trim();
+      if (!trimmed || trimmed.length > 280) return;
+
+      setOperationError(null);
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, content: trimmed } : p))
+      );
+
+      try {
+        const { error } = await supabase
+          .from("community_posts")
+          .update({ content: trimmed })
+          .eq("id", postId)
+          .eq("user_id", user.id);
+
+        if (error) {
+          console.error("Error editing post:", error.message);
+          setOperationError(getCommunityErrorMessage(error));
+          fetchData();
+        }
+      } catch (err) {
+        console.error("Failed to edit post:", err);
+        fetchData();
+      }
+    },
+    [user, supabase, fetchData]
+  );
+
   const addComment = useCallback(
     async (postId: string, content: string) => {
       if (!user) return;
@@ -584,6 +615,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     clearOperationError: () => setOperationError(null),
     addPost,
     deletePost,
+    editPost,
     sharePost,
     toggleReaction,
     votePoll,
