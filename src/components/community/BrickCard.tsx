@@ -318,26 +318,25 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       </p>
 
       {post.media_url && !post.attached_article && (
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-background-void/90 max-h-[340px] sm:max-h-[380px] flex items-center justify-center">
-          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[340px] sm:max-h-[380px] w-full object-contain" />
+        <div className="relative mt-3 max-w-[500px] overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
+          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[300px] w-full object-contain" />
         </div>
       )}
 
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-3 block overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
+          className="group/article mt-3 block max-w-[500px] overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
         >
           {post.attached_article.image_url && (
-            <div className="relative aspect-[2/1] sm:aspect-[2.2/1] max-h-[220px] w-full overflow-hidden border-b border-white/10 bg-black/40">
+            <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/50">
               <img
                 loading="lazy"
                 decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-105"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-103"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background-void/80 via-transparent to-transparent opacity-50 pointer-events-none" />
             </div>
           )}
           <div className="p-3.5 sm:p-4">

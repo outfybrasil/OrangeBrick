@@ -342,14 +342,11 @@ export function PostArticle({ post, stats }: PostArticleProps) {
             {post.summary}
           </p>
 
-          <section className="grid gap-px border border-white/10 bg-white/10 sm:grid-cols-[1fr_auto]">
-            <div className="bg-[#111217] p-4 sm:p-5">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">O que importa</p>
-              <p className="mt-2 text-sm leading-relaxed text-gray-200">{post.summary}</p>
-            </div>
-            <div className="flex min-w-36 items-center bg-[#111217] p-4 text-xs font-bold text-gray-400">
-              <span className={`mr-2 h-2 w-2 ${post.information_status === "rumor" ? "bg-amber-400" : post.information_status === "corrected" ? "bg-sky-400" : "bg-emerald-400"}`} /> {INFORMATION_STATUS_LABELS[post.information_status || "confirmed"]}
-            </div>
+          <section className="flex items-center gap-2.5 border border-white/10 bg-[#111217] px-4 py-3">
+            <span aria-hidden="true" className={`h-2 w-2 shrink-0 ${post.information_status === "rumor" ? "bg-amber-400" : post.information_status === "corrected" ? "bg-sky-400" : "bg-emerald-400"}`} />
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              Estado da informação: <span className="text-white">{INFORMATION_STATUS_LABELS[post.information_status || "confirmed"]}</span>
+            </p>
           </section>
 
           <div className="flex flex-col gap-3 border-y border-brand-orange-muted/10 py-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
