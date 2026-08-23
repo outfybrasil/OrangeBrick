@@ -318,39 +318,34 @@ export function BrickCard({ post, onReaction, onDeletePost, onSharePost, onAddCo
       </p>
 
       {post.media_url && !post.attached_article && (
-        <div className="relative mt-3 max-w-[500px] overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
-          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[300px] w-full object-contain" />
+        <div className="relative mt-2.5 max-w-[390px] overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
+          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[260px] w-full object-contain" />
         </div>
       )}
 
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-3 block max-w-[500px] overflow-hidden rounded-xl border border-white/10 bg-background-void/60 transition-all hover:border-brand-orange/50 hover:bg-background-void/90"
+          className="group/article mt-2.5 block max-w-[390px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
         >
           {post.attached_article.image_url && (
-            <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/50">
+            <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
               <img
                 loading="lazy"
                 decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-103"
+                className="h-full w-full object-cover transition-transform duration-300 group-hover/article:scale-[1.02]"
               />
             </div>
           )}
-          <div className="p-3.5 sm:p-4">
-            <span className="text-[10px] sm:text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-1">
-              Matéria do Orange Brick
+          <div className="p-2.5 sm:p-3">
+            <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
+              Orange Brick
             </span>
-            <h5 className="break-words font-subtitle text-sm sm:text-base font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange">
+            <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
               {post.attached_article.title}
             </h5>
-            {post.attached_article.summary && (
-              <p className="mt-1.5 break-words font-body text-xs leading-relaxed text-gray-400 line-clamp-2">
-                {post.attached_article.summary}
-              </p>
-            )}
           </div>
         </Link>
       )}
