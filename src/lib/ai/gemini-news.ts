@@ -1093,6 +1093,11 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       if (uploadedUrl) return uploadedUrl;
     }
 
+    for (const url of OFFICIAL_HARDWARE_ASSETS.playstation) {
+      const uploadedUrl = await trySecureImage(url, prefix);
+      if (uploadedUrl) return uploadedUrl;
+    }
+
     return "";
   }
 
@@ -1309,6 +1314,11 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       for (let i = 0; i < fallbackPool.length; i++) {
         const idx = (fallbackIndex + i) % fallbackPool.length;
         const uploadedUrl = await trySecureImageSingle(fallbackPool[idx], prefix);
+        if (uploadedUrl) return uploadedUrl;
+      }
+
+      for (const url of OFFICIAL_HARDWARE_ASSETS.playstation) {
+        const uploadedUrl = await trySecureImageSingle(url, prefix);
         if (uploadedUrl) return uploadedUrl;
       }
 
