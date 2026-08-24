@@ -690,9 +690,19 @@ function isItemAlreadyCovered(item: { title: string; link: string; summary?: str
   return false;
 }
 
+function isSameCalendarDayInBrasilia(a: Date, b: Date): boolean {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return fmt.format(a) === fmt.format(b);
+}
+
 async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>, context: RecentPostContext): Promise<{ title: string; link: string; summary: string } | null> {
   const now = Date.now();
-  const maxAgeMs = 24 * 60 * 60 * 1000;
+  const nowDate = new Date(now);
   const items: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
 
   const feedResults = await Promise.allSettled(
@@ -718,20 +728,26 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
 
         if (titleMatch && linkMatch) {
           const rawDate = dateMatch ? new Date(dateMatch[1].trim()) : null;
-          const pubDate = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
-          const age = now - pubDate.getTime();
+          if (!rawDate || isNaN(rawDate.getTime())) {
+            continue;
+          }
+          if (!isSameCalendarDayInBrasilia(rawDate, nowDate)) {
+            continue;
+          }
+          const age = now - rawDate.getTime();
+          if (age < -30 * 60 * 1000) {
+            continue;
+          }
 
-          if (age <= maxAgeMs && age >= -30 * 60 * 1000) {
-            const title = titleMatch[1]
-              .replace(/<[^>]+>/g, "")
-              .replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer|GameSpot|Push Square|Pure Xbox|Nintendo Life).*$/i, "")
-              .trim();
-            const link = linkMatch[1].replace(/<[^>]+>/g, "").trim();
-            const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
-            const score = scoreNewsItem(title, summary);
-            if (score > 0) {
-              parsed.push({ title, link, summary, score, pubDate });
-            }
+          const title = titleMatch[1]
+            .replace(/<[^>]+>/g, "")
+            .replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer|GameSpot|Push Square|Pure Xbox|Nintendo Life).*$/i, "")
+            .trim();
+          const link = linkMatch[1].replace(/<[^>]+>/g, "").trim();
+          const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
+          const score = scoreNewsItem(title, summary);
+          if (score > 0) {
+            parsed.push({ title, link, summary, score, pubDate: rawDate });
           }
         }
       }
@@ -872,10 +888,10 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       const articleData = await fetchNewsArticleData(topNews.link);
       sourceImages = articleData.images;
       primarySourceUrl = isGoogleNewsRedirectUrl(topNews.link) ? topNews.link : articleData.finalUrl;
-      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${primarySourceUrl}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}`;
+      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${primarySourceUrl}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}\n\nEsta é uma notícia PUBLICADA HOJE; trate o fato como novidade do dia.`;
     } else {
       throw new NoFreshTopicError(
-        "Nenhuma pauta inédita encontrada nos feeds nas últimas 24h (todas já cobertas pelo portal)."
+        "Nenhuma pauta inédita publicada HOJE nos feeds (itens de dias anteriores são ignorados, e as recentes já foram cobertas pelo portal)."
       );
     }
   }
