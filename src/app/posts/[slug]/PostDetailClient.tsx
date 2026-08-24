@@ -284,10 +284,16 @@ export function PostArticle({ post, stats }: PostArticleProps) {
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-2 sm:py-4 sticky top-0 z-30 backdrop-blur-md watch-compact">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-2 sm:px-4">
           <button
-            onClick={() => router.push("/")}
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
             className="flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:gap-2 sm:text-xs"
           >
-            ← <span className="hidden xs:inline">Voltar</span> Home
+            ← <span className="hidden xs:inline">Voltar</span>
           </button>
           <button
             type="button"

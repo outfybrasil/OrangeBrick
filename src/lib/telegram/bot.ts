@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Post } from "../types/database.ts";
-import { generateNewsDraft } from "../ai/gemini-news.ts";
+import { generateNewsDraft, NoFreshTopicError } from "../ai/gemini-news.ts";
 import { getSiteUrl } from "../site-url.ts";
 import { createPreviewToken } from "../preview-token.ts";
 
@@ -84,7 +84,7 @@ export async function sendPostForApproval(post: Post, wordCount?: number) {
   const safeTitle = escapeHtml(post.title);
   const safeCategory = escapeHtml(post.category.toUpperCase());
   const safeAuthor = escapeHtml(post.author_name || "The Brick");
-  const safeSummary = escapeHtml(post.summary || "");
+  const safeSummary = escapeHtml((post.summary || "").slice(0, 300));
 
   const caption = `🔥 <b>NOVO RASCUNHO GERADO PELO GEMINI</b>\n\n` +
     `📰 <b>${safeTitle}</b>\n\n` +
@@ -203,7 +203,12 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
     if (action === "discard" && postId) {
       try {
-        const { error } = await supabase.from("posts").delete().eq("id", postId);
+        const { data: deleted, error } = await supabase
+          .from("posts")
+          .delete()
+          .eq("id", postId)
+          .select("id");
+
         if (error) {
           await sendTelegramApi("answerCallbackQuery", {
             callback_query_id: cq.id,
@@ -215,9 +220,30 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
 
         await sendTelegramApi("answerCallbackQuery", {
           callback_query_id: cq.id,
-          text: "🗑️ Rascunho descartado com sucesso!",
+          text: deleted && deleted.length > 0 ? "🗑️ Rascunho descartado com sucesso!" : "ℹ️ Este rascunho já havia sido removido.",
           show_alert: true,
         });
+
+        if (!deleted || deleted.length === 0) {
+          if (cq.message?.photo) {
+            await sendTelegramApi("editMessageCaption", {
+              chat_id: cq.message.chat.id,
+              message_id: cq.message.message_id,
+              caption: `${cq.message.caption || ""}\n\n🗑️ <b>RASCUNHO DESCARTADO</b>`,
+              parse_mode: "HTML",
+              reply_markup: { inline_keyboard: [] },
+            });
+          } else if (cq.message) {
+            await sendTelegramApi("editMessageText", {
+              chat_id: cq.message.chat.id,
+              message_id: cq.message.message_id,
+              text: `${cq.message.text || ""}\n\n🗑️ <b>RASCUNHO DESCARTADO</b>`,
+              parse_mode: "HTML",
+              reply_markup: { inline_keyboard: [] },
+            });
+          }
+          return;
+        }
 
         if (cq.message?.photo) {
           await sendTelegramApi("editMessageCaption", {
@@ -415,6 +441,14 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         const result = await generateNewsDraft();
         await sendPostForApproval(result.post, result.wordCount);
       } catch (err: unknown) {
+        if (err instanceof NoFreshTopicError) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `📭 <b>Nenhuma pauta inédita no momento.</b>\n${escapeHtml(err.message)}\n\nUse <code>/gerar &lt;tema&gt;</code> para cobrir um assunto específico.`,
+            parse_mode: "HTML",
+          });
+          return;
+        }
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
@@ -445,6 +479,14 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         const result = await generateNewsDraft({ topic: commandArgs });
         await sendPostForApproval(result.post, result.wordCount);
       } catch (err: unknown) {
+        if (err instanceof NoFreshTopicError) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `♻️ <b>Matéria não criada: tema já coberto.</b>\n${escapeHtml(err.message)}`,
+            parse_mode: "HTML",
+          });
+          return;
+        }
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
@@ -466,6 +508,14 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         const result = await generateNewsDraft({ sourceUrl: rawText });
         await sendPostForApproval(result.post, result.wordCount);
       } catch (err: unknown) {
+        if (err instanceof NoFreshTopicError) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `♻️ <b>Matéria não criada: esse assunto já foi coberto.</b>\n${escapeHtml(err.message)}`,
+            parse_mode: "HTML",
+          });
+          return;
+        }
         const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,

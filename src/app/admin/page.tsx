@@ -568,16 +568,16 @@ export default function AdminDashboard() {
                           aria-label={`Selecionar ${post.title}`}
                           className="size-4 shrink-0 accent-brand-orange"
                         />
-                        <span className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 text-[11px] font-bold text-gray-300">
+                        <span className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 text-xs font-bold text-gray-300">
                           <span className="h-1.5 w-1.5 rounded-full bg-brand-orange" />
                           {CATEGORY_LABELS[post.category] || post.category}
                         </span>
                         {post.is_published ? (
-                          <span className="inline-block rounded px-2 py-0.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                          <span className="inline-block rounded px-2 py-0.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
                             Publicada
                           </span>
                         ) : (
-                          <span className="inline-block rounded px-2 py-0.5 text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
+                          <span className="inline-block rounded px-2 py-0.5 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20">
                             Em revisão
                           </span>
                         )}
@@ -641,7 +641,7 @@ export default function AdminDashboard() {
                         {post.image_url ? (
                           <img loading="lazy" decoding="async" src={post.image_url} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-[10px] text-gray-600 font-semibold">Sem capa</div>
+                          <div className="flex h-full items-center justify-center text-xs text-gray-600 font-semibold">Sem capa</div>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -650,7 +650,7 @@ export default function AdminDashboard() {
                             {post.title}
                           </h3>
                         </Link>
-                        <p className="mt-1 text-[11px] text-gray-500">
+                        <p className="mt-1 text-xs text-gray-500">
                           {post.author_name.split(" ")[0]} • {formatDate(post.published_at || post.updated_at)}
                         </p>
                       </div>
@@ -864,9 +864,10 @@ export default function AdminDashboard() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                aria-label="Página anterior"
                 className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
-                ‹
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
@@ -884,9 +885,10 @@ export default function AdminDashboard() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                aria-label="Próxima página"
                 className="flex min-h-11 min-w-11 items-center justify-center rounded border border-white/10 text-gray-400 disabled:opacity-30 hover:bg-white/5"
               >
-                ›
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
           </div>
@@ -987,7 +989,8 @@ export default function AdminDashboard() {
             </div>
             <div className="mt-4 border-t border-white/10 pt-3">
               <Link href="/admin?status=production" className="flex items-center justify-between text-xs font-semibold text-gray-400 hover:text-white">
-                <span>Ver todos os rascunhos</span><span>›</span>
+                <span>Ver todos os rascunhos</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </Link>
             </div>
           </div>

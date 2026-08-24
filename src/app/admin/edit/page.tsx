@@ -819,10 +819,11 @@ function EditForm() {
                   <button
                     type="button"
                     onClick={() => removeBlock(block.id)}
-                    className="p-1 text-gray-600 hover:text-red-400 transition-colors text-xs"
+                    className="min-h-8 min-w-8 p-1 text-gray-600 hover:text-red-400 transition-colors"
                     title="Remover bloco"
+                    aria-label={`Remover bloco ${index + 1}`}
                   >
-                    ✕
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="h-3.5 w-3.5" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
                   </button>
                 </div>
               ))}
@@ -1048,7 +1049,9 @@ function EditForm() {
           <div ref={previewRef} role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" tabIndex={-1} className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-white/10 bg-[#0e0f14] p-4 text-white focus:outline-none sm:max-h-[90vh] sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="preview-dialog-title" className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
-              <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">✕</button>
+              <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="mx-auto h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+              </button>
             </div>
             <h1 className="font-heading text-2xl font-black">{title}</h1>
             <p className="text-sm text-gray-300 leading-relaxed italic">{summary}</p>

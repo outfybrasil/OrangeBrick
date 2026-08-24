@@ -601,9 +601,13 @@ export default function CommunityAdminPage() {
               <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-xs text-gray-500">
               <Link href="/admin/releases" className="text-xs text-brand-orange font-semibold hover:underline">Ver todos →</Link>
               <div className="flex items-center gap-1">
-                <button onClick={() => setCurrentPageTopics(p => Math.max(1, p - 1))} disabled={currentPageTopics === 1} className="min-h-11 min-w-11 border border-white/10 disabled:opacity-20">‹</button>
+                <button onClick={() => setCurrentPageTopics(p => Math.max(1, p - 1))} disabled={currentPageTopics === 1} aria-label="Página anterior" className="flex min-h-11 min-w-11 items-center justify-center border border-white/10 disabled:opacity-20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
                 <span className="text-white font-bold">{currentPageTopics}</span>
-                <button onClick={() => setCurrentPageTopics(p => Math.min(totalTopicPages, p + 1))} disabled={currentPageTopics === totalTopicPages} className="min-h-11 min-w-11 border border-white/10 disabled:opacity-20">›</button>
+                <button onClick={() => setCurrentPageTopics(p => Math.min(totalTopicPages, p + 1))} disabled={currentPageTopics === totalTopicPages} aria-label="Próxima página" className="flex min-h-11 min-w-11 items-center justify-center border border-white/10 disabled:opacity-20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
             </div>
           </div>
@@ -617,7 +621,9 @@ export default function CommunityAdminPage() {
           <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md space-y-4 rounded-xl border border-white/10 bg-[#0e0f14] p-4 text-white sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="poll-dialog-title" className="font-heading text-base font-bold">Pergunta do dia</h3>
-              <button type="button" onClick={() => setShowNewPollModal(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar">✕</button>
+              <button type="button" onClick={() => setShowNewPollModal(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="mx-auto h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+              </button>
             </div>
 
             <div>

@@ -453,7 +453,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
             </div>
           )}
           <div className="p-2.5 sm:p-3">
-            <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
+            <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
               Orange Brick
             </span>
             <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
@@ -512,7 +512,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                     </div>
                   )}
                   <div className="flex flex-col justify-center p-2.5 min-w-0">
-                    <span className="text-[10px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
+                    <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
                       Matéria Citada
                     </span>
                     <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">

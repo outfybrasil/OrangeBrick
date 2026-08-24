@@ -229,6 +229,7 @@ html.high-contrast .text-gray-300 {
 
   html, body {
     background-color: #000000 !important;
+    /* impeccable-disable-next-line design-system-font-size -- watch-mode: base escalada para telas de 340px */
     font-size: 14px !important;
     overflow-x: clip !important;
     width: 100vw !important;
@@ -257,6 +258,7 @@ html.high-contrast .text-gray-300 {
   }
 
   .watch-title {
+    /* impeccable-disable-next-line design-system-font-size -- watch-mode: manchete fluida específica de telas redondas */
     font-size: clamp(1.15rem, 5vw, 1.45rem) !important;
     line-height: 1.25 !important;
     letter-spacing: -0.01em !important;

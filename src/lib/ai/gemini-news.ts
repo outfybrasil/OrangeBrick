@@ -1,8 +1,18 @@
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
-import sharp from "sharp";
 import crypto from "node:crypto";
 import type { Post, PostCategory } from "../types/database.ts";
+
+type SharpFactory = (input?: Buffer | string) => import("sharp").Sharp;
+
+let sharpModulePromise: Promise<SharpFactory> | null = null;
+
+async function getSharp(): Promise<SharpFactory> {
+  if (!sharpModulePromise) {
+    sharpModulePromise = import("sharp").then((m) => m.default as unknown as SharpFactory);
+  }
+  return sharpModulePromise;
+}
 
 const CATEGORY_TAGS: Record<PostCategory, string> = {
   breaking: "💣 Plantão",
@@ -256,6 +266,7 @@ async function fetchMultiSourceCandidates(query: string, sourceImages: string[] 
 
 async function downloadAndProcessImage(url: string): Promise<{ buffer: Buffer; width: number; height: number } | null> {
   try {
+    const sharp = await getSharp();
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -360,6 +371,7 @@ DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
 interface ScrapedArticleData {
   text: string;
   images: string[];
+  finalUrl: string;
 }
 
 async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
@@ -371,8 +383,9 @@ async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
       },
       signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok) return { text: "", images: [] };
+    if (!res.ok) return { text: "", images: [], finalUrl: url };
     const html = await res.text();
+    const finalUrl = res.url || url;
 
     const images: string[] = [];
 
@@ -388,6 +401,7 @@ async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
       images.push(twMatch[1]);
     }
 
+    // impeccable-disable-next-line broken-image -- regex de extração de URLs, não é elemento img renderizado
     const imgMatches = [...html.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+\.(?:jpg|jpeg|png|webp))(?:\?[^"']*)?["'][^>]*>/gi)];
     for (const m of imgMatches) {
       const src = m[1];
@@ -409,9 +423,9 @@ async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
       .replace(/\s+/g, " ")
       .trim();
 
-    return { text: clean.slice(0, 4500), images: images.slice(0, 10) };
+    return { text: clean.slice(0, 4500), images: images.slice(0, 10), finalUrl };
   } catch {
-    return { text: "", images: [] };
+    return { text: "", images: [], finalUrl: url };
   }
 }
 
@@ -464,27 +478,84 @@ function scoreNewsItem(title: string, summary: string): number {
   return s;
 }
 
+export class NoFreshTopicError extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = "NoFreshTopicError";
+  }
+}
+
 interface RecentPostContext {
   recentTitles: string[];
   recentSlugs: string[];
   recentSourceUrls: string[];
+  recentSummaries: string[];
+}
+
+function normalizeTextForMatch(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const DEDUP_STOPWORDS = new Set([
+  "anuncia", "anunciado", "revela", "revelado", "confirma", "confirmado", "oficial",
+  "lancamento", "trailer", "gameplay", "update", "atualizacao", "novo", "nova",
+  "novos", "novas", "jogo", "games", "gaming", "primeiro", "video", "videos",
+  "para", "como", "sobre", "todos", "todas", "mais", "menos", "antes", "depois",
+  "com", "sem", "que", "esta", "esse", "essa", "isso", "pelo", "pela", "das",
+  "dos", "sera", "esta", "the", "and", "for", "with", "from", "this", "that",
+  "new", "news", "gets", "has", "have", "will", "its", "are", "was", "were",
+  "announced", "revealed", "confirmed", "release", "launch", "trailer", "update",
+  "details", "first", "official", "game", "games", "video", "coming", "out",
+  "leak", "leaked", "leaks", "rumor", "rumor", "report", "reports", "says",
+  "show", "shows", "shown", "take", "look", "check", "here", "what", "when",
+  "week", "month", "year", "today", "day", "best", "top", "vs", "via",
+]);
+
+function extractSignificantTokens(text: string): string[] {
+  return [...new Set(
+    normalizeTextForMatch(text)
+      .split(" ")
+      .filter((w) => w.length >= 3 && !DEDUP_STOPWORDS.has(w) && !/^\d+$/.test(w))
+  )];
+}
+
+function countTokenOverlap(tokensA: string[], tokensB: string[]): number {
+  const setB = new Set(tokensB);
+  let matches = 0;
+  for (const t of tokensA) {
+    if (setB.has(t)) matches++;
+  }
+  return matches;
 }
 
 async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<RecentPostContext> {
-  const { data: recentPosts } = await supabase
-    .from("posts")
-    .select("title, slug, editorial_sources, summary")
-    .order("created_at", { ascending: false })
-    .limit(40);
-
   const titles: string[] = [];
   const slugs: string[] = [];
   const sourceUrls: string[] = [];
+  const summaries: string[] = [];
 
-  if (recentPosts) {
-    for (const p of recentPosts) {
+  try {
+    const { data: recentPosts, error } = await supabase
+      .from("posts")
+      .select("title, slug, editorial_sources, summary")
+      .order("created_at", { ascending: false })
+      .limit(60);
+
+    if (error) {
+      console.error("Falha ao carregar contexto de posts recentes (dedup desligado):", error.message);
+      return { recentTitles: [], recentSlugs: [], recentSourceUrls: [], recentSummaries: [] };
+    }
+
+    for (const p of recentPosts || []) {
       if (p.title) titles.push(p.title);
       if (p.slug) slugs.push(p.slug);
+      if (p.summary) summaries.push(p.summary);
       if (Array.isArray(p.editorial_sources)) {
         for (const s of p.editorial_sources) {
           if (s && typeof s === "object" && "url" in s && typeof s.url === "string") {
@@ -493,35 +564,45 @@ async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdm
         }
       }
     }
+  } catch (err) {
+    console.error("Exceção ao carregar contexto de posts recentes:", err);
   }
 
-  return { recentTitles: titles, recentSlugs: slugs, recentSourceUrls: sourceUrls };
+  return { recentTitles: titles, recentSlugs: slugs, recentSourceUrls: sourceUrls, recentSummaries: summaries };
 }
 
-function isItemAlreadyCovered(item: { title: string; link: string }, context: RecentPostContext): boolean {
-  const cleanLink = item.link.toLowerCase().split("?")[0].replace(/\/$/, "");
-  if (context.recentSourceUrls.some((u) => u === cleanLink || cleanLink.includes(u) || u.includes(cleanLink))) {
-    return true;
-  }
+function normalizeSourceUrl(url: string): string {
+  return url.toLowerCase().split("?")[0].replace(/\/$/, "").replace(/^https?:\/\/(www\.)?/, "");
+}
 
-  const rawWords = item.title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length >= 4 && !["anuncia", "revela", "confirma", "lancamento", "trailer", "gameplay", "update", "novo", "nova", "jogo", "games", "primeiro", "oficial"].includes(w));
+function isGoogleNewsRedirectUrl(url: string): boolean {
+  return /news\.google\.com\/rss\/articles/i.test(url);
+}
 
-  if (rawWords.length >= 2) {
-    for (const recentTitle of context.recentTitles) {
-      const rtLower = recentTitle.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      let matchCount = 0;
-      for (const rw of rawWords) {
-        if (rtLower.includes(rw)) matchCount++;
-      }
-      if (matchCount >= 2) {
+function isItemAlreadyCovered(item: { title: string; link: string; summary?: string }, context: RecentPostContext): boolean {
+  const isGoogleNewsRedirect = /news\.google\.com\/rss\/articles/i.test(item.link);
+  const cleanLink = normalizeSourceUrl(item.link);
+
+  if (!isGoogleNewsRedirect && cleanLink.length > 20) {
+    for (const u of context.recentSourceUrls) {
+      if (u === cleanLink || cleanLink.includes(u) || u.includes(cleanLink)) {
         return true;
       }
+    }
+  }
+
+  const itemTokens = extractSignificantTokens(`${item.title} ${item.summary || ""}`);
+  if (itemTokens.length === 0) return false;
+
+  for (let i = 0; i < context.recentTitles.length; i++) {
+    const recentTokens = extractSignificantTokens(
+      `${context.recentTitles[i]} ${context.recentSummaries[i] || ""}`
+    );
+    const overlap = countTokenOverlap(itemTokens, recentTokens);
+    const smallerSet = Math.min(itemTokens.length, recentTokens.length) || 1;
+
+    if (overlap >= 3 || (overlap >= 2 && overlap / smallerSet >= 0.4)) {
+      return true;
     }
   }
 
@@ -530,11 +611,11 @@ function isItemAlreadyCovered(item: { title: string; link: string }, context: Re
 
 async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAdmin>, context: RecentPostContext): Promise<{ title: string; link: string; summary: string } | null> {
   const now = Date.now();
-  const maxAgeMs = 36 * 60 * 60 * 1000;
+  const maxAgeMs = 24 * 60 * 60 * 1000;
   const items: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
 
-  for (const src of GAMING_FEEDS) {
-    try {
+  const feedResults = await Promise.allSettled(
+    GAMING_FEEDS.map(async (src) => {
       const res = await fetch(src.url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -542,8 +623,9 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
         },
         signal: AbortSignal.timeout(8000),
       });
-      if (!res.ok) continue;
+      if (!res.ok) return [];
       const xml = await res.text();
+      const parsed: { title: string; link: string; summary: string; score: number; pubDate: Date }[] = [];
       const itemMatches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)];
 
       for (const match of itemMatches) {
@@ -558,7 +640,7 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
           const pubDate = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
           const age = now - pubDate.getTime();
 
-          if (age <= maxAgeMs) {
+          if (age <= maxAgeMs && age >= -30 * 60 * 1000) {
             const title = titleMatch[1]
               .replace(/<[^>]+>/g, "")
               .replace(/\s*-\s*(Gematsu|IGN|VGC|Olhar Digital|TecMundo|Crunchyroll|Eurogamer|GameSpot|Push Square|Pure Xbox|Nintendo Life).*$/i, "")
@@ -567,27 +649,34 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
             const summary = descMatch ? descMatch[1].replace(/<[^>]+>/g, "").trim() : "";
             const score = scoreNewsItem(title, summary);
             if (score > 0) {
-              items.push({ title, link, summary, score, pubDate });
+              parsed.push({ title, link, summary, score, pubDate });
             }
           }
         }
       }
-    } catch {
-      continue;
-    }
+      return parsed;
+    })
+  );
+
+  for (const r of feedResults) {
+    if (r.status === "fulfilled") items.push(...r.value);
   }
 
   if (items.length === 0) return null;
 
   items.sort((a, b) => b.score - a.score || b.pubDate.getTime() - a.pubDate.getTime());
 
+  let coveredCount = 0;
   for (const item of items) {
-    if (!isItemAlreadyCovered(item, context)) {
-      return item;
+    if (isItemAlreadyCovered(item, context)) {
+      coveredCount++;
+      continue;
     }
+    return item;
   }
 
-  return items[0] || null;
+  console.log(`Todas as ${coveredCount} pautas dos feeds já foram cobertas recentemente.`);
+  return null;
 }
 
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
@@ -597,11 +686,15 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   let userPrompt = "";
   let sourceImages: string[] = [];
+  let primarySourceUrl = options.sourceUrl || "";
 
   if (options.sourceUrl) {
     const articleData = await fetchNewsArticleData(options.sourceUrl);
     sourceImages = articleData.images;
-    userPrompt = `Apure e redija uma matéria jornalística completa para o Orange Brick baseada nesta notícia:\nURL: ${options.sourceUrl}\nConteúdo da fonte:\n${articleData.text || options.sourceUrl}`;
+    if (!isGoogleNewsRedirectUrl(options.sourceUrl)) {
+      primarySourceUrl = articleData.finalUrl;
+    }
+    userPrompt = `Apure e rediga uma matéria jornalística completa para o Orange Brick baseada nesta notícia:\nURL: ${primarySourceUrl}\nConteúdo da fonte:\n${articleData.text || options.sourceUrl}`;
   } else if (options.topic) {
     userPrompt = `Pesquise a fundo e redija uma matéria jornalística completa para o Orange Brick sobre o seguinte tema:\n"${options.topic}".`;
   } else {
@@ -609,9 +702,12 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     if (topNews) {
       const articleData = await fetchNewsArticleData(topNews.link);
       sourceImages = articleData.images;
-      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${topNews.link}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}`;
+      primarySourceUrl = isGoogleNewsRedirectUrl(topNews.link) ? topNews.link : articleData.finalUrl;
+      userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${primarySourceUrl}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}`;
     } else {
-      userPrompt = `Apure e redija a matéria mais importante de games, trailers e anúncios de hoje para o Orange Brick.`;
+      throw new NoFreshTopicError(
+        "Nenhuma pauta inédita encontrada nos feeds nas últimas 24h (todas já cobertas pelo portal)."
+      );
     }
   }
 
@@ -624,18 +720,20 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     userPrompt += `\n\nIMPORTANTE (NÃO REPETIR TEMAS RECENTES): O portal já publicou recentemente os seguintes assuntos abaixo. NÃO repita nem cubra novamente os mesmos fatos destes títulos:\n${excludedList}`;
   }
 
-  const candidateModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
+  const candidateModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
   let responseText = "";
   let lastError: Error | null = null;
 
   for (const modelName of candidateModels) {
     try {
+      const useSearch = /^gemini-(2|3)/.test(modelName);
       const response = await gemini.models.generateContent({
         model: modelName,
         contents: userPrompt,
         config: {
           systemInstruction: EDITORIAL_SYSTEM_INSTRUCTION,
           temperature: 0.3,
+          ...(useSearch ? { tools: [{ googleSearch: {} }] } : {}),
         },
       });
       if (response.text) {
@@ -644,6 +742,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       }
     } catch (err: unknown) {
       lastError = err instanceof Error ? err : new Error(String(err));
+      console.error(`Modelo ${modelName} falhou:`, lastError.message);
       continue;
     }
   }
@@ -681,8 +780,18 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   let parsed: EditorialGeminiOutput;
   try {
     parsed = JSON.parse(jsonString) as EditorialGeminiOutput;
-  } catch (err) {
-    throw new Error(`Falha ao decodificar resposta do Gemini: ${err instanceof Error ? err.message : String(err)}\nResposta bruta: ${responseText.slice(0, 300)}`);
+  } catch {
+    const firstBrace = jsonString.indexOf("{");
+    const lastBrace = jsonString.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        parsed = JSON.parse(jsonString.slice(firstBrace, lastBrace + 1)) as EditorialGeminiOutput;
+      } catch (err2) {
+        throw new Error(`Falha ao decodificar resposta do Gemini: ${err2 instanceof Error ? err2.message : String(err2)}\nResposta bruta: ${responseText.slice(0, 300)}`);
+      }
+    } else {
+      throw new Error(`Resposta do Gemini sem JSON válido.\nResposta bruta: ${responseText.slice(0, 300)}`);
+    }
   }
 
   const rawTitle = (parsed.title || "NOTÍCIA ORANGE BRICK").replace(/\*\*/g, "").trim().toUpperCase();
@@ -693,6 +802,10 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   const authorName = options.authorName || "The Brick";
   const authorTag = "Editor-Chefe";
   let slug = buildSlug(rawTitle);
+  const { data: existingPost } = await supabase.from("posts").select("id, slug").eq("slug", slug).maybeSingle();
+  if (existingPost) {
+    slug = `${slug}-${Date.now().toString().slice(-4)}`;
+  }
 
   validateNoCorruptedCharacters(rawTitle);
   validateNoCorruptedCharacters(summary);
@@ -700,9 +813,19 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   validateNoCorruptedCharacters(parsed.development_text || "");
   validateNoCorruptedCharacters(parsed.conclusion_text || "");
 
-  const { data: existingPost } = await supabase.from("posts").select("id, slug").eq("slug", slug).maybeSingle();
-  if (existingPost) {
-    slug = `${slug}-${Date.now().toString().slice(-4)}`;
+  const generatedText = `${rawTitle} ${summary}`;
+  const generatedTokens = extractSignificantTokens(generatedText);
+  for (let i = 0; i < recentContext.recentTitles.length; i++) {
+    const recentTokens = extractSignificantTokens(
+      `${recentContext.recentTitles[i]} ${recentContext.recentSummaries[i] || ""}`
+    );
+    const overlap = countTokenOverlap(generatedTokens, recentTokens);
+    const smallerSet = Math.min(generatedTokens.length, recentTokens.length) || 1;
+    if (overlap >= 3 || (overlap >= 2 && overlap / smallerSet >= 0.4)) {
+      throw new NoFreshTopicError(
+        `Rascunho descartado: o tema já foi coberto pela matéria recente "${recentContext.recentTitles[i]}".`
+      );
+    }
   }
 
   const newPostId = crypto.randomUUID();
@@ -784,7 +907,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       }
     }
 
-    return fallbackPool[0];
+    return "";
   }
 
   const [coverUrl, img1Url, img2Url] = await Promise.all([
@@ -797,40 +920,50 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   const devText = (parsed.development_text || "").trim();
   const conclusionText = (parsed.conclusion_text || "").trim();
 
-  const blocks = [
+  const blocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string }> = [
     {
       id: "block-0",
       type: "text",
       content: introText,
     },
-    {
-      id: "block-1",
+  ];
+
+  if (img1Url) {
+    blocks.push({
+      id: `block-${blocks.length}`,
       type: "image",
       url: img1Url,
       alt: parsed.image_1_alt || `${rawTitle} - Gameplay e Ação`,
       caption: parsed.image_1_caption || `Cena de ação e jogabilidade. (Foto: Divulgação/Oficial)`,
-    },
-    {
-      id: "block-2",
-      type: "text",
-      content: devText,
-    },
-    {
-      id: "block-3",
+    });
+  }
+
+  blocks.push({
+    id: `block-${blocks.length}`,
+    type: "text",
+    content: devText,
+  });
+
+  if (img2Url) {
+    blocks.push({
+      id: `block-${blocks.length}`,
       type: "image",
       url: img2Url,
       alt: parsed.image_2_alt || `${rawTitle} - Detalhes e Ambientação`,
       caption: parsed.image_2_caption || `Ambientação e detalhes visuais. (Foto: Divulgação/Oficial)`,
-    },
-    {
-      id: "block-4",
-      type: "text",
-      content: conclusionText,
-    },
-  ];
+    });
+  }
+
+  blocks.push({
+    id: `block-${blocks.length}`,
+    type: "text",
+    content: conclusionText,
+  });
 
   const sourceName = parsed.source_name || "Fonte Primária";
-  const sourceUrl = parsed.source_url || options.sourceUrl || "https://orange-brick.vercel.app";
+  const sourceUrl = parsed.source_url && !isGoogleNewsRedirectUrl(parsed.source_url)
+    ? parsed.source_url
+    : (primarySourceUrl || "https://orange-brick.vercel.app");
   const sources = [{ name: sourceName, url: sourceUrl }];
 
   const now = new Date().toISOString();
@@ -983,7 +1116,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
         }
       }
 
-      return fallbackPool[0];
+      return "";
     }
 
     const [coverUrl, img1Url, img2Url] = await Promise.all([
@@ -1004,37 +1137,45 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
     const devText = textBlocks[1]?.content || `## Detalhes e Novidades de ${cleanSubject}\n\nA matéria foi atualizada com detalhes completos e novas imagens oficiais de jogabilidade.`;
     const conclusionText = textBlocks[2]?.content || textBlocks[textBlocks.length - 1]?.content || `O que você achou dessa novidade? Participe do debate deixando sua opinião nos comentários abaixo!\n\n---\n\nFonte: [Orange Brick News](https://orange-brick.vercel.app)`;
 
-    const newBlocks = [
+    const newBlocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string }> = [
       {
         id: "block-0",
         type: "text",
         content: introText,
       },
-      {
-        id: "block-1",
+    ];
+
+    if (img1Url) {
+      newBlocks.push({
+        id: `block-${newBlocks.length}`,
         type: "image",
         url: img1Url,
         alt: `${post.title} - Gameplay e Ação`,
         caption: `Cena de ação e jogabilidade. (Foto: Divulgação/Oficial)`,
-      },
-      {
-        id: "block-2",
-        type: "text",
-        content: devText,
-      },
-      {
-        id: "block-3",
+      });
+    }
+
+    newBlocks.push({
+      id: `block-${newBlocks.length}`,
+      type: "text",
+      content: devText,
+    });
+
+    if (img2Url) {
+      newBlocks.push({
+        id: `block-${newBlocks.length}`,
         type: "image",
         url: img2Url,
         alt: `${post.title} - Detalhes e Ambientação`,
         caption: `Ambientação e detalhes visuais. (Foto: Divulgação/Oficial)`,
-      },
-      {
-        id: "block-4",
-        type: "text",
-        content: conclusionText,
-      },
-    ];
+      });
+    }
+
+    newBlocks.push({
+      id: `block-${newBlocks.length}`,
+      type: "text",
+      content: conclusionText,
+    });
 
     const now = new Date().toISOString();
     const { data: updated, error } = await supabase

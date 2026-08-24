@@ -112,8 +112,9 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
                     onClick={() => removeOption(idx)}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-red-400"
                     title="Remover opção"
+                    aria-label={`Remover opção ${idx + 1}`}
                   >
-                    ✕
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
                   </button>
                 )}
               </div>

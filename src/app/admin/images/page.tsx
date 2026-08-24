@@ -164,7 +164,17 @@ export default function AdminImagesPage() {
                 </div>
                 <div className="border-t border-white/[0.08] pt-3 md:border-0 md:pt-0">
                   <time className="block text-xs text-gray-400" dateTime={image.created_at}>{new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(image.created_at))}</time>
-                  <button type="button" onClick={() => void copyUrl(image)} className={`mt-2 min-h-11 rounded-lg px-3 text-xs font-bold transition-colors ${copiedId === image.id ? "bg-emerald-500 text-white" : "bg-white/[0.06] text-gray-300 hover:bg-white/10 hover:text-white"}`}>{copiedId === image.id ? "URL copiada" : "Copiar URL"}</button>
+                  <button
+                    type="button"
+                    onClick={() => void copyUrl(image)}
+                    className={`mt-2 min-h-11 rounded-lg px-3 text-xs font-bold transition-colors ${
+                      copiedId === image.id
+                        ? "bg-emerald-500 text-black"
+                        : "bg-white/[0.06] text-gray-300 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {copiedId === image.id ? "URL copiada" : "Copiar URL"}
+                  </button>
                 </div>
               </article>
             ))}

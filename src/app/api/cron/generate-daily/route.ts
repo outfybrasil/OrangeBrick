@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { generateNewsDraft } from "@/lib/ai/gemini-news";
-import { sendPostForApproval } from "@/lib/telegram/bot";
+import { generateNewsDraft, NoFreshTopicError } from "@/lib/ai/gemini-news";
+import { sendPostForApproval, sendTelegramApi } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -9,6 +9,16 @@ export const maxDuration = 60;
 function authorized(request: Request): boolean {
   const cronSecret = process.env.CRON_SECRET;
   return Boolean(cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`);
+}
+
+async function notifyAdminNoFreshTopic(reason: string) {
+  const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+  if (!chatId) return;
+  await sendTelegramApi("sendMessage", {
+    chat_id: chatId,
+    text: `📭 <b>Cron diário: nenhuma pauta inédita gerada.</b>\n${reason}\n\nUse <code>/hoje</code> ou <code>/gerar &lt;tema&gt;</code> se quiser forçar uma cobertura.`,
+    parse_mode: "HTML",
+  }).catch(() => {});
 }
 
 export async function GET(request: Request) {
@@ -35,6 +45,11 @@ export async function GET(request: Request) {
       },
     });
   } catch (err: unknown) {
+    if (err instanceof NoFreshTopicError) {
+      console.log("Cron diário sem pauta nova:", err.message);
+      await notifyAdminNoFreshTopic(err.message);
+      return NextResponse.json({ ok: false, reason: err.message });
+    }
     const message = err instanceof Error ? err.message : "Falha na geração";
     console.error("Erro na geração automática diária:", err);
     return NextResponse.json({ error: message }, { status: 500 });

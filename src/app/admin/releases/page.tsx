@@ -534,7 +534,7 @@ export default function AdminReleasesPage() {
             <details key={month.key} open={month.key !== "sem-data" && month.key >= currentMonthKey} className="group overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02]">
               <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-4 transition-colors hover:bg-white/[0.04] [&::-webkit-details-marker]:hidden">
                 <span className="flex min-w-0 items-center gap-3">
-                  <span className="text-brand-orange transition-transform group-open:rotate-90">›</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5 shrink-0 text-brand-orange transition-transform group-open:rotate-90" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   <span className="truncate text-sm font-bold capitalize text-white">{month.label}</span>
                 </span>
                 <span className="shrink-0 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-gray-400">{month.items.length} {month.items.length === 1 ? "jogo" : "jogos"}</span>

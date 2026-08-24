@@ -131,7 +131,9 @@ function BannerCropperModal({ imageSrc, onCancel, onConfirm, isUploading }: Bann
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
           <h2 className="font-heading text-xl font-black text-white">Personalizar arte do banner</h2>
-          <button type="button" onClick={onCancel} disabled={isUploading} className="rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white">✕</button>
+          <button type="button" onClick={onCancel} disabled={isUploading} aria-label="Fechar personalização do banner" className="flex min-h-9 min-w-9 items-center justify-center rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
         </div>
 
         {/* Info Banner */}

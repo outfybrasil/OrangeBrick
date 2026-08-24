@@ -294,7 +294,7 @@ export function AdminShell({
           <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brand-orange">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-orange">
                   PAINEL ADMINISTRATIVO
                 </p>
                 {status}
@@ -318,7 +318,7 @@ export function AdminShell({
         <div className="grid grid-cols-5 items-center gap-1">
           <Link
             href="/admin"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
               active === "overview"
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
@@ -330,7 +330,7 @@ export function AdminShell({
 
           <Link
             href="/admin/edit"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
               active === "editor"
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
@@ -342,7 +342,7 @@ export function AdminShell({
 
           <Link
             href="/admin/images"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
               active === "images"
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
@@ -354,7 +354,7 @@ export function AdminShell({
 
           <Link
             href="/admin/releases"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold transition-all ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
               active === "releases"
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
@@ -370,7 +370,7 @@ export function AdminShell({
             aria-haspopup="dialog"
             aria-expanded={mobileMenuOpen}
             aria-controls="admin-mobile-drawer"
-            className="flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-[10px] font-bold text-gray-400 transition-all hover:text-white active:scale-95"
+            className="flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold text-gray-400 transition-all hover:text-white active:scale-95"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -408,7 +408,7 @@ export function AdminShell({
                   <p className="font-heading text-xs font-black uppercase tracking-wider text-white">
                     ORANGE<span className="text-brand-orange">_</span>BRICK
                   </p>
-                  <p className="text-[10px] text-gray-500 font-semibold">Painel Administrativo</p>
+                  <p className="text-xs text-gray-500 font-semibold">Painel Administrativo</p>
                 </div>
               </div>
               <button
@@ -417,14 +417,14 @@ export function AdminShell({
                 className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-white"
                 aria-label="Fechar navegação"
               >
-                ✕
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
               </button>
             </div>
 
             {/* DRAWER NAV LINKS */}
             <nav className="flex-1 space-y-4 overflow-y-auto py-4" onClick={() => setMobileMenuOpen(false)}>
               <div>
-                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                <p className="px-3 pb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
                   Operação Editorial
                 </p>
                 <div className="space-y-1">
@@ -439,7 +439,7 @@ export function AdminShell({
               </div>
 
               <div>
-                <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">
+                <p className="px-3 pb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
                   Administração
                 </p>
                 <div className="space-y-1">

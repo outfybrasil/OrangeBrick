@@ -9,6 +9,12 @@ colors:
   text: "#E5E5E5"
   white: "#FFFFFF"
   contrast: "#000000"
+  category-breaking: "#FF5E00"
+  category-hardware: "#6EA8D8"
+  category-industry: "#8FBF8F"
+  category-modding: "#56BFB2"
+  category-review: "#D9B45B"
+  category-opinion: "#E5766B"
 typography:
   display:
     fontFamily: "Outfit, sans-serif"
@@ -32,6 +38,11 @@ typography:
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "0.06em"
+  mono:
+    fontFamily: "ui-monospace, Cascadia Mono, Segoe UI Mono, Menlo, Consolas, monospace"
+    fontSize: "0.75rem"
+    fontWeight: 500
+    lineHeight: 1.4
 rounded:
   editorial: "0px"
   temporary: "12px"
@@ -93,6 +104,17 @@ A paleta combina um fundo quase preto, superfícies de ardósia e laranja de sin
 - **Texto Claro:** corpo e informação funcional.
 - **Branco:** títulos e contraste máximo.
 - **Preto de Contraste:** modo de acessibilidade com separação máxima entre conteúdo e fundo.
+
+### Category Signals
+
+Matizes discretos que identificam cada categoria editorial em tags e metadados. São tons dessaturados, legíveis sobre o Vazio Editorial (AA), usados apenas em texto e detalhe de borda inferior — nunca como preenchimento de superfície:
+
+- **Plantão (`#FF5E00`):** mantém o laranja de sinalização — urgência genuína.
+- **Hard News (`#6EA8D8`):** azul-aço para hardware.
+- **Radar (`#8FBF8F`):** verde suave para indústria e mercado.
+- **Gambiarra (`#56BFB2`):** turquesa para modding.
+- **Review (`#D9B45B`):** dourado para análises.
+- **Opinião (`#E5766B`):** coral para artigos de opinião.
 
 **The Signal Rule.** O laranja indica algo; nunca funciona como preenchimento decorativo indiscriminado.
 
