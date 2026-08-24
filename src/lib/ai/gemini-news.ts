@@ -1186,11 +1186,18 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
   let postsToFix: Post[] = [];
 
   if (target && target.toLowerCase() !== "todas" && target.toLowerCase() !== "all" && target.toLowerCase() !== "ultimo" && target.toLowerCase() !== "recent") {
-    const { data: byIdOrSlug } = await supabase
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(target);
+    const filter = isUuid
+      ? `id.eq.${target},slug.eq.${target},title.ilike.%${target}%`
+      : `slug.eq.${target},title.ilike.%${target}%`;
+    const { data: byIdOrSlug, error } = await supabase
       .from("posts")
       .select("*")
-      .or(`id.eq.${target},slug.eq.${target},title.ilike.%${target}%`)
+      .or(filter)
       .limit(1);
+    if (error) {
+      console.error("[corrigir] falha ao buscar post por alvo:", error.message);
+    }
     if (byIdOrSlug && byIdOrSlug.length > 0) {
       postsToFix = byIdOrSlug as Post[];
     }
