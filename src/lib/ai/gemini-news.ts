@@ -497,7 +497,7 @@ async function fetchNewsArticleData(url: string): Promise<ScrapedArticleData> {
       .replace(/\s+/g, " ")
       .trim();
 
-    return { text: clean.slice(0, 4500), images: images.slice(0, 10), finalUrl };
+    return { text: clean.slice(0, 3200), images: images.slice(0, 10), finalUrl };
   } catch {
     return { text: "", images: [], finalUrl: url };
   }
@@ -753,7 +753,7 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
   return null;
 }
 
-const GROQ_MODEL_PREFERENCES = ["openai/gpt-oss-120b", "qwen/qwen3.6", "openai/gpt-oss-20b"];
+const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
 
 async function callGroqEditorial(userPrompt: string): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
@@ -761,7 +761,7 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
     throw new Error("GROQ_API_KEY nÃ£o configurada para o fallback.");
   }
 
-  const candidates: string[] = [];
+  const candidates: string[] = [GROQ_PRIMARY_MODEL];
   try {
     const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
       headers: { Authorization: `Bearer ${apiKey}` },
@@ -769,31 +769,19 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
     });
     if (modelsRes.ok) {
       const data = (await modelsRes.json()) as { data?: Array<{ id: string }> };
-      const ids = (data.data || [])
-        .map((m) => m.id)
-        .filter((id) => !/whisper|tts|orpheus|guard|embed|playai|compound/i.test(id));
-      for (const pref of GROQ_MODEL_PREFERENCES) {
-        const match = ids.find((id) => id.includes(pref));
-        if (match && !candidates.includes(match)) {
-          candidates.push(match);
-        }
-      }
-      for (const id of ids) {
-        if (!candidates.includes(id)) candidates.push(id);
+      const available = (data.data || []).map((m) => m.id);
+      if (!available.includes(GROQ_PRIMARY_MODEL)) {
+        console.warn(`[groq] modelo preferido ${GROQ_PRIMARY_MODEL} nao consta na lista atual da conta.`);
       }
     }
   } catch {
-    candidates.push(GROQ_MODEL_PREFERENCES[0]);
-  }
-
-  if (candidates.length === 0) {
-    candidates.push(GROQ_MODEL_PREFERENCES[0]);
+    console.warn("[groq] falha ao listar modelos; seguindo com o preferido.");
   }
 
   let lastErrorText = "";
-  for (const model of candidates.slice(0, 3)) {
-    for (const maxTokens of [5200, 3800]) {
-      console.log(`Usando fallback Groq com modelo ${model} (max_tokens ${maxTokens}).`);
+  for (const model of candidates) {
+    for (const maxTokens of [4800, 3600, 2600]) {
+      console.log(`[groq] tentativa ${model} (max_tokens ${maxTokens}).`);
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -818,14 +806,14 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
         const content = data.choices?.[0]?.message?.content || "";
         if (!content.trim()) {
           lastErrorText = "resposta vazia do modelo";
-          break;
+          continue;
         }
         return content;
       }
 
       lastErrorText = `HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 160)}`;
-      console.error(`Groq ${model} (${maxTokens} tokens) falhou:`, lastErrorText);
-      if (res.status === 413 || res.status === 429) {
+      console.error(`[groq] ${model} (${maxTokens} tokens) falhou: ${lastErrorText}`);
+      if (res.status === 413 || res.status === 429 || res.status >= 500) {
         continue;
       }
       break;
@@ -872,7 +860,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   }
 
   if (recentContext.recentTitles.length > 0) {
-    const excludedList = recentContext.recentTitles.slice(0, 15).map((t) => `- ${t}`).join("\n");
+    const excludedList = recentContext.recentTitles.slice(0, 10).map((t) => `- ${t}`).join("\n");
     userPrompt += `\n\nIMPORTANTE (NÃƒO REPETIR TEMAS RECENTES): O portal jÃ¡ publicou recentemente os seguintes assuntos abaixo. NÃƒO repita nem cubra novamente os mesmos fatos destes tÃ­tulos:\n${excludedList}`;
   }
 
