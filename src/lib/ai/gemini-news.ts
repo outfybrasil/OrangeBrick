@@ -679,6 +679,73 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
   return null;
 }
 
+const GROQ_MODEL_PREFERENCES = ["openai/gpt-oss-120b", "qwen/qwen3.6", "openai/gpt-oss-20b"];
+
+async function callGroqEditorial(userPrompt: string): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY não configurada para o fallback.");
+  }
+
+  let modelId = "";
+  try {
+    const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (modelsRes.ok) {
+      const data = (await modelsRes.json()) as { data?: Array<{ id: string }> };
+      const ids = (data.data || [])
+        .map((m) => m.id)
+        .filter((id) => !/whisper|tts|orpheus|guard|embed|playai/i.test(id));
+      for (const pref of GROQ_MODEL_PREFERENCES) {
+        const match = ids.find((id) => id.includes(pref));
+        if (match) {
+          modelId = match;
+          break;
+        }
+      }
+      if (!modelId && ids.length > 0) modelId = ids[0];
+    }
+  } catch {
+    modelId = "";
+  }
+
+  const model = modelId || GROQ_MODEL_PREFERENCES[0];
+  console.log(`Usando fallback Groq com modelo ${model}.`);
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.3,
+      max_tokens: 8192,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: EDITORIAL_SYSTEM_INSTRUCTION },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+    signal: AbortSignal.timeout(55000),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => "");
+    throw new Error(`Fallback Groq (${model}) falhou: HTTP ${res.status} ${errText.slice(0, 200)}`);
+  }
+
+  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const content = data.choices?.[0]?.message?.content || "";
+  if (!content.trim()) {
+    throw new Error("Fallback Groq retornou resposta vazia.");
+  }
+  return content;
+}
+
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
   const gemini = getGeminiClient();
   const supabase = getSupabaseAdmin();
@@ -722,7 +789,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
   let responseText = "";
-  let lastError: Error | null = null;
+  const geminiErrors: string[] = [];
 
   for (const modelName of candidateModels) {
     try {
@@ -741,14 +808,16 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
         break;
       }
     } catch (err: unknown) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      console.error(`Modelo ${modelName} falhou:`, lastError.message);
+      const msg = err instanceof Error ? err.message : String(err);
+      geminiErrors.push(`${modelName}: ${msg.slice(0, 160)}`);
+      console.error(`Modelo ${modelName} falhou:`, msg);
       continue;
     }
   }
 
   if (!responseText) {
-    throw lastError || new Error("Falha ao obter resposta dos modelos do Gemini.");
+    console.warn("Todos os modelos Gemini falharam. Acionando fallback Groq.", geminiErrors.join(" | "));
+    responseText = await callGroqEditorial(userPrompt);
   }
 
   let jsonString = responseText.trim();
