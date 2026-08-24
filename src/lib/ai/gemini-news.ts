@@ -99,8 +99,7 @@ const OFFICIAL_HARDWARE_ASSETS: Record<string, string[]> = {
   ],
   pc: [
     "https://upload.wikimedia.org/wikipedia/commons/a/a4/Custom-built_computer_with_GeForce_RTX_3080.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/3/30/NVIDIA_GeForce_RTX_4090_Founders_Edition.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/7/74/Custom_PC_with_transparent_side_panel.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/8/88/Immagine_Playstation_5.jpg",
   ],
 };
 
@@ -325,42 +324,54 @@ function readPixelDimensions(buffer: Buffer, contentType: string): { width: numb
 }
 
 async function downloadImageForUpload(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
-  try {
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-      },
-      cache: "no-store",
-      signal: AbortSignal.timeout(12000),
-    });
-    if (!res.ok) {
-      console.warn(`[img] download falhou (HTTP ${res.status}): ${url.slice(0, 100)}`);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "OrangeBrickEditorialBot/1.0 (https://orange-brick.vercel.app; contato editorial)",
+          "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(12000),
+      });
+      if (res.status === 429 && attempt === 0) {
+        console.warn(`[img] 429 de ${new URL(url).host}; aguardando 3s para re-tentar.`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        continue;
+      }
+      if (!res.ok) {
+        console.warn(`[img] download falhou (HTTP ${res.status}): ${url.slice(0, 100)}`);
+        return null;
+      }
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) {
+        console.warn(`[img] descartada por tamanho (${buffer.length} bytes): ${url.slice(0, 100)}`);
+        return null;
+      }
+      const contentType = sniffImageContentType(buffer, res.headers.get("content-type"));
+      if (!contentType) {
+        console.warn(`[img] formato não suportado (${res.headers.get("content-type") || "desconhecido"}): ${url.slice(0, 100)}`);
+        return null;
+      }
+      const dims = readPixelDimensions(buffer, contentType);
+      if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT) {
+        console.warn(
+          `[img] rejeitada por dimensão ${dims ? `${dims.width}x${dims.height}` : "ilegível"}: ${url.slice(0, 100)}`
+        );
+        return null;
+      }
+      return { buffer, contentType };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[img] erro ao baixar ${url.slice(0, 100)}: ${msg.slice(0, 120)}`);
       return null;
     }
-    const buffer = Buffer.from(await res.arrayBuffer());
-    if (buffer.length === 0 || buffer.length > MAX_IMAGE_BYTES) {
-      console.warn(`[img] descartada por tamanho (${buffer.length} bytes): ${url.slice(0, 100)}`);
-      return null;
-    }
-    const contentType = sniffImageContentType(buffer, res.headers.get("content-type"));
-    if (!contentType) {
-      console.warn(`[img] formato não suportado (${res.headers.get("content-type") || "desconhecido"}): ${url.slice(0, 100)}`);
-      return null;
-    }
-    const dims = readPixelDimensions(buffer, contentType);
-    if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT) {
-      console.warn(
-        `[img] rejeitada por dimensão ${dims ? `${dims.width}x${dims.height}` : "ilegível"}: ${url.slice(0, 100)}`
-      );
-      return null;
-    }
-    return { buffer, contentType };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn(`[img] erro ao baixar ${url.slice(0, 100)}: ${msg.slice(0, 120)}`);
-    return null;
   }
+  return null;
+}
+
+function sanitizeStrayQuestionMark(text: string): string {
+  return text.replace(/(\p{L})\?(?=\p{L})/gu, "$1 ");
 }
 
 async function uploadToSupabaseStorage(
@@ -963,8 +974,8 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     }
   }
 
-  const rawTitle = (parsed.title || "NOTÍCIA ORANGE BRICK").replace(/\*\*/g, "").trim().toUpperCase();
-  const summary = (parsed.summary || "").trim();
+  const rawTitle = sanitizeStrayQuestionMark((parsed.title || "NOTÍCIA ORANGE BRICK").replace(/\*\*/g, "").trim().toUpperCase());
+  const summary = sanitizeStrayQuestionMark((parsed.summary || "").trim());
   const category: PostCategory = parsed.category && CATEGORY_TAGS[parsed.category as PostCategory]
     ? (parsed.category as PostCategory)
     : "industry";
@@ -1016,6 +1027,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     `${cleanSubject} gameplay screenshot`,
     `${cleanSubject} action combat`,
     `${cleanSubject} screenshot`,
+    cleanSubject,
   ].filter((q): q is string => Boolean(q));
 
   const img2Queries: string[] = [
@@ -1023,6 +1035,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     `${cleanSubject} environment world scenery`,
     `${cleanSubject} boss cinematic scene`,
     `${cleanSubject} character trailer`,
+    cleanSubject,
   ].filter((q): q is string => Boolean(q));
 
   const usedImageUrls = new Set<string>();
