@@ -396,6 +396,7 @@ async function uploadToSupabaseStorage(
 
 const EDITORIAL_SYSTEM_INSTRUCTION = `
 Você é o editor-chefe do portal Orange Brick (portal brasileiro de notícias sobre videogames, lançamentos, hardware e cultura gamer).
+ESCOPO OBRIGATÓRIO: cubra SOMENTE o universo dos videogames — jogos, lançamentos, consoles e hardware de videogame, estúdios, publishers, indústria gamer, esports e periféricos. Se o material fornecido não for sobre games, recuse o tema respondendo apenas: {"erro": "fora_do_escopo"}.
 Seu objetivo é redigir matérias completas, aprofundadas, 100% autorais e envolventes sobre jogos, trailers, mecânicas de gameplay e lançamentos.
 
 DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
@@ -864,6 +865,60 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
   throw new Error(`Fallback Groq não conseguiu gerar a matéria. Último erro: ${lastErrorText}`);
 }
 
+async function isGamingRelated(contextText: string): Promise<boolean> {
+  const groqKey = process.env.GROQ_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_DRIVE_API_KEY;
+  const classifierSystem = "Você é um classificador editorial rigoroso. Responda EXCLUSIVAMENTE com um JSON válido.";
+  const userPrompt = `O assunto abaixo pertence ao universo dos videogames? Considere: jogos, lançamentos, consoles e hardware de videogame, estúdios, publishers, indústria gamer, esports, periféricos e cultura gamer.\n\nResponda {"gaming": true} ou {"gaming": false}.\n\nASSUNTO:\n${contextText.slice(0, 600)}`;
+
+  try {
+    if (groqKey) {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: GROQ_PRIMARY_MODEL,
+          temperature: 0,
+          max_tokens: 30,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: classifierSystem },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const parsed = JSON.parse(data.choices?.[0]?.message?.content || "{}") as { gaming?: boolean };
+        return parsed.gaming === true;
+      }
+    }
+  } catch (err) {
+    console.warn("[escopo] classificador Groq falhou:", err instanceof Error ? err.message.slice(0, 120) : err);
+  }
+
+  try {
+    if (geminiKey) {
+      const gemini = new GoogleGenAI({ apiKey: geminiKey });
+      const response = await gemini.models.generateContent({
+        model: "gemini-3.6-flash",
+        contents: userPrompt,
+        config: { systemInstruction: classifierSystem, temperature: 0 },
+      });
+      if (response.text) {
+        const match = response.text.match(/\{\s*"gaming"\s*:\s*(true|false)\s*\}/i);
+        if (match) return match[1].toLowerCase() === "true";
+      }
+    }
+  } catch (err) {
+    console.warn("[escopo] classificador Gemini falhou:", err instanceof Error ? err.message.slice(0, 120) : err);
+  }
+
+  console.warn("[escopo] classificadores indisponíveis; permitindo geração por padrão.");
+  return true;
+}
+
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
   const gemini = getGeminiClient();
   const supabase = getSupabaseAdmin();
@@ -872,6 +927,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   let userPrompt = "";
   let sourceImages: string[] = [];
   let primarySourceUrl = options.sourceUrl || "";
+  let scopeContext = "";
 
   if (options.sourceUrl) {
     const articleData = await fetchNewsArticleData(options.sourceUrl);
@@ -879,8 +935,10 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     if (!isGoogleNewsRedirectUrl(options.sourceUrl)) {
       primarySourceUrl = articleData.finalUrl;
     }
+    scopeContext = articleData.text || options.sourceUrl;
     userPrompt = `Apure e rediga uma matéria jornalística completa para o Orange Brick baseada nesta notícia:\nURL: ${primarySourceUrl}\nConteúdo da fonte:\n${articleData.text || options.sourceUrl}`;
   } else if (options.topic) {
+    scopeContext = options.topic;
     userPrompt = `Pesquise a fundo e redija uma matéria jornalística completa para o Orange Brick sobre o seguinte tema:\n"${options.topic}".`;
   } else {
     const topNews = await fetchTopDailyGamingNews(supabase, recentContext);
@@ -888,12 +946,20 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       const articleData = await fetchNewsArticleData(topNews.link);
       sourceImages = articleData.images;
       primarySourceUrl = isGoogleNewsRedirectUrl(topNews.link) ? topNews.link : articleData.finalUrl;
+      scopeContext = `${topNews.title}. ${topNews.summary}`;
       userPrompt = `Apure e redija a matéria do dia para o Orange Brick baseada na principal notícia das fontes:\nTítulo original: ${topNews.title}\nFonte: ${primarySourceUrl}\nResumo/Conteúdo:\n${articleData.text || topNews.summary}\n\nEsta é uma notícia PUBLICADA HOJE; trate o fato como novidade do dia.`;
     } else {
       throw new NoFreshTopicError(
         "Nenhuma pauta inédita publicada HOJE nos feeds (itens de dias anteriores são ignorados, e as recentes já foram cobertas pelo portal)."
       );
     }
+  }
+
+  const isGamingTopic = await isGamingRelated(scopeContext);
+  if (!isGamingTopic) {
+    throw new NoFreshTopicError(
+      "O assunto está fora do escopo do Orange Brick: só publicamos matérias do universo dos videogames (jogos, lançamentos, consoles, hardware, estúdios e indústria gamer)."
+    );
   }
 
   if (options.category) {
