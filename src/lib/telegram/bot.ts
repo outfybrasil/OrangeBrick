@@ -482,7 +482,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate) {
         if (err instanceof NoFreshTopicError) {
           await sendTelegramApi("sendMessage", {
             chat_id: chatId,
-            text: `♻️ <b>Matéria não criada: tema já coberto.</b>\n${escapeHtml(err.message)}`,
+            text: `♻️ <b>Matéria não criada.</b>\n${escapeHtml(err.message)}`,
             parse_mode: "HTML",
           });
           return;
