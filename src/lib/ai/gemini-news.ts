@@ -585,8 +585,11 @@ function normalizeTextForMatch(text: string): string {
 }
 
 const DEDUP_STOPWORDS = new Set([
-  "anuncia", "anunciado", "revela", "revelado", "confirma", "confirmado", "oficial",
-  "lancamento", "trailer", "gameplay", "update", "atualizacao", "novo", "nova",
+  "anuncia", "anunciado", "anunciada", "anunciadas", "anunciados", "revela",
+  "revelado", "reveladas", "revelados", "confirma", "confirmado", "confirmada",
+  "confirmadas", "confirmados", "oficial",
+  "lancamento", "lancamentos", "trailer", "gameplay", "update", "atualizacao",
+  "atualizacoes", "novo", "nova",
   "novos", "novas", "jogo", "games", "gaming", "primeiro", "video", "videos",
   "para", "como", "sobre", "todos", "todas", "mais", "menos", "antes", "depois",
   "com", "sem", "que", "esta", "esse", "essa", "isso", "pelo", "pela", "das",
@@ -597,6 +600,7 @@ const DEDUP_STOPWORDS = new Set([
   "leak", "leaked", "leaks", "rumor", "rumor", "report", "reports", "says",
   "show", "shows", "shown", "take", "look", "check", "here", "what", "when",
   "week", "month", "year", "today", "day", "best", "top", "vs", "via",
+  "ganha", "ganhou", "chega", "chegando", "mostra", "apresenta",
 ]);
 
 function extractSignificantTokens(text: string): string[] {
@@ -607,13 +611,57 @@ function extractSignificantTokens(text: string): string[] {
   )];
 }
 
-function countTokenOverlap(tokensA: string[], tokensB: string[]): number {
-  const setB = new Set(tokensB);
-  let matches = 0;
+const GENERIC_GAMING_TOKENS = new Set([
+  "sony", "playstation", "ps5", "ps4", "ps6", "psvr", "xbox", "series",
+  "microsoft", "nintendo", "switch", "steam", "deck", "valve", "epic",
+  "sega", "capcom", "square", "enix", "bandai", "namco", "fromsoftware",
+  "ubisoft", "konami", "bethesda", "blizzard", "activision", "rockstar",
+  "ea", "take", "two", "gamescom", "gamesfest", "showcase", "direct",
+  "presentation", "state", "play", "insider", "partner", "digital",
+  "founders", "edition", "edicao", "limitada", "deluxe", "standard",
+  "preco", "precos", "pre venda", "prevenda", "console", "consoles",
+  "portatil", "pro", "slim", "dualsense", "joycon", "controle",
+]);
+
+interface SimilarityMeasure {
+  specific: number;
+  generic: number;
+  ratio: number;
+}
+
+function measureSimilarity(aText: string, bText: string): SimilarityMeasure {
+  const tokensA = extractSignificantTokens(aText);
+  const tokensB = new Set(extractSignificantTokens(bText));
+  let specific = 0;
+  let generic = 0;
   for (const t of tokensA) {
-    if (setB.has(t)) matches++;
+    if (!tokensB.has(t)) continue;
+    if (GENERIC_GAMING_TOKENS.has(t)) {
+      generic++;
+    } else {
+      specific++;
+    }
   }
-  return matches;
+  const smallerSet = Math.min(tokensA.length, tokensB.size) || 1;
+  return { specific, generic, ratio: (specific + generic) / smallerSet };
+}
+
+function isSimilarEnough(m: SimilarityMeasure): boolean {
+  if (m.specific >= 3) return true;
+  if (m.specific >= 2 && m.generic >= 1) return true;
+  if (m.specific >= 2 && m.ratio >= 0.5) return true;
+  return false;
+}
+
+function findSimilarRecentTitle(text: string, context: RecentPostContext, windowSize = 15): string | null {
+  const limit = Math.min(context.recentTitles.length, windowSize);
+  for (let i = 0; i < limit; i++) {
+    const m = measureSimilarity(text, `${context.recentTitles[i]} ${context.recentSummaries[i] || ""}`);
+    if (isSimilarEnough(m)) {
+      return context.recentTitles[i];
+    }
+  }
+  return null;
 }
 
 async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<RecentPostContext> {
@@ -673,22 +721,7 @@ function isItemAlreadyCovered(item: { title: string; link: string; summary?: str
     }
   }
 
-  const itemTokens = extractSignificantTokens(`${item.title} ${item.summary || ""}`);
-  if (itemTokens.length === 0) return false;
-
-  for (let i = 0; i < context.recentTitles.length; i++) {
-    const recentTokens = extractSignificantTokens(
-      `${context.recentTitles[i]} ${context.recentSummaries[i] || ""}`
-    );
-    const overlap = countTokenOverlap(itemTokens, recentTokens);
-    const smallerSet = Math.min(itemTokens.length, recentTokens.length) || 1;
-
-    if (overlap >= 3 || (overlap >= 2 && overlap / smallerSet >= 0.4)) {
-      return true;
-    }
-  }
-
-  return false;
+  return findSimilarRecentTitle(`${item.title} ${item.summary || ""}`, context) !== null;
 }
 
 function isSameCalendarDayInBrasilia(a: Date, b: Date): boolean {
@@ -1076,18 +1109,11 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   validateNoCorruptedCharacters(parsed.conclusion_text || "");
 
   const generatedText = `${rawTitle} ${summary}`;
-  const generatedTokens = extractSignificantTokens(generatedText);
-  for (let i = 0; i < recentContext.recentTitles.length; i++) {
-    const recentTokens = extractSignificantTokens(
-      `${recentContext.recentTitles[i]} ${recentContext.recentSummaries[i] || ""}`
+  const similarRecentTitle = findSimilarRecentTitle(generatedText, recentContext);
+  if (similarRecentTitle) {
+    throw new NoFreshTopicError(
+      `Rascunho descartado: o tema já foi coberto pela matéria recente "${similarRecentTitle}".`
     );
-    const overlap = countTokenOverlap(generatedTokens, recentTokens);
-    const smallerSet = Math.min(generatedTokens.length, recentTokens.length) || 1;
-    if (overlap >= 3 || (overlap >= 2 && overlap / smallerSet >= 0.4)) {
-      throw new NoFreshTopicError(
-        `Rascunho descartado: o tema já foi coberto pela matéria recente "${recentContext.recentTitles[i]}".`
-      );
-    }
   }
 
   const newPostId = crypto.randomUUID();
