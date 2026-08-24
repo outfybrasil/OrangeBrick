@@ -1041,52 +1041,40 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   const usedImageUrls = new Set<string>();
   const fallbackPool = getHardwareFallback(cleanSubject);
 
+  async function trySecureImage(url: string, prefix: string): Promise<string | null> {
+    if (usedImageUrls.has(url)) return null;
+    usedImageUrls.add(url);
+    const processed = await downloadImageForUpload(url);
+    if (!processed) {
+      usedImageUrls.delete(url);
+      return null;
+    }
+    try {
+      return await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer, processed.contentType);
+    } catch {
+      usedImageUrls.delete(url);
+      return null;
+    }
+  }
+
   async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number, extraSources: string[] = []): Promise<string> {
     for (const url of extraSources) {
-      if (usedImageUrls.has(url)) continue;
-      const processed = await downloadImageForUpload(url);
-      if (processed) {
-        try {
-          const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer, processed.contentType);
-          usedImageUrls.add(url);
-          return uploadedUrl;
-        } catch {
-          continue;
-        }
-      }
+      const uploadedUrl = await trySecureImage(url, prefix);
+      if (uploadedUrl) return uploadedUrl;
     }
 
     for (const q of queries) {
       const candidates = await fetchMultiSourceCandidates(q, sourceImages);
       for (const url of candidates) {
-        if (usedImageUrls.has(url)) continue;
-        const processed = await downloadImageForUpload(url);
-        if (processed) {
-          try {
-            const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer, processed.contentType);
-            usedImageUrls.add(url);
-            return uploadedUrl;
-          } catch {
-            continue;
-          }
-        }
+        const uploadedUrl = await trySecureImage(url, prefix);
+        if (uploadedUrl) return uploadedUrl;
       }
     }
 
     for (let i = 0; i < fallbackPool.length; i++) {
       const idx = (fallbackIndex + i) % fallbackPool.length;
-      const url = fallbackPool[idx];
-      if (usedImageUrls.has(url)) continue;
-      const processed = await downloadImageForUpload(url);
-      if (processed) {
-        try {
-          const uploadedUrl = await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer, processed.contentType);
-          usedImageUrls.add(url);
-          return uploadedUrl;
-        } catch {
-          continue;
-        }
-      }
+      const uploadedUrl = await trySecureImage(fallbackPool[idx], prefix);
+      if (uploadedUrl) return uploadedUrl;
     }
 
     return "";
@@ -1258,48 +1246,47 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       `${cleanSubject} gameplay screenshot`,
       `${cleanSubject} action combat`,
       `${cleanSubject} screenshot`,
+      cleanSubject,
     ];
     const img2Queries = [
       `${cleanSubject} environment world scenery`,
       `${cleanSubject} boss cinematic scene`,
       `${cleanSubject} character trailer`,
+      cleanSubject,
     ];
 
     const usedImageUrls = new Set<string>();
     const fallbackPool = getHardwareFallback(cleanSubject);
 
+    async function trySecureImageSingle(url: string, prefix: string): Promise<string | null> {
+      if (usedImageUrls.has(url)) return null;
+      usedImageUrls.add(url);
+      const processed = await downloadImageForUpload(url);
+      if (!processed) {
+        usedImageUrls.delete(url);
+        return null;
+      }
+      try {
+        return await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer, processed.contentType);
+      } catch {
+        usedImageUrls.delete(url);
+        return null;
+      }
+    }
+
     async function findAndUploadSingle(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
       for (const q of queries) {
         const candidates = await fetchMultiSourceCandidates(q);
         for (const url of candidates) {
-          if (usedImageUrls.has(url)) continue;
-          const processed = await downloadImageForUpload(url);
-          if (processed) {
-            try {
-              const uploadedUrl = await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer, processed.contentType);
-              usedImageUrls.add(url);
-              return uploadedUrl;
-            } catch {
-              continue;
-            }
-          }
+          const uploadedUrl = await trySecureImageSingle(url, prefix);
+          if (uploadedUrl) return uploadedUrl;
         }
       }
 
       for (let i = 0; i < fallbackPool.length; i++) {
         const idx = (fallbackIndex + i) % fallbackPool.length;
-        const url = fallbackPool[idx];
-        if (usedImageUrls.has(url)) continue;
-        const processed = await downloadImageForUpload(url);
-        if (processed) {
-          try {
-            const uploadedUrl = await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer, processed.contentType);
-            usedImageUrls.add(url);
-            return uploadedUrl;
-          } catch {
-            continue;
-          }
-        }
+        const uploadedUrl = await trySecureImageSingle(fallbackPool[idx], prefix);
+        if (uploadedUrl) return uploadedUrl;
       }
 
       return "";
