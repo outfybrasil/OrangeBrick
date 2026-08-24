@@ -720,7 +720,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     userPrompt += `\n\nIMPORTANTE (NÃO REPETIR TEMAS RECENTES): O portal já publicou recentemente os seguintes assuntos abaixo. NÃO repita nem cubra novamente os mesmos fatos destes títulos:\n${excludedList}`;
   }
 
-  const candidateModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
   let responseText = "";
   let lastError: Error | null = null;
 
