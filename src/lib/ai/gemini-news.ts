@@ -750,6 +750,7 @@ async function fetchTopDailyGamingNews(supabase: ReturnType<typeof getSupabaseAd
 }
 
 const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
+const GROQ_RETRY_DELAY_MS = 18000;
 
 async function callGroqEditorial(userPrompt: string): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
@@ -758,33 +759,58 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
   }
 
   const model = GROQ_PRIMARY_MODEL;
-  const tiers = [4800, 3600, 2600];
   let lastErrorText = "";
 
-  for (const [tierIdx, maxTokens] of tiers.entries()) {
-    if (tierIdx > 0) {
-      console.log("[groq] aguardando 22s para renovar a janela de TPM antes de re-tentar.");
-      await new Promise((resolve) => setTimeout(resolve, 22000));
+  interface GroqAttempt {
+    maxTokens: number;
+    jsonMode: boolean;
+    waitBefore: boolean;
+  }
+
+  const attempts: GroqAttempt[] = [
+    { maxTokens: 4800, jsonMode: true, waitBefore: false },
+    { maxTokens: 4800, jsonMode: false, waitBefore: false },
+    { maxTokens: 3600, jsonMode: true, waitBefore: true },
+    { maxTokens: 3600, jsonMode: false, waitBefore: false },
+    { maxTokens: 2600, jsonMode: false, waitBefore: true },
+  ];
+
+  for (const attempt of attempts) {
+    if (attempt.waitBefore) {
+      console.log(`[groq] aguardando ${GROQ_RETRY_DELAY_MS / 1000}s para renovar a janela de TPM.`);
+      await new Promise((resolve) => setTimeout(resolve, GROQ_RETRY_DELAY_MS));
     }
-    console.log(`[groq] tentativa ${model} (max_tokens ${maxTokens}).`);
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.3,
-        max_tokens: maxTokens,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: EDITORIAL_SYSTEM_INSTRUCTION },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-      signal: AbortSignal.timeout(50000),
-    });
+
+    const body: Record<string, unknown> = {
+      model,
+      temperature: 0.3,
+      max_tokens: attempt.maxTokens,
+      messages: [
+        { role: "system", content: EDITORIAL_SYSTEM_INSTRUCTION },
+        { role: "user", content: userPrompt },
+      ],
+    };
+    if (attempt.jsonMode) {
+      body.response_format = { type: "json_object" };
+    }
+
+    console.log(`[groq] tentativa ${model} (max_tokens ${attempt.maxTokens}, json_mode=${attempt.jsonMode}).`);
+    let res: Response;
+    try {
+      res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(45000),
+      });
+    } catch (err) {
+      lastErrorText = err instanceof Error ? err.message : String(err);
+      console.error(`[groq] exceção na chamada: ${lastErrorText.slice(0, 140)}`);
+      continue;
+    }
 
     if (res.ok) {
       const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
@@ -797,7 +823,11 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
     }
 
     lastErrorText = `HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 160)}`;
-    console.error(`[groq] ${model} (${maxTokens} tokens) falhou: ${lastErrorText}`);
+    console.error(`[groq] ${model} (${attempt.maxTokens}, json=${attempt.jsonMode}) falhou: ${lastErrorText}`);
+
+    if (res.status === 400 && attempt.jsonMode) {
+      continue;
+    }
     if (res.status === 413 || res.status === 429 || res.status >= 500) {
       continue;
     }
@@ -854,7 +884,8 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 - development_text: NO MÍNIMO 3 seções com subtítulos "## ", cada uma com pelo menos 150 palavras cobrindo fatos, dados concretos, números, datas, plataformas, contexto de mercado e impacto para o leitor.
 - Se o material fornecido contiver declaração pública de executivo, desenvolvedor ou porta-voz, traduza com fidelidade e cite entre aspas, indicando quem falou, cargo e onde foi dito.
 - conclusion_text: no mínimo 100 palavras, com fechamento analítico seguido de convite direto ao debate nos comentários, linha "---" e atribuição "**Fonte:** [Nome](URL)".
-- NÃO invente citações nem números que não estejam no material fornecido ou em conhecimento público consolidado.`;
+- NÃO invente citações nem números que não estejam no material fornecido ou em conhecimento público consolidado.
+- Nos valores de texto do JSON, escape toda quebra de linha como \\n e nunca use aspas duplas sem escapar dentro dos textos.`;
 
   const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
   let responseText = "";
