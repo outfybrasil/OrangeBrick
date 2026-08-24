@@ -687,7 +687,7 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
     throw new Error("GROQ_API_KEY não configurada para o fallback.");
   }
 
-  let modelId = "";
+  const candidates: string[] = [];
   try {
     const modelsRes = await fetch("https://api.groq.com/openai/v1/models", {
       headers: { Authorization: `Bearer ${apiKey}` },
@@ -697,53 +697,68 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
       const data = (await modelsRes.json()) as { data?: Array<{ id: string }> };
       const ids = (data.data || [])
         .map((m) => m.id)
-        .filter((id) => !/whisper|tts|orpheus|guard|embed|playai/i.test(id));
+        .filter((id) => !/whisper|tts|orpheus|guard|embed|playai|compound/i.test(id));
       for (const pref of GROQ_MODEL_PREFERENCES) {
         const match = ids.find((id) => id.includes(pref));
-        if (match) {
-          modelId = match;
-          break;
+        if (match && !candidates.includes(match)) {
+          candidates.push(match);
         }
       }
-      if (!modelId && ids.length > 0) modelId = ids[0];
+      for (const id of ids) {
+        if (!candidates.includes(id)) candidates.push(id);
+      }
     }
   } catch {
-    modelId = "";
+    candidates.push(GROQ_MODEL_PREFERENCES[0]);
   }
 
-  const model = modelId || GROQ_MODEL_PREFERENCES[0];
-  console.log(`Usando fallback Groq com modelo ${model}.`);
-
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.3,
-      max_tokens: 8192,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: EDITORIAL_SYSTEM_INSTRUCTION },
-        { role: "user", content: userPrompt },
-      ],
-    }),
-    signal: AbortSignal.timeout(55000),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => "");
-    throw new Error(`Fallback Groq (${model}) falhou: HTTP ${res.status} ${errText.slice(0, 200)}`);
+  if (candidates.length === 0) {
+    candidates.push(GROQ_MODEL_PREFERENCES[0]);
   }
 
-  const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = data.choices?.[0]?.message?.content || "";
-  if (!content.trim()) {
-    throw new Error("Fallback Groq retornou resposta vazia.");
+  let lastErrorText = "";
+  for (const model of candidates.slice(0, 3)) {
+    for (const maxTokens of [4500, 3200]) {
+      console.log(`Usando fallback Groq com modelo ${model} (max_tokens ${maxTokens}).`);
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0.3,
+          max_tokens: maxTokens,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: EDITORIAL_SYSTEM_INSTRUCTION },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+        signal: AbortSignal.timeout(50000),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const content = data.choices?.[0]?.message?.content || "";
+        if (!content.trim()) {
+          lastErrorText = "resposta vazia do modelo";
+          break;
+        }
+        return content;
+      }
+
+      lastErrorText = `HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 160)}`;
+      console.error(`Groq ${model} (${maxTokens} tokens) falhou:`, lastErrorText);
+      if (res.status === 413 || res.status === 429) {
+        continue;
+      }
+      break;
+    }
   }
-  return content;
+
+  throw new Error(`Fallback Groq esgotou os modelos disponíveis. Último erro: ${lastErrorText}`);
 }
 
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
