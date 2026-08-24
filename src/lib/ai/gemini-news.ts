@@ -718,7 +718,7 @@ async function callGroqEditorial(userPrompt: string): Promise<string> {
 
   let lastErrorText = "";
   for (const model of candidates.slice(0, 3)) {
-    for (const maxTokens of [4500, 3200]) {
+    for (const maxTokens of [5200, 3800]) {
       console.log(`Usando fallback Groq com modelo ${model} (max_tokens ${maxTokens}).`);
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -801,6 +801,14 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     const excludedList = recentContext.recentTitles.slice(0, 15).map((t) => `- ${t}`).join("\n");
     userPrompt += `\n\nIMPORTANTE (NÃO REPETIR TEMAS RECENTES): O portal já publicou recentemente os seguintes assuntos abaixo. NÃO repita nem cubra novamente os mesmos fatos destes títulos:\n${excludedList}`;
   }
+
+  userPrompt += `\n\nREQUISITOS DE EXTENSÃO E PROFUNDIDADE (OBRIGATÓRIOS — respostas curtas são rejeitadas pela editoria):
+- intro_text + development_text + conclusion_text juntos devem totalizar ENTRE 700 E 1.000 PALAVRAS.
+- intro_text: 4 a 6 linhas diretas com o fato principal e por que ele importa.
+- development_text: NO MÍNIMO 3 seções com subtítulos "## ", cobrindo fatos, dados concretos, números, datas, plataformas, contexto de mercado e impacto para o leitor.
+- Se o material fornecido contiver declaração pública de executivo, desenvolvedor ou porta-voz, traduza com fidelidade e cite entre aspas, indicando quem falou, cargo e onde foi dito.
+- conclusion_text: fechamento analítico seguido de convite direto ao debate nos comentários, linha "---" e atribuição "**Fonte:** [Nome](URL)".
+- NÃO invente citações nem números que não estejam no material fornecido ou em conhecimento público consolidado.`;
 
   const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
   let responseText = "";
