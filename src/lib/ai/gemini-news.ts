@@ -17,6 +17,7 @@ export interface GeneratePostOptions {
   sourceUrl?: string;
   category?: PostCategory;
   authorName?: string;
+  force?: boolean;
 }
 
 export interface GeneratedDraftResult {
@@ -98,20 +99,21 @@ const OFFICIAL_HARDWARE_ASSETS: Record<string, string[]> = {
     "https://upload.wikimedia.org/wikipedia/commons/0/07/Nintendo-Switch-wJoyCons-BlRd-Handheld-FL.jpg",
   ],
   pc: [
-    "https://upload.wikimedia.org/wikipedia/commons/a/a4/Custom-built_computer_with_GeForce_RTX_3080.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/8/88/Immagine_Playstation_5.jpg",
+    "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1920",
+    "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=1920",
+    "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=1920",
   ],
 };
 
 function getHardwareFallback(subject: string): string[] {
   const s = subject.toLowerCase();
-  if (s.includes("playstation") || s.includes("ps5") || s.includes("sony") || s.includes("dualsense")) {
+  if (/\b(ps5|ps4|ps6|psvr|dualsense|dualshock|playstation\s*(?:5|4|6|pro)?)\b/.test(s)) {
     return OFFICIAL_HARDWARE_ASSETS.playstation;
   }
-  if (s.includes("xbox") || s.includes("microsoft") || s.includes("game pass") || s.includes("series x") || s.includes("series s")) {
+  if (/\b(series\s*[xs]|xbox\s*(?:one|series|x|s)?|game\s*pass|gamepass|xcloud)\b/.test(s)) {
     return OFFICIAL_HARDWARE_ASSETS.xbox;
   }
-  if (s.includes("nintendo") || s.includes("switch") || s.includes("mario") || s.includes("zelda")) {
+  if (/\b(switch\s*(?:2|oled|lite)?|joy-con|joycon|mario|zelda|metroid|pokemon|nintendo)\b/.test(s)) {
     return OFFICIAL_HARDWARE_ASSETS.nintendo;
   }
   return OFFICIAL_HARDWARE_ASSETS.pc;
@@ -160,104 +162,44 @@ export async function fetchSteamGameImages(gameName: string): Promise<string[]> 
   }
 }
 
-async function searchWikimediaImages(query: string): Promise<string[]> {
-  try {
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url|mime|dimensions&format=json`;
-    const res = await fetch(url, {
-      headers: { "User-Agent": "OrangeBrickEditorialBot/1.0 (contact@orangebrick.com.br)" },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    const pages = Object.values(data.query?.pages || {});
-    return pages
-      .map((p: unknown) => {
-        const page = p as { imageinfo?: Array<{ url?: string; mime?: string; width?: number }> };
-        const info = page.imageinfo?.[0];
-        if (!info || !info.url) return null;
-        if (info.mime && !/^(image\/(jpeg|png|webp|jpg))$/i.test(info.mime)) return null;
-        if (info.width && info.width < 500) return null;
-        return info.url;
-      })
-      .filter((u): u is string => Boolean(u));
-  } catch {
-    return [];
-  }
-}
-
-async function searchOpenverseImages(query: string): Promise<string[]> {
-  try {
-    const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&page_size=6`;
-    const res = await fetch(url, {
-      headers: { "User-Agent": "OrangeBrickEditorialBot/1.0" },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results || [])
-      .map((r: { url?: string }) => r.url)
-      .filter((u: unknown): u is string => typeof u === "string" && !/\.(svg|pdf|webm|mp4)$/i.test(u));
-  } catch {
-    return [];
-  }
-}
-
-async function searchDuckDuckGoImages(query: string): Promise<string[]> {
-  try {
-    const tokenRes = await fetch(`https://duckduckgo.com/?q=${encodeURIComponent(query)}&t=h_&iax=images&ia=images`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      },
-      signal: AbortSignal.timeout(6000),
-    });
-    if (!tokenRes.ok) return [];
-    const tokenHtml = await tokenRes.text();
-    const vqdMatch = tokenHtml.match(/vqd=['"]([^'"]+)['"]/i) || tokenHtml.match(/vqd=([0-9-]+)/i);
-    if (!vqdMatch) return [];
-    const vqd = vqdMatch[1];
-    const apiUrl = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${vqd}&f=,,,size:wallpaper,,,&p=1`;
-    const apiRes = await fetch(apiUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Referer": "https://duckduckgo.com/",
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!apiRes.ok) return [];
-    const data = (await apiRes.json()) as { results?: { image?: string }[] };
-    return (data.results || [])
-      .map((r) => r.image)
-      .filter((u): u is string => typeof u === "string" && !/\.(svg|pdf|webm|mp4)$/i.test(u));
-  } catch {
-    return [];
-  }
-}
-
 async function fetchMultiSourceCandidates(query: string, sourceImages: string[] = []): Promise<string[]> {
   const results: string[] = [...sourceImages];
 
   const steam = await fetchSteamGameImages(query);
   results.push(...steam);
 
-  const [wiki, openverse, ddg] = await Promise.allSettled([
-    searchWikimediaImages(query),
-    searchOpenverseImages(query),
-    searchDuckDuckGoImages(query),
-  ]);
-
-  if (wiki.status === "fulfilled") results.push(...wiki.value);
-  if (openverse.status === "fulfilled") results.push(...openverse.value);
-  if (ddg.status === "fulfilled") results.push(...ddg.value);
-
   const unique = [...new Set(results.filter((u): u is string => typeof u === "string" && Boolean(u)))];
   console.log(
-    `[img] candidatos para "${query.slice(0, 60)}": steam=${steam.length} wiki=${wiki.status === "fulfilled" ? wiki.value.length : -1} openverse=${openverse.status === "fulfilled" ? openverse.value.length : -1} ddg=${ddg.status === "fulfilled" ? ddg.value.length : -1} total=${unique.length}`
+    `[img] candidatos para "${query.slice(0, 60)}": steam=${steam.length} source=${sourceImages.length} total=${unique.length}`
   );
   return unique;
 }
 
-const MIN_IMAGE_WIDTH = 600;
-const MIN_IMAGE_HEIGHT = 340;
+async function geminiSearchImages(query: string): Promise<string[]> {
+  try {
+    const gemini = getGeminiClient();
+    const response = await gemini.models.generateContent({
+      model: "gemini-3.6-flash",
+      contents: `Find direct image URLs for: ${query}. Return ONLY a JSON array of up to 5 direct URLs to high-quality images (jpg/png/webp). URLs must start with http and end with an image extension or contain image in the path. No text, no explanation, just the JSON array.`,
+      config: {
+        temperature: 0,
+        tools: [{ googleSearch: {} }],
+      },
+    });
+    if (!response.text) return [];
+    const text = response.text.trim();
+    const urlRegex = /https?:\/\/[^\s"')]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s"')]*)?/gi;
+    const urls = text.match(urlRegex) || [];
+    console.log(`[img] Gemini search para "${query.slice(0, 50)}": ${urls.length} URLs encontradas`);
+    return urls.slice(0, 5);
+  } catch (err) {
+    console.warn(`[img] Gemini search falhou: ${err instanceof Error ? err.message.slice(0, 100) : err}`);
+    return [];
+  }
+}
+
+const MIN_IMAGE_WIDTH = 1200;
+const MIN_IMAGE_HEIGHT = 675;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 
 function sniffImageContentType(buffer: Buffer, declared?: string | null): string | null {
@@ -394,6 +336,60 @@ async function uploadToSupabaseStorage(
   return `${renderBase}?width=1920&height=1080&resize=cover&quality=82&format=webp`;
 }
 
+function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[]) {
+  const usedImageUrls = new Set<string>();
+  const fallbackPool = getHardwareFallback(sourceImages.length > 0 ? "" : "");
+
+  async function trySecureImage(url: string, prefix: string): Promise<string | null> {
+    if (usedImageUrls.has(url)) return null;
+    usedImageUrls.add(url);
+    const processed = await downloadImageForUpload(url);
+    if (!processed) {
+      usedImageUrls.delete(url);
+      return null;
+    }
+    try {
+      return await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType);
+    } catch {
+      usedImageUrls.delete(url);
+      return null;
+    }
+  }
+
+  async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number, extraSources: string[] = []): Promise<string> {
+    for (const url of extraSources) {
+      const uploadedUrl = await trySecureImage(url, prefix);
+      if (uploadedUrl) return uploadedUrl;
+    }
+
+    for (const q of queries) {
+      const candidates = await fetchMultiSourceCandidates(q, sourceImages);
+      for (const url of candidates) {
+        const uploadedUrl = await trySecureImage(url, prefix);
+        if (uploadedUrl) return uploadedUrl;
+      }
+    }
+
+    for (const q of queries) {
+      const geminiUrls = await geminiSearchImages(q);
+      for (const url of geminiUrls) {
+        const uploadedUrl = await trySecureImage(url, prefix);
+        if (uploadedUrl) return uploadedUrl;
+      }
+    }
+
+    for (let i = 0; i < fallbackPool.length; i++) {
+      const idx = (fallbackIndex + i) % fallbackPool.length;
+      const uploadedUrl = await trySecureImage(fallbackPool[idx], prefix);
+      if (uploadedUrl) return uploadedUrl;
+    }
+
+    return "";
+  }
+
+  return { trySecureImage, findAndUpload };
+}
+
 const EDITORIAL_SYSTEM_INSTRUCTION = `
 Você é o editor-chefe do portal Orange Brick (portal brasileiro de notícias sobre videogames, lançamentos, hardware e cultura gamer).
 ESCOPO OBRIGATÓRIO: cubra SOMENTE o universo dos videogames — jogos, lançamentos, consoles e hardware de videogame, estúdios, publishers, indústria gamer, esports e periféricos. Se o material fornecido não for sobre games, recuse o tema respondendo apenas: {"erro": "fora_do_escopo"}.
@@ -417,6 +413,13 @@ DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
 3. COERÊNCIA E DIRETRIZES DE IMAGENS:
    - As imagens devem fazer pleno sentido com a notícia e OBRIGATORIAMENTE com a legenda descritiva.
    - Forneça termos de busca precisos em inglês para capa, imagem 1 e imagem 2.
+   - REGRAS OBRIGATÓRIAS PARA QUERIES DE IMAGEM:
+     * Cada query DEVE conter o NOME EXATO do jogo, console ou produto em inglês (ex: "Monster Hunter Wilds", "PlayStation 5 Pro", "GTA VI").
+     * NUNCA use queries genéricas como "game screenshot", "gameplay", "new game" sem o nome do produto.
+     * As 3 queries DEVEM ser diferentes entre si — cover, imagem 1 e imagem 2 retratam aspectos distintos.
+     * Queries devem ser em inglês, com termos técnicos de busca (ex: "official key art", "gameplay screenshot", "in-game environment").
+     * Para hardware: incluir nome exato do produto (ex: "PlayStation 5 Pro console", "Xbox Series X dashboard").
+     * Para indústria/notícias: usar a logo oficial da empresa ou foto do produto discutido (ex: "Nintendo Switch 2 official", "Xbox logo official").
    - Capa: Arte oficial de divulgação, Key Art 4K ou pôster oficial do jogo.
    - Imagem 1: Screenshot real de gameplay / combate / ação do jogo.
    - Imagem 2: Screenshot de cenário, chefe, vilão ou detalhe complementar do jogo.
@@ -567,6 +570,15 @@ export class NoFreshTopicError extends Error {
   }
 }
 
+export class SimilarTopicError extends Error {
+  public readonly similarTitles: string[];
+  constructor(message: string, similarTitles: string[]) {
+    super(message);
+    this.name = "SimilarTopicError";
+    this.similarTitles = similarTitles;
+  }
+}
+
 interface RecentPostContext {
   recentTitles: string[];
   recentSlugs: string[];
@@ -662,6 +674,18 @@ function findSimilarRecentTitle(text: string, context: RecentPostContext, window
     }
   }
   return null;
+}
+
+function findAllSimilarRecentTitles(text: string, context: RecentPostContext, windowSize = 15): string[] {
+  const found: string[] = [];
+  const limit = Math.min(context.recentTitles.length, windowSize);
+  for (let i = 0; i < limit; i++) {
+    const m = measureSimilarity(text, `${context.recentTitles[i]} ${context.recentSummaries[i] || ""}`);
+    if (isSimilarEnough(m)) {
+      found.push(context.recentTitles[i]);
+    }
+  }
+  return found;
 }
 
 async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<RecentPostContext> {
@@ -952,6 +976,23 @@ async function isGamingRelated(contextText: string): Promise<boolean> {
   return true;
 }
 
+const GENERIC_IMAGE_QUERIES = /^(game screenshot|gameplay|new game|screenshot|game art|video game|gaming|console|controller)$/i;
+
+function isQuerySpecific(query: string, subject: string): boolean {
+  if (!query || query.length < 5) return false;
+  if (GENERIC_IMAGE_QUERIES.test(query.trim())) return false;
+  const subjectWords = subject.toLowerCase().split(/\s+/).filter((w) => w.length >= 3);
+  const queryLower = query.toLowerCase();
+  const hasSubjectWord = subjectWords.some((w) => queryLower.includes(w));
+  return hasSubjectWord;
+}
+
+function validateImageQuery(query: string, subject: string, fallbackQuery: string): string {
+  if (isQuerySpecific(query, subject)) return query;
+  console.warn(`[img] query rejeitada como genérica: "${query}" — usando fallback com nome do jogo`);
+  return fallbackQuery || `${subject} official`;
+}
+
 export async function generateNewsDraft(options: GeneratePostOptions = {}): Promise<GeneratedDraftResult> {
   const gemini = getGeminiClient();
   const supabase = getSupabaseAdmin();
@@ -1110,28 +1151,35 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const generatedText = `${rawTitle} ${summary}`;
   const similarRecentTitle = findSimilarRecentTitle(generatedText, recentContext);
-  if (similarRecentTitle) {
-    throw new NoFreshTopicError(
-      `Rascunho descartado: o tema já foi coberto pela matéria recente "${similarRecentTitle}".`
+  if (similarRecentTitle && !options.force) {
+    const allSimilar = findAllSimilarRecentTitles(generatedText, recentContext);
+    throw new SimilarTopicError(
+      `O tema já foi coberto recentemente.`,
+      allSimilar.length > 0 ? allSimilar : [similarRecentTitle]
     );
   }
 
   const newPostId = crypto.randomUUID();
 
   const cleanSubject = rawTitle
-    .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?)\s+/i, "")
-    .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA|ANUNCIA).*$/i, "")
+    .replace(/^(CONFIRA|VEJA|NOVO|NOVA|REVELADO|ANUNCIADO|OFICIAL|DATA DE LANÇAMENTO:?|TUDO SOBRE|COMO FUNCIONA|GUIA|ANÁLISE|REVIEW)\s+/i, "")
+    .replace(/\s+(GANHA|RECEBE|TERÁ|CHEGA|É ANUNCIADO|REVELA|CONFIRMA|ANUNCIA|REVELADAS|REVELADOS|REVELADO|VAZADAS|VAZADOS|VAZADO|TODO TUDO|QUE SABEMOS|O QUE).*/i, "")
+    .replace(/[:\-–].*$/, "")
     .trim();
 
+  const validatedCoverQuery = validateImageQuery(parsed.cover_image_query || "", cleanSubject, `${cleanSubject} official key art`);
+  const validatedImg1Query = validateImageQuery(parsed.image_1_query || "", cleanSubject, `${cleanSubject} gameplay screenshot`);
+  const validatedImg2Query = validateImageQuery(parsed.image_2_query || "", cleanSubject, `${cleanSubject} environment scenery`);
+
   const coverQueries: string[] = [
-    parsed.cover_image_query,
+    validatedCoverQuery,
     `${cleanSubject} official game cover art`,
     `${cleanSubject} official key art 4k`,
     cleanSubject,
   ].filter((q): q is string => Boolean(q));
 
   const img1Queries: string[] = [
-    parsed.image_1_query,
+    validatedImg1Query,
     `${cleanSubject} gameplay screenshot`,
     `${cleanSubject} action combat`,
     `${cleanSubject} screenshot`,
@@ -1139,59 +1187,14 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   ].filter((q): q is string => Boolean(q));
 
   const img2Queries: string[] = [
-    parsed.image_2_query,
+    validatedImg2Query,
     `${cleanSubject} environment world scenery`,
     `${cleanSubject} boss cinematic scene`,
     `${cleanSubject} character trailer`,
     cleanSubject,
   ].filter((q): q is string => Boolean(q));
 
-  const usedImageUrls = new Set<string>();
-  const fallbackPool = getHardwareFallback(cleanSubject);
-
-  async function trySecureImage(url: string, prefix: string): Promise<string | null> {
-    if (usedImageUrls.has(url)) return null;
-    usedImageUrls.add(url);
-    const processed = await downloadImageForUpload(url);
-    if (!processed) {
-      usedImageUrls.delete(url);
-      return null;
-    }
-    try {
-      return await uploadToSupabaseStorage(supabase, newPostId, prefix, processed.buffer, processed.contentType);
-    } catch {
-      usedImageUrls.delete(url);
-      return null;
-    }
-  }
-
-  async function findAndUpload(queries: string[], prefix: string, fallbackIndex: number, extraSources: string[] = []): Promise<string> {
-    for (const url of extraSources) {
-      const uploadedUrl = await trySecureImage(url, prefix);
-      if (uploadedUrl) return uploadedUrl;
-    }
-
-    for (const q of queries) {
-      const candidates = await fetchMultiSourceCandidates(q, sourceImages);
-      for (const url of candidates) {
-        const uploadedUrl = await trySecureImage(url, prefix);
-        if (uploadedUrl) return uploadedUrl;
-      }
-    }
-
-    for (let i = 0; i < fallbackPool.length; i++) {
-      const idx = (fallbackIndex + i) % fallbackPool.length;
-      const uploadedUrl = await trySecureImage(fallbackPool[idx], prefix);
-      if (uploadedUrl) return uploadedUrl;
-    }
-
-    for (const url of OFFICIAL_HARDWARE_ASSETS.playstation) {
-      const uploadedUrl = await trySecureImage(url, prefix);
-      if (uploadedUrl) return uploadedUrl;
-    }
-
-    return "";
-  }
+  const { findAndUpload } = createImagePipeline(supabase, newPostId, sourceImages);
 
   const [coverUrl, img1Url, img2Url] = await Promise.all([
     findAndUpload(coverQueries, "cover", 0, sourceImages.slice(0, 1)),
@@ -1318,7 +1321,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
     const { data: allDrafts } = await supabase
       .from("posts")
       .select("*")
-      .or("image_url.is.null,image_url.eq.''")
+      .eq("is_published", false)
       .order("created_at", { ascending: false })
       .limit(10);
     if (allDrafts && allDrafts.length > 0) {
@@ -1328,20 +1331,11 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
     const { data: latest } = await supabase
       .from("posts")
       .select("*")
-      .or("image_url.is.null,image_url.eq.''")
+      .eq("is_published", false)
       .order("created_at", { ascending: false })
       .limit(1);
     if (latest && latest.length > 0) {
       postsToFix = latest as Post[];
-    } else {
-      const { data: anyLatest } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1);
-      if (anyLatest && anyLatest.length > 0) {
-        postsToFix = anyLatest as Post[];
-      }
     }
   }
 
@@ -1375,47 +1369,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       cleanSubject,
     ];
 
-    const usedImageUrls = new Set<string>();
-    const fallbackPool = getHardwareFallback(cleanSubject);
-
-    async function trySecureImageSingle(url: string, prefix: string): Promise<string | null> {
-      if (usedImageUrls.has(url)) return null;
-      usedImageUrls.add(url);
-      const processed = await downloadImageForUpload(url);
-      if (!processed) {
-        usedImageUrls.delete(url);
-        return null;
-      }
-      try {
-        return await uploadToSupabaseStorage(supabase, post.id, prefix, processed.buffer, processed.contentType);
-      } catch {
-        usedImageUrls.delete(url);
-        return null;
-      }
-    }
-
-    async function findAndUploadSingle(queries: string[], prefix: string, fallbackIndex: number): Promise<string> {
-      for (const q of queries) {
-        const candidates = await fetchMultiSourceCandidates(q);
-        for (const url of candidates) {
-          const uploadedUrl = await trySecureImageSingle(url, prefix);
-          if (uploadedUrl) return uploadedUrl;
-        }
-      }
-
-      for (let i = 0; i < fallbackPool.length; i++) {
-        const idx = (fallbackIndex + i) % fallbackPool.length;
-        const uploadedUrl = await trySecureImageSingle(fallbackPool[idx], prefix);
-        if (uploadedUrl) return uploadedUrl;
-      }
-
-      for (const url of OFFICIAL_HARDWARE_ASSETS.playstation) {
-        const uploadedUrl = await trySecureImageSingle(url, prefix);
-        if (uploadedUrl) return uploadedUrl;
-      }
-
-      return "";
-    }
+    const { findAndUpload: findAndUploadSingle } = createImagePipeline(supabase, post.id, []);
 
     const [coverUrl, img1Url, img2Url] = await Promise.all([
       findAndUploadSingle(coverQueries, "cover", 0),

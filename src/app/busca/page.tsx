@@ -19,16 +19,15 @@ export const metadata: Metadata = {
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const query = (await searchParams).q?.trim().slice(0, 80) || "";
   const supabase = createPublicServerClient();
-  const pattern = `%${query.replace(/[%_]/g, "")}%`;
+  const sanitizedQuery = query.replace(/[^\w\sàáâãéêíóôõúüç]/gi, " ").trim();
   const results = query.length >= 2 ? await Promise.all([
-    supabase.from("posts").select("*").eq("is_published", true).or(`title.ilike.${pattern},summary.ilike.${pattern}`).limit(12),
-    supabase.from("release_radar_items").select("*").eq("is_active", true).ilike("game", pattern).limit(10),
-    supabase.from("profiles").select("*").or(`display_name.ilike.${pattern},username.ilike.${pattern}`).limit(8),
-    supabase.from("community_posts").select("*").ilike("content", pattern).limit(12),
+    supabase.from("posts").select("*").eq("is_published", true).textSearch("search_vector", sanitizedQuery, { type: "websearch", config: "portuguese" }).limit(12),
+    supabase.from("release_radar_items").select("*").eq("is_active", true).textSearch("search_vector", sanitizedQuery, { type: "websearch", config: "portuguese" }).limit(10),
+    supabase.from("profiles").select("*").textSearch("search_vector", sanitizedQuery, { type: "websearch", config: "portuguese" }).limit(8),
+    supabase.from("community_posts").select("*").textSearch("search_vector", sanitizedQuery, { type: "websearch", config: "portuguese" }).limit(12),
   ]) : [];
-  const rank = (value: string) => value.toLocaleLowerCase("pt-BR") === query.toLocaleLowerCase("pt-BR") ? 0 : value.toLocaleLowerCase("pt-BR").startsWith(query.toLocaleLowerCase("pt-BR")) ? 1 : 2;
-  const posts = ((results[0]?.data || []) as Post[]).sort((a, b) => rank(a.title) - rank(b.title));
-  const releases = ((results[1]?.data || []) as ReleaseRadarItem[]).sort((a, b) => rank(a.game) - rank(b.game));
+  const posts = (results[0]?.data || []) as Post[];
+  const releases = (results[1]?.data || []) as ReleaseRadarItem[];
   const profiles = (results[2]?.data || []) as Profile[];
   const bricks = (results[3]?.data || []) as CommunityPostRow[];
   const total = posts.length + releases.length + profiles.length + bricks.length;

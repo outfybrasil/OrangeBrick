@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { handleTelegramWebhook } from "@/lib/telegram/bot";
+import { handleTelegramWebhook, notifyNewCommunityReports } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -30,6 +30,9 @@ export async function POST(request: Request) {
   }
   try {
     const update = await request.json();
+    after(async () => {
+      await notifyNewCommunityReports().catch(() => {});
+    });
     await handleTelegramWebhook(update);
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {

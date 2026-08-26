@@ -100,3 +100,79 @@ export function validateEditorialContent(content: EditorialContent): string[] {
 
   return errors;
 }
+
+export interface EditorialQualityItem {
+  id: number;
+  label: string;
+  complete: boolean;
+  detail?: string;
+}
+
+export interface EditorialQualityInput {
+  summary: string;
+  body: EditorialBlock[];
+  sourcesText: string;
+  quoteText: string;
+  quoteAuthor: string;
+  quoteSourceUrl: string;
+  absenceRegistered?: boolean;
+}
+
+export function validateEditorialQuality(input: EditorialQualityInput): EditorialQualityItem[] {
+  const { summary, body, sourcesText, quoteText, quoteAuthor, quoteSourceUrl, absenceRegistered } = input;
+
+  const textContent = body
+    .filter((b): b is Extract<EditorialBlock, { type: "text" }> => b.type === "text")
+    .map((b) => b.content)
+    .join("\n");
+  const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
+
+  const sources = sourcesText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const validSources = sources.filter((l) => /^.+\|https:\/\//.test(l));
+
+  const hasQuote = Boolean(quoteText.trim());
+  const quoteComplete = hasQuote
+    ? Boolean(quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim()))
+    : false;
+  const hasDeclaraçaoPublica = /declara[çc][ãa]o p[uú]blica/i.test(textContent);
+
+  return [
+    {
+      id: 1,
+      label: "Resumo entre 80 e 180 caracteres",
+      complete: summary.trim().length >= 80 && summary.trim().length <= 180,
+      detail: summary.trim().length > 0
+        ? `${summary.trim().length} caracteres`
+        : undefined,
+    },
+    {
+      id: 2,
+      label: "Corpo entre 700 e 1.000 palavras",
+      complete: wordCount >= 700 && wordCount <= 1000,
+      detail: `${wordCount} palavras`,
+    },
+    {
+      id: 3,
+      label: "Pelo menos três fontes estruturadas",
+      complete: validSources.length >= 3,
+      detail: `${validSources.length} de ${sources.length} fontes válidas`,
+    },
+    {
+      id: 4,
+      label: "Fala verificada ou ausência registrada",
+      complete: hasQuote ? quoteComplete : hasDeclaraçaoPublica || (absenceRegistered ?? false),
+      detail: hasQuote
+        ? quoteComplete
+          ? "Fala completa"
+          : "Fala incompleta (falta autor ou URL)"
+        : absenceRegistered
+          ? "Ausência registrada"
+          : hasDeclaraçaoPublica
+            ? "Ausência registrada no texto"
+            : "Nenhuma fala ou registro de ausência",
+    },
+  ];
+}

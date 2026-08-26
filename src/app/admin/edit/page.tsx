@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
+import { EditorialQualityChecklist } from "@/components/admin/EditorialQualityChecklist";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { createDataClient } from "@/lib/supabase/client";
 import { parseMarkdownToReact } from "@/lib/markdown";
@@ -62,6 +63,7 @@ type ArticleDraftFields = {
   quoteSourceUrl: string;
   sourcesText: string;
   correctionNote: string;
+  scheduledAt: string | null;
   blocks: ContentBlock[];
 };
 
@@ -101,6 +103,7 @@ function serializeDraftState(fields: ArticleDraftFields) {
     quoteSourceUrl: fields.quoteSourceUrl,
     sourcesText: fields.sourcesText,
     correctionNote: fields.correctionNote,
+    scheduledAt: fields.scheduledAt,
     blocks: fields.blocks,
   });
 }
@@ -123,11 +126,13 @@ function EditForm() {
   const [authorName, setAuthorName] = useState("Redação");
   const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [informationStatus, setInformationStatus] = useState<InformationStatus>("confirmed");
   const [quoteText, setQuoteText] = useState("");
   const [quoteAuthor, setQuoteAuthor] = useState("");
   const [quoteRole, setQuoteRole] = useState("");
   const [quoteSourceUrl, setQuoteSourceUrl] = useState("");
+  const [absenceRegistered, setAbsenceRegistered] = useState(false);
   const [sourcesText, setSourcesText] = useState("");
   const [correctionNote, setCorrectionNote] = useState("");
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("publicacao");
@@ -188,11 +193,11 @@ function EditForm() {
     const storageKey = `orange-brick:article-draft:${postId || "new"}`;
     const timer = window.setInterval(() => {
       const savedAt = new Date().toISOString();
-      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, blocks, savedAt }));
+      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, scheduledAt, blocks, savedAt }));
       setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(savedAt)));
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, slug, sourcesText, summary, title, topicId]);
+  }, [authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, scheduledAt, slug, sourcesText, summary, title, topicId]);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -263,6 +268,7 @@ function EditForm() {
             quoteSourceUrl: "",
             sourcesText: "",
             correctionNote: "",
+            scheduledAt: null,
             blocks: [],
           };
           const storedDraft = readLocalDraft(`orange-brick:article-draft:new`);
@@ -296,12 +302,14 @@ function EditForm() {
           setAuthorName(typedPost.author_name);
           setAuthorTag(normalizeAuthorTag(typedPost.author_tag));
           setPublishedAt(typedPost.published_at || null);
+          setScheduledAt(typedPost.scheduled_at || null);
           setInformationStatus(typedPost.information_status || "confirmed");
-          const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string } | null;
+          const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string; absence_registered?: boolean } | null;
           setQuoteText(storedQuote?.text || "");
           setQuoteAuthor(storedQuote?.author || "");
           setQuoteRole(storedQuote?.role || "");
           setQuoteSourceUrl(storedQuote?.source_url || "");
+          setAbsenceRegistered(Boolean(storedQuote?.absence_registered));
           const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string }> : [];
           setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"));
           setCorrectionNote(typedPost.correction_note || "");
@@ -334,6 +342,7 @@ function EditForm() {
             quoteSourceUrl: storedQuote?.source_url || "",
             sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"),
             correctionNote: typedPost.correction_note || "",
+            scheduledAt: typedPost.scheduled_at || null,
             blocks: parsedBlocks,
           };
           const storedDraft = readLocalDraft(`orange-brick:article-draft:${postId}`);
@@ -479,6 +488,7 @@ function EditForm() {
           : null,
         editorial_sources: parsedSources,
         correction_note: correctionNote.trim() || null,
+        scheduled_at: scheduledAt && !isPublished ? scheduledAt : null,
       };
 
       if (postId) {
@@ -538,6 +548,7 @@ function EditForm() {
     setQuoteSourceUrl(draft.quoteSourceUrl || "");
     setSourcesText(draft.sourcesText || "");
     setCorrectionNote(draft.correctionNote || "");
+    setScheduledAt(draft.scheduledAt || null);
     setBlocks(Array.isArray(draft.blocks) ? draft.blocks : []);
     setHasChanges(false);
     setAutoSavedAt(localDraft.savedLabel);
@@ -896,7 +907,7 @@ function EditForm() {
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1">Status</label>
                 <div className="inline-block rounded border border-white/15 bg-background-void px-2.5 py-1.5 text-xs font-bold text-gray-300">
-                  {publishedAt ? "Publicada" : "Rascunho"}
+                  {publishedAt ? "Publicada" : scheduledAt ? "Agendada" : "Rascunho"}
                 </div>
               </div>
               <div>
@@ -912,6 +923,31 @@ function EditForm() {
                 </select>
               </div>
             </div>
+
+            {!publishedAt && (
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1">Agendar publicação</label>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt ? scheduledAt.slice(0, 16) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setScheduledAt(val ? new Date(val).toISOString() : null);
+                    setHasChanges(true);
+                  }}
+                  className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none focus:border-brand-orange/40"
+                />
+                {scheduledAt && (
+                  <button
+                    type="button"
+                    onClick={() => { setScheduledAt(null); setHasChanges(true); }}
+                    className="mt-1 text-xs text-gray-500 hover:text-gray-300"
+                  >
+                    Limpar agendamento
+                  </button>
+                )}
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">Categoria</label>
@@ -1038,6 +1074,19 @@ function EditForm() {
                 <span>{pendingChecklistCount} itens precisam de atenção antes de publicar</span>
               </div>
             )}
+          </div>
+
+          {/* CHECKLIST DE QUALIDADE EDITORIAL — 4 REGRAS DE OURO */}
+          <div className="border-t border-white/10 pt-4">
+            <EditorialQualityChecklist
+              summary={summary}
+              body={blocks}
+              sourcesText={sourcesText}
+              quoteText={quoteText}
+              quoteAuthor={quoteAuthor}
+              quoteSourceUrl={quoteSourceUrl}
+              absenceRegistered={absenceRegistered}
+            />
           </div>
 
         </aside>

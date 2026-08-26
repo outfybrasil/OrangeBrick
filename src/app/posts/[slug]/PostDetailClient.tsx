@@ -18,7 +18,8 @@ import { Footer } from "@/components/ui/Footer";
 import { BookmarkIcon, RepostIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
 import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
 import { createDataClient } from "@/lib/supabase/client";
-import { normalizeAuthorTag } from "@/lib/content-validation";
+import { normalizeAuthorTag, validateEditorialQuality, type EditorialBlock } from "@/lib/content-validation";
+import { EditorialQualityChecklist } from "@/components/admin/EditorialQualityChecklist";
 import type { Post, PostStats } from "@/lib/types/database";
 import { ArticleCommunityNotes } from "@/components/community/ArticleCommunityNotes";
 import { youtubeEmbedUrl } from "@/lib/youtube";
@@ -135,12 +136,75 @@ const INFORMATION_STATUS_LABELS: Record<Post["information_status"], string> = {
   corrected: "Matéria corrigida",
 };
 
+function DraftQualityBanner({ post }: { post: Post }) {
+  const blocks = useMemo<EditorialBlock[]>(() => {
+    try {
+      const parsed = JSON.parse(post.body);
+      if (Array.isArray(parsed)) return parsed as EditorialBlock[];
+    } catch {}
+    return [];
+  }, [post.body]);
+
+  const sourcesText = useMemo(() => {
+    const sources = Array.isArray(post.editorial_sources)
+      ? post.editorial_sources.filter(
+          (s): s is { name: string; url: string } =>
+            Boolean(s && typeof s === "object" && "name" in s && "url" in s),
+        )
+      : [];
+    return sources.map((s) => `${s.name}|${s.url}`).join("\n");
+  }, [post.editorial_sources]);
+
+  const quote = useMemo(() => {
+    if (!post.featured_quote || typeof post.featured_quote !== "object" || Array.isArray(post.featured_quote)) return null;
+    return post.featured_quote as { text?: string; author?: string; role?: string; source_url?: string; absence_registered?: boolean };
+  }, [post.featured_quote]);
+
+  const items = validateEditorialQuality({
+    summary: post.summary,
+    body: blocks,
+    sourcesText,
+    quoteText: quote?.text || "",
+    quoteAuthor: quote?.author || "",
+    quoteSourceUrl: quote?.source_url || "",
+    absenceRegistered: quote?.absence_registered,
+  });
+
+  const pending = items.filter((i) => !i.complete);
+  if (pending.length === 0) return null;
+
+  return (
+    <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/[0.07] p-4">
+      <p className="text-xs font-bold uppercase tracking-wider text-amber-300">
+        Checklist editorial pendente ({pending.length})
+      </p>
+      <ul className="mt-2 space-y-1 text-xs leading-5 text-amber-200/90">
+        {pending.map((item) => (
+          <li key={item.id}>· {item.label}{item.detail ? ` — ${item.detail}` : ""}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+type RelatedPost = { id: string; slug: string; title: string; summary: string; image_url: string | null; category: string; published_at: string | null };
+
 interface PostArticleProps {
   post: Post;
   stats: PostStats;
+  relatedPosts?: RelatedPost[];
 }
 
-export function PostArticle({ post, stats }: PostArticleProps) {
+const CATEGORY_LABELS: Record<string, string> = {
+  breaking: "Plantão",
+  hardware: "Hardware",
+  industry: "Indústria",
+  modding: "Modding",
+  review: "Review",
+  opinion: "Opinião",
+};
+
+export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps) {
   const router = useRouter();
   const supabase = useMemo(() => createDataClient(), []);
   const { user } = useAuth();
@@ -310,6 +374,16 @@ export function PostArticle({ post, stats }: PostArticleProps) {
       </header>
 
       <main className="mx-auto w-full min-w-0 max-w-3xl px-2 py-4 sm:px-4 sm:py-10 watch-container">
+        <nav aria-label="Breadcrumb" className="mb-4 text-xs text-gray-500">
+          <ol className="flex items-center gap-1.5">
+            <li><a href="/" className="hover:text-brand-orange transition-colors">Início</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href="/noticias" className="hover:text-brand-orange transition-colors">Notícias</a></li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-gray-300 font-semibold line-clamp-1">{post.title}</li>
+          </ol>
+        </nav>
+        {!post.is_published && <DraftQualityBanner post={post} />}
         <article className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -443,6 +517,27 @@ export function PostArticle({ post, stats }: PostArticleProps) {
 
         <ArticleHypeSummary postSlug={post.slug} />
         <ArticleCommunityNotes postId={post.id} />
+
+        {relatedPosts.length > 0 && (
+          <section className="mt-10">
+            <h2 className="font-heading text-lg font-black uppercase text-white mb-4">Matérias relacionadas</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {relatedPosts.map((rp) => (
+                <a key={rp.id} href={`/posts/${rp.slug}`} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">
+                  {rp.image_url ? (
+                    <img src={rp.image_url} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
+                  ) : (
+                    <div className="h-16 w-24 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-xs text-gray-600">Sem capa</div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-bold text-brand-orange">{CATEGORY_LABELS[rp.category] || rp.category}</span>
+                    <h3 className="mt-0.5 font-heading text-xs font-bold uppercase leading-snug text-white line-clamp-2 group-hover:text-brand-orange transition-colors">{rp.title}</h3>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mt-10 border-y border-brand-orange/30 bg-brand-orange/[0.05] px-4 py-5 sm:px-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

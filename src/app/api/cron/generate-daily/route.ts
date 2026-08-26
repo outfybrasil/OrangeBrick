@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateNewsDraft, NoFreshTopicError } from "@/lib/ai/gemini-news";
-import { sendPostForApproval, sendTelegramApi } from "@/lib/telegram/bot";
+import { sendPostForApproval, sendTelegramApi, notifyAdmin } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -52,6 +52,7 @@ export async function GET(request: Request) {
     }
     const message = err instanceof Error ? err.message : "Falha na geração";
     console.error("Erro na geração automática diária:", err);
+    await notifyAdmin(`❌ <b>Cron diário falhou.</b>\n<code>${message.replace(/</g, "&lt;")}</code>\n\nUse <code>/hoje</code> para tentar manualmente.`).catch(() => {});
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

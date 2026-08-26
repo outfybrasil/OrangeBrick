@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
-import type { Post, PostStats, ReactionType } from "@/lib/types/database";
+import type { Post, PostStats, PostCategory, ReactionType } from "@/lib/types/database";
 import { getSiteUrl } from "@/lib/site-url";
 import { verifyPreviewToken } from "@/lib/preview-token";
 
@@ -59,6 +59,19 @@ function getStats(postId: string): Promise<PostStats> {
   return getStatsCached(postId);
 }
 
+async function getRelatedPosts(postId: string, category: PostCategory): Promise<Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at">[]> {
+  const serviceClient = createServiceRoleClient();
+  const { data } = await serviceClient
+    .from("posts")
+    .select("id,slug,title,summary,image_url,category,published_at")
+    .eq("is_published", true)
+    .eq("category", category)
+    .neq("id", postId)
+    .order("published_at", { ascending: false })
+    .limit(4);
+  return (data || []) as Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at">[];
+}
+
 export async function generateMetadata({ params, searchParams }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const sParams = searchParams ? await searchParams : {};
@@ -93,7 +106,10 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
   const isPreview = typeof sParams.preview === "string" && verifyPreviewToken(slug, sParams.preview);
   const post = await getPost(slug, isPreview);
   if (!post) notFound();
-  const stats = await getStats(post.id);
+  const [stats, relatedPosts] = await Promise.all([
+    getStats(post.id),
+    getRelatedPosts(post.id, post.category),
+  ]);
   const siteUrl = getSiteUrl();
   const newsArticleJsonLd = {
     "@context": "https://schema.org",
@@ -155,7 +171,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
           MODO DE PRÉ-VISUALIZAÇÃO — Este rascunho ainda não foi publicado no portal
         </div>
       )}
-      <PostArticle post={post} stats={stats} />
+      <PostArticle post={post} stats={stats} relatedPosts={relatedPosts} />
     </>
   );
 }

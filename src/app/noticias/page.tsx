@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { Tag } from "@/components/ui/Tag";
+import { NewsList } from "@/components/feed/NewsList";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
@@ -11,14 +10,14 @@ import { POST_LIST_COLUMNS } from "@/lib/types/database";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Arquivo Editorial de Notícias — Orange Brick",
-  description: "Explore todas as matérias, furos jornalísticos, análises da indústria e notícias de games publicadas no Orange Brick.",
+  title: "Arquivo Editorial de Noticias - Orange Brick",
+  description: "Explore todas as materias, furos jornalisticos, analises da industria e noticias de games publicadas no Orange Brick.",
   alternates: {
     canonical: "/noticias",
   },
   openGraph: {
-    title: "Arquivo Editorial de Notícias | Orange Brick",
-    description: "Todas as matérias e notícias publicadas no Orange Brick.",
+    title: "Arquivo Editorial de Noticias | Orange Brick",
+    description: "Todas as materias e noticias publicadas no Orange Brick.",
     url: "/noticias",
     type: "website",
   },
@@ -29,7 +28,7 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
   const period = params.periodo === "mes" ? "mes" : "todas";
   const search = params.q?.trim().slice(0, 80) || "";
   const supabase = createPublicServerClient();
-  let query = supabase.from("posts").select(POST_LIST_COLUMNS).eq("is_published", true).order("published_at", { ascending: false }).limit(100);
+  let query = supabase.from("posts").select(POST_LIST_COLUMNS, { count: "exact" }).eq("is_published", true).order("published_at", { ascending: false }).limit(20);
   if (period === "mes") {
     const start = new Date();
     start.setDate(1);
@@ -37,11 +36,12 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
     query = query.gte("published_at", start.toISOString());
   }
   if (search.length >= 2) {
-    const pattern = `%${search.replace(/[%_,]/g, "")}%`;
-    query = query.or(`title.ilike.${pattern},summary.ilike.${pattern}`);
+    const sanitized = search.replace(/[^\w\sàáâãéêíóôõúüç]/gi, " ").trim();
+    query = query.textSearch("search_vector", sanitized, { type: "websearch", config: "portuguese" });
   }
-  const { data } = await query;
+  const { data, count } = await query;
   const posts = (data || []) as Post[];
+  const total = count || 0;
 
   return (
     <div className="min-h-dvh bg-background-void text-white">
@@ -64,23 +64,8 @@ export default async function NewsArchivePage({ searchParams }: { searchParams: 
           <input id="news-search" name="q" type="search" defaultValue={search} minLength={2} placeholder="Buscar por título ou assunto" className="min-h-12 min-w-0 flex-1 border border-white/15 bg-card-slate/40 px-4 text-base text-white outline-none placeholder:text-gray-500 focus:border-brand-orange" />
           <button className="min-h-12 bg-brand-orange px-5 text-xs font-black uppercase text-white transition-colors hover:bg-[#d94f00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">Buscar</button>
         </form>
-        {search && <p className="mt-4 text-sm text-gray-400">{posts.length} {posts.length === 1 ? "resultado" : "resultados"} para “{search}”</p>}
-        {posts.length ? (
-          <div className="divide-y divide-white/10">
-            {posts.map((post) => (
-              <article key={post.id} className="grid gap-4 py-6 sm:grid-cols-[12rem_1fr] sm:items-center">
-                <Link href={`/posts/${post.slug}`} className="relative aspect-video overflow-hidden bg-card-slate focus-visible:outline-2 focus-visible:outline-brand-orange">
-                  {post.image_url && <Image src={post.image_url} alt={post.image_alt || post.title} fill sizes="(max-width: 640px) 100vw, 12rem" className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]" />}
-                </Link>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-3"><Tag category={post.category} /><time className="text-xs text-gray-500">{new Date(post.published_at || post.created_at).toLocaleDateString("pt-BR")}</time></div>
-                  <h2 className="mt-3 font-heading text-xl font-black uppercase leading-tight"><Link href={`/posts/${post.slug}`} className="transition-colors hover:text-brand-orange">{post.title}</Link></h2>
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-400">{post.summary}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : <div className="py-20 text-center text-sm text-gray-400">Nenhuma matéria publicada neste período.</div>}
+        {search && <p className="mt-4 text-sm text-gray-400">{total} {total === 1 ? "resultado" : "resultados"} para &ldquo;{search}&rdquo;</p>}
+        <NewsList initialPosts={posts} total={total} period={period} search={search} />
       </main>
       <Footer />
     </div>

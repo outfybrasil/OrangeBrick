@@ -49,13 +49,8 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Use generated images only as a last resort, when no suitable official image exists or the topic is a concept without a visual reference.
 - Body images must add visual context to the article, such as the quoted person, a speech screenshot, gameplay, the product, the event, or a document discussed in the text.
 - Keep cover and body images distinct, test every image URL, and write alt text that connects the image to the article summary.
-- Every article imported from Google Drive must receive at least two distinct body images before it is handed off for review. The assistant running the import is responsible for sourcing, uploading, inserting, and validating those images; this is not a manual follow-up task for the user.
-- Whenever the cron creates a Google Drive draft, Codex is responsible for the complete image workflow: search for the cover and at least two distinct images to be placed inside the article body, follow all current image-sourcing rules, prioritize official assets, validate HTTP 200 and dimensions, upload them to Orange Brick Storage, insert them between the text sections with specific alt text and captions, and verify the saved result in Supabase. The cover does not count toward the two required body images. Never leave image sourcing or body-image placement as a task for the user.
-- Essa busca de imagens começa no mesmo momento da importação, antes de entregar o rascunho. Importar o texto primeiro e deixar fotos para depois é considerado fluxo incompleto.
-- A Drive draft created by the cron is incomplete until Codex finishes the image workflow. It must remain unpublished and must not be handed off for editorial review while the cover or either required body image is missing or invalid.
-- Drive imports must preserve the `text → image → text → image → text` structure. The two body images must use different assets and perspectives, and neither may repeat the cover.
 - If two suitable official or otherwise rule-compliant images cannot be found, keep the article as an incomplete draft and report the missing assets. Never fill the body with generic stock imagery merely to satisfy the image count.
-- Before completing a Drive import, confirm HTTP 200, 16:9 dimensions of at least 1200 × 675, specific alt text and caption, and exactly which subject each body image depicts.
+- Every body image must be validated before saving: confirm HTTP 200, 16:9 dimensions of at least 1200 × 675, specific alt text and caption, and exactly which subject each image depicts.
 
 ## Official trailers
 
@@ -148,7 +143,7 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - **Sempre testar a URL** com fetch/curl antes de salvar — confirmar HTTP 200
 - Preferir imagens com boa resolução (mínimo 1200px de largura)
 - Para logos de eventos: buscar `"[nome do evento] logo"` no Google Imagens
-- O sincronizador do Drive deve rejeitar automaticamente capas do Unsplash, Pexels e Pixabay. Para jogos, consoles e empresas, usar arte oficial, screenshot oficial, foto oficial de hardware ou logo corporativa; se não houver material válido, deixar a capa pendente para revisão manual em vez de usar imagem genérica.
+- Para jogos, consoles e empresas, usar arte oficial, screenshot oficial, foto oficial de hardware ou logo corporativa; se não houver material válido, deixar a capa pendente para revisão manual em vez de usar imagem genérica.
 
 ### Checklist de qualidade (rodar ANTES de salvar)
 

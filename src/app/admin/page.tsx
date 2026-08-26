@@ -58,10 +58,29 @@ function MiniBarChart({ values, color }: { values: number[]; color: string }) {
   );
 }
 
+type PaginatedPost = Pick<Post, "id" | "slug" | "title" | "summary" | "category" | "image_url" | "author_name" | "is_published" | "published_at" | "created_at" | "updated_at" | "scheduled_at">;
+
+interface StatsData {
+  publishedCount: number;
+  draftsCount: number;
+  scheduledCount: number;
+  authorsList: string[];
+}
+
+interface PaginatedResponse {
+  posts: PaginatedPost[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export default function AdminDashboard() {
   const supabase = useMemo(() => createDataClient(), []);
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PaginatedPost[]>([]);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,17 +91,21 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [dashboardNow] = useState(() => Date.now());
   const [publishingId, setPublishingId] = useState<string | null>(null);
-  const [publishCandidate, setPublishCandidate] = useState<Post | null>(null);
+  const [publishCandidate, setPublishCandidate] = useState<PaginatedPost | null>(null);
   const [publishOnBrickboard, setPublishOnBrickboard] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [brickboardPostingId, setBrickboardPostingId] = useState<string | null>(null);
   const [brickboardMessage, setBrickboardMessage] = useState<string | null>(null);
-  const [deleteCandidate, setDeleteCandidate] = useState<Post | null>(null);
+  const [deleteCandidate, setDeleteCandidate] = useState<PaginatedPost | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchCategory, setBatchCategory] = useState<PostCategory | "">("");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+  const [stats, setStats] = useState<StatsData>({ publishedCount: 0, draftsCount: 0, scheduledCount: 0, authorsList: [] });
+  const [recentDrafts, setRecentDrafts] = useState<PaginatedPost[]>([]);
+  const [weeklyPublished, setWeeklyPublished] = useState<{ published_at: string | null }[]>([]);
+  const [categoryDistributionRaw, setCategoryDistribution] = useState<{ category: string; count: number }[]>([]);
 
   const updateSelectedCategory = async () => {
     if (!batchCategory || selectedIds.length === 0) return;
@@ -102,7 +125,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const deletePost = async (post: Post) => {
+  const deletePost = async (post: PaginatedPost) => {
     setDeletingId(post.id);
     setDeleteError(null);
     setError(null);
@@ -129,7 +152,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const postPublishedArticleOnBrickboard = async (post: Post) => {
+  const postPublishedArticleOnBrickboard = async (post: PaginatedPost) => {
     setBrickboardPostingId(post.id);
     setBrickboardMessage(null);
     setError(null);
@@ -167,12 +190,11 @@ export default function AdminDashboard() {
         },
         is_official: true,
         is_pinned: false,
-        topic_id: post.topic_id,
         source_post_id: post.id,
         is_official_thread: true,
       });
-      if (threadError) throw new Error("A publicação no Brickboard falhou. Tente novamente.");
-      setBrickboardMessage(`“${post.title}” foi publicada no Brickboard.`);
+      if (threadError) throw new Error("A publicação no Brickboard falhou.");
+      setBrickboardMessage(`"${post.title}" foi publicada no Brickboard.`);
     } catch (postingError) {
       setError(errorMessage(postingError, "Não foi possível publicar a matéria no Brickboard."));
     } finally {
@@ -180,19 +202,26 @@ export default function AdminDashboard() {
     }
   };
 
-  const publishPost = async (post: Post) => {
+  const publishPost = async (post: PaginatedPost) => {
     setPublishingId(post.id);
     setError(null);
     setPublishError(null);
 
     try {
-      const blocks = JSON.parse(post.body) as EditorialBlock[];
+      const { data: fullPost, error: fetchBodyError } = await supabase
+        .from("posts")
+        .select("body")
+        .eq("id", post.id)
+        .single();
+      if (fetchBodyError || !fullPost) throw new Error("Não foi possível carregar o conteúdo da matéria.");
+
+      const blocks = JSON.parse(String(fullPost.body)) as EditorialBlock[];
       const validationErrors = validateEditorialContent({
         slug: post.slug,
         title: post.title,
         summary: post.summary,
         imageUrl: post.image_url || "",
-        imageAlt: post.image_alt || "",
+        imageAlt: "",
         blocks,
       });
 
@@ -211,7 +240,7 @@ export default function AdminDashboard() {
         .single();
 
       if (publishError) throw publishError;
-      setPosts((current) => current.map((item) => item.id === post.id ? data as Post : item));
+      setPosts((current) => current.map((item) => item.id === post.id ? { ...item, is_published: true, published_at: publishedAt, updated_at: publishedAt } : item));
 
       if (publishOnBrickboard) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -244,7 +273,6 @@ export default function AdminDashboard() {
             },
             is_official: true,
             is_pinned: false,
-            topic_id: post.topic_id,
             source_post_id: post.id,
             is_official_thread: true,
           });
@@ -265,46 +293,94 @@ export default function AdminDashboard() {
     }
   };
 
-  const checkAdminAndFetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (page: number, category: string, status: string, editor: string, search: string, sort: string) => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
 
-      if (!isAdminUser(user)) {
-        router.push("/admin/login");
-        return;
-      }
+      const params = new URLSearchParams({ page: String(page), pageSize: "20" });
+      if (category !== "all") params.set("category", category);
+      if (status !== "all") params.set("status", status);
+      if (editor !== "all") params.set("editor", editor);
+      if (search) params.set("search", search);
+      if (sort === "title") params.set("sort", "title");
 
-      const { data, error: fetchError } = await supabase
-        .from("posts")
-        .select("*")
-        .order("updated_at", { ascending: false })
-        .returns<Post[]>();
-
-      if (fetchError) throw fetchError;
-      setPosts(data || []);
+      const res = await fetch(`/api/admin/posts?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error("Erro ao carregar matérias");
+      const data: PaginatedResponse = await res.json();
+      setPosts(data.posts);
+      setTotalPosts(data.total);
+      setTotalPages(data.totalPages);
     } catch (err: unknown) {
       setError(errorMessage(err, "Não foi possível carregar as matérias."));
-    } finally {
-      setIsLoading(false);
     }
-  }, [router, supabase]);
+  }, [supabase]);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const [statsRes, draftsRes, weeklyRes, distRes] = await Promise.all([
+        fetch("/api/admin/stats", { headers: { Authorization: `Bearer ${session.access_token}` } }),
+        supabase.from("posts").select("id,slug,title,summary,category,image_url,author_name,is_published,published_at,updated_at").eq("is_published", false).order("updated_at", { ascending: false }).limit(3),
+        supabase.from("posts").select("published_at").eq("is_published", true).gte("published_at", new Date(dashboardNow - 6 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from("posts").select("category"),
+      ]);
+
+      if (statsRes.ok) {
+        const data: StatsData = await statsRes.json();
+        setStats(data);
+      }
+      setRecentDrafts((draftsRes.data || []) as PaginatedPost[]);
+      setWeeklyPublished((weeklyRes.data || []) as { published_at: string | null }[]);
+      const cats = (distRes.data || []) as { category: string }[];
+      const catMap = new Map<string, number>();
+      cats.forEach((r) => catMap.set(r.category, (catMap.get(r.category) || 0) + 1));
+      setCategoryDistribution(Array.from(catMap.entries()).map(([category, count]) => ({ category, count })));
+    } catch {
+      // Stats are non-critical, fail silently
+    }
+  }, [supabase, dashboardNow]);
 
   useEffect(() => {
-    queueMicrotask(() => void checkAdminAndFetchPosts());
-  }, [checkAdminAndFetchPosts]);
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!isAdminUser(user)) {
+          router.push("/admin/login");
+          return;
+        }
+        await Promise.all([
+          fetchPosts(1, "all", "all", "all", "", "date"),
+          fetchStats(),
+        ]);
+      } catch (err: unknown) {
+        setError(errorMessage(err, "Não foi possível carregar as matérias."));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    queueMicrotask(() => void init());
+  }, [supabase, router, fetchPosts, fetchStats]);
 
-  const publishedCount = useMemo(() => posts.filter(p => p.is_published).length, [posts]);
-  const draftsCount = useMemo(() => posts.filter(p => !p.is_published).length, [posts]);
-  const inProductionCount = draftsCount;
+  useEffect(() => {
+    if (!isLoading) {
+      void fetchPosts(currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder);
+    }
+  }, [currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder, isLoading, fetchPosts]);
+
+  // Filtragem das matérias
+  const publishedCount = stats.publishedCount;
+  const inProductionCount = stats.draftsCount;
   const inRevisionCount = 0;
-  const scheduledCount = 0;
-  const recentDrafts = useMemo(() => posts.filter((post) => !post.is_published).slice(0, 3), [posts]);
-  const weeklyPublished = useMemo(() => {
-    const start = dashboardNow - 6 * 24 * 60 * 60 * 1000;
-    return posts.filter((post) => post.is_published && new Date(post.published_at || post.updated_at).getTime() >= start);
-  }, [dashboardNow, posts]);
+  const scheduledCount = stats.scheduledCount;
+  const authorsList = stats.authorsList;
+
   const weeklyRhythm = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = new Date(dashboardNow);
     date.setHours(0, 0, 0, 0);
@@ -314,46 +390,19 @@ export default function AdminDashboard() {
     return {
       day: new Intl.DateTimeFormat("pt-BR", { weekday: "short" }).format(date).replace(".", ""),
       val: weeklyPublished.filter((post) => {
-        const published = new Date(post.published_at || post.updated_at);
+        const published = new Date(post.published_at || new Date().toISOString());
         return published >= date && published < next;
       }).length,
     };
   }), [dashboardNow, weeklyPublished]);
+
   const categoryDistribution = useMemo(() => CATEGORY_OPTIONS.map(([category, label]) => ({
     category,
     label,
-    count: posts.filter((post) => post.category === category).length,
-  })).filter((item) => item.count > 0), [posts]);
+    count: categoryDistributionRaw.find(c => c.category === category)?.count || 0,
+  })).filter((item) => item.count > 0), [categoryDistributionRaw]);
 
-  // Filtragem das matérias
-  const filteredPosts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return posts.filter(post => {
-      if (filterCategory !== "all" && post.category !== filterCategory) return false;
-      if (filterStatus === "published" && !post.is_published) return false;
-      if (filterStatus === "production" && post.is_published) return false;
-      if ((filterStatus === "revision" || filterStatus === "scheduled")) return false;
-      if (selectedEditor !== "all" && post.author_name !== selectedEditor) return false;
-      if (!query) return true;
-      return [post.title, post.slug, post.author_name].some(v => v.toLowerCase().includes(query));
-    }).sort((a, b) => {
-      if (sortOrder === "title") return a.title.localeCompare(b.title, "pt-BR");
-      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-    });
-  }, [filterCategory, filterStatus, posts, searchQuery, selectedEditor, sortOrder]);
-
-  const authorsList = useMemo(() => {
-    return Array.from(new Set(posts.map(p => p.author_name).filter(Boolean)));
-  }, [posts]);
-
-  // Paginação
-  const pageSize = 5;
-  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize));
-  const paginatedPosts = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredPosts.slice(start, start + pageSize);
-  }, [filteredPosts, currentPage]);
-  const allVisibleSelected = paginatedPosts.length > 0 && paginatedPosts.every((post) => selectedIds.includes(post.id));
+  const allVisibleSelected = posts.length > 0 && posts.every((post) => selectedIds.includes(post.id));
 
   if (isLoading) {
     return (
@@ -424,7 +473,7 @@ export default function AdminDashboard() {
             <p className="mt-2 font-heading text-3xl font-black text-white">{inProductionCount}</p>
             <p className="mt-1 text-xs text-gray-500">Rascunhos</p>
           </div>
-          <MiniBarChart values={[draftsCount]} color="bg-brand-orange" />
+          <MiniBarChart values={[inProductionCount]} color="bg-brand-orange" />
         </div>
 
         {/* AGUARDANDO REVISÃO */}
@@ -469,7 +518,7 @@ export default function AdminDashboard() {
               <h2 id="editorial-queue-title" className="font-heading text-base font-bold text-white">
                 Fila editorial
               </h2>
-              <span className="text-xs text-gray-500 font-semibold">{filteredPosts.length} matérias</span>
+              <span className="text-xs text-gray-500 font-semibold">{totalPosts} matérias</span>
             </div>
 
             {/* TABS DE STATUS */}
@@ -550,12 +599,12 @@ export default function AdminDashboard() {
 
           {/* VISUALIZAÇÃO ADAPTATIVA: CARDS NO MOBILE (sm:hidden) */}
           <div className="divide-y divide-white/10 sm:hidden">
-            {paginatedPosts.length === 0 ? (
+            {posts.length === 0 ? (
               <div className="py-12 text-center text-xs text-gray-500">
                 Nenhuma matéria encontrada.
               </div>
             ) : (
-              paginatedPosts.map((post) => {
+              posts.map((post) => {
                 return (
                   <article key={post.id} className="p-3.5 space-y-3 transition-colors hover:bg-white/[0.02]">
                     {/* TOPO DO CARD: STATUS, CATEGORIA E MENU */}
@@ -708,7 +757,7 @@ export default function AdminDashboard() {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-white/10 text-xs uppercase font-bold text-gray-500 bg-white/[0.01]">
                 <tr>
-                  <th className="w-12 py-3 pl-4"><input type="checkbox" checked={allVisibleSelected} onChange={() => setSelectedIds((current) => allVisibleSelected ? current.filter((id) => !paginatedPosts.some((post) => post.id === id)) : Array.from(new Set([...current, ...paginatedPosts.map((post) => post.id)])))} aria-label="Selecionar matérias desta página" className="size-4 accent-brand-orange" /></th>
+                  <th className="w-12 py-3 pl-4"><input type="checkbox" checked={allVisibleSelected} onChange={() => setSelectedIds((current) => allVisibleSelected ? current.filter((id) => !posts.some((post) => post.id === id)) : Array.from(new Set([...current, ...posts.map((post) => post.id)])))} aria-label="Selecionar matérias desta página" className="size-4 accent-brand-orange" /></th>
                   <th className="py-3 px-4">Matéria</th>
                   <th className="py-3 px-4">Categoria / Autor</th>
                   <th className="py-3 px-4">Status</th>
@@ -718,14 +767,14 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {paginatedPosts.length === 0 ? (
+                {posts.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-gray-500">
                       Nenhuma matéria encontrada.
                     </td>
                   </tr>
                 ) : (
-                  paginatedPosts.map((post) => {
+                  posts.map((post) => {
                     return (
                       <tr key={post.id} className="hover:bg-white/[0.02] transition-colors group">
                         <td className="py-3 pl-4"><input type="checkbox" checked={selectedIds.includes(post.id)} onChange={() => setSelectedIds((current) => current.includes(post.id) ? current.filter((id) => id !== post.id) : [...current, post.id])} aria-label={`Selecionar ${post.title}`} className="size-4 accent-brand-orange" /></td>
@@ -858,7 +907,7 @@ export default function AdminDashboard() {
 
           {/* RODAPÉ DA TABELA */}
           <div className="flex flex-col gap-3 border-t border-white/10 p-4 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
-            <span className="shrink-0">Mostrando {filteredPosts.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filteredPosts.length)} de {filteredPosts.length} matérias</span>
+            <span className="shrink-0">Mostrando {totalPosts > 0 ? (currentPage - 1) * 20 + 1 : 0}–{Math.min(currentPage * 20, totalPosts)} de {totalPosts} matérias</span>
             <div className="flex max-w-full items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
               <button
                 type="button"

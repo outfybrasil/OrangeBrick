@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { notifyNewCommunityReports } from "@/lib/telegram/bot";
 
 const EVENT_NAMES = new Set(["article", "brickboard", "radar", "return_summary"]);
 
@@ -36,7 +37,11 @@ export async function POST(request: Request) {
   });
   if (rateError || !allowed) return new NextResponse(null, { status: 204 });
   const { error } = await client.from("home_engagement_events").insert({ event_name: eventName, target });
-  return error
-    ? NextResponse.json({ error: "Não foi possível registrar o evento" }, { status: 500 })
-    : new NextResponse(null, { status: 204 });
+  if (error) {
+    return NextResponse.json({ error: "Não foi possível registrar o evento" }, { status: 500 });
+  }
+  after(async () => {
+    await notifyNewCommunityReports().catch(() => {});
+  });
+  return new NextResponse(null, { status: 204 });
 }

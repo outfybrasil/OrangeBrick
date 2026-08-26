@@ -261,6 +261,11 @@ export interface Post {
   featured_quote: Json | null;
   editorial_sources: Json;
   correction_note: string | null;
+  publish_to_brickboard?: boolean | null;
+  brickboard_copy?: string | null;
+  scheduled_at?: string | null;
+  scheduled_by?: string | null;
+  archived_at?: string | null;
 }
 
 export interface PostInsert {
@@ -283,6 +288,11 @@ export interface PostInsert {
   featured_quote?: Json | null;
   editorial_sources?: Json;
   correction_note?: string | null;
+  publish_to_brickboard?: boolean | null;
+  brickboard_copy?: string | null;
+  scheduled_at?: string | null;
+  scheduled_by?: string | null;
+  archived_at?: string | null;
 }
 
 export interface EditorialImage {

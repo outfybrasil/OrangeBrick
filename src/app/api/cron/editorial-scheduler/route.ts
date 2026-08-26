@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { notifyAdmin } from "@/lib/telegram/bot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -110,6 +111,14 @@ export async function GET(request: Request) {
     }
 
     published.push(post.id);
+  }
+
+  if (failures.length > 0) {
+    const detail = failures
+      .slice(0, 5)
+      .map((failure) => `• <code>${failure.id}</code>: ${failure.error.replace(/</g, "&lt;")}`)
+      .join("\n");
+    await notifyAdmin(`⚠️ <b>Scheduler publicou com ${failures.length} falha(s).</b>\n${detail}`).catch(() => {});
   }
 
   return NextResponse.json({ published, failures, checked_at: now });
