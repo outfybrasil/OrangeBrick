@@ -27,8 +27,7 @@ export async function GET(request: Request) {
     query = query.gte("published_at", start.toISOString());
   }
   if (search && search.length >= 2) {
-    const sanitized = search.replace(/[^\w\sàáâãéêíóôõúüç]/gi, " ").trim();
-    query = query.textSearch("search_vector", sanitized, { type: "websearch", config: "portuguese" });
+    query = query.or(`title.ilike.%${search}%,summary.ilike.%${search}%`);
   }
 
   query = query.range(from, to);

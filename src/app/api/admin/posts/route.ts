@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
-const TABLE_COLUMNS = "id,slug,title,summary,category,image_url,author_name,is_published,published_at,created_at,updated_at,scheduled_at";
+const TABLE_COLUMNS = "id,slug,title,summary,category,image_url,author_name,is_published,published_at,created_at,updated_at";
 
 function serviceClient() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -46,8 +46,7 @@ export async function GET(request: Request) {
     query = query.eq("author_name", editor);
   }
   if (search) {
-    const sanitized = search.replace(/[^\w\sàáâãéêíóôõúüç]/gi, " ").trim();
-    query = query.textSearch("search_vector", sanitized, { type: "websearch", config: "portuguese" });
+    query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%,author_name.ilike.%${search}%`);
   }
 
   query = query.order(sort, { ascending: sort === "title" });
