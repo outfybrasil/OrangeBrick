@@ -1,3 +1,4 @@
+import { ReactionIcon } from "./ReactionIcon";
 import { Icon } from "@/components/ui/Icon";
 import type { IconName } from "@/components/ui/Icon";
 import type { ReactionType } from "@/lib/types/database";
@@ -55,11 +56,15 @@ export function ReactionButton({ type, icon, count, disabled, active, onClick }:
         }
       `}
     >
-      <Icon
-        name={icon}
-        size={14}
-        className={`transition-all duration-200 ${active ? "scale-110" : currentMeta.hoverIcon}`}
-      />
+      {type === "hype" || type === "flop" ? (
+        <ReactionIcon type={type} count={count} active={active} size={15} />
+      ) : (
+        <Icon
+          name={icon}
+          size={14}
+          className={`transition-all duration-200 ${active ? "scale-110" : currentMeta.hoverIcon}`}
+        />
+      )}
       <span className="text-xs font-semibold tracking-tight">{currentMeta.label}</span>
       <span className="text-xs font-bold tabular-nums opacity-80 bg-black/20 px-1.5 py-0.5 rounded-md">
         {count}

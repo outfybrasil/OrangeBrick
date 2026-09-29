@@ -1,4 +1,5 @@
 import { ReactionsError } from "./ReactionsError";
+import { ReactionIcon } from "./ReactionIcon";
 import { Icon } from "@/components/ui/Icon";
 import type { ReactionType } from "@/lib/types/database";
 
@@ -44,7 +45,7 @@ export function ReactionBar({
           type="button"
           onClick={() => onToggle("hype")}
           disabled={disabled}
-          className={`group relative flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-xs font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
+          className={`group/hype group relative flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-xs font-bold transition-all cursor-pointer sm:gap-1.5 sm:px-3 sm:text-xs ${
             activeReaction === "hype"
               ? "bg-brand-orange/20 text-brand-orange border border-brand-orange/50 shadow-[0_0_12px_rgba(255,94,0,0.25)]"
               : "text-gray-400 border border-transparent hover:text-brand-orange hover:bg-card-slate/50"
@@ -53,12 +54,18 @@ export function ReactionBar({
         >
           {hypePulse > 0 && (
             <span key={hypePulse} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-visible motion-reduce:hidden">
-              <Icon name="hype" size={12} className="hype-particle absolute left-[32%] top-1/2 text-brand-orange" />
-              <Icon name="hype" size={9} className="hype-particle hype-particle-delay absolute left-1/2 top-1/2 text-amber-300" />
-              <Icon name="hype" size={11} className="hype-particle hype-particle-late absolute left-[66%] top-1/2 text-brand-orange" />
+              <span className="hype-particle absolute left-[30%] top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <img src="/images/reactions/hype/level-4.png" alt="" width={14} height={18} className="h-4.5 w-3.5 object-contain drop-shadow-[0_0_6px_rgba(255,94,0,0.8)]" />
+              </span>
+              <span className="hype-particle hype-particle-delay absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <img src="/images/reactions/hype/level-5.png" alt="" width={16} height={20} className="h-5 w-4 object-contain drop-shadow-[0_0_8px_rgba(255,140,0,1)]" />
+              </span>
+              <span className="hype-particle hype-particle-late absolute left-[70%] top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <img src="/images/reactions/hype/level-3.png" alt="" width={14} height={18} className="h-4.5 w-3.5 object-contain drop-shadow-[0_0_6px_rgba(255,94,0,0.8)]" />
+              </span>
             </span>
           )}
-          <Icon name="hype" size={14} className={`transition-all ${activeReaction === "hype" ? "scale-110" : "group-hover:scale-125"}`} />
+          <ReactionIcon type="hype" count={hype} active={activeReaction === "hype"} size={17} />
           <span className="hidden sm:inline">Hype</span>
           <span className="text-xs sm:text-xs font-bold tabular-nums opacity-90">
             {hype}
@@ -76,7 +83,12 @@ export function ReactionBar({
           }`}
           title="Decepcionou / Não curti (Flop)"
         >
-          <Icon name="flop" size={14} className={`transition-all ${activeReaction === "flop" ? "scale-110" : "group-hover:rotate-12"}`} />
+          <ReactionIcon
+            type="flop"
+            count={combinedFlop}
+            active={activeReaction === "flop" || activeReaction === "salty"}
+            size={17}
+          />
           <span className="hidden sm:inline">Flop</span>
           <span className="text-xs sm:text-xs font-bold tabular-nums opacity-90">
             {combinedFlop}
@@ -89,7 +101,7 @@ export function ReactionBar({
           className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs"
           title="Ver e enviar respostas"
         >
-          <Icon name="comment" size={14} className="text-gray-400 group-hover:text-brand-orange group-hover:scale-110 transition-all" />
+          <ReactionIcon type="comment" count={commentCount ?? 0} size={17} />
           <span className="hidden sm:inline">Respostas</span>
           <span className="text-xs sm:text-xs font-bold tabular-nums opacity-90">
             {commentCount ?? 0}
@@ -99,12 +111,10 @@ export function ReactionBar({
         <button
           type="button"
           onClick={onRepostClick}
-          className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-emerald-400 sm:gap-1.5 sm:px-3 sm:text-xs"
+          className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs"
           title="Republicar e comentar sobre isso no Brickboard"
         >
-          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-emerald-400 group-hover:rotate-180 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <ReactionIcon type="repost" count={shareCount ?? 0} size={17} />
           <span className="hidden sm:inline">Republicar</span>
           <span className="text-xs sm:text-xs font-bold tabular-nums opacity-90">
             {shareCount ?? 0}
@@ -112,8 +122,13 @@ export function ReactionBar({
         </button>
 
         {onShareClick && (
-          <button type="button" onClick={onShareClick} className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs" title="Compartilhar link">
-            <span aria-hidden="true" className="text-sm">↗</span>
+          <button
+            type="button"
+            onClick={onShareClick}
+            className="group flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-bold text-gray-400 transition-all hover:bg-card-slate/50 hover:text-brand-orange sm:gap-1.5 sm:px-3 sm:text-xs"
+            title="Compartilhar link"
+          >
+            <ReactionIcon type="share" size={17} />
             <span className="hidden sm:inline">Compartilhar</span>
           </button>
         )}

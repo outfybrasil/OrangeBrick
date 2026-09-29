@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { HypeIcon } from "@/components/reactions/HypeIcon";
 import { CATEGORY_CONFIG, type Post, type PostStats } from "@/lib/types/database";
 
 interface NewsCardCompactProps {
@@ -82,10 +83,12 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
               type="button"
               onClick={(e) => { e.stopPropagation(); toggleReaction("hype"); }}
               disabled={isPending}
-              className={`flex min-h-11 items-center gap-1 px-2 font-bold transition-colors ${userReaction === "hype" ? "text-brand-orange" : "text-gray-400 hover:text-brand-orange"}`}
+              className={`group/hype group flex min-h-11 items-center gap-1.5 px-2 font-bold transition-colors ${userReaction === "hype" ? "text-brand-orange" : "text-gray-400 hover:text-brand-orange"}`}
               aria-label={`Marcar como hype. ${counts.hype} reações`}
             >
-              Hype {counts.hype}
+              <HypeIcon count={counts.hype} active={userReaction === "hype"} size={14} />
+              <span>Hype</span>
+              <span className="tabular-nums">{counts.hype}</span>
             </button>
             <button
               type="button"
