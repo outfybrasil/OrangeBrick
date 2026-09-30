@@ -93,6 +93,7 @@ begin
     'game_clubs',
     'game_club_members'
   ] loop
+    if to_regclass('public.' || target_table) is null then continue; end if;
     execute format('drop policy if exists authenticated_human_users_only on public.%I', target_table);
     execute format(
       'create policy authenticated_human_users_only on public.%I as restrictive for all to authenticated using ((select public.authenticated_user_is_human())) with check ((select public.authenticated_user_is_human()))',

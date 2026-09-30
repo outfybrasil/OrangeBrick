@@ -2,6 +2,9 @@ alter table public.editorial_images
   add column if not exists content_sha256 text;
 
 alter table public.editorial_images
+  drop constraint if exists editorial_images_content_sha256_format;
+
+alter table public.editorial_images
   add constraint editorial_images_content_sha256_format
   check (content_sha256 is null or content_sha256 ~ '^[a-f0-9]{64}$');
 

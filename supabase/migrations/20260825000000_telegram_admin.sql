@@ -1,8 +1,18 @@
-alter table public.community_moderation_actions
-  alter column moderator_id drop not null;
+do $$ begin
+  alter table public.community_moderation_actions
+    alter column moderator_id drop not null;
+exception when undefined_table or undefined_column then null;
+end $$;
 
-grant execute on function public.admin_resolve_community_report(uuid, text) to service_role;
-grant execute on function public.admin_restore_community_user(uuid) to service_role;
+do $$ begin
+  grant execute on function public.admin_resolve_community_report(uuid, text) to service_role;
+exception when undefined_function then null;
+end $$;
+
+do $$ begin
+  grant execute on function public.admin_restore_community_user(uuid) to service_role;
+exception when undefined_function then null;
+end $$;
 
 create or replace function public.admin_moderate_user(
   target_user_id uuid,

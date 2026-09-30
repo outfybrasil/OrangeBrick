@@ -6,6 +6,8 @@ create table if not exists public.community_note_votes (
 );
 
 alter table public.community_note_votes enable row level security;
+drop policy if exists "note votes are public" on public.community_note_votes;
+drop policy if exists "users manage own note votes" on public.community_note_votes;
 create policy "note votes are public" on public.community_note_votes for select using (true);
 create policy "users manage own note votes" on public.community_note_votes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
@@ -16,6 +18,7 @@ begin
   return coalesce(new, old);
 end;
 $$;
+drop trigger if exists sync_community_note_helpful_count_trigger on public.community_note_votes;
 create trigger sync_community_note_helpful_count_trigger after insert or delete on public.community_note_votes for each row execute function public.sync_community_note_helpful_count();
 
 create table if not exists public.backup_runs (

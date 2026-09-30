@@ -24,6 +24,9 @@ alter table public.admin_audit_log enable row level security;
 
 create or replace function public.is_current_admin()
 returns boolean language sql stable as $$ select coalesce((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean, false) $$;
+drop policy if exists "admins manage trash" on public.admin_trash;
+drop policy if exists "admins read audit log" on public.admin_audit_log;
+drop policy if exists "admins moderate community notes" on public.community_notes;
 create policy "admins manage trash" on public.admin_trash for all using (public.is_current_admin()) with check (public.is_current_admin());
 create policy "admins read audit log" on public.admin_audit_log for select using (public.is_current_admin());
 create policy "admins moderate community notes" on public.community_notes for all using (public.is_current_admin()) with check (public.is_current_admin());
