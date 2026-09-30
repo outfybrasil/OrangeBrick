@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import type { AttachedArticle } from "@/lib/types/community";
 import { Icon } from "@/components/ui/Icon";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
@@ -13,9 +13,9 @@ export interface ComposeBrickModalProps {
     platformTag?: string,
     attachedArticle?: AttachedArticle,
     mediaUrl?: string
-  ) => void;
+  ) => Promise<void>;
   initialArticle?: AttachedArticle | null;
-  initialMode?: "default" | "attachment" | "poll";
+  initialMode?: "default" | "attachment";
 }
 
 const PLATFORM_OPTIONS = ["[PS5]", "[XSX]", "[SWITCH 2]", "[PC]", "[MOBILE]"];
@@ -31,10 +31,13 @@ export function ComposeBrickModal({
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [attachedArticle, setAttachedArticle] = useState<AttachedArticle | null>(initialArticle || null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  const [showPollBuilder, setShowPollBuilder] = useState(() => initialMode === "poll");
-  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
+  const handleClose = useCallback(() => {
+    if (!isPublishing) onClose();
+  }, [isPublishing, onClose]);
+  const dialogRef = useModalDialog<HTMLDivElement>(isOpen, handleClose);
 
   useEffect(() => {
     if (isOpen && initialMode === "attachment" && fileInputRef.current) {
@@ -46,69 +49,60 @@ export function ComposeBrickModal({
   if (!isOpen) return null;
 
   const charCount = content.length;
-  const validPollOptions = pollOptions.map((o) => o.trim()).filter((o) => o.length > 0);
-  const isPollValid = !showPollBuilder || validPollOptions.length >= 2;
-  const isPublishDisabled = content.trim().length === 0 || charCount > 280 || !isPollValid;
+  const isPublishDisabled = content.trim().length === 0 || charCount > 280 || isPublishing;
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setPublishError("A imagem precisa ter até 5 MB.");
+        e.target.value = "";
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        setPublishError("Escolha um arquivo de imagem.");
+        e.target.value = "";
+        return;
+      }
+      setPublishError(null);
       const reader = new FileReader();
       reader.onload = () => {
         setMediaUrl(reader.result as string);
       };
+      reader.onerror = () => setPublishError("Não foi possível ler a imagem. Tente outro arquivo.");
       reader.readAsDataURL(file);
     }
   };
 
-  const handlePublish = (event: React.FormEvent) => {
+  const handlePublish = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isPublishDisabled) return;
-
-    const finalContent =
-      showPollBuilder && validPollOptions.length >= 2
-        ? `${content.trim()}\n\n${validPollOptions.map((opt) => `• ${opt}`).join("\n")}`
-        : content.trim();
-
-    onPublish(
-      finalContent,
-      selectedTag || undefined,
-      attachedArticle || undefined,
-      mediaUrl || undefined
-    );
-
-    setContent("");
-    setSelectedTag(null);
-    setAttachedArticle(null);
-    setMediaUrl(null);
-    setShowPollBuilder(false);
-    setPollOptions(["", ""]);
-    onClose();
-  };
-
-  const addPollOption = () => {
-    if (pollOptions.length < 4) {
-      setPollOptions([...pollOptions, ""]);
-    }
-  };
-
-  const updatePollOption = (index: number, val: string) => {
-    const next = [...pollOptions];
-    next[index] = val;
-    setPollOptions(next);
-  };
-
-  const removePollOption = (index: number) => {
-    if (pollOptions.length > 2) {
-      setPollOptions(pollOptions.filter((_, i) => i !== index));
+    setIsPublishing(true);
+    setPublishError(null);
+    try {
+      await onPublish(
+        content.trim(),
+        selectedTag || undefined,
+        attachedArticle || undefined,
+        mediaUrl || undefined
+      );
+      setContent("");
+      setSelectedTag(null);
+      setAttachedArticle(null);
+      setMediaUrl(null);
+      onClose();
+    } catch (cause) {
+      setPublishError(cause instanceof Error ? cause.message : "Não foi possível publicar. Tente novamente.");
+    } finally {
+      setIsPublishing(false);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background-void/90 px-3 py-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (!isPublishing && event.target === event.currentTarget) handleClose();
       }}
     >
       <div
@@ -117,8 +111,9 @@ export function ComposeBrickModal({
         aria-modal="true"
         aria-labelledby="compose-brick-title"
         tabIndex={-1}
-        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-[#191b21] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+        className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl border-x border-t border-white/15 bg-[#16181F] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_rgba(0,0,0,0.8)] duration-200 animate-in slide-in-from-bottom sm:my-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border sm:border-white/10 sm:bg-[#191b21] sm:p-6 sm:shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:slide-in-from-bottom-0 sm:fade-in"
       >
+        <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-white/20 sm:hidden" />
         <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-2">
             <svg className="h-5 w-5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -130,7 +125,8 @@ export function ComposeBrickModal({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
+            disabled={isPublishing}
             aria-label="Fechar criação de Brick"
             className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
@@ -145,10 +141,15 @@ export function ComposeBrickModal({
             </label>
             <textarea
               id="brick-content"
+              autoFocus
               rows={4}
               maxLength={280}
               value={content}
-              onChange={(event) => setContent(event.target.value)}
+              onChange={(event) => {
+                setContent(event.target.value);
+                setPublishError(null);
+              }}
+              disabled={isPublishing}
               placeholder="Qual é a sua leitura sobre esse anúncio ou jogo?"
               aria-describedby="brick-guidance brick-count"
               className="w-full resize-none rounded-xl border border-white/10 bg-background-void p-3.5 text-sm text-white outline-none transition-colors placeholder:text-[#777982] focus:border-brand-orange/60 focus-visible:outline-2 focus-visible:outline-brand-orange/30"
@@ -163,7 +164,8 @@ export function ComposeBrickModal({
             </div>
           </div>
 
-          {/* Botões de Ação Rápida (Anexo de Imagem e Enquete) */}
+          {publishError && <p role="alert" className="border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{publishError}</p>}
+
           <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
             <input
               type="file"
@@ -171,31 +173,18 @@ export function ComposeBrickModal({
               accept="image/*"
               className="hidden"
               onChange={handleImageFileChange}
+              disabled={isPublishing}
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-gray-300 transition-colors hover:border-brand-orange/40 hover:text-white"
+              disabled={isPublishing}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-bold text-gray-300 transition-colors hover:border-brand-orange/40 hover:text-white"
             >
               <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
               </svg>
-              <span>{mediaUrl ? "Alterar imagem" : "Anexar Imagem"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowPollBuilder(!showPollBuilder)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
-                showPollBuilder
-                  ? "border-brand-orange bg-brand-orange/15 text-brand-orange"
-                  : "border-white/10 bg-white/[0.03] text-gray-300 hover:border-brand-orange/40 hover:text-white"
-              }`}
-            >
-              <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span>{showPollBuilder ? "Remover Enquete" : "Criar Enquete"}</span>
+              <span>{mediaUrl ? "Alterar imagem" : "Anexar imagem"}</span>
             </button>
           </div>
 
@@ -206,50 +195,12 @@ export function ComposeBrickModal({
               <button
                 type="button"
                 onClick={() => setMediaUrl(null)}
+                disabled={isPublishing}
                 className="absolute right-2 top-2 rounded-full bg-black/80 p-1 text-white hover:bg-brand-orange"
                 title="Remover anexo"
               >
                 <Icon name="close" size={16} />
               </button>
-            </div>
-          )}
-
-          {/* Construtor de Enquete Personalizada */}
-          {showPollBuilder && (
-            <div className="rounded-xl border border-brand-orange/30 bg-background-void/90 p-3.5 space-y-2.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-orange">
-                Opções da sua Enquete (mínimo 2)
-              </span>
-              {pollOptions.map((opt, idx) => (
-                <div key={idx} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    placeholder={`Opção ${idx + 1}`}
-                    value={opt}
-                    onChange={(e) => updatePollOption(idx, e.target.value)}
-                    className="flex-1 rounded-lg border border-white/10 bg-[#111217] px-3 py-1.5 text-xs text-white outline-none focus:border-brand-orange"
-                  />
-                  {pollOptions.length > 2 && (
-                    <button
-                      type="button"
-                      onClick={() => removePollOption(idx)}
-                      aria-label={`Remover opção ${idx + 1}`}
-                      className="flex min-h-9 min-w-9 items-center justify-center text-gray-500 hover:text-red-400"
-                    >
-                      <Icon name="close" size={12} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              {pollOptions.length < 4 && (
-                <button
-                  type="button"
-                  onClick={addPollOption}
-                  className="text-xs font-bold text-brand-orange hover:underline pt-1 block"
-                >
-                  + Adicionar mais uma opção
-                </button>
-              )}
             </div>
           )}
 
@@ -266,6 +217,7 @@ export function ComposeBrickModal({
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setSelectedTag(isSelected ? null : tag)}
+                    disabled={isPublishing}
                     className={`min-h-11 rounded-xl border px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-brand-orange ${
                       isSelected
                         ? "border-brand-orange/60 bg-brand-orange/15 text-brand-orange"
@@ -298,6 +250,7 @@ export function ComposeBrickModal({
               <button
                 type="button"
                 onClick={() => setAttachedArticle(null)}
+                disabled={isPublishing}
                 aria-label="Remover matéria anexada"
                 className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 hover:bg-white/5 hover:text-white"
               >
@@ -309,7 +262,8 @@ export function ComposeBrickModal({
           <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-4 sm:flex sm:items-center sm:justify-end">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
+              disabled={isPublishing}
               className="min-h-11 rounded-xl px-4 text-xs font-semibold text-[#b8bac2] transition-colors hover:bg-white/5 hover:text-white"
             >
               Cancelar
@@ -319,7 +273,7 @@ export function ComposeBrickModal({
               disabled={isPublishDisabled}
               className="min-h-11 rounded-xl bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-[#e95500] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Publicar Brick
+              {isPublishing ? "Publicando…" : "Publicar Brick"}
             </button>
           </div>
         </form>

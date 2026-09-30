@@ -3,16 +3,19 @@ import { ReleasesPageClient } from "./ReleasesPageClient";
 import type { ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { ReleaseRadarItem } from "@/lib/types/database";
+import { isRetainedRelease } from "@/lib/release-dates";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
-  title: "Calendário de Lançamentos de Jogos 2026 — Orange Brick",
-  description: "Agenda completa de lançamentos de jogos para PlayStation 5, Xbox Series X/S, Nintendo Switch, Switch 2 e PC em 2026.",
+  title: "Calendário de Lançamentos de Jogos | Orange Brick",
+  description: "Agenda de lançamentos de jogos para PlayStation 5, Xbox Series X/S, Nintendo Switch, Switch 2 e PC, organizada pelo ano oficial.",
   openGraph: {
-    title: "Calendário de Lançamentos de Jogos 2026 — Orange Brick",
-    description: "Agenda completa de lançamentos de jogos em 2026 organizados por mês e plataforma.",
+    title: "Calendário de Lançamentos de Jogos — Orange Brick",
+    description: "Agenda de lançamentos de jogos organizada por data e plataforma.",
+    url: "/lancamentos",
   },
+  alternates: { canonical: "/lancamentos" },
 };
 
 export default async function LancamentosPage() {
@@ -26,7 +29,7 @@ export default async function LancamentosPage() {
     supabase.rpc("get_release_hype_counts"),
   ]);
 
-  const initialReleases: ReleaseItem[] = ((items || []) as unknown as ReleaseRadarItem[]).map((item) => ({
+  const initialReleases: ReleaseItem[] = ((items || []) as unknown as ReleaseRadarItem[]).filter((item) => isRetainedRelease(item.release_date)).map((item) => ({
     id: item.id,
     game: item.game,
     releaseDate: item.release_label,

@@ -2,13 +2,18 @@
 
 import { useReducer, useEffect } from "react";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { cn } from "@/lib/utils";
 
 interface TimerProps {
-  date: string;
+  date?: string;
+  publishedAt?: string | null;
+  createdAt?: string;
+  className?: string;
 }
 
-export function Timer({ date }: TimerProps) {
+export function Timer({ date: legacyDate, publishedAt, createdAt, className }: TimerProps) {
   const [, refresh] = useReducer((value: number) => value + 1, 0);
+  const date = publishedAt || legacyDate || createdAt || "";
   const parsedDate = new Date(date);
   const exactDate = Number.isNaN(parsedDate.getTime())
     ? ""
@@ -28,7 +33,7 @@ export function Timer({ date }: TimerProps) {
   }, [date]);
 
   return (
-    <time dateTime={date} className="shrink-0 whitespace-nowrap text-xs font-medium text-gray-300">
+    <time dateTime={date} className={cn("min-w-0 text-xs font-medium text-gray-300", className)}>
       {exactDate}{exactDate ? " · " : ""}{timeAgo(date)}
     </time>
   );

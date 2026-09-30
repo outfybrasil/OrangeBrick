@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Termos de Uso",
   description: "Termos de Uso do Orange Brick — regras, direitos e responsabilidades ao utilizar o portal.",
+  alternates: { canonical: "/termos" },
 };
 
 export default function TermosPage() {
   return (
-    <main className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
       <article className="max-w-3xl mx-auto space-y-6 font-sans text-sm leading-relaxed text-gray-300">
         <h1 className="text-3xl font-black uppercase text-white mb-8">Termos de Uso</h1>
         <p className="text-gray-500 text-xs">Última atualização: Julho de 2026</p>
@@ -88,7 +89,7 @@ export default function TermosPage() {
           <p>
             Conteúdo ou conta que viole estes termos pode ser restringido ou removido. Sempre que cabível,
             o usuário será informado sobre o motivo e poderá pedir reconsideração pelo e-mail{" "}
-            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange hover:underline">
+            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange underline underline-offset-4">
               orangebrick0@gmail.com
             </a>. Denúncias de fraude, ameaça, assédio, exploração de menores, violação de direitos ou
             conteúdo ilegal podem ser enviadas permanentemente pelo mesmo canal.
@@ -125,7 +126,7 @@ export default function TermosPage() {
           <h2 className="text-lg font-bold text-white mt-8 mb-3">10. Privacidade e dados pessoais</h2>
           <p>
             O tratamento de dados pessoais é regido pela nossa{" "}
-            <a href="/privacidade" className="text-brand-orange hover:underline">Política de Privacidade</a>,
+            <a href="/privacidade" className="text-brand-orange underline underline-offset-4">Política de Privacidade</a>,
             que faz parte integrante destes Termos de Uso.
           </p>
         </section>
@@ -157,7 +158,7 @@ export default function TermosPage() {
           </p>
           <p className="mt-2">
             <strong>E-mail:</strong>{" "}
-            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange hover:underline">orangebrick0@gmail.com</a>
+            <a href="mailto:orangebrick0@gmail.com" className="text-brand-orange underline underline-offset-4">orangebrick0@gmail.com</a>
           </p>
         </section>
       </article>

@@ -18,7 +18,7 @@ export default function MyBrickRedirectPage() {
   }, [isLoading, profile?.username, router, user]);
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-background-void" aria-label="Abrindo Meu Brick">
+    <main id="conteudo-principal" tabIndex={-1} className="grid min-h-dvh place-items-center bg-background-void" aria-label="Abrindo Meu Brick">
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-orange/30 border-t-brand-orange" />
     </main>
   );

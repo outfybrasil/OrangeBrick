@@ -7,7 +7,6 @@ import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { BrickCard } from "@/components/community/BrickCard";
 import { GamerPollWidget } from "@/components/community/GamerPollWidget";
 import { ComposeBrickModal } from "@/components/community/ComposeBrickModal";
-import { CreatePollModal } from "@/components/community/CreatePollModal";
 import type { AttachedArticle } from "@/lib/types/community";
 import { UserNav } from "@/components/auth/UserNav";
 import { Icon } from "@/components/ui/Icon";
@@ -46,9 +45,9 @@ function BrickboardContent() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
 
-  const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending">("latest");
+  const activeFeed = searchParams.get("feed");
+  const activeTab = activeFeed === "following" || activeFeed === "trending" ? activeFeed : "latest";
   const [visiblePostCount, setVisiblePostCount] = useState(8);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -58,11 +57,19 @@ function BrickboardContent() {
   const attachSlug = searchParams.get("attach");
   const attachTitle = searchParams.get("title");
   const [isComposeOpen, setIsComposeOpen] = useState(Boolean(attachSlug && attachTitle));
-  const [isPollModalOpen, setIsPollModalOpen] = useState(false);
   const [inlineMediaUrl, setInlineMediaUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [selectedPlatform, setSelectedPlatform] = useState<string>("TODOS");
+  const searchQuery = searchParams.get("search") || "";
+  const requestedPlatform = searchParams.get("platform");
+  const selectedPlatform = PLATFORM_TABS.some((tab) => tab.id === requestedPlatform) ? requestedPlatform! : "TODOS";
+  const updateFeedFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set(key, value);
+    else params.delete(key);
+    const destination = `/brickboard${params.size ? `?${params}` : ""}`;
+    if (key === "search") router.replace(destination, { scroll: false });
+    else router.push(destination, { scroll: false });
+  };
   const [preAttachedArticle, setPreAttachedArticle] = useState<AttachedArticle | null>(() => {
     if (attachSlug && attachTitle) {
       return {
@@ -76,6 +83,8 @@ function BrickboardContent() {
     }
     return null;
   });
+
+  const { posts, poll, isVoting, pollVoteError, isLoaded, loadError, fetchData, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments, hasMore, isLoadingMore, loadMore } = useCommunityFeed({ search: searchQuery, platform: selectedPlatform === "TODOS" ? "" : selectedPlatform, article: articleSlug, topic: topicId, post: targetPostId, order: activeTab });
 
   const followedProfileSet = useMemo(
     () => new Set(follows.profile.map((value) => value.toLowerCase())),
@@ -128,7 +137,7 @@ function BrickboardContent() {
 
   const displayPosts = [...filteredPosts].sort((a, b) => {
     if (activeTab === "trending") {
-      const score = (post: typeof a) => (post.comments_count || 0) * 3 + (post.reactions.hype || 0) + (post.reactions.flop || 0) + (post.shares_count || 0) * 2;
+      const score = (post: typeof a) => (post.comments_count || 0) * 3 + (post.reactions.hype || 0) + (post.shares_count || 0) * 2;
       return score(b) - score(a) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -243,7 +252,7 @@ function BrickboardContent() {
                 id="brickboard-search"
                 type="search"
                 value={searchQuery}
-                onChange={(event) => { setSearchQuery(event.target.value); setVisiblePostCount(8); }}
+                onChange={(event) => { setVisiblePostCount(8); updateFeedFilter("search", event.target.value); }}
                 placeholder="Buscar conversas e leitores..."
                 className="min-h-9 w-full border border-white/10 bg-white/[0.04] px-9 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange/40 focus:bg-white/[0.06]"
               />
@@ -275,7 +284,7 @@ function BrickboardContent() {
         </div>
       </header>
 
-      <main id="conteudo-principal" className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {user && userProgress && (
           <Link
             href={profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange"}
@@ -311,6 +320,10 @@ function BrickboardContent() {
         )}
 
         {/* HERO */}
+        <div className="mb-5 md:hidden">
+          <label htmlFor="brickboard-mobile-search" className="mb-2 block text-sm font-semibold text-gray-200">Buscar na comunidade</label>
+          <input id="brickboard-mobile-search" type="search" value={searchQuery} onChange={(event) => { setVisiblePostCount(8); updateFeedFilter("search", event.target.value); }} placeholder="Jogo, assunto ou autor" className="min-h-11 w-full border border-white/15 bg-white/[0.03] px-3 text-base text-white outline-none focus:border-brand-orange" />
+        </div>
         <section className="mb-6 grid gap-4 border-b border-brand-orange/20 pb-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <div className="mb-2.5 flex items-center gap-3">
@@ -339,11 +352,11 @@ function BrickboardContent() {
               {([
                 { id: "latest", label: "Recentes" },
                 { id: "following", label: "Seguindo" },
-                { id: "trending", label: "Top debates" },
+                { id: "trending", label: "Mais debatidas" },
               ] as const).map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); setVisiblePostCount(8); }}
+                  onClick={() => { setVisiblePostCount(8); updateFeedFilter("feed", tab.id === "latest" ? "" : tab.id); }}
                   aria-pressed={activeTab === tab.id}
                   className={`relative inline-flex min-h-11 items-center px-4 text-sm font-semibold transition-colors ${
                     activeTab === tab.id ? "text-white" : "text-gray-500 hover:text-gray-300"
@@ -363,7 +376,7 @@ function BrickboardContent() {
             {PLATFORM_TABS.map((platform) => (
               <button
                 key={platform.id}
-                onClick={() => { setSelectedPlatform(platform.id); setVisiblePostCount(8); }}
+                onClick={() => { setVisiblePostCount(8); updateFeedFilter("platform", platform.id === "TODOS" ? "" : platform.id); }}
                 aria-pressed={selectedPlatform === platform.id}
                 className={`min-h-9 shrink-0 px-3 text-xs font-medium transition-colors whitespace-nowrap ${
                   selectedPlatform === platform.id
@@ -389,9 +402,14 @@ function BrickboardContent() {
                 {conversationTitle || "Discussão no Brickboard"}
               </h2>
             </div>
-            <Link href="/brickboard" className="inline-flex min-h-10 shrink-0 items-center justify-center border border-white/15 px-4 text-xs font-bold text-gray-200 transition-colors hover:border-white/30 hover:text-white">
-              Ver toda a timeline
-            </Link>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href={`/posts/${encodeURIComponent(articleSlug)}`} className="inline-flex min-h-10 shrink-0 items-center justify-center border border-brand-orange/40 bg-brand-orange/15 px-3.5 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white">
+                ← Voltar para a matéria
+              </Link>
+              <Link href="/brickboard" className="inline-flex min-h-10 shrink-0 items-center justify-center border border-white/15 px-3.5 text-xs font-bold text-gray-200 transition-colors hover:border-white/30 hover:text-white">
+                Ver toda a timeline
+              </Link>
+            </div>
           </section>
         )}
 
@@ -413,15 +431,34 @@ function BrickboardContent() {
           </div>
         )}
 
-        {isLoaded && (
+        {isLoaded && loadError && posts.length === 0 && (
+          <div role="alert" className="my-8 border border-red-400/25 bg-red-500/10 p-5 text-center">
+            <p className="text-sm text-red-100">{loadError}</p>
+            <button type="button" onClick={() => void fetchData(true)} className="mt-3 min-h-11 px-4 text-sm font-bold text-brand-orange hover:text-white">
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
+        {isLoaded && loadError && posts.length > 0 && (
+          <div role="status" className="mb-5 flex items-center justify-between gap-4 border border-amber-300/25 bg-amber-300/10 p-3 text-sm text-amber-100">
+            <p>{loadError}</p>
+            <button type="button" onClick={() => void fetchData(true)} className="min-h-11 shrink-0 px-2 font-bold text-white">
+              Atualizar
+            </button>
+          </div>
+        )}
+
+        {isLoaded && !loadError && (
           <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
 
             {/* ── FEED ── */}
             <div className="space-y-0">
               {poll && (
-                <div className="mb-4 lg:hidden">
-                  <GamerPollWidget poll={poll} onVote={(optionId) => requireUser(() => votePoll(optionId))} />
-                </div>
+                <details className="mb-4 border border-white/10 lg:hidden">
+                  <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-gray-200"><span>Pergunta do dia</span><span className="text-xs text-gray-400">{poll.total_votes} votos</span></summary>
+                  <GamerPollWidget poll={poll} isAuthenticated={Boolean(user)} isVoting={isVoting} error={pollVoteError} onVote={(optionId) => requireUser(() => votePoll(optionId))} />
+                </details>
               )}
               {/* Composer embutido */}
               <div className="mb-4 border border-white/10 bg-white/[0.02] p-4">
@@ -480,16 +517,6 @@ function BrickboardContent() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => requireUser(() => setIsPollModalOpen(true))}
-                    className="flex items-center gap-1.5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
-                  >
-                    <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span>Enquete</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => requireUser(() => setIsComposeOpen(true))}
                     className="ml-auto bg-brand-orange px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
                   >
@@ -517,8 +544,8 @@ function BrickboardContent() {
                   <p className="text-sm font-semibold text-white">
                     {targetPostId ? "Esta conversa não está mais disponível." : "Nenhum Brick encontrado para estes filtros."}
                   </p>
-                  {!targetPostId && <p className="text-xs text-gray-400">Seja a primeira lenda a abrir o debate.</p>}
-                  {!targetPostId && <button type="button" onClick={() => requireUser(() => setIsComposeOpen(true))} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">Criar novo Brick</button>}
+                  {!targetPostId && <p className="text-xs text-gray-400">Tente outro assunto ou remova os filtros para encontrar conversas.</p>}
+                  {!targetPostId && <button type="button" onClick={() => { setVisiblePostCount(8); router.push("/brickboard", { scroll: false }); }} className="mt-4 inline-flex min-h-11 items-center justify-center border border-brand-orange/50 px-5 text-xs font-black uppercase tracking-wide text-brand-orange transition-colors hover:bg-brand-orange/10">Limpar filtros</button>}
                   {targetPostId && (
                     <Link href="/brickboard" className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange transition-colors hover:text-white">
                       Voltar para a timeline
@@ -531,15 +558,16 @@ function BrickboardContent() {
                     <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28 content-visibility-auto">
                       <BrickCard
                         post={post}
-                        onReaction={(postId, type) => {
-                          toggleReaction(postId, type);
-                          void trackXp();
+                        onReaction={async (postId, type) => {
+                          const reacted = await toggleReaction(postId, type);
+                          if (reacted) void trackXp();
+                          return reacted;
                         }}
                         onDeletePost={deletePost}
                         onEditPost={editPost}
                         onSharePost={sharePost}
-                        onAddComment={async (postId, content) => {
-                          await addComment(postId, content);
+                        onAddComment={async (postId, content, parentId) => {
+                          await addComment(postId, content, parentId);
                           void trackXp();
                         }}
                         onDeleteComment={deleteComment}
@@ -555,10 +583,11 @@ function BrickboardContent() {
                     </div>
                   ))}
                   {visiblePostCount < displayPosts.length && (
-                    <div ref={loadMoreRef} className="flex min-h-20 items-center justify-center border-t border-white/10" aria-label="Carregando mais conversas">
-                      <span className="size-5 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />
+                    <div ref={loadMoreRef} role="status" className="flex min-h-20 items-center justify-center border-t border-white/10" aria-label="Carregando mais conversas">
+                      <span aria-hidden="true" className="size-5 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />
                     </div>
                   )}
+                  {hasMore && visiblePostCount >= displayPosts.length && <button type="button" disabled={isLoadingMore} onClick={() => void loadMore()} className="mt-5 min-h-11 w-full border border-brand-orange/40 px-5 text-sm font-bold text-brand-orange disabled:opacity-50">{isLoadingMore ? "Carregando conversas…" : "Carregar mais conversas"}</button>}
                 </>
               )}
             </div>
@@ -578,7 +607,7 @@ function BrickboardContent() {
                   </div>
                   <div className="p-4">
                     <p className="font-heading text-base font-black uppercase leading-snug text-white">{poll.question}</p>
-                    <p className="mb-3 mt-1 text-xs text-gray-400">Resultado da comunidade:</p>
+                    <p className="mb-3 mt-1 text-xs text-gray-400">{poll.user_voted_option === null ? "Escolha uma alternativa:" : "Resultado da comunidade:"}</p>
                     <div className="space-y-2">
                       {poll.options.map((option) => {
                         const pct = poll.total_votes > 0 ? Math.round((option.votes / poll.total_votes) * 100) : 0;
@@ -588,7 +617,7 @@ function BrickboardContent() {
                           <button
                             key={option.id}
                             onClick={() => requireUser(() => votePoll(option.id))}
-                            disabled={isSelected}
+                            disabled={isSelected || isVoting}
                             className={`relative min-h-11 w-full overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-colors ${
                               isSelected ? "border-brand-orange bg-brand-orange/[0.06]" : "border-white/10 bg-[#0c0d11] hover:border-brand-orange/40"
                             }`}
@@ -603,6 +632,8 @@ function BrickboardContent() {
                         );
                       })}
                     </div>
+                    {pollVoteError && <p role="alert" className="mt-3 text-xs text-red-300">{pollVoteError}</p>}
+                    {isVoting && <p role="status" className="mt-3 text-xs text-gray-300">Registrando voto...</p>}
                     {poll.ends_at && (
                       <p className="mt-3 text-xs text-gray-500">
                         Termina em {Math.max(0, Math.ceil((new Date(poll.ends_at).getTime() - now) / 3600000))}h
@@ -616,7 +647,7 @@ function BrickboardContent() {
               {trendingTopics.length > 0 && (
                 <div className="overflow-hidden border border-white/10 bg-[#101116]">
                   <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
-                    <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="trending-up" size={14} /></span>Em alta agora</span>
+                    <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="trending-up" size={14} /></span>Plataformas ativas</span>
                     <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">Brickboard</span>
                   </div>
 <div className="space-y-2 p-3">
@@ -624,14 +655,14 @@ function BrickboardContent() {
                       <button
                         key={topic.name}
                         type="button"
-                        onClick={() => { setSelectedPlatform(topic.name); setVisiblePostCount(8); }}
-                        aria-label={`Filtrar conversas da plataforma ${topic.name}`}
+                        onClick={() => { setVisiblePostCount(8); updateFeedFilter("search", topic.name); }}
+                        aria-label={`Buscar conversas sobre ${topic.name}`}
                         className="group flex min-h-14 w-full items-center gap-3 rounded-xl border border-white/10 bg-[#0c0d11] p-2.5 text-left transition-colors hover:border-brand-orange/40"
                       >
                         <span className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-slate-600 font-heading text-xs font-black text-gray-300 group-hover:border-brand-orange group-hover:text-brand-orange">{String(i + 1).padStart(2, "0")}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-heading text-sm font-bold text-white group-hover:text-brand-orange">{topic.name}</span>
-                          <span className="mt-1 block text-xs text-gray-500">{topic.count} resposta{topic.count !== 1 ? "s" : ""}</span>
+                          <span className="mt-1 block text-xs text-gray-500">{topic.count} interaç{topic.count !== 1 ? "ões" : "ão"}</span>
                         </span>
                         <span className="text-gray-600 group-hover:text-brand-orange">→</span>
                       </button>
@@ -647,11 +678,11 @@ function BrickboardContent() {
 
       <button
         onClick={() => requireUser(() => setIsComposeOpen(true))}
-        className="mobile-overlay-sensitive fixed right-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
+        className="mobile-overlay-sensitive fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-40 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-brand-orange text-xl text-white shadow-[0_10px_28px_rgba(255,94,0,0.4)] transition-[opacity,transform] active:scale-95 sm:hidden"
         title="Criar novo Brick"
         aria-label="Criar novo Brick"
       >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </button>
@@ -665,21 +696,12 @@ function BrickboardContent() {
             router.replace("/brickboard");
           }
         }}
-        onPublish={(content, tag, article, media) => {
-          addPost(content, tag, article, media || inlineMediaUrl || undefined);
+        onPublish={async (content, tag, article, media) => {
+          await addPost(content, tag, article, media || inlineMediaUrl || undefined);
           setInlineMediaUrl(null);
           void trackXp();
         }}
         initialArticle={preAttachedArticle}
-      />
-
-      <CreatePollModal
-        isOpen={isPollModalOpen}
-        onClose={() => setIsPollModalOpen(false)}
-        onPublishPoll={(question, options) => {
-          const formattedContent = `${question}\n\n${options.map((opt) => `• ${opt}`).join("\n")}`;
-          addPost(formattedContent);
-        }}
       />
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

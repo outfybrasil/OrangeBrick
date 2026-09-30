@@ -7,7 +7,7 @@ function getVar(k) {
   return m ? m[1].trim().replace(/^["']|["']$/g, "") : process.env[k];
 }
 
-const supabase = createClient(getVar("NEXT_PUBLIC_SUPABASE_URL"), getVar("SUPABASE_SERVICE_ROLE_KEY"));
+const supabase = createClient(getVar("NEXT_PUBLIC_SUPABASE_URL"), (getVar("SUPABASE_SECRET_KEY") || getVar("SUPABASE_SERVICE_ROLE_KEY")));
 
 const { data: posts, error } = await supabase
   .from("posts")

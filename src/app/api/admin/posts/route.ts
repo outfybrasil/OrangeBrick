@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { normalizeNewsSearch, parseNewsPage } from "@/lib/news-query";
 
 export const runtime = "nodejs";
 
-const TABLE_COLUMNS = "id,slug,title,summary,category,image_url,author_name,is_published,published_at,created_at,updated_at";
+const TABLE_COLUMNS = "id,slug,title,summary,category,image_url,image_alt,author_name,is_published,published_at,created_at,updated_at,scheduled_at";
 
 function serviceClient() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }
@@ -22,12 +23,19 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
+  const page = parseNewsPage(searchParams.get("page"), 500);
+  const pageSizeValue = searchParams.get("pageSize") || "20";
+  if (!page || !/^\d+$/.test(pageSizeValue)) {
+    return NextResponse.json({ error: "Página ou tamanho de página inválido." }, { status: 400 });
+  }
+  const pageSize = Math.min(50, Math.max(1, Number(pageSizeValue)));
   const category = searchParams.get("category");
   const status = searchParams.get("status");
+  if (status && !["all", "production", "scheduled", "published"].includes(status)) {
+    return NextResponse.json({ error: "Filtro de status inválido." }, { status: 400 });
+  }
   const editor = searchParams.get("editor");
-  const search = searchParams.get("search");
+  const search = normalizeNewsSearch(searchParams.get("search") || "", 80);
   const sort = searchParams.get("sort") === "title" ? "title" : "updated_at";
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -40,7 +48,9 @@ export async function GET(request: Request) {
   if (status === "published") {
     query = query.eq("is_published", true);
   } else if (status === "production") {
-    query = query.eq("is_published", false);
+    query = query.eq("is_published", false).is("scheduled_at", null);
+  } else if (status === "scheduled") {
+    query = query.eq("is_published", false).not("scheduled_at", "is", null);
   }
   if (editor && editor !== "all") {
     query = query.eq("author_name", editor);

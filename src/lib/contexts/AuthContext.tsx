@@ -5,12 +5,13 @@ import { createDataClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
+import { safeReturnTo } from "@/lib/auth/return-to";
 
 interface AuthState {
   user: User | null;
   profile: Profile | null;
   isLoading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (returnTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async (authenticatedUser: User) => {
     const { data } = await supabase
-      .from("profiles")
+      .from("public_profiles")
       .select("*")
       .eq("user_id", authenticatedUser.id)
       .maybeSingle<Profile>();
@@ -62,18 +63,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase, fetchProfile]);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (returnTo = "/") => {
     const baseUrl =
       typeof window !== "undefined"
         ? window.location.origin
         : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const callbackUrl = new URL("/auth/callback", baseUrl);
+    callbackUrl.searchParams.set("next", safeReturnTo(returnTo));
 
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${baseUrl}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
+    if (error) throw error;
   }, [supabase]);
 
   const signOut = useCallback(async () => {

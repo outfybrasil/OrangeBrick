@@ -63,7 +63,7 @@ async function findAndUpdate() {
     }
   });
 
-  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 

@@ -21,6 +21,7 @@ export function AccessibilityMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [preferences, setPreferences] = useState<Preferences>(DEFAULTS);
   const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     try {
@@ -41,7 +42,16 @@ export function AccessibilityMenu() {
       if (!panelRef.current?.contains(event.target as Node)) setIsOpen(false);
     };
     window.addEventListener("pointerdown", close);
-    return () => window.removeEventListener("pointerdown", close);
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("pointerdown", close);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
   }, [isOpen]);
 
   const update = (next: Preferences) => {
@@ -51,7 +61,7 @@ export function AccessibilityMenu() {
   };
 
   return (
-    <div ref={panelRef} className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 z-[65] sm:bottom-5 sm:right-5 watch-hidden">
+    <div ref={panelRef} className="accessibility-menu fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 z-[65] sm:bottom-5 sm:right-5 watch-hidden">
       {isOpen && (
         <section
           id="accessibility-panel"
@@ -98,6 +108,7 @@ export function AccessibilityMenu() {
       )}
 
       <button
+        ref={triggerRef}
         type="button"
         aria-label="Abrir preferências de acessibilidade"
         aria-expanded={isOpen}

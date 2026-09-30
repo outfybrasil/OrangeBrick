@@ -3,7 +3,7 @@ import { CredentialAuthForm } from "@/components/auth/CredentialAuthForm";
 
 export default function LoginPage() {
   return (
-    <main className="grid min-h-dvh bg-background-void text-white lg:grid-cols-[minmax(0,0.9fr)_minmax(30rem,1.1fr)]">
+    <main id="conteudo-principal" tabIndex={-1} className="grid min-h-dvh bg-background-void text-white lg:grid-cols-[minmax(0,0.9fr)_minmax(30rem,1.1fr)]">
       <section className="relative hidden min-h-dvh overflow-hidden border-r border-white/10 bg-[#15161b] p-10 lg:flex lg:flex-col lg:justify-between xl:p-16">
         <Link href="/" className="font-heading text-xl font-black uppercase tracking-wider text-white">Orange<span className="text-brand-orange">_</span>Brick</Link>
         <div className="max-w-xl">

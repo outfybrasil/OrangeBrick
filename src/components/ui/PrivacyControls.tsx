@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { clearConsent, DEVICE_STORAGE_KEY } from "@/lib/consent";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { invokeFunction } from "@/lib/supabase/functions";
+import { USER_DATA_EXPORT_DATASETS } from "@/lib/user-data-export";
 
 type ActionState = "idle" | "exporting" | "deleting";
 
 export function PrivacyControls() {
+  const router = useRouter();
   const { user } = useAuth();
   const [action, setAction] = useState<ActionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -25,20 +28,57 @@ export function PrivacyControls() {
 
   const exportData = async () => {
     setAction("exporting");
-    setMessage(null);
+    setMessage("Preparando a cópia dos seus dados.");
     try {
-      const response = await fetch("/api/user/data", {
+      const metadataResponse = await fetch("/api/user/data", {
         headers: deviceHeaders(),
         credentials: "same-origin",
       });
-      if (!response.ok) throw new Error("Falha ao preparar o arquivo");
-      const blob = await response.blob();
+      if (!metadataResponse.ok) throw new Error("Falha ao preparar o arquivo");
+
+      const payload = await metadataResponse.json() as Record<string, unknown>;
+      let recordsDownloaded = 0;
+
+      for (const dataset of USER_DATA_EXPORT_DATASETS) {
+        const rows: unknown[] = [];
+        let cursor: string | null = null;
+
+        do {
+          const query = new URLSearchParams({ dataset });
+          if (cursor) query.set("cursor", cursor);
+
+          const response = await fetch(`/api/user/data?${query.toString()}`, {
+            headers: deviceHeaders(),
+            credentials: "same-origin",
+          });
+          if (!response.ok) throw new Error("Falha ao preparar o arquivo");
+
+          const page = await response.json() as { rows: unknown[]; next_cursor: string | null };
+          if (!Array.isArray(page.rows)) throw new Error("A exportação retornou dados inválidos");
+          if (page.next_cursor !== null && typeof page.next_cursor !== "string") {
+            throw new Error("A exportação retornou um cursor inválido");
+          }
+
+          rows.push(...page.rows);
+          recordsDownloaded += page.rows.length;
+          setMessage(`Baixando seus dados (${recordsDownloaded} registros).`);
+
+          if (page.next_cursor === cursor && page.next_cursor !== null) {
+            throw new Error("A exportação não avançou para a próxima página");
+          }
+          cursor = page.next_cursor;
+        } while (cursor !== null);
+
+        payload[dataset] = rows;
+      }
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `orange-brick-dados-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       setMessage("Cópia dos dados gerada.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível exportar os dados.");
@@ -78,7 +118,8 @@ export function PrivacyControls() {
       });
       if (!response.ok) throw new Error("A exclusão não pôde ser concluída");
       clearConsent();
-      window.location.assign("/");
+      router.replace("/");
+      router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível excluir a conta.");
       setAction("idle");

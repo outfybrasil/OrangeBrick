@@ -17,9 +17,9 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
   if (!src || hasError) {
     return (
       <div className="aspect-video w-full bg-card-slate flex items-center justify-center border-y border-brand-orange-muted/10">
-        <div className="flex flex-col items-center gap-1 opacity-40">
-          <Icon name="brick" size={32} className="text-brand-orange-muted" />
-          <span className="text-xs font-mono text-brand-orange-muted uppercase tracking-widest">
+        <div className="flex flex-col items-center gap-2">
+          <Icon name="brick" size={32} className="text-brand-orange" aria-hidden="true" />
+          <span className="text-xs font-mono text-brand-orange uppercase tracking-widest">
             Sem mídia
           </span>
         </div>

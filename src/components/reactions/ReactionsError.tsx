@@ -7,7 +7,7 @@ export function ReactionsError({ message }: ReactionsErrorProps) {
 
   return (
     <div className="px-4 pb-1">
-      <p className="text-xs font-mono text-red-400">{message}</p>
+      <p role="alert" className="break-words text-xs text-red-300">{message}</p>
     </div>
   );
 }

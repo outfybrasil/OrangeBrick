@@ -4,16 +4,17 @@ import { PrivacyControls } from "@/components/ui/PrivacyControls";
 export const metadata: Metadata = {
   title: "Política de Privacidade",
   description: "Como o Orange Brick coleta, utiliza, compartilha e protege dados pessoais.",
+  alternates: { canonical: "/privacidade" },
 };
 
 export default function PrivacidadePage() {
   return (
-    <main className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
       <article className="mx-auto max-w-3xl font-body text-sm leading-7 text-[#c3c5cc]">
         <header className="border-b border-white/10 pb-8">
           <p className="text-sm font-bold text-brand-orange">Privacidade no Orange Brick</p>
           <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">Política de Privacidade</h1>
-          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 23 de julho de 2026</p>
+          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 25 de setembro de 2026</p>
         </header>
 
         <PrivacyControls />
@@ -35,7 +36,8 @@ export default function PrivacidadePage() {
           <ul className="list-disc space-y-2 pl-5">
             <li><strong className="text-white">Conta Google:</strong> identificador da conta, nome, e-mail e foto informados pelo Google.</li>
             <li><strong className="text-white">Perfil e comunidade:</strong> apelido, avatar, biografia, publicações, comentários, votos, curtidas e reações.</li>
-            <li><strong className="text-white">Contato comercial:</strong> nome, empresa, e-mail, faixa de orçamento e mensagem enviados voluntariamente.</li>
+            <li><strong className="text-white">Contato:</strong> nome, e-mail, assunto e mensagem enviados pelo formulário.</li>
+            <li><strong className="text-white">Newsletter:</strong> endereço de e-mail informado para receber comunicações editoriais.</li>
             <li><strong className="text-white">Segurança:</strong> registros técnicos, agente do navegador e hash de IP usado para limitar abuso. O hash reduz a exposição do IP, mas continua sendo tratado como dado pessoal quando puder ser relacionado a uma pessoa.</li>
             <li><strong className="text-white">Métricas opcionais:</strong> com sua permissão, um identificador aleatório do dispositivo reconhece reações e leituras. Ele não contém nome ou e-mail.</li>
             <li><strong className="text-white">Notificações push:</strong> endereço técnico da assinatura e chaves fornecidas pelo navegador quando você ativa o recurso.</li>
@@ -51,6 +53,7 @@ export default function PrivacidadePage() {
           <ul className="list-disc space-y-2 pl-5">
             <li>Executar os recursos solicitados, como autenticação, perfil e comunidade.</li>
             <li>Atender solicitações e contatos iniciados pelo titular.</li>
+            <li>Manter a lista de pessoas inscritas na newsletter e respeitar pedidos de cancelamento.</li>
             <li>Prevenir fraude, spam e uso abusivo, respeitando os direitos do titular.</li>
             <li>Cumprir obrigações legais, regulatórias e ordens de autoridades competentes.</li>
             <li>Registrar métricas opcionais e enviar push somente após uma escolha afirmativa.</li>
@@ -80,6 +83,7 @@ export default function PrivacidadePage() {
             <li><strong className="text-white">Supabase:</strong> autenticação, banco, armazenamento e funções de backend.</li>
             <li><strong className="text-white">Google:</strong> autenticação social escolhida pelo usuário.</li>
             <li><strong className="text-white">Vercel:</strong> hospedagem e entrega do site.</li>
+            <li><strong className="text-white">Telegram:</strong> aviso operacional enviado à equipe quando chega um contato; o aviso não inclui nome, e-mail, assunto ou mensagem.</li>
             <li><strong className="text-white">Serviços de push do navegador:</strong> entrega de notificações quando ativadas.</li>
           </ul>
           <p className="mt-4">
@@ -103,10 +107,12 @@ export default function PrivacidadePage() {
           <h2 className="mb-3 mt-10 text-xl font-bold text-white">7. Retenção e eliminação</h2>
           <p>
             Dados de conta e comunidade são mantidos enquanto a conta estiver ativa ou enquanto forem
-            necessários para prestar o serviço. Registros de segurança, atendimento, incidentes e
-            obrigações legais podem permanecer pelo prazo necessário à finalidade ou ao exercício de
-            direitos. A exclusão da conta remove os dados diretamente associados no banco ativo; cópias
-            residuais em backup seguem o ciclo técnico restrito do fornecedor e não são reutilizadas.
+            necessários para prestar o serviço. Contatos enviados pelo formulário são eliminados após 12
+            meses. O e-mail da newsletter permanece até o pedido de cancelamento, que pode ser feito pelo
+            canal de privacidade. Registros de segurança, incidentes e obrigações legais podem permanecer
+            pelo prazo necessário à finalidade ou ao exercício de direitos. A exclusão da conta remove os
+            dados diretamente associados no banco ativo; cópias residuais em backup seguem o ciclo técnico
+            restrito do fornecedor e não são reutilizadas.
           </p>
         </section>
 

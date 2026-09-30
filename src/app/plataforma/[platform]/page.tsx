@@ -22,7 +22,8 @@ export async function generateMetadata({ params }: PlatformPageProps): Promise<M
 
   if (!config) {
     return {
-      title: "Plataforma Não Encontrada | Orange Brick",
+      title: "Plataforma Não Encontrada",
+      robots: { index: false, follow: false },
     };
   }
 
@@ -32,7 +33,9 @@ export async function generateMetadata({ params }: PlatformPageProps): Promise<M
     openGraph: {
       title: `${config.name} | Orange Brick`,
       description: config.description,
+      url: `/plataforma/${encodeURIComponent(slug)}`,
     },
+    alternates: { canonical: `/plataforma/${encodeURIComponent(slug)}` },
   };
 }
 

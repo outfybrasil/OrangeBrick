@@ -41,21 +41,22 @@ export function HomePageClient({ initialPosts }: HomePageClientProps) {
     <>
       <SiteHeader variant="full" searchQuery={qParam} />
 
-      <main id="conteudo-principal" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <HomeEngagementTracker />
-        <SinceLastVisit />
-
-        <ReleaseRadarStrip />
 
         <NewsFeed
+          headingLevel="h1"
           category={activeCategory}
           activeTag={activeTag}
           searchQuery={qParam}
           onSelectCategory={handleCategoryClick}
+          onClearFilters={() => router.push("/")}
           initialPosts={hasQueryFilters ? undefined : initialPosts}
         />
 
+        <SinceLastVisit />
         <CommunityPulse />
+        <ReleaseRadarStrip />
 
         <MultimediaSection />
       </main>

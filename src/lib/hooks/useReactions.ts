@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invokeFunction } from "@/lib/supabase/functions";
+import { getCommunityErrorMessage } from "@/lib/community-errors";
 import { useDeviceId } from "./useDeviceId";
 import type { ReactionType } from "@/lib/types/database";
 
@@ -57,7 +58,7 @@ export function useReactions({ postId, initial, initialUserReaction = null, hydr
       setCounts(result.counts);
       setUserReaction(result.activeReaction);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Erro ao registrar reação");
+      setError(getCommunityErrorMessage(cause));
     } finally {
       pendingRef.current = false;
       setIsPending(false);

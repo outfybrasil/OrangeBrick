@@ -6,9 +6,12 @@ import { Icon } from "@/components/ui/Icon";
 interface GamerPollWidgetProps {
   poll: CommunityPoll;
   onVote: (optionId: number) => void;
+  isAuthenticated?: boolean;
+  isVoting?: boolean;
+  error?: string | null;
 }
 
-export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
+export function GamerPollWidget({ poll, onVote, isAuthenticated = false, isVoting = false, error = null }: GamerPollWidgetProps) {
   const hasVoted = poll.user_voted_option !== undefined && poll.user_voted_option !== null;
 
   return (
@@ -41,7 +44,7 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
                 role="radio"
                 aria-checked={isSelected}
                 onClick={() => onVote(option.id)}
-                disabled={hasVoted}
+                disabled={isSelected || isVoting}
                 className={`group relative w-full overflow-hidden rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-default ${
                   isSelected
                     ? "border-brand-orange bg-brand-orange/10 text-white"
@@ -68,9 +71,11 @@ export function GamerPollWidget({ poll, onVote }: GamerPollWidgetProps) {
           })}
         </div>
 
+        {error && <p role="alert" className="mt-3 text-xs text-red-300">{error}</p>}
+
         <footer className="mt-3 flex items-center gap-2 border-t border-white/10 pt-2.5 text-xs font-medium text-gray-400" aria-live="polite">
           <span className={`size-1.5 rounded-full ${hasVoted ? "bg-emerald-400" : "bg-brand-orange"}`} aria-hidden="true" />
-          {hasVoted ? "Voto registrado." : "Voto anônimo e rápido."}
+          {isVoting ? "Registrando voto..." : hasVoted ? "Voto registrado. Escolha outra alternativa para mudar." : isAuthenticated ? "Escolha uma alternativa. Seu voto não aparece no perfil público." : "Entre para votar. Seu voto não aparece no perfil público."}
         </footer>
       </div>
     </section>

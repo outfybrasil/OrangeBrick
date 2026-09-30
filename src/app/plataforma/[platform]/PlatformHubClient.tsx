@@ -85,7 +85,7 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
         </div>
       </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-7xl flex-1 space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-7xl flex-1 space-y-5 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8">
         <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r ${config.gradientFrom} to-card-slate/80 border ${config.borderColor} p-4 sm:rounded-3xl sm:p-8 shadow-2xl backdrop-blur-md`}>
           <div className="relative z-10 space-y-3">
             <div className="flex flex-col items-start gap-3 xs:flex-row xs:items-center xs:justify-between">

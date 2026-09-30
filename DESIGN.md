@@ -3,10 +3,13 @@ name: Orange Brick
 description: Portal editorial brasileiro de games com linguagem direta e identidade modular.
 colors:
   orange-signal: "#FF5E00"
-  orange-deep: "#A84300"
+  orange-deep: "#D65F1E"
+  orange-shadow: "#A84300"
   void: "#0D0E12"
   slate: "#1C1E24"
   text: "#E5E5E5"
+  text-muted: "#999BA3"
+  text-subtle: "#C7C8CD"
   white: "#FFFFFF"
   contrast: "#000000"
   category-breaking: "#FF5E00"
@@ -116,6 +119,10 @@ Matizes discretos que identificam cada categoria editorial em tags e metadados. 
 - **Review (`#D9B45B`):** dourado para análises.
 - **Opinião (`#E5766B`):** coral para artigos de opinião.
 
+### Decorative Effects
+
+- **Laranja de Profundidade (`#A84300`):** base para brilhos, bordas e detalhes decorativos com transparência; não usar em texto nem em controles de ação.
+
 **The Signal Rule.** O laranja indica algo; nunca funciona como preenchimento decorativo indiscriminado.
 
 ## Typography
@@ -154,7 +161,7 @@ Cards, campos, filtros e botões editoriais usam cantos retos. Avatares são cir
 ### Buttons
 
 - **Shape:** reto no conteúdo editorial; raio moderado apenas em superfícies temporárias.
-- **Primary:** laranja com texto branco e altura mínima de 44px.
+- **Primary:** laranja de sinalização com texto preto de alto contraste e altura mínima de 44px.
 - **Hover / Focus:** mudança tonal no hover e contorno laranja de 2px no foco visível.
 
 ### Chips

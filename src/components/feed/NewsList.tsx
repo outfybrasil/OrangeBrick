@@ -17,30 +17,37 @@ export function NewsList({ initialPosts, total, period, search }: NewsListProps)
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [page, setPage] = useState(2);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requestPending = useRef(false);
   const [hasMore, setHasMore] = useState(initialPosts.length < total);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore) return;
+    if (requestPending.current || !hasMore) return;
+    requestPending.current = true;
     setIsLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({ page: String(page) });
       if (period === "mes") params.set("periodo", "mes");
       if (search) params.set("q", search);
       const res = await fetch(`/api/news?${params}`);
-      if (!res.ok) return;
+      if (!res.ok) throw new Error("Não foi possível carregar mais matérias.");
       const data = await res.json();
       setPosts((prev) => [...prev, ...data.posts]);
       setPage((p) => p + 1);
-      setHasMore(page + 1 < data.totalPages);
+      setHasMore(page < data.totalPages);
+    } catch {
+      setError("Não foi possível carregar mais matérias. Tente novamente.");
     } finally {
+      requestPending.current = false;
       setIsLoading(false);
     }
-  }, [isLoading, hasMore, page, period, search]);
+  }, [hasMore, page, period, search]);
 
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || error) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) void loadMore();
@@ -49,7 +56,7 @@ export function NewsList({ initialPosts, total, period, search }: NewsListProps)
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [loadMore]);
+  }, [loadMore, error]);
 
   if (posts.length === 0) {
     return <div className="py-20 text-center text-sm text-gray-400">Nenhuma matéria publicada neste período.</div>;
@@ -72,6 +79,7 @@ export function NewsList({ initialPosts, total, period, search }: NewsListProps)
         ))}
       </div>
       <div ref={sentinelRef} className="py-8 text-center">
+        {error && <div role="alert" className="space-y-3 text-sm text-gray-300"><p>{error}</p><button type="button" onClick={() => void loadMore()} className="min-h-11 rounded border border-brand-orange px-4 text-brand-orange hover:bg-brand-orange/10">Tentar novamente</button></div>}
         {isLoading && <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />}
         {!hasMore && posts.length > 0 && <p className="text-xs text-gray-500">Todas as matérias carregadas.</p>}
       </div>

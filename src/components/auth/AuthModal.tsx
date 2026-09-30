@@ -3,8 +3,10 @@
 import { useCallback, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
+import { safeReturnTo } from "@/lib/auth/return-to";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,10 +16,13 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { signInWithGoogle } = useAuth();
+  const router = useRouter();
   const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED === "true";
   const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
   const [mounted, setMounted] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,10 +35,25 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   }, []);
 
   const handleGoogleLogin = useCallback(async () => {
-    if (!eligibilityConfirmed) return;
-    await signInWithGoogle();
-    onSuccess?.();
-  }, [eligibilityConfirmed, onSuccess, signInWithGoogle]);
+    if (!eligibilityConfirmed || isSigningIn) return;
+    setIsSigningIn(true);
+    setLoginError(null);
+    const returnTo = safeReturnTo(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+    try {
+      await signInWithGoogle(returnTo);
+      onSuccess?.();
+    } catch {
+      setLoginError("Não foi possível entrar com Google. Tente novamente.");
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, [eligibilityConfirmed, isSigningIn, onSuccess, signInWithGoogle]);
+
+  const navigateToCredentialAuth = (path: "/entrar" | "/cadastro") => {
+    const returnTo = safeReturnTo(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+    onClose();
+    router.push(`${path}?next=${encodeURIComponent(returnTo)}`);
+  };
 
   if (!isOpen) return null;
 
@@ -68,10 +88,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             </svg>
           </div>
           <h2 id="auth-modal-title" className="font-heading text-2xl font-bold text-white">
-            Entre no Brickboard
+            Entre para participar
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#b8bac2]">
-            Entre com Google ou use uma conta Orange Brick para comentar, reagir e publicar.
+            {emailAuthEnabled ? "Entre com Google ou e-mail para comentar, reagir e publicar." : "Entre com Google para comentar, reagir e publicar."}
           </p>
         </div>
 
@@ -90,7 +110,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         <button
           type="button"
           onClick={handleGoogleLogin}
-          disabled={!eligibilityConfirmed}
+          disabled={!eligibilityConfirmed || isSigningIn}
           className="mt-4 flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#25262a] transition-colors hover:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-45"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -99,26 +119,27 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          Entrar com Google
+          {isSigningIn ? "Conectando ao Google…" : "Entrar com Google"}
         </button>
+        {loginError && <p role="alert" className="mt-3 text-sm text-red-300">{loginError}</p>}
 
         {emailAuthEnabled && (
           <>
             <div className="my-4 flex items-center gap-3 text-xs text-gray-600"><span className="h-px flex-1 bg-white/10" /><span>ou</span><span className="h-px flex-1 bg-white/10" /></div>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/entrar" onClick={onClose} className="flex min-h-11 items-center justify-center rounded-xl border border-white/15 text-sm font-bold text-white transition-colors hover:border-brand-orange/50">Entrar com e-mail</Link>
-              <Link href="/cadastro" onClick={onClose} className="flex min-h-11 items-center justify-center rounded-xl bg-brand-orange text-sm font-bold text-white transition-colors hover:bg-[#ff7526]">Criar conta</Link>
+              <button type="button" onClick={() => navigateToCredentialAuth("/entrar")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/15 text-sm font-bold text-white transition-colors hover:border-brand-orange/50">Entrar com e-mail</button>
+              <button type="button" onClick={() => navigateToCredentialAuth("/cadastro")} className="flex min-h-11 items-center justify-center rounded-xl bg-brand-orange text-sm font-bold text-white transition-colors hover:bg-[#ff7526]">Criar conta</button>
             </div>
           </>
         )}
 
         <p className="mt-4 text-center text-xs leading-5 text-[#8f919a]">
           Ao entrar, você concorda com os{" "}
-          <Link href="/termos" className="text-brand-orange hover:text-white">
+          <Link href="/termos" className="text-brand-orange underline underline-offset-4 hover:text-white">
             Termos de Uso
           </Link>{" "}
           e a{" "}
-          <Link href="/privacidade" className="text-brand-orange hover:text-white">
+          <Link href="/privacidade" className="text-brand-orange underline underline-offset-4 hover:text-white">
             Política de Privacidade
           </Link>.
         </p>

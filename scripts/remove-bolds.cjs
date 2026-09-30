@@ -21,7 +21,7 @@ try {
   });
 
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY);
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error("Variáveis do Supabase ausentes no .env.local.");

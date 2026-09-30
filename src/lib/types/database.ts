@@ -45,6 +45,12 @@ export interface Database {
         Update: Partial<CommentInsert>;
         Relationships: [];
       };
+      article_comment_likes: {
+        Row: ArticleCommentLike;
+        Insert: ArticleCommentLikeInsert;
+        Update: Partial<ArticleCommentLikeInsert>;
+        Relationships: [];
+      };
       post_views: {
         Row: PostView;
         Insert: PostViewInsert;
@@ -201,8 +207,22 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      seasons: {
+        Row: { id: string; name: string; slug: string; starts_at: string; ends_at: string; status: "draft" | "calibration" | "active" | "calculating" | "completed"; rules_version: number; created_at: string };
+        Insert: { id?: string; name: string; slug: string; starts_at: string; ends_at: string; status: "draft" | "calibration" | "active" | "calculating" | "completed"; rules_version?: number; created_at?: string };
+        Update: Partial<{ name: string; starts_at: string; ends_at: string; status: "draft" | "calibration" | "active" | "calculating" | "completed"; rules_version: number }>;
+        Relationships: [];
+      };
     };
     Functions: {
+      community_poll_results: {
+        Args: { p_poll_id: string };
+        Returns: Json;
+      };
+      community_feed_page: {
+        Args: { page_offset?: number; search_text?: string; platform_filter?: string; article_filter?: string; topic_filter?: string; post_filter?: string; feed_order?: string };
+        Returns: Json;
+      };
       consume_rate_limit: {
         Args: {
           p_action: string;
@@ -215,6 +235,10 @@ export interface Database {
       get_post_interest_scores: {
         Args: Record<string, never>;
         Returns: { post_id: string; interest_score: number }[];
+      };
+      get_post_stats: {
+        Args: { p_post_ids: string[]; p_device_id: string | null };
+        Returns: { post_id: string; hype: number; flop: number; salty: number; views: number; comments: number; user_reaction: string | null }[];
       };
       get_release_hype_counts: {
         Args: Record<string, never>;
@@ -231,8 +255,17 @@ export interface Database {
       admin_archive_post: { Args: { target_post_id: string }; Returns: undefined };
       admin_restore_post: { Args: { target_trash_id: string }; Returns: undefined };
       apply_retention_policy: { Args: Record<string, never>; Returns: Json };
+      delete_user_account_data: {
+        Args: { p_user_id: string; p_device_id: string | null; p_email: string | null };
+        Returns: undefined;
+      };
     };
-    Views: Record<string, never>;
+    Views: {
+      public_profiles: {
+        Row: Profile;
+        Relationships: [];
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
@@ -260,12 +293,15 @@ export interface Post {
   information_status: "confirmed" | "developing" | "rumor" | "updated" | "corrected";
   featured_quote: Json | null;
   editorial_sources: Json;
+  short_article_reason?: string | null;
   correction_note: string | null;
   publish_to_brickboard?: boolean | null;
   brickboard_copy?: string | null;
   scheduled_at?: string | null;
   scheduled_by?: string | null;
   archived_at?: string | null;
+  is_featured?: boolean | null;
+  featured_priority?: number | null;
 }
 
 export interface PostInsert {
@@ -287,12 +323,15 @@ export interface PostInsert {
   information_status?: Post["information_status"];
   featured_quote?: Json | null;
   editorial_sources?: Json;
+  short_article_reason?: string | null;
   correction_note?: string | null;
   publish_to_brickboard?: boolean | null;
   brickboard_copy?: string | null;
   scheduled_at?: string | null;
   scheduled_by?: string | null;
   archived_at?: string | null;
+  is_featured?: boolean | null;
+  featured_priority?: number | null;
 }
 
 export interface EditorialImage {
@@ -300,6 +339,7 @@ export interface EditorialImage {
   post_id: string | null;
   kind: "cover" | "body" | "release";
   source_url: string;
+  content_sha256: string | null;
   storage_path: string;
   public_url: string;
   alt_text: string | null;
@@ -317,6 +357,7 @@ export interface EditorialImageInsert {
   post_id?: string | null;
   kind?: EditorialImage["kind"];
   source_url: string;
+  content_sha256?: string | null;
   storage_path: string;
   public_url: string;
   alt_text?: string | null;
@@ -440,10 +481,12 @@ export interface ContactSubmission {
   id: string;
   name: string;
   company: string;
+  subject?: string | null;
   email: string;
   budget: string;
   message: string;
   ip_hash: string | null;
+  is_read?: boolean;
   created_at: string;
 }
 
@@ -451,10 +494,12 @@ export interface ContactSubmissionInsert {
   id?: string;
   name: string;
   company: string;
+  subject?: string | null;
   email: string;
   budget: string;
   message: string;
   ip_hash?: string | null;
+  is_read?: boolean;
   created_at?: string;
 }
 
@@ -476,6 +521,20 @@ export interface CommentInsert {
   content: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface ArticleCommentLike {
+  id: string;
+  comment_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface ArticleCommentLikeInsert {
+  id?: string;
+  comment_id: string;
+  user_id: string;
+  created_at?: string;
 }
 
 export interface PostView {
@@ -515,6 +574,8 @@ export interface Profile {
   show_in_leaderboard: boolean;
   created_at: string;
   updated_at: string;
+  playing_now?: string | null;
+  favorite_games?: string[];
 }
 
 export interface ProfileInsert {
@@ -538,6 +599,8 @@ export interface ProfileInsert {
   show_in_leaderboard?: boolean;
   created_at?: string;
   updated_at?: string;
+  playing_now?: string | null;
+  favorite_games?: string[];
 }
 
 export interface PushSubscription {
@@ -657,6 +720,7 @@ export interface CommunityReactionInsert {
 export interface CommunityCommentRow {
   id: string;
   post_id: string;
+  parent_id: string | null;
   user_id: string;
   author_name: string;
   author_username: string | null;
@@ -669,6 +733,7 @@ export interface CommunityCommentRow {
 export interface CommunityCommentInsert {
   id?: string;
   post_id: string;
+  parent_id?: string | null;
   user_id: string;
   author_name: string;
   author_username?: string | null;

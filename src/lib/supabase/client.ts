@@ -4,7 +4,7 @@ import type { Database } from "@/lib/types/database";
 export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
   );
 }
 
@@ -15,7 +15,7 @@ type FlexibleTable = {
   Relationships: [];
 };
 
-interface FlexibleDatabase {
+export interface FlexibleDatabase {
   public: {
     Tables: Record<string, FlexibleTable>;
     Views: Record<string, never>;
@@ -29,6 +29,6 @@ interface FlexibleDatabase {
 export function createDataClient() {
   return createBrowserClient<FlexibleDatabase>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
   );
 }

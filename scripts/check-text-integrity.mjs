@@ -1,13 +1,14 @@
 import { readFile, readdir } from "node:fs/promises";
 import { extname, join, relative } from "node:path";
 
-const roots = ["src", "tests", "scripts", "supabase"];
+const roots = ["src", "tests", "scripts", "supabase", "e2e"];
 const extensions = new Set([".ts", ".tsx", ".js", ".mjs", ".sql", ".md"]);
 const ignored = new Set(["node_modules", ".next", ".git"]);
 const patterns = [
   { name: "UTF-8 interpretado como Latin-1", expression: /(?:Ã[\x80-\xBF]|Â[\x80-\xBF]|â(?:€|†|€¢|€¦)|ðŸ)/u },
   { name: "caractere de substituição", expression: /�/u },
   { name: "acentuação substituída por interrogação", expression: /\b(?:n\?o|est\?|mat\?ria|voc\?|p\?gina|not\?cia|lan\?amento|usu\?rio|configura\?\?)/iu },
+  { name: "Mojibake UTF-8 comum", expression: /(?:\u00c3[\u0080-\u00bf\u00a0-\u00bf]|\u00c2[\u0080-\u00bf\u00a0-\u00bf]|\u00e2\u20ac[\u0080-\u00bf]|\u00f0\u0178)/u },
   { name: "caractere CJK inesperado", expression: /[\u3400-\u9fff]/u },
 ];
 

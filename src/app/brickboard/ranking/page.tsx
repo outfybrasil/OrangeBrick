@@ -8,38 +8,73 @@ import { resolveAvatarUrl } from "@/lib/avatar";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type { LeaderboardEntry } from "@/lib/types/progression";
 
+type ActiveSeason = { name: string; slug: string; starts_at: string; ends_at: string };
+
 export default function RankingPage() {
   const supabase = useMemo(() => createDataClient(), []);
   const { profile } = useAuth();
   const username = profile?.username || null;
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [season, setSeason] = useState<ActiveSeason | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
-      const { data } = await supabase.rpc("season_leaderboard", {
-        target_season_slug: null,
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+      const now = new Date().toISOString();
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("name, slug, starts_at, ends_at")
+        .in("status", ["calibration", "active"])
+        .lte("starts_at", now)
+        .gt("ends_at", now)
+        .order("starts_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (seasonError) throw seasonError;
+      if (cancelled) return;
+      const activeSeason = seasonData as ActiveSeason | null;
+      setSeason(activeSeason);
+      if (!activeSeason) {
+        setEntries([]);
+        return;
+      }
+      const { data, error } = await supabase.rpc("season_leaderboard", {
+        target_season_slug: activeSeason.slug,
         target_limit: 100,
       });
+      if (error) throw error;
+      if (cancelled) return;
       setEntries((data || []) as LeaderboardEntry[]);
-      setIsLoading(false);
+      } catch {
+        if (!cancelled) setLoadError("Não foi possível carregar a classificação.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
     }
     void load();
-  }, [supabase]);
+    return () => { cancelled = true; };
+  }, [supabase, retry]);
 
   return (
-    <main className="min-h-dvh bg-background-void text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void text-white">
       <PageHeader title="Ranking" />
       <section className="border-b border-white/10">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
             <div>
-              <p className="text-xs font-bold text-brand-orange">Temporada de calibração</p>
+              <p className="text-xs font-bold text-brand-orange">{season?.name || "Ranking por temporada"}</p>
               <h1 className="mt-3 max-w-4xl font-heading text-[clamp(2.5rem,8vw,5rem)] font-black leading-[0.92] tracking-[-0.03em]">
                 O nível fica. A disputa recomeça.
               </h1>
               <p className="mt-5 max-w-[68ch] text-sm leading-6 text-gray-300">
-                O ranking considera apenas o XP da temporada. Seu nível vitalício e suas conquistas nunca são apagados.
+                {season ? `Temporada ativa até ${new Date(season.ends_at).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" })}. ` : "Não há uma temporada ativa no momento. "}
+                O ranking considera apenas o XP da temporada. Seu nível vitalício e suas conquistas permanecem no perfil.
               </p>
             </div>
             <Link href="/brickboard/como-funciona" className="inline-flex min-h-11 items-center justify-center border border-white/15 px-4 text-xs font-bold hover:border-brand-orange/50">
@@ -50,21 +85,28 @@ export default function RankingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        <MyStandingCard entries={entries} username={username} isLoading={isLoading} />
+        {!loadError && <MyStandingCard entries={entries} username={username} isLoading={isLoading} />}
         <div className="mb-5 flex items-end justify-between gap-4 border-b border-white/10 pb-3">
           <div>
             <h2 className="font-heading text-xl font-bold">Classificação atual</h2>
             <p className="mt-1 text-xs text-gray-500">Mínimo de 100 XP em três dias ativos.</p>
           </div>
-          <span className="text-xs text-gray-500">{entries.length} classificados</span>
+          {!isLoading && !loadError && <span className="text-xs text-gray-500">{entries.length} classificados</span>}
         </div>
 
-        {isLoading ? (
+        {loadError ? (
+          <div role="alert" className="border-y border-white/10 py-12 text-sm text-gray-300"><p>{loadError}</p><button type="button" onClick={() => setRetry((current) => current + 1)} className="mt-4 min-h-11 border border-brand-orange/50 px-4 text-brand-orange">Tentar novamente</button></div>
+        ) : isLoading ? (
           <p className="py-16 text-sm text-gray-400">Carregando classificação…</p>
+        ) : !season ? (
+          <div className="border-y border-white/10 py-16">
+            <h2 className="font-heading text-2xl font-bold">Nenhuma temporada ativa.</h2>
+            <p className="mt-2 text-sm text-gray-400">A próxima classificação aparece aqui quando uma nova temporada começar.</p>
+          </div>
         ) : entries.length === 0 ? (
           <div className="border-y border-white/10 py-16">
             <h2 className="font-heading text-2xl font-bold">A parede ainda está vazia.</h2>
-            <p className="mt-2 text-sm text-gray-400">O ranking abre quando os primeiros leitores atingirem os critérios.</p>
+            <p className="mt-2 text-sm text-gray-400">Ainda não há participantes classificados nesta temporada.</p>
           </div>
         ) : (
           <ol className="divide-y divide-white/10 border-y border-white/10">

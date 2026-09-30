@@ -4,12 +4,12 @@ import { createClient } from "@supabase/supabase-js";
 config({ path: ".env.local" });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const serviceRoleKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
 const adminEmail = process.argv[2] || process.env.ADMIN_EMAIL;
 const adminPassword = process.argv[3] || process.env.ADMIN_PASSWORD;
 
 if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error("Configure NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no .env.local.");
+  throw new Error("Configure NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY ou SUPABASE_SERVICE_ROLE_KEY no .env.local.");
 }
 
 if (!adminEmail || !adminPassword) {

@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import { Outfit, Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Geist } from "next/font/google";
@@ -19,21 +19,18 @@ const headingFont = Outfit({
   subsets: ["latin"],
   variable: "--font-heading-var",
   display: "swap",
-  weight: ["500", "600", "700", "800", "900"],
 });
 
 const subtitleFont = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-subtitle-var",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
 });
 
 const bodyFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-body-var",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
 });
 
 const monoFont = JetBrains_Mono({
@@ -54,10 +51,12 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "Orange Brick",
+    default: "Orange Brick — notícias de games, hardware e indústria",
     template: "%s | Orange Brick",
   },
   description: "Portal de notícias de games — rápido, direto e sem frescura.",
@@ -78,20 +77,19 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Orange Brick",
+    title: "Orange Brick — notícias de games, hardware e indústria",
   },
-  alternates: { canonical: "/", types: { "application/rss+xml": "/feed.xml" } },
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
   openGraph: {
     title: "Orange Brick",
     description: "Portal de notícias de games — rápido, direto e sem frescura.",
     siteName: "Orange Brick",
     type: "website",
     locale: "pt_BR",
-    url: "/",
     images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "Orange Brick Logo" }],
   },
-  twitter: { card: "summary_large_image", title: "Orange Brick", description: "Notícias de games, hardware, indústria e modding." },
-  verification: { google: "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs" },
+  twitter: { card: "summary_large_image", title: "Orange Brick — notícias de games, hardware e indústria", description: "Notícias de games, hardware, indústria e modding." },
+  verification: { google: ["1MwU6xe9hs6pdkfLkjZq-plADLtEYNW9IqCq0th5l74", "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs"] },
 };
 
 export default function RootLayout({
@@ -106,6 +104,7 @@ export default function RootLayout({
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
         <a
+          id="link-pular-conteudo"
           href="#conteudo-principal"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-brand-orange focus:px-4 focus:py-2 focus:text-xs focus:font-black focus:text-black focus:outline-2 focus:outline-offset-2"
         >
@@ -126,7 +125,7 @@ export default function RootLayout({
                 target: `${getSiteUrl()}/busca?q={search_term_string}`,
                 "query-input": "required name=search_term_string",
               },
-            }),
+            }).replace(/</g, "\\u003c"),
           }}
         />
         <AuthProvider>

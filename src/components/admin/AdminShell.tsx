@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
-type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health";
+type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -187,6 +187,10 @@ export function AdminShell({
               Administração
             </p>
             <div className="space-y-1">
+              <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}>
+                <OverviewIcon />
+                Caixa de entrada
+              </Link>
               <Link href="/admin/team" className={navClass("team")} aria-current={active === "team" ? "page" : undefined}>
                 <CommunityIcon />
                 Equipe
@@ -289,7 +293,7 @@ export function AdminShell({
         </header>
 
         {/* CONTEÚDO PRINCIPAL COM SAFE-AREA E PADDING PARA BOTTOM DOCK */}
-        <main className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3.5 py-4 pb-28 xs:px-4 sm:px-6 sm:py-6 sm:pb-12 lg:px-8`}>
+        <main id="conteudo-principal" tabIndex={-1} className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3.5 py-4 pb-28 xs:px-4 sm:px-6 sm:py-6 sm:pb-12 lg:px-8`}>
           {/* HEADER DA PÁGINA */}
           <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
@@ -443,6 +447,7 @@ export function AdminShell({
                   Administração
                 </p>
                 <div className="space-y-1">
+                  <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}><OverviewIcon />Caixa de entrada</Link>
                   <Link href="/admin/team" className={navClass("team")}><CommunityIcon />Equipe</Link>
                   <Link href="/admin/settings" className={navClass("settings")}><OverviewIcon />Configurações</Link>
                 </div>

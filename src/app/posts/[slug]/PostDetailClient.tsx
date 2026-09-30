@@ -15,11 +15,11 @@ import { useComments } from "@/lib/hooks/useComments";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { Footer } from "@/components/ui/Footer";
-import { BookmarkIcon, RepostIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
+import { BookmarkIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
 import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
 import { createDataClient } from "@/lib/supabase/client";
-import { normalizeAuthorTag, validateEditorialQuality, type EditorialBlock } from "@/lib/content-validation";
-import { EditorialQualityChecklist } from "@/components/admin/EditorialQualityChecklist";
+import Link from "next/link";
+import { normalizeAuthorTag, parseEditorialBlocks, validateEditorialQuality, type EditorialBlock } from "@/lib/content-validation";
 import type { Post, PostStats } from "@/lib/types/database";
 import { ArticleCommunityNotes } from "@/components/community/ArticleCommunityNotes";
 import { youtubeEmbedUrl } from "@/lib/youtube";
@@ -29,25 +29,12 @@ import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useToast } from "@/lib/contexts/ToastContext";
 
 
-type ContentBlock =
-  | { id: string; type: "text"; content: string }
-  | { id: string; type: "image"; url: string; alt: string; caption?: string }
-  | { id: string; type: "video"; url: string; title: string };
+type ContentBlock = EditorialBlock;
 
 function PostContent({ post }: { post: Post }) {
-  const blocks = useMemo<ContentBlock[] | null>(() => {
-    try {
-      const parsed: unknown = JSON.parse(post.body);
-      if (Array.isArray(parsed)) {
-        return parsed as ContentBlock[];
-      }
-    } catch {
-      return null;
-    }
-    return null;
-  }, [post.body]);
+  const blocks = useMemo<ContentBlock[]>(() => parseEditorialBlocks(post.body), [post.body]);
 
-  if (blocks) {
+  if (blocks.length > 0 && !(blocks.length === 1 && blocks[0].id === "legacy-body")) {
     const renderedUrls = new Set<string>();
     if (post.image_url) {
       renderedUrls.add(post.image_url);
@@ -137,22 +124,16 @@ const INFORMATION_STATUS_LABELS: Record<Post["information_status"], string> = {
 };
 
 function DraftQualityBanner({ post }: { post: Post }) {
-  const blocks = useMemo<EditorialBlock[]>(() => {
-    try {
-      const parsed = JSON.parse(post.body);
-      if (Array.isArray(parsed)) return parsed as EditorialBlock[];
-    } catch {}
-    return [];
-  }, [post.body]);
+  const blocks = useMemo<EditorialBlock[]>(() => parseEditorialBlocks(post.body), [post.body]);
 
   const sourcesText = useMemo(() => {
     const sources = Array.isArray(post.editorial_sources)
       ? post.editorial_sources.filter(
-          (s): s is { name: string; url: string } =>
-            Boolean(s && typeof s === "object" && "name" in s && "url" in s),
+          (s): s is { name: string; url: string; is_official?: boolean } =>
+            Boolean(s && typeof s === "object" && "name" in s && typeof s.name === "string" && "url" in s && typeof s.url === "string"),
         )
       : [];
-    return sources.map((s) => `${s.name}|${s.url}`).join("\n");
+    return sources.map((s) => `${s.name}|${s.url}${s.is_official ? "|oficial" : ""}`).join("\n");
   }, [post.editorial_sources]);
 
   const quote = useMemo(() => {
@@ -162,12 +143,19 @@ function DraftQualityBanner({ post }: { post: Post }) {
 
   const items = validateEditorialQuality({
     summary: post.summary,
+    title: post.title,
+    imageUrl: post.image_url || "",
+    imageAlt: post.image_alt || "",
     body: blocks,
     sourcesText,
     quoteText: quote?.text || "",
     quoteAuthor: quote?.author || "",
+    quoteRole: quote?.role || "",
     quoteSourceUrl: quote?.source_url || "",
     absenceRegistered: quote?.absence_registered,
+    informationStatus: post.information_status,
+    correctionNote: post.correction_note || "",
+    shortArticleReason: post.short_article_reason || "",
   });
 
   const pending = items.filter((i) => !i.complete);
@@ -220,10 +208,11 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
     postId: post.id,
     initialCount: stats.views,
   });
-  const { comments, isLoading: commentsLoading, error: commentsError, fetchComments, addComment, deleteComment } = useComments(post.id);
+  const { comments, isLoading: commentsLoading, isLoadingMore: commentsLoadingMore, hasMore: hasMoreComments, loadMore: loadMoreComments, error: commentsError, fetchComments, addComment, deleteComment, toggleCommentLike } = useComments(post.id);
   const { addPost: addCommunityBrick } = useCommunityFeed({ load: false });
   const [isBrickModalOpen, setIsBrickModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
   const [readerScale, setReaderScale] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = Number(window.localStorage.getItem("orange-reader-scale"));
@@ -233,6 +222,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
   });
   const [conversationCount, setConversationCount] = useState(0);
   const editorialSignals = useMemo(() => getEditorialSignals(post), [post]);
+  const replyTarget = comments.find((comment) => comment.id === replyToCommentId) || null;
 
   useEffect(() => {
     queueMicrotask(() => void fetchComments());
@@ -373,12 +363,12 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
         </div>
       </header>
 
-      <main className="mx-auto w-full min-w-0 max-w-3xl px-2 py-4 sm:px-4 sm:py-10 watch-container">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-3xl px-2 py-4 sm:px-4 sm:py-10 watch-container">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-gray-500">
           <ol className="flex items-center gap-1.5">
-            <li><a href="/" className="hover:text-brand-orange transition-colors">Início</a></li>
+            <li><Link href="/" className="hover:text-brand-orange transition-colors">Início</Link></li>
             <li aria-hidden="true">/</li>
-            <li><a href="/noticias" className="hover:text-brand-orange transition-colors">Notícias</a></li>
+            <li><Link href="/noticias" className="hover:text-brand-orange transition-colors">Notícias</Link></li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" className="text-gray-300 font-semibold line-clamp-1">{post.title}</li>
           </ol>
@@ -386,8 +376,16 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
         {!post.is_published && <DraftQualityBanner post={post} />}
         <article className="space-y-4 sm:space-y-6">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <Tag category={post.category} />
+              {post.topic_id && (
+                <Link
+                  href={`/games/${post.topic_id}`}
+                  className="inline-flex min-h-6 items-center gap-1 border border-brand-orange/40 bg-brand-orange/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-orange hover:bg-brand-orange hover:text-white transition-colors"
+                >
+                  🎮 Ver jogo
+                </Link>
+              )}
               <Timer date={post.published_at ?? ""} />
             </div>
             <button
@@ -491,7 +489,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
 
           {editorialSignals.quote && <blockquote className="border-y border-brand-orange/40 py-7 sm:py-9">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Fala em destaque</p>
-            <p className="mt-3 font-heading text-xl font-bold leading-snug text-white sm:text-2xl">“{editorialSignals.quote}”</p>
+            <p className="mt-3 font-heading text-[1.25em] sm:text-[1.5em] font-bold leading-snug text-white">“{editorialSignals.quote}”</p>
             {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{editorialSignals.quoteSourceUrl && <a href={editorialSignals.quoteSourceUrl} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">Ver fonte ↗</a>}</footer>}
           </blockquote>}
 
@@ -570,16 +568,21 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               </h3>
             </div>
 
-            <button
-              onClick={handleRepostClick}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-brand-orange/40 bg-card-slate/80 px-4 text-xs font-bold uppercase tracking-wider text-brand-orange transition-colors hover:bg-brand-orange hover:text-white xs:w-auto"
-            >
-              <RepostIcon />
-              <span>Republicar no Brickboard</span>
-            </button>
           </div>
 
-          <CommentForm onSubmit={(content) => addComment(content)} />
+          {replyTarget && (
+            <div role="status" className="mb-3 flex items-center justify-between gap-3 border border-brand-orange/20 bg-brand-orange/[0.06] px-3 py-2 text-xs text-gray-300">
+              <span>Respondendo a <strong className="text-white">{replyTarget.author_nickname}</strong></span>
+              <button type="button" onClick={() => setReplyToCommentId(null)} className="min-h-9 px-2 font-bold text-brand-orange hover:text-white">Cancelar resposta</button>
+            </div>
+          )}
+          <CommentForm
+            placeholder={replyTarget ? `Resposta para ${replyTarget.author_nickname}...` : undefined}
+            onSubmit={async (content) => {
+              await addComment(content, replyToCommentId);
+              setReplyToCommentId(null);
+            }}
+          />
 
           <div className="space-y-4 pt-2">
             <CommentList
@@ -587,7 +590,15 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               isLoading={commentsLoading}
               error={commentsError}
               onRetry={() => void fetchComments()}
-              onDelete={(commentId) => void deleteComment(commentId)}
+              hasMore={hasMoreComments}
+              isLoadingMore={commentsLoadingMore}
+              onLoadMore={() => void loadMoreComments()}
+              onLike={toggleCommentLike}
+              onReply={setReplyToCommentId}
+              onDelete={(commentId) => {
+                void deleteComment(commentId);
+                if (replyToCommentId === commentId) setReplyToCommentId(null);
+              }}
             />
           </div>
         </div>
@@ -597,8 +608,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
         isOpen={isBrickModalOpen}
         onClose={() => setIsBrickModalOpen(false)}
         initialArticle={attachedArticle}
-        onPublish={(content, platformTag, article, mediaUrl) => {
-          addCommunityBrick(content, platformTag, article, mediaUrl);
+        onPublish={async (content, platformTag, article, mediaUrl) => {
+          await addCommunityBrick(content, platformTag, article, mediaUrl);
           router.push("/brickboard");
         }}
       />

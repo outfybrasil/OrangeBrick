@@ -22,7 +22,7 @@ export function NewsletterForm() {
         return;
       }
       form.reset();
-      setStatus({ type: "success", message: "Inscrição confirmada! Você receberá o resumo semanal." });
+      setStatus({ type: "success", message: "Seu e-mail foi cadastrado." });
     } catch {
       setStatus({ type: "error", message: "Erro de conexão. Tente novamente." });
     }

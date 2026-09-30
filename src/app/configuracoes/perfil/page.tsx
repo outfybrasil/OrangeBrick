@@ -435,7 +435,7 @@ export default function ProfileSettingsPage() {
           })).error;
 
       if (cosmeticsError) {
-        setMessage("O perfil foi salvo, mas a personalização não pôde ser applied.");
+        setMessage("O perfil foi salvo, mas a personalização não pôde ser aplicada.");
       } else {
         await refreshProfile();
         setMessage("Perfil atualizado.");
@@ -449,7 +449,7 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-background-void text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void text-white">
       {/* Banner Cropper Modal */}
       {bannerCropSrc && (
         <BannerCropperModal

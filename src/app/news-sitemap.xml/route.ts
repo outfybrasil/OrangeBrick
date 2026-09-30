@@ -34,21 +34,7 @@ export async function GET() {
       .order("published_at", { ascending: false })
       .limit(100);
 
-    if (data && data.length > 0) {
-      posts = data as Array<{ slug: string; title: string; published_at: string | null }>;
-    } else {
-      // Fallback: If no news in last 48h, fetch top 15 most recent published posts so urlset is never empty
-      const { data: recentData } = await supabase
-        .from("posts")
-        .select("slug, title, published_at")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false })
-        .limit(15);
-
-      if (recentData) {
-        posts = recentData as Array<{ slug: string; title: string; published_at: string | null }>;
-      }
-    }
+    if (data) posts = data as Array<{ slug: string; title: string; published_at: string | null }>;
   } catch {
     // return valid XML structure
   }

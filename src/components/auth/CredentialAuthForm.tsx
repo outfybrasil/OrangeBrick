@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { safeReturnTo } from "@/lib/auth/return-to";
 
 interface CredentialAuthFormProps {
   mode: "login" | "signup";
@@ -26,6 +27,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
   const supabase = createDataClient();
   const { signInWithGoogle } = useAuth();
   const isSignup = mode === "signup";
+  const returnTo = safeReturnTo(searchParams.get("next"), "/brickboard");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -39,6 +41,21 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
     }
     return null;
   });
+
+  const handleGoogleLogin = async () => {
+    if (!eligibilityConfirmed || loading) return;
+    setLoading(true);
+    setError(null);
+    setErrorField(null);
+    try {
+      await signInWithGoogle(returnTo);
+    } catch {
+      setError("Não foi possível entrar com Google. Tente novamente.");
+      setErrorField("form");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -66,15 +83,17 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/profile/setup` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/profile/setup&returnTo=${encodeURIComponent(returnTo)}`,
+          },
         });
         if (signUpError) throw signUpError;
-        if (data.session) router.push("/profile/setup");
+        if (data.session) router.push(`/profile/setup?returnTo=${encodeURIComponent(returnTo)}`);
         else setMessage("Conta criada. Abra o e-mail de confirmação para ativar seu acesso.");
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
         if (signInError) throw signInError;
-        router.push("/brickboard");
+        router.push(returnTo);
         router.refresh();
       }
     } catch (caught) {
@@ -128,7 +147,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
       </form>
 
       <div className="my-6 flex items-center gap-3 text-xs text-gray-600"><span className="h-px flex-1 bg-white/10" /><span>ou</span><span className="h-px flex-1 bg-white/10" /></div>
-      <button type="button" disabled={!eligibilityConfirmed || loading} onClick={() => signInWithGoogle()} className="flex min-h-12 w-full items-center justify-center border border-white/20 bg-white px-4 text-sm font-bold text-[#202126] transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-45">Continuar com Google</button>
+      <button type="button" disabled={!eligibilityConfirmed || loading} onClick={() => void handleGoogleLogin()} className="flex min-h-12 w-full items-center justify-center border border-white/20 bg-white px-4 text-sm font-bold text-[#202126] transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-45">Continuar com Google</button>
       <p className="mt-6 text-center text-sm text-gray-400">
         {isSignup ? "Já tem uma conta?" : "Ainda não tem conta?"}{" "}
         <Link href={isSignup ? "/entrar" : "/cadastro"} className="font-bold text-brand-orange hover:text-white">{isSignup ? "Entrar" : "Criar conta"}</Link>

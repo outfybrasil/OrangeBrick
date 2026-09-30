@@ -3,10 +3,10 @@ import { config } from 'dotenv';
 config({ path: '.env.local' });
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const serviceRoleKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 if (!supabaseUrl || !serviceRoleKey) {
-  console.error('.env.local não encontrado ou faltando SUPABASE_SERVICE_ROLE_KEY');
+  console.error('.env.local não encontrado ou sem SUPABASE_SECRET_KEY/SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 

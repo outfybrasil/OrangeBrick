@@ -135,6 +135,7 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Toda matéria criada pelo opencode DEVE ser salva como **rascunho** (`is_published: false`)
 - Nunca publicar diretamente — o usuário revisa e publica manualmente pelo painel admin
 - Exceção: apenas se o usuário EXPLICITAMENTE pedir para publicar
+- Autorização explícita de 29/09/2026: o gerador agendado pode publicar automaticamente às **11h, 17h e 20h de Brasília**, desde que o conteúdo e as três imagens passem nas validações editoriais. O Telegram deve informar título e link após a publicação. Matérias com conteúdo ou imagens pendentes permanecem como rascunho, com aviso do motivo.
 
 ### Busca de imagens
 
@@ -288,3 +289,13 @@ Exemplos:
 | `opinion` | Editorial, artigo de opinião | Voz marcante, pode ser ácido, irônico | Tese → argumentos → provocação final |
 
 ---
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

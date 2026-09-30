@@ -39,7 +39,7 @@ export default function NewPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
       <section className="w-full max-w-md border border-white/10 bg-[#111217] p-5 sm:p-8">
         <p className="font-subtitle text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Segurança da conta</p>
         <h1 className="mt-3 font-heading text-3xl font-black">Crie uma nova senha.</h1>

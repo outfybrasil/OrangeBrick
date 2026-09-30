@@ -1,6 +1,29 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, createServiceRoleClient } from "@/lib/supabase/server";
 
+async function listStoragePaths(
+  client: ReturnType<typeof createServiceRoleClient>,
+  bucket: string,
+  directory: string,
+): Promise<string[]> {
+  const paths: string[] = [];
+  let offset = 0;
+
+  while (true) {
+    const { data, error } = await client.storage.from(bucket).list(directory, {
+      limit: 100,
+      offset,
+      sortBy: { column: "name", order: "asc" },
+    });
+    if (error) throw error;
+
+    const files = (data || []).filter((file) => file.id);
+    paths.push(...files.map((file) => `${directory}/${file.name}`));
+    if (!data || data.length < 100) return paths;
+    offset += data.length;
+  }
+}
+
 function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   const site = request.headers.get("sec-fetch-site");
@@ -15,7 +38,7 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const supabase = await createServerSupabaseClient(request);
+    const supabase = await createServerSupabaseClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -25,42 +48,29 @@ export async function DELETE(request: Request) {
     const serviceClient = createServiceRoleClient();
     const rawDeviceId = request.headers.get("x-orange-brick-device") ?? "";
     const deviceId = /^[a-f0-9]{32}$/.test(rawDeviceId) ? rawDeviceId : null;
-    const storagePaths: string[] = [`profiles/${user.id}/banner.webp`];
-    const { data: avatarFiles, error: avatarListError } = await serviceClient.storage
-      .from("post-images")
-      .list(`avatars/${user.id}`, { limit: 100 });
-    if (avatarListError) throw avatarListError;
-    storagePaths.push(...(avatarFiles || []).map((file) => `avatars/${user.id}/${file.name}`));
-    const { error: storageError } = await serviceClient.storage.from("post-images").remove(storagePaths);
-    if (storageError) throw storageError;
-
-    const deletions = [
-      await serviceClient.from("community_comment_likes").delete().eq("user_id", user.id),
-      await serviceClient.from("community_poll_votes").delete().eq("user_id", user.id),
-      await serviceClient.from("community_reactions").delete().eq("user_id", user.id),
-      await serviceClient.from("community_comments").delete().eq("user_id", user.id),
-      await serviceClient.from("community_posts").delete().eq("user_id", user.id),
-      await serviceClient.from("notifications").delete().eq("user_id", user.id),
-      await serviceClient.from("comments").delete().eq("user_id", user.id),
-      await serviceClient.from("profiles").delete().eq("user_id", user.id),
-    ];
-
-    if (deviceId) {
-      deletions.push(
-        await serviceClient.from("reactions").delete().eq("device_id", deviceId),
-        await serviceClient.from("post_views").delete().eq("device_id", deviceId)
-      );
+    const [profileImagePaths, legacyAvatarPaths] = await Promise.all([
+      listStoragePaths(serviceClient, "profile-images", user.id),
+      listStoragePaths(serviceClient, "post-images", `avatars/${user.id}`),
+    ]);
+    if (profileImagePaths.length) {
+      const { error } = await serviceClient.storage.from("profile-images").remove(profileImagePaths);
+      if (error) throw error;
+    }
+    if (legacyAvatarPaths.length) {
+      const { error } = await serviceClient.storage.from("post-images").remove(legacyAvatarPaths);
+      if (error) throw error;
     }
 
-    if (user.email) {
-      deletions.push(
-        await serviceClient.from("contact_submissions").delete().eq("email", user.email)
-      );
-    }
-
-    if (deletions.some((result) => result.error)) {
-      throw new Error("Falha ao remover dados associados");
-    }
+    const deleteUserAccountData = serviceClient.rpc.bind(serviceClient) as unknown as (
+      name: "delete_user_account_data",
+      args: { p_user_id: string; p_device_id: string | null; p_email: string | null }
+    ) => PromiseLike<{ error: { message: string } | null }>;
+    const { error: cleanupError } = await deleteUserAccountData("delete_user_account_data", {
+      p_user_id: user.id,
+      p_device_id: deviceId,
+      p_email: user.email?.toLowerCase() || null,
+    });
+    if (cleanupError) throw cleanupError;
 
     const { error: deleteError } = await serviceClient.auth.admin.deleteUser(user.id);
     if (deleteError) throw deleteError;

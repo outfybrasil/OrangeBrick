@@ -5,6 +5,7 @@ import Link from "next/link";
 import CoverflowGallery from "@/components/originkit/ui/coverflowgallery-custom-style";
 import { createDataClient } from "@/lib/supabase/client";
 import { isAllowedReleaseImageUrl } from "@/lib/release-images";
+import { getReleaseMonth, isRetainedRelease } from "@/lib/release-dates";
 import type { ReleaseRadarItem } from "@/lib/types/database";
 
 export interface ReleaseItem {
@@ -20,26 +21,10 @@ export interface ReleaseItem {
   slug?: string;
 }
 
-const MONTHS: Record<string, number> = {
-  janeiro: 0,
-  fevereiro: 1,
-  março: 2,
-  abril: 3,
-  maio: 4,
-  junho: 5,
-  julho: 6,
-  agosto: 7,
-  setembro: 8,
-  outubro: 9,
-  novembro: 10,
-  dezembro: 11,
-};
-
 function releaseDateValue(item: ReleaseItem) {
-  if (item.releaseDateIso) return new Date(`${item.releaseDateIso}T12:00:00Z`);
-  const match = item.releaseDate.toLowerCase().match(/^(\d{1,2}) de ([a-zç]+)/);
-  if (!match || MONTHS[match[2]] === undefined) return null;
-  return new Date(Date.UTC(2026, MONTHS[match[2]], Number(match[1]), 12));
+  if (!item.releaseDateIso) return null;
+  const date = new Date(`${item.releaseDateIso}T12:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function saoPauloTodayIso() {
@@ -92,7 +77,7 @@ export function ReleaseRadarStrip() {
         category: item.category,
         slug: item.post_slug || undefined,
     }));
-    setReleases(databaseItems.sort((a, b) => {
+    setReleases(databaseItems.filter((item) => isRetainedRelease(item.releaseDateIso)).sort((a, b) => {
       const first = releaseDateValue(a)?.getTime() ?? Number.MAX_SAFE_INTEGER;
       const second = releaseDateValue(b)?.getTime() ?? Number.MAX_SAFE_INTEGER;
       return first - second || a.game.localeCompare(b.game, "pt-BR");
@@ -108,12 +93,8 @@ export function ReleaseRadarStrip() {
     const map = new Map<string, string>();
     map.set("all", "Todos os meses");
     for (const item of releases) {
-      const match = item.releaseDate.toLowerCase().match(/^(\d{1,2}) de ([a-zç]+)/);
-      if (match) {
-        const monthKey = match[2];
-        const capitalized = monthKey.charAt(0).toUpperCase() + monthKey.slice(1);
-        map.set(monthKey, `${capitalized} 2026`);
-      }
+      const month = getReleaseMonth(item.releaseDateIso);
+      map.set(month.key, month.label);
     }
     return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
   }, [releases]);
@@ -123,8 +104,7 @@ export function ReleaseRadarStrip() {
   const displayedReleases = useMemo(() => {
     if (selectedMonth !== "all") {
       return releases.filter((item) => {
-        const match = item.releaseDate.toLowerCase().match(/^(\d{1,2}) de ([a-zç]+)/);
-        return match && match[2] === selectedMonth;
+        return getReleaseMonth(item.releaseDateIso).key === selectedMonth;
       });
     }
     const upcoming = releases
@@ -157,7 +137,7 @@ export function ReleaseRadarStrip() {
             <p className="mb-1 text-xs font-bold text-brand-orange">Agenda de jogos</p>
             <Link
               href="/lancamentos"
-              className="text-xs font-bold text-brand-orange hover:underline sm:hidden"
+              className="inline-flex min-h-11 items-center px-2 text-xs font-bold text-brand-orange hover:underline sm:hidden"
             >
               Ver todos →
             </Link>
@@ -190,6 +170,7 @@ export function ReleaseRadarStrip() {
               key={option.key}
               type="button"
               onClick={() => setSelectedMonth(option.key)}
+              aria-pressed={selectedMonth === option.key}
               className={`min-h-11 shrink-0 rounded-sm border px-3 text-xs font-bold transition-all ${
                 selectedMonth === option.key
                   ? "border-brand-orange bg-brand-orange text-black font-black"

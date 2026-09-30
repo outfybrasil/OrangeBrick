@@ -66,7 +66,7 @@ export function ArticleHypeSummary({ postSlug }: { postSlug: string }) {
         <span>{counts.buy} garantiram</span>
         <span>{counts.watch} estão de olho</span>
         <span>{counts.skip} vão passar</span>
-        <Link href={`/lancamentos#${release.id}`} className="ml-auto font-bold text-brand-orange hover:text-white">
+        <Link href={`/lancamentos#release-${release.id}`} className="ml-auto font-bold text-brand-orange hover:text-white">
           Votar no Radar
         </Link>
       </div>

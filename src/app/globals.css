@@ -7,9 +7,11 @@
 @theme inline {
   --color-background-void: #0D0E12;
   --color-brand-orange: #FF5E00;
-  --color-brand-orange-muted: #A84300;
+  --color-brand-orange-muted: #D65F1E;
   --color-card-slate: #1C1E24;
   --color-accent-blue: #00A3FF;
+  --color-gray-500: #A0A4AD;
+  --color-gray-600: #8B8F99;
   --font-heading: var(--font-heading-var), "Outfit", sans-serif;
   --font-subtitle: var(--font-subtitle-var), "Space Grotesk", sans-serif;
   --font-body: var(--font-body-var), "Plus Jakarta Sans", sans-serif;
@@ -95,6 +97,13 @@ a,
 button,
 [role="button"] {
   border-radius: 0;
+}
+
+.bg-brand-orange.text-white,
+.bg-brand-orange\/90.text-white,
+[class~="hover:bg-brand-orange"][class~="hover:text-white"]:hover,
+[class~="hover:bg-brand-orange/90"][class~="hover:text-white"]:hover {
+  color: #000000;
 }
 
 :where(a, button, input, textarea, select, summary):focus-visible {
@@ -205,6 +214,10 @@ html.high-contrast .text-gray-300 {
   color: #ffffff;
 }
 
+body:has([data-mobile-bottom-overlay]) .accessibility-menu {
+  bottom: calc(var(--bottom-overlay-height, 14rem) + 0.75rem);
+}
+
 @media (max-width: 480px) {
   .hide-xs { display: none !important; }
 
@@ -222,7 +235,7 @@ html.high-contrast .text-gray-300 {
   }
 }
 
-@media (max-width: 340px), (max-height: 380px), (shape: round) {
+@media (max-width: 280px) and (max-height: 380px), (shape: round) {
   :root {
     --reader-font-scale: 0.92;
   }
@@ -770,4 +783,8 @@ html.high-contrast .text-gray-300 {
 .content-visibility-auto {
   content-visibility: auto;
   contain-intrinsic-size: 0 350px;
+}
+
+#conteudo-principal {
+  scroll-margin-top: 5rem;
 }

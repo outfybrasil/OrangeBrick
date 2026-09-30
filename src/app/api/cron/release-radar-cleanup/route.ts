@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -7,16 +8,15 @@ export const runtime = "nodejs";
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
 
 async function authorized(request: Request) {
   const authorization = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
   if (request.method === "GET") {
-    return Boolean(cronSecret && authorization === `Bearer ${cronSecret}`);
+    return isAuthorizedCronRequest(request);
   }
   if (!authorization?.startsWith("Bearer ")) return false;
   const supabase = serviceClient();

@@ -1,15 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
+import { safeReturnTo } from "@/lib/auth/return-to";
 
-export default function ProfileSetup() {
+function ProfileSetupLoading() {
+  return (
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh flex items-center justify-center bg-background-void">
+      <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
+    </main>
+  );
+}
+
+function ProfileSetupContent() {
   const { user, profile, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createDataClient();
 
   const [nickname, setNickname] = useState("");
@@ -18,14 +28,15 @@ export default function ProfileSetup() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const returnTo = safeReturnTo(searchParams.get("returnTo"));
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/");
       return;
     }
-    if (profile) {
-      router.push("/");
+    if (profile && returnTo) {
+      router.replace(returnTo);
       return;
     }
     if (user) {
@@ -34,7 +45,7 @@ export default function ProfileSetup() {
         queueMicrotask(() => setAvatarUrl(googlePic));
       }
     }
-  }, [user, profile, isLoading, router, avatarUrl]);
+  }, [user, profile, isLoading, router, avatarUrl, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +96,7 @@ export default function ProfileSetup() {
         avatar_url: durableAvatarUrl,
       });
       if (insertError) throw insertError;
-      router.push("/");
+      router.push(returnTo || "/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao salvar perfil.");
     } finally {
@@ -94,15 +105,11 @@ export default function ProfileSetup() {
   };
 
   if (isLoading || !user) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center bg-background-void">
-        <div className="w-8 h-8 border-2 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin" />
-      </div>
-    );
+    return <ProfileSetupLoading />;
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background-void px-3 py-[max(0.75rem,env(safe-area-inset-top))] text-white sm:px-4">
+    <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-3 py-[max(0.75rem,env(safe-area-inset-top))] text-white sm:px-4">
       <div className="w-full max-w-md rounded-2xl border border-brand-orange-muted/20 bg-card-slate/40 p-5 shadow-2xl sm:p-8">
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-2xl mx-auto mb-3">
@@ -122,27 +129,28 @@ export default function ProfileSetup() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs uppercase font-bold text-gray-400 mb-1">
+            <label htmlFor="profile-nickname" className="block text-xs uppercase font-bold text-gray-400 mb-1">
               Apelido *
             </label>
             <input
+              id="profile-nickname"
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="Seu apelido (2-30 caracteres)"
               maxLength={30}
               className="w-full bg-background-void border border-brand-orange-muted/20 text-white rounded-xl px-4 py-3 outline-none focus:border-brand-orange/50 transition-colors text-sm"
-              autoFocus
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase text-gray-400">
+            <label htmlFor="profile-username" className="mb-1 block text-xs font-bold uppercase text-gray-400">
               Usuário *
             </label>
             <div className="flex min-h-11 items-center rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 focus-within:border-brand-orange/50">
               <span className="text-sm text-gray-500">@</span>
               <input
+                id="profile-username"
                 type="text"
                 value={username}
                 onChange={(event) => setUsername(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
@@ -190,6 +198,14 @@ export default function ProfileSetup() {
           </Link>.
         </p>
       </div>
-    </div>
+    </main>
+  );
+}
+
+export default function ProfileSetup() {
+  return (
+    <Suspense fallback={<ProfileSetupLoading />}>
+      <ProfileSetupContent />
+    </Suspense>
   );
 }

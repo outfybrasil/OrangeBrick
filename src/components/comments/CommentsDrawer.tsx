@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { CommentList } from "./CommentList";
 import { CommentForm } from "./CommentForm";
@@ -14,8 +14,10 @@ interface CommentsDrawerProps {
 }
 
 export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps) {
-  const { comments, isLoading, error, addComment, fetchComments } = useComments(postId);
+  const { comments, isLoading, error, addComment, toggleCommentLike, fetchComments } = useComments(postId);
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
+  const replyTarget = comments.find((comment) => comment.id === replyToCommentId) || null;
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -79,11 +81,23 @@ export function CommentsDrawer({ postId, isOpen, onClose }: CommentsDrawerProps)
         </div>
 
         <div className="flex-1 overflow-y-auto px-4">
-          <CommentList comments={comments} isLoading={isLoading} error={error} onRetry={() => void fetchComments()} />
+          <CommentList comments={comments} isLoading={isLoading} error={error} onRetry={() => void fetchComments()} onLike={toggleCommentLike} onReply={setReplyToCommentId} />
         </div>
 
         <div className="px-4 py-3 border-t border-brand-orange-muted/10">
-          <CommentForm onSubmit={(content) => addComment(content)} />
+          {replyTarget && (
+            <div role="status" className="mb-3 flex items-center justify-between gap-3 border border-brand-orange/20 bg-brand-orange/[0.06] px-3 py-2 text-xs text-gray-300">
+              <span>Respondendo a <strong className="text-white">{replyTarget.author_nickname}</strong></span>
+              <button type="button" onClick={() => setReplyToCommentId(null)} className="min-h-9 px-2 font-bold text-brand-orange hover:text-white">Cancelar</button>
+            </div>
+          )}
+          <CommentForm
+            placeholder={replyTarget ? `Resposta para ${replyTarget.author_nickname}...` : undefined}
+            onSubmit={async (content) => {
+              await addComment(content, replyToCommentId);
+              setReplyToCommentId(null);
+            }}
+          />
         </div>
       </div>
     </>

@@ -1,11 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getConsent, saveConsent } from "@/lib/consent";
 
 export function CookieConsent() {
   const [show, setShow] = useState(false);
+  const consentRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!show || !consentRef.current) return;
+    const element = consentRef.current;
+    const update = () => document.documentElement.style.setProperty("--bottom-overlay-height", `${element.getBoundingClientRect().height}px`);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.removeProperty("--bottom-overlay-height");
+    };
+  }, [show]);
 
   useEffect(() => {
     if (getConsent()) return;
@@ -22,19 +35,20 @@ export function CookieConsent() {
 
   return (
     <section
+      ref={consentRef}
       aria-labelledby="consent-title"
       aria-describedby="consent-description"
       data-mobile-bottom-overlay
-      className="fixed inset-x-0 bottom-0 z-[70] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5 watch-hidden"
+      className="fixed inset-x-0 bottom-0 z-[70] max-h-[calc(100dvh-4rem)] overflow-y-auto px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:px-5 sm:pb-5 watch-hidden"
     >
       <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#17191f] shadow-[0_18px_60px_rgba(0,0,0,0.55)]">
         <div className="h-1 bg-brand-orange" />
-        <div className="grid gap-4 p-4 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-5 sm:p-6">
+        <div className="grid gap-2 p-3 sm:grid-cols-[1fr_auto] sm:items-end sm:gap-5 sm:p-6">
           <div>
-            <p id="consent-title" className="font-heading text-base font-bold text-white">
+            <p id="consent-title" className="font-heading text-sm font-bold text-white sm:text-base">
               Sua leitura, sua escolha
             </p>
-            <p id="consent-description" className="mt-2 max-w-xl text-sm leading-6 text-[#b8bac2]">
+            <p id="consent-description" className="mt-1 max-w-xl text-xs leading-4 text-[#b8bac2] sm:mt-2 sm:text-sm sm:leading-6">
               O site funciona com armazenamento essencial. Com sua permissão, também guardamos um
               identificador aleatório para reconhecer reações e medir leituras sem usar seu nome ou e-mail.{" "}
               <Link
@@ -49,14 +63,14 @@ export function CookieConsent() {
             <button
               type="button"
               onClick={() => choose("denied")}
-              className="min-h-11 rounded-xl border border-white/15 px-4 text-sm font-semibold text-[#d7d8dc] transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+              className="min-h-10 rounded-xl border border-white/15 px-3 text-xs font-semibold text-[#d7d8dc] transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:min-h-11 sm:px-4 sm:text-sm"
             >
               Só essenciais
             </button>
             <button
               type="button"
               onClick={() => choose("accepted")}
-              className="min-h-11 rounded-xl bg-brand-orange px-5 text-sm font-bold text-white transition-colors hover:bg-[#e95500] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="min-h-10 rounded-xl bg-brand-orange px-3 text-xs font-bold text-white transition-colors hover:bg-[#e95500] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:min-h-11 sm:px-5 sm:text-sm"
             >
               Permitir métricas
             </button>

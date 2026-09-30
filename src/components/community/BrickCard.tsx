@@ -9,6 +9,8 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
 import { UserBadge } from "@/components/ui/UserBadge";
+import { BookmarkIcon } from "@/components/ui/ContentActionIcons";
+import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
 import { resolveAvatarUrl } from "@/lib/avatar";
 import { SpoilerText } from "@/components/community/SpoilerText";
 import { timeAgo } from "@/lib/utils/time-ago";
@@ -17,11 +19,11 @@ import { createDataClient } from "@/lib/supabase/client";
 
 interface BrickCardProps {
   post: CommunityPost;
-  onReaction: (postId: string, type: ReactionType) => void;
+  onReaction: (postId: string, type: ReactionType) => Promise<boolean>;
   onDeletePost?: (postId: string) => void;
   onEditPost?: (postId: string, newContent: string) => Promise<void> | void;
   onSharePost: (post: CommunityPost, comment: string) => Promise<void>;
-  onAddComment: (postId: string, content: string) => Promise<void>;
+  onAddComment: (postId: string, content: string, parentId?: string) => Promise<void>;
   onDeleteComment: (commentId: string) => Promise<void>;
   onToggleCommentLike?: (commentId: string) => Promise<void>;
   getComments: (postId: string) => Promise<CommunityComment[]>;
@@ -40,6 +42,8 @@ const reportReasons = [
 
 export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
   const { user } = useAuth();
+  const { toggleSaveBrick, isBrickSaved } = useSavedBricks();
+  const isSaved = isBrickSaved(post.id);
   const supabase = useMemo(() => createDataClient(), []);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -49,12 +53,19 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
   const [hypePulse, setHypePulse] = useState(0);
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [commentText, setCommentText] = useState("");
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+  const [hasLoadedComments, setHasLoadedComments] = useState(false);
   const [commentPendingDelete, setCommentPendingDelete] = useState<string | null>(null);
   const [isDeletingComment, setIsDeletingComment] = useState(false);
   const [reportedContent, setReportedContent] = useState<string[]>([]);
   const [reportMessage, setReportMessage] = useState<string | null>(null);
   const [shareNotice, setShareNotice] = useState("");
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [reactionError, setReactionError] = useState<string | null>(null);
+  const [isReacting, setIsReacting] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: "post" | "comment"; id: string } | null>(null);
   const [reportReason, setReportReason] = useState(reportReasons[0]);
   const [isReporting, setIsReporting] = useState(false);
@@ -76,6 +87,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const commentInputRef = useRef<HTMLInputElement>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -119,13 +131,26 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     }
   };
 
-  const handleReaction = (type: ReactionType) => {
+  const handleReaction = async (type: ReactionType) => {
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
-    if (type === "hype" && post.user_reaction !== "hype") setHypePulse((value) => value + 1);
-    onReaction(post.id, type);
+    if (isReacting) return;
+    setIsReacting(true);
+    setReactionError(null);
+    try {
+      const reacted = await onReaction(post.id, type);
+      if (!reacted) {
+        setReactionError("Não foi possível registrar sua reação. Tente novamente.");
+        return;
+      }
+      if (type === "hype" && post.user_reaction !== "hype") setHypePulse((value) => value + 1);
+    } catch {
+      setReactionError("Não foi possível registrar sua reação. Tente novamente.");
+    } finally {
+      setIsReacting(false);
+    }
   };
 
   const handleCommentClick = async () => {
@@ -138,11 +163,15 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       return;
     }
     setIsCommentOpen(true);
-    if (comments.length === 0) {
+    if (!hasLoadedComments) {
       setIsCommentsLoading(true);
+      setCommentError(null);
       try {
         const fetched = await getComments(post.id);
         setComments(fetched);
+        setHasLoadedComments(true);
+      } catch {
+        setCommentError("Não foi possível carregar as respostas. Feche e abra a conversa para tentar novamente.");
       } finally {
         setIsCommentsLoading(false);
       }
@@ -156,6 +185,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     }
     setIsShareOpen(!isShareOpen);
     setShareText("");
+    setShareError(null);
   };
 
   const handleQuickShare = async () => {
@@ -175,10 +205,16 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     const trimmed = shareText.trim();
     if (!trimmed) return;
     setIsSharing(true);
-    await onSharePost(post, trimmed);
-    setShareText("");
-    setIsShareOpen(false);
-    setIsSharing(false);
+    setShareError(null);
+    try {
+      await onSharePost(post, trimmed);
+      setShareText("");
+      setIsShareOpen(false);
+    } catch (cause) {
+      setShareError(cause instanceof Error ? cause.message : "Não foi possível republicar. Tente novamente.");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -191,19 +227,36 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     const trimmed = commentText.trim();
     if (!trimmed) return;
 
-    await onAddComment(post.id, trimmed);
-    setCommentText("");
-
-    const fetched = await getComments(post.id);
-    setComments(fetched);
+    setIsSubmittingComment(true);
+    setCommentError(null);
+    try {
+      await onAddComment(post.id, trimmed, replyToCommentId || undefined);
+      setCommentText("");
+      setReplyToCommentId(null);
+      try {
+        const fetched = await getComments(post.id);
+        setComments(fetched);
+        setHasLoadedComments(true);
+      } catch {
+        setHasLoadedComments(false);
+        setCommentError("Resposta publicada, mas a lista não atualizou. Feche e abra a conversa para recarregar.");
+      }
+    } catch (cause) {
+      setCommentError(cause instanceof Error ? cause.message : "Não foi possível enviar a resposta. Tente novamente.");
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   const handleDeleteComment = async (commentId: string) => {
     setIsDeletingComment(true);
     try {
       await onDeleteComment(commentId);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId && comment.parent_id !== commentId));
       setCommentPendingDelete(null);
+      setCommentError(null);
+    } catch (cause) {
+      setCommentError(cause instanceof Error ? cause.message : "Não foi possível apagar a resposta.");
     } finally {
       setIsDeletingComment(false);
     }
@@ -225,6 +278,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       setIsAuthModalOpen(true);
       return;
     }
+    const currentComment = comments.find((comment) => comment.id === commentId);
+    if (!currentComment || !onToggleCommentLike) return;
     setComments((prev) =>
       prev.map((c) => {
         if (c.id !== commentId) return c;
@@ -233,8 +288,10 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
         return { ...c, user_has_liked: newHasLiked, likes_count: newCount };
       })
     );
-    if (onToggleCommentLike) {
+    try {
       await onToggleCommentLike(commentId);
+    } catch {
+      setComments((prev) => prev.map((comment) => comment.id === commentId ? currentComment : comment));
     }
   };
 
@@ -268,7 +325,18 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     setIsReporting(false);
   };
 
-  const totalCommentCount = comments.length || post.comments_count || 0;
+  const totalCommentCount = hasLoadedComments ? comments.length : post.comments_count || 0;
+  const repliesByParent = new Map<string, CommunityComment[]>();
+  for (const comment of comments) {
+    if (!comment.parent_id) continue;
+    const replies = repliesByParent.get(comment.parent_id) || [];
+    replies.push(comment);
+    repliesByParent.set(comment.parent_id, replies);
+  }
+  const threadedComments = comments
+    .filter((comment) => !comment.parent_id)
+    .flatMap((comment) => [comment, ...(repliesByParent.get(comment.id) || [])]);
+  const replyTarget = comments.find((comment) => comment.id === replyToCommentId) || null;
   const avatarSrc = resolveAvatarUrl(post.author_avatar, post.author_name, post.is_official);
 
   return (
@@ -351,6 +419,18 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                 role="menu"
                 className="absolute right-0 top-9 z-30 min-w-[190px] rounded-xl border border-white/15 bg-[#14161D] p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100"
               >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    toggleSaveBrick(post);
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <BookmarkIcon filled={isSaved} className={`size-4 ${isSaved ? "text-brand-orange" : "text-gray-400"}`} />
+                  {isSaved ? "Remover dos salvos" : "Salvar Brick"}
+                </button>
                 {isPostOwner ? (
                   <>
                     {onEditPost && (
@@ -439,7 +519,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-2.5 block max-w-[390px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
+          className="group/article mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
         >
           {post.attached_article.image_url && (
             <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
@@ -452,13 +532,18 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
               />
             </div>
           )}
-          <div className="p-2.5 sm:p-3">
-            <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
-              Orange Brick
+          <div className="p-3 sm:p-3.5 space-y-1">
+            <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
+              {post.attached_article.category || "Orange Brick"}
             </span>
             <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
               {post.attached_article.title}
             </h5>
+            {post.attached_article.summary && (
+              <p className="line-clamp-2 font-body text-xs leading-relaxed text-gray-300">
+                {post.attached_article.summary}
+              </p>
+            )}
           </div>
         </Link>
       )}
@@ -500,24 +585,29 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
               {post.shared_post.original_attached_article && (
                 <Link
                   href={`/posts/${post.shared_post.original_attached_article.slug}`}
-                  className="group/article mt-2.5 grid grid-cols-[85px_minmax(0,1fr)] sm:grid-cols-[130px_minmax(0,1fr)] overflow-hidden rounded-xl border border-white/10 bg-background-void/80 hover:border-brand-orange/40 transition-all"
+                  className="group/article mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
                 >
                   {post.shared_post.original_attached_article.image_url && (
-                    <div className="relative h-full min-h-[75px] w-full overflow-hidden border-r border-white/10">
+                    <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
                       <img loading="lazy" decoding="async"
                         src={post.shared_post.original_attached_article.image_url}
                         alt={post.shared_post.original_attached_article.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover/article:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover/article:scale-[1.02]"
                       />
                     </div>
                   )}
-                  <div className="flex flex-col justify-center p-2.5 min-w-0">
-                    <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block mb-0.5">
-                      Matéria Citada
+                  <div className="p-2.5 sm:p-3 space-y-1">
+                    <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
+                      {post.shared_post.original_attached_article.category || "Matéria Citada"}
                     </span>
-                    <h5 className="break-words font-subtitle text-xs font-bold leading-5 text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
+                    <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
                       {post.shared_post.original_attached_article.title}
                     </h5>
+                    {post.shared_post.original_attached_article.summary && (
+                      <p className="line-clamp-2 font-body text-xs leading-relaxed text-gray-300">
+                        {post.shared_post.original_attached_article.summary}
+                      </p>
+                    )}
                   </div>
                 </Link>
               )}
@@ -532,6 +622,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
           flop={(post.reactions.flop || 0) + (post.reactions.salty || 0)}
           salty={0}
           onToggle={handleReaction}
+          disabled={isReacting}
+          error={reactionError}
           hypePulse={hypePulse}
           activeReaction={post.user_reaction}
           commentCount={totalCommentCount}
@@ -567,6 +659,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
               {isSharing ? "..." : "Republicar"}
             </button>
           </form>
+          {shareError && <p role="alert" className="text-xs text-red-300">{shareError}</p>}
         </div>
       )}
 
@@ -586,10 +679,10 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                 Seja o primeiro a responder a esse Brick!
               </p>
             ) : (
-              comments.map((c) => {
+              threadedComments.map((c) => {
                 const canDeleteComment = isPostOwner || c.user_id === currentUserId;
                 return (
-                  <div key={c.id} className="group/comm border-t border-white/[0.07] py-3 first:border-t-0">
+                  <div key={c.id} className={`group/comm border-t border-white/[0.07] py-3 first:border-t-0 ${c.parent_id ? "ml-6 border-l border-l-brand-orange/20 pl-3" : ""}`}>
                     <div className="flex items-start gap-2.5">
                       <Link href={`/profile/${encodeURIComponent(c.author_username || c.author_name)}`} className="shrink-0 group/cauthor">
                         <img loading="lazy" decoding="async"
@@ -612,6 +705,20 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                             </time>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
+                            {user && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setReplyToCommentId(c.parent_id || c.id);
+                                  setCommentError(null);
+                                  window.setTimeout(() => commentInputRef.current?.focus(), 0);
+                                }}
+                                aria-label={`Responder a ${c.author_name}`}
+                                className="min-h-9 px-2 text-xs font-semibold text-gray-500 transition-colors hover:text-white"
+                              >
+                                Responder
+                              </button>
+                            )}
                             {!canDeleteComment && user && (
                               <button
                                 type="button"
@@ -637,6 +744,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                           <button
                             type="button"
                             onClick={() => handleLikeComment(c.id)}
+                            aria-pressed={c.user_has_liked}
                             className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors ${
                               c.user_has_liked
                                 ? "bg-brand-orange/10 text-brand-orange"
@@ -662,21 +770,34 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
             )}
           </div>
 
+          {replyTarget && (
+            <div role="status" className="flex items-center justify-between gap-3 border border-brand-orange/20 bg-brand-orange/[0.06] px-3 py-2 text-xs text-gray-300">
+              <span>Respondendo a <strong className="text-white">{replyTarget.author_name}</strong></span>
+              <button type="button" onClick={() => setReplyToCommentId(null)} className="min-h-9 px-2 font-bold text-brand-orange hover:text-white">Cancelar</button>
+            </div>
+          )}
+          {commentError && <p role="alert" className="border border-red-400/25 bg-red-500/10 px-3 py-2 text-xs text-red-200">{commentError}</p>}
           <form onSubmit={handleAddComment} className="flex flex-col gap-2 pt-1 xs:flex-row">
             <input
+              ref={commentInputRef}
               type="text"
               value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Escreva sua resposta..."
+              onChange={(e) => {
+                setCommentText(e.target.value);
+                setCommentError(null);
+              }}
+              placeholder={replyTarget ? `Resposta para ${replyTarget.author_name}...` : "Escreva sua resposta..."}
               maxLength={280}
+              aria-label={replyTarget ? `Resposta para ${replyTarget.author_name}` : "Sua resposta ao Brick"}
+              disabled={isSubmittingComment}
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange"
             />
             <button
               type="submit"
-              disabled={!commentText.trim()}
+              disabled={!commentText.trim() || isSubmittingComment}
               className="min-h-11 shrink-0 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange/90 disabled:opacity-40"
             >
-              Responder
+              {isSubmittingComment ? "Enviando…" : "Responder"}
             </button>
           </form>
         </div>

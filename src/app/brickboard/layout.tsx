@@ -3,16 +3,16 @@ import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: {
-    default: "Brickboard — Comunidade Gamer | Orange Brick",
-    template: "%s | Brickboard — Orange Brick",
+    default: "BrickBoard — Comunidade Gamer",
+    template: "%s | BrickBoard | Orange Brick",
   },
-  description: "Fórum, debates em tempo real e discussões gamer. Compartilhe opiniões, reaja a notícias e suba de nível na comunidade Orange Brick.",
+  description: "Debates em tempo real, Hype, Flop e discussões da comunidade gamer OrangeBrick.",
   alternates: {
     canonical: "/brickboard",
   },
   openGraph: {
-    title: "Brickboard — Comunidade Gamer | Orange Brick",
-    description: "Fórum, debates e discussões gamer no Orange Brick.",
+    title: "BrickBoard — Comunidade Gamer | Orange Brick",
+    description: "Debates em tempo real, Hype, Flop e discussões da comunidade gamer no OrangeBrick.",
     url: "/brickboard",
     type: "website",
   },

@@ -23,7 +23,9 @@ const pages = {
 export async function generateMetadata({ params }: InstitutionalProps): Promise<Metadata> {
   const { slug } = await params;
   const page = pages[slug as keyof typeof pages];
-  return page ? { title: page.title, description: page.description } : {};
+  return page
+    ? { title: page.title, description: page.description, alternates: { canonical: `/institucional/${encodeURIComponent(slug)}` } }
+    : { robots: { index: false, follow: false } };
 }
 
 export default async function InstitutionalPage({ params }: InstitutionalProps) {

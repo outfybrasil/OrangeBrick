@@ -22,10 +22,28 @@ export function handleOptions(request: Request) {
   return request.method === "OPTIONS" ? new Response("ok", { headers: corsHeaders }) : null;
 }
 
+function serviceApiKey() {
+  const secretKeysJson = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (secretKeysJson) {
+    try {
+      const secretKeys: unknown = JSON.parse(secretKeysJson);
+      if (typeof secretKeys === "object" && secretKeys !== null && "default" in secretKeys) {
+        const defaultKey = secretKeys.default;
+        if (typeof defaultKey === "string" && defaultKey.length > 0) return defaultKey;
+      }
+    } catch {
+      throw new Error("SUPABASE_SECRET_KEYS contém JSON inválido.");
+    }
+  }
+  const key = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!key) throw new Error("Configure uma chave secreta do Supabase para as Edge Functions.");
+  return key;
+}
+
 export function serviceClient() {
   return createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    serviceApiKey(),
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
@@ -37,7 +55,7 @@ export function requestIp(request: Request) {
 }
 
 export async function hashIdentity(value: string) {
-  const salt = Deno.env.get("RATE_LIMIT_SALT") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const salt = Deno.env.get("RATE_LIMIT_SALT") || serviceApiKey();
   const bytes = new TextEncoder().encode(`${salt}:${value}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");

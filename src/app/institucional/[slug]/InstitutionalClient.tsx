@@ -81,7 +81,7 @@ function AdvertiseSection() {
           <input tabIndex={-1} autoComplete="off" value={formData.website} onChange={(event) => setFormData({ ...formData, website: event.target.value })} />
         </label>
         {submitError && <p role="alert" className="text-xs text-red-400">{submitError}</p>}
-        <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-brand-orange hover:bg-brand-orange/90 font-bold uppercase disabled:opacity-50 cursor-pointer">
+        <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-brand-orange text-black hover:bg-brand-orange/90 font-bold uppercase disabled:opacity-50 cursor-pointer">
           {isSubmitting ? "Enviando..." : "Solicitar proposta"}
         </button>
       </form>
@@ -132,7 +132,7 @@ export function InstitutionalClient({ slug }: { slug: InstitutionalSlug }) {
           </Link>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 py-12 min-h-[65vh]">
+      <main id="conteudo-principal" tabIndex={-1} className="max-w-5xl mx-auto px-4 py-12 min-h-[65vh]">
         {slug === "anuncie" ? <AdvertiseSection /> : <LawSection type={slug} />}
       </main>
       <Footer />

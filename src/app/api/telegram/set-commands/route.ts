@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 import { registerBotCommands } from "@/lib/telegram/bot";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function authorized(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  return Boolean(cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`);
-}
 
 async function handle(): Promise<NextResponse> {
   try {
@@ -20,11 +16,11 @@ async function handle(): Promise<NextResponse> {
 }
 
 export async function GET(request: Request) {
-  if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAuthorizedCronRequest(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return handle();
 }
 
 export async function POST(request: Request) {
-  if (!authorized(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAuthorizedCronRequest(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return handle();
 }

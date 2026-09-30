@@ -15,6 +15,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -23,11 +24,12 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
       if (!trimmed || !user) return;
 
       setIsSubmitting(true);
+      setSubmitError(null);
       try {
         await onSubmit(trimmed);
         setContent("");
-      } catch {
-        return;
+      } catch (cause) {
+        setSubmitError(cause instanceof Error ? cause.message : "Não foi possível publicar o comentário. Tente novamente.");
       } finally {
         setIsSubmitting(false);
       }
@@ -50,7 +52,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
               Quer participar dessa discussão?
             </h4>
             <p className="text-xs sm:text-sm text-gray-400 font-subtitle leading-relaxed">
-              Faça login com sua conta Google para enviar seus comentários e interagir com outros leitores.
+              Faça login para comentar e interagir com outros leitores.
             </p>
           </div>
 
@@ -107,8 +109,9 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea
+          aria-label="Seu comentário"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => { setContent(e.target.value); setSubmitError(null); }}
           placeholder={placeholder}
           maxLength={500}
           rows={3}
@@ -120,6 +123,7 @@ export function CommentForm({ onSubmit, placeholder = "O que você achou dessa m
             disabled:opacity-50
           "
         />
+        {submitError && <p role="alert" className="text-sm text-red-300">{submitError}</p>}
 
         <div className="flex flex-col gap-2 xs:flex-row xs:items-center xs:justify-between">
           <span className="text-xs font-subtitle text-gray-500">

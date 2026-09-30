@@ -1,5 +1,24 @@
 project_id = "orange-brick"
 
+[auth]
+site_url = "https://orangebrick.blog"
+enable_anonymous_sign_ins = false
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "https://orange-brick.vercel.app",
+  "https://orange-brick.vercel.app/auth/callback",
+  "https://orange-brick-outfys-projects.vercel.app/",
+  "https://orange-brick-outfys-projects.vercel.app/**",
+  "https://orange-*-brick-outfys-projects.vercel.app",
+  "https://orange-*-brick-outfys-projects.vercel.app/**",
+  "https://orange-brick-luisgustavoarrudalanconi-6595-outfys-projects.vercel.app/",
+  "https://orange-brick-luisgustavoarrudalanconi-6595-outfys-projects.vercel.app/**",
+  "https://orange-*-brick-luisgustavoarrudalanconi-6595-outfys-projects.vercel.app",
+  "https://orange-*-brick-luisgustavoarrudalanconi-6595-outfys-projects.vercel.app/**",
+  "https://orangebrick.blog/auth/callback",
+  "https://www.orangebrick.blog/auth/callback",
+]
+
 [functions.toggle-reaction]
 verify_jwt = false
 

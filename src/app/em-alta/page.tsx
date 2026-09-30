@@ -10,7 +10,7 @@ import { POST_LIST_COLUMNS } from "@/lib/types/database";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Matérias em Alta no Momento — Orange Brick",
+  title: "Matérias em Alta no Momento",
   description: "As notícias e matérias de games mais lidas e debatidas pela comunidade no Orange Brick.",
   alternates: {
     canonical: "/em-alta",
@@ -46,7 +46,7 @@ export default async function TrendingPage() {
 
   return <div className="min-h-dvh bg-background-void text-white">
     <SiteHeader variant="strip" />
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Termômetro das matérias recentes</p>
       <h1 className="mt-2 font-heading text-4xl font-black uppercase sm:text-6xl">Em alta agora</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">Ranking calculado por leitura e reação. Não é uma seleção patrocinada.</p>

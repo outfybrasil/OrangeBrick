@@ -58,16 +58,17 @@ npm run admin:create
 
 ## Produção
 
-Configure no provedor do Next.js as variáveis públicas, `SUPABASE_SERVICE_ROLE_KEY` somente no servidor e o domínio definitivo em `NEXT_PUBLIC_SITE_URL`. Nunca exponha a service role no navegador ou em variáveis com prefixo `NEXT_PUBLIC_`.
+Configure `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para clientes públicos e `SUPABASE_SECRET_KEY` somente no servidor, além do domínio definitivo em `NEXT_PUBLIC_SITE_URL`. As chaves `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` continuam como compatibilidade durante a migração; nunca exponha uma chave secreta no navegador ou em variável com prefixo `NEXT_PUBLIC_`.
 
 Também configure `CRON_SECRET` com um valor aleatório forte para autorizar a limpeza mensal do Radar.
 
 Antes da divulgação pública:
 
-1. Vincule o domínio definitivo e confirme `NEXT_PUBLIC_SITE_URL`.
-2. Cadastre o domínio no Google Search Console.
-3. Envie `/sitemap.xml` e `/news-sitemap.xml` no Search Console.
-4. Verifique `/robots.txt`, `/feed.xml` e os dados estruturados das matérias.
-5. Teste cadastro, login, perfil, Brick, comentário, denúncia, ranking e exclusão de conta.
-6. Revise a fila de denúncias em `/admin/community`.
-7. Execute `npm run check` e `npx supabase db lint --linked --level warning`.
+1. Adicione `orangebrick.blog` e `www.orangebrick.blog` ao projeto `orange-brick` na Vercel. Mantenha os nameservers atuais da Hostinger, configure os registros A/CNAME exatos exibidos pela Vercel e redirecione `www` para o domínio raiz.
+2. Defina `NEXT_PUBLIC_SITE_URL=https://orangebrick.blog` em Production e faça um novo deploy depois que o DNS e o HTTPS forem validados.
+3. Cadastre o domínio no Google Search Console.
+4. Envie `/sitemap.xml` e `/news-sitemap.xml` no Search Console.
+5. Verifique `/robots.txt`, `/feed.xml` e os dados estruturados das matérias.
+6. Teste cadastro, login, perfil, Brick, comentário, denúncia, ranking e exclusão de conta.
+7. Revise a fila de denúncias em `/admin/community`.
+8. Execute `npm run check` e `npx supabase db lint --linked --level warning`.

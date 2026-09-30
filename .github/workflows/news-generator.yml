@@ -1,16 +1,31 @@
 name: daily-news-generator
 
 on:
-  schedule:
-    # Roda a cada 3 horas (09h, 12h, 15h, 18h, 21h, 00h no fuso de Brasília)
-    - cron: "0 0,3,12,15,18,21 * * *"
   workflow_dispatch:
+    inputs:
+      slot:
+        description: Horário editorial em Brasília
+        required: true
+        type: choice
+        options:
+          - "11"
+          - "17"
+          - "20"
+
+permissions: {}
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 6
     steps:
       - name: Executar gerador de notícias editorial Orange Brick
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          NEWS_SLOT: ${{ inputs.slot }}
         run: |
-          curl -fsS -X GET "https://orange-brick.vercel.app/api/cron/generate-daily" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl --fail --show-error --silent --max-time 300 --get \
+            --data-urlencode "slot=$NEWS_SLOT" \
+            "https://orange-brick.vercel.app/api/cron/generate-daily" \
+            -H "Authorization: Bearer $CRON_SECRET"

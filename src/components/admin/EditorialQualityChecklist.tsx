@@ -1,43 +1,60 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  validateEditorialQuality,
-  type EditorialBlock,
-  type EditorialQualityItem,
-} from "@/lib/content-validation";
+import { validateEditorialQuality, type EditorialBlock, type EditorialInformationStatus, type EditorialQualityItem } from "@/lib/content-validation";
 
 type EditorialQualityChecklistProps = {
+  title: string;
   summary: string;
+  imageUrl: string;
+  imageAlt: string;
   body: EditorialBlock[];
   sourcesText: string;
   quoteText: string;
   quoteAuthor: string;
+  quoteRole: string;
   quoteSourceUrl: string;
-  absenceRegistered?: boolean;
+  absenceRegistered: boolean;
+  informationStatus: EditorialInformationStatus;
+  correctionNote: string;
+  shortArticleReason: string;
 };
 
 export function EditorialQualityChecklist({
+  title,
   summary,
+  imageUrl,
+  imageAlt,
   body,
   sourcesText,
   quoteText,
   quoteAuthor,
+  quoteRole,
   quoteSourceUrl,
   absenceRegistered,
+  informationStatus,
+  correctionNote,
+  shortArticleReason,
 }: EditorialQualityChecklistProps) {
   const items: EditorialQualityItem[] = useMemo(
     () =>
       validateEditorialQuality({
+        title,
         summary,
+        imageUrl,
+        imageAlt,
         body,
         sourcesText,
         quoteText,
         quoteAuthor,
+        quoteRole,
         quoteSourceUrl,
         absenceRegistered,
+        informationStatus,
+        correctionNote,
+        shortArticleReason,
       }),
-    [summary, body, sourcesText, quoteText, quoteAuthor, quoteSourceUrl, absenceRegistered],
+    [title, summary, imageUrl, imageAlt, body, sourcesText, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, absenceRegistered, informationStatus, correctionNote, shortArticleReason],
   );
 
   const completed = items.filter((i) => i.complete).length;
@@ -81,7 +98,7 @@ export function EditorialQualityChecklist({
                 {item.label}
               </span>
               {item.detail && (
-                <span className="ml-1.5 text-[10px] text-gray-500">
+                <span className="ml-1.5 text-xs text-gray-400">
                   ({item.detail})
                 </span>
               )}
@@ -93,7 +110,7 @@ export function EditorialQualityChecklist({
       {pending > 0 && (
         <div
           role="status"
-          className="mt-1 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-[11px] leading-4 text-amber-200/90"
+          className="mt-1 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs leading-4 text-amber-200/90"
         >
           {pending === 1
             ? "1 item precisa de atenção antes de publicar."

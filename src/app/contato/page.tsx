@@ -6,11 +6,12 @@ import { NewsletterForm } from "@/components/contact/NewsletterForm";
 export const metadata: Metadata = {
   title: "Contato",
   description: "Fale com a redação do Orange Brick, proponha pautas ou envie denúncias de erros.",
+  alternates: { canonical: "/contato" },
 };
 
 export default function ContatoPage() {
   return (
-    <main className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void px-3 py-8 text-white sm:px-4 sm:py-12">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-3xl font-black uppercase text-white mb-8">Contato</h1>
 

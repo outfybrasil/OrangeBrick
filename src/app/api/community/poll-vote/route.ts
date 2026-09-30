@@ -25,7 +25,7 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const supabase = await createServerSupabaseClient(request);
+    const supabase = await createServerSupabaseClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

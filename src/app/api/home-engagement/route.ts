@@ -1,14 +1,14 @@
-import { createHash } from "node:crypto";
 import { NextResponse, after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyNewCommunityReports } from "@/lib/telegram/bot";
+import { getRateLimitIdentity, getRateLimitWindowStart } from "@/lib/server/rate-limit";
 
 const EVENT_NAMES = new Set(["article", "brickboard", "radar", "return_summary"]);
 
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 }
@@ -22,12 +22,10 @@ export async function POST(request: Request) {
   const target = typeof body?.target === "string" ? body.target.trim().slice(0, 180) : null;
   if (!EVENT_NAMES.has(eventName)) return NextResponse.json({ error: "Evento inválido" }, { status: 400 });
 
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const secret = process.env.RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
-  const identity = createHash("sha256").update(`${secret}:${forwarded}`).digest("hex");
-  const windowStart = new Date();
-  windowStart.setUTCMinutes(0, 0, 0);
+  const secret = process.env.RATE_LIMIT_SALT || (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY) || "";
+  const identity = getRateLimitIdentity(request, secret);
+  if (!identity) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
+  const windowStart = getRateLimitWindowStart(new Date(), 60 * 60 * 1000);
   const client = serviceClient();
   const { data: allowed, error: rateError } = await client.rpc("consume_rate_limit", {
     p_action: "home_engagement",

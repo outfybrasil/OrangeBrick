@@ -50,6 +50,7 @@ Deno.serve(async (request) => {
     let tag: string;
     let kind: "news" | "community";
     let recipientId: string | null = null;
+    let conversationId: string | null = null;
 
     if (user.app_metadata?.is_admin === true && typeof values.title === "string") {
       title = cleanText(values.title, 120);
@@ -92,6 +93,7 @@ Deno.serve(async (request) => {
         .eq("user_id", user.id)
         .maybeSingle();
       const actorName = actorProfile?.nickname || user.user_metadata?.full_name || "Alguém";
+      if (eventType !== "comment_like") conversationId = referenceId;
 
       if (eventType === "reaction") {
         const { data: reaction } = await supabase
@@ -152,22 +154,24 @@ Deno.serve(async (request) => {
         if (!like) return json({ error: "Curtida não encontrada" }, 404);
         const { data: comment } = await supabase
           .from("community_comments")
-          .select("user_id")
+          .select("user_id, post_id")
           .eq("id", referenceId)
           .single();
         recipientId = comment?.user_id || null;
+        conversationId = comment?.post_id || null;
         body = `${actorName} curtiu seu comentário`;
       }
 
       if (!recipientId || recipientId === user.id) return json({ sent: 0, total: 0 });
       title = "Orange Brick";
-      url = new URL("/brickboard", siteBaseUrl).toString();
+      url = new URL(conversationId ? `/brickboard?post=${encodeURIComponent(conversationId)}` : "/brickboard", siteBaseUrl).toString();
       tag = `community-${eventType}-${referenceId}`.slice(0, 96);
       kind = "community";
     }
 
     if (recipientId) {
-      const { data: preferences } = await supabase.from("notification_preferences").select("brickboard_replies").eq("user_id", recipientId).maybeSingle();
+      const { data: preferences, error: preferenceError } = await supabase.from("notification_preferences").select("brickboard_replies").eq("user_id", recipientId).maybeSingle();
+      if (preferenceError) throw preferenceError;
       if (preferences && preferences.brickboard_replies === false) return json({ sent: 0, total: 0, skipped: "preference" });
     }
 
@@ -198,7 +202,8 @@ Deno.serve(async (request) => {
 
     let eligibleSubscriptions = subscriptions || [];
     if (kind === "news" && !recipientId) {
-      const { data: optedOut } = await supabase.from("notification_preferences").select("user_id").eq("breaking_news", false);
+      const { data: optedOut, error: preferenceError } = await supabase.from("notification_preferences").select("user_id").eq("breaking_news", false);
+      if (preferenceError) throw preferenceError;
       const optedOutIds = new Set((optedOut || []).map((row) => row.user_id));
       eligibleSubscriptions = eligibleSubscriptions.filter((subscription) => !subscription.user_id || !optedOutIds.has(subscription.user_id));
     }

@@ -11,7 +11,7 @@ interface PulsePost {
   author_avatar: string | null;
   content: string;
   created_at: string;
-  comments_count: number;
+  comments_count: number | null;
 }
 
 export function CommunityPulse() {
@@ -38,26 +38,16 @@ export function CommunityPulse() {
 
       const rows = (data || []) as Array<Omit<PulsePost, "comments_count">>;
       const ids = rows.filter((post) => post && post.id).map((post) => post.id);
-      const commentCounts = new Map<string, number>();
-
-      if (ids.length > 0) {
-        const { data: comments, error: commentsError } = await supabase
+      const commentCounts = await Promise.all(ids.map(async (id) => {
+        const { count, error: countError } = await supabase
           .from("community_comments")
-          .select("post_id")
-          .in("post_id", ids);
+          .select("id", { count: "exact", head: true })
+          .eq("post_id", id);
+        return [id, countError ? null : count ?? 0] as const;
+      }));
 
-        if (commentsError) {
-          setHasError(false);
-        } else {
-          for (const comment of (comments || []) as Array<{ post_id: string }>) {
-            if (comment && comment.post_id) {
-              commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
-            }
-          }
-        }
-      }
-
-      setPosts(rows.map((post) => ({ ...post, comments_count: commentCounts.get(post.id) || 0 })));
+      const countByPost = new Map(commentCounts);
+      setPosts(rows.map((post) => ({ ...post, comments_count: countByPost.get(post.id) ?? null })));
     } catch {
       setHasError(true);
     } finally {
@@ -82,7 +72,7 @@ export function CommunityPulse() {
         <div>
           <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">Conversas recentes</p>
           <h2 id="community-pulse-title" className="font-heading text-lg font-black text-white">
-            Agora no Brickboard
+            Agora no BrickBoard
           </h2>
         </div>
         <Link
@@ -143,7 +133,7 @@ export function CommunityPulse() {
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                {post.comments_count} {post.comments_count === 1 ? "resposta" : "respostas"}
+                {post.comments_count !== null && <>{post.comments_count} {post.comments_count === 1 ? "resposta" : "respostas"}</>}
               </div>
             </Link>
           ) : (

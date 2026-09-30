@@ -9,7 +9,7 @@ import { EditorialQualityChecklist } from "@/components/admin/EditorialQualityCh
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { createDataClient } from "@/lib/supabase/client";
 import { parseMarkdownToReact } from "@/lib/markdown";
-import { AUTHOR_TAGS, normalizeAuthorTag, validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { AUTHOR_TAGS, normalizeAuthorTag, parseEditorialBlocks, parseEditorialSources, validateEditorialContent, validateEditorialQuality, type EditorialBlock } from "@/lib/content-validation";
 import { youtubeEmbedUrl } from "@/lib/youtube";
 import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory, Topic } from "@/lib/types/database";
@@ -62,6 +62,8 @@ type ArticleDraftFields = {
   quoteRole: string;
   quoteSourceUrl: string;
   sourcesText: string;
+  shortArticleReason: string;
+  absenceRegistered: boolean;
   correctionNote: string;
   scheduledAt: string | null;
   blocks: ContentBlock[];
@@ -102,6 +104,8 @@ function serializeDraftState(fields: ArticleDraftFields) {
     quoteRole: fields.quoteRole,
     quoteSourceUrl: fields.quoteSourceUrl,
     sourcesText: fields.sourcesText,
+    shortArticleReason: fields.shortArticleReason,
+    absenceRegistered: fields.absenceRegistered,
     correctionNote: fields.correctionNote,
     scheduledAt: fields.scheduledAt,
     blocks: fields.blocks,
@@ -134,6 +138,7 @@ function EditForm() {
   const [quoteSourceUrl, setQuoteSourceUrl] = useState("");
   const [absenceRegistered, setAbsenceRegistered] = useState(false);
   const [sourcesText, setSourcesText] = useState("");
+  const [shortArticleReason, setShortArticleReason] = useState("");
   const [correctionNote, setCorrectionNote] = useState("");
   const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("publicacao");
 
@@ -163,41 +168,33 @@ function EditForm() {
     }
   };
 
-  const editorialChecklist = useMemo(() => {
-    const textContent = blocks
-      .filter((block): block is Extract<ContentBlock, { type: "text" }> => block.type === "text")
-      .map((block) => block.content)
-      .join("\n");
-    const wordCount = textContent.trim().split(/\s+/).filter(Boolean).length;
-    const imageBlocks = blocks.filter((block): block is Extract<ContentBlock, { type: "image" }> => block.type === "image");
-    const sources = sourcesText.split("\n").map((line) => line.trim()).filter(Boolean);
-    return [
-      { id: 1, label: "Título com até 70 caracteres", complete: Boolean(title.trim() && title.length <= 70) },
-      { id: 2, label: "Resumo entre 80 e 180 caracteres", complete: summary.trim().length >= 80 && summary.trim().length <= 180 },
-      { id: 3, label: "Capa e texto alternativo preenchidos", complete: Boolean(imageUrl.trim() && imageAlt.trim().length >= 3) },
-      { id: 4, label: "Corpo entre 700 e 1.000 palavras", complete: wordCount >= 700 && wordCount <= 1000 },
-      { id: 5, label: "Duas imagens internas distintas", complete: imageBlocks.length >= 2 && new Set(imageBlocks.map((block) => block.url.trim()).filter(Boolean)).size >= 2 },
-      { id: 6, label: "Alt text e legenda nas imagens internas", complete: imageBlocks.length >= 2 && imageBlocks.every((block) => block.alt.trim().length >= 3 && Boolean(block.caption?.trim())) },
-      { id: 7, label: "Pelo menos três fontes estruturadas", complete: sources.length >= 3 && sources.every((line) => /^.+\|https:\/\//.test(line)) },
-      { id: 8, label: "Fonte citada ao final do texto", complete: /\*\*Fonte:\*\*/i.test(textContent) },
-      { id: 9, label: "Estado da informação definido", complete: Boolean(informationStatus) },
-      { id: 10, label: "Fala verificada ou ausência registrada", complete: Boolean(quoteText.trim() ? quoteAuthor.trim() && /^https:\/\//.test(quoteSourceUrl.trim()) : textContent.toLowerCase().includes("declaração pública")) },
-    ];
-  }, [blocks, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteSourceUrl, quoteText, sourcesText, summary, title]);
-
-  const completedChecklistCount = editorialChecklist.filter((item) => item.complete).length;
-  const pendingChecklistCount = editorialChecklist.length - completedChecklistCount;
+  const editorialChecklist = useMemo(() => validateEditorialQuality({
+    title,
+    summary,
+    imageUrl,
+    imageAlt,
+    body: blocks,
+    sourcesText,
+    quoteText,
+    quoteAuthor,
+    quoteRole,
+    quoteSourceUrl,
+    absenceRegistered,
+    informationStatus,
+    correctionNote,
+    shortArticleReason,
+  }), [absenceRegistered, blocks, correctionNote, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, shortArticleReason, sourcesText, summary, title]);
 
   useEffect(() => {
     if (isLoading || !hasChanges) return;
     const storageKey = `orange-brick:article-draft:${postId || "new"}`;
     const timer = window.setInterval(() => {
       const savedAt = new Date().toISOString();
-      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, correctionNote, scheduledAt, blocks, savedAt }));
+      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, shortArticleReason, correctionNote, scheduledAt, absenceRegistered, blocks, savedAt }));
       setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(savedAt)));
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, scheduledAt, slug, sourcesText, summary, title, topicId]);
+  }, [absenceRegistered, authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, scheduledAt, shortArticleReason, slug, sourcesText, summary, title, topicId]);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -267,6 +264,8 @@ function EditForm() {
             quoteRole: "",
             quoteSourceUrl: "",
             sourcesText: "",
+            shortArticleReason: "",
+            absenceRegistered: false,
             correctionNote: "",
             scheduledAt: null,
             blocks: [],
@@ -310,19 +309,11 @@ function EditForm() {
           setQuoteRole(storedQuote?.role || "");
           setQuoteSourceUrl(storedQuote?.source_url || "");
           setAbsenceRegistered(Boolean(storedQuote?.absence_registered));
-          const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string }> : [];
-          setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"));
+          const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string; is_official?: boolean }> : [];
+          setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}`).join("\n"));
           setCorrectionNote(typedPost.correction_note || "");
 
-          let parsedBlocks: ContentBlock[] = [{ id: "legacy-block", type: "text", content: typedPost.body }];
-          try {
-            const jsonBlocks = JSON.parse(typedPost.body);
-            if (Array.isArray(jsonBlocks)) {
-              parsedBlocks = jsonBlocks;
-            }
-          } catch {
-            parsedBlocks = [{ id: "legacy-block", type: "text", content: typedPost.body }];
-          }
+          const parsedBlocks = parseEditorialBlocks(typedPost.body);
           setBlocks(parsedBlocks);
 
           const loadedState: ArticleDraftFields = {
@@ -340,7 +331,9 @@ function EditForm() {
             quoteAuthor: storedQuote?.author || "",
             quoteRole: storedQuote?.role || "",
             quoteSourceUrl: storedQuote?.source_url || "",
-            sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}`).join("\n"),
+            sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}`).join("\n"),
+            shortArticleReason: typedPost.short_article_reason || "",
+            absenceRegistered: Boolean(storedQuote?.absence_registered),
             correctionNote: typedPost.correction_note || "",
             scheduledAt: typedPost.scheduled_at || null,
             blocks: parsedBlocks,
@@ -374,7 +367,7 @@ function EditForm() {
     } else if (type === "quote") {
       newBlock = { id, type: "text", content: "> \"Insira sua citação aqui.\"\n\n" };
     } else if (type === "video") {
-      newBlock = { id, type: "video", url: "", title: "" };
+      newBlock = { id, type: "video", url: "", title: "", channelName: "", officialChannelConfirmed: false };
     } else {
       newBlock = { id, type: "text", content: "" };
     }
@@ -393,8 +386,13 @@ function EditForm() {
     setHasChanges(true);
   };
 
-  const updateVideoBlock = (id: string, field: "url" | "title", value: string) => {
+  const updateVideoBlock = (id: string, field: "url" | "title" | "channelName", value: string) => {
     setBlocks(prev => prev.map(b => b.id === id && b.type === "video" ? { ...b, [field]: value } : b));
+    setHasChanges(true);
+  };
+
+  const confirmVideoChannel = (id: string, officialChannelConfirmed: boolean) => {
+    setBlocks(prev => prev.map(b => b.id === id && b.type === "video" ? { ...b, officialChannelConfirmed } : b));
     setHasChanges(true);
   };
 
@@ -430,17 +428,7 @@ function EditForm() {
       if (!title.trim()) throw new Error("O título é obrigatório");
       if (!cleanSlug) throw new Error("O slug é obrigatório");
 
-      const parsedSources = sourcesText
-        .split("\n")
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => {
-          const separator = line.indexOf("|");
-          if (separator >= 0) {
-            return { name: line.slice(0, separator).trim(), url: line.slice(separator + 1).trim() };
-          }
-          return { name: "Fonte", url: line.trim() };
-        });
+      const parsedSources = parseEditorialSources(sourcesText);
 
       if (isPublished) {
         const validationErrors = validateEditorialContent({
@@ -450,6 +438,8 @@ function EditForm() {
           imageUrl: imageUrl.trim(),
           imageAlt: imageAlt.trim(),
           blocks,
+          shortArticleReason,
+          absenceRegistered,
           editorialMetadata: {
             informationStatus,
             quote: quoteText.trim()
@@ -484,17 +474,20 @@ function EditForm() {
         ...basePostData,
         information_status: informationStatus,
         featured_quote: quoteText.trim()
-          ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim() }
-          : null,
+          ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim(), absence_registered: false }
+          : absenceRegistered ? { absence_registered: true } : null,
         editorial_sources: parsedSources,
+        short_article_reason: shortArticleReason.trim() || null,
         correction_note: correctionNote.trim() || null,
         scheduled_at: scheduledAt && !isPublished ? scheduledAt : null,
       };
 
+      let savedPostId = postId;
       if (postId) {
         const { error: updateErr } = await supabase.from("posts").update(extendedPostData).eq("id", postId);
         if (updateErr) {
           if (updateErr.message?.includes("Could not find the") && updateErr.message?.includes("column")) {
+            if (isPublished) throw new Error("Aplique as migrations editoriais pendentes antes de publicar esta matéria.");
             const { error: fallbackErr } = await supabase.from("posts").update(basePostData).eq("id", postId);
             if (fallbackErr) throw fallbackErr;
           } else {
@@ -502,13 +495,67 @@ function EditForm() {
           }
         }
       } else {
-        const { error: insertErr } = await supabase.from("posts").insert([extendedPostData]);
+        const { data: insertedData, error: insertErr } = await supabase.from("posts").insert([extendedPostData]).select("id").single();
         if (insertErr) {
           if (insertErr.message?.includes("Could not find the") && insertErr.message?.includes("column")) {
-            const { error: fallbackErr } = await supabase.from("posts").insert([basePostData]);
+            if (isPublished) throw new Error("Aplique as migrations editoriais pendentes antes de publicar esta matéria.");
+            const { data: fallbackData, error: fallbackErr } = await supabase.from("posts").insert([basePostData]).select("id").single();
             if (fallbackErr) throw fallbackErr;
+            if (typeof fallbackData?.id !== "string") throw new Error("Não foi possível confirmar a matéria salva.");
+            savedPostId = fallbackData.id;
           } else {
             throw insertErr;
+          }
+        } else {
+          if (typeof insertedData?.id !== "string") throw new Error("Não foi possível confirmar a matéria salva.");
+          savedPostId = insertedData.id;
+        }
+      }
+
+      if (isPublished && savedPostId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: existingThread } = await supabase
+            .from("community_posts")
+            .select("id")
+            .eq("source_post_id", savedPostId)
+            .eq("is_official_thread", true)
+            .maybeSingle();
+
+          const attachedArticle = {
+            id: savedPostId,
+            slug: cleanSlug,
+            title: title.trim(),
+            summary: summary.trim(),
+            image_url: imageUrl.trim() || null,
+            category,
+            topic_id: topicId && topicId.trim() !== "" ? topicId.trim() : null,
+          };
+
+          if (existingThread && typeof existingThread.id === "string") {
+            await supabase
+              .from("community_posts")
+              .update({
+                content: summary.trim().slice(0, 280),
+                attached_article: attachedArticle,
+                topic_id: topicId && topicId.trim() !== "" ? topicId.trim() : null,
+              })
+              .eq("id", existingThread.id);
+          } else {
+            await supabase.from("community_posts").insert({
+              user_id: user.id,
+              author_name: "Orange Brick",
+              author_avatar: "",
+              content: summary.trim().slice(0, 280),
+              media_url: null,
+              platform_tag: null,
+              attached_article: attachedArticle,
+              is_official: true,
+              is_pinned: false,
+              source_post_id: savedPostId,
+              is_official_thread: true,
+              topic_id: topicId && topicId.trim() !== "" ? topicId.trim() : null,
+            });
           }
         }
       }
@@ -547,6 +594,8 @@ function EditForm() {
     setQuoteRole(draft.quoteRole || "");
     setQuoteSourceUrl(draft.quoteSourceUrl || "");
     setSourcesText(draft.sourcesText || "");
+    setShortArticleReason(draft.shortArticleReason || "");
+    setAbsenceRegistered(Boolean(draft.absenceRegistered));
     setCorrectionNote(draft.correctionNote || "");
     setScheduledAt(draft.scheduledAt || null);
     setBlocks(Array.isArray(draft.blocks) ? draft.blocks : []);
@@ -675,15 +724,15 @@ function EditForm() {
               <div className="flex items-center justify-between text-xs font-bold uppercase text-gray-500 mb-1.5">
                 <label htmlFor="article-summary">Resumo editorial</label>
                 <div className="flex items-center gap-1.5">
-                  <span>{summary.length} / 200</span>
-                  {summary.length >= 20 && <span className="text-emerald-400">✓</span>}
+                  <span>{summary.length} / 180</span>
+                  {summary.length >= 80 && summary.length <= 180 && <span className="text-emerald-400">✓</span>}
                 </div>
               </div>
               <textarea
                 id="article-summary"
                 value={summary}
                 onChange={(e) => { setSummary(e.target.value); setHasChanges(true); }}
-                maxLength={200}
+                maxLength={180}
                 rows={3}
                 placeholder="Insira uma breve descrição da matéria..."
                 className="w-full rounded-lg border border-white/10 bg-background-void p-3 text-xs text-gray-200 outline-none focus:border-brand-orange/50 transition-colors leading-relaxed"
@@ -780,7 +829,7 @@ function EditForm() {
                         <input
                           id={`image-caption-${block.id}`}
                           type="text"
-                          value={block.caption}
+                          value={block.caption || ""}
                           onChange={(e) => updateImageBlock(block.id, "caption", e.target.value)}
                           placeholder="Legenda da imagem..."
                           className="h-8 w-full rounded border border-white/10 bg-background-void px-2 text-xs text-gray-300 outline-none"
@@ -822,6 +871,19 @@ function EditForm() {
                           placeholder="Título acessível do trailer"
                           className="min-h-11 w-full border border-white/10 bg-background-void px-3 text-base text-gray-200 outline-none focus:border-brand-orange/50 sm:text-sm"
                         />
+                        <label htmlFor={`video-channel-${block.id}`} className="block text-xs font-semibold text-gray-300">Canal oficial responsável</label>
+                        <input
+                          id={`video-channel-${block.id}`}
+                          type="text"
+                          value={block.channelName || ""}
+                          onChange={(event) => updateVideoBlock(block.id, "channelName", event.target.value)}
+                          placeholder="Nome do estúdio, publisher ou evento"
+                          className="min-h-11 w-full border border-white/10 bg-background-void px-3 text-base text-gray-200 outline-none focus:border-brand-orange/50 sm:text-sm"
+                        />
+                        <label className="flex min-h-11 items-start gap-3 rounded border border-white/10 bg-white/[0.03] p-3 text-xs leading-5 text-gray-300">
+                          <input type="checkbox" checked={Boolean(block.officialChannelConfirmed)} onChange={(event) => confirmVideoChannel(block.id, event.target.checked)} className="mt-0.5 h-4 w-4 accent-orange-500" />
+                          <span>Confirmei que o vídeo está disponível no canal oficial e corresponde à matéria.</span>
+                        </label>
                       </div>
                     )}
                   </div>
@@ -989,6 +1051,11 @@ function EditForm() {
               <label htmlFor="correction-note" className="mb-1 block text-xs font-bold text-gray-500">Nota de correção</label>
               <textarea id="correction-note" value={correctionNote} onChange={(event) => { setCorrectionNote(event.target.value); setHasChanges(true); }} rows={3} maxLength={500} placeholder="Explique com clareza o que foi corrigido." className="w-full rounded border border-white/10 bg-background-void p-2 text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
             </div>}
+
+            <div>
+              <label htmlFor="short-article-reason" className="mb-1 block text-xs font-bold text-gray-500">Justificativa para matéria curta</label>
+              <textarea id="short-article-reason" value={shortArticleReason} onChange={(event) => { setShortArticleReason(event.target.value); setHasChanges(true); }} rows={3} maxLength={500} placeholder="Obrigatória quando o corpo tiver menos de 700 palavras." className="w-full rounded border border-white/10 bg-background-void p-2 text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            </div>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
@@ -996,11 +1063,15 @@ function EditForm() {
             <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" aria-label="Declaração em destaque" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
             <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
             <label className="space-y-1 text-xs font-bold text-gray-300">URL da declaração<input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label>
+            <label className="flex min-h-11 items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs leading-5 text-gray-300">
+              <input type="checkbox" checked={absenceRegistered} onChange={(event) => { setAbsenceRegistered(event.target.checked); setHasChanges(true); }} className="mt-0.5 h-4 w-4 accent-orange-500" />
+              <span>Confirmei na apuração que não há declaração pública relevante disponível.</span>
+            </label>
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha no formato Nome|https://endereco.com</p></div>
-            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com\nVGC|https://videogameschronicle.com"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha: Nome|URL. Para comunicado oficial, acrescente |oficial.</p></div>
+            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com|oficial\nVGC|https://videogameschronicle.com"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL|oficial opcional" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}
@@ -1040,55 +1111,22 @@ function EditForm() {
             />
           </div>
 
-          {/* CHECKLIST EDITORIAL */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading text-xs font-bold text-white">Checklist editorial</h3>
-              <span className="text-xs font-bold text-brand-orange">{completedChecklistCount} de {editorialChecklist.length}</span>
-            </div>
-
-            {/* BARRA DE PROGRESSO DO CHECKLIST */}
-            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-brand-orange transition-[width] duration-500"
-                style={{ width: `${(completedChecklistCount / editorialChecklist.length) * 100}%` }}
-              />
-            </div>
-
-            <div className="space-y-1.5 text-xs">
-              {editorialChecklist.map((item) => (
-                <div key={item.id} className="flex items-center gap-2">
-                  <span className={item.complete ? "text-emerald-400" : "text-gray-600"}>
-                    {item.complete ? "✓" : "○"}
-                  </span>
-                  <span className={item.complete ? "text-gray-300" : "text-gray-500"}>{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {pendingChecklistCount > 0 && (
-              <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 flex items-center gap-2">
-                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z" />
-                </svg>
-                <span>{pendingChecklistCount} itens precisam de atenção antes de publicar</span>
-              </div>
-            )}
-          </div>
-
-          {/* CHECKLIST DE QUALIDADE EDITORIAL — 4 REGRAS DE OURO */}
-          <div className="border-t border-white/10 pt-4">
-            <EditorialQualityChecklist
-              summary={summary}
-              body={blocks}
-              sourcesText={sourcesText}
-              quoteText={quoteText}
-              quoteAuthor={quoteAuthor}
-              quoteSourceUrl={quoteSourceUrl}
-              absenceRegistered={absenceRegistered}
-            />
-          </div>
-
+          <EditorialQualityChecklist
+            title={title}
+            summary={summary}
+            imageUrl={imageUrl}
+            imageAlt={imageAlt}
+            body={blocks}
+            sourcesText={sourcesText}
+            quoteText={quoteText}
+            quoteAuthor={quoteAuthor}
+            quoteRole={quoteRole}
+            quoteSourceUrl={quoteSourceUrl}
+            absenceRegistered={absenceRegistered}
+            informationStatus={informationStatus}
+            correctionNote={correctionNote}
+            shortArticleReason={shortArticleReason}
+          />
         </aside>
       </div>
 

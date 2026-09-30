@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <main className="min-h-dvh bg-background-void text-white">
+      <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void text-white">
         <header className="border-b border-white/10">
           <div className="mx-auto flex min-h-16 max-w-4xl items-center px-4 sm:px-6">
             <Link href="/" className="inline-flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Página inicial</Link>

@@ -28,10 +28,12 @@ create index if not exists post_versions_post_created_idx
 
 alter table public.post_versions enable row level security;
 
+drop policy if exists post_versions_admin_select on public.post_versions;
 create policy post_versions_admin_select on public.post_versions
   for select to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean = true);
 
+drop policy if exists post_versions_admin_insert on public.post_versions;
 create policy post_versions_admin_insert on public.post_versions
   for insert to authenticated
   with check ((auth.jwt() -> 'app_metadata' ->> 'is_admin')::boolean = true);

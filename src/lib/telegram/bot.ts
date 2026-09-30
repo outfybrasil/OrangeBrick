@@ -3,6 +3,8 @@ import type { Post } from "../types/database.ts";
 import { generateNewsDraft, NoFreshTopicError, SimilarTopicError } from "../ai/gemini-news.ts";
 import { getSiteUrl } from "../site-url.ts";
 import { createPreviewToken } from "../preview-token.ts";
+import { validateStoredEditorialPost } from "../content-validation.ts";
+import { normalizeNewsSearch } from "../news-query.ts";
 
 export interface TelegramUpdate {
   update_id: number;
@@ -77,9 +79,9 @@ function getAdminChatId(): string | null {
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
   if (!url || !serviceKey) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados.");
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL ou SUPABASE_SECRET_KEY não configurados.");
   }
   return createClient(url, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -92,12 +94,26 @@ export async function sendTelegramApi(method: string, body: Record<string, unkno
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(12000),
   });
-  const data = (await res.json()) as { ok: boolean; description?: string; result?: unknown };
+  const data = (await res.json()) as { ok: boolean; error_code?: number; description?: string; result?: unknown };
   if (!data.ok) {
     console.error(`Erro na API do Telegram (${method}):`, data);
   }
   return data;
+}
+
+export async function sendTelegramMessageWithRetry(body: Record<string, unknown>): Promise<boolean> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await sendTelegramApi("sendMessage", body);
+      if (response.ok) return true;
+      if (response.error_code && response.error_code < 500 && response.error_code !== 429) return false;
+    } catch {
+    }
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+  }
+  return false;
 }
 
 export async function notifyAdmin(html: string): Promise<void> {
@@ -223,8 +239,13 @@ async function loadPost(postId: string): Promise<Post | null> {
   return (data as Post) || null;
 }
 
-function previewUrlFor(slug: string): string {
-  return `${getSiteUrl()}/posts/${slug}?preview=${createPreviewToken(slug)}`;
+function previewUrlFor(post: Post): string {
+  const siteUrl = getSiteUrl();
+  const token = createPreviewToken(post.slug);
+  if (!token || new URL(siteUrl).protocol !== "https:") {
+    return `https://orangebrick.blog/admin/edit?id=${encodeURIComponent(post.id)}`;
+  }
+  return `${siteUrl}/posts/${post.slug}?preview=${token}`;
 }
 
 function wordCount(body: string): number {
@@ -251,7 +272,7 @@ function approvalText(post: Post, extra = ""): string {
 }
 
 function approvalKeyboard(post: Post): InlineKeyboard {
-  const previewUrl = previewUrlFor(post.slug);
+  const previewUrl = previewUrlFor(post);
   return [
     [
       { text: "🚀 Publicar", callback_data: `pub:${post.id}` },
@@ -270,10 +291,10 @@ function approvalKeyboard(post: Post): InlineKeyboard {
 }
 
 export async function sendPostForApproval(post: Post, _wordCountArg?: number) {
+  void _wordCountArg;
   const adminChatId = getAdminChatId();
   if (!adminChatId) {
-    console.warn("TELEGRAM_ADMIN_CHAT_ID não configurado. Impossível enviar notificação para aprovação.");
-    return null;
+    throw new Error("TELEGRAM_ADMIN_CHAT_ID não configurado. Não foi possível enviar a matéria para aprovação.");
   }
 
   const caption =
@@ -291,12 +312,14 @@ export async function sendPostForApproval(post: Post, _wordCountArg?: number) {
     if (photoRes.ok) return photoRes;
   }
 
-  return sendTelegramApi("sendMessage", {
+  const messageRes = await sendTelegramApi("sendMessage", {
     chat_id: adminChatId,
     text: caption,
     parse_mode: "HTML",
     reply_markup: { inline_keyboard: approvalKeyboard(post) },
   });
+  if (!messageRes.ok) throw new Error(`Telegram não confirmou o cartão de aprovação: ${messageRes.description || "erro desconhecido"}`);
+  return messageRes;
 }
 
 async function editCard(
@@ -573,7 +596,7 @@ export async function notifyNewCommunityReports(): Promise<void> {
 
 async function findProfileByTerm(term: string) {
   const supabase = getSupabaseAdmin();
-  const clean = term.replace(/^@/, "").trim();
+  const clean = normalizeNewsSearch(term.replace(/^@/, ""), 80);
   if (!clean) return null;
   const { data } = await supabase
     .from("profiles")
@@ -710,6 +733,11 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
       await answerToast(cq, "Matéria não encontrada.", true);
       return;
     }
+    const publicationErrors = validateStoredEditorialPost(post);
+    if (publicationErrors.length > 0) {
+      await answerToast(cq, `Publicação bloqueada: ${publicationErrors.slice(0, 2).join(" ")}`, true);
+      return;
+    }
     const now = new Date().toISOString();
     const { data: updated, error } = await supabase
       .from("posts")
@@ -758,13 +786,13 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
       return;
     }
     await answerToast(cq, "Cartão aberto.", false);
-    await sendDetailCard(cq.message?.chat.id!, post);
+    if (cq.message?.chat.id) await sendDetailCard(cq.message.chat.id, post);
     return;
   }
 
   if (action === "pgd") {
     await answerToast(cq, "Carregando…", false);
-    await listDraftsPage(cq.message?.chat.id!, Number(arg1) || 0);
+    if (cq.message?.chat.id) await listDraftsPage(cq.message.chat.id, Number(arg1) || 0);
     return;
   }
 
@@ -885,7 +913,7 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
 
   if (action === "rpt") {
     await answerToast(cq, "Carregando…", false);
-    await listReportsPage(cq.message?.chat.id!, Number(arg1) || 0);
+    if (cq.message?.chat.id) await listReportsPage(cq.message.chat.id, Number(arg1) || 0);
     return;
   }
 
@@ -933,7 +961,7 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
 
   if (action === "bvw" && arg1) {
     await answerToast(cq, "Abrindo…", false);
-    await brickDetailView(cq.message?.chat.id!, arg1);
+    if (cq.message?.chat.id) await brickDetailView(cq.message.chat.id, arg1);
     return;
   }
 
@@ -957,7 +985,7 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
 
   if (action === "bdln" && arg1) {
     await answerToast(cq, "Cancelado.", false);
-    await brickDetailView(cq.message?.chat.id!, arg1);
+    if (cq.message?.chat.id) await brickDetailView(cq.message.chat.id, arg1);
     return;
   }
 

@@ -4,9 +4,11 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
+import { normalizeNewsSearch } from "@/lib/news-query";
 
 const PAGE_SIZE = 50;
 const REFRESH_INTERVAL = 120_000;
+const EMPTY_INITIAL_POSTS: Post[] = [];
 
 interface UseInfiniteFeedReturn {
   posts: Post[];
@@ -18,7 +20,7 @@ interface UseInfiniteFeedReturn {
   refresh: () => void;
 }
 
-export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Post[] = []): UseInfiniteFeedReturn {
+export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Post[] = EMPTY_INITIAL_POSTS, search = "", tag = "", platformKeywords: string[] = []): UseInfiniteFeedReturn {
   const supabase = useMemo(() => createClient(), []);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(initialPosts.length === 0);
@@ -54,6 +56,18 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
         if (category) {
           query = query.eq("category", category);
         }
+        const searchTerm = normalizeNewsSearch(search);
+        if (searchTerm) query = query.or(`title.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
+        const tagTerm = normalizeNewsSearch(tag);
+        if (tagTerm) query = query.or(`title.ilike.%${tagTerm}%,summary.ilike.%${tagTerm}%,author_tag.ilike.%${tagTerm}%`);
+        if (platformKeywords.length > 0) {
+          const platformFilters = platformKeywords.flatMap((keyword) => {
+            const term = normalizeNewsSearch(keyword);
+            if (!term) return [];
+            return [`title.ilike.%${term}%`, `summary.ilike.%${term}%`, `category.ilike.%${term}%`, `author_tag.ilike.%${term}%`];
+          });
+          if (platformFilters.length > 0) query = query.or(platformFilters.join(","));
+        }
 
         if (!isRefresh && cursorRef.current) {
           query = query.lt("created_at", cursorRef.current);
@@ -73,11 +87,8 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
           setPosts((prev) => [...prev, ...newPosts]);
         }
 
-        if (newPosts.length < PAGE_SIZE) {
-          setHasMore(false);
-        } else {
-          cursorRef.current = newPosts[newPosts.length - 1].created_at;
-        }
+        setHasMore(newPosts.length === PAGE_SIZE);
+        cursorRef.current = newPosts.at(-1)?.created_at || null;
       } catch (err) {
         const msg =
           err && typeof err === "object" && "message" in err
@@ -90,7 +101,7 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
         loadingRef.current = false;
       }
     },
-    [category, supabase]
+    [category, search, tag, platformKeywords, supabase]
   );
 
   useEffect(() => {

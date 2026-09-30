@@ -6,6 +6,7 @@ export function getCommunityErrorMessage(error: unknown): string {
       : "";
   const normalized = message.toLocaleLowerCase("pt-BR");
 
+  if (normalized.includes("muitas tentativas")) return "Você fez muitas tentativas. Aguarde um minuto e tente novamente.";
   if (normalized.includes("limite diário")) return "Você atingiu o limite de hoje. Amanhã as ações serão liberadas novamente.";
   if (normalized.includes("suspensa até")) return message;
   if (normalized.includes("bloqueada pela moderação")) return "Sua participação no Brickboard está bloqueada. Você ainda pode acessar e ler o conteúdo.";

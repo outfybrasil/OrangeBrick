@@ -58,6 +58,7 @@ export default function CoverflowGallery({
 }: CoverflowGalleryProps) {
   const [active, setActive] = useState(0);
   const [availableWidth, setAvailableWidth] = useState(cardWidth);
+  const [reducedMotion, setReducedMotion] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const duration = transition.duration ?? 0.45;
   const delay = transition.delay ?? 2.5;
@@ -79,6 +80,14 @@ export default function CoverflowGallery({
   }, [slides.length]);
 
   useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     const observer = new ResizeObserver(([entry]) => setAvailableWidth(entry.contentRect.width));
@@ -87,11 +96,11 @@ export default function CoverflowGallery({
   }, []);
 
   useEffect(() => {
-    if (!autoplay || slides.length < 2) return;
+    if (!autoplay || reducedMotion || slides.length < 2) return;
     const direction = autoplayDirection === "leftToRight" ? -1 : 1;
     const timer = window.setInterval(() => step(direction), Math.max(600, delay * 1000));
     return () => window.clearInterval(timer);
-  }, [autoplay, autoplayDirection, delay, slides.length, step]);
+  }, [autoplay, autoplayDirection, delay, reducedMotion, slides.length, step]);
 
   const touchStartXRef = useRef<number | null>(null);
   const touchDeltaXRef = useRef<number>(0);
@@ -154,6 +163,9 @@ export default function CoverflowGallery({
             <button
               key={`${slide.title}-${index}`}
               type="button"
+              inert={!visible}
+              aria-hidden={!visible}
+              tabIndex={visible ? 0 : -1}
               onClick={() => selected ? step(1) : setActive(index)}
               aria-label={selected ? `${slide.title}. Próximo lançamento` : `Selecionar ${slide.title}`}
               aria-current={selected ? "true" : undefined}
@@ -164,10 +176,10 @@ export default function CoverflowGallery({
                 pointerEvents: visible ? "auto" : "none",
                 transform,
                 transformStyle: "preserve-3d",
-                transition: `transform ${duration}s ${easing}, opacity ${duration}s ${easing}`,
+                transition: reducedMotion ? "none" : `transform ${duration}s ${easing}, opacity ${duration}s ${easing}`,
               }}
             >
-              {slide.image?.src && <img src={slide.image.src} alt={slide.image.alt || ""} draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />}
+              {slide.image?.src && <img loading="lazy" decoding="async" src={slide.image.src} alt={slide.image.alt || ""} draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />}
               {showTitle && (
                 <>
                   <span className={`absolute inset-0 ${isTop ? "bg-gradient-to-b" : "bg-gradient-to-t"} from-black/90 via-black/20 to-transparent`} aria-hidden="true" />

@@ -80,21 +80,21 @@ export function parseMarkdownToReact(text: string) {
 
     if (trimmed.startsWith("### ")) {
       return (
-        <h3 key={i} className="text-lg sm:text-xl font-heading font-extrabold text-white mt-6 mb-3 uppercase tracking-tight">
+        <h3 key={i} className="text-[1.125em] sm:text-[1.25em] font-heading font-extrabold text-white mt-6 mb-3 uppercase tracking-tight">
           {parseInlineMarkdown(trimmed.slice(4))}
         </h3>
       );
     }
     if (trimmed.startsWith("## ")) {
       return (
-        <h2 key={i} className="text-xl sm:text-2xl font-heading font-extrabold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/20 pb-2">
+        <h2 key={i} className="text-[1.25em] sm:text-[1.5em] font-heading font-extrabold text-white mt-8 mb-4 uppercase tracking-tight border-b border-brand-orange-muted/20 pb-2">
           {parseInlineMarkdown(trimmed.slice(3))}
         </h2>
       );
     }
     if (trimmed.startsWith("# ")) {
       return (
-        <h1 key={i} className="text-2xl sm:text-3xl font-heading font-black text-white mt-10 mb-6 uppercase tracking-tight">
+        <h1 key={i} className="text-[1.5em] sm:text-[1.875em] font-heading font-black text-white mt-10 mb-6 uppercase tracking-tight">
           {parseInlineMarkdown(trimmed.slice(2))}
         </h1>
       );
@@ -112,7 +112,7 @@ export function parseMarkdownToReact(text: string) {
       const quote = trimmed.slice(2).replace(/^(["“])|(["”])$/g, "");
       return (
         <blockquote key={i} className="my-6 border-y border-brand-orange/40 py-6 sm:py-8">
-          <p className="font-heading text-xl font-bold leading-snug text-white sm:text-2xl">
+          <p className="font-heading text-[1.25em] sm:text-[1.5em] font-bold leading-snug text-white">
             “{parseInlineMarkdown(quote)}”
           </p>
         </blockquote>
@@ -124,7 +124,7 @@ export function parseMarkdownToReact(text: string) {
     }
 
     return (
-      <p key={i} className="text-gray-300 font-sans text-base leading-relaxed my-4">
+      <p key={i} className="text-gray-300 font-sans text-[1em] leading-relaxed my-4">
         {parseInlineMarkdown(trimmed)}
       </p>
     );

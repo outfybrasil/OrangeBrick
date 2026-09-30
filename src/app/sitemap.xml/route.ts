@@ -22,21 +22,39 @@ function formatDateISO(dateStr: string | null | undefined): string | null {
 export async function GET() {
   const siteUrl = getSiteUrl();
 
-  let posts: { slug: string; updated_at: string | null }[] = [];
+  const posts: { slug: string; updated_at: string | null }[] = [];
+  const games: { id: string; updated_at?: string | null }[] = [];
 
   try {
     const supabase = createPublicServerClient();
-    const { data } = await supabase
-      .from("posts")
-      .select("slug, updated_at")
-      .eq("is_published", true)
-      .order("published_at", { ascending: false });
+    const pageSize = 1000;
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("slug, updated_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .range(from, from + pageSize - 1);
 
-    if (data) {
-      posts = data as { slug: string; updated_at: string | null }[];
+      if (error) throw error;
+      if (!data?.length) break;
+      posts.push(...data as { slug: string; updated_at: string | null }[]);
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+
+    const { data: gamesData } = await supabase
+      .from("release_radar_items")
+      .select("id, created_at")
+      .eq("is_active", true);
+
+    if (gamesData) {
+      for (const item of gamesData as { id: string; created_at: string }[]) {
+        games.push({ id: item.id, updated_at: item.created_at });
+      }
     }
   } catch {
-    // serve static entries only
   }
 
   const lines = [
@@ -50,6 +68,7 @@ export async function GET() {
     { loc: `${siteUrl}/em-alta`, priority: "0.8", changefreq: "hourly" },
     { loc: `${siteUrl}/lancamentos`, priority: "0.8", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard`, priority: "0.8", changefreq: "hourly" },
+    { loc: `${siteUrl}/meu-brick`, priority: "0.7", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard/ranking`, priority: "0.5", changefreq: "daily" },
     { loc: `${siteUrl}/brickboard/conquistas`, priority: "0.5", changefreq: "weekly" },
     { loc: `${siteUrl}/brickboard/como-funciona`, priority: "0.5", changefreq: "monthly" },
@@ -82,6 +101,19 @@ export async function GET() {
     lines.push(
       `    <changefreq>weekly</changefreq>`,
       `    <priority>0.8</priority>`,
+      "  </url>");
+  }
+
+  for (const game of games) {
+    lines.push("  <url>",
+      `    <loc>${esc(`${siteUrl}/games/${game.id}`)}</loc>`);
+    const formattedLastMod = formatDateISO(game.updated_at);
+    if (formattedLastMod) {
+      lines.push(`    <lastmod>${formattedLastMod}</lastmod>`);
+    }
+    lines.push(
+      `    <changefreq>daily</changefreq>`,
+      `    <priority>0.7</priority>`,
       "  </url>");
   }
 

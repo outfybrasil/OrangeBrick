@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createDataClient } from "@/lib/supabase/client";
 import type { CommunityPost, CommunityPoll, CommunityComment, AttachedArticle, SharedPostData } from "@/lib/types/community";
-import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow, CommunityPollVoteRow } from "@/lib/types/database";
+import type { ReactionType, CommunityPostRow, CommunityReactionRow, CommunityCommentRow, CommunityPollRow } from "@/lib/types/database";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { invokeFunction } from "@/lib/supabase/functions";
@@ -11,16 +11,37 @@ import { getCommunityErrorMessage } from "@/lib/community-errors";
 
 interface UseCommunityFeedOptions {
   load?: boolean;
+  search?: string;
+  platform?: string;
+  article?: string | null;
+  topic?: string | null;
+  post?: string | null;
+  order?: "latest" | "following" | "trending";
 }
 
-export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) {
+interface CommunityPollResults {
+  counts: Record<string, number>;
+  total_votes: number;
+  user_voted_option: number | null;
+}
+
+export function useCommunityFeed({ load = true, search = "", platform = "", article = null, topic = null, post = null, order = "latest" }: UseCommunityFeedOptions = {}) {
   const { user, profile } = useAuth();
   const supabase = useMemo(() => createDataClient(), []);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+  const [pollVoteError, setPollVoteError] = useState<string | null>(null);
+  const pollVotePendingRef = useRef(false);
   const [isLoaded, setIsLoaded] = useState(!load);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [operationError, setOperationError] = useState<string | null>(null);
   const isMountedRef = useRef(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const pageOffsetRef = useRef(0);
+  const feedPendingRef = useRef(false);
+  const feedVersionRef = useRef(0);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -45,74 +66,30 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
     }
   }, [supabase]);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (showLoading = false, append = false) => {
+    if (append && feedPendingRef.current) return;
+    feedPendingRef.current = true;
+    const requestVersion = ++feedVersionRef.current;
+    if (append) setIsLoadingMore(true);
+    setLoadError(null);
+    if (showLoading) setIsLoaded(false);
     try {
-      const { data: postRows } = await supabase
-        .from("community_posts")
-        .select("*")
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+      const { data: result, error: postsError } = await supabase.rpc("community_feed_page", {
+        page_offset: append ? pageOffsetRef.current : 0,
+        search_text: search.trim(),
+        platform_filter: platform,
+        article_filter: article || "",
+        topic_filter: topic || "",
+        post_filter: post || "",
+        feed_order: order,
+      });
+      if (postsError) throw postsError;
+      if (requestVersion !== feedVersionRef.current) return;
+      const page = result as unknown as { posts: Array<CommunityPostRow & { reactions: Record<ReactionType, number>; user_reaction: ReactionType | null; comments_count: number; shares_count: number }>; has_more: boolean };
+      if (!page || !Array.isArray(page.posts)) throw new Error("Resposta inválida ao carregar conversas.");
+      const postRows = page.posts;
 
-      const userReactions: Record<string, ReactionType> = {};
-      if (user) {
-        try {
-          const { data: reactions } = await supabase
-            .from("community_reactions")
-            .select("*")
-            .eq("user_id", user.id);
-          if (reactions) {
-            for (const r of reactions as CommunityReactionRow[]) {
-              userReactions[r.post_id] = r.reaction_type;
-            }
-          }
-        } catch {
-          // Fallback silencioso
-        }
-      }
-
-      const reactionMap: Record<string, Record<ReactionType, number>> = {};
-      try {
-        const { data: allReactions } = await supabase
-          .from("community_reactions")
-          .select("*");
-        if (allReactions) {
-          for (const r of allReactions as CommunityReactionRow[]) {
-            if (!reactionMap[r.post_id]) {
-              reactionMap[r.post_id] = { hype: 0, flop: 0, salty: 0 };
-            }
-            reactionMap[r.post_id][r.reaction_type]++;
-          }
-        }
-      } catch {
-        // Fallback silencioso
-      }
-
-      const commentCountMap: Record<string, number> = {};
-      try {
-        const { data: allComments } = await supabase
-          .from("community_comments")
-          .select("*");
-        if (allComments) {
-          for (const c of allComments as CommunityCommentRow[]) {
-            commentCountMap[c.post_id] = (commentCountMap[c.post_id] || 0) + 1;
-          }
-        }
-      } catch {
-        // Fallback silencioso
-      }
-
-      const shareCountMap: Record<string, number> = {};
-      if (postRows) {
-        for (const row of postRows as CommunityPostRow[]) {
-          const article = row.attached_article as Record<string, unknown> | null;
-          if (article && article._type === "shared_post") {
-            const origId = article.original_post_id as string;
-            shareCountMap[origId] = (shareCountMap[origId] || 0) + 1;
-          }
-        }
-      }
-
-      const mappedPosts: CommunityPost[] = (postRows as CommunityPostRow[] | null || []).map((row) => {
+      const mappedPosts: CommunityPost[] = postRows.map((row) => {
         const rawArticle = row.attached_article as Record<string, unknown> | null;
         let attachedArticle: AttachedArticle | null = null;
         let sharedPost: SharedPostData | null = null;
@@ -134,10 +111,10 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           platform_tag: row.platform_tag,
           attached_article: attachedArticle,
           shared_post: sharedPost,
-          reactions: reactionMap[row.id] || { hype: 0, flop: 0, salty: 0 },
-          user_reaction: userReactions[row.id] || null,
-          comments_count: commentCountMap[row.id] || 0,
-          shares_count: shareCountMap[row.id] || 0,
+          reactions: row.reactions,
+          user_reaction: row.user_reaction,
+          comments_count: row.comments_count,
+          shares_count: row.shares_count,
           created_at: row.created_at,
           is_pinned: row.is_pinned,
           is_official: row.is_official,
@@ -147,10 +124,13 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         };
       });
 
-      if (!isMountedRef.current) return;
-      setPosts(mappedPosts);
+      if (!isMountedRef.current || requestVersion !== feedVersionRef.current) return;
+      setPosts((current) => append ? [...current, ...mappedPosts.filter((item) => !current.some((existing) => existing.id === item.id))] : mappedPosts);
+      pageOffsetRef.current = (append ? pageOffsetRef.current : 0) + mappedPosts.length;
+      setHasMore(page.has_more);
+      if (append) return;
 
-      const { data: pollRows } = await supabase
+      const { data: pollRows, error: pollRowsError } = await supabase
         .from("community_polls")
         .select("*")
         .eq("is_active", true)
@@ -158,62 +138,49 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         .order("prompt_date", { ascending: false })
         .limit(1)
         .maybeSingle();
+      if (pollRowsError) throw pollRowsError;
 
       if (pollRows) {
         const pollRow = pollRows as CommunityPollRow;
-        let userVotedOption: number | undefined;
-        if (user) {
-          const { data: vote } = await supabase
-            .from("community_poll_votes")
-            .select("*")
-            .eq("poll_id", pollRow.id)
-            .eq("user_id", user.id)
-            .maybeSingle();
-          if (vote) {
-            userVotedOption = (vote as CommunityPollVoteRow).option_index;
-          }
-        }
-
-        const { data: allVotes } = await supabase
-          .from("community_poll_votes")
-          .select("*")
-          .eq("poll_id", pollRow.id);
-
-        const voteCounts: Record<number, number> = {};
-        if (allVotes) {
-          for (const v of allVotes as CommunityPollVoteRow[]) {
-            voteCounts[v.option_index] = (voteCounts[v.option_index] || 0) + 1;
-          }
-        }
+        const { data: pollResults, error: pollResultsError } = await supabase.rpc("community_poll_results", { p_poll_id: pollRow.id });
+        if (pollResultsError) throw pollResultsError;
+        const results = pollResults as unknown as CommunityPollResults | null;
+        if (!results || !results.counts || !Number.isFinite(results.total_votes)) throw new Error("Resultado da enquete indisponível.");
 
         const rawOptions = pollRow.options as Array<{ id: number; text: string }>;
         const options = rawOptions.map((opt) => ({
           ...opt,
-          votes: voteCounts[opt.id] || 0,
+          votes: results.counts[String(opt.id)] || 0,
         }));
 
-        if (!isMountedRef.current) return;
+        if (!isMountedRef.current || requestVersion !== feedVersionRef.current) return;
         setPoll({
           id: pollRow.id,
           question: pollRow.question,
           options,
-          total_votes: allVotes?.length || 0,
-          user_voted_option: userVotedOption ?? null,
+          total_votes: results.total_votes,
+          user_voted_option: user?.id ? results.user_voted_option : null,
           created_at: pollRow.created_at,
           ends_at: pollRow.expires_at,
         });
       }
     } catch (err) {
-      console.error("Failed to load community data:", err);
+      if (isMountedRef.current && requestVersion === feedVersionRef.current) setLoadError(getCommunityErrorMessage(err));
     } finally {
-      if (isMountedRef.current) setIsLoaded(true);
+      if (requestVersion === feedVersionRef.current) {
+        feedPendingRef.current = false;
+        if (isMountedRef.current) {
+          setIsLoadingMore(false);
+          setIsLoaded(true);
+        }
+      } else if (isMountedRef.current && requestVersion === feedVersionRef.current) setPoll(null);
     }
-  }, [user, supabase]);
+  }, [user, supabase, search, platform, article, topic, post, order]);
 
   useEffect(() => {
     if (!load) return;
     const t = setTimeout(() => {
-      void fetchData();
+      void fetchData(true);
     }, 0);
     return () => clearTimeout(t);
   }, [fetchData, load]);
@@ -230,6 +197,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
           if (
             payload.table === "community_posts" ||
             payload.table === "community_reactions" ||
+            payload.table === "community_comments" ||
             payload.table === "community_poll_votes"
           ) {
             fetchData();
@@ -245,7 +213,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
 
   const addPost = useCallback(
     async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para publicar no Brickboard.");
 
       const authorName =
         profile?.nickname ||
@@ -271,14 +239,21 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         media_url: mediaUrl || null,
         topic_id: attachedArticle?.topic_id || null,
       });
-      if (error) setOperationError(getCommunityErrorMessage(error));
+      if (error) {
+        const message = getCommunityErrorMessage(error);
+        setOperationError(message);
+        throw new Error(message);
+      }
+      setOperationError(null);
     },
     [user, profile, supabase]
   );
 
   const toggleReaction = useCallback(
     async (postId: string, reactionType: ReactionType) => {
-      if (!user) return;
+      if (!user) return false;
+      const previousPost = posts.find((post) => post.id === postId);
+      if (!previousPost) return false;
 
       setPosts((prevPosts) =>
         prevPosts.map((p) => {
@@ -301,26 +276,30 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       );
 
       try {
-        const { data: existing } = await supabase
+        const { data: existing, error: lookupError } = await supabase
           .from("community_reactions")
           .select("*")
           .eq("post_id", postId)
           .eq("user_id", user.id)
           .maybeSingle();
+        if (lookupError) throw lookupError;
 
         const existingRow = existing as CommunityReactionRow | null;
 
         if (existingRow) {
           if (existingRow.reaction_type === reactionType) {
-            await supabase.from("community_reactions").delete().eq("id", existingRow.id);
+            const { error } = await supabase.from("community_reactions").delete().eq("id", existingRow.id);
+            if (error) throw error;
           } else {
-            await supabase.from("community_reactions").delete().eq("id", existingRow.id);
-            const { error } = await supabase.from("community_reactions").insert({
+            const { error: deleteError } = await supabase.from("community_reactions").delete().eq("id", existingRow.id);
+            if (deleteError) throw deleteError;
+            const { error: insertError } = await supabase.from("community_reactions").insert({
               post_id: postId,
               user_id: user.id,
               reaction_type: reactionType,
             });
-            if (!error) await sendCommunityPush("reaction", postId);
+            if (insertError) throw insertError;
+            await sendCommunityPush("reaction", postId);
           }
         } else {
           const { error } = await supabase.from("community_reactions").insert({
@@ -328,43 +307,32 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
             user_id: user.id,
             reaction_type: reactionType,
           });
-          if (!error) await sendCommunityPush("reaction", postId);
+          if (error) throw error;
+          await sendCommunityPush("reaction", postId);
         }
-      } catch {
-        fetchData();
+        setOperationError(null);
+        return true;
+      } catch (cause) {
+        setOperationError(getCommunityErrorMessage(cause));
+        setPosts((prevPosts) => prevPosts.map((post) => post.id === postId ? previousPost : post));
+        await fetchData();
+        return false;
       }
     },
-    [user, supabase, fetchData, sendCommunityPush]
+    [user, posts, supabase, fetchData, sendCommunityPush]
   );
 
   const votePoll = useCallback(
     async (optionId: number) => {
-      if (!user || !poll) return;
+      if (!user || !poll || pollVotePendingRef.current) return;
 
       const previousVote = poll.user_voted_option;
       if (previousVote === optionId) return;
 
-      setPoll((prevPoll) => {
-        if (!prevPoll) return null;
-        const newOptions = prevPoll.options.map((opt) => {
-          if (opt.id === optionId) {
-            return { ...opt, votes: opt.votes + 1 };
-          }
-          if (previousVote !== undefined && previousVote !== null && opt.id === previousVote) {
-            return { ...opt, votes: Math.max(0, opt.votes - 1) };
-          }
-          return opt;
-        });
-
-        const isNewVote = previousVote === undefined || previousVote === null;
-
-        return {
-          ...prevPoll,
-          options: newOptions,
-          total_votes: isNewVote ? prevPoll.total_votes + 1 : prevPoll.total_votes,
-          user_voted_option: optionId,
-        };
-      });
+      pollVotePendingRef.current = true;
+      setIsVoting(true);
+      setPollVoteError(null);
+      let voteSaved = false;
 
       try {
         const isChangingVote = previousVote !== undefined && previousVote !== null;
@@ -387,17 +355,33 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
             });
           if (error) throw error;
         }
+        voteSaved = true;
+        const { data: pollResults, error: pollResultsError } = await supabase.rpc("community_poll_results", { p_poll_id: poll.id });
+        if (pollResultsError) throw pollResultsError;
+        const results = pollResults as unknown as CommunityPollResults | null;
+        if (!results || !results.counts || !Number.isFinite(results.total_votes)) throw new Error("Resultado da enquete indisponível.");
+        setPoll((current) => current?.id === poll.id ? {
+          ...current,
+          options: current.options.map((option) => ({ ...option, votes: results.counts[String(option.id)] || 0 })),
+          total_votes: results.total_votes,
+          user_voted_option: results.user_voted_option,
+        } : current);
       } catch (err) {
-        console.error("Failed to vote:", err);
-        await fetchData();
+        if (voteSaved) {
+          setPoll((current) => current?.id === poll.id ? { ...current, user_voted_option: optionId } : current);
+          setPollVoteError("Seu voto foi registrado, mas os totais não foram atualizados. Recarregue a página.");
+        } else setPollVoteError(getCommunityErrorMessage(err));
+      } finally {
+        pollVotePendingRef.current = false;
+        setIsVoting(false);
       }
     },
-    [user, poll, supabase, fetchData]
+    [user, poll, supabase]
   );
 
   const sharePost = useCallback(
     async (originalPost: CommunityPost, comment: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para compartilhar um Brick.");
 
       const authorName =
         profile?.nickname ||
@@ -431,8 +415,12 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
         },
         topic_id: originalPost.topic_id || null,
       });
-      if (error) setOperationError(getCommunityErrorMessage(error));
-      else await sendCommunityPush("repost", originalPost.id);
+      if (error) {
+        const message = getCommunityErrorMessage(error);
+        setOperationError(message);
+        throw new Error(message);
+      }
+      await sendCommunityPush("repost", originalPost.id);
     },
     [user, profile, supabase, sendCommunityPush]
   );
@@ -489,8 +477,8 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   );
 
   const addComment = useCallback(
-    async (postId: string, content: string) => {
-      if (!user) return;
+    async (postId: string, content: string, parentId?: string) => {
+      if (!user) throw new Error("Entre na sua conta para responder no Brickboard.");
 
       const authorName =
         profile?.nickname ||
@@ -507,52 +495,69 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       setOperationError(null);
       const { error } = await supabase.from("community_comments").insert({
         post_id: postId,
+        parent_id: parentId || null,
         user_id: user.id,
         author_name: authorName,
         author_username: profile?.username || null,
         author_avatar: authorAvatar,
         content,
       });
-      if (error) setOperationError(getCommunityErrorMessage(error));
-      else await sendCommunityPush("comment", postId);
+      if (error) {
+        const message = getCommunityErrorMessage(error);
+        setOperationError(message);
+        throw new Error(message);
+      }
+      setOperationError(null);
+      await sendCommunityPush("comment", postId);
     },
     [user, profile, supabase, sendCommunityPush]
   );
 
   const deleteComment = useCallback(
     async (commentId: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para apagar uma resposta.");
       setOperationError(null);
       const { error } = await supabase.from("community_comments").delete().eq("id", commentId).eq("user_id", user.id);
-      if (error) setOperationError(getCommunityErrorMessage(error));
+      if (error) {
+        const message = getCommunityErrorMessage(error);
+        setOperationError(message);
+        throw new Error(message);
+      }
     },
     [user, supabase]
   );
 
   const toggleCommentLike = useCallback(
     async (commentId: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para curtir uma resposta.");
 
       try {
-        const { data: existing } = await supabase
+        setOperationError(null);
+        const { data: existing, error: lookupError } = await supabase
           .from("community_comment_likes")
           .select("*")
           .eq("comment_id", commentId)
           .eq("user_id", user.id)
           .maybeSingle();
+        if (lookupError) throw lookupError;
 
         const existingRow = existing as { id: string } | null;
 
         if (existingRow) {
-          await supabase.from("community_comment_likes").delete().eq("id", existingRow.id);
+          const { error } = await supabase.from("community_comment_likes").delete().eq("id", existingRow.id);
+          if (error) throw error;
         } else {
           const { error } = await supabase.from("community_comment_likes").insert({
             comment_id: commentId,
             user_id: user.id,
           });
-          if (!error) await sendCommunityPush("comment_like", commentId);
+          if (error) throw error;
+          await sendCommunityPush("comment_like", commentId);
         }
-      } catch {
+      } catch (cause) {
+        const message = getCommunityErrorMessage(cause);
+        setOperationError(message);
+        throw new Error(message);
       }
     },
     [user, supabase, sendCommunityPush]
@@ -560,11 +565,12 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
 
   const getComments = useCallback(
     async (postId: string): Promise<CommunityComment[]> => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("community_comments")
         .select("*")
         .eq("post_id", postId)
         .order("created_at", { ascending: true });
+      if (error) throw new Error(getCommunityErrorMessage(error));
 
       const rows = data as CommunityCommentRow[] | null;
       if (!rows || rows.length === 0) return [];
@@ -593,6 +599,7 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
       return rows.map((row) => ({
         id: row.id,
         post_id: row.post_id,
+        parent_id: row.parent_id,
         user_id: row.user_id,
         author_name: row.author_name,
         author_username: row.author_username,
@@ -610,7 +617,14 @@ export function useCommunityFeed({ load = true }: UseCommunityFeedOptions = {}) 
   return {
     posts,
     poll,
+    isVoting,
+    pollVoteError,
     isLoaded,
+    hasMore,
+    isLoadingMore,
+    loadMore: () => fetchData(false, true),
+    loadError,
+    fetchData,
     operationError,
     clearOperationError: () => setOperationError(null),
     addPost,

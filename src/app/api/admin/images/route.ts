@@ -7,12 +7,12 @@ import {
   validateReleaseSourceUrl,
 } from "@/lib/release-images";
 import type { EditorialImage } from "@/lib/types/database";
-import { validateRemoteUrl } from "@/lib/server/network";
+import { fetchValidatedRemote, readResponseBuffer } from "@/lib/server/network";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
+const MAX_SOURCE_BYTES = 4 * 1024 * 1024;
 const OUTPUT_WIDTH = 1280;
 const OUTPUT_HEIGHT = 720;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
@@ -31,62 +31,51 @@ interface ProcessedImage {
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
 
-async function assertSafeUrl(value: string) {
-  return validateRemoteUrl(value, false);
-}
-
 async function downloadImage(sourceUrl: string, kind: ImageKind) {
-  if (kind === "release") {
-    const sourceError = validateReleaseSourceUrl(sourceUrl);
-    if (sourceError) throw new Error(sourceError);
+  const response = await fetchValidatedRemote(sourceUrl, {
+    httpsOnly: false,
+    validateRedirect: kind === "release" ? (url) => {
+      const sourceError = validateReleaseSourceUrl(url.toString());
+      if (sourceError) throw new Error(sourceError);
+    } : undefined,
+    headers: {
+      Accept: "image/avif,image/webp,image/png,image/jpeg",
+      "User-Agent": "OrangeBrick-ImageImporter/1.0",
+    },
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error(`A origem respondeu com HTTP ${response.status}`);
   }
-  let currentUrl = await assertSafeUrl(sourceUrl);
-
-  for (let redirect = 0; redirect <= 3; redirect += 1) {
-    const response = await fetch(currentUrl, {
-      redirect: "manual",
-      headers: {
-        Accept: "image/avif,image/webp,image/png,image/jpeg",
-        "User-Agent": "OrangeBrick-ImageImporter/1.0",
-      },
-      signal: AbortSignal.timeout(15_000),
-    });
-
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location");
-      if (!location || redirect === 3) throw new Error("Redirecionamentos demais");
-      const redirectedUrl = new URL(location, currentUrl).toString();
-      if (kind === "release") {
-        const redirectError = validateReleaseSourceUrl(redirectedUrl);
-        if (redirectError) throw new Error(redirectError);
-      }
-      currentUrl = await assertSafeUrl(redirectedUrl);
-      continue;
-    }
-
-    if (!response.ok) throw new Error(`A origem respondeu com HTTP ${response.status}`);
-    const contentType = response.headers.get("content-type")?.split(";")[0].toLowerCase() || "";
-    if (!ALLOWED_TYPES.has(contentType)) throw new Error("A URL não retornou uma imagem compatível");
-    const declaredSize = Number(response.headers.get("content-length") || 0);
-    if (declaredSize > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 10 MB");
-    const source = Buffer.from(await response.arrayBuffer());
-    if (source.byteLength > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 10 MB");
-    return source;
+  const contentType = response.headers.get("content-type")?.split(";")[0].toLowerCase() || "";
+  if (!ALLOWED_TYPES.has(contentType)) {
+    await response.body?.cancel();
+    throw new Error("A URL não retornou uma imagem compatível");
   }
-
-  throw new Error("Não foi possível baixar a imagem");
+  const declaredSize = Number(response.headers.get("content-length") || 0);
+  if (declaredSize > MAX_SOURCE_BYTES) {
+    await response.body?.cancel();
+    throw new Error("A imagem ultrapassa 4 MB");
+  }
+  try {
+    return await readResponseBuffer(response, MAX_SOURCE_BYTES);
+  } catch {
+    throw new Error("A imagem ultrapassa 4 MB ou não pôde ser lida");
+  }
 }
 
 async function readUploadedImage(file: File) {
   if (!ALLOWED_TYPES.has(file.type)) throw new Error("Envie uma imagem JPEG, PNG, WebP ou AVIF");
-  if (file.size > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 10 MB");
+  if (file.size > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 4 MB");
   const source = Buffer.from(await file.arrayBuffer());
-  if (source.byteLength > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 10 MB");
+  if (source.byteLength > MAX_SOURCE_BYTES) throw new Error("A imagem ultrapassa 4 MB");
   return source;
 }
 

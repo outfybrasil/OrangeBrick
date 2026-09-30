@@ -7,7 +7,8 @@ import { Footer } from "@/components/ui/Footer";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
 import type { ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
-import { isAllowedReleaseImageUrl } from "@/lib/release-images";
+import { GameCoverImage } from "@/components/releases/GameCoverImage";
+import { getReleaseMonth, isRetainedRelease } from "@/lib/release-dates";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type {
   ReleaseHypeCount,
@@ -91,23 +92,6 @@ function ReleaseHypeMeter({
   );
 }
 
-function getMonthGroupKey(dateStr: string): { key: string; label: string } {
-  const lower = dateStr.toLowerCase();
-  if (lower.includes("janeiro")) return { key: "2026-01", label: "Janeiro de 2026" };
-  if (lower.includes("fevereiro")) return { key: "2026-02", label: "Fevereiro de 2026" };
-  if (lower.includes("março")) return { key: "2026-03", label: "Março de 2026" };
-  if (lower.includes("abril")) return { key: "2026-04", label: "Abril de 2026" };
-  if (lower.includes("maio")) return { key: "2026-05", label: "Maio de 2026" };
-  if (lower.includes("junho")) return { key: "2026-06", label: "Junho de 2026" };
-  if (lower.includes("julho")) return { key: "2026-07", label: "Julho de 2026" };
-  if (lower.includes("agosto")) return { key: "2026-08", label: "Agosto de 2026" };
-  if (lower.includes("setembro")) return { key: "2026-09", label: "Setembro de 2026" };
-  if (lower.includes("outubro")) return { key: "2026-10", label: "Outubro de 2026" };
-  if (lower.includes("novembro")) return { key: "2026-11", label: "Novembro de 2026" };
-  if (lower.includes("dezembro")) return { key: "2026-12", label: "Dezembro de 2026" };
-  return { key: "other", label: "A confirmar" };
-}
-
 function extractDayNumber(dateStr: string, isoStr?: string): number {
   if (isoStr) {
     const parts = isoStr.split("-");
@@ -178,9 +162,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
           category: item.category,
           slug: item.post_slug || undefined,
     }));
-    const now = new Date();
-    const currentMonthStart = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-01";
-    setReleases(databaseReleases.filter((item) => !item.releaseDateIso || item.releaseDateIso >= currentMonthStart));
+    setReleases(databaseReleases.filter((item) => isRetainedRelease(item.releaseDateIso)));
     setIsLoadingReleases(false);
   }, [supabase]);
 
@@ -300,7 +282,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
   const groupedReleases = useMemo(() => {
     const groups = new Map<string, { label: string; items: ReleaseItem[] }>();
     for (const item of filteredReleases) {
-      const month = getMonthGroupKey(item.releaseDate);
+        const month = getReleaseMonth(item.releaseDateIso);
       const group = groups.get(month.key) || { label: month.label, items: [] };
       group.items.push(item);
       groups.set(month.key, group);
@@ -325,35 +307,50 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
 
   useEffect(() => {
     if (hasPositionedCalendar.current || releases.length === 0 || search || selectedPlatform !== "all") return;
-    const datedReleases = releases
-      .filter((item) => item.releaseDateIso)
-      .sort((first, second) => first.releaseDateIso!.localeCompare(second.releaseDateIso!));
-    const target = datedReleases.find((item) => item.releaseDateIso! >= todayIso) || datedReleases.at(-1);
-    if (!target) return;
+    const targetId = window.location.hash.slice(1);
+    if (!targetId.startsWith("release-")) return;
 
     hasPositionedCalendar.current = true;
     const frame = window.requestAnimationFrame(() => {
-      document.getElementById(`release-${target.id}`)?.scrollIntoView({ block: "start" });
+      document.getElementById(targetId)?.scrollIntoView({ block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [releases, search, selectedPlatform, todayIso]);
 
-  const weeklyHypeRanking = useMemo(() => {
-    return releases
-      .filter((item) => item.category === "week")
-      .map((item) => {
-        const counts = hypeCounts[item.id] || EMPTY_HYPE_COUNTS;
-        return {
-          item,
-          counts,
-          score: counts.buy * 3 + counts.watch * 2,
-          total: counts.buy + counts.watch + counts.skip,
-        };
-      })
-      .filter((entry) => entry.total > 0)
-      .sort((first, second) => second.score - first.score || second.total - first.total)
+  const [rankingTab, setRankingTab] = useState<"week" | "month" | "radar">("week");
+
+  const communityRankings = useMemo(() => {
+    const list = releases.map((item) => {
+      const counts = hypeCounts[item.id] || EMPTY_HYPE_COUNTS;
+      const score = counts.buy * 3 + counts.watch * 2;
+      const total = counts.buy + counts.watch + counts.skip;
+      return {
+        item,
+        counts,
+        score,
+        total,
+        buy: counts.buy,
+        watch: counts.watch,
+      };
+    });
+
+    if (rankingTab === "week") {
+      return list
+        .filter((entry) => entry.item.category === "week" && entry.total > 0)
+        .sort((first, second) => second.score - first.score || second.total - first.total)
+        .slice(0, 5);
+    }
+    if (rankingTab === "month") {
+      return list
+        .filter((entry) => entry.total > 0)
+        .sort((first, second) => second.buy + second.watch - (first.buy + first.watch) || second.total - first.total)
+        .slice(0, 5);
+    }
+    return list
+      .filter((entry) => entry.watch > 0)
+      .sort((first, second) => second.watch - first.watch || second.total - first.total)
       .slice(0, 5);
-  }, [hypeCounts, releases]);
+  }, [hypeCounts, rankingTab, releases]);
 
   return (
     <div className="min-h-dvh bg-background-void text-white">
@@ -362,7 +359,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 text-xs font-bold text-gray-400 transition-colors hover:text-white"
+            className="flex min-h-11 items-center gap-2 text-xs font-bold text-gray-400 transition-colors hover:text-white"
           >
             ← Voltar para a Home
           </button>
@@ -380,17 +377,18 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
         </div>
       </header>
 
+      <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh">
       {/* Hero Header */}
       <div className="border-b border-white/10 bg-card-slate/10 py-10 sm:py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <p className="mb-2 text-xs font-black uppercase tracking-widest text-brand-orange">
-            Calendário de Games 2026
+            Radar de lançamentos
           </p>
           <h1 className="font-heading text-3xl font-black uppercase tracking-tight text-white sm:text-5xl">
             Lançamentos <span className="text-brand-orange">Oficiais</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400">
-            Agenda completa dos principais jogos confirmados para PlayStation, Xbox, Nintendo Switch, Switch 2 e PC em 2026.
+            Confira jogos confirmados por data e plataforma, com datas organizadas pelo ano oficial de lançamento.
           </p>
 
           {/* Filtros e Busca */}
@@ -401,12 +399,14 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                 placeholder="Buscar por nome do jogo..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="min-h-11 w-full border border-white/10 bg-background-void px-4 text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none"
+                  className="min-h-11 w-full border border-white/10 bg-background-void pl-4 pr-14 text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none"
               />
               {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="absolute right-3 top-2.5 text-xs text-gray-400 hover:text-white"
+                  <button
+                    type="button"
+                    aria-label="Limpar busca de jogos"
+                    onClick={() => setSearch("")}
+                    className="absolute right-0 top-0 flex min-h-11 min-w-11 items-center justify-center text-xs text-gray-400 hover:text-white"
                 >
                   <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
                     <path d="M6 6l12 12M18 6 6 18" />
@@ -415,24 +415,26 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x sm:flex-wrap sm:overflow-visible sm:pb-0">
               {[
-                ["all", "Todas as plataformas"],
-                ["ps5", "PS5"],
-                ["xsx", "Xbox Series"],
-                ["switch", "Nintendo"],
-                ["pc", "PC"],
-              ].map(([key, label]) => (
+                ["all", "Todas as plataformas", "Todas"],
+                ["ps5", "PS5", "PS5"],
+                ["xbox", "Xbox Series", "Xbox"],
+                ["switch", "Nintendo", "Switch"],
+                ["pc", "PC", "PC"],
+              ].map(([key, fullLabel, shortLabel]) => (
                 <button
                   key={key}
                   onClick={() => setSelectedPlatform(key)}
-                  className={`min-h-11 border px-3 text-xs font-bold transition-colors ${
+                  aria-pressed={selectedPlatform === key}
+                  className={`min-h-11 shrink-0 snap-start border px-3 text-xs font-bold transition-colors ${
                     selectedPlatform === key
                       ? "border-brand-orange bg-brand-orange text-white"
                       : "border-white/10 bg-card-slate/40 text-gray-300 hover:border-white/25 hover:text-white"
                   }`}
                 >
-                  {label}
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="hidden sm:inline">{fullLabel}</span>
                 </button>
               ))}
             </div>
@@ -441,44 +443,107 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
       </div>
 
       {/* Grade Principal de Lançamentos */}
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <section className="mb-12 border-y border-white/10" aria-labelledby="weekly-hype-title">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <section className="mb-12 border-y border-white/10" aria-labelledby="community-ranking-title">
           <div className="grid gap-0 lg:grid-cols-[0.8fr_2.2fr]">
             <div className="border-b border-white/10 py-6 lg:border-b-0 lg:border-r lg:pr-8">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-orange">
                 Voto da comunidade
               </p>
-              <h2 id="weekly-hype-title" className="mt-2 font-heading text-2xl font-black leading-none text-white sm:text-3xl">
-                Os mais aguardados da semana
+              <h2 id="community-ranking-title" className="mt-2 font-heading text-2xl font-black leading-none text-white sm:text-3xl">
+                {rankingTab === "week"
+                  ? "Mais aguardados da semana"
+                  : rankingTab === "month"
+                  ? "Mais hypados do mês"
+                  : "No radar da comunidade"}
               </h2>
               <p className="mt-3 max-w-sm text-xs leading-5 text-gray-400">
-                Pré-venda vale três pontos. Entrar no radar vale dois. Sem algoritmo escondido.
+                {rankingTab === "week"
+                  ? "Jogos da semana atual avaliados pela comunidade OrangeBrick. Garanti vale 3 pontos, Radar vale 2."
+                  : rankingTab === "month"
+                  ? "Jogos com maior soma de Hypes acumulados de Garanti e Radar neste ciclo."
+                  : "Os títulos que os jogadores estão de olho e aguardando novidades."}
               </p>
+
+              <div className="mt-6 flex flex-wrap gap-1.5" role="tablist" aria-label="Filtro de rankings da comunidade">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={rankingTab === "week"}
+                  onClick={() => setRankingTab("week")}
+                  className={`min-h-9 px-3 text-xs font-black uppercase tracking-wider transition-colors ${
+                    rankingTab === "week"
+                      ? "bg-brand-orange text-white"
+                      : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
+                  }`}
+                >
+                  🎮 Esta semana
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={rankingTab === "month"}
+                  onClick={() => setRankingTab("month")}
+                  className={`min-h-9 px-3 text-xs font-black uppercase tracking-wider transition-colors ${
+                    rankingTab === "month"
+                      ? "bg-brand-orange text-white"
+                      : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
+                  }`}
+                >
+                  🔥 Mais hypados
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={rankingTab === "radar"}
+                  onClick={() => setRankingTab("radar")}
+                  className={`min-h-9 px-3 text-xs font-black uppercase tracking-wider transition-colors ${
+                    rankingTab === "radar"
+                      ? "bg-brand-orange text-white"
+                      : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
+                  }`}
+                >
+                  👀 No radar
+                </button>
+              </div>
             </div>
 
             <div className="py-2 lg:pl-8">
-              {weeklyHypeRanking.length === 0 ? (
+              {communityRankings.length === 0 ? (
                 <div className="flex min-h-28 items-center">
                   <p className="text-sm text-gray-400">
-                    O ranking abre assim que chegar o primeiro voto.
+                    O ranking abre assim que chegar o primeiro voto nesta categoria.
                   </p>
                 </div>
               ) : (
                 <ol className="divide-y divide-white/[0.08]">
-                  {weeklyHypeRanking.map(({ item, counts, total }, index) => (
+                  {communityRankings.map(({ item, counts, total }, index) => (
                     <li key={item.id} className="grid grid-cols-[2rem_1fr_auto] items-center gap-3 py-3">
                       <span className={`font-heading text-xl font-black tabular-nums ${index === 0 ? "text-brand-orange" : "text-gray-600"}`}>
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-extrabold text-white">{item.game}</p>
+                        <Link
+                          href={`/games/${item.id}`}
+                          className="truncate text-sm font-extrabold text-white transition-colors hover:text-brand-orange block"
+                        >
+                          {item.game}
+                        </Link>
                         <p className="mt-0.5 text-xs uppercase tracking-wide text-gray-400">
                           {counts.buy} garantiram · {counts.watch} no radar
                         </p>
                       </div>
-                      <span className="text-xs font-bold tabular-nums text-gray-400">
-                        {total} {total === 1 ? "voto" : "votos"}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-bold tabular-nums text-gray-400">
+                          {total} {total === 1 ? "voto" : "votos"}
+                        </span>
+                        <Link
+                          href={`/games/${item.id}`}
+                          className="hidden sm:inline-block text-xs font-bold text-brand-orange hover:underline"
+                        >
+                          Ver jogo →
+                        </Link>
+                      </div>
                     </li>
                   ))}
                 </ol>
@@ -539,22 +604,19 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                           : "border border-white/10"
                       }`}
                     >
-                      <div className="relative aspect-video w-full overflow-hidden bg-[#0C0D11]">
-                        {isAllowedReleaseImageUrl(item.image) ? (
-                          <img
-                            src={item.image}
-                            alt={item.game}
-                            className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center px-6 text-center">
-                            <span className="text-xs font-semibold text-gray-500">Capa pendente</span>
-                          </div>
-                        )}
+                      <Link
+                        href={`/games/${item.id}`}
+                        className="relative aspect-video w-full overflow-hidden bg-[#0C0D11] block"
+                      >
+                        <GameCoverImage
+                          src={item.image}
+                          alt={item.game}
+                          className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                        />
                         <span className="absolute right-2 top-2 z-10 border-b-2 border-brand-orange bg-black/80 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white shadow-md">
                           {item.badge}
                         </span>
-                      </div>
+                      </Link>
 
                       <div className="flex flex-1 flex-col justify-between p-4">
                         <div>
@@ -566,27 +628,33 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                               {item.dayOfWeek}
                             </span>
                           </div>
-                          <h3 className="font-heading text-sm font-extrabold leading-tight text-white transition-colors group-hover:text-brand-orange sm:text-base line-clamp-2">
-                            {item.game}
-                          </h3>
+                          <Link href={`/games/${item.id}`}>
+                            <h3 className="font-heading text-sm font-extrabold leading-tight text-white transition-colors group-hover:text-brand-orange sm:text-base line-clamp-2">
+                              {item.game}
+                            </h3>
+                          </Link>
                         </div>
 
                         <div className="mt-4 flex items-end justify-between gap-2">
                           <p className="truncate text-xs font-bold uppercase tracking-wide text-gray-400">
                             {item.platforms.join(" · ")}
                           </p>
-                          {item.slug ? (
+                          <div className="flex items-center gap-2 shrink-0">
                             <Link
-                              href={`/posts/${item.slug}`}
-                              className="shrink-0 text-xs font-bold text-brand-orange hover:underline"
+                              href={`/games/${item.id}`}
+                              className="text-xs font-bold text-gray-400 hover:text-white transition-colors"
                             >
-                              Ver matéria →
+                              Ver jogo →
                             </Link>
-                          ) : (
-                            <span className="shrink-0 text-xs font-bold text-gray-400">
-                              Confirmado
-                            </span>
-                          )}
+                            {item.slug && (
+                              <Link
+                                href={`/posts/${item.slug}`}
+                                className="text-xs font-bold text-brand-orange hover:underline"
+                              >
+                                Matéria
+                              </Link>
+                            )}
+                          </div>
                         </div>
 
                         <ReleaseHypeMeter
@@ -604,6 +672,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
             ))}
           </div>
         )}
+      </div>
       </main>
 
       <Footer />

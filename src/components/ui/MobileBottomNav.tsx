@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { GradientButtonGroup } from "@/components/ui/gradient-button-group";
-import { useAuth } from "@/lib/contexts/AuthContext";
 
 const items = [
   {
@@ -20,27 +19,25 @@ const items = [
   {
     href: "/lancamentos",
     label: "Lançamentos",
-    active: (pathname: string) => pathname.startsWith("/lancamentos"),
+    active: (pathname: string) => pathname.startsWith("/lancamentos") || pathname.startsWith("/games/"),
     icon: <><path strokeLinecap="round" strokeLinejoin="round" d="M8 3v3M16 3v3M4 10h16M5 6h14a1 1 0 0 1 1 1v13H4V7a1 1 0 0 1 1-1Z" /><path strokeLinecap="round" strokeLinejoin="round" d="m10.5 14.5 1.5 1.5 2.5-2.5" /></>,
   },
   {
     href: "/brickboard",
-    label: "Brickboard",
+    label: "BrickBoard",
     active: (pathname: string) => pathname.startsWith("/brickboard"),
     icon: <><path strokeLinecap="round" strokeLinejoin="round" d="M4 5h16v14H4zM4 10h16M9 5v5M15 10v5M9 15v4" /></>,
   },
   {
-    href: "/minha-orange",
+    href: "/meu-brick",
     label: "Meu Brick",
-    active: (pathname: string) => pathname.startsWith("/minha-orange") || (pathname.startsWith("/profile/") && pathname !== "/profile/setup"),
-    icon: <><circle cx="12" cy="8" r="3.5" /><path strokeLinecap="round" strokeLinejoin="round" d="M5 21a7 7 0 0 1 14 0" /></>,
+    active: (pathname: string) => pathname.startsWith("/meu-brick") || pathname.startsWith("/profile/"),
+    icon: <><path strokeLinecap="round" strokeLinejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
   },
 ];
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { profile } = useAuth();
-  const myBrickHref = profile?.username ? `/profile/${encodeURIComponent(profile.username)}` : "/minha-orange";
 
   if (
     pathname.startsWith("/admin") ||
@@ -53,14 +50,14 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] sm:hidden watch-hidden" />
+      <div aria-hidden="true" className="h-[calc(5.5rem+env(safe-area-inset-bottom))] lg:hidden watch-hidden" />
       <div
-        className="mobile-overlay-sensitive fixed inset-x-0 bottom-0 z-40 px-[max(0.75rem,env(safe-area-inset-left))] pb-[max(0.65rem,env(safe-area-inset-bottom))] sm:hidden watch-hidden"
+        className="mobile-overlay-sensitive fixed inset-x-0 bottom-0 z-40 px-[max(0.75rem,env(safe-area-inset-left))] pb-[max(0.65rem,env(safe-area-inset-bottom))] lg:hidden watch-hidden"
       >
         <GradientButtonGroup
           ariaLabel="Navegação principal"
           items={items.map((item) => ({
-            href: item.label === "Meu Brick" ? myBrickHref : item.href,
+            href: item.href,
             label: item.label,
             active: item.active(pathname),
             icon: (

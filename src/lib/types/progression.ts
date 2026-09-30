@@ -37,6 +37,8 @@ export interface PublicProfileData {
   avatar_url: string | null;
   banner_url: string | null;
   bio: string | null;
+  playing_now?: string | null;
+  favorite_games?: string[];
   is_official: boolean;
   created_at: string;
   favorite_platforms: string[];
@@ -46,6 +48,7 @@ export interface PublicProfileData {
   profile_theme: string;
   progress: ProgressionSummary | null;
   season: SeasonSummary | null;
+  season_history: SeasonSummary[];
   stats: {
     posts: number;
     comments: number;

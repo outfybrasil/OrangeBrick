@@ -25,6 +25,7 @@ interface NewsFeedProps {
   onClearFilters?: () => void;
   homeHighlights?: ReactNode;
   initialPosts?: Post[];
+  headingLevel?: "h1" | "h2";
 }
 
 const CATEGORIES: { label: string; value: PostCategory | null }[] = [
@@ -41,10 +42,13 @@ const EMPTY_STATS: PostStats = {
   comments: 0,
   userReaction: null,
 };
+const EMPTY_PLATFORM_KEYWORDS: string[] = [];
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts, headingLevel = "h2" }: NewsFeedProps) {
+  const Heading = headingLevel;
+  const platformKeywords = platformSlug && platformSlug in PLATFORMS_CONFIG ? PLATFORMS_CONFIG[platformSlug].tagKeywords : EMPTY_PLATFORM_KEYWORDS;
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
-    useInfiniteFeed(category, initialPosts);
+    useInfiniteFeed(category, initialPosts, searchQuery, activeTag || "", platformKeywords);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
 
   const posts = useMemo(() => {
@@ -101,7 +105,16 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
       const dated = result.map((post) => ({ post, date: new Date(post.published_at || post.created_at).getTime() }));
       const weekPosts = dated.filter((entry) => entry.date >= startOfWeek.getTime());
       const olderPosts = dated.filter((entry) => entry.date < startOfWeek.getTime());
-      result = [...weekPosts, ...olderPosts].slice(0, 5).map((entry) => entry.post);
+      const ordered = [...weekPosts, ...olderPosts].map((entry) => entry.post);
+      const selected: Post[] = [];
+      const topics = new Set<string>();
+      for (const post of ordered) {
+        if (post.topic_id && topics.has(post.topic_id)) continue;
+        selected.push(post);
+        if (post.topic_id) topics.add(post.topic_id);
+        if (selected.length === 5) break;
+      }
+      result = [...selected, ...ordered.filter((post) => !selected.some((item) => item.id === post.id))].slice(0, 5);
     }
     return result;
   }, [rawPosts, platformSlug, searchQuery, activeTag, hasRequestedFilters]);
@@ -199,7 +212,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               <Timer date={heroPost.published_at ?? ""} />
             </div>
 
-            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
+            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300">
               {heroPost.title}
             </h2>
 
@@ -278,13 +291,13 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
             <div className="mb-4 flex flex-col gap-2 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-6 w-1 bg-brand-orange" />
-                <h2 className="font-heading text-xl font-black text-white">
+                <Heading className="font-heading text-xl font-black text-white">
                   {category ? (
                     <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
                   ) : (
                     <>Últimas <span className="text-brand-orange">notícias</span></>
                   )}
-                </h2>
+                </Heading>
               </div>
 
               {onSelectCategory && (

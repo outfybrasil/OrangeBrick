@@ -5,6 +5,7 @@ import { timeAgo } from "@/lib/utils/time-ago";
 import type { CommentWithProfile } from "@/lib/hooks/useComments";
 
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 import { UserBadge } from "@/components/ui/UserBadge";
 import { resolveAvatarUrl } from "@/lib/avatar";
@@ -12,13 +13,16 @@ import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 interface CommentItemProps {
   comment: CommentWithProfile;
+  onLike: (commentId: string) => Promise<void>;
+  onReply?: (commentId: string) => void;
   onDelete?: (commentId: string) => void;
 }
 
-export function CommentItem({ comment, onDelete }: CommentItemProps) {
+export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemProps) {
   const { user } = useAuth();
-  const [likes, setLikes] = useState(0);
-  const [hasLiked, setHasLiked] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [likeError, setLikeError] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(
     showDeleteConfirmation,
@@ -26,13 +30,20 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
   );
   const isOwner = user && user.id === comment.user_id;
 
-  const handleLike = () => {
-    if (hasLiked) {
-      setLikes((prev) => prev - 1);
-      setHasLiked(false);
-    } else {
-      setLikes((prev) => prev + 1);
-      setHasLiked(true);
+  const handleLike = async () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setIsLiking(true);
+    setLikeError(null);
+    try {
+      await onLike(comment.id);
+    } catch (cause) {
+      setLikeError(cause instanceof Error ? cause.message : "Não foi possível curtir o comentário.");
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -71,6 +82,16 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
+              {user && onReply && (
+                <button
+                  type="button"
+                  onClick={() => onReply(comment.parent_id || comment.id)}
+                  className="min-h-9 px-2 text-xs font-semibold text-gray-500 transition-colors hover:text-white"
+                  aria-label={`Responder a ${comment.author_nickname}`}
+                >
+                  Responder
+                </button>
+              )}
               {isOwner && onDelete && (
                 <button
                   onClick={() => setShowDeleteConfirmation(true)}
@@ -85,18 +106,21 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
               )}
 
               <button
+                type="button"
                 onClick={handleLike}
                 className={`flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors ${
-                  hasLiked
+                  comment.user_has_liked
                     ? "bg-brand-orange/10 text-brand-orange"
                     : "text-gray-500 hover:bg-white/5 hover:text-white"
                 }`}
+                aria-pressed={comment.user_has_liked}
+                disabled={isLiking}
                 aria-label="Curtir comentário"
               >
-                <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={hasLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.8}>
+                <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={comment.user_has_liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.8}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />
                 </svg>
-                <span>{likes}</span>
+                <span>{comment.likes_count}</span>
               </button>
             </div>
           </div>
@@ -104,6 +128,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
           <p className="mt-1.5 whitespace-pre-line break-words text-xs leading-relaxed text-gray-300 sm:text-sm">
             {comment.content}
           </p>
+          {likeError && <p role="alert" className="mt-1 text-xs text-red-300">{likeError}</p>}
         </div>
       </div>
 
@@ -148,6 +173,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
           </div>
         </div>
       )}
+      {isAuthModalOpen && <AuthModal isOpen onClose={() => setIsAuthModalOpen(false)} />}
     </div>
   );
 }

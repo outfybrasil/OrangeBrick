@@ -1,13 +1,13 @@
-import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { getRateLimitIdentity, getRateLimitWindowStart } from "@/lib/server/rate-limit";
 
 export const runtime = "nodejs";
 
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 }
@@ -18,14 +18,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Origem não permitida" }, { status: 403 });
   }
   const supabase = serviceClient();
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const secret = process.env.RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
-  const identityHash = createHash("sha256")
-    .update(`${secret}:${forwarded}`)
-    .digest("hex");
-  const windowStart = new Date();
-  windowStart.setUTCMinutes(0, 0, 0);
+  const secret = process.env.RATE_LIMIT_SALT || (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const identityHash = getRateLimitIdentity(request, secret || "");
+  if (!identityHash) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
+  const windowStart = getRateLimitWindowStart(new Date(), 60 * 60 * 1000);
   const { data: withinLimit } = await supabase.rpc("consume_rate_limit", {
     p_action: "client_error",
     p_identity_hash: identityHash,

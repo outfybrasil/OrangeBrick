@@ -25,7 +25,7 @@ export default function PasswordRecoveryPage() {
   };
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
       <section className="w-full max-w-md border border-white/10 bg-[#111217] p-5 sm:p-8">
         <Link href="/entrar" className="inline-flex min-h-11 items-center text-sm font-bold text-gray-400 hover:text-white">← Voltar ao acesso</Link>
         <p className="mt-5 font-subtitle text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Recuperar acesso</p>

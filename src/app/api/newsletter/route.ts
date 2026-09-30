@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getRateLimitIdentity, getRateLimitWindowStart } from "@/lib/server/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,17 +8,9 @@ export const runtime = "nodejs";
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
-}
-
-function clientIdentity(request: Request): string | null {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  if (!forwarded || forwarded === "unknown") return null;
-  const secret = process.env.RATE_LIMIT_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) return null;
-  return createHash("sha256").update(`${secret}:${forwarded}`).digest("hex");
 }
 
 export async function POST(request: Request) {
@@ -44,27 +36,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const identity = clientIdentity(request);
-    const windowStart = new Date();
-    windowStart.setUTCMinutes(0, 0, 0);
+    const secret = process.env.RATE_LIMIT_SALT || (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY) || "";
+    const identity = getRateLimitIdentity(request, secret);
+    if (!identity) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
+    const windowStart = getRateLimitWindowStart(new Date(), 60 * 60 * 1000);
     const client = serviceClient();
 
-    if (identity) {
-      const { data: allowed, error: rateError } = await client.rpc("consume_rate_limit", {
-        p_action: "newsletter_signup",
-        p_identity_hash: identity,
-        p_window_start: windowStart.toISOString(),
-        p_limit: 5,
-      });
-      if (rateError || !allowed) {
-        return NextResponse.json(
-          { error: "Muitas tentativas. Tente novamente mais tarde." },
-          { status: 429 },
-        );
-      }
+    const { data: allowed, error: rateError } = await client.rpc("consume_rate_limit", {
+      p_action: "newsletter_signup",
+      p_identity_hash: identity,
+      p_window_start: windowStart.toISOString(),
+      p_limit: 5,
+    });
+    if (rateError || !allowed) {
+      return NextResponse.json(
+        { error: "Muitas tentativas. Tente novamente mais tarde." },
+        { status: 429 },
+      );
     }
 
-    const { error } = await client.from("newsletter_subscribers").insert({ email });
+    const { error } = await client.from("newsletter_subscribers").upsert({ email }, { onConflict: "email", ignoreDuplicates: true });
 
     if (error) {
       console.error("Falha ao gravar inscrição na newsletter:", error.message);

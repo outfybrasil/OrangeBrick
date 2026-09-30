@@ -30,7 +30,7 @@ export function ContactForm() {
         return;
       }
       form.reset();
-      setStatus({ type: "success", message: "Mensagem enviada! Retornaremos em breve." });
+      setStatus({ type: "success", message: "Mensagem registrada com sucesso." });
     } catch {
       setStatus({ type: "error", message: "Erro de conexão. Tente novamente." });
     }

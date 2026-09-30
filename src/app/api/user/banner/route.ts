@@ -4,10 +4,12 @@ import sharp from "sharp";
 
 export const runtime = "nodejs";
 
+const MAX_BANNER_BYTES = 4 * 1024 * 1024;
+
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 }
@@ -21,19 +23,20 @@ export async function POST(request: Request) {
 
   const windowStart = new Date();
   windowStart.setUTCMinutes(0, 0, 0);
-  const { data: withinLimit } = await supabase.rpc("consume_rate_limit", {
+  const { data: withinLimit, error: rateLimitError } = await supabase.rpc("consume_rate_limit", {
     p_action: "profile_banner",
     p_identity_hash: user.id,
     p_window_start: windowStart.toISOString(),
     p_limit: 10,
   });
+  if (rateLimitError) return NextResponse.json({ error: "Não foi possível validar o envio" }, { status: 503 });
   if (!withinLimit) return NextResponse.json({ error: "Limite de dez alterações por hora atingido" }, { status: 429 });
 
   try {
     const formData = await request.formData();
     const file = formData.get("banner");
     if (!(file instanceof File)) return NextResponse.json({ error: "Escolha uma imagem" }, { status: 400 });
-    if (file.size > 8 * 1024 * 1024) return NextResponse.json({ error: "A imagem deve ter no máximo 8 MB" }, { status: 413 });
+    if (file.size > MAX_BANNER_BYTES) return NextResponse.json({ error: "A imagem deve ter no máximo 4 MB" }, { status: 413 });
     if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
       return NextResponse.json({ error: "Use JPG, PNG, WebP ou AVIF" }, { status: 415 });
     }
@@ -52,28 +55,59 @@ export async function POST(request: Request) {
         .toBuffer();
     }
     if (output.byteLength > 450 * 1024) return NextResponse.json({ error: "Esta imagem tem detalhes demais. Escolha outra foto" }, { status: 413 });
+    const { data: previousProfile, error: previousProfileError } = await supabase
+      .from("profiles")
+      .select("banner_url")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (previousProfileError || !previousProfile) {
+      console.error("Falha ao carregar banner atual", previousProfileError);
+      return NextResponse.json({ error: "Não foi possível atualizar o perfil" }, { status: 500 });
+    }
     const path = `${user.id}/banner-${crypto.randomUUID()}.webp`;
     const { error: uploadError } = await supabase.storage.from("profile-images").upload(path, output, {
       contentType: "image/webp",
       cacheControl: "31536000",
       upsert: false,
     });
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error("Falha ao armazenar banner", uploadError);
+      return NextResponse.json({ error: "Não foi possível armazenar esta imagem" }, { status: 502 });
+    }
 
     const { data } = supabase.storage.from("profile-images").getPublicUrl(path);
     const publicUrl = data.publicUrl;
-    const { error: updateError } = await supabase
+    const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({ banner_url: publicUrl, updated_at: new Date().toISOString() })
-      .eq("user_id", user.id);
-    if (updateError) throw updateError;
+      .eq("user_id", user.id)
+      .select("user_id")
+      .maybeSingle();
+    if (updateError || !updatedProfile) {
+      await supabase.storage.from("profile-images").remove([path]);
+      console.error("Falha ao atualizar banner do perfil", updateError);
+      return NextResponse.json({ error: "Não foi possível atualizar o perfil" }, { status: 500 });
+    }
 
-    const { data: storedFiles } = await supabase.storage.from("profile-images").list(user.id, { limit: 100 });
-    const obsoleteBanners = (storedFiles || []).filter((item) => item.name.startsWith("banner-") && `${user.id}/${item.name}` !== path).map((item) => `${user.id}/${item.name}`);
-    if (obsoleteBanners.length) await supabase.storage.from("profile-images").remove(obsoleteBanners);
+    const previousPath = profileImagePath(previousProfile.banner_url, user.id, "banner-");
+    if (previousPath && previousPath !== path) await supabase.storage.from("profile-images").remove([previousPath]);
 
     return NextResponse.json({ publicUrl, bytes: output.byteLength });
   } catch {
     return NextResponse.json({ error: "Não foi possível processar esta imagem" }, { status: 400 });
+  }
+}
+
+function profileImagePath(publicUrl: string | null, userId: string, prefix: string) {
+  if (!publicUrl) return null;
+  try {
+    const pathname = new URL(publicUrl).pathname;
+    const marker = `/storage/v1/object/public/profile-images/${userId}/`;
+    if (!pathname.startsWith(marker)) return null;
+    const fileName = decodeURIComponent(pathname.slice(marker.length));
+    if (!fileName.startsWith(prefix) || !fileName.endsWith(".webp") || fileName.includes("/")) return null;
+    return `${userId}/${fileName}`;
+  } catch {
+    return null;
   }
 }

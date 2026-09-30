@@ -1,30 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyAdmin } from "@/lib/telegram/bot";
+import { validateStoredEditorialPost } from "@/lib/content-validation";
+import type { Post } from "@/lib/types/database";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
+import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-function authorized(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  return Boolean(cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`);
-}
-
 function serviceClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
 }
 
 export async function GET(request: Request) {
-  if (!authorized(request)) {
+  if (!isAuthorizedCronRequest(request)) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
   const supabase = serviceClient();
   const now = new Date().toISOString();
+  await retryPendingPublicationNotices().catch((error) => {
+    console.error("Falha ao reenviar avisos pendentes:", error);
+  });
   const { data: scheduledPosts, error: loadError } = await supabase
     .from("posts")
     .select("*")
@@ -41,21 +43,54 @@ export async function GET(request: Request) {
   const failures: { id: string; error: string }[] = [];
 
   for (const post of scheduledPosts || []) {
-    const publishedAt = post.scheduled_at || now;
-    const { error: publishError } = await supabase
+    const validationErrors = validateStoredEditorialPost(post as Post);
+    if (validationErrors.length > 0) {
+      const { error: unscheduleError } = await supabase
+        .from("posts")
+        .update({ scheduled_at: null, scheduled_by: null, updated_at: now })
+        .eq("id", post.id);
+      failures.push({
+        id: post.id,
+        error: `${validationErrors.join(" ")}${unscheduleError ? ` Não foi possível remover o agendamento: ${unscheduleError.message}` : " O agendamento foi removido para revisão editorial."}`,
+      });
+      continue;
+    }
+
+    try {
+      await queuePublicationNotice(post.id);
+    } catch {
+      failures.push({ id: post.id, error: "Aviso do Telegram não pôde ser registrado; publicação adiada." });
+      continue;
+    }
+
+    const publishedAt = new Date().toISOString();
+    const { data: publishedPost, error: publishError } = await supabase
       .from("posts")
       .update({
         is_published: true,
         published_at: publishedAt,
         scheduled_at: null,
         scheduled_by: null,
-        updated_at: now,
+        updated_at: publishedAt,
       })
-      .eq("id", post.id);
+      .eq("id", post.id)
+      .eq("is_published", false)
+      .select("id")
+      .maybeSingle();
 
     if (publishError) {
       failures.push({ id: post.id, error: publishError.message });
       continue;
+    }
+    if (!publishedPost) continue;
+
+    published.push(post.id);
+    try {
+      if (!await deliverPublicationNotice(post.id)) {
+        failures.push({ id: post.id, error: "Publicada, mas o Telegram não confirmou o aviso; reenvio pendente." });
+      }
+    } catch {
+      failures.push({ id: post.id, error: "Publicada, mas o aviso do Telegram ficou pendente de reenvio." });
     }
 
     if (post.publish_to_brickboard && post.scheduled_by) {
@@ -90,27 +125,28 @@ export async function GET(request: Request) {
       }
     }
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-    const pushResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${serviceRoleKey}`,
-        apikey: serviceRoleKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: post.title,
-        body: post.summary,
-        url: `/posts/${post.slug}`,
-        tag: `news-${post.slug}`,
-        kind: "news",
-      }),
-    });
-    if (!pushResponse.ok) {
+    const serviceRoleKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!;
+    try {
+      const pushResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${serviceRoleKey}`,
+          apikey: serviceRoleKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: post.title,
+          body: post.summary,
+          url: `/posts/${post.slug}`,
+          tag: `news-${post.slug}`,
+          kind: "news",
+        }),
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!pushResponse.ok) throw new Error("push_unavailable");
+    } catch {
       failures.push({ id: post.id, error: "Publicada, mas o push agendado falhou" });
     }
-
-    published.push(post.id);
   }
 
   if (failures.length > 0) {

@@ -21,7 +21,7 @@ const actions = [
 
 export default function ProgressionGuidePage() {
   return (
-    <main className="min-h-dvh bg-background-void text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void text-white">
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/brickboard" className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Brickboard</Link>
@@ -37,7 +37,7 @@ export default function ProgressionGuidePage() {
 
         <section className="mt-16">
           <h2 className="font-heading text-2xl font-bold">Como ganhar XP</h2>
-          <div className="mt-5 overflow-x-auto border-y border-white/10">
+          <div role="region" aria-label="Tabela de ações e pontos de XP" tabIndex={0} className="mt-5 overflow-x-auto border-y border-white/10 focus-visible:outline-2 focus-visible:outline-brand-orange">
             <table className="w-full min-w-[32rem] text-left text-sm">
               <thead className="text-xs text-gray-500">
                 <tr><th className="py-3">Ação</th><th className="py-3">Valor</th><th className="py-3 text-right">Limite</th></tr>

@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/types/database";
+import { safeReturnTo } from "@/lib/auth/return-to";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const requestedNext = searchParams.get("next");
-  const next = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
-    ? requestedNext
-    : "/";
+  const next = safeReturnTo(searchParams.get("next"));
+  const returnTo = safeReturnTo(searchParams.get("returnTo") ?? next);
 
   if (code) {
     const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = [];
 
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
       {
         cookies: {
           getAll: () => {
@@ -39,12 +38,14 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("id")
           .eq("user_id", user.id)
           .single();
 
-        const dest = profile ? `${origin}${next}` : `${origin}/profile/setup`;
+        const dest = profile
+          ? `${origin}${next}`
+          : `${origin}/profile/setup?returnTo=${encodeURIComponent(returnTo)}`;
         const response = NextResponse.redirect(dest);
         for (const { name, value, options } of pendingCookies) {
           response.cookies.set(name, value, options);

@@ -4,7 +4,7 @@ interface FunctionOptions {
 
 export async function invokeFunction<T>(name: string, body: unknown, options: FunctionOptions = {}): Promise<T> {
   const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const anonKey = (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   if (!baseUrl || !anonKey) throw new Error("Supabase não configurado");
   const response = await fetch(`${baseUrl}/functions/v1/${name}`, {
     method: "POST",

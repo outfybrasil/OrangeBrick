@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
 import { isAdminUser } from "@/lib/auth";
-import { validateEditorialContent, type EditorialBlock } from "@/lib/content-validation";
+import { validateStoredEditorialPost } from "@/lib/content-validation";
 import { createDataClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 
-type StatusFilter = "all" | "production" | "revision" | "scheduled" | "published";
+type StatusFilter = "all" | "production" | "scheduled" | "published";
 
 const CATEGORY_LABELS: Record<PostCategory, string> = {
   breaking: "Plantão",
@@ -58,13 +58,14 @@ function MiniBarChart({ values, color }: { values: number[]; color: string }) {
   );
 }
 
-type PaginatedPost = Pick<Post, "id" | "slug" | "title" | "summary" | "category" | "image_url" | "author_name" | "is_published" | "published_at" | "created_at" | "updated_at" | "scheduled_at">;
+type PaginatedPost = Pick<Post, "id" | "slug" | "title" | "summary" | "category" | "image_url" | "image_alt" | "author_name" | "is_published" | "published_at" | "created_at" | "updated_at" | "scheduled_at">;
 
 interface StatsData {
   publishedCount: number;
   draftsCount: number;
   scheduledCount: number;
   authorsList: string[];
+  categoryCounts: Array<{ category: string; count: number }>;
 }
 
 interface PaginatedResponse {
@@ -102,7 +103,8 @@ export default function AdminDashboard() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchCategory, setBatchCategory] = useState<PostCategory | "">("");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
-  const [stats, setStats] = useState<StatsData>({ publishedCount: 0, draftsCount: 0, scheduledCount: 0, authorsList: [] });
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [recentDrafts, setRecentDrafts] = useState<PaginatedPost[]>([]);
   const [weeklyPublished, setWeeklyPublished] = useState<{ published_at: string | null }[]>([]);
   const [categoryDistributionRaw, setCategoryDistribution] = useState<{ category: string; count: number }[]>([]);
@@ -210,25 +212,33 @@ export default function AdminDashboard() {
     try {
       const { data: fullPost, error: fetchBodyError } = await supabase
         .from("posts")
-        .select("body")
+        .select("body, information_status, featured_quote, editorial_sources, short_article_reason, correction_note")
         .eq("id", post.id)
         .single();
+      if (fetchBodyError?.message?.includes("Could not find the") && fetchBodyError.message.includes("column")) {
+        throw new Error("Aplique as migrations editoriais pendentes antes de publicar esta matéria.");
+      }
       if (fetchBodyError || !fullPost) throw new Error("Não foi possível carregar o conteúdo da matéria.");
 
-      const blocks = JSON.parse(String(fullPost.body)) as EditorialBlock[];
-      const validationErrors = validateEditorialContent({
+      const completePost = fullPost as unknown as Pick<Post, "body" | "information_status" | "featured_quote" | "editorial_sources" | "short_article_reason" | "correction_note">;
+      const validationErrors = validateStoredEditorialPost({
         slug: post.slug,
         title: post.title,
         summary: post.summary,
-        imageUrl: post.image_url || "",
-        imageAlt: "",
-        blocks,
+        body: String(completePost.body),
+        image_url: post.image_url,
+        image_alt: post.image_alt,
+        information_status: completePost.information_status,
+        featured_quote: completePost.featured_quote,
+        editorial_sources: completePost.editorial_sources,
+        short_article_reason: completePost.short_article_reason,
+        correction_note: completePost.correction_note,
       });
 
       if (validationErrors.length > 0) throw new Error(validationErrors.join(" "));
 
       const publishedAt = new Date().toISOString();
-      const { data, error: publishError } = await supabase
+      const { error: publishError } = await supabase
         .from("posts")
         .update({
           is_published: true,
@@ -321,27 +331,26 @@ export default function AdminDashboard() {
   const fetchStats = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) throw new Error("Sessão indisponível para consultar as estatísticas.");
 
-      const [statsRes, draftsRes, weeklyRes, distRes] = await Promise.all([
+      const [statsRes, draftsRes, weeklyRes] = await Promise.all([
         fetch("/api/admin/stats", { headers: { Authorization: `Bearer ${session.access_token}` } }),
-        supabase.from("posts").select("id,slug,title,summary,category,image_url,author_name,is_published,published_at,updated_at").eq("is_published", false).order("updated_at", { ascending: false }).limit(3),
+        supabase.from("posts").select("id,slug,title,summary,category,image_url,image_alt,author_name,is_published,published_at,updated_at").eq("is_published", false).order("updated_at", { ascending: false }).limit(3),
         supabase.from("posts").select("published_at").eq("is_published", true).gte("published_at", new Date(dashboardNow - 6 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase.from("posts").select("category"),
       ]);
 
-      if (statsRes.ok) {
-        const data: StatsData = await statsRes.json();
-        setStats(data);
+      if (!statsRes.ok || draftsRes.error || weeklyRes.error) {
+        throw new Error("Não foi possível consultar os números do painel.");
       }
+      const data: StatsData = await statsRes.json();
+      setStats(data);
       setRecentDrafts((draftsRes.data || []) as PaginatedPost[]);
       setWeeklyPublished((weeklyRes.data || []) as { published_at: string | null }[]);
-      const cats = (distRes.data || []) as { category: string }[];
-      const catMap = new Map<string, number>();
-      cats.forEach((r) => catMap.set(r.category, (catMap.get(r.category) || 0) + 1));
-      setCategoryDistribution(Array.from(catMap.entries()).map(([category, count]) => ({ category, count })));
-    } catch {
-      // Stats are non-critical, fail silently
+      setCategoryDistribution(data.categoryCounts);
+      setStatsError(null);
+    } catch (statsLoadError) {
+      setStats(null);
+      setStatsError(errorMessage(statsLoadError, "Não foi possível consultar os números do painel."));
     }
   }, [supabase, dashboardNow]);
 
@@ -370,16 +379,16 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!isLoading) {
-      void fetchPosts(currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder);
+      queueMicrotask(() => {
+        void fetchPosts(currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder);
+      });
     }
   }, [currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder, isLoading, fetchPosts]);
 
-  // Filtragem das matérias
-  const publishedCount = stats.publishedCount;
-  const inProductionCount = stats.draftsCount;
-  const inRevisionCount = 0;
-  const scheduledCount = stats.scheduledCount;
-  const authorsList = stats.authorsList;
+  const publishedCount = stats?.publishedCount ?? 0;
+  const inProductionCount = stats?.draftsCount ?? 0;
+  const scheduledCount = stats?.scheduledCount ?? 0;
+  const authorsList = stats?.authorsList || [];
 
   const weeklyRhythm = useMemo(() => Array.from({ length: 7 }, (_, index) => {
     const date = new Date(dashboardNow);
@@ -401,6 +410,7 @@ export default function AdminDashboard() {
     label,
     count: categoryDistributionRaw.find(c => c.category === category)?.count || 0,
   })).filter((item) => item.count > 0), [categoryDistributionRaw]);
+  const categoryTotal = categoryDistributionRaw.reduce((total, item) => total + item.count, 0);
 
   const allVisibleSelected = posts.length > 0 && posts.every((post) => selectedIds.includes(post.id));
 
@@ -445,7 +455,8 @@ export default function AdminDashboard() {
       )}
 
       {/* CARDS KPIS NO TOPO */}
-      <section aria-label="Estatísticas gerais" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {statsError && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-200"><span>{statsError}</span><button type="button" onClick={() => void fetchStats()} className="min-h-11 border border-amber-400/40 px-3 font-bold hover:bg-amber-400/10">Tentar novamente</button></div>}
+      <section aria-label="Estatísticas gerais" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* PUBLICADAS */}
         <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
           <div>
@@ -455,10 +466,10 @@ export default function AdminDashboard() {
               </svg>
               <span>Publicadas</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">{publishedCount}</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">{stats ? publishedCount : "—"}</p>
             <p className="mt-1 text-xs text-gray-500">Total no banco</p>
           </div>
-          <MiniBarChart values={weeklyRhythm.map((day) => day.val)} color="bg-emerald-500" />
+          {stats && <MiniBarChart values={weeklyRhythm.map((day) => day.val)} color="bg-emerald-500" />}
         </div>
 
         {/* EM PRODUÇÃO */}
@@ -470,25 +481,10 @@ export default function AdminDashboard() {
               </svg>
               <span>Em produção</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">{inProductionCount}</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">{stats ? inProductionCount : "—"}</p>
             <p className="mt-1 text-xs text-gray-500">Rascunhos</p>
           </div>
-          <MiniBarChart values={[inProductionCount]} color="bg-brand-orange" />
-        </div>
-
-        {/* AGUARDANDO REVISÃO */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
-              <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Aguardando revisão</span>
-            </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">{inRevisionCount}</p>
-            <p className="mt-1 text-xs text-gray-500">Fluxo não configurado</p>
-          </div>
-          <MiniBarChart values={[0]} color="bg-amber-400" />
+          {stats && <MiniBarChart values={[inProductionCount]} color="bg-brand-orange" />}
         </div>
 
         {/* AGENDADAS */}
@@ -500,10 +496,10 @@ export default function AdminDashboard() {
               </svg>
               <span>Agendadas</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">{scheduledCount}</p>
-            <p className="mt-1 text-xs text-gray-500">Agendamento não configurado</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">{stats ? scheduledCount : "—"}</p>
+            <p className="mt-1 text-xs text-gray-500">Rascunhos com horário definido</p>
           </div>
-          <MiniBarChart values={[0]} color="bg-sky-400" />
+          {stats && <MiniBarChart values={[scheduledCount]} color="bg-sky-400" />}
         </div>
       </section>
 
@@ -526,7 +522,6 @@ export default function AdminDashboard() {
               {([
                 ["all", "Todas"],
                 ["production", "Em produção"],
-                ["revision", "Revisão"],
                 ["scheduled", "Agendadas"],
                 ["published", "Publicadas"],
               ] as const).map(([val, label]) => (
@@ -1051,12 +1046,12 @@ export default function AdminDashboard() {
               <span className="text-xs text-gray-500">Últimos 7 dias</span>
             </div>
             <div className="mt-4">
-              <p className="text-2xl font-black font-heading text-white">{weeklyPublished.length}</p>
-              <p className="text-xs text-gray-400 mt-0.5">publicações nesta semana</p>
+              <p className="text-2xl font-black font-heading text-white">{stats ? weeklyPublished.length : "—"}</p>
+              <p className="text-xs text-gray-400 mt-0.5">publicações nos últimos 7 dias</p>
             </div>
             {/* GRÁFICO DE BARRAS DA SEMANA */}
             <div className="mt-4 flex items-end justify-between gap-2 h-20 border-b border-white/10 pb-2">
-              {weeklyRhythm.map((item) => (
+              {stats && weeklyRhythm.map((item) => (
                 <div key={item.day} className="flex flex-col items-center flex-1 h-full justify-end">
                   <span className="text-xs font-bold text-gray-400 mb-1">{item.val}</span>
                   <div
@@ -1076,7 +1071,7 @@ export default function AdminDashboard() {
               <span className="text-xs text-gray-500">Todas as matérias</span>
             </div>
             <div className="mt-3 space-y-3">
-              {categoryDistribution.length === 0 ? (
+              {!stats ? <p className="py-3 text-xs text-gray-500">Dados indisponíveis.</p> : categoryDistribution.length === 0 ? (
                 <p className="py-3 text-xs text-gray-500">Nenhuma matéria cadastrada.</p>
               ) : categoryDistribution.map((item) => (
                 <div key={item.category}>
@@ -1085,7 +1080,7 @@ export default function AdminDashboard() {
                     <span className="font-bold text-gray-500">{item.count}</span>
                   </div>
                   <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-orange rounded-full" style={{ width: `${(item.count / Math.max(posts.length, 1)) * 100}%` }} />
+                    <div className="h-full bg-brand-orange rounded-full" style={{ width: `${(item.count / Math.max(categoryTotal, 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}

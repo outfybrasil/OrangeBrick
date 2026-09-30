@@ -37,12 +37,18 @@ export default function AchievementsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [progressReady, setProgressReady] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     let isActive = true;
 
     async function load() {
+      setIsLoading(true);
       setLoadError(null);
+      setProgressReady(false);
+      try {
       const { data: catalog, error: catalogError } = await supabase
         .from("achievements")
         .select("slug, name, description, category, rarity, criteria, is_hidden")
@@ -70,16 +76,24 @@ export default function AchievementsPage() {
       }));
 
       if (profile?.username) {
-        const { data } = await supabase.rpc("public_profile", { target_username: profile.username });
+        const { data, error: progressError } = await supabase.rpc("public_profile", { target_username: profile.username });
+        if (progressError || !data) {
+          if (isActive) {
+            setLoadError("Não foi possível carregar seu progresso. Tente novamente.");
+            setIsLoading(false);
+          }
+          return;
+        }
         const loaded = data as PublicProfileData | null;
         if (!isActive) return;
-        if (loaded?.achievements.length) {
+        if (loaded) {
           const progressBySlug = new Map(loaded.achievements.map((item) => [item.slug, item]));
           const mergedAchievements = prepareAchievements(
             catalogAchievements.map((item) => ({ ...item, ...(progressBySlug.get(item.slug) || {}) }))
           );
           setAchievements(mergedAchievements);
           setEquipped(mergedAchievements.filter((item) => item.is_equipped).map((item) => item.slug));
+          setProgressReady(true);
           setIsLoading(false);
           return;
         }
@@ -88,27 +102,49 @@ export default function AchievementsPage() {
       setAchievements(prepareAchievements(catalogAchievements));
       setEquipped([]);
       setIsLoading(false);
+      } catch {
+        if (isActive) {
+          setLoadError("Falha ao carregar conquistas. Tente novamente.");
+          setIsLoading(false);
+        }
+      }
     }
 
     void load();
     return () => {
       isActive = false;
     };
-  }, [profile?.is_official, profile?.username, supabase]);
+  }, [isAuthLoading, loadAttempt, profile?.username, supabase, user?.id]);
 
   function toggleShowcase(slug: string) {
     const achievement = achievements.find((item) => item.slug === slug);
-    if (!achievement?.unlocked_at) return;
-    setEquipped((current) => current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug].slice(-3));
+    if (!achievement?.unlocked_at) {
+      setMessage(achievement?.description || "Esta conquista ainda não foi desbloqueada.");
+      return;
+    }
+    if (!equipped.includes(slug) && equipped.length >= 3) {
+      setMessage("Sua vitrine comporta três conquistas. Remova uma antes de adicionar outra.");
+      return;
+    }
+    setMessage(null);
+    setEquipped((current) => current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug]);
   }
 
   async function saveShowcase() {
-    const { error } = await supabase.rpc("set_achievement_showcase", { target_slugs: equipped });
-    setMessage(error ? "Não foi possível atualizar sua vitrine." : "Vitrine atualizada.");
+    if (!progressReady || isSaving) return;
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.rpc("set_achievement_showcase", { target_slugs: equipped });
+      setMessage(error ? "Não foi possível atualizar sua vitrine." : "Vitrine atualizada.");
+    } catch {
+      setMessage("Não foi possível atualizar sua vitrine.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
-    <main className="min-h-dvh bg-background-void text-white">
+    <main id="conteudo-principal" tabIndex={-1} className="min-h-dvh bg-background-void text-white">
       <header className="border-b border-white/10">
         <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/brickboard" className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Brickboard</Link>
@@ -125,17 +161,20 @@ export default function AchievementsPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        {user && !isAuthLoading && (
+        {!user && !isAuthLoading && <div className="mb-8 border-y border-white/10 py-5 text-sm text-gray-300"><p>Você está explorando o catálogo de conquistas.</p><Link href="/entrar?next=%2Fbrickboard%2Fconquistas" className="mt-2 inline-flex min-h-11 items-center text-brand-orange underline">Entrar para ver meu progresso</Link></div>}
+        {message && <p role="status" className="mb-4 text-sm text-gray-300">{message}</p>}
+        {user && !isAuthLoading && !profile?.username && <div className="mb-8 border-y border-amber-400/20 py-5 text-sm text-amber-100"><p>Seu perfil ainda não está configurado para exibir progresso.</p><Link href="/profile/setup" className="mt-2 inline-flex min-h-11 items-center text-brand-orange underline">Configurar perfil</Link></div>}
+        {user && !isAuthLoading && profile?.username && progressReady && (
           <div className="mb-10 flex flex-col gap-4 border-y border-white/10 py-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-gray-300">Selecione até três conquistas desbloqueadas para exibir no perfil.</p>
             <div className="flex items-center gap-3">
               {message && <span className="text-xs text-gray-400">{message}</span>}
-              <button type="button" onClick={() => void saveShowcase()} className="min-h-11 bg-brand-orange px-5 text-xs font-bold hover:bg-[#ff7526]">Salvar vitrine</button>
+              <button type="button" onClick={() => void saveShowcase()} disabled={isSaving} className="min-h-11 bg-brand-orange px-5 text-xs font-bold hover:bg-[#ff7526] disabled:cursor-wait disabled:opacity-60">{isSaving ? "Salvando…" : "Salvar vitrine"}</button>
             </div>
           </div>
         )}
         {loadError ? (
-          <p role="alert" className="border-y border-red-400/30 py-8 text-sm text-red-200">{loadError}</p>
+          <div className="border-y border-red-400/30 py-8"><p role="alert" className="text-sm text-red-200">{loadError}</p><button type="button" onClick={() => { setIsLoading(true); setLoadAttempt((value) => value + 1); }} className="mt-4 min-h-11 border border-red-300/40 px-4 text-sm font-bold text-red-100 hover:bg-red-300/10">Tentar novamente</button></div>
         ) : isLoading && achievements.length === 0 ? (
           <p className="border-y border-white/10 py-12 text-sm text-gray-400">Carregando conquistas…</p>
         ) : (
@@ -144,12 +183,13 @@ export default function AchievementsPage() {
               <button
                 key={achievement.slug}
                 type="button"
-                onClick={() => toggleShowcase(achievement.slug)}
-                disabled={!achievement.unlocked_at}
+                onClick={() => progressReady && toggleShowcase(achievement.slug)}
+                disabled={!progressReady}
+                aria-label={`${achievement.name}: ${achievement.description}${achievement.unlocked_at ? ". Selecionar para vitrine" : ". Ver critério"}`}
                 aria-pressed={equipped.includes(achievement.slug)}
                 className={`min-w-0 text-left disabled:cursor-default ${equipped.includes(achievement.slug) ? "bg-brand-orange/[0.06] px-4 pb-4" : ""}`}
               >
-                <AchievementMark achievement={achievement} />
+                <AchievementMark achievement={achievement} catalog={!progressReady} />
               </button>
             ))}
           </div>

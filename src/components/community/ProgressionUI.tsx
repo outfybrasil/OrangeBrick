@@ -60,7 +60,7 @@ export function SeasonStanding({ season }: { season: SeasonSummary | null }) {
   );
 }
 
-export function AchievementMark({ achievement }: { achievement: AchievementProgress }) {
+export function AchievementMark({ achievement, catalog = false }: { achievement: AchievementProgress; catalog?: boolean }) {
   const isUnlocked = Boolean(achievement.unlocked_at);
   const percent = Math.min(100, Math.round((achievement.progress / Math.max(achievement.target, 1)) * 100));
 
@@ -76,8 +76,8 @@ export function AchievementMark({ achievement }: { achievement: AchievementProgr
       <h3 className="font-heading text-base font-bold text-white">{achievement.name}</h3>
       <p className="mt-1 text-xs leading-5 text-gray-400">{achievement.description}</p>
       <div className="mt-4 flex items-center justify-between gap-3 text-xs">
-        <span>{isUnlocked ? rarityLabel(achievement.rarity) : `${achievement.progress} de ${achievement.target}`}</span>
-        {!isUnlocked && <span>{percent}%</span>}
+        <span>{catalog ? rarityLabel(achievement.rarity) : isUnlocked ? rarityLabel(achievement.rarity) : `${achievement.progress} de ${achievement.target}`}</span>
+        {!catalog && !isUnlocked && <span>{percent}%</span>}
       </div>
     </article>
   );
