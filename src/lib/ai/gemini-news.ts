@@ -6,6 +6,7 @@ import { fetchValidatedRemote, readResponseBuffer } from "../server/network.ts";
 import { isOfficialEditorialSource } from "../content-validation.ts";
 import { editorialPublicationBlockers } from "../server/editorial-publication.ts";
 import { normalizeNewsSearch } from "../news-query.ts";
+import { isMissingPostgrestColumn } from "../postgrest-error.ts";
 import {
   buildDailyEditorialPrompt,
   buildGamingClassificationPrompt,
@@ -349,11 +350,10 @@ async function uploadToSupabaseStorage(
   const { data } = supabase.storage.from("post-images").getPublicUrl(filename);
   const renderBase = data.publicUrl.replace("/object/public/", "/render/image/public/");
   const publicUrl = `${renderBase}?width=1920&height=1080&resize=cover&quality=82&format=webp`;
-  const { error: registryError } = await supabase.from("editorial_images").insert({
+  const registryRecord = {
     post_id: null,
     kind: prefix === "cover" ? "cover" : "body",
     source_url: sourceUrl,
-    content_sha256: contentSha256,
     storage_path: filename,
     public_url: publicUrl,
     alt_text: null,
@@ -361,7 +361,12 @@ async function uploadToSupabaseStorage(
     height,
     file_size: buffer.byteLength,
     mime_type: contentType,
-  });
+  };
+  const firstInsert = await supabase.from("editorial_images").insert({ ...registryRecord, content_sha256: contentSha256 });
+  let registryError = firstInsert.error;
+  if (registryError && isMissingPostgrestColumn(registryError)) {
+    registryError = (await supabase.from("editorial_images").insert(registryRecord)).error;
+  }
   if (registryError) {
     await supabase.storage.from("post-images").remove([filename]);
     throw registryError;
@@ -394,7 +399,9 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
         .select("id")
         .eq("content_sha256", sha256)
         .limit(1);
-      if (hashError || (reusedHash && reusedHash.length > 0)) return null;
+      if (hashError) {
+        if (!isMissingPostgrestColumn(hashError)) return null;
+      } else if (reusedHash && reusedHash.length > 0) return null;
       const timeoutMs = boundedRequestTimeout(deadline, AI_REQUEST_TIMEOUT_MS);
       if (timeoutMs <= 0) return null;
       const review = await getGeminiClient(timeoutMs).models.generateContent({

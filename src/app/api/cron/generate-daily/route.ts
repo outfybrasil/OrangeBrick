@@ -4,6 +4,7 @@ import { generateNewsDraft, NoFreshTopicError } from "@/lib/ai/gemini-news";
 import { notifyAdmin } from "@/lib/telegram/bot";
 import { getSiteUrl } from "@/lib/site-url";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
+import { isMissingPostgrestRelation } from "@/lib/postgrest-error";
 import { claimEditorialSlot, isScheduledEditorialSlot, type EditorialSlotStore } from "@/lib/server/editorial-slot";
 import { editorialPublicationBlockers } from "@/lib/server/editorial-publication";
 import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
@@ -36,7 +37,13 @@ async function setSlotState(supabase: ReturnType<typeof serviceClient>, key: str
     .from("bot_state")
     .update({ value, updated_at: new Date().toISOString() })
     .eq("key", key);
-  if (error) throw error;
+  if (error) {
+    if (isMissingPostgrestRelation(error)) {
+      console.error("bot_state indisponível no schema remoto; seguindo sem lock persistente.");
+      return;
+    }
+    throw error;
+  }
 }
 
 function editorialSlotStore(supabase: ReturnType<typeof serviceClient>): EditorialSlotStore {

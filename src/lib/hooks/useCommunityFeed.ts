@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { getCommunityErrorMessage } from "@/lib/community-errors";
+import { isMissingPostgrestFunction } from "@/lib/postgrest-error";
 
 interface UseCommunityFeedOptions {
   load?: boolean;
@@ -142,15 +143,15 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
 
       if (pollRows) {
         const pollRow = pollRows as CommunityPollRow;
-        const { data: pollResults, error: pollResultsError } = await supabase.rpc("community_poll_results", { p_poll_id: pollRow.id });
-        if (pollResultsError) throw pollResultsError;
-        const results = pollResults as unknown as CommunityPollResults | null;
-        if (!results || !results.counts || !Number.isFinite(results.total_votes)) throw new Error("Resultado da enquete indisponível.");
-
         const rawOptions = pollRow.options as Array<{ id: number; text: string }>;
+        const { data: pollResults, error: pollResultsError } = await supabase.rpc("community_poll_results", { p_poll_id: pollRow.id });
+        if (pollResultsError && !isMissingPostgrestFunction(pollResultsError)) throw pollResultsError;
+        const results = (pollResultsError ? null : pollResults) as unknown as CommunityPollResults | null;
+        if (!pollResultsError && (!results || !results.counts || !Number.isFinite(results.total_votes))) throw new Error("Resultado da enquete indisponível.");
+
         const options = rawOptions.map((opt) => ({
           ...opt,
-          votes: results.counts[String(opt.id)] || 0,
+          votes: results?.counts[String(opt.id)] || 0,
         }));
 
         if (!isMountedRef.current || requestVersion !== feedVersionRef.current) return;
@@ -158,8 +159,8 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
           id: pollRow.id,
           question: pollRow.question,
           options,
-          total_votes: results.total_votes,
-          user_voted_option: user?.id ? results.user_voted_option : null,
+          total_votes: results?.total_votes ?? 0,
+          user_voted_option: user?.id ? results?.user_voted_option ?? null : null,
           created_at: pollRow.created_at,
           ends_at: pollRow.expires_at,
         });

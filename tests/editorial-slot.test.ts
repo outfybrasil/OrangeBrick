@@ -94,3 +94,27 @@ test("fails closed for an invalid timestamp in slot state", async () => {
   const fixture = createStore({ value: "running", updated_at: "invalid" });
   assert.equal(await claimEditorialSlot(fixture.store, "slot"), false);
 });
+
+test("proceeds without a persistent lock when the slot table is missing", async () => {
+  const missingRelation = { code: "PGRST205", message: "not in schema cache" };
+  const fixture = createStore(null);
+  const store: EditorialSlotStore = {
+    ...fixture.store,
+    async readSlot() {
+      throw missingRelation;
+    },
+  };
+  assert.equal(await claimEditorialSlot(store, "slot"), true);
+  assert.equal(fixture.inserts, 0);
+});
+
+test("rethrows slot read failures that are not a missing table", async () => {
+  const fixture = createStore(null);
+  const store: EditorialSlotStore = {
+    ...fixture.store,
+    async readSlot() {
+      throw new Error("connection reset");
+    },
+  };
+  await assert.rejects(claimEditorialSlot(store, "slot"), /connection reset/);
+});
