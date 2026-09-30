@@ -4990,6 +4990,40 @@ const { error: cleanupError } = await supabase.from("posts").delete().eq("id", i
 if (cleanupError) throw cleanupError;
 ```
 
+# **[OB-102] A rota editorial do checkout depende de bot_state sem fallback e quebraria o cron no deploy**
+
+- **Categoria:** Bug
+- **Severidade:** Alta
+- **Confiança:** Alta
+- **Localização:** `src/app/api/cron/generate-daily/route.ts:34-73,97` (HEAD `53f8de9`); `src/lib/server/editorial-slot.ts:26-29`.
+- **Evidência:**
+
+```ts
+async readSlot(key) {
+  const { data, error } = await supabase.from("bot_state").select("value, updated_at").eq("key", key).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+```
+
+```ts
+const claimed = await claimEditorialSlot(editorialSlotStore(supabase), slotKey);
+```
+
+- **Descrição:** A rota editorial nova entrou no repositório no commit `53f8de9` (até `db8be6b`, a rota ainda era o fluxo antigo com cartão de aprovação e sem claim de slot). Ela reclama o slot via `claimEditorialSlot` antes de gerar, e `readSlot` lança o erro do PostgREST quando `bot_state` não existe. O `production:check` confirma `bot_state: PGRST205` no banco remoto. Sem fallback, toda invocação dos três horários lançaria antes de gerar, responderia 500 e notificaria falha no Telegram. A release implantada (`dpl_Bp3th4DEwEY77Y3onFHA6F56unsJ`) não depende de `bot_state` e produziu registros em 29/09; o checkout divergiu da produção nesse ponto.
+- **Mitigações verificadas:** O erro é capturado pelo `catch` da rota, que tenta registrar `failed` e envia aviso ao admin no Telegram; nenhum rascunho parcial é publicado. O deployment atual não contém esse código e segue operacional.
+- **Impacto:** Implantar o checkout como está interrompe a geração editorial automática nos três horários (HTTP 500 em cada slot) até que `bot_state` exista ou o fallback seja restaurado.
+- **Como reproduzir:** Em staging sem a relação `bot_state`, invoque `GET /api/cron/generate-daily?slot=11` com o segredo do cron e observe o 500 antes de qualquer geração; repita após aplicar a migration que cria a tabela.
+- **Solução recomendada:** Restaurar o fallback da release implantada (executar sem lock persistente quando o PostgREST retornar `PGRST205` para `bot_state`) ou aplicar a migration de `bot_state` em staging/produção antes do deploy; validar os três slots após a correção.
+- **Exemplo corrigido:**
+
+```ts
+const existing = await store.readSlot(key).catch((error) => {
+  if (error?.code === "PGRST205") return null;
+  throw error;
+});
+```
+
 ## Retomada da auditoria e revalidação do checkout — 29/09/2026
 
 ### Estado do escopo
@@ -5333,3 +5367,41 @@ O usuário autorizou publicação direta nos três horários, seguida apenas de 
 - Após o deployment, a lista remota confirmou os slots 11/17/20, o Drive continuou ausente e sua rota retornou 404. A rota editorial recusou acesso sem o segredo do cron. Ainda falta observar uma execução completa com imagens selecionadas e confirmação de aviso no Telegram. A análise visual por IA reduz o problema, mas não comprova por si só todas as condições de autoria/licenciamento ou todos os casos de semelhança visual.
 
 Este registro substitui o requisito de aprovação manual para o gerador agendado e a situação de produção descritos nos adendos anteriores. O desligamento do workflow legado no GitHub permanece pendente de acesso; sua rota de destino já foi retirada da produção.
+
+## Continuação da auditoria — 30/09/2026
+
+### Estado do workspace e da produção
+
+- O workspace foi commitado e está limpo: HEAD `53f8de9` (redesenho do Meu Brick e do perfil público), sobre `db8be6b` (reações); a branch está 2 commits à frente de `origin/master` (não enviados). Os dois commits **não** estão implantados — a produção com o domínio `orangebrick.blog` continua na release isolada `dpl_Bp3th4DEwEY77Y3onFHA6F56unsJ` (29/09, 16:46 de Brasília).
+- A rota editorial nova (slots 11/17/20, gates, publicação direta, `maxDuration = 300`, aviso no Telegram) entrou no repositório no commit `53f8de9`. Até `db8be6b`, a rota ainda era o fluxo antigo (`maxDuration = 60`, cartão de aprovação, sem claim de slot).
+- `vercel crons list` confirma em produção: `generate-daily?slot=11` às 14h UTC, `slot=17` às 20h UTC e `slot=20` às 23h UTC; `drive-sync` ausente. Os logs de runtime da Vercel retêm cerca de 30 minutos — insuficientes para auditar execuções passadas; o tráfego visível mostra apenas leituras de middleware/estáticas e sondagens de bot (`/wp-admin/install.php`).
+
+### Execuções editoriais observadas no banco (leitura)
+
+- **Slot 17 de 29/09:** post "Ace Combat 8: Wings of Theve inicia acesso antecipado" (`13b3c7c3-…`) criado às 20:42:46 UTC e publicado (`is_published: true`), 42 min após o horário agendado (atraso de disparo do cron ou origem manual — causa NÃO VERIFICADA). Revisão `update` (confirmed→confirmed, `editor_id` null) 4 min depois. Título em caixa mista com slug divergente indica edição posterior; autoria exata NÃO VERIFICADA. Sem registros em `editorial_images` para o post.
+- **Imagem do post Ace Combat:** `live.staticflickr.com`, HTTP 200, `image/jpeg`. Inspeção visual do arquivo baixado: arte/screenshot de caças fictícios estilo Ace Combat, enquadramento 16:9, coerente com o assunto — material de jogo, não foto genérica. Porém o host não consta em `OFFICIAL_EDITORIAL_DOMAINS` (`src/lib/content-validation.ts:64-68`) nem em `ASSET_DOMAINS` (`src/lib/ai/editorial-images.ts:11`), que rejeitariam essa URL; a release implantada aceitou uma origem que o checkout atual recusaria. Autoria/licenciamento da imagem NÃO VERIFICADOS — confirmação de uso editorial pendente (atualiza OB-25).
+- **Slot 20 de 29/09:** rascunho "SEGA ENTRA NO XBOX DISC-TO-DIGITAL…" (`52c31298-…`) criado às 23:16:07 UTC (16 min após o horário), **sem capa e sem imagens internas** (0 imagens; `check-drafts-health` confirma). A seleção de imagens falhou por completo e o fluxo degradou corretamente para rascunho com aviso ao admin. Sem registros em `editorial_images`/`editorial_revisions` para o rascunho.
+- **Slot 11 de 30/09 (14h UTC):** NENHUM post criado — nenhum registro com `created_at` de 30/09 entre os 20 mais recentes. A rota implantada, em falha de geração, responde 500 e avisa o admin; sem pauta nova, retorna `NoFreshTopic` e avisa com 📭 — em ambos os casos, sem salvar post. A causa (sem pauta, falha de provedor ou cron não disparado) é NÃO VERIFICADA desta estação; conferir o chat admin do Telegram às 11h. Todos os demais rascunhos têm capa e 2 imagens internas com HTTP 200.
+
+### Revalidação de prontidão
+
+- `npm run production:check` segue `ready:false`, com mudanças relevantes: `notification_preferences` e `user_follows` agora respondem OK (OB-02 parcialmente resolvido — 2 de 5). Continuam `PGRST205`: `admin_audit_log`, `admin_trash`, `backup_runs` e `bot_state`.
+- Novas pendências remotas das migrations de 30/09: funções `community_poll_results`/`_anon` (PGRST202), coluna `editorial_images.content_sha256` (42703); `add_featured_posts` e `profile_gaming_fields` também não aplicadas — o checkout novo (Meu Brick, enquete, fingerprints) depende delas. `migrations.count` subiu para 72 versões locais únicas; `remote_history_confirmed` segue falso (ledger não reconsultável nesta sessão: sem `SUPABASE_ACCESS_TOKEN`).
+- Ambiente local: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` ausente; `PRODUCTION_EXTERNAL_CHECKS_CONFIRMED` definido mas com valor diferente de `"true"` — o check corretamente segue não confirmado; `RAWG_API_KEY` agora consta no `.env.local` (presença no Vercel Production segue NÃO VERIFICADA); os aliases legados do Supabase continuam presentes — rotação OB-01 incompleta (chaves legacy habilitadas, consumidores Edge/GitHub pendentes).
+- Backup: último em 29/09 17:44 UTC, 24,4h de idade, incompleto — `stale` (OB-04). `gh` continua indisponível — o workflow `drive-sync.yml` no GitHub remoto segue sem verificação/desativação possíveis desta máquina. OB-95 (migration local-only) segue sem confirmação remota.
+- Acesso HTTP ao site continua bloqueado nesta rede (reset TLS; webfetch com erro de transporte) — limitação registrada; Supabase e Vercel acessíveis normalmente.
+
+### Novo achado
+
+- **OB-102 (Alta):** a rota editorial do checkout depende de `bot_state` sem fallback; implantar o checkout quebraria os três horários com HTTP 500 antes de gerar. Detalhe na seção de achados.
+
+### Bloqueios e próximas ações
+
+1. Corrigir OB-102 (fallback `PGRST205` ou migration `bot_state`) antes de qualquer deploy do checkout.
+2. Aplicar em staging/produção as quatro relações restantes e as migrations de 30/09 antes de implantar o checkout novo.
+3. Investigar o slot de 11h de hoje pelo chat admin do Telegram (avisos 📭/❌) e considerar retenção de logs (log drain) para diagnóstico.
+4. Confirmar autoria/licenciamento da imagem Flickr do post Ace Combat ou trocá-la por material oficial rastreado.
+5. Observar as execuções de 17h e 20h de hoje (site + Telegram).
+6. Desativar o workflow `drive-sync` no GitHub (requer credencial ou push); continuar rotação OB-01, backup completo externo e validações externas.
+
+**Contagem:** 102 achados — 1 crítica, 4 altas, 61 médias, 36 baixas. Nenhuma migration remota, rotação de chave, deployment, publicação ou restauração foi executada nesta continuação; somente `AUDITORIA.md` foi atualizado.
