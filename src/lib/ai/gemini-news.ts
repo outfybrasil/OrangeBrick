@@ -1049,6 +1049,10 @@ async function isGamingRelated(contextText: string, deadline: number): Promise<b
   const geminiKey = process.env.GEMINI_API_KEY;
   const classifierSystem = "Você é um classificador editorial rigoroso. Responda EXCLUSIVAMENTE com um JSON válido.";
   const userPrompt = buildGamingClassificationPrompt(contextText);
+  const classifierFailures: string[] = [
+    ...(!groqKey ? ["Groq sem chave configurada"] : []),
+    ...(!geminiKey ? ["Gemini sem chave configurada"] : []),
+  ];
 
   try {
     if (groqKey) {
@@ -1073,8 +1077,11 @@ async function isGamingRelated(contextText: string, deadline: number): Promise<b
         const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
         return parseGamingClassificationJson(data.choices?.[0]?.message?.content || "{}");
       }
+      classifierFailures.push(`Groq HTTP ${res.status}`);
     }
   } catch (err) {
+    const groqReason = err instanceof Error ? err.message : String(err);
+    classifierFailures.push(`Groq: ${groqReason.slice(0, 160)}`);
     console.warn("[escopo] classificador Groq falhou:", err instanceof Error ? err.message.slice(0, 120) : err);
   }
 
@@ -1098,12 +1105,16 @@ async function isGamingRelated(contextText: string, deadline: number): Promise<b
       if (response.text) {
         return parseGamingClassificationJson(response.text);
       }
+      classifierFailures.push("Gemini resposta vazia");
     }
   } catch (err) {
+    const geminiReason = err instanceof Error ? err.message : String(err);
+    classifierFailures.push(`Gemini: ${geminiReason.slice(0, 160)}`);
     console.warn("[escopo] classificador Gemini falhou:", err instanceof Error ? err.message.slice(0, 120) : err);
   }
 
-  throw new Error("Classificadores indisponíveis; geração cancelada para validar o escopo editorial.");
+  const classifierDetail = classifierFailures.length > 0 ? ` (${classifierFailures.join("; ").slice(0, 300)})` : "";
+  throw new Error(`Classificadores indisponíveis${classifierDetail}; geração cancelada para validar o escopo editorial.`);
 }
 
 const GENERIC_IMAGE_QUERIES = /^(game screenshot|gameplay|new game|screenshot|game art|video game|gaming|console|controller)$/i;
@@ -1445,7 +1456,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     verifiedImages,
   });
   if (blockers.length > 0) {
-    throw new Error(`Matéria descartada antes de salvar: ${blockers.join(" ")}`);
+    console.warn(`Rascunho salvo com pendências editoriais: ${blockers.join(" | ")}`);
   }
 
   const { data: insertedPost, error: insertError } = await supabase
