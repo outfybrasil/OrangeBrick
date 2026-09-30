@@ -28,12 +28,10 @@
     "telegram:setup": "node --env-file=.env.local scripts/setup-telegram-webhook.mjs"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
     "@google/genai": "^2.17.1",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "@vercel/functions": "^3.9.9",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "ipaddr.js": "^2.5.0",
