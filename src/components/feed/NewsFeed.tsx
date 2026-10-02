@@ -96,7 +96,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     return result;
   }, [rawPosts, platformSlug, searchQuery, activeTag]);
 
-  const stats = usePostStats(rawPosts.map((post) => post.id));
+  const rawPostIds = useMemo(() => rawPosts.map((post) => post.id), [rawPosts]);
+  const stats = usePostStats(rawPostIds);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("orange-feed-scroll");

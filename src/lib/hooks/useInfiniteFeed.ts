@@ -9,6 +9,7 @@ import { normalizeNewsSearch } from "@/lib/news-query";
 const PAGE_SIZE = 50;
 const REFRESH_INTERVAL = 120_000;
 const EMPTY_INITIAL_POSTS: Post[] = [];
+const EMPTY_PLATFORM_KEYWORDS: string[] = [];
 
 interface UseInfiniteFeedReturn {
   posts: Post[];
@@ -20,7 +21,13 @@ interface UseInfiniteFeedReturn {
   refresh: () => void;
 }
 
-export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Post[] = EMPTY_INITIAL_POSTS, search = "", tag = "", platformKeywords: string[] = []): UseInfiniteFeedReturn {
+export function useInfiniteFeed(
+  category?: PostCategory | null,
+  initialPosts: Post[] = EMPTY_INITIAL_POSTS,
+  search = "",
+  tag = "",
+  platformKeywords: string[] = EMPTY_PLATFORM_KEYWORDS
+): UseInfiniteFeedReturn {
   const supabase = useMemo(() => createClient(), []);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(initialPosts.length === 0);
@@ -31,7 +38,18 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
     initialPosts.length === PAGE_SIZE ? initialPosts[initialPosts.length - 1].created_at : null
   );
   const loadingRef = useRef(false);
-  const hydratedRef = useRef(false);
+
+  const platformKeywordsKey = platformKeywords.join(",");
+  const stablePlatformKeywords = useMemo(
+    () => (platformKeywordsKey ? platformKeywordsKey.split(",") : EMPTY_PLATFORM_KEYWORDS),
+    [platformKeywordsKey]
+  );
+  const filterKey = useMemo(
+    () => `${category || ""}|${search.trim()}|${tag.trim()}|${platformKeywordsKey}`,
+    [category, search, tag, platformKeywordsKey]
+  );
+  const prevFilterKeyRef = useRef(filterKey);
+  const isFirstMountRef = useRef(true);
 
   const fetchPosts = useCallback(
     async (isRefresh = false) => {
@@ -40,6 +58,7 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
 
       try {
         if (isRefresh) {
+          cursorRef.current = null;
           setIsLoading(true);
         } else {
           setIsLoadingMore(true);
@@ -60,8 +79,8 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
         if (searchTerm) query = query.or(`title.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`);
         const tagTerm = normalizeNewsSearch(tag);
         if (tagTerm) query = query.or(`title.ilike.%${tagTerm}%,summary.ilike.%${tagTerm}%,author_tag.ilike.%${tagTerm}%`);
-        if (platformKeywords.length > 0) {
-          const platformFilters = platformKeywords.flatMap((keyword) => {
+        if (stablePlatformKeywords.length > 0) {
+          const platformFilters = stablePlatformKeywords.flatMap((keyword) => {
             const term = normalizeNewsSearch(keyword);
             if (!term) return [];
             return [`title.ilike.%${term}%`, `summary.ilike.%${term}%`, `category.ilike.%${term}%`, `author_tag.ilike.%${term}%`];
@@ -101,50 +120,47 @@ export function useInfiniteFeed(category?: PostCategory | null, initialPosts: Po
         loadingRef.current = false;
       }
     },
-    [category, search, tag, platformKeywords, supabase]
+    [category, search, tag, stablePlatformKeywords, supabase]
   );
 
   useEffect(() => {
-    const firstRun = !hydratedRef.current;
-    hydratedRef.current = true;
-
-    if (firstRun && initialPosts.length > 0) {
-      const interval = setInterval(() => {
-        if (!loadingRef.current) {
-          cursorRef.current = null;
-          setHasMore(true);
-          fetchPosts(true);
-        }
-      }, REFRESH_INTERVAL);
-      return () => clearInterval(interval);
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      if (initialPosts.length === 0) {
+        const timer = setTimeout(() => {
+          void fetchPosts(true);
+        }, 0);
+        return () => clearTimeout(timer);
+      }
+      return;
     }
 
-    queueMicrotask(() => {
-      cursorRef.current = null;
-      setHasMore(true);
-      void fetchPosts(true);
-    });
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      const timer = setTimeout(() => {
+        void fetchPosts(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [filterKey, fetchPosts, initialPosts.length]);
 
+  useEffect(() => {
     const interval = setInterval(() => {
       if (!loadingRef.current) {
-        cursorRef.current = null;
-        setHasMore(true);
-        fetchPosts(true);
+        void fetchPosts(true);
       }
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [fetchPosts, initialPosts]);
+  }, [fetchPosts]);
 
   const loadMore = useCallback(() => {
     if (!hasMore || isLoadingMore || isLoading) return;
-    fetchPosts(false);
+    void fetchPosts(false);
   }, [hasMore, isLoadingMore, isLoading, fetchPosts]);
 
   const refresh = useCallback(() => {
-    cursorRef.current = null;
-    setHasMore(true);
-    fetchPosts(true);
+    void fetchPosts(true);
   }, [fetchPosts]);
 
   return {
