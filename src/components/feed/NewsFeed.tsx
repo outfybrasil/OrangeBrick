@@ -17,6 +17,7 @@ import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
 
 interface NewsFeedProps {
+  headingLevel?: "h1" | "h2" | string;
   category: PostCategory | null;
   platformSlug?: PlatformSlug | null;
   searchQuery?: string;
@@ -25,7 +26,6 @@ interface NewsFeedProps {
   onClearFilters?: () => void;
   homeHighlights?: ReactNode;
   initialPosts?: Post[];
-  headingLevel?: "h1" | "h2";
 }
 
 const CATEGORIES: { label: string; value: PostCategory | null }[] = [
@@ -42,13 +42,10 @@ const EMPTY_STATS: PostStats = {
   comments: 0,
   userReaction: null,
 };
-const EMPTY_PLATFORM_KEYWORDS: string[] = [];
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts, headingLevel = "h2" }: NewsFeedProps) {
-  const Heading = headingLevel;
-  const platformKeywords = platformSlug && platformSlug in PLATFORMS_CONFIG ? PLATFORMS_CONFIG[platformSlug].tagKeywords : EMPTY_PLATFORM_KEYWORDS;
+export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
-    useInfiniteFeed(category, initialPosts, searchQuery, activeTag || "", platformKeywords);
+    useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
 
   const posts = useMemo(() => {
@@ -96,28 +93,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
         `${post.title} ${post.summary} ${post.author_tag || ""}`.toLowerCase().includes(tagTerm)
       );
     }
-    if (!hasRequestedFilters) {
-      const now = new Date();
-      const startOfWeek = new Date(now);
-      const daysSinceMonday = (now.getDay() + 6) % 7;
-      startOfWeek.setDate(now.getDate() - daysSinceMonday);
-      startOfWeek.setHours(0, 0, 0, 0);
-      const dated = result.map((post) => ({ post, date: new Date(post.published_at || post.created_at).getTime() }));
-      const weekPosts = dated.filter((entry) => entry.date >= startOfWeek.getTime());
-      const olderPosts = dated.filter((entry) => entry.date < startOfWeek.getTime());
-      const ordered = [...weekPosts, ...olderPosts].map((entry) => entry.post);
-      const selected: Post[] = [];
-      const topics = new Set<string>();
-      for (const post of ordered) {
-        if (post.topic_id && topics.has(post.topic_id)) continue;
-        selected.push(post);
-        if (post.topic_id) topics.add(post.topic_id);
-        if (selected.length === 5) break;
-      }
-      result = [...selected, ...ordered.filter((post) => !selected.some((item) => item.id === post.id))].slice(0, 5);
-    }
     return result;
-  }, [rawPosts, platformSlug, searchQuery, activeTag, hasRequestedFilters]);
+  }, [rawPosts, platformSlug, searchQuery, activeTag]);
 
   const stats = usePostStats(rawPosts.map((post) => post.id));
 
@@ -135,6 +112,40 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     const target = (event.target as HTMLElement).closest("a");
     if (target?.getAttribute("href")?.startsWith("/posts/")) sessionStorage.setItem("orange-feed-scroll", String(window.scrollY));
   };
+
+  const isFiltering = hasRequestedFilters;
+  const heroPost = !isFiltering && posts.length >= 3 ? posts[0] : null;
+
+  const sidePosts = useMemo(() => {
+    if (!heroPost || posts.length < 3) return [];
+    const candidates = posts.slice(1);
+    const chosen: Post[] = [];
+    const usedCategories = new Set<string>([heroPost.category]);
+
+    for (const p of candidates) {
+      if (chosen.length === 2) break;
+      if (!usedCategories.has(p.category)) {
+        chosen.push(p);
+        usedCategories.add(p.category);
+      }
+    }
+    for (const p of candidates) {
+      if (chosen.length === 2) break;
+      if (!chosen.some((c) => c.id === p.id)) {
+        chosen.push(p);
+      }
+    }
+    return chosen;
+  }, [heroPost, posts]);
+
+  const displayPosts = useMemo(() => {
+    if (isFiltering || !heroPost) return posts;
+    const heroId = heroPost.id;
+    return posts.filter((p) => p.id !== heroId);
+  }, [isFiltering, heroPost, posts]);
+
+  const topPosts = !isFiltering ? displayPosts.slice(0, 8) : displayPosts.slice(0, 6);
+  const lowerPosts = !isFiltering ? [] : displayPosts.slice(6);
 
   if (isLoading) {
     return <><NewsFeedSkeleton /><BackToTop /></>;
@@ -154,8 +165,6 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     );
   }
 
-  const isFiltering = hasRequestedFilters;
-
   if (posts.length === 0) {
     return isFiltering ? (
       <NewsFeedEmpty
@@ -167,23 +176,24 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     ) : <NewsFeedEmpty onRefresh={refresh} />;
   }
 
-  // RENDERIZAÇÃO DO HERO (MATÉRIA DE DESTAQUE GRANDE + 2 LATERAIS)
   const renderHeroSection = () => {
-    if (isFiltering || posts.length < 3) return null;
+    if (isFiltering || !heroPost || sidePosts.length < 2) return null;
 
-    const heroPost = posts[0];
-    const sidePosts = posts.slice(1, 3);
+    const isHeroToday = Boolean(
+      heroPost.published_at &&
+      new Date(heroPost.published_at).toDateString() === new Date().toDateString()
+    );
+    const heroBadge = isHeroToday ? "Matéria do dia" : "Em destaque";
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-        {/* HERO MATÉRIA PRINCIPAL GRANDE */}
         <Link
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
           className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
-{heroPost.image_url ? (
+          {heroPost.image_url ? (
             <Image
               priority
               src={heroPost.image_url}
@@ -201,7 +211,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
 
           <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
-            <span className="text-xs font-black uppercase tracking-[0.18em] text-black">Matéria do dia</span>
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-black">{heroBadge}</span>
             <span aria-hidden="true" className="absolute -right-4 top-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
           </div>
@@ -212,9 +222,9 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               <Timer date={heroPost.published_at ?? ""} />
             </div>
 
-            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300">
+            <h1 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
               {heroPost.title}
-            </h2>
+            </h1>
 
             <p className="mt-1 hidden text-sm leading-6 text-gray-200 xs:line-clamp-2">
               {heroPost.summary}
@@ -231,7 +241,6 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
           </div>
         </Link>
 
-        {/* SIDE POSTS DO HERO */}
         <div className="flex flex-col gap-4">
           {sidePosts.map((post) => (
             <Link
@@ -241,7 +250,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               data-home-target={post.slug}
               className="group relative flex flex-1 flex-col overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
-{post.image_url && (
+              {post.image_url && (
                 <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
@@ -252,20 +261,27 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                   <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black">
-                    {CATEGORY_CONFIG[post.category].label}
+                    {CATEGORY_CONFIG[post.category]?.label || post.category}
                     <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                     <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                   </span>
                 </div>
               )}
-              <div className="p-3 flex flex-col justify-between flex-1 relative z-20">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  {!post.image_url && <Tag category={post.category} />}
-                  <Timer date={post.published_at ?? ""} />
+              <div className="p-3.5 flex flex-col justify-between flex-1 relative z-20">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    {!post.image_url && <Tag category={post.category} />}
+                    <Timer date={post.published_at ?? ""} />
+                  </div>
+                  <h3 className="line-clamp-2 font-heading text-sm font-bold leading-snug text-white transition-colors duration-200 group-hover:text-brand-orange">
+                    {post.title}
+                  </h3>
+                  {post.summary && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-400">
+                      {post.summary}
+                    </p>
+                  )}
                 </div>
-                <h4 className="line-clamp-2 font-heading text-sm font-bold leading-snug text-white transition-colors duration-200 group-hover:text-brand-orange">
-                  {post.title}
-                </h4>
               </div>
             </Link>
           ))}
@@ -274,50 +290,46 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     );
   };
 
-  const displayPosts = !isFiltering && posts.length >= 3 ? posts.slice(3) : posts;
-  const topPosts = displayPosts.slice(0, 4);
-  const lowerPosts = displayPosts.slice(4);
-
   return (
     <div className="min-w-0" onClickCapture={rememberFeedPosition}>
-      {/* 2 colunas: feed principal + sidebar */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
-
-        {/* COLUNA PRINCIPAL */}
         <div className="min-w-0 space-y-6">
           {renderHeroSection()}
 
           <div id="ultimas-noticias" className="scroll-mt-16">
-            <div className="mb-4 flex flex-col gap-2 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 flex flex-col gap-3 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-6 w-1 bg-brand-orange" />
-                <Heading className="font-heading text-xl font-black text-white">
+                <h2 className="font-heading text-xl font-black text-white">
                   {category ? (
                     <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
                   ) : (
                     <>Últimas <span className="text-brand-orange">notícias</span></>
                   )}
-                </Heading>
+                </h2>
               </div>
 
               {onSelectCategory && (
-                <nav className="-mx-1 flex max-w-full items-center overflow-x-auto px-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
+                <div role="group" aria-label="Filtrar por categoria" className="-mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1 py-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
                   {CATEGORIES.map((cat) => {
                     const isActive = category === cat.value;
                     return (
                       <button
                         key={cat.label}
+                        type="button"
+                        aria-pressed={isActive}
                         onClick={() => onSelectCategory(cat.value)}
-                        className={`relative min-h-11 shrink-0 border-b border-white/10 px-3 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
-                          isActive ? "text-white" : "text-gray-500 hover:text-gray-200"
+                        className={`min-h-8 shrink-0 rounded-md border px-3 py-1 text-xs transition-all cursor-pointer whitespace-nowrap ${
+                          isActive
+                            ? "border-brand-orange bg-brand-orange font-bold text-black shadow-sm"
+                            : "border-white/10 bg-white/[0.03] text-gray-400 hover:border-brand-orange/50 hover:text-white"
                         }`}
                       >
                         {cat.label}
-                        {isActive && <span aria-hidden="true" className="absolute inset-x-3 -bottom-px h-0.5 bg-brand-orange" />}
                       </button>
                     );
                   })}
-                </nav>
+                </div>
               )}
             </div>
 
