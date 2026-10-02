@@ -32,12 +32,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .maybeSingle<Profile>();
 
     const googleAvatarUrl = getGoogleAvatarUrl(authenticatedUser);
-    if (data && !data.avatar_url && googleAvatarUrl) {
-      setProfile({ ...data, avatar_url: googleAvatarUrl });
+    if (data) {
+      if (!data.avatar_url && googleAvatarUrl) {
+        setProfile({ ...data, avatar_url: googleAvatarUrl });
+        void supabase.from("profiles").update({ avatar_url: googleAvatarUrl }).eq("user_id", authenticatedUser.id);
+        return;
+      }
+      setProfile(data);
       return;
     }
 
-    setProfile(data);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/user/profile", {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+      });
+      if (res.ok) {
+        const payload = (await res.json()) as { profile?: Profile | null };
+        if (payload.profile) {
+          setProfile(payload.profile);
+          return;
+        }
+      }
+    } catch {
+    }
+
+    const initialName = (
+      authenticatedUser.user_metadata?.full_name ||
+      authenticatedUser.user_metadata?.name ||
+      authenticatedUser.email?.split("@")[0] ||
+      "Jogador"
+    ).slice(0, 30);
+    const cleanUsername = (
+      authenticatedUser.user_metadata?.user_name ||
+      authenticatedUser.email?.split("@")[0] ||
+      "jogador"
+    ).toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
+    const provisionalUsername = `${cleanUsername || "jogador"}-${authenticatedUser.id.slice(0, 4)}`;
+
+    const fallbackProfile: Profile = {
+      id: authenticatedUser.id,
+      user_id: authenticatedUser.id,
+      nickname: initialName,
+      display_name: initialName,
+      username: provisionalUsername,
+      avatar_url: googleAvatarUrl || null,
+      banner_url: null,
+      bio: null,
+      is_official: false,
+      favorite_platforms: [],
+      favorite_categories: [],
+      profile_theme: "default",
+      show_lifetime_xp: true,
+      show_activity_stats: true,
+      show_season_history: true,
+      show_in_leaderboard: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setProfile(fallbackProfile);
   }, [supabase]);
 
   useEffect(() => {

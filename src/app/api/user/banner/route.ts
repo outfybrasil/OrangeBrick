@@ -55,14 +55,49 @@ export async function POST(request: Request) {
         .toBuffer();
     }
     if (output.byteLength > 450 * 1024) return NextResponse.json({ error: "Esta imagem tem detalhes demais. Escolha outra foto" }, { status: 413 });
-    const { data: previousProfile, error: previousProfileError } = await supabase
+    const { data: initialPreviousProfile, error: previousProfileError } = await supabase
       .from("profiles")
       .select("banner_url")
       .eq("user_id", user.id)
       .maybeSingle();
-    if (previousProfileError || !previousProfile) {
+    let previousProfile = initialPreviousProfile;
+
+    if (previousProfileError) {
       console.error("Falha ao carregar banner atual", previousProfileError);
       return NextResponse.json({ error: "Não foi possível atualizar o perfil" }, { status: 500 });
+    }
+
+    if (!previousProfile) {
+      const initialName = (
+        user.user_metadata?.full_name ||
+        user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "Jogador"
+      ).slice(0, 30);
+      const cleanUsername = (
+        user.user_metadata?.user_name ||
+        user.email?.split("@")[0] ||
+        "jogador"
+      ).toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
+      const provisionalUsername = `${cleanUsername || "jogador"}-${user.id.slice(0, 4)}`;
+
+      const { data: createdProfile, error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: user.id,
+          nickname: initialName,
+          display_name: initialName,
+          username: provisionalUsername,
+          avatar_url: null,
+        })
+        .select("banner_url")
+        .maybeSingle();
+
+      if (insertError) {
+        console.error("Falha ao criar perfil inicial para banner", insertError);
+        return NextResponse.json({ error: "Não foi possível atualizar o perfil" }, { status: 500 });
+      }
+      previousProfile = createdProfile;
     }
     const path = `${user.id}/banner-${crypto.randomUUID()}.webp`;
     const { error: uploadError } = await supabase.storage.from("profile-images").upload(path, output, {
@@ -89,7 +124,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não foi possível atualizar o perfil" }, { status: 500 });
     }
 
-    const previousPath = profileImagePath(previousProfile.banner_url, user.id, "banner-");
+    const previousPath = profileImagePath(previousProfile?.banner_url ?? null, user.id, "banner-");
     if (previousPath && previousPath !== path) await supabase.storage.from("profile-images").remove([previousPath]);
 
     return NextResponse.json({ publicUrl, bytes: output.byteLength });

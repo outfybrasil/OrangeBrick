@@ -225,21 +225,54 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
       return next;
     });
 
-    const operation = nextVote
-      ? supabase
-          .from("release_hype_votes")
-          .upsert(
-            { release_id: releaseId, user_id: user.id, vote_type: nextVote },
-            { onConflict: "release_id,user_id" }
-          )
-      : supabase
+    let saveFailed = false;
+
+    try {
+      const res = await fetch("/api/release-hype-vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ releaseId, vote: nextVote || null }),
+      });
+
+      if (res.ok) {
+        const payload = (await res.json()) as { counts?: HypeCounts };
+        if (payload.counts) {
+          setHypeCounts((current) => ({ ...current, [releaseId]: payload.counts! }));
+        }
+      } else {
+        await supabase
           .from("release_hype_votes")
           .delete()
           .eq("release_id", releaseId)
           .eq("user_id", user.id);
 
-    const { error } = await operation;
-    if (error) {
+        if (nextVote) {
+          const { error: insError } = await supabase.from("release_hype_votes").insert({
+            release_id: releaseId,
+            user_id: user.id,
+            vote_type: nextVote,
+          });
+          if (insError) saveFailed = true;
+        }
+      }
+    } catch {
+      await supabase
+        .from("release_hype_votes")
+        .delete()
+        .eq("release_id", releaseId)
+        .eq("user_id", user.id);
+
+      if (nextVote) {
+        const { error: insError } = await supabase.from("release_hype_votes").insert({
+          release_id: releaseId,
+          user_id: user.id,
+          vote_type: nextVote,
+        });
+        if (insError) saveFailed = true;
+      }
+    }
+
+    if (saveFailed) {
       setHypeCounts((current) => ({ ...current, [releaseId]: previousCounts }));
       setMyVotes((current) => {
         const next = { ...current };

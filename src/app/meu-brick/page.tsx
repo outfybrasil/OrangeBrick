@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, useCallback } from "react";
+import { useEffect, useState, useTransition, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -8,14 +8,14 @@ import { Footer } from "@/components/ui/Footer";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
-import { resolveAvatarUrl } from "@/lib/avatar";
+import { resolveAvatarUrl, getGoogleAvatarUrl } from "@/lib/avatar";
 import { createDataClient } from "@/lib/supabase/client";
 import type { CommunityPost } from "@/lib/types/community";
 import type { ReleaseRadarItem } from "@/lib/types/database";
 
 export default function MeuBrickPage() {
   const router = useRouter();
-  const { user, profile, isLoading, signOut } = useAuth();
+  const { user, profile, isLoading, signOut, refreshProfile } = useAuth();
   const { bookmarks, toggleBookmark } = useBookmarks();
   const { savedBricks, toggleSaveBrick } = useSavedBricks();
 
@@ -34,7 +34,61 @@ export default function MeuBrickPage() {
   const [votedReleases, setVotedReleases] = useState<ReleaseRadarItem[]>([]);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarFeedback, setAvatarFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
+
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    if (file.size > 4 * 1024 * 1024) {
+      setAvatarFeedback({ type: "error", text: "A imagem deve ter no máximo 4 MB." });
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
+      setAvatarFeedback({ type: "error", text: "Formato inválido. Use JPG, PNG, WebP ou AVIF." });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setAvatarFeedback(null);
+
+    try {
+      const supabase = createDataClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setAvatarFeedback({ type: "error", text: "Sessão expirada. Entre novamente para continuar." });
+        setIsUploadingAvatar(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.set("avatar", file);
+
+      const res = await fetch("/api/user/avatar", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      const data = (await res.json()) as { publicUrl?: string; error?: string };
+      if (!res.ok || !data.publicUrl) {
+        setAvatarFeedback({ type: "error", text: data.error || "Não foi possível salvar a foto." });
+      } else {
+        await refreshProfile();
+        setAvatarFeedback({ type: "success", text: "Foto de perfil atualizada!" });
+        setTimeout(() => setAvatarFeedback(null), 4000);
+      }
+    } catch {
+      setAvatarFeedback({ type: "error", text: "Erro ao enviar a imagem. Tente novamente." });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSelectTab = useCallback((tab: "bricks" | "jogos" | "salvos" | "settings") => {
     setActiveTab(tab);
@@ -80,10 +134,7 @@ export default function MeuBrickPage() {
             .eq("user_id", currentUserId)
             .order("created_at", { ascending: false })
             .limit(20),
-          supabase
-            .from("release_hype_votes")
-            .select("release_id, vote_type")
-            .eq("user_id", currentUserId),
+          supabase.rpc("get_my_release_hype_votes"),
           currentUsername
             ? supabase
                 .from("user_follows")
@@ -258,7 +309,26 @@ export default function MeuBrickPage() {
     );
   }
 
-  const avatarUrl = resolveAvatarUrl(profile?.avatar_url);
+  const googleAvatar = getGoogleAvatarUrl(user);
+  const effectiveAvatar = profile?.avatar_url || googleAvatar;
+  const authorName =
+    profile?.display_name ||
+    profile?.nickname ||
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    "Jogador";
+  const avatarUrl = resolveAvatarUrl(effectiveAvatar, authorName, profile?.is_official);
+
+  const displayNick = profile?.username
+    ? `@${profile.username}`
+    : profile?.nickname
+      ? `@${profile.nickname.toLowerCase().replace(/\s+/g, "")}`
+      : user.user_metadata?.user_name
+        ? `@${user.user_metadata.user_name.toLowerCase().replace(/\s+/g, "")}`
+        : user.user_metadata?.full_name
+          ? `@${user.user_metadata.full_name.toLowerCase().replace(/\s+/g, "")}`
+          : "@jogador";
+
   const totalSaved = bookmarks.length + savedBricks.length;
   const favoritePlatforms = profile?.favorite_platforms?.length
     ? profile.favorite_platforms
@@ -288,17 +358,74 @@ export default function MeuBrickPage() {
 
           <div className="px-5 pb-6 pt-0 sm:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 sm:-mt-16">
-              <div className="relative size-24 sm:size-28 shrink-0 overflow-hidden rounded-2xl border-4 border-[#111619] bg-[#1a2126] shadow-2xl">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt={profile?.display_name || "Avatar"} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="grid h-full w-full place-items-center font-heading text-3xl font-black text-brand-orange">
-                    {(profile?.display_name || user.email || "U")[0].toUpperCase()}
-                  </div>
-                )}
+              <div className="relative group/avatar size-24 sm:size-28 shrink-0">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="sr-only"
+                  onChange={handleAvatarFileSelect}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  aria-label="Alterar foto de perfil"
+                  className="relative h-full w-full overflow-hidden rounded-2xl border-4 border-[#111619] bg-[#1a2126] shadow-2xl cursor-pointer block focus-visible:outline-2 focus-visible:outline-brand-orange text-left p-0"
+                >
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={authorName}
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center font-heading text-3xl font-black text-brand-orange">
+                      {authorName[0].toUpperCase()}
+                    </div>
+                  )}
+
+                  {isUploadingAvatar ? (
+                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-1.5 p-2 text-center z-20">
+                      <div className="size-5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider">Salvando</span>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 p-2 text-center z-10 backdrop-blur-[2px]">
+                      <svg viewBox="0 0 24 24" className="size-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                      </svg>
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider">Alterar</span>
+                    </div>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  aria-label="Alterar foto de perfil"
+                  className="absolute -bottom-1 -right-1 z-20 size-8 rounded-xl bg-brand-orange text-black border-2 border-[#111619] shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </button>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  className="flex min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
+                >
+                  Alterar foto
+                </button>
                 {profile?.username ? (
                   <Link
                     href={`/u/${encodeURIComponent(profile.username)}`}
@@ -334,10 +461,22 @@ export default function MeuBrickPage() {
               </div>
             </div>
 
+            {avatarFeedback && (
+              <div
+                className={`mt-4 inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold ${
+                  avatarFeedback.type === "success"
+                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"
+                    : "bg-red-500/15 border border-red-500/30 text-red-300"
+                }`}
+              >
+                <span>{avatarFeedback.text}</span>
+              </div>
+            )}
+
             <div className="mt-4">
               <div className="flex items-center gap-2">
                 <h1 className="font-heading text-2xl font-black text-white sm:text-3xl">
-                  {profile?.display_name || "Jogador"}
+                  {authorName}
                 </h1>
                 {profile?.is_official && (
                   <span className="rounded bg-brand-orange/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
@@ -345,8 +484,8 @@ export default function MeuBrickPage() {
                   </span>
                 )}
               </div>
-              <p className="font-mono text-xs text-gray-400">
-                {profile?.username ? `@${profile.username}` : user.email}
+              <p className="font-mono text-xs text-brand-orange font-bold">
+                {displayNick}
               </p>
             </div>
 

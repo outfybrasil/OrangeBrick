@@ -89,33 +89,51 @@ export function GamePageClient({
         const previousVote = ((currentVotes || []) as Array<{ release_id: string; vote_type: HypeVoteType }>)[0]?.vote_type || null;
         setVoteOwnerId(user.id);
         setUserVote(previousVote);
-        if (previousVote === vote) {
-          const { error } = await supabase
-            .from("release_hype_votes")
-            .delete()
-            .eq("release_id", game.id)
-            .eq("user_id", user.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase.from("release_hype_votes").upsert(
-            {
-              release_id: game.id,
-              user_id: user.id,
-              vote_type: vote,
-            },
-            { onConflict: "release_id,user_id" }
-          );
-          if (error) throw error;
+        const nextVote = previousVote === vote ? null : vote;
+
+        try {
+          const res = await fetch("/api/release-hype-vote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ releaseId: game.id, vote: nextVote }),
+          });
+
+          if (res.ok) {
+            const payload = (await res.json()) as { counts?: Record<HypeVoteType, number> };
+            voteSaved = true;
+            setUserVote(nextVote);
+            if (payload.counts) {
+              setCounts(payload.counts);
+            }
+          } else {
+            await supabase
+              .from("release_hype_votes")
+              .delete()
+              .eq("release_id", game.id)
+              .eq("user_id", user.id);
+
+            if (nextVote) {
+              const { error: insError } = await supabase.from("release_hype_votes").insert({
+                release_id: game.id,
+                user_id: user.id,
+                vote_type: nextVote,
+              });
+              if (insError) throw insError;
+            }
+            voteSaved = true;
+            setUserVote(nextVote);
+            const { data: refreshedCounts } = await supabase.rpc("get_release_hype_counts");
+            const currentCounts = { buy: 0, watch: 0, skip: 0 };
+            for (const row of (refreshedCounts || []) as Array<{ release_id: string; vote_type: HypeVoteType; vote_count: number }>) {
+              if (row.release_id === game.id) {
+                currentCounts[row.vote_type] = Number(row.vote_count);
+              }
+            }
+            setCounts(currentCounts);
+          }
+        } catch (innerErr) {
+          throw innerErr;
         }
-        voteSaved = true;
-        setUserVote(previousVote === vote ? null : vote);
-        const { data: refreshedCounts, error: refreshError } = await supabase.rpc("get_release_hype_counts").eq("release_id", game.id);
-        if (refreshError) throw refreshError;
-        const currentCounts = { buy: 0, watch: 0, skip: 0 };
-        for (const row of (refreshedCounts || []) as Array<{ release_id: string; vote_type: HypeVoteType; vote_count: number }>) {
-          currentCounts[row.vote_type] = Number(row.vote_count);
-        }
-        setCounts(currentCounts);
         if (previousVote !== vote) {
           setStatusNotice(vote === "buy" ? "Adicionado aos seus jogos garantidos no Meu Brick!" : vote === "watch" ? "Adicionado ao seu radar no Meu Brick!" : "Voto registrado com sucesso!");
           setTimeout(() => setStatusNotice(null), 4000);
