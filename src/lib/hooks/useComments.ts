@@ -72,14 +72,15 @@ export function useComments(postId: string) {
       const likesMap: Record<string, number> = {};
       const likedCommentIds = new Set<string>();
       if (rawComments.length > 0) {
-        const { data: likes, error: likesError } = await supabase
-          .from("article_comment_likes")
-          .select("comment_id, user_id")
-          .in("comment_id", rawComments.map((comment) => comment.id));
-        if (!likesError) {
-          for (const like of (likes || []) as Array<{ comment_id: string; user_id: string }>) {
-            likesMap[like.comment_id] = (likesMap[like.comment_id] || 0) + 1;
-            if (user && like.user_id === user.id) likedCommentIds.add(like.comment_id);
+        const commentIds = rawComments.map((comment) => comment.id);
+        for (let index = 0; index < commentIds.length; index += 200) {
+          const { data: summaries, error: summariesError } = await supabase.rpc("article_comment_like_summaries", {
+            target_comment_ids: commentIds.slice(index, index + 200),
+          });
+          if (summariesError) throw summariesError;
+          for (const summary of summaries || []) {
+            likesMap[summary.comment_id] = Number(summary.likes_count);
+            if (summary.user_has_liked) likedCommentIds.add(summary.comment_id);
           }
         }
       }
@@ -99,7 +100,7 @@ export function useComments(postId: string) {
       setIsLoadingMore(false);
       pendingRef.current = false;
     }
-  }, [pageSize, postId, supabase, user]);
+  }, [pageSize, postId, supabase]);
 
   const addComment = useCallback(async (content: string, parentId: string | null = null) => {
     setError(null);
@@ -155,10 +156,11 @@ export function useComments(postId: string) {
       : comment));
 
     try {
-      const result = nextHasLiked
-        ? await supabase.from("article_comment_likes").insert({ comment_id: commentId, user_id: user.id })
-        : await supabase.from("article_comment_likes").delete().eq("comment_id", commentId).eq("user_id", user.id);
-      if (result.error) throw result.error;
+      const { error: likeError } = await supabase.rpc("set_article_comment_like", {
+        target_comment_id: commentId,
+        should_like: nextHasLiked,
+      });
+      if (likeError) throw likeError;
     } catch {
       setComments((previous) => previous.map((comment) => comment.id === commentId ? current : comment));
       throw new Error("Não foi possível atualizar a curtida. Tente novamente.");
