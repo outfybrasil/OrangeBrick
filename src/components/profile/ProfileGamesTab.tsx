@@ -54,7 +54,7 @@ export function ProfileGamesTab({
       {playingNow && (
         <section aria-labelledby="playing-now-heading">
           <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-            <span className="text-base" aria-hidden="true">🎮</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
             <h3 id="playing-now-heading" className="font-heading text-sm font-black uppercase tracking-wider text-white">
               Jogando Agora
             </h3>
@@ -124,7 +124,7 @@ export function ProfileGamesTab({
         <section aria-labelledby="guaranteed-games-heading">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-base" aria-hidden="true">💎</span>
+              <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
               <h3 id="guaranteed-games-heading" className="font-heading text-sm font-black uppercase tracking-wider text-white">
                 Garanti ({guaranteedGames.length})
               </h3>
@@ -175,7 +175,7 @@ export function ProfileGamesTab({
         <section aria-labelledby="radar-games-heading">
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-base" aria-hidden="true">📡</span>
+              <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
               <h3 id="radar-games-heading" className="font-heading text-sm font-black uppercase tracking-wider text-white">
                 No Radar ({radarGames.length})
               </h3>

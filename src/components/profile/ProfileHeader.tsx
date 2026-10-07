@@ -111,11 +111,11 @@ export function ProfileHeader({
               onClick={() => void onToggleFollow()}
               className={`inline-flex min-h-11 items-center justify-center rounded-sm px-6 text-xs font-black uppercase tracking-wider transition-all focus-visible:outline-2 focus-visible:outline-brand-orange ${
                 isFollowing
-                  ? "border border-brand-orange bg-brand-orange text-white shadow-[0_0_12px_rgba(255,94,0,0.35)]"
+                  ? "border border-brand-orange bg-brand-orange text-white"
                   : "border border-brand-orange/60 bg-[#16171D] text-brand-orange hover:border-brand-orange hover:bg-brand-orange hover:text-white"
               }`}
             >
-              {isFollowing ? "Seguindo ✓" : "Seguir"}
+              {isFollowing ? "Seguindo" : "Seguir"}
             </button>
           )}
 

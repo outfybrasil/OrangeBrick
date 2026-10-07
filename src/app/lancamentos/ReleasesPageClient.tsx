@@ -511,7 +511,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                       : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
                   }`}
                 >
-                  🎮 Esta semana
+                  Esta semana
                 </button>
                 <button
                   type="button"
@@ -524,7 +524,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                       : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
                   }`}
                 >
-                  🔥 Mais hypados
+                  Mais aguardados
                 </button>
                 <button
                   type="button"
@@ -537,7 +537,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                       : "border border-white/10 bg-white/[0.03] text-gray-400 hover:text-white"
                   }`}
                 >
-                  👀 No radar
+                  No radar
                 </button>
               </div>
             </div>

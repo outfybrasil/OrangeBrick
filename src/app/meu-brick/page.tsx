@@ -210,11 +210,11 @@ export default function MeuBrickPage() {
         <SiteHeader variant="strip" />
         <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
           <div className="space-y-6 animate-pulse">
-            <div className="h-44 rounded-2xl bg-white/[0.04] border border-white/10" />
-            <div className="h-12 w-80 rounded-xl bg-white/[0.04]" />
+            <div className="h-44 rounded-sm bg-white/[0.04] border border-white/10" />
+            <div className="h-12 w-80 rounded-sm bg-white/[0.04]" />
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="h-44 rounded-xl bg-white/[0.04]" />
-              <div className="h-44 rounded-xl bg-white/[0.04]" />
+              <div className="h-44 rounded-sm bg-white/[0.04]" />
+              <div className="h-44 rounded-sm bg-white/[0.04]" />
             </div>
           </div>
         </main>
@@ -228,83 +228,35 @@ export default function MeuBrickPage() {
       <div className="min-h-dvh bg-background-void text-white">
         <SiteHeader variant="strip" />
         <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111619] p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-orange">
-              <span>Meu Brick</span>
-              <span className="text-gray-500">·</span>
-              <span>Área do Jogador</span>
-            </div>
-
-            <h1 className="mt-4 text-balance font-heading text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-              Sua central gamer no <span className="text-brand-orange">Orange Brick</span>.
+          <div className="border border-white/10 bg-[#111619] p-6 sm:p-10">
+            <h1 className="font-heading text-2xl font-black text-white sm:text-3xl">
+              Entre para acessar seu perfil e publicações
             </h1>
 
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-gray-300 sm:text-lg">
-              O Meu Brick é o seu espaço pessoal para gerenciar suas publicações no Brickboard, acompanhar os jogos que você está jogando, organizar matérias salvas e personalizar seu perfil público.
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-400">
+              Gerencie seus Bricks no Brickboard, acompanhe seus votos no Radar de Lançamentos e organize matérias salvas.
             </p>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-brand-orange/30">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-brand-orange/20 text-brand-orange font-mono">01</span>
-                  Perfil Gamer Personalizado
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-gray-400">
-                  Mostre suas plataformas favoritas, seus jogos prediletos e o que está jogando atualmente no seu perfil público.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-brand-orange/30">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-brand-orange/20 text-brand-orange font-mono">02</span>
-                  Histórico no Brickboard
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-gray-400">
-                  Acesse, gerencie e acompanhe as reações e respostas de todos os seus Bricks e opiniões em um só lugar.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-brand-orange/30">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-brand-orange/20 text-brand-orange font-mono">03</span>
-                  Itens & Matérias Salvas
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-gray-400">
-                  Guarde matérias completas e discussões para ler depois com sincronização contínua.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-brand-orange/30">
-                <div className="flex items-center gap-2 text-sm font-bold text-white">
-                  <span className="flex size-7 items-center justify-center rounded-lg bg-brand-orange/20 text-brand-orange font-mono">04</span>
-                  Votos no Radar de Lançamentos
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-gray-400">
-                  Vote nos jogos que você pretende comprar ou acompanhar de perto e veja a expectativa da comunidade.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex min-h-12 items-center justify-center rounded-xl bg-brand-orange px-6 text-sm font-black text-white shadow-[0_0_20px_rgba(255,94,0,0.3)] transition-colors hover:bg-[#ff7526]"
+                className="flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-sm font-black text-white transition-colors hover:bg-[#ff7526]"
               >
-                Entrar na minha conta
+                Entrar
               </button>
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex min-h-12 items-center justify-center rounded-xl border border-white/20 bg-white/[0.05] px-6 text-sm font-bold text-white transition-colors hover:bg-white/10"
+                className="flex min-h-10 items-center justify-center rounded-md border border-white/20 bg-white/[0.05] px-5 text-sm font-bold text-white transition-colors hover:bg-white/10"
               >
-                Criar conta gratuita
+                Criar conta
               </button>
               <Link
                 href="/"
-                className="flex min-h-12 items-center justify-center px-4 text-xs font-semibold text-gray-400 hover:text-white"
+                className="flex min-h-10 items-center justify-center px-4 text-xs font-semibold text-gray-400 hover:text-white"
               >
-                ← Voltar ao portal
+                Voltar ao portal
               </Link>
             </div>
           </div>
@@ -350,7 +302,7 @@ export default function MeuBrickPage() {
     <div className="min-h-dvh bg-background-void text-white">
       <SiteHeader variant="strip" />
       <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#111619] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+        <section className="overflow-hidden border border-white/10 bg-[#111619]">
           <div
             className="relative h-44 sm:h-56 w-full overflow-hidden bg-cover bg-center"
             style={{
@@ -360,9 +312,7 @@ export default function MeuBrickPage() {
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-[#111619] via-[#111619]/40 to-transparent" />
-            <div className="absolute right-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-gray-300 backdrop-blur-md">
-              Área do Jogador
-            </div>
+            
           </div>
 
           <div className="px-5 pb-6 pt-0 sm:px-8">
@@ -380,7 +330,7 @@ export default function MeuBrickPage() {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingAvatar}
                   aria-label="Alterar foto de perfil"
-                  className="relative h-full w-full overflow-hidden rounded-2xl border-4 border-[#111619] bg-[#1a2126] shadow-2xl cursor-pointer block focus-visible:outline-2 focus-visible:outline-brand-orange text-left p-0"
+                  className="relative h-full w-full overflow-hidden rounded-full border-4 border-[#111619] bg-[#1a2126] cursor-pointer block focus-visible:outline-2 focus-visible:outline-brand-orange text-left p-0"
                 >
                   {avatarUrl ? (
                     <img
@@ -417,7 +367,7 @@ export default function MeuBrickPage() {
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingAvatar}
                   aria-label="Alterar foto de perfil"
-                  className="absolute -bottom-1 -right-1 z-20 size-8 rounded-xl bg-brand-orange text-black border-2 border-[#111619] shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="absolute -bottom-1 -right-1 z-20 size-8 rounded-full bg-brand-orange text-black border-2 border-[#111619] shadow-lg flex items-center justify-center transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
@@ -431,28 +381,28 @@ export default function MeuBrickPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingAvatar}
-                  className="flex min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
+                  className="flex min-h-10 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
                 >
                   Alterar foto
                 </button>
                 {profile?.username ? (
                   <Link
                     href={`/u/${encodeURIComponent(profile.username)}`}
-                    className="flex min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
+                    className="flex min-h-10 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
                   >
                     Ver Perfil Público ↗
                   </Link>
                 ) : (
                   <Link
                     href="/profile/setup?next=/meu-brick"
-                    className="flex min-h-10 items-center justify-center rounded-xl bg-brand-orange px-4 text-xs font-black text-white transition-colors hover:bg-[#ff7526]"
+                    className="flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-4 text-xs font-black text-white transition-colors hover:bg-[#ff7526]"
                   >
                     Configurar @username
                   </Link>
                 )}
                 <Link
                   href="/configuracoes/perfil"
-                  className="flex min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
+                  className="flex min-h-10 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] px-4 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
                 >
                   Editar perfil
                 </Link>
@@ -463,7 +413,7 @@ export default function MeuBrickPage() {
                       signOut().then(() => router.push("/"));
                     });
                   }}
-                  className="flex min-h-10 items-center justify-center rounded-xl border border-white/10 px-3 text-xs font-semibold text-gray-400 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                  className="flex min-h-10 items-center justify-center rounded-md border border-white/10 px-3 text-xs font-semibold text-gray-400 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
                 >
                   Sair
                 </button>
@@ -523,9 +473,9 @@ export default function MeuBrickPage() {
                 aria-selected={activeTab === "bricks"}
                 aria-controls="profile-bricks"
                 onClick={() => handleSelectTab("bricks")}
-                className={`flex min-h-10 items-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+                className={`flex min-h-10 items-center gap-2 rounded-sm px-4 text-xs font-bold transition-all ${
                   activeTab === "bricks"
-                    ? "bg-brand-orange text-black font-black shadow-[0_0_15px_rgba(255,94,0,0.35)]"
+                    ? "bg-brand-orange text-black font-black"
                     : "border border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/15 hover:text-white"
                 }`}
               >
@@ -543,9 +493,9 @@ export default function MeuBrickPage() {
                 aria-selected={activeTab === "jogos"}
                 aria-controls="profile-jogos"
                 onClick={() => handleSelectTab("jogos")}
-                className={`flex min-h-10 items-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+                className={`flex min-h-10 items-center gap-2 rounded-sm px-4 text-xs font-bold transition-all ${
                   activeTab === "jogos"
-                    ? "bg-brand-orange text-black font-black shadow-[0_0_15px_rgba(255,94,0,0.35)]"
+                    ? "bg-brand-orange text-black font-black"
                     : "border border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/15 hover:text-white"
                 }`}
               >
@@ -563,9 +513,9 @@ export default function MeuBrickPage() {
                 aria-selected={activeTab === "salvos"}
                 aria-controls="profile-salvos"
                 onClick={() => handleSelectTab("salvos")}
-                className={`flex min-h-10 items-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+                className={`flex min-h-10 items-center gap-2 rounded-sm px-4 text-xs font-bold transition-all ${
                   activeTab === "salvos"
-                    ? "bg-brand-orange text-black font-black shadow-[0_0_15px_rgba(255,94,0,0.35)]"
+                    ? "bg-brand-orange text-black font-black"
                     : "border border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/15 hover:text-white"
                 }`}
               >
@@ -583,9 +533,9 @@ export default function MeuBrickPage() {
                 aria-selected={activeTab === "settings"}
                 aria-controls="profile-settings"
                 onClick={() => handleSelectTab("settings")}
-                className={`flex min-h-10 items-center gap-2 rounded-xl px-4 text-xs font-bold transition-all ${
+                className={`flex min-h-10 items-center gap-2 rounded-sm px-4 text-xs font-bold transition-all ${
                   activeTab === "settings"
-                    ? "bg-brand-orange text-black font-black shadow-[0_0_15px_rgba(255,94,0,0.35)]"
+                    ? "bg-brand-orange text-black font-black"
                     : "border border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/15 hover:text-white"
                 }`}
               >
@@ -598,7 +548,7 @@ export default function MeuBrickPage() {
         <div className="mt-8">
           {activeTab === "bricks" && (
             <div id="profile-bricks" role="tabpanel" className="space-y-8">
-              <section className="rounded-2xl border border-white/10 bg-[#111619] p-5 sm:p-6">
+              <section className="rounded-sm border border-white/10 bg-[#111619] p-5 sm:p-6">
                 <div className="flex items-center justify-between">
                   <h2 className="font-heading text-base font-black uppercase tracking-wider text-white">
                     Jogando agora
@@ -618,7 +568,7 @@ export default function MeuBrickPage() {
                       <Link
                         key={game.id}
                         href="/lancamentos"
-                        className="group flex overflow-hidden rounded-xl border border-white/10 bg-[#161b20] transition-colors hover:border-brand-orange/40 hover:bg-[#1a2127]"
+                        className="group flex overflow-hidden rounded-sm border border-white/10 bg-[#161b20] transition-colors hover:border-brand-orange/40 hover:bg-[#1a2127]"
                       >
                         <div className="relative size-20 shrink-0 bg-[#0d1012]">
                           {game.image_url ? (
@@ -663,7 +613,7 @@ export default function MeuBrickPage() {
                     </h2>
                     <Link
                       href="/brickboard"
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-xl bg-brand-orange px-3.5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-[#ff7526]"
+                      className="inline-flex min-h-9 items-center gap-1.5 rounded-sm bg-brand-orange px-3.5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-[#ff7526]"
                     >
                       + Novo Brick
                     </Link>
@@ -675,8 +625,8 @@ export default function MeuBrickPage() {
                       <div className="h-32 rounded-xl bg-white/[0.04] border border-white/10" />
                     </div>
                   ) : userPosts.length === 0 ? (
-                    <div className="rounded-2xl border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
-                      <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-brand-orange/15 text-brand-orange">
+                    <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
+                      <div className="mx-auto grid size-12 place-items-center rounded-sm bg-brand-orange/15 text-brand-orange">
                         <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
                         </svg>
@@ -687,7 +637,7 @@ export default function MeuBrickPage() {
                       </p>
                       <Link
                         href="/brickboard"
-                        className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
+                        className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
                       >
                         Publicar primeiro Brick
                       </Link>
@@ -695,7 +645,7 @@ export default function MeuBrickPage() {
                   ) : (
                     <div className="space-y-3">
                       {userPosts.map((post) => (
-                        <article key={post.id} className="rounded-2xl border border-white/10 bg-[#111619] p-4 sm:p-5 transition-colors hover:border-white/20">
+                        <article key={post.id} className="rounded-sm border border-white/10 bg-[#111619] p-4 sm:p-5 transition-colors hover:border-white/20">
                           <div className="flex items-center justify-between text-xs text-gray-400">
                             <div className="flex items-center gap-2.5">
                               <div className="size-8 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#161b20]">
@@ -747,7 +697,7 @@ export default function MeuBrickPage() {
                   )}
                 </section>
 
-                <aside className="rounded-2xl border border-white/10 bg-[#111619] p-5 space-y-5">
+                <aside className="rounded-sm border border-white/10 bg-[#111619] p-5 space-y-5">
                   <div>
                     <h3 className="font-heading text-sm font-black uppercase tracking-wider text-white">
                       Seu perfil gamer
@@ -795,7 +745,7 @@ export default function MeuBrickPage() {
                   <div className="border-t border-white/[0.08] pt-3">
                     <Link
                       href="/configuracoes/perfil"
-                      className="inline-flex w-full min-h-10 items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
+                      className="inline-flex w-full min-h-10 items-center justify-center rounded-md border border-white/15 bg-white/[0.03] text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/[0.08]"
                     >
                       Editar preferências gamer →
                     </Link>
@@ -807,7 +757,7 @@ export default function MeuBrickPage() {
 
           {activeTab === "jogos" && (
             <div id="profile-jogos" role="tabpanel" className="space-y-6">
-              <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#111619] p-5">
+              <div className="flex items-center justify-between rounded-sm border border-white/10 bg-[#111619] p-5">
                 <div>
                   <h2 className="font-heading text-lg font-black uppercase tracking-wider text-white">
                     Minha Coleção & Radar
@@ -818,15 +768,15 @@ export default function MeuBrickPage() {
                 </div>
                 <Link
                   href="/lancamentos"
-                  className="inline-flex min-h-9 items-center justify-center rounded-xl bg-brand-orange px-3.5 text-xs font-black uppercase text-white hover:bg-[#ff7526]"
+                  className="inline-flex min-h-9 items-center justify-center rounded-sm bg-brand-orange px-3.5 text-xs font-black uppercase text-white hover:bg-[#ff7526]"
                 >
                   Radar completo →
                 </Link>
               </div>
 
               {votedReleases.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
-                  <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-brand-orange/15 text-brand-orange">
+                <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
+                  <div className="mx-auto grid size-12 place-items-center rounded-sm bg-brand-orange/15 text-brand-orange">
                     <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
                     </svg>
@@ -837,7 +787,7 @@ export default function MeuBrickPage() {
                   </p>
                   <Link
                     href="/lancamentos"
-                    className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
+                    className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
                   >
                     Explorar Radar de Lançamentos
                   </Link>
@@ -848,7 +798,7 @@ export default function MeuBrickPage() {
                     <Link
                       key={item.id}
                       href="/lancamentos"
-                      className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#111619] transition-all hover:border-brand-orange/50 hover:bg-[#161b20]"
+                      className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111619] transition-all hover:border-brand-orange/50 hover:bg-[#161b20]"
                     >
                       <div className="relative aspect-video w-full overflow-hidden bg-[#0d1012]">
                         {item.image_url ? (
@@ -879,7 +829,7 @@ export default function MeuBrickPage() {
 
           {activeTab === "salvos" && (
             <div id="profile-salvos" role="tabpanel" className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#111619] p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#111619] p-5">
                 <div>
                   <h2 className="font-heading text-lg font-black uppercase tracking-wider text-white">
                     Publicações e Matérias Salvas
@@ -920,8 +870,8 @@ export default function MeuBrickPage() {
               </div>
 
               {totalSaved === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
-                  <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-brand-orange/15 text-brand-orange">
+                <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
+                  <div className="mx-auto grid size-12 place-items-center rounded-sm bg-brand-orange/15 text-brand-orange">
                     <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                     </svg>
@@ -933,13 +883,13 @@ export default function MeuBrickPage() {
                   <div className="mt-5 flex flex-wrap justify-center gap-3">
                     <Link
                       href="/brickboard"
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
+                      className="inline-flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
                     >
                       Explorar o BrickBoard →
                     </Link>
                     <Link
                       href="/"
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-white/15 px-5 text-xs font-bold text-white hover:bg-white/[0.04]"
+                      className="inline-flex min-h-10 items-center justify-center rounded-md border border-white/15 px-5 text-xs font-bold text-white hover:bg-white/[0.04]"
                     >
                       Ver notícias do portal
                     </Link>
@@ -955,7 +905,7 @@ export default function MeuBrickPage() {
                       {bookmarks.map((bm) => (
                         <div
                           key={bm.id}
-                          className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#111619] p-4 transition-colors hover:border-white/20"
+                          className="flex items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#111619] p-4 transition-colors hover:border-white/20"
                         >
                           <Link
                             href={`/posts/${bm.slug}`}
@@ -984,7 +934,7 @@ export default function MeuBrickPage() {
                       {savedBricks.map((brick) => (
                         <div
                           key={brick.id}
-                          className="rounded-2xl border border-white/10 bg-[#111619] p-4 transition-colors hover:border-white/20"
+                          className="rounded-sm border border-white/10 bg-[#111619] p-4 transition-colors hover:border-white/20"
                         >
                           <div className="flex items-center justify-between text-xs text-gray-400">
                             <span className="font-bold text-white">{brick.author_name}</span>
@@ -1010,7 +960,7 @@ export default function MeuBrickPage() {
             <div id="profile-settings" role="tabpanel" className="grid gap-3 sm:grid-cols-2">
               <Link
                 href="/configuracoes/perfil"
-                className="rounded-2xl border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
+                className="rounded-sm border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
               >
                 <h4 className="font-heading text-sm font-bold text-white">Editar Perfil Gamer</h4>
                 <p className="mt-1 text-xs text-gray-400">
@@ -1020,7 +970,7 @@ export default function MeuBrickPage() {
 
               <Link
                 href="/configuracoes/notificacoes"
-                className="rounded-2xl border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
+                className="rounded-sm border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
               >
                 <h4 className="font-heading text-sm font-bold text-white">Notificações</h4>
                 <p className="mt-1 text-xs text-gray-400">
@@ -1030,7 +980,7 @@ export default function MeuBrickPage() {
 
               <Link
                 href="/privacidade"
-                className="rounded-2xl border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
+                className="rounded-sm border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
               >
                 <h4 className="font-heading text-sm font-bold text-white">Privacidade & Dados</h4>
                 <p className="mt-1 text-xs text-gray-400">
@@ -1040,7 +990,7 @@ export default function MeuBrickPage() {
 
               <Link
                 href="/brickboard/conquistas"
-                className="rounded-2xl border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
+                className="rounded-sm border border-white/10 bg-[#111619] p-5 transition-all hover:border-brand-orange/40 hover:bg-[#161b20]"
               >
                 <h4 className="font-heading text-sm font-bold text-white">Conquistas & Temporada</h4>
                 <p className="mt-1 text-xs text-gray-400">

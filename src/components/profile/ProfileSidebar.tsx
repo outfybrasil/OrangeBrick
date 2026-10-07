@@ -24,7 +24,7 @@ export function ProfileSidebar({
       {playingNow && (
         <div className="rounded-sm border border-brand-orange/40 bg-[#111217] p-5 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-white/10">
-            <span className="text-sm" aria-hidden="true">🎮</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
             <h3 className="font-heading text-xs font-black uppercase tracking-wider text-white">
               Jogando Agora
             </h3>
@@ -79,7 +79,7 @@ export function ProfileSidebar({
         <div className="rounded-sm border border-white/10 bg-[#111217] p-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <span className="text-sm" aria-hidden="true">💎</span>
+              <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
               <h3 className="font-heading text-xs font-black uppercase tracking-wider text-white">
                 Garanti ({guaranteedGames.length})
               </h3>
@@ -114,7 +114,7 @@ export function ProfileSidebar({
         <div className="rounded-sm border border-white/10 bg-[#111217] p-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <span className="text-sm" aria-hidden="true">📡</span>
+              <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
               <h3 className="font-heading text-xs font-black uppercase tracking-wider text-white">
                 No Radar ({radarGames.length})
               </h3>

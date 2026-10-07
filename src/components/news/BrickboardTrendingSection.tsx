@@ -27,7 +27,7 @@ export function BrickboardTrendingSection({ bricks }: BrickboardTrendingSectionP
       <div className="flex items-end justify-between border-b border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-base" aria-hidden="true">🔥</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
             <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange">
               Comunidade
             </span>

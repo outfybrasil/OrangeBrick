@@ -18,7 +18,7 @@ export function TrendingTopicsSection({ topics }: TrendingTopicsSectionProps) {
   return (
     <section aria-labelledby="trending-topics-heading" className="my-10 rounded-sm border border-white/10 bg-[#111217] p-5 sm:p-6">
       <div className="flex items-center gap-2 pb-3">
-        <span className="text-base" aria-hidden="true">🎮</span>
+        <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
         <h2 id="trending-topics-heading" className="font-heading text-sm font-black uppercase tracking-wider text-white">
           Assuntos e Jogos em Alta
         </h2>

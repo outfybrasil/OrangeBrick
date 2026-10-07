@@ -39,10 +39,10 @@ export interface GamePageClientProps {
   relatedBricksError?: boolean;
 }
 
-const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string; emoji: string }[] = [
-  { type: "buy", label: "Já garanti", shortLabel: "Garanti", emoji: "🎮" },
-  { type: "watch", label: "No meu radar", shortLabel: "Radar", emoji: "👀" },
-  { type: "skip", label: "Passo reto", shortLabel: "Passo", emoji: "⏭️" },
+const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string }[] = [
+  { type: "buy", label: "Já garanti", shortLabel: "Garanti" },
+  { type: "watch", label: "No meu radar", shortLabel: "Radar" },
+  { type: "skip", label: "Passo reto", shortLabel: "Passo" },
 ];
 
 export function GamePageClient({
@@ -376,14 +376,11 @@ export function GamePageClient({
                       aria-pressed={isSelected}
                       className={`flex min-h-11 flex-col items-center justify-center rounded-lg border px-2 py-1 text-xs font-extrabold uppercase transition-all cursor-pointer ${
                         isSelected
-                          ? "border-brand-orange bg-brand-orange text-white shadow-[0_0_12px_rgba(255,94,0,0.3)]"
+                          ? "border-brand-orange bg-brand-orange text-white font-black"
                           : "border-white/10 bg-white/[0.025] text-gray-300 hover:border-brand-orange/40 hover:bg-white/[0.06] hover:text-white"
                       }`}
                     >
-                      <span className="flex items-center gap-1">
-                        <span>{option.emoji}</span>
-                        <span>{option.shortLabel}</span>
-                      </span>
+                      <span className="text-xs font-black tracking-wider">{option.shortLabel}</span>
                       <span className={`text-[11px] tabular-nums mt-0.5 ${isSelected ? "text-white/80" : "text-gray-500"}`}>
                         {counts[option.type]}
                       </span>

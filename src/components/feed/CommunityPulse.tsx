@@ -114,7 +114,7 @@ export function CommunityPulse() {
             href={`/brickboard?post=${posts[0].id}`}
             data-home-event="brickboard"
             data-home-target={posts[0].id}
-            className="group block rounded-lg border border-white/10 bg-gradient-to-r from-[#191912] via-[#101618] to-[#0e1215] p-5 sm:p-6 transition-all duration-200 hover:border-brand-orange/40 hover:shadow-[0_4px_24px_rgba(255,94,0,0.06)]"
+            className="group block rounded-sm border border-white/10 bg-[#111217] p-5 sm:p-6 transition-colors hover:border-brand-orange/40"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3.5 min-w-0">

@@ -64,7 +64,7 @@ export default function AdminLogin() {
   return (
     <main id="conteudo-principal" tabIndex={-1} className="grid min-h-dvh bg-background-void text-white lg:grid-cols-[minmax(360px,0.9fr)_minmax(520px,1.1fr)]">
       <section className="relative hidden overflow-hidden border-r border-white/[0.07] bg-[#15161d] p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
-        <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-orange/10 blur-3xl" />
+        
         <Link href="/" className="relative flex w-fit items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
           <img loading="lazy" decoding="async"
             src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}

@@ -383,7 +383,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
                   href={`/games/${post.topic_id}`}
                   className="inline-flex min-h-6 items-center gap-1 border border-brand-orange/40 bg-brand-orange/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-orange hover:bg-brand-orange hover:text-white transition-colors"
                 >
-                  🎮 Ver jogo
+                  Ver jogo
                 </Link>
               )}
               <Timer date={post.published_at ?? ""} />

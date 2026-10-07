@@ -385,7 +385,7 @@ function BrickboardContent() {
               O jogo continua <span className="text-brand-orange">aqui.</span>
             </h1>
             <p className="mt-1 text-xs text-gray-400 line-clamp-1 sm:line-clamp-none">
-              Opiniões, perguntas e debates da comunidade sobre o universo dos games.
+              Opiniões, perguntas e debates da comunidade sobre jogos e indústria.
             </p>
           </div>
           <button

@@ -526,7 +526,7 @@ export function ProfileView({
                         {repostPosts.map((brick) => (
                           <div key={brick.id} className="space-y-1">
                             <p className="px-2 text-xs font-bold text-gray-400">
-                              🔄 Republicado por {initialProfile.display_name}
+                              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gray-400 inline-block mr-1" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M4.5 12c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M7.5 15l-3-3 3-3m9 6 3-3-3-3" /></svg>Republicado por {initialProfile.display_name}
                             </p>
                             <BrickCard
                               post={brick}

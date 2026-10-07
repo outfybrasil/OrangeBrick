@@ -62,3 +62,4 @@ supabase/.temp/
 /public/editorial/2026-08-10/drive-covers/*.svg
 
 .originkit/
+scratch/
