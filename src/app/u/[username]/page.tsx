@@ -106,7 +106,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
       .eq("user_id", profile.user_id)
       .order("created_at", { ascending: false })
       .limit(30),
-    supabase
+    serviceSupabase
       .from("release_hype_votes")
       .select("release_id, vote_type")
       .eq("user_id", profile.user_id),
@@ -197,7 +197,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
 
   if (releaseIds.length > 0 || (fullProfile.favorite_games && fullProfile.favorite_games.length > 0)) {
     const allQueryIds = Array.from(new Set([...releaseIds, ...(fullProfile.favorite_games || [])]));
-    const { data: radarItems } = await supabase
+    const { data: radarItems } = await serviceSupabase
       .from("release_radar_items")
       .select("*")
       .in("id", allQueryIds);
