@@ -21,7 +21,9 @@ select
   show_season_history,
   show_in_leaderboard,
   created_at,
-  updated_at
+  updated_at,
+  playing_now,
+  favorite_games
 from public.profiles;
 
 revoke all on public.public_profiles from public;
@@ -58,7 +60,7 @@ create policy profiles_update_own on public.profiles
   with check (auth.uid() = user_id);
 
 revoke all on public.profiles from anon, authenticated;
-grant select (user_id) on public.profiles to authenticated;
+grant select on public.profiles to authenticated;
 grant insert (user_id, nickname, username, display_name, avatar_url) on public.profiles to authenticated;
 grant update (
   nickname,

@@ -141,7 +141,7 @@ export function ProfileView({
         const ids = (data || []).map((r) => r.user_id);
         if (ids.length > 0) {
           const { data: profiles } = await supabase
-            .from("profiles")
+            .from("public_profiles")
             .select("id, username, display_name, avatar_url, bio")
             .in("user_id", ids);
           setFollowModalUsers((profiles || []) as FollowUserItem[]);
@@ -159,7 +159,7 @@ export function ProfileView({
         const usernames = (data || []).map((r) => r.follow_value);
         if (usernames.length > 0) {
           const { data: profiles } = await supabase
-            .from("profiles")
+            .from("public_profiles")
             .select("id, username, display_name, avatar_url, bio")
             .in("username", usernames);
           setFollowModalUsers((profiles || []) as FollowUserItem[]);

@@ -5,7 +5,7 @@ import { Footer } from "@/components/ui/Footer";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import { normalizeNewsSearch } from "@/lib/news-query";
-import type { CommunityPostRow, Post, Profile, ReleaseRadarItem } from "@/lib/types/database";
+import { POST_LIST_COLUMNS, type CommunityPostRow, type Post, type Profile, type ReleaseRadarItem } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +34,7 @@ export default async function SearchPage({
       ? await Promise.all([
           supabase
             .from("posts")
-            .select("*")
+            .select(POST_LIST_COLUMNS)
             .eq("is_published", true)
             .or(`title.ilike.${pattern},summary.ilike.${pattern}`)
             .limit(16),
@@ -45,8 +45,8 @@ export default async function SearchPage({
             .ilike("game", pattern)
             .limit(12),
           supabase
-            .from("profiles")
-            .select("*")
+            .from("public_profiles")
+            .select("id, user_id, username, display_name, avatar_url, bio")
             .or(`display_name.ilike.${pattern},username.ilike.${pattern}`)
             .limit(10),
           supabase

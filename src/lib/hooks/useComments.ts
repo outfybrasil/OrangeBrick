@@ -59,7 +59,7 @@ export function useComments(postId: string) {
       const profileMap: Record<string, { nickname: string; avatar_url: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("public_profiles")
           .select("user_id, nickname, avatar_url")
           .in("user_id", userIds);
         if (profiles) {

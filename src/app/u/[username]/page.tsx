@@ -83,7 +83,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
   }
 
   const { data: extraProfile } = await supabase
-    .from("profiles")
+    .from("public_profiles")
     .select("banner_url, playing_now, favorite_games")
     .eq("user_id", profile.user_id)
     .maybeSingle<{
