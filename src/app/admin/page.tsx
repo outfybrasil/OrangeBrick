@@ -103,6 +103,9 @@ export default function AdminDashboard() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [batchCategory, setBatchCategory] = useState<PostCategory | "">("");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
+  const [isBatchDeleting, setIsBatchDeleting] = useState(false);
+  const [showBatchDeleteModal, setShowBatchDeleteModal] = useState(false);
+  const [batchDeleteError, setBatchDeleteError] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsData | null>(null);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [recentDrafts, setRecentDrafts] = useState<PaginatedPost[]>([]);
@@ -124,6 +127,40 @@ export default function AdminDashboard() {
       setError(errorMessage(batchError, "Não foi possível alterar a categoria das matérias selecionadas."));
     } finally {
       setIsBatchUpdating(false);
+    }
+  };
+
+  const deleteSelectedPosts = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBatchDeleting(true);
+    setBatchDeleteError(null);
+    setError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sua sessão expirou. Entre novamente para excluir as matérias.");
+
+      const response = await fetch("/api/admin/posts", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      const result = (await response.json()) as { error?: string; success?: boolean };
+      if (!response.ok) throw new Error(result.error || "Não foi possível excluir as matérias selecionadas.");
+
+      setPosts((current) => current.filter((item) => !selectedIds.includes(item.id)));
+      setSelectedIds([]);
+      setShowBatchDeleteModal(false);
+      void fetchStats();
+    } catch (err: unknown) {
+      const message = errorMessage(err, "Não foi possível excluir as matérias selecionadas. Tente novamente.");
+      setBatchDeleteError(message);
+    } finally {
+      setIsBatchDeleting(false);
     }
   };
 
@@ -581,13 +618,27 @@ export default function AdminDashboard() {
           {selectedIds.length > 0 && (
             <div className="flex flex-col gap-3 border-b border-brand-orange/25 bg-brand-orange/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
               <strong className="text-xs text-brand-orange">{selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}</strong>
-              <div className="flex flex-col gap-2 xs:flex-row">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBatchDeleteError(null);
+                    setShowBatchDeleteModal(true);
+                  }}
+                  disabled={isBatchDeleting || isBatchUpdating}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-red-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  {isBatchDeleting ? "Excluindo…" : `Apagar selecionadas (${selectedIds.length})`}
+                </button>
                 <select value={batchCategory} onChange={(event) => setBatchCategory(event.target.value as PostCategory | "")} className="min-h-11 rounded-lg border border-white/10 bg-[#111218] px-3 text-xs text-white outline-none focus:border-brand-orange">
                   <option value="">Trocar categoria…</option>
                   {CATEGORY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
-                <button type="button" onClick={() => void updateSelectedCategory()} disabled={!batchCategory || isBatchUpdating} className="min-h-11 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{isBatchUpdating ? "Atualizando…" : "Aplicar"}</button>
-                <button type="button" onClick={() => setSelectedIds([])} disabled={isBatchUpdating} className="min-h-11 rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 hover:bg-white/5">Cancelar</button>
+                <button type="button" onClick={() => void updateSelectedCategory()} disabled={!batchCategory || isBatchUpdating || isBatchDeleting} className="min-h-11 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{isBatchUpdating ? "Atualizando…" : "Aplicar"}</button>
+                <button type="button" onClick={() => setSelectedIds([])} disabled={isBatchUpdating || isBatchDeleting} className="min-h-11 rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 hover:bg-white/5">Cancelar</button>
               </div>
             </div>
           )}
@@ -1014,6 +1065,70 @@ export default function AdminDashboard() {
         </div>
       )}
 
+
+      {showBatchDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !isBatchDeleting && setShowBatchDeleteModal(false)}>
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="batch-delete-confirmation-title"
+            aria-describedby="batch-delete-confirmation-description"
+            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-300" aria-hidden="true">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+              </svg>
+            </div>
+            <h2 id="batch-delete-confirmation-title" className="mt-5 font-heading text-xl font-black text-white">
+              Excluir {selectedIds.length} {selectedIds.length === 1 ? "matéria" : "matérias"}?
+            </h2>
+            <p id="batch-delete-confirmation-description" className="mt-2 text-sm leading-6 text-gray-300">
+              Você está prestes a excluir definitivamente {selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}. Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-4 max-h-48 overflow-y-auto space-y-2 rounded-xl bg-white/[0.04] p-3 text-xs">
+              <p className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Matérias que serão apagadas:</p>
+              {posts.filter((p) => selectedIds.includes(p.id)).slice(0, 5).map((p) => (
+                <div key={p.id} className="flex items-center gap-2 text-gray-300">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                  <span className="truncate font-semibold">{p.title}</span>
+                  {p.is_published && <span className="ml-auto shrink-0 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">Publicada</span>}
+                </div>
+              ))}
+              {selectedIds.length > 5 && (
+                <p className="pt-1 text-gray-500 italic">... e mais {selectedIds.length - 5} matéria(s).</p>
+              )}
+            </div>
+            {batchDeleteError && (
+              <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-200">
+                {batchDeleteError}
+              </div>
+            )}
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowBatchDeleteModal(false);
+                  setBatchDeleteError(null);
+                }}
+                disabled={isBatchDeleting}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-300 transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => void deleteSelectedPosts()}
+                disabled={isBatchDeleting}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-xs font-bold text-white transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 disabled:cursor-wait disabled:opacity-60"
+              >
+                {isBatchDeleting ? "Excluindo..." : `Sim, apagar definitivamente (${selectedIds.length})`}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
         {/* WIDGETS DA DIREITA */}
         <aside className="space-y-4">
           {/* PRIORIDADES DE HOJE */}
