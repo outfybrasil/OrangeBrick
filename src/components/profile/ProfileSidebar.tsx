@@ -9,6 +9,7 @@ interface ProfileSidebarProps {
   radarGames: ReleaseRadarItem[];
   allRadarItemsMap?: Record<string, ReleaseRadarItem>;
   isOwner: boolean;
+  onSelectTab?: (tab: "bricks" | "replies" | "games" | "reposts" | "saved") => void;
 }
 
 export function ProfileSidebar({
@@ -18,6 +19,7 @@ export function ProfileSidebar({
   radarGames,
   allRadarItemsMap = {},
   isOwner,
+  onSelectTab,
 }: ProfileSidebarProps) {
   return (
     <aside aria-label="Informações gamer do perfil" className="space-y-6">
@@ -84,12 +86,22 @@ export function ProfileSidebar({
                 Garanti ({guaranteedGames.length})
               </h3>
             </div>
-            <Link
-              href="/lancamentos"
-              className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
-            >
-              Radar →
-            </Link>
+            {onSelectTab ? (
+              <button
+                type="button"
+                onClick={() => onSelectTab("games")}
+                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+              >
+                Ver todos →
+              </button>
+            ) : (
+              <a
+                href="#jogos"
+                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+              >
+                Ver todos →
+              </a>
+            )}
           </div>
           <div className="mt-3 space-y-2">
             {guaranteedGames.slice(0, 3).map((game) => (
@@ -119,12 +131,22 @@ export function ProfileSidebar({
                 No Radar ({radarGames.length})
               </h3>
             </div>
-            <Link
-              href="/lancamentos"
-              className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
-            >
-              Radar →
-            </Link>
+            {onSelectTab ? (
+              <button
+                type="button"
+                onClick={() => onSelectTab("games")}
+                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+              >
+                Ver todos →
+              </button>
+            ) : (
+              <a
+                href="#jogos"
+                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+              >
+                Ver todos →
+              </a>
+            )}
           </div>
           <div className="mt-3 space-y-2">
             {radarGames.slice(0, 3).map((game) => (
@@ -165,13 +187,24 @@ export function ProfileSidebar({
               <span>Preferências de Notificação</span>
               <span>→</span>
             </Link>
-            <Link
-              href="/lancamentos"
-              className="flex items-center justify-between py-1.5 hover:text-brand-orange transition-colors"
-            >
-              <span>Gerenciar Radar de Jogos</span>
-              <span>→</span>
-            </Link>
+            {onSelectTab ? (
+              <button
+                type="button"
+                onClick={() => onSelectTab("games")}
+                className="flex w-full items-center justify-between py-1.5 hover:text-brand-orange transition-colors text-left"
+              >
+                <span>Meus Jogos Salvos</span>
+                <span>→</span>
+              </button>
+            ) : (
+              <a
+                href="#jogos"
+                className="flex items-center justify-between py-1.5 hover:text-brand-orange transition-colors"
+              >
+                <span>Meus Jogos Salvos</span>
+                <span>→</span>
+              </a>
+            )}
           </div>
         </div>
       )}

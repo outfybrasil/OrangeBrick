@@ -34,6 +34,8 @@ export default function MeuBrickPage() {
   const [userPosts, setUserPosts] = useState<CommunityPost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [votedReleases, setVotedReleases] = useState<ReleaseRadarItem[]>([]);
+  const [releaseVoteMap, setReleaseVoteMap] = useState<Record<string, "buy" | "watch" | "skip">>({});
+  const [gameCategoryFilter, setGameCategoryFilter] = useState<"all" | "buy" | "watch">("all");
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -182,6 +184,11 @@ export default function MeuBrickPage() {
         }
 
         const voteRows = (votesRes.data || []) as Array<{ release_id: string; vote_type: string }>;
+        const voteMap: Record<string, "buy" | "watch" | "skip"> = {};
+        for (const v of voteRows) {
+          voteMap[v.release_id] = v.vote_type as "buy" | "watch" | "skip";
+        }
+        if (isMounted) setReleaseVoteMap(voteMap);
         const releaseIds = voteRows.map((v) => v.release_id);
         if (releaseIds.length > 0) {
           const { data: radarData } = await supabase
@@ -755,77 +762,137 @@ export default function MeuBrickPage() {
             </div>
           )}
 
-          {activeTab === "jogos" && (
-            <div id="profile-jogos" role="tabpanel" className="space-y-6">
-              <div className="flex items-center justify-between rounded-sm border border-white/10 bg-[#111619] p-5">
-                <div>
-                  <h2 className="font-heading text-lg font-black uppercase tracking-wider text-white">
-                    Minha Coleção & Radar
-                  </h2>
-                  <p className="mt-1 text-xs text-gray-400">
-                    Jogos que você marcou com expectativa ou que está acompanhando no OrangeBrick.
-                  </p>
-                </div>
-                <Link
-                  href="/lancamentos"
-                  className="inline-flex min-h-9 items-center justify-center rounded-sm bg-brand-orange px-3.5 text-xs font-black uppercase text-white hover:bg-[#ff7526]"
-                >
-                  Radar completo →
-                </Link>
-              </div>
+          {activeTab === "jogos" && (() => {
+            const buyCount = votedReleases.filter((g) => releaseVoteMap[g.id] === "buy").length;
+            const watchCount = votedReleases.filter((g) => releaseVoteMap[g.id] === "watch").length;
+            const filteredReleases = votedReleases.filter((g) => {
+              if (gameCategoryFilter === "all") return true;
+              return releaseVoteMap[g.id] === gameCategoryFilter;
+            });
 
-              {votedReleases.length === 0 ? (
-                <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
-                  <div className="mx-auto grid size-12 place-items-center rounded-sm bg-brand-orange/15 text-brand-orange">
-                    <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
-                    </svg>
+            return (
+              <div id="profile-jogos" role="tabpanel" className="space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#111619] p-5">
+                  <div>
+                    <h2 className="font-heading text-lg font-black uppercase tracking-wider text-white">
+                      Minha Coleção & Radar
+                    </h2>
+                    <p className="mt-1 text-xs text-gray-400">
+                      Jogos marcados na sua conta. Filtre por intenção de compra ou expectativa.
+                    </p>
                   </div>
-                  <h3 className="mt-4 font-heading text-lg font-bold text-white">Nenhum jogo no seu radar.</h3>
-                  <p className="mt-1 text-xs text-gray-400 max-w-md mx-auto">
-                    Participe dos votos do Radar de Lançamentos para registrar o hype dos seus jogos favoritos e vê-los reunidos aqui.
-                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 self-start sm:self-center">
+                    <button
+                      type="button"
+                      onClick={() => setGameCategoryFilter("all")}
+                      className={`rounded-sm px-3 py-1.5 text-xs font-bold transition-colors ${
+                        gameCategoryFilter === "all" ? "bg-white/15 text-white" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      Tudo ({votedReleases.length})
+                    </button>
+                    {buyCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setGameCategoryFilter("buy")}
+                        className={`rounded-sm px-3 py-1.5 text-xs font-bold transition-colors ${
+                          gameCategoryFilter === "buy" ? "bg-brand-orange text-white" : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        Garanti ({buyCount})
+                      </button>
+                    )}
+                    {watchCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setGameCategoryFilter("watch")}
+                        className={`rounded-sm px-3 py-1.5 text-xs font-bold transition-colors ${
+                          gameCategoryFilter === "watch" ? "bg-brand-orange text-white" : "text-gray-400 hover:text-white"
+                        }`}
+                      >
+                        No Radar ({watchCount})
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {votedReleases.length === 0 ? (
+                  <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center sm:p-12">
+                    <div className="mx-auto grid size-12 place-items-center rounded-sm bg-brand-orange/15 text-brand-orange">
+                      <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+                      </svg>
+                    </div>
+                    <h3 className="mt-4 font-heading text-lg font-bold text-white">Nenhum jogo no seu radar.</h3>
+                    <p className="mt-1 text-xs text-gray-400 max-w-md mx-auto">
+                      Participe dos votos do Radar de Lançamentos para registrar o hype dos seus jogos favoritos e vê-los reunidos aqui.
+                    </p>
+                    <Link
+                      href="/lancamentos"
+                      className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
+                    >
+                      Explorar Radar de Lançamentos
+                    </Link>
+                  </div>
+                ) : filteredReleases.length === 0 ? (
+                  <div className="rounded-sm border border-white/10 bg-[#111619] p-8 text-center text-sm text-gray-400">
+                    Nenhum jogo nesta categoria.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {filteredReleases.map((item) => {
+                      const vote = releaseVoteMap[item.id];
+                      return (
+                        <Link
+                          key={item.id}
+                          href={`/games/${encodeURIComponent(item.id)}`}
+                          className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111619] transition-all hover:border-brand-orange/50 hover:bg-[#161b20]"
+                        >
+                          <div className="relative aspect-video w-full overflow-hidden bg-[#0d1012]">
+                            {item.image_url ? (
+                              <img src={item.image_url} alt={item.game} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                            ) : (
+                              <div className="grid h-full w-full place-items-center text-xs font-bold text-gray-600">OB</div>
+                            )}
+                            <span className="absolute bottom-2 left-2 rounded-md bg-black/75 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-brand-orange backdrop-blur-sm">
+                              {item.release_label || item.release_date || "Em breve"}
+                            </span>
+                            {vote && (
+                              <span className={`absolute top-2 right-2 rounded px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-white ${
+                                vote === "buy" ? "bg-brand-orange" : "bg-white/20"
+                              }`}>
+                                {vote === "buy" ? "Garanti" : "No Radar"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-1 flex-col p-3">
+                            <p className="line-clamp-2 text-xs font-bold text-white group-hover:text-brand-orange">
+                              {item.game}
+                            </p>
+                            {item.platforms && (
+                              <p className="mt-auto pt-2 font-mono text-[10px] text-gray-500">
+                                {Array.isArray(item.platforms) ? item.platforms.join(" · ") : String(item.platforms)}
+                              </p>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-gray-400">
+                  <span>Deseja adicionar ou acompanhar novos lançamentos?</span>
                   <Link
                     href="/lancamentos"
-                    className="mt-5 inline-flex min-h-10 items-center justify-center rounded-md bg-brand-orange px-5 text-xs font-black text-white hover:bg-[#ff7526]"
+                    className="font-bold text-brand-orange hover:text-white transition-colors"
                   >
-                    Explorar Radar de Lançamentos
+                    Explorar novos jogos no Radar completo →
                   </Link>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  {votedReleases.map((item) => (
-                    <Link
-                      key={item.id}
-                      href="/lancamentos"
-                      className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111619] transition-all hover:border-brand-orange/50 hover:bg-[#161b20]"
-                    >
-                      <div className="relative aspect-video w-full overflow-hidden bg-[#0d1012]">
-                        {item.image_url ? (
-                          <img src={item.image_url} alt={item.game} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                        ) : (
-                          <div className="grid h-full w-full place-items-center text-xs font-bold text-gray-600">OB</div>
-                        )}
-                        <span className="absolute bottom-2 left-2 rounded-md bg-black/75 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase text-brand-orange backdrop-blur-sm">
-                          {item.release_label || item.release_date || "Em breve"}
-                        </span>
-                      </div>
-                      <div className="flex flex-1 flex-col p-3">
-                        <p className="line-clamp-2 text-xs font-bold text-white group-hover:text-brand-orange">
-                          {item.game}
-                        </p>
-                        {item.platforms && (
-                          <p className="mt-auto pt-2 font-mono text-[10px] text-gray-500">
-                            {Array.isArray(item.platforms) ? item.platforms.join(" · ") : String(item.platforms)}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            );
+          })()}
 
           {activeTab === "salvos" && (
             <div id="profile-salvos" role="tabpanel" className="space-y-6">

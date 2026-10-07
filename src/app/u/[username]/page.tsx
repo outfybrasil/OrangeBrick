@@ -6,7 +6,7 @@ import { ProfileView } from "@/components/profile/ProfileView";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { isAllowedUserAvatarUrl } from "@/lib/avatar";
 import type { PublicProfileData } from "@/lib/types/progression";
-import type { ReleaseRadarItem, ReactionType } from "@/lib/types/database";
+import type { ProfileGameReview, ReleaseRadarItem, ReactionType, UserGameTracking, Game } from "@/lib/types/database";
 import type { CommunityPost, AttachedArticle, SharedPostData } from "@/lib/types/community";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +99,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
     favorite_games: extraProfile?.favorite_games || [],
   };
 
-  const [postsRes, votesRes] = await Promise.all([
+  const [postsRes, votesRes, gameTrackingRes] = await Promise.all([
     supabase
       .from("community_posts")
       .select("id, user_id, author_name, author_username, author_avatar, content, media_url, media_alt, platform_tag, attached_article, created_at, is_pinned, is_official")
@@ -110,6 +110,14 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
       .from("release_hype_votes")
       .select("release_id, vote_type")
       .eq("user_id", profile.user_id),
+    serviceSupabase
+      .from("user_game_tracking")
+      .select("user_id, game_id, status, rating, review_text, is_public, created_at, updated_at")
+      .eq("user_id", profile.user_id)
+      .eq("status", "joguei")
+      .eq("is_public", true)
+      .order("updated_at", { ascending: false })
+      .limit(48),
   ]);
 
   interface RawPostRow {
@@ -189,6 +197,22 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
   });
 
   const votes = (votesRes.data || []) as Array<{ release_id: string; vote_type: string }>;
+  const gameTrackingRows = (gameTrackingRes.data || []) as UserGameTracking[];
+  const trackedGameIds = gameTrackingRows.map((tracking) => tracking.game_id);
+  let publicGameReviews: ProfileGameReview[] = [];
+
+  if (trackedGameIds.length > 0) {
+    const { data: trackedGames } = await serviceSupabase
+      .from("games")
+      .select("id, slug, name, cover_image_url, release_date, platforms")
+      .in("id", trackedGameIds);
+    const trackedGamesById = new Map(((trackedGames as Array<Pick<Game, "id" | "slug" | "name" | "cover_image_url" | "release_date" | "platforms">>) || []).map((game) => [game.id, game]));
+    publicGameReviews = gameTrackingRows.flatMap((tracking): ProfileGameReview[] => {
+      const game = trackedGamesById.get(tracking.game_id);
+      return game ? [{ ...tracking, status: "joguei", game }] : [];
+    });
+  }
+
   const releaseIds = Array.from(new Set(votes.map((v) => v.release_id)));
 
   let guaranteedGames: ReleaseRadarItem[] = [];
@@ -223,6 +247,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
           initialPosts={initialPosts}
           initialGuaranteedGames={guaranteedGames}
           initialRadarGames={radarGames}
+          initialGameReviews={publicGameReviews}
           allRadarMap={allRadarMap}
         />
       </main>

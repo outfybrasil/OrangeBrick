@@ -21,6 +21,18 @@ export interface Database {
         Update: Partial<ReleaseRadarItemInsert>;
         Relationships: [];
       };
+      games: {
+        Row: Game;
+        Insert: GameInsert;
+        Update: Partial<GameInsert>;
+        Relationships: [];
+      };
+      user_game_tracking: {
+        Row: UserGameTracking;
+        Insert: UserGameTrackingInsert;
+        Update: Partial<UserGameTrackingInsert>;
+        Relationships: [];
+      };
       release_hype_votes: {
         Row: ReleaseHypeVote;
         Insert: ReleaseHypeVoteInsert;
@@ -457,6 +469,69 @@ export interface ReleaseRadarItemInsert {
   created_at?: string;
   updated_at?: string;
   topic_id?: string | null;
+}
+
+export interface Game {
+  id: string;
+  slug: string;
+  name: string;
+  summary: string | null;
+  cover_image_url: string | null;
+  hero_image_url: string | null;
+  release_date: string | null;
+  release_status: "tba" | "announced" | "released" | "delayed" | "cancelled";
+  platforms: string[];
+  genres: string[];
+  developer: string | null;
+  publisher: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GameInsert {
+  id?: string;
+  slug: string;
+  name: string;
+  summary?: string | null;
+  cover_image_url?: string | null;
+  hero_image_url?: string | null;
+  release_date?: string | null;
+  release_status?: Game["release_status"];
+  platforms?: string[];
+  genres?: string[];
+  developer?: string | null;
+  publisher?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserGameTracking {
+  user_id: string;
+  game_id: string;
+  status: "garanti" | "radar" | "passo" | "joguei";
+  rating: number | null;
+  review_text: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserGameTrackingInsert {
+  user_id: string;
+  game_id: string;
+  status: UserGameTracking["status"];
+  rating?: number | null;
+  review_text?: string | null;
+  is_public?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProfileGameReview extends Omit<UserGameTracking, "status"> {
+  status: "joguei";
+  game: Pick<Game, "id" | "slug" | "name" | "cover_image_url" | "release_date" | "platforms">;
 }
 
 export interface ReleaseHypeVote {

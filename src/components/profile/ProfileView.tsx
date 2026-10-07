@@ -16,7 +16,7 @@ import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes"
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
 import type { PublicProfileData } from "@/lib/types/progression";
-import type { ReleaseRadarItem, ReactionType } from "@/lib/types/database";
+import type { ProfileGameReview, ReleaseRadarItem, ReactionType } from "@/lib/types/database";
 import type { CommunityPost, SharedPostData, CommunityComment } from "@/lib/types/community";
 
 interface ProfileViewProps {
@@ -24,6 +24,7 @@ interface ProfileViewProps {
   initialPosts: CommunityPost[];
   initialGuaranteedGames: ReleaseRadarItem[];
   initialRadarGames: ReleaseRadarItem[];
+  initialGameReviews: ProfileGameReview[];
   allRadarMap?: Record<string, ReleaseRadarItem>;
 }
 
@@ -32,6 +33,7 @@ export function ProfileView({
   initialPosts,
   initialGuaranteedGames,
   initialRadarGames,
+  initialGameReviews,
   allRadarMap = {},
 }: ProfileViewProps) {
   const { user } = useAuth();
@@ -511,6 +513,8 @@ export function ProfileView({
                     guaranteedGames={initialGuaranteedGames}
                     radarGames={initialRadarGames}
                     allRadarItemsMap={allRadarMap}
+                    initialGameReviews={initialGameReviews}
+                    currentUserId={isOwner ? user?.id || null : null}
                     isOwner={isOwner}
                   />
                 )}
@@ -578,6 +582,7 @@ export function ProfileView({
                 radarGames={initialRadarGames}
                 allRadarItemsMap={allRadarMap}
                 isOwner={isOwner}
+                onSelectTab={setActiveTab}
               />
             </div>
           </div>
