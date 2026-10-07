@@ -6,13 +6,27 @@ import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import {
+  getSavedAccounts,
+  saveAccount,
+  removeSavedAccount,
+  clearAllSavedAccounts,
+  upsertAccountFromSession,
+  type SavedAccount,
+} from "@/lib/auth/saved-accounts";
+
+export type { SavedAccount };
 
 interface AuthState {
   user: User | null;
   profile: Profile | null;
   isLoading: boolean;
+  savedAccounts: SavedAccount[];
   signInWithGoogle: (returnTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signOutAll: () => Promise<void>;
+  switchAccount: (userId: string) => Promise<boolean>;
+  removeAccount: (userId: string) => void;
   refreshProfile: () => Promise<void>;
 }
 
@@ -23,6 +37,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>(() => getSavedAccounts());
+
+  const syncSavedAccount = useCallback(async (authenticatedUser: User, currentProfile: Profile | null) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        upsertAccountFromSession(authenticatedUser, currentProfile, session);
+        setSavedAccounts(getSavedAccounts());
+      }
+    } catch {
+    }
+  }, [supabase]);
 
   const fetchProfile = useCallback(async (authenticatedUser: User) => {
     const { data } = await supabase
@@ -34,11 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const googleAvatarUrl = getGoogleAvatarUrl(authenticatedUser);
     if (data) {
       if (!data.avatar_url && googleAvatarUrl) {
-        setProfile({ ...data, avatar_url: googleAvatarUrl });
+        const updated = { ...data, avatar_url: googleAvatarUrl };
+        setProfile(updated);
         void supabase.from("profiles").update({ avatar_url: googleAvatarUrl }).eq("user_id", authenticatedUser.id);
+        void syncSavedAccount(authenticatedUser, updated);
         return;
       }
       setProfile(data);
+      void syncSavedAccount(authenticatedUser, data);
       return;
     }
 
@@ -51,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const payload = (await res.json()) as { profile?: Profile | null };
         if (payload.profile) {
           setProfile(payload.profile);
+          void syncSavedAccount(authenticatedUser, payload.profile);
           return;
         }
       }
@@ -91,7 +121,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updated_at: new Date().toISOString(),
     };
     setProfile(fallbackProfile);
-  }, [supabase]);
+    void syncSavedAccount(authenticatedUser, fallbackProfile);
+  }, [supabase, syncSavedAccount]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === "ob_saved_accounts_v1") {
+        setSavedAccounts(getSavedAccounts());
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -111,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
       }
+      setSavedAccounts(getSavedAccounts());
     });
 
     return () => subscription.unsubscribe();
@@ -128,16 +170,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider: "google",
       options: {
         redirectTo: callbackUrl.toString(),
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
     if (error) throw error;
   }, [supabase]);
 
-  const signOut = useCallback(async () => {
+  const switchAccount = useCallback(async (targetUserId: string): Promise<boolean> => {
+    const accounts = getSavedAccounts();
+    const target = accounts.find((a) => a.userId === targetUserId);
+    if (!target) return false;
+
+    try {
+      const { data, error } = await supabase.auth.setSession({
+        access_token: target.accessToken,
+        refresh_token: target.refreshToken,
+      });
+
+      if (error || !data.session) {
+        removeSavedAccount(targetUserId);
+        setSavedAccounts(getSavedAccounts());
+        return false;
+      }
+
+      saveAccount({
+        ...target,
+        accessToken: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+        lastActiveAt: Date.now(),
+      });
+      setSavedAccounts(getSavedAccounts());
+      setUser(data.session.user);
+      if (data.session.user) {
+        await fetchProfile(data.session.user);
+      }
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
+      return true;
+    } catch {
+      removeSavedAccount(targetUserId);
+      setSavedAccounts(getSavedAccounts());
+      return false;
+    }
+  }, [supabase, fetchProfile]);
+
+  const removeAccount = useCallback((targetUserId: string) => {
+    removeSavedAccount(targetUserId);
+    setSavedAccounts(getSavedAccounts());
+  }, []);
+
+  const signOutAll = useCallback(async () => {
+    clearAllSavedAccounts();
+    setSavedAccounts([]);
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   }, [supabase]);
+
+  const signOut = useCallback(async () => {
+    const currentUserId = user?.id;
+    if (currentUserId) {
+      removeSavedAccount(currentUserId);
+    }
+    const remaining = getSavedAccounts();
+    setSavedAccounts(remaining);
+
+    if (remaining.length > 0) {
+      const nextAccount = remaining[0];
+      const switched = await switchAccount(nextAccount.userId);
+      if (switched) return;
+    }
+
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  }, [supabase, user, switchAccount]);
 
   const refreshProfile = useCallback(async () => {
     if (user) {
@@ -146,7 +262,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, fetchProfile]);
 
   return (
-    <AuthContext value={{ user, profile, isLoading, signInWithGoogle, signOut, refreshProfile }}>
+    <AuthContext value={{
+      user,
+      profile,
+      isLoading,
+      savedAccounts,
+      signInWithGoogle,
+      signOut,
+      signOutAll,
+      switchAccount,
+      removeAccount,
+      refreshProfile,
+    }}>
       {children}
     </AuthContext>
   );

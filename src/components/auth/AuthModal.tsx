@@ -15,13 +15,14 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
-  const { signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, savedAccounts, switchAccount, removeAccount } = useAuth();
   const router = useRouter();
-  const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED === "true";
+  const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED !== "false";
   const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
   const [mounted, setMounted] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [switchingUserId, setSwitchingUserId] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +50,24 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     }
   }, [eligibilityConfirmed, isSigningIn, onSuccess, signInWithGoogle]);
 
+  const handleQuickSwitch = useCallback(async (accountUserId: string) => {
+    setSwitchingUserId(accountUserId);
+    setLoginError(null);
+    try {
+      const ok = await switchAccount(accountUserId);
+      if (ok) {
+        onSuccess?.();
+        onClose();
+      } else {
+        setLoginError("A sessão desta conta expirou. Entre novamente com suas credenciais.");
+      }
+    } catch {
+      setLoginError("Não foi possível alternar de conta. Tente novamente.");
+    } finally {
+      setSwitchingUserId(null);
+    }
+  }, [switchAccount, onSuccess, onClose]);
+
   const navigateToCredentialAuth = (path: "/entrar" | "/cadastro") => {
     const returnTo = safeReturnTo(`${window.location.pathname}${window.location.search}${window.location.hash}`);
     onClose();
@@ -56,6 +75,10 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   };
 
   if (!isOpen) return null;
+
+  const selectableAccounts = user
+    ? savedAccounts.filter((acc) => acc.userId !== user.id)
+    : savedAccounts;
 
   const modalContent = (
     <div
@@ -88,14 +111,96 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             </svg>
           </div>
           <h2 id="auth-modal-title" className="font-heading text-2xl font-bold text-white">
-            Entre para participar
+            {user ? "Adicionar ou alternar conta" : "Entre para participar"}
           </h2>
           <p className="mt-2 text-sm leading-6 text-[#b8bac2]">
-            {emailAuthEnabled ? "Entre com Google ou e-mail para comentar, reagir e publicar." : "Entre com Google para comentar, reagir e publicar."}
+            {user
+              ? "Alterne para outra conta salva ou acesse com uma nova conta."
+              : emailAuthEnabled
+              ? "Entre com Google ou e-mail para comentar, reagir e publicar."
+              : "Entre com Google para comentar, reagir e publicar."}
           </p>
         </div>
 
-        <label className="mt-5 flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-[#c8c9cf] sm:mt-6">
+        {selectableAccounts.length > 0 && (
+          <div className="mt-5 space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Contas salvas neste dispositivo
+            </p>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {selectableAccounts.map((account) => {
+                const isSwitching = switchingUserId === account.userId;
+                return (
+                  <div
+                    key={account.userId}
+                    className="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-black/20 p-2.5 transition-colors hover:border-brand-orange/40 hover:bg-black/35"
+                  >
+                    <button
+                      type="button"
+                      disabled={Boolean(switchingUserId)}
+                      onClick={() => handleQuickSwitch(account.userId)}
+                      className="flex flex-1 items-center gap-3 text-left min-w-0"
+                    >
+                      {account.avatarUrl ? (
+                        <img
+                          src={account.avatarUrl}
+                          alt={account.nickname}
+                          referrerPolicy="no-referrer"
+                          className="h-9 w-9 rounded-full object-cover shrink-0 border border-brand-orange/40 bg-[#08090C]"
+                        />
+                      ) : (
+                        <div className="h-9 w-9 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold text-sm shrink-0">
+                          {account.nickname.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-sm text-white truncate">
+                          {account.nickname}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">
+                          @{account.username}
+                        </p>
+                      </div>
+                    </button>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        disabled={Boolean(switchingUserId)}
+                        onClick={() => handleQuickSwitch(account.userId)}
+                        className="flex items-center gap-1 rounded-lg bg-brand-orange/20 px-2.5 py-1.5 text-xs font-bold text-brand-orange hover:bg-brand-orange hover:text-white transition-colors"
+                      >
+                        {isSwitching ? (
+                          <div className="w-3.5 h-3.5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <span>Entrar</span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeAccount(account.userId)}
+                        title="Remover deste dispositivo"
+                        className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="my-4 flex items-center gap-3 text-xs text-gray-500">
+              <span className="h-px flex-1 bg-white/10" />
+              <span>ou acesse outra conta</span>
+              <span className="h-px flex-1 bg-white/10" />
+            </div>
+          </div>
+        )}
+
+        <label className="mt-4 flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-[#c8c9cf]">
           <input
             type="checkbox"
             checked={eligibilityConfirmed}

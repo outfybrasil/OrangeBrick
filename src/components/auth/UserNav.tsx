@@ -11,10 +11,11 @@ import { isAdminUser } from "@/lib/auth";
 
 export function UserNav() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const { user, profile, signOut, isLoading } = useAuth();
+  const { user, profile, signOut, signOutAll, switchAccount, removeAccount, savedAccounts, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBookmarkOpen, setIsBookmarkOpen] = useState(false);
+  const [switchingUserId, setSwitchingUserId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,7 +81,6 @@ export function UserNav() {
   return (
     <>
       <div ref={dropdownRef} className="flex items-center gap-2 relative">
-        {/* USER PROFILE TRIGGER BUTTON */}
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           aria-expanded={isDropdownOpen}
@@ -109,12 +109,10 @@ export function UserNav() {
           </svg>
         </button>
 
-        {/* NOTIFICATION BELL ON THE RIGHT SIDE OF PROFILE */}
         <NotificationCenter />
 
-        {/* DROPDOWN MENU */}
         {isDropdownOpen && (
-          <div id="user-nav-menu" className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-56">
+          <div id="user-nav-menu" className="fixed inset-x-3 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-[100] space-y-1 rounded-xl border border-brand-orange-muted/30 bg-card-slate p-2 text-xs shadow-2xl animate-fade-in sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-64">
             <div className="px-3 py-2 border-b border-brand-orange-muted/10">
               <p className="font-bold text-white truncate">{displayName}</p>
               <p className="text-xs text-gray-400 truncate">{user.email}</p>
@@ -151,7 +149,6 @@ export function UserNav() {
               <span>Conquistas</span>
             </Link>
 
-            {/* ITEM: MATÉRIAS SALVAS */}
             <button
               onClick={() => {
                 setIsDropdownOpen(false);
@@ -183,26 +180,158 @@ export function UserNav() {
               </Link>
             )}
 
-            <button
-              onClick={() => {
-                setIsDropdownOpen(false);
-                signOut();
-              }}
-              className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 text-left font-medium text-red-300/80 transition-colors hover:bg-red-500/15 hover:text-red-200"
-            >
-              <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span>Sair</span>
-            </button>
+            <div className="pt-2 mt-2 border-t border-brand-orange-muted/15">
+              <div className="px-3 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                <span>Contas</span>
+                {savedAccounts.length > 1 && (
+                  <span className="text-[10px] text-brand-orange font-mono">
+                    {savedAccounts.length} salvas
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-0.5 mt-1">
+                {savedAccounts.map((account) => {
+                  const isActive = account.userId === user.id;
+                  const isSwitching = switchingUserId === account.userId;
+                  return (
+                    <div
+                      key={account.userId}
+                      className={`group flex items-center justify-between rounded-lg px-2.5 py-1.5 transition-colors ${
+                        isActive
+                          ? "bg-brand-orange/15 text-white"
+                          : "text-gray-300 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        disabled={isActive || Boolean(switchingUserId)}
+                        onClick={async () => {
+                          if (isActive) return;
+                          setSwitchingUserId(account.userId);
+                          await switchAccount(account.userId);
+                        }}
+                        className="flex flex-1 items-center gap-2 text-left min-w-0"
+                      >
+                        {account.avatarUrl ? (
+                          <img
+                            src={account.avatarUrl}
+                            alt={account.nickname}
+                            referrerPolicy="no-referrer"
+                            className="w-6 h-6 rounded-full object-cover shrink-0 border border-brand-orange/30 bg-[#08090C]"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold text-[10px] shrink-0">
+                            {account.nickname.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-xs truncate leading-tight">
+                            {account.nickname}
+                          </p>
+                          <p className="text-[10px] text-gray-400 truncate leading-tight">
+                            @{account.username}
+                          </p>
+                        </div>
+                      </button>
+
+                      {isActive ? (
+                        <span
+                          title="Conta ativa"
+                          className="shrink-0 text-brand-orange ml-1.5 flex items-center justify-center"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      ) : isSwitching ? (
+                        <div className="w-3.5 h-3.5 border-2 border-brand-orange border-t-transparent rounded-full animate-spin shrink-0 ml-1.5" />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeAccount(account.userId);
+                          }}
+                          title="Remover conta deste dispositivo"
+                          className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-1 text-gray-400 transition-opacity shrink-0 ml-1.5"
+                        >
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  setIsAuthModalOpen(true);
+                }}
+                className="mt-1 flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Adicionar outra conta</span>
+              </button>
+            </div>
+
+            <div className="pt-2 mt-2 border-t border-brand-orange-muted/15 space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  signOut();
+                }}
+                className="flex min-h-9 w-full items-center gap-2 rounded-lg px-3 text-left font-medium text-red-300/80 transition-colors hover:bg-red-500/15 hover:text-red-200"
+              >
+                <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>
+                  {savedAccounts.length > 1
+                    ? `Sair de @${profile?.username || displayName}`
+                    : "Sair"}
+                </span>
+              </button>
+
+              {savedAccounts.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    signOutAll();
+                  }}
+                  className="flex min-h-9 w-full items-center gap-2 rounded-lg px-3 text-left font-medium text-red-400/70 text-[11px] transition-colors hover:bg-red-500/15 hover:text-red-300"
+                >
+                  <svg className="w-3.5 h-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Sair de todas as contas</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* DRAWER DE MATÉRIAS SALVAS ACCESSIBLE FROM ANY PAGE */}
       <BookmarkDrawer
         isOpen={isBookmarkOpen}
         onClose={() => setIsBookmarkOpen(false)}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </>
   );
