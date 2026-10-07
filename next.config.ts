@@ -55,6 +55,8 @@ const nextConfig: NextConfig = {
       { source: "/institucional/privacidade", destination: "/privacidade", permanent: true },
       { source: "/assuntos", destination: "/noticias", permanent: true },
       { source: "/profile/:nickname((?!setup$).*)", destination: "/u/:nickname", permanent: true },
+      { source: "/configuracoes", destination: "/configuracoes/perfil", permanent: false },
+      { source: "/brickboard/regras", destination: "/brickboard/como-funciona", permanent: false },
     ];
   },
   async headers() {
