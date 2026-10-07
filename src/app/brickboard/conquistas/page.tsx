@@ -78,7 +78,7 @@ export default function AchievementsPage() {
       }));
 
       if (profile?.username) {
-        const { data, error: progressError } = await supabase.rpc("public_profile", { target_username: profile.username });
+        const { data, error: progressError } = await supabase.rpc("public_profile_safe", { target_username: profile.username });
         if (progressError || !data) {
           if (isActive) {
             setLoadError("Não foi possível carregar seu progresso. Tente novamente.");
