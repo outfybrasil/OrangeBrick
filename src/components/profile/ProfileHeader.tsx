@@ -13,6 +13,7 @@ interface ProfileHeaderProps {
   bio?: string | null;
   isOfficial?: boolean;
   isOwner: boolean;
+  isAuthenticated: boolean;
   followersCount: number;
   followingCount: number;
   isFollowing: boolean;
@@ -29,6 +30,7 @@ export function ProfileHeader({
   bio,
   isOfficial,
   isOwner,
+  isAuthenticated,
   followersCount,
   followingCount,
   isFollowing,
@@ -108,7 +110,14 @@ export function ProfileHeader({
             <button
               type="button"
               disabled={isFollowLoading}
-              onClick={() => void onToggleFollow()}
+              aria-pressed={isAuthenticated ? isFollowing : undefined}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setAuthOpen(true);
+                  return;
+                }
+                void onToggleFollow();
+              }}
               className={`inline-flex min-h-11 items-center justify-center rounded-sm px-6 text-xs font-black uppercase tracking-wider transition-all focus-visible:outline-2 focus-visible:outline-brand-orange ${
                 isFollowing
                   ? "border border-brand-orange bg-brand-orange text-white"

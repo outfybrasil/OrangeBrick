@@ -171,11 +171,11 @@ export async function GET(request: Request) {
           }
           case "user_follows": {
             const offset = cursor ? Number(cursor) : 0;
-            const query = serviceClient.from("user_follows").select("follow_type,follow_value,created_at").eq("user_id", user.id).order("follow_type").order("follow_value").range(offset, offset + USER_DATA_EXPORT_PAGE_SIZE - 1);
+            const query = serviceClient.from("user_follows").select("follow_type,follow_value,followed_user_id,created_at").eq("user_id", user.id).order("follow_type").order("follow_value").range(offset, offset + USER_DATA_EXPORT_PAGE_SIZE - 1);
             return createOffsetPage(query, offset);
           }
           case "notification_preferences": {
-            let query = serviceClient.from("notification_preferences").select("user_id,breaking_news,followed_topics,brickboard_replies,weekly_digest,updated_at").eq("user_id", user.id).order("user_id");
+            let query = serviceClient.from("notification_preferences").select("user_id,breaking_news,followed_topics,brickboard_replies,brickboard_follows,weekly_digest,updated_at").eq("user_id", user.id).order("user_id");
             if (cursor) query = query.gt("user_id", cursor);
             return createPage(query.range(start, end), "user_id");
           }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useNotificationCenter } from "@/lib/hooks/useNotificationCenter";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { createDataClient } from "@/lib/supabase/client";
 import type { AppNotification } from "@/lib/types/database";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -13,6 +14,7 @@ function NotificationIcon({ type }: { type: AppNotification["type"] }) {
     comment: "Comentário",
     reply: "Resposta",
     system: "Aviso",
+    follow: "Novo seguidor",
   };
 
   return (
@@ -108,8 +110,9 @@ function NotificationItem({
 }
 
 export function NotificationCenter() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
+  const supabase = useMemo(() => createDataClient(), []);
   const {
     notifications,
     unreadCount,
@@ -156,11 +159,21 @@ export function NotificationCenter() {
     if (cleared) setConfirmClear(false);
   };
 
-  const handleOpen = (notification: AppNotification) => {
+  const handleOpen = async (notification: AppNotification) => {
     void markAsRead(notification.id);
     setOpen(false);
-    if (notification.reference_type === "profile" && profile?.username) {
-      router.push(`/profile/${profile.username}`);
+    if (notification.reference_type === "profile") {
+      const { data: actorProfile } = notification.actor_id
+        ? await supabase
+            .from("public_profiles")
+            .select("username")
+            .eq("user_id", notification.actor_id)
+            .maybeSingle()
+        : { data: null };
+      const username = typeof actorProfile?.username === "string"
+        ? actorProfile.username
+        : notification.reference_id;
+      if (username) router.push(`/profile/${encodeURIComponent(username)}`);
       return;
     }
     if (notification.reference_type === "achievement") {

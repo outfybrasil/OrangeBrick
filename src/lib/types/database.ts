@@ -154,15 +154,15 @@ export interface Database {
         Relationships: [];
       };
       user_follows: {
-        Row: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; created_at: string };
-        Insert: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; created_at?: string };
-        Update: { follow_type?: "topic" | "platform" | "profile"; follow_value?: string };
+        Row: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; followed_user_id: string | null; created_at: string };
+        Insert: { user_id: string; follow_type: "topic" | "platform" | "profile"; follow_value: string; followed_user_id?: string | null; created_at?: string };
+        Update: { follow_type?: "topic" | "platform" | "profile"; follow_value?: string; followed_user_id?: string | null };
         Relationships: [];
       };
       notification_preferences: {
-        Row: { user_id: string; breaking_news: boolean; followed_topics: boolean; brickboard_replies: boolean; weekly_digest: boolean; updated_at: string };
-        Insert: { user_id: string; breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; weekly_digest?: boolean; updated_at?: string };
-        Update: { breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; weekly_digest?: boolean; updated_at?: string };
+        Row: { user_id: string; breaking_news: boolean; followed_topics: boolean; brickboard_replies: boolean; brickboard_follows: boolean; weekly_digest: boolean; updated_at: string };
+        Insert: { user_id: string; breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; brickboard_follows?: boolean; weekly_digest?: boolean; updated_at?: string };
+        Update: { breaking_news?: boolean; followed_topics?: boolean; brickboard_replies?: boolean; brickboard_follows?: boolean; weekly_digest?: boolean; updated_at?: string };
         Relationships: [];
       };
       community_notes: {
@@ -756,7 +756,7 @@ export interface RateLimitInsert {
 export interface AppNotification {
   id: string;
   user_id: string;
-  type: "reaction" | "comment" | "reply" | "system";
+  type: "reaction" | "comment" | "reply" | "system" | "follow";
   message: string;
   reference_type: "post" | "comment" | "profile" | "achievement" | "ranking";
   reference_id: string;

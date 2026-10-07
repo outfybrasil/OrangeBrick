@@ -19,6 +19,7 @@ interface ProfileFollowModalProps {
   username: string;
   items: FollowUserItem[];
   isLoading: boolean;
+  error?: string | null;
   onClose: () => void;
 }
 
@@ -27,6 +28,7 @@ export function ProfileFollowModal({
   type,
   items,
   isLoading,
+  error,
   onClose,
 }: ProfileFollowModalProps) {
   useEffect(() => {
@@ -77,6 +79,10 @@ export function ProfileFollowModal({
             <div className="flex items-center justify-center py-12">
               <span className="h-6 w-6 animate-spin rounded-full border-2 border-brand-orange/30 border-t-brand-orange" />
             </div>
+          ) : error ? (
+            <p role="alert" className="px-4 py-8 text-center text-sm text-red-300">
+              {error}
+            </p>
           ) : items.length === 0 ? (
             <div className="py-12 text-center text-sm text-gray-400">
               {type === "followers"
@@ -112,6 +118,11 @@ export function ProfileFollowModal({
             })
           )}
         </div>
+        {!isLoading && !error && items.length === 30 && (
+          <p className="border-t border-white/10 px-5 py-3 text-xs text-gray-400">
+            Exibindo os 30 perfis mais recentes.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -50,44 +50,53 @@ export function ProfileView({
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [followError, setFollowError] = useState<string | null>(null);
 
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [followModalType, setFollowModalType] = useState<"followers" | "following">("followers");
   const [followModalUsers, setFollowModalUsers] = useState<FollowUserItem[]>([]);
   const [followModalLoading, setFollowModalLoading] = useState(false);
+  const [followModalError, setFollowModalError] = useState<string | null>(null);
 
   const { savedBricks } = useSavedBricks();
 
   const loadFollowsData = useCallback(async () => {
     try {
-      const [{ count: fCount }, { count: ingCount }] = await Promise.all([
+      const [followersResult, followingResult] = await Promise.all([
         supabase
           .from("user_follows")
           .select("*", { count: "exact", head: true })
           .eq("follow_type", "profile")
-          .eq("follow_value", initialProfile.username),
+          .eq("followed_user_id", initialProfile.user_id),
         supabase
           .from("user_follows")
           .select("*", { count: "exact", head: true })
           .eq("follow_type", "profile")
           .eq("user_id", initialProfile.user_id),
       ]);
-      setFollowersCount(fCount || 0);
-      setFollowingCount(ingCount || 0);
+      if (followersResult.error) throw followersResult.error;
+      if (followingResult.error) throw followingResult.error;
+      setFollowersCount(followersResult.count || 0);
+      setFollowingCount(followingResult.count || 0);
+      setFollowError(null);
 
       if (user && !isOwner) {
-        const { data: myFollow } = await supabase
+        const { data: myFollow, error } = await supabase
           .from("user_follows")
-          .select("id")
+          .select("followed_user_id")
           .eq("user_id", user.id)
           .eq("follow_type", "profile")
-          .eq("follow_value", initialProfile.username)
+          .eq("followed_user_id", initialProfile.user_id)
           .maybeSingle();
+        if (error) throw error;
         setIsFollowing(Boolean(myFollow));
+      } else {
+        setIsFollowing(false);
       }
     } catch {
+      setFollowError("Não foi possível carregar os dados de seguidores agora.");
     }
-  }, [initialProfile.user_id, initialProfile.username, isOwner, supabase, user]);
+  }, [initialProfile.user_id, isOwner, supabase, user]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => { void loadFollowsData(); }, 0);
@@ -97,6 +106,7 @@ export function ProfileView({
   const handleToggleFollow = async () => {
     if (!user || isOwner || followLoading) return;
     setFollowLoading(true);
+    setFollowError(null);
     const nextState = !isFollowing;
     setIsFollowing(nextState);
     setFollowersCount((prev) => (nextState ? prev + 1 : Math.max(0, prev - 1)));
@@ -107,6 +117,7 @@ export function ProfileView({
           user_id: user.id,
           follow_type: "profile",
           follow_value: initialProfile.username,
+          followed_user_id: initialProfile.user_id,
         });
         if (error) throw error;
       } else {
@@ -115,12 +126,13 @@ export function ProfileView({
           .delete()
           .eq("user_id", user.id)
           .eq("follow_type", "profile")
-          .eq("follow_value", initialProfile.username);
+          .eq("followed_user_id", initialProfile.user_id);
         if (error) throw error;
       }
     } catch {
       setIsFollowing(!nextState);
       setFollowersCount((prev) => (nextState ? Math.max(0, prev - 1) : prev + 1));
+      setFollowError("Não foi possível atualizar quem você segue. Tente novamente.");
     } finally {
       setFollowLoading(false);
     }
@@ -130,40 +142,47 @@ export function ProfileView({
     setFollowModalType(type);
     setFollowModalOpen(true);
     setFollowModalLoading(true);
+    setFollowModalError(null);
 
     try {
       if (type === "followers") {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_follows")
           .select("user_id")
           .eq("follow_type", "profile")
-          .eq("follow_value", initialProfile.username)
+          .eq("followed_user_id", initialProfile.user_id)
+          .order("created_at", { ascending: false })
           .limit(30);
+        if (error) throw error;
 
         const ids = (data || []).map((r) => r.user_id);
         if (ids.length > 0) {
-          const { data: profiles } = await supabase
+          const { data: profiles, error: profilesError } = await supabase
             .from("public_profiles")
             .select("id, username, display_name, avatar_url, bio")
             .in("user_id", ids);
+          if (profilesError) throw profilesError;
           setFollowModalUsers((profiles || []) as FollowUserItem[]);
         } else {
           setFollowModalUsers([]);
         }
       } else {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("user_follows")
-          .select("follow_value")
+          .select("followed_user_id, created_at")
           .eq("follow_type", "profile")
           .eq("user_id", initialProfile.user_id)
+          .order("created_at", { ascending: false })
           .limit(30);
+        if (error) throw error;
 
-        const usernames = (data || []).map((r) => r.follow_value);
-        if (usernames.length > 0) {
-          const { data: profiles } = await supabase
+        const userIds = [...new Set((data || []).map((row) => row.followed_user_id).filter((id): id is string => Boolean(id)))];
+        if (userIds.length > 0) {
+          const { data: profiles, error: profilesError } = await supabase
             .from("public_profiles")
             .select("id, username, display_name, avatar_url, bio")
-            .in("username", usernames);
+            .in("user_id", userIds);
+          if (profilesError) throw profilesError;
           setFollowModalUsers((profiles || []) as FollowUserItem[]);
         } else {
           setFollowModalUsers([]);
@@ -171,6 +190,7 @@ export function ProfileView({
       }
     } catch {
       setFollowModalUsers([]);
+      setFollowModalError("Não foi possível carregar esta lista. Feche e tente novamente.");
     } finally {
       setFollowModalLoading(false);
     }
@@ -435,6 +455,7 @@ export function ProfileView({
           bio={initialProfile.bio}
           isOfficial={initialProfile.is_official}
           isOwner={isOwner}
+          isAuthenticated={Boolean(user)}
           followersCount={followersCount}
           followingCount={followingCount}
           isFollowing={isFollowing}
@@ -443,6 +464,12 @@ export function ProfileView({
           onOpenFollowers={() => void handleOpenFollowModal("followers")}
           onOpenFollowing={() => void handleOpenFollowModal("following")}
         />
+
+        {followError && (
+          <p role="alert" className="mx-4 mt-3 text-sm text-red-300 sm:mx-6 lg:mx-8">
+            {followError}
+          </p>
+        )}
 
         <div className="mt-6 px-4 sm:px-6 lg:px-8">
           <ProfileStats
@@ -596,6 +623,7 @@ export function ProfileView({
         username={initialProfile.username}
         items={followModalUsers}
         isLoading={followModalLoading}
+        error={followModalError}
         onClose={() => setFollowModalOpen(false)}
       />
     </div>

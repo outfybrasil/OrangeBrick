@@ -6,7 +6,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
 
-const defaults = { breaking_news: true, followed_topics: true, brickboard_replies: true, weekly_digest: true };
+const defaults = { breaking_news: true, followed_topics: true, brickboard_replies: true, brickboard_follows: true, weekly_digest: true };
 type Preferences = typeof defaults;
 
 export default function NotificationSettingsPage() {
@@ -27,7 +27,7 @@ export default function NotificationSettingsPage() {
     setLoadingPreferences(true);
     setLoadError(null);
     try {
-      const { data, error } = await supabase.from("notification_preferences").select("breaking_news, followed_topics, brickboard_replies, weekly_digest").eq("user_id", user.id).maybeSingle();
+      const { data, error } = await supabase.from("notification_preferences").select("breaking_news, followed_topics, brickboard_replies, brickboard_follows, weekly_digest").eq("user_id", user.id).maybeSingle();
       if (error) throw error;
       setPreferences(data ? data as Preferences : defaults);
     } catch {
@@ -58,6 +58,7 @@ export default function NotificationSettingsPage() {
     ["breaking_news", "Plantões", "Notícias urgentes confirmadas pela redação."],
     ["followed_topics", "Assuntos seguidos", "Atualizações sobre jogos, empresas e plataformas acompanhadas."],
     ["brickboard_replies", "Respostas no Brickboard", "Comentários, respostas e interações diretas."],
+    ["brickboard_follows", "Novos seguidores", "Avisos quando alguém começa a seguir seu perfil."],
     ["weekly_digest", "Resumo semanal", "Uma seleção do que você pode ter perdido."],
   ].map(([key, label, description]) => <label key={key} className="flex cursor-pointer items-start justify-between gap-6 py-5"><span><strong className="block text-sm">{label}</strong><span className="mt-1 block text-xs leading-relaxed text-gray-400">{description}</span></span><input type="checkbox" disabled={!user || loadingPreferences || saving || Boolean(loadError)} checked={preferences[key as keyof Preferences]} onChange={(event) => setPreferences((current) => ({ ...current, [key]: event.target.checked }))} className="mt-1 h-5 w-5 accent-[#ff5e00]" /></label>)}</div>{message && <p role="status" className="mt-4 text-xs text-gray-300">{message}</p>}<button type="button" disabled={!user || loadingPreferences || saving || Boolean(loadError)} onClick={() => void save()} className="mt-6 min-h-11 bg-brand-orange px-6 text-xs font-black uppercase">{saving ? "Salvando…" : loadingPreferences ? "Carregando preferências…" : "Salvar preferências"}</button></div><AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} /></main>;
 }

@@ -144,7 +144,7 @@ export default function MeuBrickPage() {
                 .from("user_follows")
                 .select("*", { count: "exact", head: true })
                 .eq("follow_type", "profile")
-                .eq("follow_value", currentUsername)
+                .eq("followed_user_id", currentUserId)
             : Promise.resolve({ count: 0 }),
           supabase
             .from("user_follows")
