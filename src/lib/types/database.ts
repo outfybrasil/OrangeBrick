@@ -272,6 +272,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: ReleaseHypeVoteSelection[];
       };
+      get_game_review_stats: {
+        Args: { target_game_ids: string[] };
+        Returns: GameReviewRatingAggregate[];
+      };
       admin_resolve_community_report: {
         Args: { target_report_id: string; target_action: string };
         Returns: Json;
@@ -449,6 +453,7 @@ export interface ReleaseRadarItem {
   created_at: string;
   updated_at: string;
   topic_id: string | null;
+  game_id: string | null;
 }
 
 export interface ReleaseRadarItemInsert {
@@ -469,6 +474,7 @@ export interface ReleaseRadarItemInsert {
   created_at?: string;
   updated_at?: string;
   topic_id?: string | null;
+  game_id?: string | null;
 }
 
 export interface Game {
@@ -532,6 +538,12 @@ export interface UserGameTrackingInsert {
 export interface ProfileGameReview extends Omit<UserGameTracking, "status"> {
   status: "joguei";
   game: Pick<Game, "id" | "slug" | "name" | "cover_image_url" | "release_date" | "platforms">;
+}
+
+export interface GameReviewRatingAggregate {
+  game_id: string;
+  average_rating: number | null;
+  rating_count: number;
 }
 
 export interface ReleaseHypeVote {

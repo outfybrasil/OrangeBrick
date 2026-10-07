@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -13,7 +14,7 @@ import { BrickCard } from "@/components/community/BrickCard";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes";
 import { getCommunityErrorMessage } from "@/lib/community-errors";
-import type { ReleaseRadarItem, ReleaseHypeVote, CommunityCommentRow } from "@/lib/types/database";
+import type { ReleaseRadarItem, ReleaseHypeVote, CommunityCommentRow, GameReviewRatingAggregate, UserGameTracking } from "@/lib/types/database";
 import type { CommunityPost, CommunityComment } from "@/lib/types/community";
 import type { ReactionType } from "@/lib/types/database";
 
@@ -26,6 +27,12 @@ export interface GamePageClientProps {
   initialUserVote?: HypeVoteType | null;
   initialVoteUserId?: string | null;
   initialVoteError?: boolean;
+  reviewGameId: string | null;
+  initialGameReviewStats: GameReviewRatingAggregate;
+  initialGameReviewStatsError?: boolean;
+  initialPersonalReview: Pick<UserGameTracking, "rating" | "review_text" | "is_public"> | null;
+  initialReviewUserId?: string | null;
+  initialPersonalReviewError?: boolean;
   relatedPosts: Array<{
     id: string;
     slug: string;
@@ -52,6 +59,12 @@ export function GamePageClient({
   initialUserVote = null,
   initialVoteUserId = null,
   initialVoteError = false,
+  reviewGameId,
+  initialGameReviewStats,
+  initialGameReviewStatsError = false,
+  initialPersonalReview,
+  initialReviewUserId = null,
+  initialPersonalReviewError = false,
   relatedPosts,
   relatedBricks,
   relatedBricksError = false,
@@ -65,12 +78,131 @@ export function GamePageClient({
   const [isVoting, setIsVoting] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [pendingVote, setPendingVote] = useState<HypeVoteType | null>(null);
+  const [pendingGameReview, setPendingGameReview] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
   const [bricks, setBricks] = useState(relatedBricks);
+  const [gameReviewStats, setGameReviewStats] = useState(initialGameReviewStats);
+  const [gameReviewStatsError, setGameReviewStatsError] = useState(initialGameReviewStatsError);
+  const [personalReview, setPersonalReview] = useState(initialPersonalReview);
+  const [reviewOwnerId, setReviewOwnerId] = useState(initialReviewUserId);
+  const [personalReviewError, setPersonalReviewError] = useState(initialPersonalReviewError);
+  const [reviewRatingDraft, setReviewRatingDraft] = useState(initialPersonalReview?.rating == null ? "" : String(initialPersonalReview.rating));
+  const [reviewTextDraft, setReviewTextDraft] = useState(initialPersonalReview?.review_text || "");
+  const [reviewIsPublic, setReviewIsPublic] = useState(initialPersonalReview?.is_public ?? true);
+  const [reviewEditorOpen, setReviewEditorOpen] = useState(false);
+  const [savingGameReview, setSavingGameReview] = useState(false);
+  const [gameReviewError, setGameReviewError] = useState<string | null>(null);
+  const [gameReviewNotice, setGameReviewNotice] = useState<string | null>(null);
   const reactionPendingRef = useRef(new Set<string>());
 
+  const viewerId = user?.id || null;
+  const visiblePersonalReview = viewerId && reviewOwnerId === viewerId ? personalReview : null;
+  const isLoadingPersonalReview = Boolean(viewerId && reviewOwnerId !== viewerId);
   const totalVotes = counts.buy + counts.watch + counts.skip;
   const hypePercent = totalVotes === 0 ? 0 : Math.round(((counts.buy + counts.watch) / totalVotes) * 100);
+
+  useEffect(() => {
+    if (!viewerId || !reviewGameId || reviewOwnerId === viewerId) return;
+
+    let isActive = true;
+    const loadPersonalReview = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("user_game_tracking")
+          .select("rating, review_text, is_public")
+          .eq("user_id", viewerId)
+          .eq("game_id", reviewGameId)
+          .eq("status", "joguei")
+          .maybeSingle();
+        if (error) throw error;
+        if (!isActive) return;
+        const nextReview = data as Pick<UserGameTracking, "rating" | "review_text" | "is_public"> | null;
+        setPersonalReview(nextReview);
+        setReviewOwnerId(viewerId);
+        setReviewRatingDraft(nextReview?.rating == null ? "" : String(nextReview.rating));
+        setReviewTextDraft(nextReview?.review_text || "");
+        setReviewIsPublic(nextReview?.is_public ?? true);
+        setPersonalReviewError(false);
+      } catch {
+        if (isActive) setPersonalReviewError(true);
+      }
+    };
+
+    void loadPersonalReview();
+    return () => {
+      isActive = false;
+    };
+  }, [reviewGameId, reviewOwnerId, supabase, viewerId]);
+
+  const openGameReviewEditor = () => {
+    if (isAuthLoading || !reviewGameId) return;
+    if (!user) {
+      setPendingGameReview(true);
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    setGameReviewError(null);
+    setGameReviewNotice(null);
+    setReviewEditorOpen(true);
+  };
+
+  const saveGameReview = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user || !reviewGameId || reviewOwnerId !== user.id) {
+      setGameReviewError("Entre na sua conta para registrar seu voto.");
+      return;
+    }
+
+    const numericRating = Number(reviewRatingDraft);
+    if (!reviewRatingDraft || !Number.isFinite(numericRating) || numericRating < 0 || numericRating > 10 || numericRating * 2 !== Math.trunc(numericRating * 2)) {
+      setGameReviewError("Escolha uma nota entre 0 e 10, em intervalos de 0,5.");
+      return;
+    }
+
+    setSavingGameReview(true);
+    setGameReviewError(null);
+    setGameReviewNotice(null);
+    const updatedAt = new Date().toISOString();
+    const nextReview: Pick<UserGameTracking, "rating" | "review_text" | "is_public"> = {
+      rating: numericRating,
+      review_text: reviewTextDraft.trim() || null,
+      is_public: reviewIsPublic,
+    };
+
+    try {
+      const { error } = await supabase.from("user_game_tracking").upsert({
+        user_id: user.id,
+        game_id: reviewGameId,
+        status: "joguei",
+        ...nextReview,
+        updated_at: updatedAt,
+      }, { onConflict: "user_id,game_id" });
+      if (error) throw error;
+
+      setPersonalReview(nextReview);
+      setReviewOwnerId(user.id);
+      setPersonalReviewError(false);
+      setReviewEditorOpen(false);
+      setGameReviewNotice("Sua nota foi salva.");
+
+      try {
+        const { data, error: statsError } = await supabase.rpc("get_game_review_stats", {
+          target_game_ids: [reviewGameId],
+        });
+        if (statsError) throw statsError;
+        setGameReviewStats(data?.[0] || { game_id: reviewGameId, average_rating: null, rating_count: 0 });
+        setGameReviewStatsError(false);
+      } catch {
+        setGameReviewStatsError(true);
+        setGameReviewNotice("Sua nota foi salva, mas a média pública não atualizou. Recarregue a página.");
+      }
+    } catch {
+      setGameReviewError("Não foi possível salvar seu voto. Tente novamente.");
+    } finally {
+      setSavingGameReview(false);
+    }
+  };
 
   const commitVote = useCallback(
     async (vote: HypeVoteType) => {
@@ -344,6 +476,97 @@ export function GamePageClient({
               </div>
             </div>
 
+            <section aria-labelledby="game-review-scores-title" className="mb-5 rounded-xl border border-white/10 bg-[#12141A] p-4">
+              <h2 id="game-review-scores-title" className="mb-3 font-heading text-sm font-black uppercase tracking-wider text-white">
+                Notas dos jogadores
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Média da comunidade</p>
+                  <p className="mt-1 font-heading text-3xl font-black tabular-nums text-brand-orange" aria-label={gameReviewStats.average_rating === null ? "Sem média pública" : `Média pública ${gameReviewStats.average_rating} de 10`}>
+                    {gameReviewStats.average_rating === null ? "—" : gameReviewStats.average_rating.toFixed(1).replace(".", ",")}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {gameReviewStatsError ? "Média indisponível" : gameReviewStats.rating_count === 1 ? "1 voto público" : `${gameReviewStats.rating_count} votos públicos`}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Sua nota</p>
+                  <p className="mt-1 font-heading text-3xl font-black tabular-nums text-white" aria-label={visiblePersonalReview?.rating == null ? "Você ainda não avaliou este jogo" : `Sua nota ${visiblePersonalReview.rating} de 10`}>
+                    {visiblePersonalReview?.rating == null ? "—" : visiblePersonalReview.rating.toFixed(1).replace(".", ",")}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {isLoadingPersonalReview ? "Carregando sua nota" : visiblePersonalReview ? visiblePersonalReview.is_public ? "Voto público" : "Nota privada" : user ? "Você ainda não avaliou" : "Entre para avaliar"}
+                  </p>
+                </div>
+              </div>
+
+              {gameReviewStatsError && <p role="alert" className="mt-2 text-xs text-amber-200">Não foi possível carregar a média pública.</p>}
+              {personalReviewError && user && <p role="alert" className="mt-2 text-xs text-amber-200">Não foi possível carregar sua avaliação. Tente novamente.</p>}
+
+              {!reviewEditorOpen ? (
+                <button
+                  type="button"
+                  onClick={openGameReviewEditor}
+                  disabled={isAuthLoading || !reviewGameId}
+                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-orange px-4 text-xs font-black uppercase text-white transition-colors hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {visiblePersonalReview ? "Alterar minha nota" : user ? "Avaliar este jogo" : "Entrar para avaliar"}
+                </button>
+              ) : (
+                <form onSubmit={(event) => void saveGameReview(event)} className="mt-4 space-y-3 border-t border-white/10 pt-4">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="game-page-rating" className="mb-1.5 block text-xs font-bold text-gray-300">Sua nota</label>
+                      <select
+                        id="game-page-rating"
+                        required
+                        value={reviewRatingDraft}
+                        onChange={(event) => setReviewRatingDraft(event.target.value)}
+                        disabled={isLoadingPersonalReview || savingGameReview}
+                        className="h-11 w-full rounded-lg border border-white/15 bg-[#0c0e12] px-3 text-sm text-white outline-none focus:border-brand-orange disabled:opacity-60"
+                      >
+                        <option value="">Selecione de 0 a 10</option>
+                        {Array.from({ length: 21 }, (_, index) => index / 2).map((score) => (
+                          <option key={score} value={String(score)}>{score.toFixed(1).replace(".", ",")}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="game-page-review-text" className="mb-1.5 block text-xs font-bold text-gray-300">Comentário curto (opcional)</label>
+                      <textarea
+                        id="game-page-review-text"
+                        value={reviewTextDraft}
+                        onChange={(event) => setReviewTextDraft(event.target.value.slice(0, 280))}
+                        maxLength={280}
+                        rows={2}
+                        disabled={isLoadingPersonalReview || savingGameReview}
+                        className="w-full resize-y rounded-lg border border-white/15 bg-[#0c0e12] px-3 py-2 text-sm text-white outline-none focus:border-brand-orange disabled:opacity-60"
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex min-h-11 items-center gap-2 text-xs text-gray-300">
+                    <input type="checkbox" checked={reviewIsPublic} onChange={(event) => setReviewIsPublic(event.target.checked)} disabled={isLoadingPersonalReview || savingGameReview} className="size-4 accent-brand-orange" />
+                    Contar como voto público na média da comunidade
+                  </label>
+
+                  {gameReviewError && <p role="alert" className="text-xs text-red-300">{gameReviewError}</p>}
+                  {gameReviewNotice && <p role="status" className="text-xs text-emerald-300">{gameReviewNotice}</p>}
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button type="button" onClick={() => { setReviewEditorOpen(false); setGameReviewError(null); }} disabled={savingGameReview} className="inline-flex min-h-11 items-center justify-center rounded-lg border border-white/15 px-4 text-xs font-bold text-gray-300 hover:bg-white/5 disabled:opacity-50">
+                      Cancelar
+                    </button>
+                    <button type="submit" disabled={isLoadingPersonalReview || reviewOwnerId !== user?.id || !reviewRatingDraft || savingGameReview} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-orange px-4 text-xs font-black uppercase text-white hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-50">
+                      {savingGameReview ? "Salvando..." : "Salvar nota"}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {!reviewEditorOpen && gameReviewNotice && <p role="status" className="mt-2 text-xs text-emerald-300">{gameReviewNotice}</p>}
+            </section>
+
             <div className="border border-white/10 bg-[#12141A] p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
@@ -505,11 +728,17 @@ export function GamePageClient({
         onClose={() => {
           setIsAuthModalOpen(false);
           setPendingVote(null);
+          setPendingGameReview(false);
         }}
         onSuccess={() => {
           if (pendingVote) {
             void commitVote(pendingVote);
             setPendingVote(null);
+          }
+          if (pendingGameReview) {
+            setReviewEditorOpen(true);
+            setGameReviewError(null);
+            setPendingGameReview(false);
           }
         }}
       />

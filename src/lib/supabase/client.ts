@@ -35,6 +35,10 @@ export interface FlexibleDatabase {
         Args: { target_comment_id: string; should_like: boolean };
         Returns: undefined;
       };
+      get_game_review_stats: {
+        Args: { target_game_ids: string[] };
+        Returns: { game_id: string; average_rating: number | null; rating_count: number }[];
+      };
     };
   };
 }

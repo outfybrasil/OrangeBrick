@@ -6,10 +6,11 @@ interface GameCoverImageProps {
   src?: string | null;
   alt: string;
   className?: string;
+  fit?: "cover" | "contain";
   priority?: boolean;
 }
 
-export function GameCoverImage({ src, alt, className = "", priority = false }: GameCoverImageProps) {
+export function GameCoverImage({ src, alt, className = "", fit = "cover", priority = false }: GameCoverImageProps) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [hasError, setHasError] = useState(false);
 
@@ -43,7 +44,7 @@ export function GameCoverImage({ src, alt, className = "", priority = false }: G
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         onError={() => setHasError(true)}
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"} transition-transform duration-300 group-hover:scale-105`}
       />
     </div>
   );

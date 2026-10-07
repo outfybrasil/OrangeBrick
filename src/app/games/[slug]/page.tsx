@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createPublicServerClient, createServerDataClient } from "@/lib/supabase/server";
 import { GamePageClient, type GamePageClientProps } from "./GamePageClient";
-import type { ReleaseRadarItem, ReleaseHypeVote, ReleaseHypeCount, ReleaseHypeVoteSelection, CommunityPostRow, ReactionType } from "@/lib/types/database";
+import type { ReleaseRadarItem, ReleaseHypeVote, ReleaseHypeCount, ReleaseHypeVoteSelection, CommunityPostRow, ReactionType, GameReviewRatingAggregate, UserGameTracking } from "@/lib/types/database";
 import type { CommunityPost, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -71,6 +71,21 @@ export default async function GamePage({ params }: GamePageProps) {
   const game = gameData as ReleaseRadarItem;
 
   const { data: voteCountsData, error: voteCountsError } = await supabase.rpc("get_release_hype_counts").eq("release_id", game.id);
+  const communityClient = await createServerDataClient();
+
+  let initialGameReviewStats: GameReviewRatingAggregate = {
+    game_id: game.game_id || "",
+    average_rating: null,
+    rating_count: 0,
+  };
+  let initialGameReviewStatsError = false;
+  if (game.game_id) {
+    const { data: reviewStatsData, error: reviewStatsError } = await communityClient.rpc("get_game_review_stats", {
+      target_game_ids: [game.game_id],
+    });
+    initialGameReviewStatsError = Boolean(reviewStatsError);
+    initialGameReviewStats = reviewStatsData?.[0] || initialGameReviewStats;
+  }
 
   const initialCounts = { buy: 0, watch: 0, skip: 0 };
   for (const row of (voteCountsData || []) as ReleaseHypeCount[]) {
@@ -80,10 +95,11 @@ export default async function GamePage({ params }: GamePageProps) {
   let initialUserVote: ReleaseHypeVote["vote_type"] | null = null;
   let initialVoteUserId: string | null = null;
   let initialVoteError = false;
-  const communityClient = await createServerDataClient();
+  let initialReviewUserId: string | null = null;
   try {
     const { data: { user } } = await communityClient.auth.getUser();
     if (user) {
+      initialReviewUserId = user.id;
       const { data: myVotes, error: myVotesError } = await communityClient.rpc("get_my_release_hype_votes").eq("release_id", game.id);
       if (myVotesError) throw myVotesError;
       initialVoteUserId = user.id;
@@ -95,13 +111,27 @@ export default async function GamePage({ params }: GamePageProps) {
     initialVoteError = true;
   }
 
-  const { data: postsData } = await supabase
-    .from("posts")
-    .select("id, slug, title, summary, image_url, category, published_at")
-    .eq("is_published", true)
-    .or(`topic_id.eq.${decodedSlug},title.ilike.%${game.game}%`)
-    .order("published_at", { ascending: false })
-    .limit(6);
+  const [postsResponse, personalReviewResponse] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("id, slug, title, summary, image_url, category, published_at")
+      .eq("is_published", true)
+      .or(`topic_id.eq.${decodedSlug},title.ilike.%${game.game}%`)
+      .order("published_at", { ascending: false })
+      .limit(6),
+    initialReviewUserId && game.game_id
+      ? communityClient
+        .from("user_game_tracking")
+        .select("rating, review_text, is_public")
+        .eq("user_id", initialReviewUserId)
+        .eq("game_id", game.game_id)
+        .eq("status", "joguei")
+        .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
+  const postsData = postsResponse.data;
+  const initialPersonalReviewError = Boolean(personalReviewResponse.error);
+  const initialPersonalReview = personalReviewResponse.data as Pick<UserGameTracking, "rating" | "review_text" | "is_public"> | null;
 
   const communityFilters = [
     { topic_filter: game.topic_id || "", search_text: game.topic_id ? "" : game.game },
@@ -211,6 +241,12 @@ export default async function GamePage({ params }: GamePageProps) {
         initialUserVote={initialUserVote}
         initialVoteUserId={initialVoteUserId}
         initialVoteError={initialVoteError}
+        reviewGameId={game.game_id}
+        initialGameReviewStats={initialGameReviewStats}
+        initialGameReviewStatsError={initialGameReviewStatsError}
+        initialPersonalReview={initialPersonalReview}
+        initialReviewUserId={initialReviewUserId}
+        initialPersonalReviewError={initialPersonalReviewError}
         relatedPosts={(postsData || []) as GamePageClientProps["relatedPosts"]}
         relatedBricks={relatedBricks}
         relatedBricksError={relatedBricksError}

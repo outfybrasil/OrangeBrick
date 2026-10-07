@@ -5,7 +5,7 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import { GameCoverImage } from "@/components/releases/GameCoverImage";
 import { createDataClient } from "@/lib/supabase/client";
-import type { Game, ProfileGameReview, ReleaseRadarItem, UserGameTracking } from "@/lib/types/database";
+import type { Game, GameReviewRatingAggregate, ProfileGameReview, ReleaseRadarItem, UserGameTracking } from "@/lib/types/database";
 
 type GameSearchResult = Pick<Game, "id" | "slug" | "name" | "cover_image_url" | "release_date" | "platforms">;
 
@@ -33,7 +33,7 @@ export function ProfileGamesTab({
   const [filter, setFilter] = useState<"all" | "guaranteed" | "radar">("all");
   const supabase = useMemo(() => createDataClient(), []);
   const [gameReviews, setGameReviews] = useState(initialGameReviews);
-  const [loadingGameReviews, setLoadingGameReviews] = useState(false);
+  const [loadingGameReviews, setLoadingGameReviews] = useState(isOwner && Boolean(currentUserId));
   const [gameReviewsError, setGameReviewsError] = useState<string | null>(null);
   const [reviewEditorOpen, setReviewEditorOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,16 +48,18 @@ export function ProfileGamesTab({
   const [confirmingDeleteGameId, setConfirmingDeleteGameId] = useState<string | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [communityScores, setCommunityScores] = useState<Record<string, GameReviewRatingAggregate>>({});
+  const [communityScoreError, setCommunityScoreError] = useState(false);
+  const visibleGameReviews = isOwner ? gameReviews : initialGameReviews;
+  const reviewGameIds = useMemo(
+    () => Array.from(new Set(visibleGameReviews.map((review) => review.game_id))),
+    [visibleGameReviews]
+  );
 
   useEffect(() => {
-    if (!isOwner || !currentUserId) {
-      setGameReviews(initialGameReviews);
-      setGameReviewsError(null);
-      return;
-    }
+    if (!isOwner || !currentUserId) return;
 
     let isActive = true;
-    setLoadingGameReviews(true);
 
     const loadReviews = async () => {
       try {
@@ -103,15 +105,33 @@ export function ProfileGamesTab({
     return () => {
       isActive = false;
     };
-  }, [currentUserId, initialGameReviews, isOwner, supabase]);
+  }, [currentUserId, isOwner, supabase]);
+
+  useEffect(() => {
+    if (reviewGameIds.length === 0) return;
+
+    let isActive = true;
+    const loadCommunityScores = async () => {
+      try {
+        const { data, error } = await supabase.rpc("get_game_review_stats", { target_game_ids: reviewGameIds });
+        if (error) throw error;
+        if (!isActive) return;
+        setCommunityScores(Object.fromEntries((data || []).map((score) => [score.game_id, score])));
+        setCommunityScoreError(false);
+      } catch {
+        if (isActive) setCommunityScoreError(true);
+      }
+    };
+
+    void loadCommunityScores();
+    return () => {
+      isActive = false;
+    };
+  }, [reviewGameIds, supabase]);
 
   useEffect(() => {
     const query = searchQuery.trim();
-    if (!reviewEditorOpen || selectedGame || query.length < 2) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      return;
-    }
+    if (!reviewEditorOpen || selectedGame || query.length < 2) return;
 
     let isActive = true;
     const timer = window.setTimeout(() => {
@@ -148,6 +168,8 @@ export function ProfileGamesTab({
   const openNewReview = () => {
     setSelectedGame(null);
     setSearchQuery("");
+    setSearchResults([]);
+    setSearchLoading(false);
     setRating("");
     setReviewText("");
     setIsPublic(true);
@@ -161,6 +183,7 @@ export function ProfileGamesTab({
     const existingReview = gameReviews.find((review) => review.game_id === game.id);
     setSelectedGame(game);
     setSearchQuery(game.name);
+    setSearchLoading(false);
     setRating(existingReview?.rating === null || existingReview?.rating === undefined ? "" : String(existingReview.rating));
     setReviewText(existingReview?.review_text || "");
     setIsPublic(existingReview?.is_public ?? true);
@@ -262,7 +285,7 @@ export function ProfileGamesTab({
     playingNow ||
     favoriteGames.length > 0 ||
     totalVoted > 0 ||
-    gameReviews.length > 0
+    visibleGameReviews.length > 0
   );
 
   const ownerControls = isOwner ? (
@@ -305,7 +328,7 @@ export function ProfileGamesTab({
             id="game-review-search"
             type="search"
             value={searchQuery}
-            onChange={(event) => { setSearchQuery(event.target.value.slice(0, 80)); setSelectedGame(null); setReviewError(null); }}
+            onChange={(event) => { setSearchQuery(event.target.value.slice(0, 80)); setSearchResults([]); setSearchLoading(false); setSelectedGame(null); setReviewError(null); }}
             placeholder="Busque no catálogo de jogos"
             autoComplete="off"
             maxLength={80}
@@ -313,7 +336,7 @@ export function ProfileGamesTab({
           />
           {searchQuery.trim().length < 2 && !selectedGame && <p className="mt-1.5 text-xs text-gray-500">Digite ao menos 2 caracteres.</p>}
           {searchLoading && <p role="status" className="mt-2 text-xs text-gray-400">Buscando jogos...</p>}
-          {!searchLoading && searchQuery.trim().length >= 2 && !selectedGame && searchResults.length === 0 && <p className="mt-2 text-xs text-gray-400">Nenhum jogo encontrado no catálogo.</p>}
+          {!searchLoading && !reviewError && searchQuery.trim().length >= 2 && !selectedGame && searchResults.length === 0 && <p className="mt-2 text-xs text-gray-400">Nenhum jogo encontrado no catálogo.</p>}
           {searchResults.length > 0 && !selectedGame && (
             <ul aria-label="Resultados da busca de jogos" className="mt-2 max-h-64 divide-y divide-white/10 overflow-y-auto rounded-sm border border-white/10">
               {searchResults.map((game) => (
@@ -405,28 +428,42 @@ export function ProfileGamesTab({
     </section>
   ) : null;
 
-  const reviewsSection = gameReviews.length > 0 ? (
+  const reviewsSection = visibleGameReviews.length > 0 ? (
     <section aria-labelledby="played-games-heading">
       <div className="flex items-center justify-between border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
           <h3 id="played-games-heading" className="font-heading text-sm font-black uppercase tracking-wider text-white">
-            Jogos que já joguei ({gameReviews.length})
+            Jogos que já joguei ({visibleGameReviews.length})
           </h3>
         </div>
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {gameReviews.map((review) => (
+        {visibleGameReviews.map((review) => (
           <article key={review.game_id} className="flex min-w-0 gap-3 rounded-sm border border-white/10 bg-[#111217] p-3">
-            <div className="w-28 shrink-0 overflow-hidden rounded-sm bg-black/30 sm:w-32">
-              <GameCoverImage src={review.game.cover_image_url} alt={review.game.name} />
+            <div className="w-28 shrink-0 self-start overflow-hidden rounded-sm bg-black/30 sm:w-32">
+              <GameCoverImage src={review.game.cover_image_url} alt={review.game.name} fit="contain" />
             </div>
             <div className="min-w-0 flex-1">
               <h4 className="line-clamp-2 font-heading text-sm font-black uppercase text-white">{review.game.name}</h4>
-              <p className="mt-1 text-sm font-black text-brand-orange" aria-label={review.rating === null ? "Sem nota" : `Nota ${review.rating} de 10`}>
-                {review.rating === null ? "Sem nota" : `${review.rating.toFixed(1).replace(".", ",").replace(",0", "")}/10`}
-              </p>
+              <div className="mt-2 grid max-w-sm grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{isOwner ? "Sua nota" : "Nota pessoal"}</p>
+                  <p className="mt-0.5 text-sm font-black text-brand-orange" aria-label={review.rating === null ? "Sem nota pessoal" : `Nota pessoal ${review.rating} de 10`}>
+                    {review.rating === null ? "—" : `${review.rating.toFixed(1).replace(".", ",").replace(",0", "")}/10`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Média pública</p>
+                  <p className="mt-0.5 text-sm font-black text-white" aria-label={communityScores[review.game_id]?.average_rating === null || communityScores[review.game_id]?.average_rating === undefined ? "Sem média pública" : `Média pública ${communityScores[review.game_id]?.average_rating} de 10`}>
+                    {communityScoreError ? "Indisponível" : communityScores[review.game_id]?.average_rating === null || communityScores[review.game_id]?.average_rating === undefined ? "—" : `${communityScores[review.game_id]?.average_rating?.toFixed(1).replace(".", ",")}/10`}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {communityScoreError ? "" : `${communityScores[review.game_id]?.rating_count || 0} votos públicos`}
+                  </p>
+                </div>
+              </div>
               {review.review_text && <p className="mt-2 line-clamp-3 whitespace-pre-wrap break-words text-xs leading-relaxed text-gray-300">{review.review_text}</p>}
               {isOwner && (
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">

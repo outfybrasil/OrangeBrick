@@ -508,6 +508,7 @@ export function ProfileView({
 
                 {activeTab === "games" && (
                   <ProfileGamesTab
+                    key={`${initialProfile.user_id}:${isOwner ? user?.id || "owner" : "visitor"}`}
                     playingNow={initialProfile.playing_now}
                     favoriteGames={initialProfile.favorite_games || []}
                     guaranteedGames={initialGuaranteedGames}
