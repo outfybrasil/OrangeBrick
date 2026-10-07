@@ -8,6 +8,7 @@ import { isMissingPostgrestRelation } from "@/lib/postgrest-error";
 import { claimEditorialSlot, isScheduledEditorialSlot, type EditorialSlotStore } from "@/lib/server/editorial-slot";
 import { editorialPublicationBlockers } from "@/lib/server/editorial-publication";
 import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
+import { buildCoverAbsenceTelegramMessage } from "@/lib/editorial-cover";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -41,7 +42,7 @@ async function setSlotState(supabase: ReturnType<typeof serviceClient>, key: str
     .maybeSingle();
   if (error) {
     if (isMissingPostgrestRelation(error)) {
-      throw new Error("bot_state indispon\u00edvel; publica\u00e7\u00e3o editorial bloqueada sem lock persistente.");
+      throw new Error("bot_state indisponível; publicação editorial bloqueada sem lock persistente.");
     }
     throw error;
   }
@@ -113,9 +114,17 @@ export async function GET(request: Request) {
     if (blockers.length > 0) {
       await setSlotState(supabase, slotKey, `draft:${result.post.id}`);
       slotStateTransitioned = true;
-      await notifyAdmin(
-        `⚠️ <b>Matéria mantida como rascunho</b>\n${escapeHtml(result.post.title)}\n\n${blockers.map((blocker) => `• ${escapeHtml(blocker)}`).join("\n")}`,
-      );
+      const isCoverBlocker =
+        !result.post.image_url?.trim() ||
+        blockers.some((b) => b.toLowerCase().includes("capa"));
+
+      if (isCoverBlocker) {
+        await notifyAdmin(buildCoverAbsenceTelegramMessage(slot));
+      } else {
+        await notifyAdmin(
+          `⚠️ <b>Matéria mantida como rascunho</b>\n${escapeHtml(result.post.title)}\n\n${blockers.map((blocker) => `• ${escapeHtml(blocker)}`).join("\n")}`,
+        );
+      }
       return NextResponse.json({ ok: true, published: false, draftId: result.post.id, blockers, wordCount: result.wordCount });
     }
 

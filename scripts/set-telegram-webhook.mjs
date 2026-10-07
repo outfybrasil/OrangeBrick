@@ -11,7 +11,7 @@ function getEnv(name) {
 
 const botToken = getEnv("TELEGRAM_BOT_TOKEN");
 const webhookSecret = getEnv("TELEGRAM_WEBHOOK_SECRET");
-const siteUrl = getEnv("NEXT_PUBLIC_SITE_URL") || "https://orange-brick.vercel.app";
+const siteUrl = getEnv("TELEGRAM_WEBHOOK_URL_HOST") || (getEnv("NEXT_PUBLIC_SITE_URL") && !getEnv("NEXT_PUBLIC_SITE_URL").includes("localhost") ? getEnv("NEXT_PUBLIC_SITE_URL") : "https://orangebrick.blog");
 
 if (!botToken || !webhookSecret) {
   console.error("Defina TELEGRAM_BOT_TOKEN e TELEGRAM_WEBHOOK_SECRET (via variável de ambiente ou .env.local).");

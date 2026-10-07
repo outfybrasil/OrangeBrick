@@ -1,8 +1,13 @@
 import { independentEditorialPublisherCount, isOfficialEditorialSource, isSpecificEditorialSource, validateStoredEditorialPost } from "../content-validation.ts";
 import type { GeneratedDraftResult } from "../ai/gemini-news.ts";
 import { isVerifiedEditorialImageEvidenceUrl } from "../ai/editorial-images.ts";
+import { generateFactualAltText, isGenericOrProhibitedImage } from "../editorial-cover.ts";
 
 export function editorialPublicationBlockers(result: GeneratedDraftResult): string[] {
+  if (result.post.image_url && (!result.post.image_alt || result.post.image_alt.trim().length < 3)) {
+    result.post.image_alt = generateFactualAltText(result.post);
+  }
+
   const blockers = validateStoredEditorialPost(result.post);
   if (result.post.title.trim().length > 70) blockers.push("Título acima de 70 caracteres.");
   if (result.post.summary.trim().length > 180) blockers.push("Resumo acima de 180 caracteres.");
@@ -23,17 +28,30 @@ export function editorialPublicationBlockers(result: GeneratedDraftResult): stri
   const bodyImages = blocks.filter((block) => block.type === "image");
   const imageUrls = [result.post.image_url, ...bodyImages.map((block) => block.url)]
     .filter((url): url is string => typeof url === "string" && Boolean(url.trim()));
-  if (!result.post.image_url || bodyImages.length < 2 || new Set(imageUrls).size < 3) {
-    blockers.push("Capa e duas imagens internas distintas não foram validadas.");
+
+  if (!result.post.image_url || !result.post.image_url.trim()) {
+    blockers.push("A imagem de capa é obrigatória para a publicação.");
   }
-  if (!result.post.image_alt?.trim() || bodyImages.slice(0, 2).some((image) => !image.alt?.trim() || !image.caption?.trim())) {
+
+  if (new Set(imageUrls).size !== imageUrls.length) {
+    blockers.push("As imagens internas distintas e a capa não podem ter URLs repetidas.");
+  }
+
+  if (bodyImages.some((image) => !image.alt?.trim() || !image.caption?.trim())) {
     blockers.push("Texto alternativo ou legenda de imagem ausente.");
+  }
+
+  if (
+    isGenericOrProhibitedImage(result.post.image_alt || "") ||
+    isGenericOrProhibitedImage(result.post.image_url || "")
+  ) {
+    blockers.push("A imagem de capa selecionada é genérica ou não possui relação editorial comprovada.");
   }
 
   const sourceCandidates = result.sources.filter((source) => isSpecificEditorialSource(source.url));
   const specificSources = sourceCandidates.filter((source) => source.source_verified === true);
   if (result.sources.length > 0 && sourceCandidates.length === 0) {
-    blockers.push("As fontes apontam para homepages, n\u00e3o para p\u00e1ginas espec\u00edficas.");
+    blockers.push("As fontes apontam para homepages, não para páginas específicas.");
   }
   if (sourceCandidates.some((source) => source.source_verified !== true)) {
     blockers.push("Uma ou mais fontes não foram consultadas e verificadas quanto à relevância.");
@@ -45,11 +63,27 @@ export function editorialPublicationBlockers(result: GeneratedDraftResult): stri
   }
 
   const evidence = result.verifiedImages || [];
-  if (imageUrls.length !== 3 || imageUrls.some((url) => !evidence.some((image) => image.url === url
-    && isVerifiedEditorialImageEvidenceUrl(image.sourceUrl) && /^[a-f0-9]{64}$/.test(image.sha256)
-    && image.alt.trim().length >= 20 && image.caption.trim().length >= 20))
-    || new Set(evidence.map((image) => image.sha256)).size !== 3) {
-    blockers.push("As três imagens precisam de origem oficial e correspondência visual comprovadas pelo seletor.");
+  if (
+    imageUrls.length === 0 ||
+    imageUrls.some(
+      (url) =>
+        !evidence.some(
+          (image) =>
+            image.url === url &&
+            isVerifiedEditorialImageEvidenceUrl(image.sourceUrl) &&
+            /^[a-f0-9]{64}$/.test(image.sha256) &&
+            image.alt.trim().length >= 20 &&
+            image.caption.trim().length >= 20 &&
+            !isGenericOrProhibitedImage(image.alt),
+        ),
+    ) ||
+    new Set(
+      imageUrls
+        .map((url) => evidence.find((image) => image.url === url)?.sha256)
+        .filter(Boolean),
+    ).size !== imageUrls.length
+  ) {
+    blockers.push("A capa e as imagens incluídas precisam de origem oficial e correspondência visual comprovadas pelo seletor.");
   }
 
   return [...new Set(blockers)];

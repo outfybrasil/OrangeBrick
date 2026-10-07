@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
     "supabase/functions/**",
     ".agents/**",
     "tmp/**",
+    "scratch/**",
   ]),
 ]);
 

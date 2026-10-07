@@ -182,7 +182,7 @@ async function geminiSearchImages(query: string, deadline: number): Promise<stri
     if (timeoutMs <= 0) return [];
     const gemini = getGeminiClient(timeoutMs);
     const response = await gemini.models.generateContent({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.8-flash",
       contents: `Find official material specifically depicting: ${query}. Search publisher, studio, platform or official press sites. Never use stock photos, generic gaming setups, controllers unrelated to the topic, AI images, fan art or another game. Return ONLY a JSON array of up to 5 direct HTTPS image URLs (jpg/png/webp), at least 1200x675, from official domains. Prefer gameplay, key art, product photos or company/game logos appropriate to the subject.`,
       config: {
         temperature: 0,
@@ -409,7 +409,7 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
       const timeoutMs = boundedRequestTimeout(deadline, AI_REQUEST_TIMEOUT_MS);
       if (timeoutMs <= 0) return null;
       const review = await getGeminiClient(timeoutMs).models.generateContent({
-        model: "gemini-3.6-flash",
+        model: "gemini-3.8-flash",
         contents: [
           { text: buildVisualImageReviewPrompt(context) },
           { inlineData: { data: processed.buffer.toString("base64"), mimeType: processed.contentType } },
@@ -1108,7 +1108,7 @@ async function isGamingRelated(contextText: string, deadline: number): Promise<b
       if (timeoutMs <= 0) throw new Error("Orçamento de tempo editorial esgotado.");
       const gemini = new GoogleGenAI({ apiKey: geminiKey, httpOptions: { timeout: timeoutMs, retryOptions: { attempts: 1 } } });
       const response = await gemini.models.generateContent({
-        model: "gemini-3.6-flash",
+        model: "gemini-3.8-flash",
         contents: userPrompt,
         config: {
           systemInstruction: classifierSystem,
@@ -1238,7 +1238,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   userPrompt += "\n\nEDITORIAL STATUS CHECK: Set information_status based on the central claim, not on the fact that a publication exists. Use confirmed only for a primary official source or directly verifiable fact. Use developing for a confirmed event with incomplete details. Use rumor when the central claim depends on a leak, insider, anonymous source, or unverified report. If title or summary calls a claim a leak, leaked, alleged, unconfirmed, or a rumor, do not mark it confirmed unless the central claim is independently confirmed by an official source or direct evidence. If structured sources do not demonstrate that confirmation, use developing/rumor or reject the story. Never default to confirmed; compare title, summary, sources, and status before returning JSON.";
 
   const { text: responseText, sources: groundingSources } = await generateWithProviderFallback(
-    ["gemini-3.6-flash", "gemini-3.5-flash"],
+    ["gemini-3.8-flash", "gemini-2.5-flash"],
     userPrompt,
     deadline,
     {

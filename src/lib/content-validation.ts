@@ -229,7 +229,7 @@ export function validateEditorialContent(content: EditorialContent): string[] {
   }
 
   const uniqueBodyImageUrls = new Set(imageBlocks.map((block) => block.url.trim()).filter(Boolean));
-  if (uniqueBodyImageUrls.size < 2) errors.push("A matéria precisa de duas imagens internas distintas.");
+  if (imageBlocks.length > 0 && uniqueBodyImageUrls.size !== imageBlocks.length) errors.push("As imagens do corpo não devem ter URLs repetidas.");
   if (imageBlocks.some((block) => block.alt.trim().length < 3 || !block.caption?.trim())) {
     errors.push("Cada imagem interna precisa de texto alternativo e legenda específicos.");
   }

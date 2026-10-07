@@ -1,6 +1,6 @@
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
 const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://orange-brick.vercel.app";
+const siteUrl = process.env.TELEGRAM_WEBHOOK_URL_HOST || (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost") ? process.env.NEXT_PUBLIC_SITE_URL : "https://orangebrick.blog");
 
 if (!botToken || !webhookSecret) {
   console.error("❌ Erro: TELEGRAM_BOT_TOKEN e TELEGRAM_WEBHOOK_SECRET não encontrados nas variáveis de ambiente");
