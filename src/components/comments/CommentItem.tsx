@@ -15,7 +15,7 @@ interface CommentItemProps {
   comment: CommentWithProfile;
   onLike: (commentId: string) => Promise<void>;
   onReply?: (commentId: string) => void;
-  onDelete?: (commentId: string) => void;
+  onDelete?: (commentId: string) => Promise<void> | void;
 }
 
 export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemProps) {
@@ -24,9 +24,13 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
   const [likeError, setLikeError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const dialogRef = useModalDialog<HTMLDivElement>(
     showDeleteConfirmation,
-    () => setShowDeleteConfirmation(false)
+    () => {
+      if (!isDeleting) setShowDeleteConfirmation(false);
+    }
   );
   const isOwner = user && user.id === comment.user_id;
 
@@ -47,9 +51,18 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
     }
   };
 
-  const confirmDelete = () => {
-    setShowDeleteConfirmation(false);
-    onDelete?.(comment.id);
+  const confirmDelete = async () => {
+    if (!onDelete) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await onDelete(comment.id);
+      setShowDeleteConfirmation(false);
+    } catch (cause) {
+      setDeleteError(cause instanceof Error ? cause.message : "Não foi possível apagar o comentário. Tente novamente.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -94,7 +107,10 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
               )}
               {isOwner && onDelete && (
                 <button
-                  onClick={() => setShowDeleteConfirmation(true)}
+                  onClick={() => {
+                    setDeleteError(null);
+                    setShowDeleteConfirmation(true);
+                  }}
                   aria-label="Apagar comentário"
                   className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-red-300/60 transition-colors hover:bg-red-500/10 hover:text-red-200"
                   title="Apagar comentário"
@@ -136,7 +152,7 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
         <div
           className="fixed inset-0 z-[80] flex items-center justify-center bg-background-void/90 p-3 sm:p-4"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setShowDeleteConfirmation(false);
+            if (event.target === event.currentTarget && !isDeleting) setShowDeleteConfirmation(false);
           }}
         >
           <div
@@ -154,20 +170,23 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
             <p id={`delete-comment-description-${comment.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
               Esta ação não pode ser desfeita.
             </p>
+            {deleteError && <p role="alert" className="mt-3 text-sm text-red-300">{deleteError}</p>}
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirmation(false)}
-                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+                disabled={isDeleting}
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                onClick={confirmDelete}
-                className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400"
+                onClick={() => void confirmDelete()}
+                disabled={isDeleting}
+                className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Apagar
+                {isDeleting ? "Apagando…" : "Apagar"}
               </button>
             </div>
           </div>

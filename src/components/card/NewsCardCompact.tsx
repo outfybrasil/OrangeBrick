@@ -16,9 +16,10 @@ import { CATEGORY_CONFIG, type Post, type PostStats } from "@/lib/types/database
 interface NewsCardCompactProps {
   post: Post;
   stats: PostStats;
+  headingLevel?: "h2" | "h3";
 }
 
-export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
+export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCompactProps) {
   const { user } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -75,9 +76,15 @@ export function NewsCardCompact({ post, stats }: NewsCardCompactProps) {
               <Timer date={post.published_at ?? ""} />
               <span className="h-px min-w-5 flex-1 bg-white/10" aria-hidden="true" />
             </div>
-            <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
-              <Link href={`/posts/${post.slug}`} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
-            </h2>
+            {headingLevel === "h2" ? (
+              <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
+                <Link href={`/posts/${post.slug}`} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
+              </h2>
+            ) : (
+              <h3 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
+                <Link href={`/posts/${post.slug}`} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
+              </h3>
+            )}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-1 text-xs">
             <button

@@ -24,7 +24,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-4 text-center">
+    <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
       <Icon name="brick" size={48} className="text-red-400" />
       <h1 className="text-lg font-mono font-bold text-white">
         Algo quebrou
@@ -38,6 +38,6 @@ export default function Error({
       >
         Tentar novamente
       </button>
-    </div>
+    </main>
   );
 }

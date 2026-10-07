@@ -1,6 +1,6 @@
-import { allowRequest, handleOptions, hashIdentity, isUuid, json, requestIp, serviceClient } from "../_shared/platform.ts";
+import { allowRequest, handleOptions, hashIdentity, isUuid, json, requestIp, serve, serviceClient } from "../_shared/platform.ts";
 
-Deno.serve(async (request) => {
+serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   if (request.method !== "POST") return json({ error: "Método não permitido" }, 405);

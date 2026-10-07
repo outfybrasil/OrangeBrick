@@ -22,7 +22,20 @@ export interface FlexibleDatabase {
     Functions: Record<string, {
       Args: Record<string, unknown>;
       Returns: unknown;
-    }>;
+    }> & {
+      get_community_comment_like_summaries: {
+        Args: { target_comment_ids: string[] };
+        Returns: { comment_id: string; likes_count: number; user_has_liked: boolean }[];
+      };
+      article_comment_like_summaries: {
+        Args: { target_comment_ids: string[] };
+        Returns: { comment_id: string; likes_count: number; user_has_liked: boolean }[];
+      };
+      set_article_comment_like: {
+        Args: { target_comment_id: string; should_like: boolean };
+        Returns: undefined;
+      };
+    };
   };
 }
 

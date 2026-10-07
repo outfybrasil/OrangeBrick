@@ -79,16 +79,20 @@ export default async function GamePage({ params }: GamePageProps) {
 
   let initialUserVote: ReleaseHypeVote["vote_type"] | null = null;
   let initialVoteUserId: string | null = null;
+  let initialVoteError = false;
   const communityClient = await createServerDataClient();
   try {
     const { data: { user } } = await communityClient.auth.getUser();
     if (user) {
+      const { data: myVotes, error: myVotesError } = await communityClient.rpc("get_my_release_hype_votes").eq("release_id", game.id);
+      if (myVotesError) throw myVotesError;
       initialVoteUserId = user.id;
-      const { data: myVotes } = await communityClient.rpc("get_my_release_hype_votes").eq("release_id", game.id);
       initialUserVote = ((myVotes || []) as ReleaseHypeVoteSelection[])[0]?.vote_type || null;
     }
   } catch {
     initialUserVote = null;
+    initialVoteUserId = null;
+    initialVoteError = true;
   }
 
   const { data: postsData } = await supabase
@@ -138,6 +142,7 @@ export default async function GamePage({ params }: GamePageProps) {
         author_avatar: row.author_avatar,
         content: row.content,
         media_url: row.media_url,
+        media_alt: row.media_alt,
         platform_tag: row.platform_tag,
         attached_article: attachedArticle,
         shared_post: sharedPost,
@@ -205,6 +210,7 @@ export default async function GamePage({ params }: GamePageProps) {
         initialCountsError={Boolean(voteCountsError)}
         initialUserVote={initialUserVote}
         initialVoteUserId={initialVoteUserId}
+        initialVoteError={initialVoteError}
         relatedPosts={(postsData || []) as GamePageClientProps["relatedPosts"]}
         relatedBricks={relatedBricks}
         relatedBricksError={relatedBricksError}

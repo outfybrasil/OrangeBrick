@@ -11,9 +11,12 @@ export interface ComposeBrickModalProps {
     content: string,
     platformTag?: string,
     attachedArticle?: AttachedArticle,
-    mediaUrl?: string
+    mediaUrl?: string,
+    mediaAlt?: string
   ) => Promise<void>;
   initialArticle?: AttachedArticle | null;
+  initialMediaUrl?: string | null;
+  onRemoveInitialMedia?: () => void;
   initialMode?: "default" | "attachment";
 }
 
@@ -24,12 +27,16 @@ export function ComposeBrickModal({
   onClose,
   onPublish,
   initialArticle,
+  initialMediaUrl = null,
+  onRemoveInitialMedia,
   initialMode = "default",
 }: ComposeBrickModalProps) {
   const [content, setContent] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [attachedArticle, setAttachedArticle] = useState<AttachedArticle | null>(initialArticle || null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [mediaAlt, setMediaAlt] = useState("");
+  const initialMediaUrlRef = useRef<string | null>(null);
   const [imageFileName, setImageFileName] = useState<string>("");
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -56,6 +63,24 @@ export function ComposeBrickModal({
   }, [isOpen, initialArticle]);
 
   useEffect(() => {
+    if (!isOpen) return;
+    if (initialMediaUrl) {
+      if (initialMediaUrlRef.current === initialMediaUrl) return;
+      initialMediaUrlRef.current = initialMediaUrl;
+      setMediaUrl(initialMediaUrl);
+      setMediaAlt("");
+      return;
+    }
+    if (initialMediaUrlRef.current) {
+      if (mediaUrl === initialMediaUrlRef.current) {
+        setMediaUrl(null);
+        setMediaAlt("");
+      }
+      initialMediaUrlRef.current = null;
+    }
+  }, [isOpen, initialMediaUrl, mediaUrl]);
+
+  useEffect(() => {
     if (isOpen && initialMode === "attachment" && fileInputRef.current) {
       const timer = window.setTimeout(() => fileInputRef.current?.click(), 100);
       return () => window.clearTimeout(timer);
@@ -65,19 +90,20 @@ export function ComposeBrickModal({
   if (!isOpen) return null;
 
   const charCount = content.length;
-  const isPublishDisabled = (content.trim().length === 0 && !mediaUrl) || charCount > 280 || isPublishing;
+  const isPublishDisabled = (content.trim().length === 0 && !mediaUrl) || (Boolean(mediaUrl) && (!mediaAlt.trim() || mediaAlt.length > 300)) || charCount > 280 || isPublishing;
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      showToast("Escolha uma imagem PNG, JPG ou WebP de até 5 MB.");
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 4 * 1024 * 1024) {
+      showToast("Escolha uma imagem PNG, JPG ou WebP de até 4 MB.");
       e.target.value = "";
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
       setMediaUrl(reader.result as string);
+      setMediaAlt("");
       setImageFileName(file.name);
     };
     reader.onerror = () => showToast("Não foi possível ler a imagem. Tente outro arquivo.");
@@ -86,7 +112,9 @@ export function ComposeBrickModal({
 
   const handleRemoveImage = () => {
     setMediaUrl(null);
+    setMediaAlt("");
     setImageFileName("");
+    onRemoveInitialMedia?.();
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -137,12 +165,14 @@ export function ComposeBrickModal({
         finalContent,
         platformTag,
         attachedArticle || undefined,
-        mediaUrl || undefined
+        mediaUrl || undefined,
+        mediaAlt.trim() || undefined
       );
       setContent("");
       setSelectedPlatforms([]);
       setAttachedArticle(null);
       setMediaUrl(null);
+      setMediaAlt("");
       setImageFileName("");
       setIsSpoiler(false);
       onClose();
@@ -284,6 +314,25 @@ export function ComposeBrickModal({
                 >
                   Remover
                 </button>
+              </div>
+            )}
+
+            {mediaUrl && (
+              <div className="mb-4 space-y-1.5">
+                <label htmlFor="brick-image-alt" className="text-xs font-semibold text-gray-200">Descrição da imagem</label>
+                <textarea
+                  id="brick-image-alt"
+                  value={mediaAlt}
+                  onChange={(event) => setMediaAlt(event.target.value)}
+                  maxLength={300}
+                  rows={2}
+                  required
+                  disabled={isPublishing}
+                  aria-describedby="brick-image-alt-help"
+                  className="w-full resize-y border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none"
+                  placeholder="Descreva o que aparece na imagem"
+                />
+                <p id="brick-image-alt-help" className="text-xs leading-5 text-gray-400">Necessária para que pessoas que não veem a imagem entendam o anexo. Até 300 caracteres.</p>
               </div>
             )}
 

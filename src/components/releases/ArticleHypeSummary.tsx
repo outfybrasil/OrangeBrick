@@ -9,31 +9,63 @@ export function ArticleHypeSummary({ postSlug }: { postSlug: string }) {
   const supabase = useMemo(() => createDataClient(), []);
   const [release, setRelease] = useState<ReleaseRadarItem | null>(null);
   const [counts, setCounts] = useState({ buy: 0, watch: 0, skip: 0 });
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    async function loadSummary() {
-      const { data: releaseData } = await supabase
-        .from("release_radar_items")
-        .select("*")
-        .eq("post_slug", postSlug)
-        .eq("is_active", true)
-        .maybeSingle();
-      const matchedRelease = releaseData as ReleaseRadarItem | null;
-      if (!matchedRelease) return;
+    let isMounted = true;
 
-      setRelease(matchedRelease);
-      const { data: countData } = await supabase.rpc("get_release_hype_counts");
-      const nextCounts = { buy: 0, watch: 0, skip: 0 };
-      for (const row of (countData || []) as ReleaseHypeCount[]) {
-        if (row.release_id === matchedRelease.id) {
-          nextCounts[row.vote_type] = Number(row.vote_count);
+    async function loadSummary() {
+      setLoadError(false);
+      setRelease(null);
+      setCounts({ buy: 0, watch: 0, skip: 0 });
+      try {
+        const { data: releaseData, error: releaseError } = await supabase
+          .from("release_radar_items")
+          .select("*")
+          .eq("post_slug", postSlug)
+          .eq("is_active", true)
+          .maybeSingle();
+        if (releaseError) throw releaseError;
+        const matchedRelease = releaseData as ReleaseRadarItem | null;
+        if (!matchedRelease) {
+          if (isMounted) setRelease(null);
+          return;
         }
+
+        const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
+        if (countError) throw countError;
+        const nextCounts = { buy: 0, watch: 0, skip: 0 };
+        for (const row of (countData || []) as ReleaseHypeCount[]) {
+          if (row.release_id === matchedRelease.id) {
+            nextCounts[row.vote_type] = Number(row.vote_count);
+          }
+        }
+        if (isMounted) {
+          setRelease(matchedRelease);
+          setCounts(nextCounts);
+        }
+      } catch {
+        if (isMounted) setLoadError(true);
       }
-      setCounts(nextCounts);
     }
 
     void loadSummary();
-  }, [postSlug, supabase]);
+    return () => {
+      isMounted = false;
+    };
+  }, [postSlug, retry, supabase]);
+
+  if (loadError) {
+    return (
+      <section role="alert" className="mt-10 border-y border-red-400/20 py-5 text-sm text-red-200">
+        <p>Não foi possível carregar o termômetro desta matéria.</p>
+        <button type="button" onClick={() => { setRelease(null); setRetry((value) => value + 1); }} className="mt-2 min-h-11 font-bold text-brand-orange">
+          Tentar novamente
+        </button>
+      </section>
+    );
+  }
 
   if (!release) return null;
 

@@ -210,17 +210,17 @@ export default function AdminDashboard() {
     setPublishError(null);
 
     try {
-      const { data: fullPost, error: fetchBodyError } = await supabase
-        .from("posts")
-        .select("body, information_status, featured_quote, editorial_sources, short_article_reason, correction_note")
-        .eq("id", post.id)
-        .single();
-      if (fetchBodyError?.message?.includes("Could not find the") && fetchBodyError.message.includes("column")) {
-        throw new Error("Aplique as migrations editoriais pendentes antes de publicar esta matéria.");
-      }
-      if (fetchBodyError || !fullPost) throw new Error("Não foi possível carregar o conteúdo da matéria.");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const fullPostResponse = await fetch(`/api/admin/posts/${encodeURIComponent(post.id)}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      });
+      if (!fullPostResponse.ok) throw new Error("Não foi possível carregar o conteúdo da matéria.");
+      const { post: fullPost } = await fullPostResponse.json() as { post: Post };
+      if (!fullPost) throw new Error("Não foi possível carregar o conteúdo da matéria.");
 
-      const completePost = fullPost as unknown as Pick<Post, "body" | "information_status" | "featured_quote" | "editorial_sources" | "short_article_reason" | "correction_note">;
+      const completePost = fullPost as Pick<Post, "body" | "information_status" | "featured_quote" | "editorial_sources" | "short_article_reason" | "correction_note">;
       const validationErrors = validateStoredEditorialPost({
         slug: post.slug,
         title: post.title,
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
           updated_at: publishedAt,
         })
         .eq("id", post.id)
-        .select("*")
+        .select("id")
         .single();
 
       if (publishError) throw publishError;

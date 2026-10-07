@@ -29,7 +29,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">Categorias</h4>
+          <h2 className="text-xs font-bold text-white uppercase tracking-wider">Categorias</h2>
           <div className="flex flex-col text-xs">
             {FOOTER_CATEGORIES.map((category) => (
               <Link key={category} href={`/?category=${category}`} className="flex min-h-11 items-center transition-colors hover:text-white">
@@ -40,7 +40,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">Institucional</h4>
+          <h2 className="text-xs font-bold text-white uppercase tracking-wider">Institucional</h2>
           <div className="flex flex-col text-xs">
             <Link href="/sobre" className="flex min-h-11 items-center transition-colors hover:text-white">
               Sobre e política editorial

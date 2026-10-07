@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/Icon";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-4 text-center">
+    <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh flex-col items-center justify-center gap-4 px-4 text-center">
       <Icon name="brick" size={48} className="text-brand-orange-muted opacity-40" />
       <h1 className="text-lg font-mono font-bold text-white">
         404 — Tijolo não encontrado
@@ -17,6 +17,6 @@ export default function NotFound() {
       >
         Voltar ao feed
       </Link>
-    </div>
+    </main>
   );
 }

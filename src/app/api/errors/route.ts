@@ -22,12 +22,16 @@ export async function POST(request: Request) {
   const identityHash = getRateLimitIdentity(request, secret || "");
   if (!identityHash) return NextResponse.json({ error: "Serviço indisponível" }, { status: 503 });
   const windowStart = getRateLimitWindowStart(new Date(), 60 * 60 * 1000);
-  const { data: withinLimit } = await supabase.rpc("consume_rate_limit", {
+  const { data: withinLimit, error: rateLimitError } = await supabase.rpc("consume_rate_limit", {
     p_action: "client_error",
     p_identity_hash: identityHash,
     p_window_start: windowStart.toISOString(),
     p_limit: 20,
   });
+  if (rateLimitError || withinLimit === null) {
+    console.error("Falha ao validar limite da telemetria de erros", rateLimitError?.code ?? "sem resultado");
+    return NextResponse.json({ error: "Telemetria temporariamente indisponível" }, { status: 503 });
+  }
   if (!withinLimit) return new NextResponse(null, { status: 204 });
 
   const body = await request.json().catch(() => null) as {
@@ -40,12 +44,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
   }
 
-  await supabase.rpc("record_app_error", {
+  const { error: recordError } = await supabase.rpc("record_app_error", {
     target_source: typeof body.source === "string" ? body.source.slice(0, 80) : "web",
     target_message: body.message.trim().slice(0, 1000),
     target_route: typeof body.route === "string" ? body.route.slice(0, 300) : null,
     target_reference: typeof body.reference === "string" ? body.reference.slice(0, 100) : null,
     target_metadata: {},
   });
+  if (recordError) {
+    console.error("Falha ao persistir evento de erro", recordError.code);
+    return NextResponse.json({ error: "Não foi possível registrar o erro" }, { status: 503 });
+  }
   return new NextResponse(null, { status: 204 });
 }

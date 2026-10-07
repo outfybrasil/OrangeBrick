@@ -1,3 +1,6 @@
+alter table public.comments
+  add column if not exists parent_id uuid;
+
 create unique index if not exists comments_id_post_unique_idx
   on public.comments (id, post_id);
 

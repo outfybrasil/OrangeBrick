@@ -32,7 +32,7 @@ export function GradientButtonGroup({ items, ariaLabel }: GradientButtonGroupPro
               key={item.href}
               href={item.href}
               aria-current={item.active ? "page" : undefined}
-              className={`relative z-10 flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-0.5 text-center text-[10px] min-[370px]:text-[11px] min-[410px]:text-xs font-extrabold leading-tight transition-colors active:bg-white/10 sm:px-1 ${
+              className={`relative z-10 flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-0.5 text-center text-xs font-extrabold leading-tight transition-colors active:bg-white/10 sm:px-1 ${
                 item.active ? "text-black font-black" : "text-gray-400 hover:text-white"
               }`}
             >

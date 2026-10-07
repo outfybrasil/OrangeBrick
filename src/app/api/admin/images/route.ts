@@ -159,20 +159,49 @@ export async function GET(request: Request) {
   const user = await requireAdmin(request);
   if (!user) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
 
+  const params = new URL(request.url).searchParams;
+  const cursorCreatedAt = params.get("afterCreatedAt");
+  const cursorId = params.get("afterId");
+  if ((cursorCreatedAt && !Number.isFinite(Date.parse(cursorCreatedAt)))
+    || (cursorId && !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(cursorId))
+    || Boolean(cursorCreatedAt) !== Boolean(cursorId)) {
+    return NextResponse.json({ error: "Cursor inv\u00e1lido" }, { status: 400 });
+  }
+
+  const pageSize = 50;
   const supabase = serviceClient();
-  const { data, error } = await supabase
+  let pageQuery = supabase
     .from("editorial_images")
     .select("*")
-    .order("created_at", { ascending: false })
-    .limit(200);
+    .not("storage_path", "like", "avatars/%")
+    .not("storage_path", "like", "archive/avatar/%")
+    .not("storage_path", "like", "archive/community/%");
+  const countQuery = supabase
+    .from("editorial_images")
+    .select("id", { count: "exact", head: true })
+    .not("storage_path", "like", "avatars/%")
+    .not("storage_path", "like", "archive/avatar/%")
+    .not("storage_path", "like", "archive/community/%");
 
-  if (error) return NextResponse.json({ error: "Falha ao carregar a biblioteca" }, { status: 500 });
+  if (cursorCreatedAt && cursorId) {
+    const normalizedCursor = new Date(cursorCreatedAt).toISOString();
+    pageQuery = pageQuery.or(
+      `created_at.lt.${normalizedCursor},and(created_at.eq.${normalizedCursor},id.lt.${cursorId})`,
+    );
+  }
 
-  const images = ((data || []) as EditorialImage[]).filter((image) =>
-    !image.storage_path.startsWith("avatars/")
-    && !image.storage_path.startsWith("archive/avatar/")
-    && !image.storage_path.startsWith("archive/community/")
-  );
+  const [{ data, error }, { count, error: countError }] = await Promise.all([
+    pageQuery
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(pageSize + 1),
+    countQuery,
+  ]);
+  if (error || countError) return NextResponse.json({ error: "Falha ao carregar a biblioteca" }, { status: 500 });
+
+  const hasMore = (data?.length || 0) > pageSize;
+  const images = ((data || []).slice(0, pageSize) as EditorialImage[]);
+  const lastImage = images.at(-1);
   const postIds = [...new Set(images.map((image) => image.post_id).filter((id): id is string => Boolean(id)))];
   const { data: posts } = postIds.length
     ? await supabase.from("posts").select("*").in("id", postIds)
@@ -181,9 +210,13 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     images: images.map((image) => ({ ...image, post: image.post_id ? postMap.get(image.post_id) || null : null })),
+    totalCount: count || 0,
+    hasMore,
+    nextCursor: hasMore && lastImage
+      ? { created_at: lastImage.created_at, id: lastImage.id }
+      : null,
   });
 }
-
 export async function POST(request: Request) {
   const user = await requireAdmin(request);
   if (!user) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });

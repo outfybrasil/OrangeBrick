@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import type { Post, Reaction } from "@/lib/types/database";
+import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
 
 export const revalidate = 60;
@@ -34,13 +34,8 @@ export default async function TrendingPage() {
     for (const row of scoreData as unknown as Array<{ post_id: string; interest_score: number | string }>) {
       scores[row.post_id] = Number(row.interest_score);
     }
-  } else {
-    const [{ data: reactionData }, { data: viewData }] = await Promise.all([
-      supabase.from("reactions").select("post_id, reaction_type"),
-      supabase.from("post_views").select("post_id"),
-    ]);
-    for (const reaction of (reactionData || []) as Pick<Reaction, "post_id" | "reaction_type">[]) scores[reaction.post_id] = (scores[reaction.post_id] || 0) + (reaction.reaction_type === "hype" ? 4 : 2);
-    for (const view of (viewData || []) as Array<{ post_id: string }>) scores[view.post_id] = (scores[view.post_id] || 0) + 1;
+  } else if (scoreError) {
+    console.error("Falha ao calcular pontuações do ranking", scoreError.code);
   }
   const posts = ((postData || []) as unknown as Post[]).sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
 
@@ -49,7 +44,7 @@ export default async function TrendingPage() {
     <main id="conteudo-principal" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Termômetro das matérias recentes</p>
       <h1 className="mt-2 font-heading text-4xl font-black uppercase sm:text-6xl">Em alta agora</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">Ranking calculado por leitura e reação. Não é uma seleção patrocinada.</p>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300">{scoreError || !scoreData ? "As métricas estão temporariamente indisponíveis; exibindo matérias recentes." : "Ranking calculado por leitura e reação. Não é uma seleção patrocinada."}</p>
       <div className="mt-10 divide-y divide-white/10 border-y border-white/10">
         {posts.map((post, index) => <Link key={post.id} href={`/posts/${post.slug}`} className="group grid gap-4 py-5 sm:grid-cols-[3rem_10rem_1fr] sm:items-center">
           <span className="font-heading text-3xl font-black text-brand-orange">{String(index + 1).padStart(2, "0")}</span>

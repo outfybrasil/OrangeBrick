@@ -39,6 +39,8 @@ function BrickboardContent() {
   const { follows, toggleFollow } = useFollowPreferences();
   const supabase = useMemo(() => createDataClient(), []);
   const [userProgress, setUserProgress] = useState<PrivateProgressData | null>(null);
+  const [userProgressError, setUserProgressError] = useState(false);
+  const [loadingUserProgress, setLoadingUserProgress] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -46,7 +48,8 @@ function BrickboardContent() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { posts, poll, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
+  const { posts, poll, isVoting, pollVoteError, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
+  const isPollExpired = Boolean(poll?.ends_at && new Date(poll.ends_at).getTime() <= now);
 
   const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending">("latest");
   const [visiblePostCount, setVisiblePostCount] = useState(8);
@@ -160,30 +163,66 @@ function BrickboardContent() {
 
   const toast = useToast();
   const lastXpRef = useRef<number | null>(null);
+  const userId = user?.id;
+  const progressUserIdRef = useRef(userId);
 
   useEffect(() => {
-    if (!user) return;
-    supabase.rpc("current_user_progress", {}).then(({ data }) => {
-      if (data) {
-        setUserProgress(data as PrivateProgressData);
-        lastXpRef.current = (data as PrivateProgressData).progress.lifetime_xp;
+    progressUserIdRef.current = userId;
+  }, [userId]);
+
+  const loadUserProgress = useCallback(async () => {
+    if (!userId) return;
+    setLoadingUserProgress(true);
+    setUserProgressError(false);
+    try {
+      const { data, error } = await supabase.rpc("current_user_progress", {});
+      if (progressUserIdRef.current !== userId) return;
+      if (error || !data) {
+        setUserProgressError(true);
+        return;
       }
-    });
-  }, [supabase, user]);
+      const next = data as PrivateProgressData;
+      setUserProgress(next);
+      lastXpRef.current = next.progress.lifetime_xp;
+    } catch {
+      if (progressUserIdRef.current === userId) setUserProgressError(true);
+    } finally {
+      if (progressUserIdRef.current === userId) setLoadingUserProgress(false);
+    }
+  }, [supabase, userId]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setUserProgress(null);
+      setUserProgressError(false);
+      lastXpRef.current = null;
+      if (userId) void loadUserProgress();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadUserProgress, userId]);
 
   const trackXp = useCallback(async () => {
-    if (!user) return;
+    if (!userId) return;
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    const { data } = await supabase.rpc("current_user_progress", {});
-    if (!data) return;
-    const next = data as PrivateProgressData;
-    setUserProgress(next);
-    const xp = next.progress.lifetime_xp;
-    if (lastXpRef.current !== null && xp > lastXpRef.current) {
-      toast.success(`+${formatXp(xp - lastXpRef.current)} XP`, "Contribuição registrada");
+    try {
+      const { data, error } = await supabase.rpc("current_user_progress", {});
+      if (progressUserIdRef.current !== userId) return;
+      if (error || !data) {
+        setUserProgressError(true);
+        return;
+      }
+      const next = data as PrivateProgressData;
+      setUserProgress(next);
+      setUserProgressError(false);
+      const xp = next.progress.lifetime_xp;
+      if (lastXpRef.current !== null && xp > lastXpRef.current) {
+        toast.success(`+${formatXp(xp - lastXpRef.current)} XP`, "Contribuição registrada");
+      }
+      lastXpRef.current = xp;
+    } catch {
+      if (progressUserIdRef.current === userId) setUserProgressError(true);
     }
-    lastXpRef.current = xp;
-  }, [supabase, toast, user]);
+  }, [supabase, toast, userId]);
 
   const trendingTopics = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -325,6 +364,14 @@ function BrickboardContent() {
           <div role="alert" className="mb-5 flex items-start justify-between gap-4 border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
             <p>{operationError}</p>
             <button type="button" onClick={clearOperationError} className="min-h-8 shrink-0 px-2 font-bold text-red-200 hover:text-white" aria-label="Fechar aviso">Fechar</button>
+          </div>
+        )}
+        {user && userProgressError && (
+          <div role="alert" className="mb-5 flex items-start justify-between gap-4 border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-100">
+            <p>{userProgress ? "Não foi possível atualizar seu progresso; os dados anteriores foram mantidos." : "Não foi possível carregar seu progresso."}</p>
+            <button type="button" onClick={() => void loadUserProgress()} disabled={loadingUserProgress} className="min-h-8 shrink-0 px-2 font-bold text-amber-200 hover:text-white disabled:opacity-60">
+              {loadingUserProgress ? "Tentando…" : "Tentar novamente"}
+            </button>
           </div>
         )}
 
@@ -499,9 +546,9 @@ function BrickboardContent() {
             </aside>
 
             <div className="space-y-0 min-w-0">
-              {poll && (
+              {poll && !isPollExpired && (
                 <div className="mb-4 lg:hidden">
-                  <GamerPollWidget poll={poll} onVote={(optionId) => requireUser(() => votePoll(optionId))} />
+                  <GamerPollWidget poll={poll} onVote={(optionId) => requireUser(() => votePoll(optionId))} isAuthenticated={Boolean(user)} isVoting={isVoting} error={pollVoteError} />
                 </div>
               )}
               {/* Composer embutido */}
@@ -538,11 +585,16 @@ function BrickboardContent() {
                   <input
                     type="file"
                     ref={fileInputRef}
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 4 * 1024 * 1024) {
+                          toast.error("Escolha uma imagem PNG, JPG ou WebP de até 4 MB.", "Imagem não aceita");
+                          e.target.value = "";
+                          return;
+                        }
                         const reader = new FileReader();
                         reader.onload = () => setInlineMediaUrl(reader.result as string);
                         reader.readAsDataURL(file);
@@ -637,7 +689,7 @@ function BrickboardContent() {
                     </div>
                   ))}
                   {visiblePostCount < displayPosts.length && (
-                    <div ref={loadMoreRef} className="flex min-h-20 items-center justify-center border-t border-white/10" aria-label="Carregando mais conversas">
+                    <div ref={loadMoreRef} className="flex min-h-20 items-center justify-center border-t border-white/10" aria-hidden="true">
                       <span className="size-5 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />
                     </div>
                   )}
@@ -708,7 +760,7 @@ function BrickboardContent() {
                         <div key={p.id} className="flex items-center justify-between gap-3 p-2">
                           <Link href={`/profile/${encodeURIComponent(p.username)}`} className="flex items-center gap-2.5 min-w-0 group/person">
                             {p.avatar ? (
-                              <img src={p.avatar} alt={p.name} className="size-8 shrink-0 rounded-full object-cover" />
+                              <img src={resolveAvatarUrl(p.avatar, p.name)} alt={p.name} className="size-8 shrink-0 rounded-full object-cover" />
                             ) : (
                               <div className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-orange/20 text-xs font-bold text-brand-orange">
                                 {p.name.charAt(0).toUpperCase()}
@@ -791,12 +843,14 @@ function BrickboardContent() {
             router.replace("/brickboard");
           }
         }}
-        onPublish={async (content, tag, article, media) => {
-          await addPost(content, tag, article, media || inlineMediaUrl || undefined);
+        onPublish={async (content, tag, article, media, mediaAlt) => {
+          await addPost(content, tag, article, media || inlineMediaUrl || undefined, mediaAlt);
           setInlineMediaUrl(null);
           void trackXp();
         }}
         initialArticle={preAttachedArticle}
+        initialMediaUrl={inlineMediaUrl}
+        onRemoveInitialMedia={() => setInlineMediaUrl(null)}
       />
 
       <CreatePollModal

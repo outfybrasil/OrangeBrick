@@ -12,6 +12,7 @@ import { ProfileSidebar } from "./ProfileSidebar";
 import { ProfileFollowModal, type FollowUserItem } from "./ProfileFollowModal";
 import { BrickCard } from "@/components/community/BrickCard";
 import { createDataClient } from "@/lib/supabase/client";
+import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
 import type { PublicProfileData } from "@/lib/types/progression";
@@ -203,14 +204,9 @@ export function ProfileView({
       const commentIds = rows.map((r) => r.id);
       const likesMap: Record<string, number> = {};
       if (commentIds.length > 0) {
-        const { data: likes } = await supabase
-          .from("community_comment_likes")
-          .select("comment_id")
-          .in("comment_id", commentIds);
-
-        const lList = (likes || []) as Array<{ comment_id: string }>;
-        for (const l of lList) {
-          likesMap[l.comment_id] = (likesMap[l.comment_id] || 0) + 1;
+        const likes = await getCommunityCommentLikeSummaries(supabase, commentIds);
+        for (const like of likes) {
+          likesMap[like.comment_id] = like.likes_count;
         }
       }
 
@@ -320,7 +316,7 @@ export function ProfileView({
   };
 
   const handleSharePost = async (post: CommunityPost, comment: string) => {
-    if (!user) return;
+    if (!user) throw new Error("Entre na sua conta para compartilhar um Brick.");
     const authorName = user.user_metadata?.full_name || initialProfile.display_name;
     const authorUsername = initialProfile.username;
     const sharedData: SharedPostData = {
@@ -334,7 +330,7 @@ export function ProfileView({
       original_platform_tag: post.platform_tag || undefined,
       original_attached_article: post.attached_article,
     };
-    await supabase.from("community_posts").insert({
+    const { error } = await supabase.from("community_posts").insert({
       user_id: user.id,
       author_name: authorName,
       author_username: authorUsername,
@@ -342,6 +338,7 @@ export function ProfileView({
       content: comment.trim(),
       attached_article: sharedData,
     });
+    if (error) throw new Error("Não foi possível republicar este Brick. Tente novamente.");
   };
 
   const handleAddComment = async (postId: string, content: string, parentId?: string) => {
@@ -392,8 +389,16 @@ export function ProfileView({
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!isOwner) return;
-    await supabase.from("community_posts").delete().eq("id", postId);
+    if (!isOwner || !user) throw new Error("Você não tem permissão para apagar esta publicação.");
+    const { data: deletedPost, error } = await supabase
+      .from("community_posts")
+      .delete()
+      .eq("id", postId)
+      .eq("user_id", user.id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error("Não foi possível apagar a publicação. Tente novamente.");
+    if (!deletedPost) throw new Error("A publicação não foi encontrada ou você não tem permissão para apagá-la.");
     setPosts((prev) => prev.filter((p) => p.id !== postId));
   };
 

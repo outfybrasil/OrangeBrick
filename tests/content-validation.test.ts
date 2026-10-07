@@ -3,7 +3,8 @@ import test from "node:test";
 import { AUTHOR_TAGS, unverifiedEditorialImageCaption, validateEditorialContent, validateEditorialQuality, type EditorialBlock } from "../src/lib/content-validation.ts";
 
 const longText = Array.from({ length: 700 }, (_, index) => "informacao" + index).join(" ");
-const finalSource = "**Fonte:** [Fonte oficial](https://example.com/source)";
+const finalUrl = "https://example.com/news/console-atual-midia-fisica";
+const finalSource = `**Fonte:** [Fonte oficial](${finalUrl})`;
 
 test("removes unverified official credits from generated image captions", () => {
   assert.equal(
@@ -35,9 +36,9 @@ const validContent = {
   editorialMetadata: {
     informationStatus: "confirmed" as const,
     sources: [
-      { name: "Fonte A", url: "https://example.com/source" },
-      { name: "Fonte B", url: "https://fonteb.com/b" },
-      { name: "Fonte C", url: "https://fontec.com/c" },
+      { name: "Fonte A", url: finalUrl, source_verified: true },
+      { name: "Fonte B", url: "https://fonteb.com/noticias/console-atual-midia-fisica", source_verified: true },
+      { name: "Fonte C", url: "https://fontec.com/noticias/console-atual-midia-fisica", source_verified: true },
     ],
   },
 };
@@ -66,11 +67,16 @@ test("mantém as tags de autoria definidas por categoria", () => {
 });
 
 test("aceita uma fonte identificada como oficial e exige contexto verificável da fala", () => {
+  const officialUrl = "https://www.nintendo.com/news/console-atual-midia-fisica";
+  const officialBlocks = blocks.map((block) => block.type === "text" && block.content.includes(finalSource)
+    ? { ...block, content: block.content.replace(finalSource, `**Fonte:** [Nintendo](${officialUrl})`) }
+    : block);
   const officialSource = validateEditorialContent({
     ...validContent,
+    blocks: officialBlocks,
     editorialMetadata: {
       informationStatus: "confirmed",
-      sources: [{ name: "Comunicado oficial", url: "https://example.com/source", is_official: true }],
+      sources: [{ name: "Comunicado oficial", url: officialUrl, is_official: true, source_verified: true }],
     },
   });
   assert.deepEqual(officialSource, []);
@@ -80,9 +86,9 @@ test("aceita uma fonte identificada como oficial e exige contexto verificável d
     editorialMetadata: {
       informationStatus: "confirmed",
       sources: [
-        { name: "Fonte A", url: "https://example.com/source" },
-        { name: "Fonte B", url: "https://example.com/article-b" },
-        { name: "Fonte C", url: "https://example.com/article-c" },
+        { name: "Fonte A", url: "https://example.com/news/source-a", source_verified: true },
+        { name: "Fonte B", url: "https://www.example.com/news/source-b", source_verified: true },
+        { name: "Fonte C", url: "https://m.example.com/news/source-c", source_verified: true },
       ],
     },
   });
@@ -148,7 +154,7 @@ test("checklist exibe os mesmos critérios usados no bloqueio de publicação", 
     imageUrl: validContent.imageUrl,
     imageAlt: validContent.imageAlt,
     body: blocks,
-    sourcesText: "Fonte A|https://example.com/source\nFonte B|https://fonteb.com/b\nFonte C|https://fontec.com/c",
+    sourcesText: `Fonte A|${finalUrl}|verificada\nFonte B|https://fonteb.com/noticias/console-atual-midia-fisica|verificada\nFonte C|https://fontec.com/noticias/console-atual-midia-fisica|verificada`,
     quoteText: "",
     quoteAuthor: "",
     quoteRole: "",

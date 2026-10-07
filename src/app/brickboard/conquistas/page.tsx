@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { AchievementMark } from "@/components/community/ProgressionUI";
 import type { AchievementProgress, PublicProfileData } from "@/lib/types/progression";
 
@@ -31,6 +32,7 @@ function prepareAchievements(list: AchievementWithMeta[]): AchievementWithMeta[]
 
 export default function AchievementsPage() {
   const { user, profile, isLoading: isAuthLoading } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const supabase = useMemo(() => createDataClient(), []);
   const [achievements, setAchievements] = useState<AchievementProgress[]>([]);
   const [equipped, setEquipped] = useState<string[]>([]);
@@ -161,7 +163,7 @@ export default function AchievementsPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        {!user && !isAuthLoading && <div className="mb-8 border-y border-white/10 py-5 text-sm text-gray-300"><p>Você está explorando o catálogo de conquistas.</p><Link href="/entrar?next=%2Fbrickboard%2Fconquistas" className="mt-2 inline-flex min-h-11 items-center text-brand-orange underline">Entrar para ver meu progresso</Link></div>}
+        {!user && !isAuthLoading && <div className="mb-8 border-y border-white/10 py-5 text-sm text-gray-300"><p>Você está explorando o catálogo de conquistas.</p><button type="button" onClick={() => setIsAuthModalOpen(true)} className="mt-2 inline-flex min-h-11 items-center text-brand-orange underline">Entrar para ver meu progresso</button></div>}
         {message && <p role="status" className="mb-4 text-sm text-gray-300">{message}</p>}
         {user && !isAuthLoading && !profile?.username && <div className="mb-8 border-y border-amber-400/20 py-5 text-sm text-amber-100"><p>Seu perfil ainda não está configurado para exibir progresso.</p><Link href="/profile/setup" className="mt-2 inline-flex min-h-11 items-center text-brand-orange underline">Configurar perfil</Link></div>}
         {user && !isAuthLoading && profile?.username && progressReady && (
@@ -195,6 +197,7 @@ export default function AchievementsPage() {
           </div>
         )}
       </section>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </main>
   );
 }

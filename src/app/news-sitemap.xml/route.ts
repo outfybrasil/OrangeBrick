@@ -26,7 +26,7 @@ export async function GET() {
   let posts: Array<{ slug: string; title: string; published_at: string | null }> = [];
 
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("posts")
       .select("slug, title, published_at")
       .eq("is_published", true)
@@ -34,9 +34,13 @@ export async function GET() {
       .order("published_at", { ascending: false })
       .limit(100);
 
+    if (error) throw error;
     if (data) posts = data as Array<{ slug: string; title: string; published_at: string | null }>;
   } catch {
-    // return valid XML structure
+    return new NextResponse("Sitemap temporariamente indisponível.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
   }
 
   const lines = [

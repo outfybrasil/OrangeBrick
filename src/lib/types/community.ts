@@ -31,6 +31,7 @@ export interface CommunityPost {
   author_avatar: string;
   content: string;
   media_url?: string | null;
+  media_alt?: string | null;
   platform_tag?: string | null;
   attached_article?: AttachedArticle | null;
   shared_post?: SharedPostData | null;

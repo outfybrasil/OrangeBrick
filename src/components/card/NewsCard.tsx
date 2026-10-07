@@ -191,8 +191,8 @@ export function NewsCard({ post, stats }: NewsCardProps) {
         isOpen={isBrickModalOpen}
         onClose={() => setIsBrickModalOpen(false)}
         initialArticle={attachedArticle}
-        onPublish={async (content, platformTag, article, mediaUrl) => {
-          await addCommunityBrick(content, platformTag, article, mediaUrl);
+        onPublish={async (content, platformTag, article, mediaUrl, mediaAlt) => {
+          await addCommunityBrick(content, platformTag, article, mediaUrl, mediaAlt);
           router.push("/brickboard");
         }}
       />

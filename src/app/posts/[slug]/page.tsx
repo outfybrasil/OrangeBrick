@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
-import type { Post, PostStats, PostCategory, ReactionType } from "@/lib/types/database";
+import { POST_DETAIL_PUBLIC_COLUMNS, type Post, type PostStats, type PostCategory, type ReactionType } from "@/lib/types/database";
 import { getSiteUrl } from "@/lib/site-url";
 import { verifyPreviewToken } from "@/lib/preview-token";
 
@@ -27,7 +27,7 @@ async function getPost(slug: string, isPreview = false): Promise<Post | null> {
   const supabase = createPublicServerClient();
   const { data } = await supabase
     .from("posts")
-    .select("*")
+    .select(POST_DETAIL_PUBLIC_COLUMNS)
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();

@@ -1,5 +1,3 @@
-import { isMissingPostgrestRelation } from "../postgrest-error.ts";
-
 const STALE_SLOT_MS = 360_000;
 const SCHEDULED_EDITORIAL_SLOTS = new Set(["11", "17", "20"]);
 
@@ -26,13 +24,7 @@ export interface EditorialSlotStore {
 }
 
 export async function claimEditorialSlot(store: EditorialSlotStore, key: string, now = Date.now()): Promise<boolean> {
-  let existing: EditorialSlotRecord | null;
-  try {
-    existing = await store.readSlot(key);
-  } catch (error) {
-    if (isMissingPostgrestRelation(error)) return true;
-    throw error;
-  }
+  const existing = await store.readSlot(key);
   const updatedAt = new Date(now).toISOString();
   if (!existing) return store.insertRunningSlot(key, updatedAt);
 

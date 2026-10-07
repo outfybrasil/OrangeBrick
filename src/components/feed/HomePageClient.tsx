@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useToast } from "@/lib/contexts/ToastContext";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
 import { SinceLastVisit } from "@/components/feed/SinceLastVisit";
@@ -21,6 +23,15 @@ export function HomePageClient({ initialPosts }: HomePageClientProps) {
   const categoryParam = searchParams.get("category") as PostCategory | null;
   const qParam = searchParams.get("q") || "";
   const tagParam = searchParams.get("tag") || null;
+
+  const errorParam = searchParams.get("error");
+  const { error: toastError } = useToast();
+
+  useEffect(() => {
+    if (errorParam === "auth_failed") {
+      toastError("Não foi possível autenticar com o Google. Tente novamente.", "Falha ao entrar");
+    }
+  }, [errorParam, toastError]);
 
   const activeTag = tagParam;
 

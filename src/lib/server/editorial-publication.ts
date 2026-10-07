@@ -1,6 +1,6 @@
-import { independentEditorialPublisherCount, isOfficialEditorialSource, validateStoredEditorialPost } from "../content-validation.ts";
+import { independentEditorialPublisherCount, isOfficialEditorialSource, isSpecificEditorialSource, validateStoredEditorialPost } from "../content-validation.ts";
 import type { GeneratedDraftResult } from "../ai/gemini-news.ts";
-import { isAllowedEditorialImageUrl } from "../ai/editorial-images.ts";
+import { isVerifiedEditorialImageEvidenceUrl } from "../ai/editorial-images.ts";
 
 export function editorialPublicationBlockers(result: GeneratedDraftResult): string[] {
   const blockers = validateStoredEditorialPost(result.post);
@@ -30,15 +30,23 @@ export function editorialPublicationBlockers(result: GeneratedDraftResult): stri
     blockers.push("Texto alternativo ou legenda de imagem ausente.");
   }
 
-  const publisherCount = independentEditorialPublisherCount(result.sources);
-  const officialSource = result.sources.some((source) => isOfficialEditorialSource(source.url));
+  const sourceCandidates = result.sources.filter((source) => isSpecificEditorialSource(source.url));
+  const specificSources = sourceCandidates.filter((source) => source.source_verified === true);
+  if (result.sources.length > 0 && sourceCandidates.length === 0) {
+    blockers.push("As fontes apontam para homepages, n\u00e3o para p\u00e1ginas espec\u00edficas.");
+  }
+  if (sourceCandidates.some((source) => source.source_verified !== true)) {
+    blockers.push("Uma ou mais fontes não foram consultadas e verificadas quanto à relevância.");
+  }
+  const publisherCount = independentEditorialPublisherCount(specificSources);
+  const officialSource = specificSources.some((source) => source.is_official || isOfficialEditorialSource(source.url));
   if (publisherCount < 3 && !officialSource) {
     blockers.push("Menos de três editoras independentes confirmadas.");
   }
 
   const evidence = result.verifiedImages || [];
   if (imageUrls.length !== 3 || imageUrls.some((url) => !evidence.some((image) => image.url === url
-    && isAllowedEditorialImageUrl(image.sourceUrl) && /^[a-f0-9]{64}$/.test(image.sha256)
+    && isVerifiedEditorialImageEvidenceUrl(image.sourceUrl) && /^[a-f0-9]{64}$/.test(image.sha256)
     && image.alt.trim().length >= 20 && image.caption.trim().length >= 20))
     || new Set(evidence.map((image) => image.sha256)).size !== 3) {
     blockers.push("As três imagens precisam de origem oficial e correspondência visual comprovadas pelo seletor.");

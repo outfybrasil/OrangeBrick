@@ -40,6 +40,11 @@ interface ReportRow {
   created_at: string;
 }
 
+interface ReportAlertCursor {
+  created_at: string;
+  id: string | null;
+}
+
 interface PendingEdit {
   postId: string;
   field: "title" | "summary";
@@ -219,18 +224,21 @@ function timeAgo(iso: string): string {
 
 async function getState(key: string): Promise<string | null> {
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase.from("bot_state").select("value").eq("key", key).maybeSingle();
+  const { data, error } = await supabase.from("bot_state").select("value").eq("key", key).maybeSingle();
+  if (error) throw error;
   return data?.value ?? null;
 }
 
 async function setState(key: string, value: string): Promise<void> {
   const supabase = getSupabaseAdmin();
-  await supabase.from("bot_state").upsert({ key, value, updated_at: new Date().toISOString() });
+  const { error } = await supabase.from("bot_state").upsert({ key, value, updated_at: new Date().toISOString() });
+  if (error) throw error;
 }
 
 async function deleteState(key: string): Promise<void> {
   const supabase = getSupabaseAdmin();
-  await supabase.from("bot_state").delete().eq("key", key);
+  const { error } = await supabase.from("bot_state").delete().eq("key", key);
+  if (error) throw error;
 }
 
 async function loadPost(postId: string): Promise<Post | null> {
@@ -546,51 +554,99 @@ async function listReportsPage(chatId: number | string, page: number): Promise<v
   });
 }
 
-const REPORT_ALERT_LOCK = "tg_report_alert_lock";
 const REPORT_ALERT_WATERMARK = "tg_report_alert_watermark";
+const REPORT_ALERT_LOCK_SECONDS = 30;
 
-async function sendSingleReportAlert(report: ReportRow): Promise<void> {
-  const content = await loadReportContent(report);
+function parseReportAlertCursor(value: string): ReportAlertCursor | null {
+  try {
+    const parsed = JSON.parse(value) as Record<string, unknown>;
+    if (
+      typeof parsed.created_at === "string"
+      && Number.isFinite(Date.parse(parsed.created_at))
+      && (parsed.id === null || (typeof parsed.id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parsed.id)))
+    ) return { created_at: parsed.created_at, id: parsed.id as string | null };
+  } catch {
+  }
+  if (Number.isFinite(Date.parse(value))) return { created_at: value, id: null };
+  return null;
+}
+
+async function sendSingleReportAlert(report: ReportRow, content: ReportContent | null): Promise<void> {
   const icon = report.content_type === "post" ? "🧱 Brick" : "💬 Comentário";
   const text =
     `🚨 <b>NOVA DENÚNCIA NO BRICKBOARD</b>\n\n` +
     `${icon} de <b>${escapeHtml(content?.author_name || "?")}</b>\n` +
     `⚠️ Motivo: <b>${escapeHtml(report.reason)}</b>\n\n` +
     `${escapeHtml(excerpt(content?.content || "(conteúdo removido)", 300))}`;
-  await sendTelegramApi("sendMessage", {
+  const response = await sendTelegramApi("sendMessage", {
     chat_id: getAdminChatId(),
     text,
     parse_mode: "HTML",
     reply_markup: { inline_keyboard: reportKeyboard(report) },
   });
+  if (!response.ok) {
+    throw new Error(`Telegram recusou o alerta de denúncia (${response.error_code ?? "sem código"})`);
+  }
 }
 
 export async function notifyNewCommunityReports(): Promise<void> {
   if (!process.env.TELEGRAM_BOT_TOKEN || !getAdminChatId()) return;
   const supabase = getSupabaseAdmin();
-  const now = Date.now();
-  const lock = await getState(REPORT_ALERT_LOCK);
-  if (lock && now - Number(lock) < 30_000) return;
-  await setState(REPORT_ALERT_LOCK, String(now));
+  const lockToken = crypto.randomUUID();
+  const { data: acquired, error: acquireError } = await supabase.rpc("claim_report_alert_lock", {
+    p_lock_token: lockToken,
+    p_lock_seconds: REPORT_ALERT_LOCK_SECONDS,
+  });
+  if (acquireError) throw acquireError;
+  if (acquired !== true) return;
 
-  let watermark = await getState(REPORT_ALERT_WATERMARK);
-  if (!watermark) {
-    await setState(REPORT_ALERT_WATERMARK, new Date().toISOString());
-    return;
-  }
+  try {
+    const savedCursor = await getState(REPORT_ALERT_WATERMARK);
+    let cursor: ReportAlertCursor;
+    if (savedCursor) {
+      const parsedCursor = parseReportAlertCursor(savedCursor);
+      if (!parsedCursor) throw new Error("Cursor de alertas de denuncia invalido");
+      cursor = parsedCursor;
+    } else {
+      cursor = { created_at: new Date().toISOString(), id: null };
+      await setState(REPORT_ALERT_WATERMARK, JSON.stringify(cursor));
+      return;
+    }
 
-  const { data: reports } = await supabase
-    .from("community_reports")
-    .select("*")
-    .eq("status", "pending")
-    .gt("created_at", watermark)
-    .order("created_at", { ascending: true })
-    .limit(10);
+    let reportsQuery = supabase
+      .from("community_reports")
+      .select("id,reporter_id,content_type,content_id,reason,status,created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true });
+    reportsQuery = cursor.id
+      ? reportsQuery.or(`created_at.gt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.gt.${cursor.id})`)
+      : reportsQuery.gte("created_at", cursor.created_at);
+    const { data: reports, error: reportsError } = await reportsQuery.limit(10);
+    if (reportsError) throw reportsError;
 
-  for (const report of (reports || []) as ReportRow[]) {
-    await sendSingleReportAlert(report).catch(() => {});
-    watermark = report.created_at;
-    await setState(REPORT_ALERT_WATERMARK, watermark);
+    for (const report of (reports || []) as ReportRow[]) {
+      try {
+        const content = await loadReportContent(report);
+        const { data: renewed, error: renewError } = await supabase.rpc("renew_report_alert_lock", {
+          p_lock_token: lockToken,
+          p_lock_seconds: REPORT_ALERT_LOCK_SECONDS,
+        });
+        if (renewError) throw renewError;
+        if (renewed !== true) return;
+        await sendSingleReportAlert(report, content);
+      } catch (error) {
+        console.error("Falha ao enviar alerta de denuncia comunitaria", error instanceof Error ? error.name : "erro_desconhecido");
+        throw error;
+      }
+      cursor = { created_at: report.created_at, id: report.id };
+      await setState(REPORT_ALERT_WATERMARK, JSON.stringify(cursor));
+    }
+  } finally {
+    const { error: releaseError } = await supabase.rpc("release_report_alert_lock", {
+      p_lock_token: lockToken,
+    });
+    if (releaseError) console.error("Falha ao liberar lock de alertas", releaseError.code || "sem código");
   }
 }
 

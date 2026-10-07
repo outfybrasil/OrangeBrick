@@ -5,11 +5,18 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import type { ContactSubmission } from "@/lib/types/database";
 
+interface ContactCursor {
+  createdAt: string;
+  id: string;
+}
+
 export default function AdminContactPage() {
   const supabase = useMemo(() => createDataClient(), []);
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<ContactCursor | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -25,15 +32,42 @@ export default function AdminContactPage() {
         headers: { Authorization: `Bearer ${session.access_token}` },
         cache: "no-store",
       });
-      const result = await response.json() as { submissions?: ContactSubmission[]; error?: string };
+      const result = await response.json() as { submissions?: ContactSubmission[]; nextCursor?: ContactCursor | null; error?: string };
       if (!response.ok) throw new Error(result.error || "Não foi possível carregar os contatos.");
       setSubmissions(result.submissions || []);
+      setNextCursor(result.nextCursor || null);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível carregar os contatos.");
     } finally {
       setLoading(false);
     }
   }, [supabase]);
+
+  const loadMore = useCallback(async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sua sessão expirou. Entre novamente no painel.");
+      const params = new URLSearchParams({ createdAt: nextCursor.createdAt, id: nextCursor.id });
+      const response = await fetch(`/api/admin/contact?${params}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      });
+      const result = await response.json() as { submissions?: ContactSubmission[]; nextCursor?: ContactCursor | null; error?: string };
+      if (!response.ok) throw new Error(result.error || "Não foi possível carregar os contatos.");
+      setSubmissions((current) => {
+        const knownIds = new Set(current.map((item) => item.id));
+        return [...current, ...(result.submissions || []).filter((item) => !knownIds.has(item.id))];
+      });
+      setNextCursor(result.nextCursor || null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Não foi possível carregar os contatos.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, nextCursor, supabase]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
@@ -75,7 +109,7 @@ export default function AdminContactPage() {
     >
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-gray-400">Últimas {submissions.length} mensagens recebidas.</p>
+          <p className="text-sm text-gray-400">{submissions.length} mensagens carregadas.</p>
           <button type="button" onClick={() => void load()} className="min-h-10 border border-white/15 px-3 text-xs font-bold text-white hover:bg-white/5">Atualizar</button>
         </div>
         {error && <p role="alert" className="border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
@@ -100,6 +134,11 @@ export default function AdminContactPage() {
               </article>
             ))}
           </div>
+        )}
+        {!loading && submissions.length > 0 && nextCursor && (
+          <button type="button" onClick={() => void loadMore()} disabled={loadingMore} className="min-h-10 w-full border border-white/15 px-3 text-xs font-bold text-white hover:bg-white/5 disabled:cursor-wait disabled:opacity-60">
+            {loadingMore ? "Carregando mensagens…" : "Carregar mensagens anteriores"}
+          </button>
         )}
       </section>
     </AdminShell>

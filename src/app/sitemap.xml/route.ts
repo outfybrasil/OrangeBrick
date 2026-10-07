@@ -44,17 +44,29 @@ export async function GET() {
       from += pageSize;
     }
 
-    const { data: gamesData } = await supabase
-      .from("release_radar_items")
-      .select("id, created_at")
-      .eq("is_active", true);
+    from = 0;
+    while (true) {
+      const { data: gamesData, error } = await supabase
+        .from("release_radar_items")
+        .select("id, created_at")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, from + pageSize - 1);
 
-    if (gamesData) {
+      if (error) throw error;
+      if (!gamesData?.length) break;
       for (const item of gamesData as { id: string; created_at: string }[]) {
         games.push({ id: item.id, updated_at: item.created_at });
       }
+      if (gamesData.length < pageSize) break;
+      from += pageSize;
     }
   } catch {
+    return new NextResponse("Sitemap temporariamente indisponível.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
   }
 
   const lines = [

@@ -15,7 +15,6 @@ import { isAdminUser } from "@/lib/auth";
 import type { Post, PostCategory, Topic } from "@/lib/types/database";
 
 type ContentBlock = EditorialBlock;
-type SidebarTab = "publicacao" | "seo" | "midia" | "historico";
 type InformationStatus = Post["information_status"];
 
 function errorMessage(error: unknown, fallback: string) {
@@ -61,6 +60,7 @@ type ArticleDraftFields = {
   quoteAuthor: string;
   quoteRole: string;
   quoteSourceUrl: string;
+  quoteSourceVerified: boolean;
   sourcesText: string;
   shortArticleReason: string;
   absenceRegistered: boolean;
@@ -103,6 +103,7 @@ function serializeDraftState(fields: ArticleDraftFields) {
     quoteAuthor: fields.quoteAuthor,
     quoteRole: fields.quoteRole,
     quoteSourceUrl: fields.quoteSourceUrl,
+    quoteSourceVerified: fields.quoteSourceVerified,
     sourcesText: fields.sourcesText,
     shortArticleReason: fields.shortArticleReason,
     absenceRegistered: fields.absenceRegistered,
@@ -136,11 +137,11 @@ function EditForm() {
   const [quoteAuthor, setQuoteAuthor] = useState("");
   const [quoteRole, setQuoteRole] = useState("");
   const [quoteSourceUrl, setQuoteSourceUrl] = useState("");
+  const [quoteSourceVerified, setQuoteSourceVerified] = useState(false);
   const [absenceRegistered, setAbsenceRegistered] = useState(false);
   const [sourcesText, setSourcesText] = useState("");
   const [shortArticleReason, setShortArticleReason] = useState("");
   const [correctionNote, setCorrectionNote] = useState("");
-  const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("publicacao");
 
   const [blocks, setBlocks] = useState<ContentBlock[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -179,22 +180,23 @@ function EditForm() {
     quoteAuthor,
     quoteRole,
     quoteSourceUrl,
+    quoteSourceVerified,
     absenceRegistered,
     informationStatus,
     correctionNote,
     shortArticleReason,
-  }), [absenceRegistered, blocks, correctionNote, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, shortArticleReason, sourcesText, summary, title]);
+  }), [absenceRegistered, blocks, correctionNote, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteRole, quoteSourceUrl, quoteSourceVerified, quoteText, shortArticleReason, sourcesText, summary, title]);
 
   useEffect(() => {
     if (isLoading || !hasChanges) return;
     const storageKey = `orange-brick:article-draft:${postId || "new"}`;
     const timer = window.setInterval(() => {
       const savedAt = new Date().toISOString();
-      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, sourcesText, shortArticleReason, correctionNote, scheduledAt, absenceRegistered, blocks, savedAt }));
+      window.localStorage.setItem(storageKey, JSON.stringify({ slug, title, summary, category, topicId, imageUrl, imageAlt, authorName, authorTag, informationStatus, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, quoteSourceVerified, sourcesText, shortArticleReason, correctionNote, scheduledAt, absenceRegistered, blocks, savedAt }));
       setAutoSavedAt(new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(savedAt)));
     }, 5000);
     return () => window.clearInterval(timer);
-  }, [absenceRegistered, authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteText, scheduledAt, shortArticleReason, slug, sourcesText, summary, title, topicId]);
+  }, [absenceRegistered, authorName, authorTag, blocks, category, correctionNote, hasChanges, imageAlt, imageUrl, informationStatus, isLoading, postId, quoteAuthor, quoteRole, quoteSourceUrl, quoteSourceVerified, quoteText, scheduledAt, shortArticleReason, slug, sourcesText, summary, title, topicId]);
 
   useEffect(() => {
     if (!hasChanges) return;
@@ -215,12 +217,15 @@ function EditForm() {
   }, [hasChanges]);
 
   useEffect(() => {
+    let isActive = true;
+
     async function init() {
       try {
         setIsLoading(true);
         setError(null);
 
         const { data: { user } } = await supabase.auth.getUser();
+        if (!isActive) return;
 
         if (!user || !isAdminUser(user)) {
           router.push("/admin/login");
@@ -232,6 +237,7 @@ function EditForm() {
           .select("*")
           .eq("is_active", true)
           .order("name", { ascending: true });
+        if (!isActive) return;
         setTopics((topicData || []) as Topic[]);
 
         if (!postId) {
@@ -240,6 +246,7 @@ function EditForm() {
             .select("*")
             .eq("user_id", user.id)
             .maybeSingle();
+          if (!isActive) return;
           const storedPreferences = preferences as { default_author?: string; default_category?: PostCategory } | null;
           const nextCategory = storedPreferences?.default_category && CATEGORY_OPTIONS.some((option) => option.value === storedPreferences.default_category)
             ? storedPreferences.default_category
@@ -263,6 +270,7 @@ function EditForm() {
             quoteAuthor: "",
             quoteRole: "",
             quoteSourceUrl: "",
+            quoteSourceVerified: false,
             sourcesText: "",
             shortArticleReason: "",
             absenceRegistered: false,
@@ -282,15 +290,20 @@ function EditForm() {
         }
 
         if (postId) {
-          const { data: post, error: fetchError } = await supabase
-            .from("posts")
-            .select("*")
-            .eq("id", postId)
-            .single();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!isActive) return;
+          if (!session) throw new Error("Sess\u00e3o expirada");
+          const postResponse = await fetch(`/api/admin/posts/${encodeURIComponent(postId)}`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+            cache: "no-store",
+          });
+          if (!isActive) return;
+          if (!postResponse.ok) throw new Error("N\u00e3o foi poss\u00edvel carregar a mat\u00e9ria.");
+          const postResult = await postResponse.json() as { post?: Post };
+          if (!isActive) return;
+          if (!postResult.post) throw new Error("Mat\u00e9ria n\u00e3o encontrada.");
 
-          if (fetchError) throw fetchError;
-
-          const typedPost = post as unknown as Post;
+          const typedPost = postResult.post;
           setTitle(typedPost.title);
           setSlug(typedPost.slug);
           setSummary(typedPost.summary);
@@ -303,14 +316,15 @@ function EditForm() {
           setPublishedAt(typedPost.published_at || null);
           setScheduledAt(typedPost.scheduled_at || null);
           setInformationStatus(typedPost.information_status || "confirmed");
-          const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string; absence_registered?: boolean } | null;
+          const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string; source_verified?: boolean; absence_registered?: boolean } | null;
           setQuoteText(storedQuote?.text || "");
           setQuoteAuthor(storedQuote?.author || "");
           setQuoteRole(storedQuote?.role || "");
           setQuoteSourceUrl(storedQuote?.source_url || "");
+          setQuoteSourceVerified(storedQuote?.source_verified === true);
           setAbsenceRegistered(Boolean(storedQuote?.absence_registered));
-          const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string; is_official?: boolean }> : [];
-          setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}`).join("\n"));
+          const storedSources = Array.isArray(typedPost.editorial_sources) ? typedPost.editorial_sources as Array<{ name?: string; url?: string; is_official?: boolean; source_verified?: boolean }> : [];
+          setSourcesText(storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}${source.source_verified ? "|verificada" : ""}`).join("\n"));
           setCorrectionNote(typedPost.correction_note || "");
 
           const parsedBlocks = parseEditorialBlocks(typedPost.body);
@@ -331,7 +345,8 @@ function EditForm() {
             quoteAuthor: storedQuote?.author || "",
             quoteRole: storedQuote?.role || "",
             quoteSourceUrl: storedQuote?.source_url || "",
-            sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}`).join("\n"),
+            quoteSourceVerified: storedQuote?.source_verified === true,
+            sourcesText: storedSources.map((source) => `${source.name || "Fonte"}|${source.url || ""}${source.is_official ? "|oficial" : ""}${source.source_verified ? "|verificada" : ""}`).join("\n"),
             shortArticleReason: typedPost.short_article_reason || "",
             absenceRegistered: Boolean(storedQuote?.absence_registered),
             correctionNote: typedPost.correction_note || "",
@@ -347,13 +362,17 @@ function EditForm() {
           }
         }
       } catch (err: unknown) {
+        if (!isActive) return;
         setError(errorMessage(err, "Erro de inicialização"));
       } finally {
-        setIsLoading(false);
+        if (isActive) setIsLoading(false);
       }
     }
 
     void init();
+    return () => {
+      isActive = false;
+    };
   }, [postId, router, supabase]);
 
   const addBlock = (type: "text" | "image" | "heading" | "quote" | "video") => {
@@ -413,6 +432,7 @@ function EditForm() {
   };
 
   const handleSave = async (isPublished: boolean) => {
+    if (isLoading) return;
     try {
       setIsSaving(true);
       setError(null);
@@ -443,7 +463,7 @@ function EditForm() {
           editorialMetadata: {
             informationStatus,
             quote: quoteText.trim()
-              ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), sourceUrl: quoteSourceUrl.trim() }
+              ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), sourceUrl: quoteSourceUrl.trim(), sourceVerified: quoteSourceVerified }
               : null,
             sources: parsedSources,
             correctionNote: correctionNote.trim() || null,
@@ -474,7 +494,7 @@ function EditForm() {
         ...basePostData,
         information_status: informationStatus,
         featured_quote: quoteText.trim()
-          ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim(), absence_registered: false }
+          ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), source_url: quoteSourceUrl.trim(), source_verified: quoteSourceVerified, absence_registered: false }
           : absenceRegistered ? { absence_registered: true } : null,
         editorial_sources: parsedSources,
         short_article_reason: shortArticleReason.trim() || null,
@@ -484,15 +504,28 @@ function EditForm() {
 
       let savedPostId = postId;
       if (postId) {
-        const { error: updateErr } = await supabase.from("posts").update(extendedPostData).eq("id", postId);
+        const { data: updatedPost, error: updateErr } = await supabase
+          .from("posts")
+          .update(extendedPostData)
+          .eq("id", postId)
+          .select("id")
+          .maybeSingle();
         if (updateErr) {
           if (updateErr.message?.includes("Could not find the") && updateErr.message?.includes("column")) {
             if (isPublished) throw new Error("Aplique as migrations editoriais pendentes antes de publicar esta matéria.");
-            const { error: fallbackErr } = await supabase.from("posts").update(basePostData).eq("id", postId);
+            const { data: fallbackPost, error: fallbackErr } = await supabase
+              .from("posts")
+              .update(basePostData)
+              .eq("id", postId)
+              .select("id")
+              .maybeSingle();
             if (fallbackErr) throw fallbackErr;
+            if (!fallbackPost) throw new Error("Matéria não encontrada. O rascunho local foi mantido.");
           } else {
             throw updateErr;
           }
+        } else if (!updatedPost) {
+          throw new Error("Matéria não encontrada. O rascunho local foi mantido.");
         }
       } else {
         const { data: insertedData, error: insertErr } = await supabase.from("posts").insert([extendedPostData]).select("id").single();
@@ -593,6 +626,7 @@ function EditForm() {
     setQuoteAuthor(draft.quoteAuthor || "");
     setQuoteRole(draft.quoteRole || "");
     setQuoteSourceUrl(draft.quoteSourceUrl || "");
+    setQuoteSourceVerified(Boolean(draft.quoteSourceVerified));
     setSourcesText(draft.sourcesText || "");
     setShortArticleReason(draft.shortArticleReason || "");
     setAbsenceRegistered(Boolean(draft.absenceRegistered));
@@ -638,7 +672,7 @@ function EditForm() {
           <button
             type="button"
             onClick={() => handleSave(false)}
-            disabled={isSaving}
+            disabled={isSaving || isLoading}
             className="min-h-11 rounded-lg border border-white/15 bg-white/[0.04] px-3.5 text-xs font-bold text-gray-200 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
           >
             Salvar rascunho
@@ -649,7 +683,7 @@ function EditForm() {
             <button
               type="button"
               onClick={() => setShowPublishConfirm(true)}
-              disabled={isSaving}
+              disabled={isSaving || isLoading}
               className="col-span-2 min-h-11 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50 sm:col-span-1"
             >
               Publicar matéria
@@ -945,22 +979,6 @@ function EditForm() {
 
         {/* ── COLUNA DIREITA: SIDEBAR DE CONFIGURAÇÕES E CHECKLIST ── */}
         <aside className="space-y-4">
-          {/* ABAS SUPERIORES */}
-          <div className="flex items-center justify-between border-b border-white/10 bg-[#0e0f14] rounded-t-xl px-2 pt-2">
-            {(["publicacao", "seo", "midia", "historico"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveSidebarTab(tab)}
-                className={`pb-2 text-xs font-bold capitalize transition-colors relative ${
-                  activeSidebarTab === tab ? "text-brand-orange" : "text-gray-500 hover:text-gray-300"
-                }`}
-              >
-                {tab === "publicacao" ? "Publicação" : tab === "seo" ? "SEO" : tab === "midia" ? "Mídia" : "Histórico"}
-                {activeSidebarTab === tab && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-brand-orange" />}
-              </button>
-            ))}
-          </div>
-
           {/* PAINEL DE PUBLICAÇÃO */}
           <div className="rounded-b-xl border-x border-b border-white/10 bg-[#0e0f14] p-4 space-y-4">
             <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Publicação</h3>
@@ -1059,10 +1077,14 @@ function EditForm() {
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">A fala só será exibida com autoria e URL da fonte.</p></div>
-            <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" aria-label="Declaração em destaque" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
-            <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
-            <label className="space-y-1 text-xs font-bold text-gray-300">URL da declaração<input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label>
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">A publicação exige uma página específica e a confirmação do texto e da autoria.</p></div>
+            <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" aria-label="Declaração em destaque" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
+            <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
+            <label className="space-y-1 text-xs font-bold text-gray-300">URL da declaração<input type="url" value={quoteSourceUrl} onChange={(event) => { setQuoteSourceUrl(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} placeholder="https://fonte-da-declaracao.com" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label>
+            <label className="flex min-h-11 items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs leading-5 text-gray-300">
+              <input type="checkbox" checked={quoteSourceVerified} disabled={!quoteText.trim()} onChange={(event) => { setQuoteSourceVerified(event.target.checked); setHasChanges(true); }} className="mt-0.5 h-4 w-4 accent-orange-500" />
+              <span>Confirmei o texto e a atribuição da fala na fonte original.</span>
+            </label>
             <label className="flex min-h-11 items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs leading-5 text-gray-300">
               <input type="checkbox" checked={absenceRegistered} onChange={(event) => { setAbsenceRegistered(event.target.checked); setHasChanges(true); }} className="mt-0.5 h-4 w-4 accent-orange-500" />
               <span>Confirmei na apuração que não há declaração pública relevante disponível.</span>
@@ -1070,8 +1092,8 @@ function EditForm() {
           </div>
 
           <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
-            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha: Nome|URL. Para comunicado oficial, acrescente |oficial.</p></div>
-            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com|oficial\nVGC|https://videogameschronicle.com"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL|oficial opcional" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
+            <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha: Nome|URL. Use |oficial quando for comunicado oficial e |verificada após conferir a página e sua relevância.</p></div>
+            <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com/article/slug|oficial|verificada\nVGC|https://videogameschronicle.com/article/slug|verificada"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL, com marcadores oficial e verificada opcionais" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}

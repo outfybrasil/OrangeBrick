@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, createServiceDataClient } from "@/lib/supabase/server";
 
+type ReleaseHypeCountRow = {
+  release_id: string;
+  vote_type: "buy" | "watch" | "skip";
+  vote_count: number;
+};
+
+function isReleaseHypeCountRow(value: unknown): value is ReleaseHypeCountRow {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Record<string, unknown>;
+  return typeof row.release_id === "string"
+    && (row.vote_type === "buy" || row.vote_type === "watch" || row.vote_type === "skip")
+    && typeof row.vote_count === "number"
+    && Number.isFinite(row.vote_count)
+    && row.vote_count >= 0;
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -35,32 +51,36 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Erro ao remover voto." }, { status: 500 });
       }
     } else {
-      await serviceClient
+      const { error: upsertError } = await serviceClient
         .from("release_hype_votes")
-        .delete()
-        .eq("release_id", releaseId)
-        .eq("user_id", user.id);
-
-      const { error: insertError } = await serviceClient
-        .from("release_hype_votes")
-        .insert({
+        .upsert({
           release_id: releaseId,
           user_id: user.id,
           vote_type: vote,
-        });
+        }, { onConflict: "release_id,user_id" });
 
-      if (insertError) {
+      if (upsertError) {
         return NextResponse.json({ error: "Erro ao registrar voto." }, { status: 500 });
       }
     }
 
-    const { data: countData } = await serviceClient.rpc("get_release_hype_counts");
+    let countData: ReleaseHypeCountRow[] | null = null;
+    try {
+      const aggregate = await serviceClient.rpc("get_release_hype_counts");
+      if (aggregate.error) {
+        return NextResponse.json({ success: true, releaseId, userVote: vote, countsUnavailable: true });
+      }
+      const rawCounts: unknown = aggregate.data;
+      if (!Array.isArray(rawCounts) || !rawCounts.every(isReleaseHypeCountRow)) {
+        return NextResponse.json({ success: true, releaseId, userVote: vote, countsUnavailable: true });
+      }
+      countData = rawCounts;
+    } catch {
+      return NextResponse.json({ success: true, releaseId, userVote: vote, countsUnavailable: true });
+    }
+
     const counts = { buy: 0, watch: 0, skip: 0 };
-    for (const row of (countData || []) as Array<{
-      release_id: string;
-      vote_type: "buy" | "watch" | "skip";
-      vote_count: number;
-    }>) {
+    for (const row of countData || []) {
       if (row.release_id === releaseId) {
         counts[row.vote_type] = Number(row.vote_count);
       }

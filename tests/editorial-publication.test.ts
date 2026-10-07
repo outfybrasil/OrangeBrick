@@ -5,8 +5,8 @@ import { editorialPublicationBlockers } from "../src/lib/server/editorial-public
 import { independentEditorialPublisherCount } from "../src/lib/content-validation.ts";
 
 function validDraft(): GeneratedDraftResult {
-  const source = { name: "Nintendo", url: "https://www.nintendo.com/news", is_official: true };
-  const text = `${"contexto jornalístico confirmado ".repeat(250)}\n\n**Fonte:** [Nintendo](https://www.nintendo.com/news)`;
+  const source = { name: "Nintendo", url: "https://www.nintendo.com/news/console-announcement", is_official: true, source_verified: true };
+  const text = `${"contexto jornalístico confirmado ".repeat(250)}\n\n**Fonte:** [Nintendo](${source.url})`;
   return {
     post: {
       id: "post-1",
@@ -15,13 +15,13 @@ function validDraft(): GeneratedDraftResult {
       summary: "A Nintendo confirmou um novo anúncio e detalhou o impacto da decisão para jogadores e para o mercado de games.",
       body: JSON.stringify([
         { id: "intro", type: "text", content: "A Nintendo confirmou um novo anúncio para o público." },
-        { id: "image-1", type: "image", url: "https://assets.nintendo.com/story-1.jpg", alt: "Cena oficial relacionada ao anúncio da Nintendo.", caption: "Imagem oficial relacionada ao anúncio." },
+        { id: "image-1", type: "image", url: "https://assets.nintendo.com/news/story-1-console-announcement.jpg", alt: "Cena oficial relacionada ao anúncio da Nintendo.", caption: "Imagem oficial relacionada ao anúncio." },
         { id: "development", type: "text", content: text },
-        { id: "image-2", type: "image", url: "https://assets.nintendo.com/story-2.jpg", alt: "Outro ângulo oficial do anúncio da Nintendo.", caption: "Segundo material oficial do anúncio." },
-        { id: "source", type: "text", content: "**Fonte:** [Nintendo](https://www.nintendo.com/news)" },
+        { id: "image-2", type: "image", url: "https://assets.nintendo.com/news/story-2-console-announcement.jpg", alt: "Outro ângulo oficial do anúncio da Nintendo.", caption: "Segundo material oficial do anúncio." },
+        { id: "source", type: "text", content: `**Fonte:** [Nintendo](${source.url})` },
       ]),
       category: "breaking",
-      image_url: "https://assets.nintendo.com/cover.jpg",
+      image_url: "https://assets.nintendo.com/news/cover-console-announcement.jpg",
       image_alt: "Arte oficial que identifica o anúncio da Nintendo.",
       author_name: "Orange Brick",
       author_tag: "Plantão",
@@ -40,8 +40,8 @@ function validDraft(): GeneratedDraftResult {
     sources: [source],
     groundingSources: [],
     verifiedImages: ["cover", "story-1", "story-2"].map((name, index) => ({
-      url: `https://assets.nintendo.com/${name}.jpg`,
-      sourceUrl: `https://assets.nintendo.com/${name}.jpg`,
+      url: `https://assets.nintendo.com/news/${name}-console-announcement.jpg`,
+      sourceUrl: source.url,
       sha256: String(index + 1).repeat(64),
       alt: "Imagem do assunto confirmado pela análise visual.",
       caption: "Material do assunto que contextualiza o anúncio.",
@@ -77,9 +77,9 @@ test("image evidence cannot approve another URL or repeated image bytes", () => 
 
 test("subdomains of one publisher count as a single source", () => {
   const sources = [
-    { name: "IGN Brasil", url: "https://br.ign.com/story" },
-    { name: "IGN", url: "https://www.ign.com/story" },
-    { name: "IGN Mobile", url: "https://m.ign.com/story" },
+    { name: "IGN Brasil", url: "https://br.ign.com/noticias/console-announcement", source_verified: true },
+    { name: "IGN", url: "https://www.ign.com/news/console-announcement", source_verified: true },
+    { name: "IGN Mobile", url: "https://m.ign.com/news/console-announcement", source_verified: true },
   ];
   const draft = validDraft();
   setSources(draft, sources);
@@ -90,9 +90,9 @@ test("subdomains of one publisher count as a single source", () => {
 
 test("distinct recognized publishers satisfy the source cross-check with verified images", () => {
   const sources = [
-    { name: "Gematsu", url: "https://www.gematsu.com/story" },
-    { name: "IGN", url: "https://www.ign.com/story" },
-    { name: "VGC", url: "https://www.videogameschronicle.com/story" },
+    { name: "Gematsu", url: "https://www.gematsu.com/news/console-announcement", source_verified: true },
+    { name: "IGN", url: "https://www.ign.com/news/console-announcement", source_verified: true },
+    { name: "VGC", url: "https://www.videogameschronicle.com/news/console-announcement", source_verified: true },
   ];
   const draft = validDraft();
   setSources(draft, sources);

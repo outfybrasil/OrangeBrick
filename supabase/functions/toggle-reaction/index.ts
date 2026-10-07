@@ -1,8 +1,8 @@
-import { allowRequest, handleOptions, hashIdentity, isUuid, json, requestIp, serviceClient } from "../_shared/platform.ts";
+import { allowRequest, handleOptions, hashIdentity, isUuid, json, requestIp, serve, serviceClient } from "../_shared/platform.ts";
 
 const reactionTypes = new Set(["hype", "flop", "salty"]);
 
-Deno.serve(async (request) => {
+serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   if (request.method !== "POST") return json({ error: "Método não permitido" }, 405);
@@ -57,16 +57,18 @@ Deno.serve(async (request) => {
       });
       if (error) throw error;
     }
-    const { data: reactions, error: countError } = await supabase
-      .from("reactions")
-      .select("reaction_type")
-      .eq("post_id", post_id);
-    if (countError) throw countError;
-    const counts = { hype: 0, flop: 0, salty: 0 };
-    for (const reaction of reactions || []) {
-      const type = reaction.reaction_type as keyof typeof counts;
-      if (type in counts) counts[type]++;
-    }
+    const { data: statsRows, error: statsError } = await supabase.rpc("get_post_stats", {
+      p_post_ids: [post_id],
+      p_device_id: device_id,
+    });
+    if (statsError) throw statsError;
+    const stats = statsRows?.[0];
+    if (!stats) return json({ error: "Matéria não encontrada" }, 404);
+    const counts = {
+      hype: Number(stats.hype || 0),
+      flop: Number(stats.flop || 0),
+      salty: Number(stats.salty || 0),
+    };
     return json({ action, activeReaction, counts });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Erro interno" }, 500);

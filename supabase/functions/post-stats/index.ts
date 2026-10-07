@@ -1,4 +1,4 @@
-import { allowRequest, handleOptions, isUuid, json, serviceClient } from "../_shared/platform.ts";
+import { allowRequest, handleOptions, isUuid, json, serve, serviceClient } from "../_shared/platform.ts";
 import { createPostStatsHandler, type PostStatsRow } from "../../../src/lib/server/post-stats-handler.ts";
 
 async function loadStats(postIds: string[], deviceId: string | null): Promise<PostStatsRow[]> {
@@ -21,4 +21,4 @@ async function loadStats(postIds: string[], deviceId: string | null): Promise<Po
   return (data || []) as PostStatsRow[];
 }
 
-Deno.serve(createPostStatsHandler({ allowRequest, handleOptions, isUuid, json, loadStats }));
+serve(createPostStatsHandler({ allowRequest, handleOptions, isUuid, json, loadStats }));

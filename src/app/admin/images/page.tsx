@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { isAdminUser } from "@/lib/auth";
@@ -9,6 +9,11 @@ import type { EditorialImage } from "@/lib/types/database";
 
 interface LibraryImage extends EditorialImage {
   post: { id: string; title: string; slug: string } | null;
+}
+
+interface ImageCursor {
+  created_at: string;
+  id: string;
 }
 
 function formatBytes(bytes: number) {
@@ -28,10 +33,15 @@ function sourceLabel(value: string) {
 export default function AdminImagesPage() {
   const supabase = useMemo(() => createDataClient(), []);
   const [images, setImages] = useState<LibraryImage[]>([]);
+  const [totalImages, setTotalImages] = useState(0);
+  const [imageCursor, setImageCursor] = useState<ImageCursor | null>(null);
+  const [hasMoreImages, setHasMoreImages] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const imageRequestId = useRef(0);
 
   const filteredImages = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("pt-BR");
@@ -50,23 +60,62 @@ export default function AdminImagesPage() {
     }
   };
 
-  const loadImages = useCallback(async () => {
-    setIsLoading(true);
+  const loadImages = useCallback(async (cursor?: ImageCursor, append = false) => {
+    const requestId = ++imageRequestId.current;
+    if (append) setIsLoadingMore(true);
+    else {
+      setIsLoading(true);
+      setIsLoadingMore(false);
+      setImages([]);
+      setTotalImages(0);
+      setImageCursor(null);
+      setHasMoreImages(false);
+    }
     setError(null);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || !isAdminUser(session.user)) throw new Error("Acesso negado");
-      const response = await fetch("/api/admin/images", {
+      const params = new URLSearchParams();
+      if (cursor) {
+        params.set("afterCreatedAt", cursor.created_at);
+        params.set("afterId", cursor.id);
+      }
+      const response = await fetch(`/api/admin/images?${params}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
         cache: "no-store",
       });
-      const payload = await response.json();
+      const payload = await response.json().catch(() => ({})) as {
+        error?: string;
+        images?: LibraryImage[];
+        totalCount?: number;
+        hasMore?: boolean;
+        nextCursor?: ImageCursor | null;
+      };
       if (!response.ok) throw new Error(payload.error || "Falha ao carregar a biblioteca");
-      setImages(payload.images as LibraryImage[]);
+      if (requestId !== imageRequestId.current) return;
+
+      const pageImages = payload.images || [];
+      if (append) {
+        setImages((current) => {
+          const existingIds = new Set(current.map((image) => image.id));
+          return [...current, ...pageImages.filter((image) => !existingIds.has(image.id))];
+        });
+      } else {
+        setImages(pageImages);
+      }
+      setTotalImages(payload.totalCount || 0);
+      setImageCursor(payload.nextCursor || null);
+      setHasMoreImages(Boolean(payload.hasMore));
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Falha ao carregar a biblioteca");
+      if (requestId === imageRequestId.current) {
+        setError(loadError instanceof Error ? loadError.message : "Falha ao carregar a biblioteca");
+      }
     } finally {
-      setIsLoading(false);
+      if (requestId === imageRequestId.current) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, [supabase]);
 
@@ -94,7 +143,10 @@ export default function AdminImagesPage() {
           <span className="sr-only">Buscar na biblioteca</span>
           <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por alt, matéria, origem ou URL" className="min-h-11 w-full rounded-xl border border-white/10 bg-[#111218] px-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-brand-orange" />
         </label>
-        <span className="text-xs text-gray-500">{filteredImages.length} de {images.length} imagens</span>
+        <div className="text-xs text-gray-500">
+          <p>{filteredImages.length} resultados entre {images.length} carregadas de {totalImages} imagens.</p>
+          <p className="mt-1">{hasMoreImages ? "A busca considera os itens carregados; carregue mais para ampliar." : "Busca em toda a biblioteca."}</p>
+        </div>
       </div>
       {error && (
         <div role="alert" className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm text-red-200">
@@ -179,6 +231,18 @@ export default function AdminImagesPage() {
               </article>
             ))}
           </div>
+        </div>
+      )}
+      {!isLoading && hasMoreImages && (
+        <div className="flex justify-center border-t border-white/[0.08] py-5">
+          <button
+            type="button"
+            disabled={isLoadingMore || !imageCursor}
+            onClick={() => imageCursor && void loadImages(imageCursor, true)}
+            className="min-h-11 rounded-xl border border-white/10 px-4 text-sm font-bold text-gray-200 transition-colors hover:border-brand-orange/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoadingMore ? "Carregando..." : "Carregar mais imagens"}
+          </button>
         </div>
       )}
     </AdminShell>

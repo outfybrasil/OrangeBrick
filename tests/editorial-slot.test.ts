@@ -95,7 +95,7 @@ test("fails closed for an invalid timestamp in slot state", async () => {
   assert.equal(await claimEditorialSlot(fixture.store, "slot"), false);
 });
 
-test("proceeds without a persistent lock when the slot table is missing", async () => {
+test("fails closed when the slot table is missing", async () => {
   const missingRelation = { code: "PGRST205", message: "not in schema cache" };
   const fixture = createStore(null);
   const store: EditorialSlotStore = {
@@ -104,7 +104,7 @@ test("proceeds without a persistent lock when the slot table is missing", async 
       throw missingRelation;
     },
   };
-  assert.equal(await claimEditorialSlot(store, "slot"), true);
+  await assert.rejects(claimEditorialSlot(store, "slot"), (error: unknown) => error === missingRelation);
   assert.equal(fixture.inserts, 0);
 });
 

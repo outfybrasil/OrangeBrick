@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { getCommunityErrorMessage } from "@/lib/community-errors";
-import { isMissingPostgrestFunction } from "@/lib/postgrest-error";
+import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes";
 
 interface UseCommunityFeedOptions {
   load?: boolean;
@@ -26,8 +26,32 @@ interface CommunityPollResults {
   user_voted_option: number | null;
 }
 
+function ownCommunityMediaPath(publicUrl: string | null, userId: string) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!publicUrl || !supabaseUrl) return null;
+
+  try {
+    const url = new URL(publicUrl);
+    const supabaseOrigin = new URL(supabaseUrl).origin;
+    const marker = `/storage/v1/object/public/profile-images/${userId}/`;
+    const filename = url.pathname.slice(marker.length);
+    if (
+      url.origin !== supabaseOrigin
+      || url.protocol !== "https:"
+      || !url.pathname.startsWith(marker)
+      || !/^brick-[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/i.test(filename)
+      || url.search
+      || url.hash
+    ) return null;
+    return `${userId}/${filename}`;
+  } catch {
+    return null;
+  }
+}
+
 export function useCommunityFeed({ load = true, search = "", platform = "", article = null, topic = null, post = null, order = "latest" }: UseCommunityFeedOptions = {}) {
   const { user, profile } = useAuth();
+  const userId = user?.id;
   const supabase = useMemo(() => createDataClient(), []);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [poll, setPoll] = useState<CommunityPoll | null>(null);
@@ -109,6 +133,7 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
           author_avatar: row.author_avatar,
           content: row.content,
           media_url: row.media_url,
+          media_alt: row.media_alt,
           platform_tag: row.platform_tag,
           attached_article: attachedArticle,
           shared_post: sharedPost,
@@ -136,6 +161,7 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         .select("*")
         .eq("is_active", true)
         .lte("prompt_date", new Date().toISOString().slice(0, 10))
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order("prompt_date", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -145,13 +171,13 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         const pollRow = pollRows as CommunityPollRow;
         const rawOptions = pollRow.options as Array<{ id: number; text: string }>;
         const { data: pollResults, error: pollResultsError } = await supabase.rpc("community_poll_results", { p_poll_id: pollRow.id });
-        if (pollResultsError && !isMissingPostgrestFunction(pollResultsError)) throw pollResultsError;
-        const results = (pollResultsError ? null : pollResults) as unknown as CommunityPollResults | null;
-        if (!pollResultsError && (!results || !results.counts || !Number.isFinite(results.total_votes))) throw new Error("Resultado da enquete indisponível.");
+        if (pollResultsError) throw pollResultsError;
+        const results = pollResults as unknown as CommunityPollResults | null;
+        if (!results || !results.counts || !Number.isFinite(results.total_votes)) throw new Error("Resultado da enquete indisponível.");
 
         const options = rawOptions.map((opt) => ({
           ...opt,
-          votes: results?.counts[String(opt.id)] || 0,
+          votes: results.counts[String(opt.id)] || 0,
         }));
 
         if (!isMountedRef.current || requestVersion !== feedVersionRef.current) return;
@@ -159,12 +185,12 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
           id: pollRow.id,
           question: pollRow.question,
           options,
-          total_votes: results?.total_votes ?? 0,
-          user_voted_option: user?.id ? results?.user_voted_option ?? null : null,
+          total_votes: results.total_votes,
+        user_voted_option: userId ? results.user_voted_option ?? null : null,
           created_at: pollRow.created_at,
           ends_at: pollRow.expires_at,
         });
-      }
+      } else setPoll(null);
     } catch (err) {
       if (isMountedRef.current && requestVersion === feedVersionRef.current) setLoadError(getCommunityErrorMessage(err));
     } finally {
@@ -176,7 +202,7 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         }
       } else if (isMountedRef.current && requestVersion === feedVersionRef.current) setPoll(null);
     }
-  }, [user, supabase, search, platform, article, topic, post, order]);
+  }, [userId, supabase, search, platform, article, topic, post, order]);
 
   useEffect(() => {
     if (!load) return;
@@ -213,8 +239,9 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
   }, [supabase, fetchData, load]);
 
   const addPost = useCallback(
-    async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string) => {
+    async (content: string, platformTag?: string, attachedArticle?: AttachedArticle, mediaUrl?: string, mediaAlt?: string) => {
       if (!user) throw new Error("Entre na sua conta para publicar no Brickboard.");
+      if (mediaUrl && !mediaAlt?.trim()) throw new Error("Descreva a imagem antes de publicar.");
 
       const authorName =
         profile?.nickname ||
@@ -229,6 +256,28 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         "";
 
       setOperationError(null);
+      let finalMediaUrl = mediaUrl || null;
+      let uploadedMedia: { publicUrl: string; path: string } | null = null;
+      if (mediaUrl?.startsWith("data:")) {
+        if (!mediaUrl.startsWith("data:image/")) throw new Error("O anexo precisa ser uma imagem.");
+        const imageBlob = await (await fetch(mediaUrl)).blob();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Entre na sua conta para enviar esta imagem.");
+        const formData = new FormData();
+        formData.set("image", imageBlob, "brick-image");
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+        const uploadResponse = await fetch(`${basePath}/api/community/media`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: formData,
+        });
+        const uploadResult = await uploadResponse.json().catch(() => null) as { publicUrl?: string; path?: string; error?: string } | null;
+        if (!uploadResponse.ok || !uploadResult?.publicUrl || !uploadResult.path) {
+          throw new Error(uploadResult?.error || "N\u00e3o foi poss\u00edvel enviar a imagem.");
+        }
+        uploadedMedia = { publicUrl: uploadResult.publicUrl, path: uploadResult.path };
+        finalMediaUrl = uploadedMedia.publicUrl;
+      }
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         author_name: authorName,
@@ -237,10 +286,30 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         content,
         platform_tag: platformTag || null,
         attached_article: attachedArticle || null,
-        media_url: mediaUrl || null,
+        media_url: finalMediaUrl,
+        media_alt: finalMediaUrl ? mediaAlt?.trim() || null : null,
         topic_id: attachedArticle?.topic_id || null,
       });
       if (error) {
+        if (uploadedMedia) {
+          const { data: savedPost, error: confirmationError } = await supabase
+            .from("community_posts")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("media_url", uploadedMedia.publicUrl)
+            .maybeSingle();
+          if (!savedPost && !confirmationError) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+              await fetch(`${basePath}/api/community/media`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ path: uploadedMedia.path }),
+              }).catch(() => undefined);
+            }
+          }
+        }
         const message = getCommunityErrorMessage(error);
         setOperationError(message);
         throw new Error(message);
@@ -292,14 +361,11 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
             const { error } = await supabase.from("community_reactions").delete().eq("id", existingRow.id);
             if (error) throw error;
           } else {
-            const { error: deleteError } = await supabase.from("community_reactions").delete().eq("id", existingRow.id);
-            if (deleteError) throw deleteError;
-            const { error: insertError } = await supabase.from("community_reactions").insert({
-              post_id: postId,
-              user_id: user.id,
-              reaction_type: reactionType,
-            });
-            if (insertError) throw insertError;
+            const { error } = await supabase
+              .from("community_reactions")
+              .update({ reaction_type: reactionType })
+              .eq("id", existingRow.id);
+            if (error) throw error;
             await sendCommunityPush("reaction", postId);
           }
         } else {
@@ -428,29 +494,77 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
 
   const deletePost = useCallback(
     async (postId: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para apagar esta publicação.");
+      const postToDelete = posts.find((post) => post.id === postId);
 
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      setOperationError(null);
 
+      let deletedPost: { id: string } | null = null;
+      let deleteError: unknown = null;
       try {
-        const { error } = await supabase.from("community_posts").delete().eq("id", postId).eq("user_id", user.id);
-        if (error) {
-          console.error("Error deleting post:", error.message);
-          fetchData();
-        }
+        const result = await supabase
+          .from("community_posts")
+          .delete()
+          .eq("id", postId)
+          .eq("user_id", user.id)
+          .select("id")
+          .maybeSingle();
+        const deletedRow = result.data as { id?: unknown } | null;
+        deletedPost = typeof deletedRow?.id === "string" ? { id: deletedRow.id } : null;
+        deleteError = result.error;
       } catch (err) {
         console.error("Failed to delete post:", err);
-        fetchData();
+        const message = getCommunityErrorMessage(err);
+        setOperationError(message);
+        void fetchData();
+        throw new Error(message);
+      }
+
+      if (deleteError) {
+        console.error("Error deleting post:", deleteError);
+        const message = getCommunityErrorMessage(deleteError);
+        setOperationError(message);
+        void fetchData();
+        throw new Error(message);
+      }
+      if (!deletedPost) {
+        const message = "Não foi possível apagar a publicação. Ela pode ter sido removida ou sua sessão não ter permissão.";
+        setOperationError(message);
+        void fetchData();
+        throw new Error(message);
+      }
+
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      const mediaPath = ownCommunityMediaPath(postToDelete?.media_url || null, user.id);
+      if (mediaPath) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            setOperationError("O Brick foi removido, mas a imagem ainda precisa ser removida do armazenamento.");
+            return;
+          }
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+          const cleanupResponse = await fetch(`${basePath}/api/community/media`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ path: mediaPath }),
+          });
+          if (!cleanupResponse.ok) {
+            setOperationError("O Brick foi removido, mas a imagem ainda precisa ser removida do armazenamento.");
+          }
+        } catch {
+          setOperationError("O Brick foi removido, mas a imagem ainda precisa ser removida do armazenamento.");
+        }
       }
     },
-    [user, supabase, fetchData]
+    [user, posts, supabase, fetchData]
   );
 
   const editPost = useCallback(
     async (postId: string, newContent: string) => {
-      if (!user) return;
+      if (!user) throw new Error("Entre na sua conta para editar esta publicação.");
       const trimmed = newContent.trim();
-      if (!trimmed || trimmed.length > 280) return;
+      if (!trimmed || trimmed.length > 280) throw new Error("O texto precisa ter entre 1 e 280 caracteres.");
 
       setOperationError(null);
       setPosts((prev) =>
@@ -458,20 +572,28 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
       );
 
       try {
-        const { error } = await supabase
+        const { data: updatedPost, error } = await supabase
           .from("community_posts")
           .update({ content: trimmed })
           .eq("id", postId)
-          .eq("user_id", user.id);
+          .eq("user_id", user.id)
+          .select("id")
+          .maybeSingle();
 
         if (error) {
-          console.error("Error editing post:", error.message);
-          setOperationError(getCommunityErrorMessage(error));
-          fetchData();
+          throw error;
+        }
+        if (!updatedPost) {
+          throw new Error("Não foi possível editar a publicação. Ela pode ter sido removida ou sua sessão não ter permissão.");
         }
       } catch (err) {
         console.error("Failed to edit post:", err);
-        fetchData();
+        const message = err instanceof Error && err.message.startsWith("Não foi possível editar")
+          ? err.message
+          : getCommunityErrorMessage(err);
+        setOperationError(message);
+        void fetchData();
+        throw new Error(message);
       }
     },
     [user, supabase, fetchData]
@@ -581,17 +703,12 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
       const userLikesMap: Record<string, boolean> = {};
 
       try {
-        const { data: likesData } = await supabase
-          .from("community_comment_likes")
-          .select("*")
-          .in("comment_id", commentIds);
+        const likesData = await getCommunityCommentLikeSummaries(supabase, commentIds);
 
-        if (likesData) {
-          for (const l of likesData as Array<{ comment_id: string; user_id: string }>) {
-            likesMap[l.comment_id] = (likesMap[l.comment_id] || 0) + 1;
-            if (user && l.user_id === user.id) {
-              userLikesMap[l.comment_id] = true;
-            }
+        for (const like of likesData) {
+          likesMap[like.comment_id] = like.likes_count;
+          if (like.user_has_liked) {
+            userLikesMap[like.comment_id] = true;
           }
         }
       } catch {
@@ -612,7 +729,7 @@ export function useCommunityFeed({ load = true, search = "", platform = "", arti
         user_has_liked: userLikesMap[row.id] || false,
       }));
     },
-    [supabase, user]
+    [supabase]
   );
 
   return {

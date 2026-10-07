@@ -17,7 +17,7 @@ import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
 
 interface NewsFeedProps {
-  headingLevel?: "h1" | "h2" | string;
+  headingLevel?: "h1" | "h2";
   category: PostCategory | null;
   platformSlug?: PlatformSlug | null;
   searchQuery?: string;
@@ -43,10 +43,11 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
+export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
+  const Heading = headingLevel;
 
   const posts = useMemo(() => {
     let result = rawPosts;
@@ -223,9 +224,9 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               <Timer date={heroPost.published_at ?? ""} />
             </div>
 
-            <h1 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
+            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
               {heroPost.title}
-            </h1>
+            </h2>
 
             <p className="mt-1 hidden text-sm leading-6 text-gray-200 xs:line-clamp-2">
               {heroPost.summary}
@@ -295,19 +296,17 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
     <div className="min-w-0" onClickCapture={rememberFeedPosition}>
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="min-w-0 space-y-6">
-          {renderHeroSection()}
-
           <div id="ultimas-noticias" className="scroll-mt-16">
             <div className="mb-4 flex flex-col gap-3 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-6 w-1 bg-brand-orange" />
-                <h2 className="font-heading text-xl font-black text-white">
+                <Heading className="font-heading text-xl font-black text-white">
                   {category ? (
                     <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
                   ) : (
                     <>Últimas <span className="text-brand-orange">notícias</span></>
                   )}
-                </h2>
+                </Heading>
               </div>
 
               {onSelectCategory && (
@@ -334,6 +333,8 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
               )}
             </div>
 
+            {renderHeroSection()}
+
             {isFiltering && (
               <div className="mb-4 flex flex-col gap-3 border-y border-white/10 py-3 sm:flex-row sm:items-center sm:justify-between" aria-live="polite">
                 <div className="min-w-0">
@@ -358,6 +359,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                   key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
+                  headingLevel={headingLevel === "h1" ? "h2" : "h3"}
                 />
               ))}
             </div>
@@ -390,6 +392,7 @@ export function NewsFeed({ category, platformSlug = null, searchQuery = "", acti
                   key={post.id}
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
+                  headingLevel={headingLevel === "h1" ? "h2" : "h3"}
                 />
               ))}
             </div>

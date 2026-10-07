@@ -19,16 +19,64 @@ async function requireAdmin(request: Request) {
 
 export async function GET(request: Request) {
   if (!await requireAdmin(request)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  const client = serviceClient();
-  const { data: reports, error } = await client
-    .from("community_reports")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  if (error) return NextResponse.json({ error: "Não foi possível carregar as denúncias" }, { status: 500 });
+  const params = new URL(request.url).searchParams;
+  const status = params.get("status") || "pending";
+  if (!["pending", "resolved", "all"].includes(status)) {
+    return NextResponse.json({ error: "Filtro inv\u00e1lido" }, { status: 400 });
+  }
 
-  const postIds = reports?.filter((item) => item.content_type === "post").map((item) => item.content_id) || [];
-  const commentIds = reports?.filter((item) => item.content_type === "comment").map((item) => item.content_id) || [];
+  const cursorCreatedAt = params.get("afterCreatedAt");
+  const cursorId = params.get("afterId");
+  if ((cursorCreatedAt && !Number.isFinite(Date.parse(cursorCreatedAt)))
+    || (cursorId && !/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(cursorId))
+    || Boolean(cursorCreatedAt) !== Boolean(cursorId)) {
+    return NextResponse.json({ error: "Cursor inv\u00e1lido" }, { status: 400 });
+  }
+
+  const pageSize = 50;
+  const client = serviceClient();
+  let pageQuery = client
+    .from("community_reports")
+    .select("*");
+  let totalQuery = client
+    .from("community_reports")
+    .select("id", { count: "exact", head: true });
+  const pendingQuery = client
+    .from("community_reports")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
+  if (status === "pending") {
+    pageQuery = pageQuery.eq("status", "pending");
+    totalQuery = totalQuery.eq("status", "pending");
+  } else if (status === "resolved") {
+    pageQuery = pageQuery.neq("status", "pending");
+    totalQuery = totalQuery.neq("status", "pending");
+  }
+
+  if (cursorCreatedAt && cursorId) {
+    const normalizedCursor = new Date(cursorCreatedAt).toISOString();
+    pageQuery = pageQuery.or(
+      `created_at.lt.${normalizedCursor},and(created_at.eq.${normalizedCursor},id.lt.${cursorId})`,
+    );
+  }
+
+  const [{ data: pageRows, error: pageError }, { count: totalCount, error: totalError }, { count: pendingCount, error: pendingError }] = await Promise.all([
+    pageQuery
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(pageSize + 1),
+    totalQuery,
+    pendingQuery,
+  ]);
+  const error = pageError || totalError || pendingError;
+  if (error) return NextResponse.json({ error: "N\u00e3o foi poss\u00edvel carregar as den\u00fancias" }, { status: 500 });
+
+  const hasMore = (pageRows?.length || 0) > pageSize;
+  const reports = (pageRows || []).slice(0, pageSize);
+  const lastReport = reports.at(-1);
+  const postIds = reports.filter((item) => item.content_type === "post").map((item) => item.content_id);
+  const commentIds = reports.filter((item) => item.content_type === "comment").map((item) => item.content_id);
   const [{ data: posts }, { data: comments }] = await Promise.all([
     postIds.length
       ? client.from("community_posts").select("id,user_id,author_name,content,created_at").in("id", postIds)
@@ -42,10 +90,16 @@ export async function GET(request: Request) {
     ...(comments || []).map((item) => [item.id, item] as [string, Record<string, unknown>]),
   ]);
   return NextResponse.json({
-    reports: (reports || []).map((report) => ({
+    reports: reports.map((report) => ({
       ...report,
       content: contentMap.get(report.content_id) || null,
     })),
+    pendingCount: pendingCount || 0,
+    totalCount: totalCount || 0,
+    hasMore,
+    nextCursor: hasMore && lastReport
+      ? { created_at: lastReport.created_at, id: lastReport.id }
+      : null,
   });
 }
 

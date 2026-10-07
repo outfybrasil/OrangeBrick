@@ -7,6 +7,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import { isAdminUser } from "@/lib/auth";
 import { formatXp } from "@/lib/progression";
+import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 interface ProgressionAdminData {
   summary: {
@@ -70,6 +71,7 @@ export default function ProgressionAdminPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [selectedMember, setSelectedMember] = useState<ProgressionMember | null>(null);
+  const adjustmentDialogRef = useModalDialog<HTMLFormElement>(Boolean(selectedMember), () => setSelectedMember(null));
   const [adjustment, setAdjustment] = useState("");
   const [reason, setReason] = useState("");
 
@@ -238,7 +240,7 @@ export default function ProgressionAdminPage() {
 
       {selectedMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setSelectedMember(null)}>
-          <form role="dialog" aria-modal="true" aria-labelledby="xp-dialog-title" onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:p-6">
+          <form ref={adjustmentDialogRef} role="dialog" aria-modal="true" aria-labelledby="xp-dialog-title" onSubmit={applyAdjustment} className="w-full max-w-md bg-[#15161d] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.45)] sm:p-6">
             <h2 id="xp-dialog-title" className="font-heading text-xl font-bold">Ajustar XP</h2>
             <p className="mt-1 text-sm text-gray-400">{selectedMember.display_name} · saldo atual de {formatXp(selectedMember.lifetime_xp)} XP</p>
             <label className="mt-6 block">

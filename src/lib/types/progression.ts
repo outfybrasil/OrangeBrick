@@ -4,7 +4,7 @@ export interface ProgressionSummary {
   lifetime_xp: number | null;
   level: number;
   next_level_xp: number;
-  active_days: number;
+  active_days: number | null;
 }
 
 export interface SeasonSummary {

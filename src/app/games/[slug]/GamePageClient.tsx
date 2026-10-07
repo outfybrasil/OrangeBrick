@@ -11,6 +11,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { BrickCard } from "@/components/community/BrickCard";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
+import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes";
 import { getCommunityErrorMessage } from "@/lib/community-errors";
 import type { ReleaseRadarItem, ReleaseHypeVote, CommunityCommentRow } from "@/lib/types/database";
 import type { CommunityPost, CommunityComment } from "@/lib/types/community";
@@ -24,6 +25,7 @@ export interface GamePageClientProps {
   initialCountsError?: boolean;
   initialUserVote?: HypeVoteType | null;
   initialVoteUserId?: string | null;
+  initialVoteError?: boolean;
   relatedPosts: Array<{
     id: string;
     slug: string;
@@ -49,6 +51,7 @@ export function GamePageClient({
   initialCountsError = false,
   initialUserVote = null,
   initialVoteUserId = null,
+  initialVoteError = false,
   relatedPosts,
   relatedBricks,
   relatedBricksError = false,
@@ -91,48 +94,28 @@ export function GamePageClient({
         setUserVote(previousVote);
         const nextVote = previousVote === vote ? null : vote;
 
-        try {
-          const res = await fetch("/api/release-hype-vote", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ releaseId: game.id, vote: nextVote }),
-          });
+        const res = await fetch("/api/release-hype-vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ releaseId: game.id, vote: nextVote }),
+        });
+        if (!res.ok) throw new Error("Voto recusado");
 
-          if (res.ok) {
-            const payload = (await res.json()) as { counts?: Record<HypeVoteType, number> };
-            voteSaved = true;
-            setUserVote(nextVote);
-            if (payload.counts) {
-              setCounts(payload.counts);
+        voteSaved = true;
+        const payload = (await res.json()) as { counts?: Record<HypeVoteType, number> | null };
+        setUserVote(nextVote);
+        if (payload.counts) {
+          setCounts(payload.counts);
+        } else {
+          const { data: refreshedCounts, error: countsError } = await supabase.rpc("get_release_hype_counts");
+          if (countsError) throw countsError;
+          const currentCounts = { buy: 0, watch: 0, skip: 0 };
+          for (const row of (refreshedCounts || []) as Array<{ release_id: string; vote_type: HypeVoteType; vote_count: number }>) {
+            if (row.release_id === game.id) {
+              currentCounts[row.vote_type] = Number(row.vote_count);
             }
-          } else {
-            await supabase
-              .from("release_hype_votes")
-              .delete()
-              .eq("release_id", game.id)
-              .eq("user_id", user.id);
-
-            if (nextVote) {
-              const { error: insError } = await supabase.from("release_hype_votes").insert({
-                release_id: game.id,
-                user_id: user.id,
-                vote_type: nextVote,
-              });
-              if (insError) throw insError;
-            }
-            voteSaved = true;
-            setUserVote(nextVote);
-            const { data: refreshedCounts } = await supabase.rpc("get_release_hype_counts");
-            const currentCounts = { buy: 0, watch: 0, skip: 0 };
-            for (const row of (refreshedCounts || []) as Array<{ release_id: string; vote_type: HypeVoteType; vote_count: number }>) {
-              if (row.release_id === game.id) {
-                currentCounts[row.vote_type] = Number(row.vote_count);
-              }
-            }
-            setCounts(currentCounts);
           }
-        } catch (innerErr) {
-          throw innerErr;
+          setCounts(currentCounts);
         }
         if (previousVote !== vote) {
           setStatusNotice(vote === "buy" ? "Adicionado aos seus jogos garantidos no Meu Brick!" : vote === "watch" ? "Adicionado ao seu radar no Meu Brick!" : "Voto registrado com sucesso!");
@@ -228,17 +211,20 @@ export function GamePageClient({
     const comments = (data || []) as CommunityCommentRow[];
     if (comments.length === 0) return [];
 
-    const { data: likes, error: likesError } = await supabase
-      .from("community_comment_likes")
-      .select("comment_id,user_id")
-      .in("comment_id", comments.map((comment) => comment.id));
-    if (likesError) throw new Error(getCommunityErrorMessage(likesError));
-
     const likesByComment = new Map<string, number>();
     const likedByUser = new Set<string>();
-    for (const like of (likes || []) as Array<{ comment_id: string; user_id: string }>) {
-      likesByComment.set(like.comment_id, (likesByComment.get(like.comment_id) || 0) + 1);
-      if (like.user_id === user?.id) likedByUser.add(like.comment_id);
+    let likeSummaries;
+    try {
+      likeSummaries = await getCommunityCommentLikeSummaries(
+        supabase,
+        comments.map((comment) => comment.id)
+      );
+    } catch (error) {
+      throw new Error(getCommunityErrorMessage(error));
+    }
+    for (const like of likeSummaries) {
+      likesByComment.set(like.comment_id, like.likes_count);
+      if (like.user_has_liked) likedByUser.add(like.comment_id);
     }
 
     return comments.map((comment) => ({
@@ -407,6 +393,7 @@ export function GamePageClient({
               </div>
 
               {initialCountsError && <p role="alert" className="mt-2.5 text-center text-xs text-red-300">Não foi possível carregar o termômetro. Recarregue a página para tentar novamente.</p>}
+              {initialVoteError && user && voteOwnerId !== user.id && <p role="alert" className="mt-2.5 text-center text-xs text-amber-200">Não foi possível confirmar seu voto atual. Ele será consultado novamente antes de qualquer alteração.</p>}
 
               {statusNotice && (
                 <p role="status" className="mt-2.5 text-center text-xs font-bold text-brand-orange animate-fade-in">

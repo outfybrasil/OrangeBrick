@@ -13,17 +13,29 @@ interface NewsListProps {
   search: string;
 }
 
+function retryDelayMs(value: string | null): number {
+  if (!value) return 60_000;
+  if (/^\d+$/.test(value)) {
+    const seconds = Number(value);
+    return Number.isSafeInteger(seconds) ? seconds * 1000 : 60_000;
+  }
+  const date = Date.parse(value);
+  return Number.isNaN(date) ? 60_000 : Math.max(0, date - Date.now());
+}
+
 export function NewsList({ initialPosts, total, period, search }: NewsListProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [page, setPage] = useState(2);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryUntil, setRetryUntil] = useState<number | null>(null);
+  const [retryCountdown, setRetryCountdown] = useState(0);
   const requestPending = useRef(false);
   const [hasMore, setHasMore] = useState(initialPosts.length < total);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadMore = useCallback(async () => {
-    if (requestPending.current || !hasMore) return;
+    if (requestPending.current || !hasMore || (retryUntil !== null && Date.now() < retryUntil)) return;
     requestPending.current = true;
     setIsLoading(true);
     setError(null);
@@ -32,18 +44,42 @@ export function NewsList({ initialPosts, total, period, search }: NewsListProps)
       if (period === "mes") params.set("periodo", "mes");
       if (search) params.set("q", search);
       const res = await fetch(`/api/news?${params}`);
+      if (res.status === 429) {
+        const delayMs = retryDelayMs(res.headers.get("Retry-After"));
+        setRetryUntil(Date.now() + delayMs);
+        setRetryCountdown(Math.ceil(delayMs / 1000));
+        setError("Muitas solicitações. Aguarde o prazo indicado antes de tentar novamente.");
+        return;
+      }
       if (!res.ok) throw new Error("Não foi possível carregar mais matérias.");
       const data = await res.json();
       setPosts((prev) => [...prev, ...data.posts]);
       setPage((p) => p + 1);
       setHasMore(page < data.totalPages);
+      setRetryUntil(null);
+      setRetryCountdown(0);
     } catch {
       setError("Não foi possível carregar mais matérias. Tente novamente.");
     } finally {
       requestPending.current = false;
       setIsLoading(false);
     }
-  }, [hasMore, page, period, search]);
+  }, [hasMore, page, period, retryUntil, search]);
+
+  useEffect(() => {
+    if (retryUntil === null) return;
+
+    const updateCountdown = () => {
+      const remaining = Math.max(0, Math.ceil((retryUntil - Date.now()) / 1000));
+      setRetryCountdown(remaining);
+      if (remaining === 0) {
+        setRetryUntil(null);
+        window.clearInterval(timer);
+      }
+    };
+    const timer = window.setInterval(updateCountdown, 1000);
+    return () => window.clearInterval(timer);
+  }, [retryUntil]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -79,7 +115,7 @@ export function NewsList({ initialPosts, total, period, search }: NewsListProps)
         ))}
       </div>
       <div ref={sentinelRef} className="py-8 text-center">
-        {error && <div role="alert" className="space-y-3 text-sm text-gray-300"><p>{error}</p><button type="button" onClick={() => void loadMore()} className="min-h-11 rounded border border-brand-orange px-4 text-brand-orange hover:bg-brand-orange/10">Tentar novamente</button></div>}
+        {error && <div role="alert" className="space-y-3 text-sm text-gray-300"><p>{error}</p><button type="button" onClick={() => void loadMore()} disabled={isLoading || retryCountdown > 0} className="min-h-11 rounded border border-brand-orange px-4 text-brand-orange hover:bg-brand-orange/10 disabled:cursor-not-allowed disabled:opacity-60">{retryCountdown > 0 ? `Tentar novamente em ${retryCountdown}s` : "Tentar novamente"}</button></div>}
         {isLoading && <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-orange/25 border-t-brand-orange" />}
         {!hasMore && posts.length > 0 && <p className="text-xs text-gray-500">Todas as matérias carregadas.</p>}
       </div>

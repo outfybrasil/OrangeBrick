@@ -1,5 +1,5 @@
 import webpush from "npm:web-push";
-import { handleOptions, json, serviceClient } from "../_shared/platform.ts";
+import { handleOptions, isServiceApiKey, json, serve, serviceClient } from "../_shared/platform.ts";
 
 type CommunityEvent = "reaction" | "comment" | "repost" | "comment_like";
 
@@ -8,24 +8,24 @@ function cleanText(value: unknown, maximumLength: number) {
   return value.replace(/\s+/g, " ").trim().slice(0, maximumLength);
 }
 
-Deno.serve(async (request) => {
+serve(async (request) => {
   const options = handleOptions(request);
   if (options) return options;
   if (request.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
   try {
     const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    if (!token) return json({ error: "Não autorizado" }, 401);
-
+    const isServiceRequest = token ? await isServiceApiKey(token) : false;
     const supabase = serviceClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) return json({ error: "Não autorizado" }, 401);
+    const authResult = token && !isServiceRequest ? await supabase.auth.getUser(token) : null;
+    const user = authResult?.data.user ?? null;
+    if (!isServiceRequest && (!user || authResult?.error)) return json({ error: "Não autorizado" }, 401);
 
     const payload: unknown = await request.json();
     if (!payload || typeof payload !== "object") return json({ error: "Payload inválido" }, 400);
 
     const values = payload as Record<string, unknown>;
-    const siteUrl = Deno.env.get("SITE_URL") || "https://orangebrick.com.br";
+    const siteUrl = Deno.env.get("SITE_URL") || "https://orangebrick.blog";
     const publicKey = Deno.env.get("VAPID_PUBLIC_KEY");
     const privateKey = Deno.env.get("VAPID_PRIVATE_KEY");
     if (!publicKey || !privateKey) return json({ error: "Push não configurado (chaves VAPID ausentes)" }, 500);
@@ -52,7 +52,7 @@ Deno.serve(async (request) => {
     let recipientId: string | null = null;
     let conversationId: string | null = null;
 
-    if (user.app_metadata?.is_admin === true && typeof values.title === "string") {
+    if ((isServiceRequest || user?.app_metadata?.is_admin === true) && typeof values.title === "string") {
       title = cleanText(values.title, 120);
       body = cleanText(values.body, 240);
       const requestedUrl = cleanText(values.url, 2048);
@@ -78,6 +78,7 @@ Deno.serve(async (request) => {
       }
       url = targetUrl.toString();
     } else {
+      if (!user) return json({ error: "Não autorizado" }, 401);
       const eventType = values.event_type as CommunityEvent;
       const referenceId = values.reference_id;
       if (
@@ -171,7 +172,7 @@ Deno.serve(async (request) => {
 
     if (recipientId) {
       const { data: preferences, error: preferenceError } = await supabase.from("notification_preferences").select("brickboard_replies").eq("user_id", recipientId).maybeSingle();
-      if (preferenceError) throw preferenceError;
+      if (preferenceError) return json({ error: "N\u00e3o foi poss\u00edvel validar as prefer\u00eancias de notifica\u00e7\u00e3o" }, 503);
       if (preferences && preferences.brickboard_replies === false) return json({ sent: 0, total: 0, skipped: "preference" });
     }
 
@@ -180,14 +181,6 @@ Deno.serve(async (request) => {
       publicKey,
       privateKey
     );
-
-    let subscriptionQuery = supabase
-      .from("push_subscriptions")
-      .select("endpoint, p256dh_key, auth_key, user_id");
-    if (recipientId) subscriptionQuery = subscriptionQuery.eq("user_id", recipientId);
-
-    const { data: subscriptions, error } = await subscriptionQuery;
-    if (error) throw error;
 
     const notification = JSON.stringify({
       title,
@@ -200,41 +193,77 @@ Deno.serve(async (request) => {
       timestamp: Date.now(),
     });
 
-    let eligibleSubscriptions = subscriptions || [];
+    const pageSize = 100;
+    const optedOutIds = new Set<string>();
     if (kind === "news" && !recipientId) {
-      const { data: optedOut, error: preferenceError } = await supabase.from("notification_preferences").select("user_id").eq("breaking_news", false);
-      if (preferenceError) throw preferenceError;
-      const optedOutIds = new Set((optedOut || []).map((row) => row.user_id));
-      eligibleSubscriptions = eligibleSubscriptions.filter((subscription) => !subscription.user_id || !optedOutIds.has(subscription.user_id));
+      let offset = 0;
+      while (true) {
+        const { data: optedOut, error: preferenceError } = await supabase
+          .from("notification_preferences")
+          .select("user_id")
+          .eq("breaking_news", false)
+          .order("user_id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
+        if (preferenceError) return json({ error: "N\u00e3o foi poss\u00edvel validar as prefer\u00eancias de notifica\u00e7\u00e3o" }, 503);
+        for (const row of optedOut || []) {
+          if (row.user_id) optedOutIds.add(row.user_id);
+        }
+        if ((optedOut || []).length < pageSize) break;
+        offset += pageSize;
+      }
     }
 
-    const results = await Promise.all(eligibleSubscriptions.map(async (subscription) => {
-      try {
-        await webpush.sendNotification({
-          endpoint: subscription.endpoint,
-          keys: { p256dh: subscription.p256dh_key, auth: subscription.auth_key },
-        }, notification, {
-          TTL: kind === "news" ? 86400 : 14400,
-          urgency: kind === "news" ? "high" : "normal",
-        });
-        return "sent" as const;
-      } catch (cause) {
-        const status = typeof cause === "object" && cause && "statusCode" in cause
-          ? Number(cause.statusCode)
-          : 0;
-        if (status === 404 || status === 410) {
-          await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
-          return "expired" as const;
+    let lastEndpoint: string | null = null;
+    let sent = 0;
+    let expired = 0;
+    let failed = 0;
+    let total = 0;
+    while (true) {
+      let subscriptionQuery = supabase
+        .from("push_subscriptions")
+        .select("endpoint, p256dh_key, auth_key, user_id");
+      if (recipientId) subscriptionQuery = subscriptionQuery.eq("user_id", recipientId);
+      if (lastEndpoint) subscriptionQuery = subscriptionQuery.gt("endpoint", lastEndpoint);
+
+      const { data: subscriptions, error } = await subscriptionQuery
+        .order("endpoint", { ascending: true })
+        .limit(pageSize);
+      if (error) throw error;
+      if (!subscriptions?.length) break;
+
+      lastEndpoint = subscriptions[subscriptions.length - 1].endpoint;
+      const eligibleSubscriptions = kind === "news" && !recipientId
+        ? subscriptions.filter((subscription) => !subscription.user_id || !optedOutIds.has(subscription.user_id))
+        : subscriptions;
+      total += eligibleSubscriptions.length;
+
+      const results = await Promise.all(eligibleSubscriptions.map(async (subscription) => {
+        try {
+          await webpush.sendNotification({
+            endpoint: subscription.endpoint,
+            keys: { p256dh: subscription.p256dh_key, auth: subscription.auth_key },
+          }, notification, {
+            TTL: kind === "news" ? 86400 : 14400,
+            urgency: kind === "news" ? "high" : "normal",
+          });
+          return "sent" as const;
+        } catch (cause) {
+          const status = typeof cause === "object" && cause && "statusCode" in cause
+            ? Number(cause.statusCode)
+            : 0;
+          if (status === 404 || status === 410) {
+            const { error: deleteError } = await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
+            return deleteError ? "failed" as const : "expired" as const;
+          }
+          return "failed" as const;
         }
-        return "failed" as const;
-      }
-    }));
+      }));
 
-    const sent = results.filter((result) => result === "sent").length;
-    const expired = results.filter((result) => result === "expired").length;
-    const failed = results.filter((result) => result === "failed").length;
-    const total = eligibleSubscriptions.length;
-
+      sent += results.filter((result) => result === "sent").length;
+      expired += results.filter((result) => result === "expired").length;
+      failed += results.filter((result) => result === "failed").length;
+      if (subscriptions.length < pageSize) break;
+    }
     if (total > 0 && sent === 0 && failed > 0) {
       return json({
         error: "O alerta não chegou aos aparelhos. Verifique as chaves VAPID e tente novamente.",

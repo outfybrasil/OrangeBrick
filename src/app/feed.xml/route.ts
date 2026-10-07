@@ -15,13 +15,19 @@ const escapeXml = (value: string) => value.replace(/[<>&'\"]/g, (character) => (
 export async function GET() {
   const siteUrl = getSiteUrl();
   const supabase = createPublicServerClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("posts")
     .select("slug, title, summary, published_at, author_name")
     .eq("is_published", true)
     .order("published_at", { ascending: false })
     .limit(30)
     .returns<Pick<Post, "slug" | "title" | "summary" | "published_at" | "author_name">[]>();
+  if (error) {
+    return new Response("Feed temporariamente indisponível.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
 
   const items = (data || []).map((post) => `
     <item>

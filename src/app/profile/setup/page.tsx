@@ -166,7 +166,7 @@ function ProfileSetupContent() {
             <label className="mb-1 block text-xs font-bold uppercase text-gray-400">Foto de perfil (opcional)</label>
             <label className="flex min-h-12 cursor-pointer items-center justify-between rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/50">
               <span>{avatarFile ? avatarFile.name : "Escolher uma foto"}</span>
-              <span className="text-xs text-brand-orange">Até 8 MB</span>
+              <span className="text-xs text-brand-orange">Até 4 MB</span>
               <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => {
                 const file = event.target.files?.[0] || null;
                 setAvatarFile(file);

@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não foi possível registrar o evento" }, { status: 500 });
   }
   after(async () => {
-    await notifyNewCommunityReports().catch(() => {});
+    await notifyNewCommunityReports().catch((error) => {
+      console.error("Falha ao atualizar alertas de denuncias comunitarias", error instanceof Error ? error.name : "erro_desconhecido");
+    });
   });
   return new NextResponse(null, { status: 204 });
 }

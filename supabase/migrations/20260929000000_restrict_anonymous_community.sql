@@ -25,7 +25,7 @@ begin
 
   select * into target_profile
   from public.profiles
-  where id = target_user_id;
+  where user_id = target_user_id;
 
   if coalesce(target_profile.community_banned, false) then
     raise exception 'Sua participação no Brickboard foi bloqueada pela moderação.';
@@ -38,6 +38,9 @@ begin
   end if;
 end;
 $$;
+
+revoke all on function public.assert_community_participation_allowed(uuid) from public, anon, authenticated;
+grant execute on function public.assert_community_participation_allowed(uuid) to authenticated;
 
 create or replace function public.report_community_content(
   target_type text,

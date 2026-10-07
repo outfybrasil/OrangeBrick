@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -25,6 +25,11 @@ interface ReportItem {
     post_id?: string;
     created_at: string;
   } | null;
+}
+
+interface ReportCursor {
+  created_at: string;
+  id: string;
 }
 
 type ModerationAction = "dismiss" | "delete" | "suspend_7d" | "ban";
@@ -62,9 +67,83 @@ export default function CommunityAdminPage() {
   const [pollDateInput, setPollDateInput] = useState(todayStr);
   const [isSavingPoll, setIsSavingPoll] = useState(false);
   const [reports, setReports] = useState<ReportItem[]>([]);
+  const [pendingReportCount, setPendingReportCount] = useState(0);
+  const [totalReports, setTotalReports] = useState(0);
+  const [reportCursor, setReportCursor] = useState<ReportCursor | null>(null);
+  const [hasMoreReports, setHasMoreReports] = useState(false);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
+  const [isLoadingMoreReports, setIsLoadingMoreReports] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeModerationId, setActiveModerationId] = useState<string | null>(null);
   const [pendingModeration, setPendingModeration] = useState<{ report: ReportItem; action: ModerationAction } | null>(null);
+  const reportRequestId = useRef(0);
+
+  const loadReports = useCallback(async (
+    tab: typeof moderationTab,
+    cursor?: ReportCursor,
+    append = false,
+  ) => {
+    const requestId = ++reportRequestId.current;
+    if (append) setIsLoadingMoreReports(true);
+    else {
+      setIsLoadingReports(true);
+      setIsLoadingMoreReports(false);
+      setReports([]);
+      setTotalReports(0);
+      setReportCursor(null);
+      setHasMoreReports(false);
+    }
+    setReportError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const params = new URLSearchParams({
+        status: tab === "pendentes" ? "pending" : tab === "resolvidas" ? "resolved" : "all",
+      });
+      if (cursor) {
+        params.set("afterCreatedAt", cursor.created_at);
+        params.set("afterId", cursor.id);
+      }
+      const response = await fetch(`/api/admin/community?${params}`, {
+        headers: { Authorization: `Bearer ${session?.access_token || ""}` },
+        cache: "no-store",
+      });
+      const payload = await response.json().catch(() => ({})) as {
+        error?: string;
+        reports?: ReportItem[];
+        pendingCount?: number;
+        totalCount?: number;
+        hasMore?: boolean;
+        nextCursor?: ReportCursor | null;
+      };
+      if (!response.ok) throw new Error(payload.error || "Não foi possível carregar as denúncias.");
+      if (requestId !== reportRequestId.current) return;
+
+      const pageReports = payload.reports || [];
+      if (append) {
+        setReports((current) => {
+          const existingIds = new Set(current.map((report) => report.id));
+          return [...current, ...pageReports.filter((report) => !existingIds.has(report.id))];
+        });
+      } else {
+        setReports(pageReports);
+        setTotalReports(payload.totalCount || 0);
+      }
+      setPendingReportCount(payload.pendingCount || 0);
+      setReportCursor(payload.nextCursor || null);
+      setHasMoreReports(Boolean(payload.hasMore));
+    } catch (loadError) {
+      if (requestId === reportRequestId.current) {
+        setReportError(loadError instanceof Error ? loadError.message : "Não foi possível carregar as denúncias.");
+      }
+    } finally {
+      if (requestId === reportRequestId.current) {
+        setIsLoadingReports(false);
+        setIsLoadingMoreReports(false);
+      }
+    }
+  }, [supabase]);
 
   const loadData = useCallback(async () => {
     try {
@@ -76,8 +155,7 @@ export default function CommunityAdminPage() {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const [{ data: topicData, error: topicError }, { data: pollData, error: pollError }, reportResponse] = await Promise.all([
+      const [{ data: topicData, error: topicError }, { data: pollData, error: pollError }] = await Promise.all([
         supabase.from("topics").select("*").order("name", { ascending: true }),
         supabase
           .from("community_polls")
@@ -86,16 +164,10 @@ export default function CommunityAdminPage() {
           .order("prompt_date", { ascending: false })
           .limit(1)
           .maybeSingle(),
-        fetch("/api/admin/community", {
-          headers: { Authorization: `Bearer ${session?.access_token || ""}` },
-          cache: "no-store",
-        }),
       ]);
-      if (topicError || pollError || !reportResponse.ok) throw topicError || pollError || new Error("Não foi possível carregar as denúncias.");
-      const reportPayload = await reportResponse.json() as { reports?: ReportItem[] };
+      if (topicError || pollError) throw topicError || pollError;
 
       setTopics((topicData || []) as Topic[]);
-      setReports(reportPayload.reports || []);
       const loadedPoll = pollData as CommunityPollRow | null;
       if (loadedPoll) {
         setPoll(loadedPoll);
@@ -113,6 +185,10 @@ export default function CommunityAdminPage() {
   useEffect(() => {
     queueMicrotask(() => void loadData());
   }, [loadData]);
+
+  useEffect(() => {
+    queueMicrotask(() => void loadReports(moderationTab));
+  }, [loadReports, moderationTab]);
 
   useEffect(() => {
     if (!showNewPollModal && !pendingModeration) return;
@@ -171,7 +247,7 @@ export default function CommunityAdminPage() {
       });
       if (!response.ok) throw new Error("Não foi possível concluir a moderação.");
       setPendingModeration(null);
-      await loadData();
+      await loadReports(moderationTab);
     } catch (moderationError) {
       setError(moderationError instanceof Error ? moderationError.message : "Não foi possível concluir a moderação.");
     } finally {
@@ -181,16 +257,14 @@ export default function CommunityAdminPage() {
 
   const filteredReports = useMemo(() => {
     const query = searchReport.trim().toLowerCase();
-    return reports.filter((report) => {
-      if (moderationTab === "pendentes" && report.status !== "pending") return false;
-      if (moderationTab === "resolvidas" && report.status === "pending") return false;
-      return !query
+    return reports.filter((report) =>
+      !query
         || report.reason.toLowerCase().includes(query)
         || report.content_id.toLowerCase().includes(query)
         || report.content?.author_name.toLowerCase().includes(query)
-        || report.content?.content.toLowerCase().includes(query);
-    });
-  }, [moderationTab, reports, searchReport]);
+        || report.content?.content.toLowerCase().includes(query)
+    );
+  }, [reports, searchReport]);
 
   const filteredTopics = useMemo(() => {
     const q = searchTopic.toLowerCase().trim();
@@ -294,8 +368,8 @@ export default function CommunityAdminPage() {
               </svg>
               <span>Denúncias abertas</span>
             </div>
-            <p className="mt-2 font-heading text-3xl font-black text-white">{reports.length}</p>
-            <p className="mt-1 text-xs text-gray-500">Nenhuma denúncia carregada</p>
+            <p className="mt-2 font-heading text-3xl font-black text-white">{pendingReportCount}</p>
+            <p className="mt-1 text-xs text-gray-500">Pendentes em toda a fila</p>
           </div>
           <MiniBarChart values={[0]} color="bg-amber-400" />
         </div>
@@ -329,7 +403,7 @@ export default function CommunityAdminPage() {
                 <h2 id="moderation-queue-title" className="font-heading text-base font-bold text-white">
                   Fila de moderação
                 </h2>
-                <span className="text-xs font-bold text-brand-orange">{reports.length} denúncias abertas</span>
+                <span className="text-xs font-bold text-brand-orange">{pendingReportCount} denúncias abertas</span>
               </div>
               <div className="flex items-center gap-1 border-b border-white/10 sm:border-b-0 pb-2 sm:pb-0">
                 {(["pendentes", "resolvidas", "todas"] as const).map((t) => (
@@ -348,27 +422,41 @@ export default function CommunityAdminPage() {
             </div>
 
             {/* FILTROS DE MODERAÇÃO */}
-            <div className="p-4 border-b border-white/10 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="relative flex-1">
-                <svg className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="search"
-                  value={searchReport}
-                  onChange={(e) => setSearchReport(e.target.value)}
-                  placeholder="Buscar conversa ou usuário"
-                  className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-9 pr-3 text-xs text-white outline-none focus:border-brand-orange/40"
-                />
+            <div className="flex flex-col gap-3 border-b border-white/10 p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <svg className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="search"
+                    value={searchReport}
+                    onChange={(e) => setSearchReport(e.target.value)}
+                    placeholder="Buscar entre as denúncias carregadas"
+                    className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-9 pr-3 text-xs text-white outline-none focus:border-brand-orange/40"
+                  />
+                </div>
+                <select className="h-9 rounded-lg border border-white/10 bg-[#0e0f14] px-3 text-xs text-gray-300 outline-none">
+                  <option>Todas as prioridades</option>
+                  <option>Alta</option>
+                  <option>Média</option>
+                  <option>Baixa</option>
+                </select>
               </div>
-              <select className="h-9 rounded-lg border border-white/10 bg-[#0e0f14] px-3 text-xs text-gray-300 outline-none">
-                <option>Todas as prioridades</option>
-                <option>Alta</option>
-                <option>Média</option>
-                <option>Baixa</option>
-              </select>
+              <div className="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-gray-500">
+                  Exibindo {reports.length} de {totalReports} denúncias desta aba. A busca considera os itens carregados.
+                </p>
+                {reportError && (
+                  <div className="flex items-center gap-3" role="alert">
+                    <span className="text-red-300">{reportError}</span>
+                    <button type="button" onClick={() => void loadReports(moderationTab)} className="font-bold text-brand-orange hover:underline">
+                      Tentar novamente
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-
             {/* TABELA DE DENÚNCIAS */}
             <p className="border-b border-white/10 px-4 py-2 text-xs text-gray-500 sm:hidden">Deslize para revisar os detalhes e as ações.</p>
             <div className="overflow-x-auto">
@@ -387,7 +475,17 @@ export default function CommunityAdminPage() {
                   {filteredReports.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-4 py-10 text-center text-xs text-gray-500">
-                        Nenhuma denúncia real foi carregada.
+                        {isLoadingReports
+                          ? "Carregando denúncias..."
+                          : reportError
+                            ? "Não foi possível carregar as denúncias."
+                            : searchReport.trim()
+                              ? "Nenhum resultado entre as denúncias carregadas."
+                              : moderationTab === "pendentes"
+                                ? "Não há denúncias pendentes."
+                                : moderationTab === "resolvidas"
+                                  ? "Não há denúncias resolvidas."
+                                  : "Nenhuma denúncia encontrada."}
                       </td>
                     </tr>
                   ) : filteredReports.map((rep) => (
@@ -433,6 +531,18 @@ export default function CommunityAdminPage() {
               </table>
             </div>
 
+            {hasMoreReports && (
+              <div className="flex justify-center border-t border-white/10 p-4">
+                <button
+                  type="button"
+                  disabled={isLoadingMoreReports || !reportCursor}
+                  onClick={() => reportCursor && void loadReports(moderationTab, reportCursor, true)}
+                  className="min-h-11 rounded-lg border border-white/10 px-4 text-xs font-bold text-gray-200 transition-colors hover:border-brand-orange/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoadingMoreReports ? "Carregando..." : "Carregar mais denúncias"}
+                </button>
+              </div>
+            )}
           </section>
 
           {/* DOIS CARDS LADO A LADO: ATIVIDADE & DESTQUES */}

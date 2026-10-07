@@ -20,13 +20,33 @@ async function requireAdmin(request: Request) {
 
 export async function GET(request: Request) {
   if (!await requireAdmin(request)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  const { data, error } = await serviceClient()
+  const searchParams = new URL(request.url).searchParams;
+  const cursorCreatedAt = searchParams.get("createdAt");
+  const cursorId = searchParams.get("id");
+  if (Boolean(cursorCreatedAt) !== Boolean(cursorId)) {
+    return NextResponse.json({ error: "Cursor inválido" }, { status: 400 });
+  }
+  if (cursorCreatedAt && (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(cursorCreatedAt) || !Number.isFinite(Date.parse(cursorCreatedAt)) || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cursorId || ""))) {
+    return NextResponse.json({ error: "Cursor inválido" }, { status: 400 });
+  }
+
+  let query = serviceClient()
     .from("contact_submissions")
     .select("id,name,company,subject,email,message,is_read,created_at")
     .order("created_at", { ascending: false })
-    .limit(100);
+    .order("id", { ascending: false });
+  if (cursorCreatedAt && cursorId) {
+    query = query.or(`created_at.lt.${cursorCreatedAt},and(created_at.eq.${cursorCreatedAt},id.lt.${cursorId})`);
+  }
+  const { data, error } = await query.limit(51);
   if (error) return NextResponse.json({ error: "Não foi possível carregar os contatos" }, { status: 500 });
-  return NextResponse.json({ submissions: data || [] }, { headers: { "Cache-Control": "no-store" } });
+  const rows = data || [];
+  const submissions = rows.slice(0, 50);
+  const lastSubmission = submissions[submissions.length - 1];
+  const nextCursor = rows.length > 50 && lastSubmission
+    ? { createdAt: lastSubmission.created_at, id: lastSubmission.id }
+    : null;
+  return NextResponse.json({ submissions, nextCursor }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function PATCH(request: Request) {

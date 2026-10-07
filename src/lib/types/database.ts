@@ -215,6 +215,18 @@ export interface Database {
       };
     };
     Functions: {
+      get_community_comment_like_summaries: {
+        Args: { target_comment_ids: string[] };
+        Returns: { comment_id: string; likes_count: number; user_has_liked: boolean }[];
+      };
+      article_comment_like_summaries: {
+        Args: { target_comment_ids: string[] };
+        Returns: { comment_id: string; likes_count: number; user_has_liked: boolean }[];
+      };
+      set_article_comment_like: {
+        Args: { target_comment_id: string; should_like: boolean };
+        Returns: undefined;
+      };
       community_poll_results: {
         Args: { p_poll_id: string };
         Returns: Json;
@@ -259,6 +271,18 @@ export interface Database {
         Args: { p_user_id: string; p_device_id: string | null; p_email: string | null };
         Returns: undefined;
       };
+      claim_telegram_webhook_update: {
+        Args: { p_update_id: number; p_lock_token: string };
+        Returns: string;
+      };
+      complete_telegram_webhook_update: {
+        Args: { p_update_id: number; p_lock_token: string };
+        Returns: boolean;
+      };
+      release_telegram_webhook_update: {
+        Args: { p_update_id: number; p_lock_token: string };
+        Returns: boolean;
+      };
     };
     Views: {
       public_profiles: {
@@ -273,6 +297,9 @@ export interface Database {
 
 export const POST_LIST_COLUMNS =
   "id, slug, title, summary, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at";
+
+export const POST_DETAIL_PUBLIC_COLUMNS =
+  "id, slug, title, summary, body, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, updated_at, topic_id, information_status, featured_quote, editorial_sources, correction_note, is_featured, featured_priority";
 
 export interface Post {
   id: string;
@@ -671,6 +698,7 @@ export interface CommunityPostRow {
   author_avatar: string;
   content: string;
   media_url: string | null;
+  media_alt: string | null;
   platform_tag: string | null;
   attached_article: Json | null;
   shared_post_id: string | null;
@@ -690,6 +718,7 @@ export interface CommunityPostInsert {
   author_avatar: string;
   content: string;
   media_url?: string | null;
+  media_alt?: string | null;
   platform_tag?: string | null;
   attached_article?: Json | null;
   shared_post_id?: string | null;

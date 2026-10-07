@@ -6,7 +6,7 @@ export type EditorialBlock =
   | { id: string; type: "image"; url: string; alt: string; caption?: string }
   | { id: string; type: "video"; url: string; title: string; channelName?: string; officialChannelConfirmed?: boolean };
 
-export type EditorialSource = { name: string; url: string; is_official?: boolean };
+export type EditorialSource = { name: string; url: string; is_official?: boolean; source_verified?: boolean };
 
 export type EditorialInformationStatus = "confirmed" | "developing" | "rumor" | "updated" | "corrected";
 
@@ -36,7 +36,7 @@ interface EditorialContent {
   absenceRegistered?: boolean;
   editorialMetadata?: {
     informationStatus: EditorialInformationStatus;
-    quote?: { text: string; author: string; role: string; sourceUrl: string } | null;
+    quote?: { text: string; author: string; role: string; sourceUrl: string; sourceVerified?: boolean } | null;
     sources: EditorialSource[];
     correctionNote?: string | null;
   };
@@ -65,6 +65,8 @@ const OFFICIAL_EDITORIAL_DOMAINS = [
   "nintendo.com", "nintendo.co.jp", "playstation.com", "xbox.com", "microsoft.com", "ea.com", "ubisoft.com",
   "capcom.com", "capcom-games.com", "sega.com", "bandainamcoent.com", "square-enix.com", "square-enix-games.com",
   "rockstargames.com", "bethesda.net", "activision.com", "blizzard.com", "epicgames.com", "cdprojektred.com", "konami.com",
+  "take2games.com", "2k.com", "valvesoftware.com", "warnerbrosgames.com", "wbgames.com", "riotgames.com", "bungie.net",
+  "remedygames.com", "krafton.com", "hoyoverse.com", "mihoyo.com", "battle.net", "atari.com",
 ];
 
 const EDITORIAL_PUBLISHERS: Array<{ publisher: string; domains: string[] }> = [
@@ -109,6 +111,15 @@ export function independentEditorialPublisherCount(sources: readonly { url: stri
   return new Set(sources.map((source) => editorialPublisherId(source.url)).filter((publisher): publisher is string => Boolean(publisher))).size;
 }
 
+export function isKnownEditorialPublisher(value: string): boolean {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+    return EDITORIAL_PUBLISHERS.some((entry) => entry.domains.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`)));
+  } catch {
+    return false;
+  }
+}
+
 export function unverifiedEditorialImageCaption(caption: string | undefined, fallback: string): string {
   const text = (caption || fallback)
     .trim()
@@ -121,6 +132,22 @@ export function isOfficialEditorialSource(value: string): boolean {
   try {
     const hostname = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
     return OFFICIAL_EDITORIAL_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  } catch {
+    return false;
+  }
+}
+
+export function isSpecificEditorialSource(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const pathSegments = url.pathname.split("/").filter(Boolean);
+    const genericSegments = new Set(["article", "articles", "blog", "category", "game", "games", "media", "news", "post", "posts", "press", "tag"]);
+    const meaningfulSegments = pathSegments.filter((segment) => !genericSegments.has(segment.toLowerCase()) && segment.length >= 4);
+    return url.protocol === "https:"
+      && !url.username
+      && !url.password
+      && (meaningfulSegments.length >= 1 && pathSegments.length >= 2
+        || pathSegments.length === 1 && meaningfulSegments.some((segment) => segment.length >= 10));
   } catch {
     return false;
   }
@@ -159,9 +186,15 @@ export function parseEditorialSources(value: string): EditorialSource[] {
     .filter(Boolean)
     .map((line) => {
       const separator = line.indexOf("|");
-      if (separator < 0) return { name: "Fonte", url: line, is_official: false };
-      const [name = "", url = "", flag = ""] = line.split("|").map((part) => part.trim());
-      return { name, url, is_official: flag.toLowerCase() === "oficial" };
+      if (separator < 0) return { name: "Fonte", url: line, is_official: false, source_verified: false };
+      const [name = "", url = "", ...flags] = line.split("|").map((part) => part.trim());
+      const normalizedFlags = flags.map((flag) => flag.toLowerCase());
+      return {
+        name,
+        url,
+        is_official: normalizedFlags.includes("oficial"),
+        source_verified: normalizedFlags.includes("verificada"),
+      };
     });
 }
 
@@ -235,13 +268,17 @@ export function validateEditorialContent(content: EditorialContent): string[] {
   if (metadata) {
     if (!["confirmed", "developing", "rumor", "updated", "corrected"].includes(metadata.informationStatus)) errors.push("Defina um estado válido para a informação.");
     if (metadata.informationStatus === "confirmed" && uncertainHeadlineClaim.test(`${title} ${summary}`)) errors.push("Revise o estado da informação: a manchete ou o resumo apresenta uma alegação incerta como confirmada.");
-    if (metadata.quote?.text && (!metadata.quote.author.trim() || !metadata.quote.role.trim() || !isValidHttpsUrl(metadata.quote.sourceUrl))) errors.push("A fala em destaque precisa de nome, cargo e URL HTTPS da fonte.");
+    if (metadata.quote?.text && (!metadata.quote.author.trim() || !metadata.quote.role.trim() || !isSpecificEditorialSource(metadata.quote.sourceUrl))) errors.push("A fala em destaque precisa de nome, cargo e página específica da fonte.");
+    if (metadata.quote?.text && metadata.quote.sourceVerified !== true) errors.push("Confirme a fala na fonte original antes de programar a publicação.");
     if (metadata.quote?.text && !articleText.includes(metadata.quote.text.trim())) errors.push("Inclua no corpo a fala registrada nos metadados, com atribuição e contexto.");
     if (metadata.sources.some((source) => !source.name.trim() || !isValidHttpsUrl(source.url))) errors.push("Todas as fontes estruturadas precisam de nome e URL HTTPS.");
     const validSources = metadata.sources.filter((source) => source.name.trim() && isValidHttpsUrl(source.url));
-    if (independentEditorialPublisherCount(validSources) < 3 && !validSources.some((source) => source.is_official || isOfficialEditorialSource(source.url))) errors.push("Inclua três editoras independentes ou uma fonte oficial.");
-    if (finalCitation && !validSources.some((source) => source.url.trim() === finalCitation)) errors.push("A fonte citada no final também precisa constar nas fontes estruturadas.");
-    if (metadata.informationStatus === "rumor" && validSources.length === 0) errors.push("Uma matéria marcada como rumor precisa ter ao menos uma fonte estruturada.");
+    const candidateSources = validSources.filter((source) => isSpecificEditorialSource(source.url));
+    const specificSources = candidateSources.filter((source) => source.source_verified === true);
+    if (candidateSources.some((source) => source.source_verified !== true)) errors.push("Confirme a leitura e a relevância de cada fonte no editor antes de publicar.");
+    if (independentEditorialPublisherCount(specificSources) < 3 && !specificSources.some((source) => source.is_official || isOfficialEditorialSource(source.url))) errors.push("Inclua três editoras independentes ou uma página oficial específica.");
+    if (finalCitation && !specificSources.some((source) => source.url.trim() === finalCitation)) errors.push("A fonte citada no final também precisa constar nas fontes estruturadas como página específica.");
+    if (metadata.informationStatus === "rumor" && specificSources.length === 0) errors.push("Uma matéria marcada como rumor precisa ter ao menos uma página de fonte específica.");
     if (metadata.informationStatus === "corrected" && !metadata.correctionNote?.trim()) errors.push("Explique a correção antes de publicar a matéria como corrigida.");
     if (!metadata.quote?.text && !absenceRegistered) errors.push("Registre uma fala verificada ou a ausência de declaração pública relevante.");
   } else {
@@ -263,7 +300,7 @@ export function validateStoredEditorialPost(post: Pick<Post, "slug" | "title" | 
   }
 
   const sources: EditorialSource[] = Array.isArray(post.editorial_sources)
-    ? post.editorial_sources.filter((source): source is EditorialSource => isRecord(source) && typeof source.name === "string" && typeof source.url === "string" && (source.is_official === undefined || typeof source.is_official === "boolean"))
+    ? post.editorial_sources.filter((source): source is EditorialSource => isRecord(source) && typeof source.name === "string" && typeof source.url === "string" && (source.is_official === undefined || typeof source.is_official === "boolean") && (source.source_verified === undefined || typeof source.source_verified === "boolean"))
     : [];
   const quote = isRecord(post.featured_quote) ? post.featured_quote : null;
   const quoteText = typeof quote?.text === "string" ? quote.text : "";
@@ -293,6 +330,7 @@ export function validateStoredEditorialPost(post: Pick<Post, "slug" | "title" | 
               author: typeof quote?.author === "string" ? quote.author : "",
               role: typeof quote?.role === "string" ? quote.role : "",
               sourceUrl: typeof quote?.source_url === "string" ? quote.source_url : "",
+              sourceVerified: quote?.source_verified === true,
             }
           : null,
         sources,
@@ -320,6 +358,7 @@ export interface EditorialQualityInput {
   quoteAuthor: string;
   quoteRole?: string;
   quoteSourceUrl: string;
+  quoteSourceVerified?: boolean;
   absenceRegistered?: boolean;
   informationStatus?: EditorialInformationStatus;
   correctionNote?: string;
@@ -327,7 +366,7 @@ export interface EditorialQualityInput {
 }
 
 export function validateEditorialQuality(input: EditorialQualityInput): EditorialQualityItem[] {
-  const { title, summary, imageUrl, imageAlt, body, sourcesText, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, absenceRegistered, informationStatus, correctionNote, shortArticleReason } = input;
+  const { title, summary, imageUrl, imageAlt, body, sourcesText, quoteText, quoteAuthor, quoteRole, quoteSourceUrl, quoteSourceVerified, absenceRegistered, informationStatus, correctionNote, shortArticleReason } = input;
 
   const textContent = textFromBlocks(body);
   const count = wordCount(textContent);
@@ -335,17 +374,19 @@ export function validateEditorialQuality(input: EditorialQualityInput): Editoria
   const videoBlocks = body.map((block, index) => ({ block, index })).filter((entry): entry is { block: Extract<EditorialBlock, { type: "video" }>; index: number } => entry.block.type === "video");
   const sources = parseEditorialSources(sourcesText);
   const validSources = sources.filter((source) => source.name && isValidHttpsUrl(source.url));
-  const sourcePublisherCount = independentEditorialPublisherCount(validSources);
+  const candidateSources = validSources.filter((source) => isSpecificEditorialSource(source.url));
+  const specificSources = candidateSources.filter((source) => source.source_verified === true);
+  const sourcePublisherCount = independentEditorialPublisherCount(specificSources);
   const hasQuote = Boolean(quoteText.trim());
   const quoteComplete = hasQuote
-    ? Boolean(quoteAuthor.trim() && quoteRole?.trim() && isValidHttpsUrl(quoteSourceUrl.trim()))
+    ? Boolean(quoteAuthor.trim() && quoteRole?.trim() && isSpecificEditorialSource(quoteSourceUrl.trim()) && quoteSourceVerified)
     : false;
-  const hasOfficialSource = validSources.some((source) => source.is_official || isOfficialEditorialSource(source.url));
+  const hasOfficialSource = specificSources.some((source) => source.is_official || isOfficialEditorialSource(source.url));
   const finalTextBlock = [...body].reverse().find((block) => block.type === "text");
   const finalSourceUrl = finalTextBlock?.type === "text"
     ? finalTextBlock.content.match(/\*\*Fonte:\*\*\s*\[[^\]]+\]\((https:\/\/[^)]+)\)/i)?.[1]
     : null;
-  const finalSourcePresent = Boolean(finalSourceUrl && validSources.some((source) => source.url === finalSourceUrl));
+  const finalSourcePresent = Boolean(finalSourceUrl && specificSources.some((source) => source.url === finalSourceUrl));
 
   return [
     {
@@ -390,7 +431,7 @@ export function validateEditorialQuality(input: EditorialQualityInput): Editoria
     },
     {
       id: 7,
-      label: "Três fontes ou uma fonte oficial",
+      label: "Três fontes verificadas ou uma fonte oficial verificada",
       complete: sourcePublisherCount >= 3 || hasOfficialSource,
       detail: hasOfficialSource ? "Fonte oficial identificada" : `${sourcePublisherCount} de 3 editoras distintas`,
     },

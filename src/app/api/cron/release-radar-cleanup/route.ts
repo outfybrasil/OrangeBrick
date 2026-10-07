@@ -37,32 +37,48 @@ async function cleanup(request: Request) {
   const today = new Date();
   const firstDay = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)).toISOString().slice(0, 10);
   const supabase = serviceClient();
-  const { data: expired, error: loadError } = await supabase
-    .from("release_radar_items")
-    .select("*")
-    .lt("release_date", firstDay);
-  if (loadError) return NextResponse.json({ error: "Falha ao localizar itens antigos" }, { status: 500 });
+  const batchSize = 100;
+  let archivedItems = 0;
+  let removedFiles = 0;
+  let batchesProcessed = 0;
 
-  const rows = expired || [];
-  const paths = rows.map((item) => storagePath(item.image_url)).filter((path): path is string => Boolean(path));
-  if (paths.length > 0) {
-    const { error: storageError } = await supabase.storage.from("post-images").remove(paths);
-    if (storageError) return NextResponse.json({ error: "Falha ao remover arquivos antigos" }, { status: 500 });
-    await supabase.from("editorial_images").delete().in("public_url", rows.map((item) => item.image_url));
-  }
+  while (true) {
+    const { data: rows, error: loadError } = await supabase
+      .from("release_radar_items")
+      .select("id,image_url,release_date,is_active")
+      .lt("release_date", firstDay)
+      .or("is_active.eq.true,image_url.not.is.null")
+      .order("release_date", { ascending: true })
+      .order("id", { ascending: true })
+      .limit(batchSize);
+    if (loadError) return NextResponse.json({ error: "Falha ao localizar itens antigos" }, { status: 500 });
+    if (!rows?.length) break;
 
-  const ids = rows.map((item) => item.id);
-  if (ids.length > 0) {
+    const paths = [...new Set(rows.map((item) => storagePath(item.image_url)).filter((path): path is string => Boolean(path)))];
+    if (paths.length > 0) {
+      const { error: storageError } = await supabase.storage.from("post-images").remove(paths);
+      if (storageError) return NextResponse.json({ error: "Falha ao remover arquivos antigos" }, { status: 500 });
+      removedFiles += paths.length;
+      const imageUrls = [...new Set(rows.map((item) => item.image_url).filter((url): url is string => Boolean(url)))];
+      if (imageUrls.length > 0) {
+        const { error: libraryError } = await supabase.from("editorial_images").delete().in("public_url", imageUrls);
+        if (libraryError) return NextResponse.json({ error: "Falha ao remover registros da biblioteca" }, { status: 500 });
+      }
+    }
+
+    const ids = rows.map((item) => item.id);
     const { error: updateError } = await supabase
       .from("release_radar_items")
       .update({ image_url: null, is_active: false, updated_at: new Date().toISOString() })
       .in("id", ids);
     if (updateError) return NextResponse.json({ error: "Falha ao retirar lançamentos antigos" }, { status: 500 });
+
+    archivedItems += ids.length;
+    batchesProcessed += 1;
   }
 
-  return NextResponse.json({ archived_items: ids.length, removed_files: paths.length, cutoff: firstDay });
+  return NextResponse.json({ archived_items: archivedItems, removed_files: removedFiles, batches_processed: batchesProcessed, cutoff: firstDay });
 }
-
 export async function GET(request: Request) {
   return cleanup(request);
 }

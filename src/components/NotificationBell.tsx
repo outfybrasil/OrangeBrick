@@ -175,23 +175,37 @@ export default function NotificationBell() {
       const subscription = await registration?.pushManager.getSubscription();
       if (subscription) {
         const endpoint = subscription.endpoint;
-        await subscription.unsubscribe();
-        setSubscribed(false);
+        let localRevoked = false;
+        try {
+          localRevoked = await subscription.unsubscribe();
+        } catch {
+          localRevoked = false;
+        }
+        setSubscribed(!localRevoked);
         localStorage.removeItem("ob_push_sync");
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
+        let serverRevoked = false;
         try {
           await invokeFunction(
             "manage-push-subscription",
             { action: "unsubscribe", endpoint },
             { accessToken: session?.access_token }
           );
+          serverRevoked = true;
         } catch {
-          setError("Os alertas foram desligados neste aparelho. O servidor removerá a assinatura antiga automaticamente.");
+          serverRevoked = false;
         }
+        if (!localRevoked || !serverRevoked) {
+          setError([
+            !localRevoked && "O navegador não confirmou o desligamento neste aparelho.",
+            !serverRevoked && "O servidor não confirmou a remoção da assinatura.",
+          ].filter(Boolean).join(" "));
+        }
+      } else {
+        localStorage.removeItem("ob_push_sync");
+        setSubscribed(false);
       }
-      localStorage.removeItem("ob_push_sync");
-      setSubscribed(false);
     } catch (cause) {
       setError(pushErrorMessage(cause));
     } finally {
@@ -215,7 +229,7 @@ export default function NotificationBell() {
       <button
         onClick={subscribed ? unsubscribe : subscribe}
         disabled={loading}
-        aria-label={subscribed ? "Desativar alertas" : "Ativar alertas"}
+        aria-label={subscribed ? "Desativar alertas" : "Receber alertas"}
         aria-describedby={error ? "push-notification-error" : undefined}
         className={`flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-bold transition-colors ${
           subscribed
@@ -231,7 +245,7 @@ export default function NotificationBell() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 01-6 0v-1m6 0H9" />
           </svg>
         )}
-        <span className="whitespace-nowrap">{subscribed ? "Alertas ativos" : "Receber alertas"}</span>
+        <span className="whitespace-nowrap">{subscribed ? "Desativar alertas" : "Receber alertas"}</span>
       </button>
 
       {error && (

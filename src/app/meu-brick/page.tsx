@@ -10,6 +10,7 @@ import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
 import { resolveAvatarUrl, getGoogleAvatarUrl } from "@/lib/avatar";
 import { createDataClient } from "@/lib/supabase/client";
+import { AuthModal } from "@/components/auth/AuthModal";
 import type { CommunityPost } from "@/lib/types/community";
 import type { ReleaseRadarItem } from "@/lib/types/database";
 
@@ -18,6 +19,7 @@ export default function MeuBrickPage() {
   const { user, profile, isLoading, signOut, refreshProfile } = useAuth();
   const { bookmarks, toggleBookmark } = useBookmarks();
   const { savedBricks, toggleSaveBrick } = useSavedBricks();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"bricks" | "jogos" | "salvos" | "settings">(() => {
     if (typeof window !== "undefined") {
@@ -130,7 +132,7 @@ export default function MeuBrickPage() {
         const [postsRes, votesRes, followsFollowersRes, followsFollowingRes] = await Promise.all([
           supabase
             .from("community_posts")
-            .select("id, user_id, author_name, author_username, author_avatar, content, media_url, platform_tag, attached_article, created_at, is_pinned, is_official")
+            .select("id, user_id, author_name, author_username, author_avatar, content, media_url, media_alt, platform_tag, attached_article, created_at, is_pinned, is_official")
             .eq("user_id", currentUserId)
             .order("created_at", { ascending: false })
             .limit(20),
@@ -160,6 +162,7 @@ export default function MeuBrickPage() {
             author_avatar: row.author_avatar ? String(row.author_avatar) : "",
             content: String(row.content || ""),
             media_url: row.media_url ? String(row.media_url) : null,
+            media_alt: row.media_alt ? String(row.media_alt) : null,
             platform_tag: row.platform_tag ? String(row.platform_tag) : null,
             attached_article: (row.attached_article as CommunityPost["attached_article"]) || null,
             reactions: { hype: 0, flop: 0, salty: 0 },
@@ -283,18 +286,20 @@ export default function MeuBrickPage() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="/entrar?returnTo=/meu-brick"
+              <button
+                type="button"
+                onClick={() => setIsAuthModalOpen(true)}
                 className="flex min-h-12 items-center justify-center rounded-xl bg-brand-orange px-6 text-sm font-black text-white shadow-[0_0_20px_rgba(255,94,0,0.3)] transition-colors hover:bg-[#ff7526]"
               >
                 Entrar na minha conta
-              </Link>
-              <Link
-                href="/cadastro?returnTo=/meu-brick"
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAuthModalOpen(true)}
                 className="flex min-h-12 items-center justify-center rounded-xl border border-white/20 bg-white/[0.05] px-6 text-sm font-bold text-white transition-colors hover:bg-white/10"
               >
                 Criar conta gratuita
-              </Link>
+              </button>
               <Link
                 href="/"
                 className="flex min-h-12 items-center justify-center px-4 text-xs font-semibold text-gray-400 hover:text-white"
@@ -304,6 +309,10 @@ export default function MeuBrickPage() {
             </div>
           </div>
         </main>
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
         <Footer />
       </div>
     );
@@ -716,7 +725,7 @@ export default function MeuBrickPage() {
 
                           {post.media_url && (
                             <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-black/30">
-                              <img src={post.media_url} alt="Mídia do post" className="max-h-80 w-full object-cover" />
+                              <img src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="max-h-80 w-full object-cover" />
                             </div>
                           )}
 

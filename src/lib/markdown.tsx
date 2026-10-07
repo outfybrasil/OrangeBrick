@@ -14,12 +14,7 @@ export function parseInlineMarkdown(text: string): ReactNode {
     const matchStr = match[0];
 
     if (matchIndex > currentIndex) {
-      const between = text.slice(currentIndex, matchIndex);
-      if (between.includes("[") && between.includes("](")) {
-        parts.push(parseInlineMarkdown(between));
-      } else {
-        parts.push(between);
-      }
+      parts.push(text.slice(currentIndex, matchIndex));
     }
 
     if (matchStr.startsWith("**") && matchStr.endsWith("**")) {
@@ -60,12 +55,7 @@ export function parseInlineMarkdown(text: string): ReactNode {
   }
 
   if (currentIndex < text.length) {
-    const remaining = text.slice(currentIndex);
-    if (remaining.includes("[") && remaining.includes("](")) {
-      parts.push(parseInlineMarkdown(remaining));
-    } else {
-      parts.push(remaining);
-    }
+    parts.push(text.slice(currentIndex));
   }
 
   return parts.length > 0 ? <>{parts}</> : text;

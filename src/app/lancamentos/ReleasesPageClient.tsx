@@ -8,7 +8,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
 import type { ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
 import { GameCoverImage } from "@/components/releases/GameCoverImage";
-import { getReleaseMonth, isRetainedRelease } from "@/lib/release-dates";
+import { getReleaseWeek, isRetainedRelease } from "@/lib/release-dates";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import type {
   ReleaseHypeCount,
@@ -19,6 +19,7 @@ import type {
 
 type HypeVoteType = ReleaseHypeVote["vote_type"];
 type HypeCounts = Record<HypeVoteType, number>;
+type HypeCountsStatus = "loading" | "unavailable" | "loaded";
 
 const EMPTY_HYPE_COUNTS: HypeCounts = { buy: 0, watch: 0, skip: 0 };
 const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string }[] = [
@@ -30,14 +31,18 @@ const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string }[] 
 function ReleaseHypeMeter({
   releaseId,
   counts,
+  countsStatus,
   selectedVote,
   isVoting,
+  canVote,
   onVote,
 }: {
   releaseId: string;
   counts: HypeCounts;
+  countsStatus: HypeCountsStatus;
   selectedVote?: HypeVoteType;
   isVoting: boolean;
+  canVote: boolean;
   onVote: (releaseId: string, vote: HypeVoteType) => void;
 }) {
   const total = counts.buy + counts.watch + counts.skip;
@@ -50,11 +55,11 @@ function ReleaseHypeMeter({
           Termômetro da comunidade
         </span>
         <span className="text-xs font-bold tabular-nums text-gray-300">
-          {total === 0 ? "Seja o primeiro" : `${positiveShare}% no hype`}
+          {countsStatus === "loading" ? "Carregando votos…" : countsStatus === "unavailable" ? "Votos indisponíveis" : total === 0 ? "Seja o primeiro" : `${positiveShare}% no hype`}
         </span>
       </div>
       <div className="mb-2.5 flex h-1 overflow-hidden bg-white/[0.06]" aria-hidden="true">
-        {total > 0 && (
+        {countsStatus === "loaded" && total > 0 && (
           <>
             <span className="bg-brand-orange" style={{ width: `${(counts.buy / total) * 100}%` }} />
             <span className="bg-[#F4A261]" style={{ width: `${(counts.watch / total) * 100}%` }} />
@@ -70,9 +75,9 @@ function ReleaseHypeMeter({
               key={option.type}
               type="button"
               onClick={() => onVote(releaseId, option.type)}
-              disabled={isVoting}
+              disabled={isVoting || !canVote}
               aria-pressed={isSelected}
-              aria-label={`${option.label}: ${counts[option.type]} votos`}
+              aria-label={countsStatus === "loaded" ? `${option.label}: ${counts[option.type]} votos` : `${option.label}: votos indisponíveis`}
               className={`min-h-11 border px-1.5 text-xs font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
                 isSelected
                   ? "border-brand-orange bg-brand-orange text-white"
@@ -82,7 +87,7 @@ function ReleaseHypeMeter({
               <span className="block sm:hidden">{option.shortLabel}</span>
               <span className="hidden sm:block">{option.label}</span>
               <span className={`ml-1 tabular-nums ${isSelected ? "text-white/75" : "text-gray-600"}`}>
-                {counts[option.type]}
+                {countsStatus === "loaded" ? counts[option.type] : "—"}
               </span>
             </button>
           );
@@ -90,21 +95,6 @@ function ReleaseHypeMeter({
       </div>
     </div>
   );
-}
-
-function extractDayNumber(dateStr: string, isoStr?: string): number {
-  if (isoStr) {
-    const parts = isoStr.split("-");
-    if (parts.length === 3) {
-      const parsed = parseInt(parts[2], 10);
-      if (!isNaN(parsed)) return parsed;
-    }
-  }
-  const match = dateStr.match(/^(\d{1,2})\s+de/i);
-  if (match) {
-    return parseInt(match[1], 10);
-  }
-  return 99;
 }
 
 interface ReleasesPageClientProps {
@@ -123,11 +113,15 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
   const [search, setSearch] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("all");
   const [hypeCounts, setHypeCounts] = useState<Record<string, HypeCounts>>(initialHypeCounts ?? {});
+  const [hypeCountsLoaded, setHypeCountsLoaded] = useState(Boolean(initialHypeCounts));
   const [myVotes, setMyVotes] = useState<Record<string, HypeVoteType>>({});
+  const [myVotesOwnerId, setMyVotesOwnerId] = useState<string | null>(null);
   const [votingReleaseId, setVotingReleaseId] = useState<string | null>(null);
   const [pendingVote, setPendingVote] = useState<{ releaseId: string; vote: HypeVoteType } | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [hypeError, setHypeError] = useState("");
+  const [isLoadingHype, setIsLoadingHype] = useState(!initialHypeCounts);
+  const [hypeRetry, setHypeRetry] = useState(0);
   const hasPositionedCalendar = useRef(false);
   const todayIso = useMemo(() => {
     const now = new Date();
@@ -172,40 +166,57 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
   }, [loadReleases, initialReleases]);
 
   const loadHype = useCallback(async () => {
-    const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
-    if (countError) {
-      setHypeError("O termômetro está indisponível agora.");
-      return;
-    }
+    setIsLoadingHype(true);
+    setHypeCountsLoaded(false);
+    setMyVotesOwnerId(null);
+    setHypeError("");
+    let countsLoadedSuccessfully = false;
+    try {
+      const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
+      if (countError) throw countError;
 
-    const nextCounts: Record<string, HypeCounts> = {};
-    for (const row of (countData || []) as ReleaseHypeCount[]) {
-      const current = nextCounts[row.release_id] || { ...EMPTY_HYPE_COUNTS };
-      current[row.vote_type] = Number(row.vote_count);
-      nextCounts[row.release_id] = current;
-    }
-    setHypeCounts(nextCounts);
+      const nextCounts: Record<string, HypeCounts> = {};
+      for (const row of (countData || []) as ReleaseHypeCount[]) {
+        const current = nextCounts[row.release_id] || { ...EMPTY_HYPE_COUNTS };
+        current[row.vote_type] = Number(row.vote_count);
+        nextCounts[row.release_id] = current;
+      }
+      setHypeCounts(nextCounts);
+      setHypeCountsLoaded(true);
+      countsLoadedSuccessfully = true;
 
-    if (!user) {
-      setMyVotes({});
-      return;
-    }
+      if (!user) {
+        setMyVotes({});
+        return;
+      }
 
-    const { data: voteData } = await supabase.rpc("get_my_release_hype_votes");
-    const nextVotes: Record<string, HypeVoteType> = {};
-    for (const row of (voteData || []) as ReleaseHypeVoteSelection[]) {
-      nextVotes[row.release_id] = row.vote_type;
+      const { data: voteData, error: voteError } = await supabase.rpc("get_my_release_hype_votes");
+      if (voteError) {
+        setHypeError("Não foi possível confirmar seu voto atual. Tente novamente antes de votar.");
+        return;
+      }
+      const nextVotes: Record<string, HypeVoteType> = {};
+      for (const row of (voteData || []) as ReleaseHypeVoteSelection[]) {
+        nextVotes[row.release_id] = row.vote_type;
+      }
+      setMyVotes(nextVotes);
+      setMyVotesOwnerId(user.id);
+    } catch {
+      setHypeError(countsLoadedSuccessfully && user
+        ? "Não foi possível confirmar seu voto atual. Tente novamente antes de votar."
+        : "O termômetro está indisponível agora.");
+    } finally {
+      setIsLoadingHype(false);
     }
-    setMyVotes(nextVotes);
   }, [supabase, user]);
 
   useEffect(() => {
     if (initialHypeCounts && !user) return;
     queueMicrotask(loadHype);
-  }, [loadHype, initialHypeCounts, user]);
+  }, [loadHype, initialHypeCounts, user, hypeRetry]);
 
   const commitVote = useCallback(async (releaseId: string, vote: HypeVoteType) => {
-    if (!user || votingReleaseId) return;
+    if (!user || !hypeCountsLoaded || myVotesOwnerId !== user.id || votingReleaseId) return;
 
     const previousVote = myVotes[releaseId];
     const previousCounts = hypeCounts[releaseId] || { ...EMPTY_HYPE_COUNTS };
@@ -226,6 +237,8 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
     });
 
     let saveFailed = false;
+    let countsUnavailable = false;
+    let voteSaved = false;
 
     try {
       const res = await fetch("/api/release-hype-vote", {
@@ -235,41 +248,28 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
       });
 
       if (res.ok) {
-        const payload = (await res.json()) as { counts?: HypeCounts };
+        voteSaved = true;
+        const payload = (await res.json()) as { counts?: HypeCounts | null };
         if (payload.counts) {
           setHypeCounts((current) => ({ ...current, [releaseId]: payload.counts! }));
+        } else {
+          const { data: countData, error: countError } = await supabase.rpc("get_release_hype_counts");
+          if (countError) {
+            countsUnavailable = true;
+          } else {
+            const refreshedCounts = { ...EMPTY_HYPE_COUNTS };
+            for (const row of (countData || []) as ReleaseHypeCount[]) {
+              if (row.release_id === releaseId) refreshedCounts[row.vote_type] = Number(row.vote_count);
+            }
+            setHypeCounts((current) => ({ ...current, [releaseId]: refreshedCounts }));
+          }
         }
       } else {
-        await supabase
-          .from("release_hype_votes")
-          .delete()
-          .eq("release_id", releaseId)
-          .eq("user_id", user.id);
-
-        if (nextVote) {
-          const { error: insError } = await supabase.from("release_hype_votes").insert({
-            release_id: releaseId,
-            user_id: user.id,
-            vote_type: nextVote,
-          });
-          if (insError) saveFailed = true;
-        }
+        saveFailed = true;
       }
     } catch {
-      await supabase
-        .from("release_hype_votes")
-        .delete()
-        .eq("release_id", releaseId)
-        .eq("user_id", user.id);
-
-      if (nextVote) {
-        const { error: insError } = await supabase.from("release_hype_votes").insert({
-          release_id: releaseId,
-          user_id: user.id,
-          vote_type: nextVote,
-        });
-        if (insError) saveFailed = true;
-      }
+      if (voteSaved) countsUnavailable = true;
+      else saveFailed = true;
     }
 
     if (saveFailed) {
@@ -282,8 +282,11 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
       });
       setHypeError("Seu voto não foi salvo. Tente novamente.");
     }
+    if (countsUnavailable && !saveFailed) {
+      setHypeError("O voto foi salvo, mas o term\u00f4metro est\u00e1 indispon\u00edvel agora.");
+    }
     setVotingReleaseId(null);
-  }, [hypeCounts, myVotes, supabase, user, votingReleaseId]);
+  }, [hypeCounts, hypeCountsLoaded, myVotes, myVotesOwnerId, supabase, user, votingReleaseId]);
 
   const handleVote = useCallback((releaseId: string, vote: HypeVoteType) => {
     if (!user) {
@@ -315,20 +318,18 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
   const groupedReleases = useMemo(() => {
     const groups = new Map<string, { label: string; items: ReleaseItem[] }>();
     for (const item of filteredReleases) {
-        const month = getReleaseMonth(item.releaseDateIso);
-      const group = groups.get(month.key) || { label: month.label, items: [] };
+      const week = getReleaseWeek(item.releaseDateIso);
+      const group = groups.get(week.key) || { label: week.label, items: [] };
       group.items.push(item);
-      groups.set(month.key, group);
+      groups.set(week.key, group);
     }
     return [...groups.entries()]
       .map(([key, group]) => ({
         key,
         ...group,
         items: group.items.sort((first, second) => {
-          const dayA = extractDayNumber(first.releaseDate, first.releaseDateIso);
-          const dayB = extractDayNumber(second.releaseDate, second.releaseDateIso);
-          if (dayA !== dayB) return dayA - dayB;
-          return first.game.localeCompare(second.game, "pt-BR");
+          const dateOrder = (first.releaseDateIso || "9999-12-31").localeCompare(second.releaseDateIso || "9999-12-31");
+          return dateOrder || first.game.localeCompare(second.game, "pt-BR");
         }),
       }))
       .sort((first, second) => {
@@ -421,7 +422,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
             Lançamentos <span className="text-brand-orange">Oficiais</span>
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400">
-            Confira jogos confirmados por data e plataforma, com datas organizadas pelo ano oficial de lançamento.
+            Confira jogos confirmados por data e plataforma, agrupados por semana de segunda a domingo.
           </p>
 
           {/* Filtros e Busca */}
@@ -586,8 +587,11 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
         </section>
 
         {hypeError && (
-          <div role="status" className="mb-6 border-l-2 border-brand-orange bg-brand-orange/[0.06] px-4 py-3 text-xs text-gray-300">
+          <div role="alert" className="mb-6 flex flex-wrap items-center justify-between gap-3 border-l-2 border-brand-orange bg-brand-orange/[0.06] px-4 py-3 text-xs text-gray-300">
             {hypeError}
+            <button type="button" onClick={() => setHypeRetry((value) => value + 1)} disabled={isLoadingHype} className="min-h-11 px-3 font-bold text-brand-orange disabled:opacity-50">
+              {isLoadingHype ? "Carregando…" : "Tentar novamente"}
+            </button>
           </div>
         )}
 
@@ -693,8 +697,10 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                         <ReleaseHypeMeter
                           releaseId={item.id}
                           counts={hypeCounts[item.id] || EMPTY_HYPE_COUNTS}
-                          selectedVote={myVotes[item.id]}
-                          isVoting={votingReleaseId === item.id}
+                          countsStatus={hypeCountsLoaded ? "loaded" : isLoadingHype ? "loading" : "unavailable"}
+                          selectedVote={myVotesOwnerId === user?.id ? myVotes[item.id] : undefined}
+                          isVoting={Boolean(votingReleaseId) || isLoadingHype}
+                          canVote={hypeCountsLoaded && (!user || myVotesOwnerId === user.id)}
                           onVote={handleVote}
                         />
                       </div>

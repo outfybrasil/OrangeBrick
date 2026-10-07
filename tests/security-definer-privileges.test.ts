@@ -13,6 +13,7 @@ test("the admin-check helper remains executable by authenticated RLS policies", 
 
 test("internal moderation and retention RPCs are not callable by public roles", () => {
   assert.match(migration, /revoke all on function public\.assert_community_participation_allowed\(uuid\) from public, anon, authenticated;/);
+  assert.match(migration, /grant execute on function public\.assert_community_participation_allowed\(uuid\) to authenticated;/);
   assert.match(migration, /revoke all on function public\.apply_retention_policy\(\) from public, anon, authenticated;/);
   assert.match(migration, /grant execute on function public\.apply_retention_policy\(\) to service_role;/);
 });

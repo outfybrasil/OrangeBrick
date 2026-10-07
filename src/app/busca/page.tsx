@@ -45,7 +45,7 @@ export default async function SearchPage({
             .ilike("game", pattern)
             .limit(12),
           supabase
-            .from("public_profiles")
+            .from("profiles")
             .select("*")
             .or(`display_name.ilike.${pattern},username.ilike.${pattern}`)
             .limit(10),

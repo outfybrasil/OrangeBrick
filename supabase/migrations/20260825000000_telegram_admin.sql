@@ -34,7 +34,7 @@ begin
     raise exception 'Ação de moderação inválida.';
   end if;
 
-  if not exists (select 1 from public.profiles where id = target_user_id) then
+  if not exists (select 1 from public.profiles where user_id = target_user_id) then
     raise exception 'Usuário não encontrado.';
   end if;
 
@@ -43,19 +43,19 @@ begin
     set community_suspended_until = now() + make_interval(days => greatest(target_days, 1)),
         community_banned = false,
         community_moderation_reason = coalesce(nullif(btrim(target_reason), ''), 'Suspensão aplicada pela moderação')
-    where id = target_user_id;
+    where user_id = target_user_id;
   elsif target_action = 'ban' then
     update public.profiles
     set community_banned = true,
         community_suspended_until = null,
         community_moderation_reason = coalesce(nullif(btrim(target_reason), ''), 'Bloqueio aplicado pela moderação')
-    where id = target_user_id;
+    where user_id = target_user_id;
   else
     update public.profiles
     set community_banned = false,
         community_suspended_until = null,
         community_moderation_reason = null
-    where id = target_user_id;
+    where user_id = target_user_id;
   end if;
 
   insert into public.community_moderation_actions (
@@ -72,7 +72,7 @@ begin
 end;
 $$;
 
-revoke all on function public.admin_moderate_user(uuid, text, text, integer) from public;
+revoke all on function public.admin_moderate_user(uuid, text, text, integer) from public, anon;
 grant execute on function public.admin_moderate_user(uuid, text, text, integer) to authenticated, service_role;
 
 create table if not exists public.bot_state (

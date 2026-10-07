@@ -1,12 +1,23 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const configuredSiteUrl = Deno.env.get("SITE_URL");
-const corsOrigin = configuredSiteUrl && configuredSiteUrl !== "http://localhost:3000"
-  ? configuredSiteUrl
-  : "https://orange-brick.vercel.app";
+const allowedCorsOrigins = new Set([
+  "https://orangebrick.blog",
+  "https://www.orangebrick.blog",
+  "https://orange-brick.vercel.app",
+]);
+function getConfiguredSiteOrigin(value: string | undefined) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+const configuredSiteOrigin = getConfiguredSiteOrigin(Deno.env.get("SITE_URL"));
+if (configuredSiteOrigin) allowedCorsOrigins.add(configuredSiteOrigin);
 
 export const corsHeaders = {
-  "Access-Control-Allow-Origin": corsOrigin,
   "Access-Control-Allow-Headers": "authorization, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -20,6 +31,24 @@ export function json(data: unknown, status = 200) {
 
 export function handleOptions(request: Request) {
   return request.method === "OPTIONS" ? new Response("ok", { headers: corsHeaders }) : null;
+}
+
+export function serve(handler: (request: Request) => Response | Promise<Response>) {
+  Deno.serve(async (request) => {
+    const response = await handler(request);
+    const headers = new Headers(response.headers);
+    const origin = request.headers.get("origin");
+    if (origin && allowedCorsOrigins.has(origin)) {
+      headers.set("Access-Control-Allow-Origin", origin);
+    }
+    const vary = headers.get("Vary");
+    headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  });
 }
 
 function serviceApiKey() {
@@ -38,6 +67,33 @@ function serviceApiKey() {
   const key = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!key) throw new Error("Configure uma chave secreta do Supabase para as Edge Functions.");
   return key;
+}
+
+export async function isServiceApiKey(value: string) {
+  const expectedKeys = new Set<string>();
+  try {
+    expectedKeys.add(serviceApiKey());
+  } catch {
+    if (!Deno.env.get("SUPABASE_SECRET_KEY") && !Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) return false;
+  }
+  for (const key of [Deno.env.get("SUPABASE_SECRET_KEY"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")]) {
+    if (key) expectedKeys.add(key);
+  }
+  if (expectedKeys.size === 0) return false;
+  const encoder = new TextEncoder();
+  const candidateHash = await crypto.subtle.digest("SHA-256", encoder.encode(value));
+  const candidateBytes = new Uint8Array(candidateHash);
+  let matches = false;
+  for (const key of expectedKeys) {
+    const expectedHash = await crypto.subtle.digest("SHA-256", encoder.encode(key));
+    const expectedBytes = new Uint8Array(expectedHash);
+    let difference = 0;
+    for (let index = 0; index < expectedBytes.length; index++) {
+      difference |= expectedBytes[index] ^ candidateBytes[index];
+    }
+    if (difference === 0) matches = true;
+  }
+  return matches;
 }
 
 export function serviceClient() {

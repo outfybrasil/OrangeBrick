@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, isAllowedUserAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 
 const platforms = ["PS5", "Xbox Series", "Switch 2", "PC", "Mobile"];
@@ -268,7 +268,10 @@ export default function ProfileSettingsPage() {
     const activeProfile = profile;
     const defaultName = activeProfile?.display_name || activeProfile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || "Jogador";
     const defaultUsername = activeProfile?.username || (user.user_metadata?.user_name || user.email?.split("@")[0] || "jogador").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
-    const defaultAvatar = activeProfile?.avatar_url || getGoogleAvatarUrl(user) || "";
+    const storedAvatarUrl = activeProfile?.avatar_url || "";
+    const defaultAvatar = isAllowedUserAvatarUrl(storedAvatarUrl, user.id)
+      ? storedAvatarUrl
+      : getGoogleAvatarUrl(user) || "";
 
     queueMicrotask(() => {
       setDisplayName(defaultName);
@@ -436,9 +439,6 @@ export default function ProfileSettingsPage() {
           showActivityStats,
           showSeasonHistory,
           showInLeaderboard,
-          selectedTitle: selectedTitle || null,
-          selectedFrame: selectedFrame || null,
-          selectedTheme,
         }),
       });
 
@@ -446,18 +446,23 @@ export default function ProfileSettingsPage() {
       if (!response.ok || result.error) {
         setMessage(result.error || "Não foi possível salvar o perfil.");
       } else {
+        let cosmeticsSaved = true;
         if (profile && !profile.is_official) {
           try {
-            await supabase.rpc("set_profile_cosmetics", {
+            const { error: cosmeticsError } = await supabase.rpc("set_profile_cosmetics", {
               target_title_slug: selectedTitle || null,
               target_frame_slug: selectedFrame || null,
               target_theme_slug: selectedTheme,
             });
+            cosmeticsSaved = !cosmeticsError;
           } catch {
+            cosmeticsSaved = false;
           }
         }
         await refreshProfile();
-        setMessage("Perfil atualizado com sucesso!");
+        setMessage(cosmeticsSaved
+          ? "Perfil atualizado com sucesso!"
+          : "Perfil salvo, mas não foi possível equipar os itens selecionados.");
       }
     } catch {
       setMessage("Erro de conexão ao salvar o perfil.");
@@ -616,7 +621,7 @@ export default function ProfileSettingsPage() {
               <Field label="Biografia" hint={`${bio.length}/160 caracteres`}>
                 <textarea value={bio} onChange={(event) => setBio(event.target.value)} maxLength={160} rows={4} className="w-full resize-none border border-white/15 bg-black/20 px-4 py-3 text-sm outline-none focus:border-brand-orange/60" />
               </Field>
-              <Field label="Foto de perfil" hint="JPG, PNG, WebP ou AVIF. Até 8 MB.">
+              <Field label="Foto de perfil" hint="JPG, PNG, WebP ou AVIF. Até 4 MB.">
                 <div className="flex flex-wrap items-center gap-3 border border-white/15 bg-black/20 p-3">
                   <label className="inline-flex min-h-11 cursor-pointer items-center bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526]">
                     {isAvatarUploading ? "Processando…" : "Escolher foto"}

@@ -4,6 +4,7 @@ export function timeAgo(date: string | Date): string {
   const then = new Date(date);
   if (isNaN(then.getTime())) return "";
   const diffMs = now.getTime() - then.getTime();
+  if (diffMs < 0) return then.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
   const diffSeconds = Math.floor(diffMs / 1000);
   const diffMinutes = Math.floor(diffSeconds / 60);
   const diffHours = Math.floor(diffMinutes / 60);

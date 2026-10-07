@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, createServiceDataClient } from "@/lib/supabase/server";
 import type { Profile } from "@/lib/types/database";
-import { getGoogleAvatarUrl } from "@/lib/avatar";
+import { getGoogleAvatarUrl, isAllowedUserAvatarUrl } from "@/lib/avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -46,11 +46,15 @@ export async function GET(request: Request) {
   }
 
   const service = createServiceDataClient();
-  const { data: profile } = await service
-    .from("public_profiles")
+  const { data: profile, error: profileReadError } = await service
+    .from("profiles")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle<Profile>();
+
+  if (profileReadError) {
+    return NextResponse.json({ error: "N\u00e3o foi poss\u00edvel consultar o perfil." }, { status: 503 });
+  }
 
   if (profile) {
     return NextResponse.json({ profile });
@@ -85,11 +89,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Falha ao provisionar perfil inicial" }, { status: 500 });
   }
 
-  const { data: createdProfile } = await service
-    .from("public_profiles")
+  const { data: createdProfile, error: createdProfileError } = await service
+    .from("profiles")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle<Profile>();
+
+  if (createdProfileError) {
+    return NextResponse.json({ error: "Perfil criado, mas n\u00e3o foi poss\u00edvel consultar os dados p\u00fablicos." }, { status: 503 });
+  }
 
   return NextResponse.json({ profile: createdProfile });
 }
@@ -111,9 +119,6 @@ export async function POST(request: Request) {
     showActivityStats?: boolean;
     showSeasonHistory?: boolean;
     showInLeaderboard?: boolean;
-    selectedTitle?: string | null;
-    selectedFrame?: string | null;
-    selectedTheme?: string | null;
   };
 
   const displayName = (body.displayName || "").trim();
@@ -147,7 +152,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Este nome de usuário já está em uso." }, { status: 409 });
   }
 
-  const durableAvatarUrl = (body.avatarUrl || "").trim() || getGoogleAvatarUrl(user) || null;
+  const requestedAvatarUrl = (body.avatarUrl || "").trim();
+  if (requestedAvatarUrl && !isAllowedUserAvatarUrl(requestedAvatarUrl, user.id)) {
+    return NextResponse.json({ error: "Use uma foto do Google ou envie um avatar pela sua conta." }, { status: 400 });
+  }
+  const durableAvatarUrl = requestedAvatarUrl || getGoogleAvatarUrl(user) || null;
 
   const { error: upsertError } = await service
     .from("profiles")
@@ -174,22 +183,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Falha ao salvar as alterações do perfil." }, { status: 500 });
   }
 
-  if (body.selectedTheme !== undefined || body.selectedTitle !== undefined || body.selectedFrame !== undefined) {
-    await service
-      .from("profiles")
-      .update({
-        profile_theme: body.selectedTheme || "default",
-        equipped_title: body.selectedTitle || null,
-        equipped_frame: body.selectedFrame || null,
-      })
-      .eq("user_id", user.id);
-  }
-
-  const { data: updatedProfile } = await service
-    .from("public_profiles")
+  const { data: updatedProfile, error: profileReadError } = await service
+    .from("profiles")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle<Profile>();
+
+  if (profileReadError) {
+    return NextResponse.json({ error: "N\u00e3o foi poss\u00edvel confirmar os dados do perfil." }, { status: 503 });
+  }
 
   return NextResponse.json({ success: true, profile: updatedProfile });
 }

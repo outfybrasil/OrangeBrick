@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createDataClient } from "@/lib/supabase/client";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { resolveAvatarUrl } from "@/lib/avatar";
 
 interface PulsePost {
   id: string;
@@ -11,7 +12,7 @@ interface PulsePost {
   author_avatar: string | null;
   content: string;
   created_at: string;
-  comments_count: number;
+  comments_count: number | null;
 }
 
 export function CommunityPulse() {
@@ -46,12 +47,12 @@ export function CommunityPulse() {
           .in("post_id", ids);
 
         if (commentsError) {
-          setHasError(false);
-        } else {
-          for (const comment of (comments || []) as Array<{ post_id: string }>) {
-            if (comment && comment.post_id) {
-              commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
-            }
+          setPosts(rows.map((post) => ({ ...post, comments_count: null })));
+          return;
+        }
+        for (const comment of (comments || []) as Array<{ post_id: string }>) {
+          if (comment && comment.post_id) {
+            commentCounts.set(comment.post_id, (commentCounts.get(comment.post_id) || 0) + 1);
           }
         }
       }
@@ -122,7 +123,7 @@ export function CommunityPulse() {
                     p.author_avatar ? (
                       <img
                         key={p.id}
-                        src={p.author_avatar}
+                        src={resolveAvatarUrl(p.author_avatar, p.author_name)}
                         alt={p.author_name}
                         referrerPolicy="no-referrer"
                         className="h-10 w-10 rounded-full object-cover ring-2 ring-[#101618]"
@@ -144,7 +145,7 @@ export function CommunityPulse() {
                     {posts[0].content}
                   </h3>
                   <p className="mt-0.5 text-xs text-gray-400 line-clamp-1">
-                    Iniciado por <strong className="text-gray-300 font-semibold">{posts[0].author_name}</strong> · {posts[0].comments_count} {posts[0].comments_count === 1 ? "resposta" : "respostas"}
+                    Iniciado por <strong className="text-gray-300 font-semibold">{posts[0].author_name}</strong> · {posts[0].comments_count === null ? "respostas indisponíveis" : `${posts[0].comments_count} ${posts[0].comments_count === 1 ? "resposta" : "respostas"}`}
                   </p>
                 </div>
               </div>
@@ -168,7 +169,7 @@ export function CommunityPulse() {
                   <div className="flex items-center gap-2.5 mb-2">
                     {post.author_avatar ? (
                       <img
-                        src={post.author_avatar}
+                        src={resolveAvatarUrl(post.author_avatar, post.author_name)}
                         alt={post.author_name}
                         referrerPolicy="no-referrer"
                         className="h-7 w-7 rounded-full object-cover"
@@ -188,7 +189,7 @@ export function CommunityPulse() {
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span>{post.comments_count} {post.comments_count === 1 ? "resposta" : "respostas"}</span>
+                    <span>{post.comments_count === null ? "Respostas indisponíveis" : `${post.comments_count} ${post.comments_count === 1 ? "resposta" : "respostas"}`}</span>
                   </div>
                 </Link>
               ))}

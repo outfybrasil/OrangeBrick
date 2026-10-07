@@ -33,17 +33,19 @@ function saoPauloDate(now: Date): string {
 }
 
 async function setSlotState(supabase: ReturnType<typeof serviceClient>, key: string, value: string) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("bot_state")
     .update({ value, updated_at: new Date().toISOString() })
-    .eq("key", key);
+    .eq("key", key)
+    .select("key")
+    .maybeSingle();
   if (error) {
     if (isMissingPostgrestRelation(error)) {
-      console.error("bot_state indisponível no schema remoto; seguindo sem lock persistente.");
-      return;
+      throw new Error("bot_state indispon\u00edvel; publica\u00e7\u00e3o editorial bloqueada sem lock persistente.");
     }
     throw error;
   }
+  if (!data) throw new Error("Lock editorial indisponível; publicação bloqueada.");
 }
 
 function editorialSlotStore(supabase: ReturnType<typeof serviceClient>): EditorialSlotStore {

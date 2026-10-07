@@ -22,7 +22,7 @@ const pages = {
 
 export async function generateMetadata({ params }: InstitutionalProps): Promise<Metadata> {
   const { slug } = await params;
-  const page = pages[slug as keyof typeof pages];
+  const page = Object.hasOwn(pages, slug) ? pages[slug as keyof typeof pages] : undefined;
   return page
     ? { title: page.title, description: page.description, alternates: { canonical: `/institucional/${encodeURIComponent(slug)}` } }
     : { robots: { index: false, follow: false } };
@@ -30,6 +30,6 @@ export async function generateMetadata({ params }: InstitutionalProps): Promise<
 
 export default async function InstitutionalPage({ params }: InstitutionalProps) {
   const { slug } = await params;
-  if (!(slug in pages)) notFound();
+  if (!Object.hasOwn(pages, slug)) notFound();
   return <InstitutionalClient slug={slug as keyof typeof pages} />;
 }

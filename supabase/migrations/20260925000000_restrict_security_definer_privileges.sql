@@ -24,6 +24,7 @@ revoke all on function public.current_user_is_admin() from public, anon, authent
 grant execute on function public.current_user_is_admin() to authenticated;
 
 revoke all on function public.assert_community_participation_allowed(uuid) from public, anon, authenticated;
+grant execute on function public.assert_community_participation_allowed(uuid) to authenticated;
 
 revoke all on function public.apply_retention_policy() from public, anon, authenticated;
 grant execute on function public.apply_retention_policy() to service_role;

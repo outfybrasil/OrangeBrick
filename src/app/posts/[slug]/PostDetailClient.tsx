@@ -595,8 +595,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               onLoadMore={() => void loadMoreComments()}
               onLike={toggleCommentLike}
               onReply={setReplyToCommentId}
-              onDelete={(commentId) => {
-                void deleteComment(commentId);
+              onDelete={async (commentId) => {
+                await deleteComment(commentId);
                 if (replyToCommentId === commentId) setReplyToCommentId(null);
               }}
             />
@@ -608,8 +608,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
         isOpen={isBrickModalOpen}
         onClose={() => setIsBrickModalOpen(false)}
         initialArticle={attachedArticle}
-        onPublish={async (content, platformTag, article, mediaUrl) => {
-          await addCommunityBrick(content, platformTag, article, mediaUrl);
+        onPublish={async (content, platformTag, article, mediaUrl, mediaAlt) => {
+          await addCommunityBrick(content, platformTag, article, mediaUrl, mediaAlt);
           router.push("/brickboard");
         }}
       />

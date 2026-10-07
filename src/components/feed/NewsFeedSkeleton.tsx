@@ -8,7 +8,7 @@ export function NewsFeedSkeleton() {
         <div className="brick-bounce">
           <Icon name="brick" size={18} className="text-brand-orange" />
         </div>
-        <p className="text-xs font-mono text-brand-orange-muted animate-pulse">
+        <p className="text-xs font-mono text-gray-300">
           Quebrando os tijolos...
         </p>
       </div>

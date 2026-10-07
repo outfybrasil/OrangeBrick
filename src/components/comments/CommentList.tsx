@@ -10,7 +10,7 @@ interface CommentListProps {
   onRetry: () => void;
   onLike: (commentId: string) => Promise<void>;
   onReply?: (commentId: string) => void;
-  onDelete?: (commentId: string) => void;
+  onDelete?: (commentId: string) => Promise<void> | void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
   onLoadMore?: () => void;

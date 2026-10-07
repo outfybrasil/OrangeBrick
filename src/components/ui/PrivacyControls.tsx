@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { clearConsent, DEVICE_STORAGE_KEY } from "@/lib/consent";
+import { clearConsent } from "@/lib/consent";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
+import { useDeviceId } from "@/lib/hooks/useDeviceId";
 import { invokeFunction } from "@/lib/supabase/functions";
 import { USER_DATA_EXPORT_DATASETS } from "@/lib/user-data-export";
 
@@ -13,25 +14,18 @@ type ActionState = "idle" | "exporting" | "deleting";
 export function PrivacyControls() {
   const router = useRouter();
   const { user } = useAuth();
+  const deviceId = useDeviceId();
   const [action, setAction] = useState<ActionState>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [confirmText, setConfirmText] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(showDelete, () => setShowDelete(false));
 
-  const deviceHeaders = () => {
-    const headers = new Headers();
-    const deviceId = window.localStorage.getItem(DEVICE_STORAGE_KEY);
-    if (deviceId) headers.set("x-orange-brick-device", deviceId);
-    return headers;
-  };
-
   const exportData = async () => {
     setAction("exporting");
     setMessage("Preparando a cópia dos seus dados.");
     try {
       const metadataResponse = await fetch("/api/user/data", {
-        headers: deviceHeaders(),
         credentials: "same-origin",
       });
       if (!metadataResponse.ok) throw new Error("Falha ao preparar o arquivo");
@@ -48,7 +42,6 @@ export function PrivacyControls() {
           if (cursor) query.set("cursor", cursor);
 
           const response = await fetch(`/api/user/data?${query.toString()}`, {
-            headers: deviceHeaders(),
             credentials: "same-origin",
           });
           if (!response.ok) throw new Error("Falha ao preparar o arquivo");
@@ -79,7 +72,7 @@ export function PrivacyControls() {
       link.download = `orange-brick-dados-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setMessage("Cópia dos dados gerada.");
+      setMessage("Cópia da conta gerada. Leituras e reações anônimas do aparelho ficaram fora do arquivo.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível exportar os dados.");
     } finally {
@@ -88,22 +81,34 @@ export function PrivacyControls() {
   };
 
   const revokeOptionalData = async () => {
+    let revocationFailed = false;
     try {
       const registration = await navigator.serviceWorker?.ready;
       const subscription = await registration?.pushManager.getSubscription();
       if (subscription) {
-        await invokeFunction("manage-push-subscription", {
-          action: "unsubscribe",
-          endpoint: subscription.endpoint,
-        });
-        await subscription.unsubscribe();
+        const endpoint = subscription.endpoint;
+        try {
+          if (!await subscription.unsubscribe()) revocationFailed = true;
+        } catch {
+          revocationFailed = true;
+        }
+        try {
+          await invokeFunction("manage-push-subscription", {
+            action: "unsubscribe",
+            endpoint,
+          });
+        } catch {
+          revocationFailed = true;
+        }
       }
     } catch {
-      setMessage("Preferências locais apagadas. A revogação do push será repetida pelo navegador.");
+      revocationFailed = true;
     }
 
     clearConsent();
-    setMessage("Preferências opcionais removidas. O banner será exibido novamente na próxima visita.");
+    setMessage(revocationFailed
+      ? "Preferências locais removidas, mas não foi possível confirmar a revogação do push no servidor."
+      : "Preferências opcionais removidas. O banner será exibido novamente na próxima visita.");
   };
 
   const deleteAccount = async () => {
@@ -113,7 +118,7 @@ export function PrivacyControls() {
     try {
       const response = await fetch("/api/user/delete", {
         method: "DELETE",
-        headers: deviceHeaders(),
+        headers: deviceId ? { "x-orange-brick-device": deviceId } : undefined,
         credentials: "same-origin",
       });
       if (!response.ok) throw new Error("A exclusão não pôde ser concluída");

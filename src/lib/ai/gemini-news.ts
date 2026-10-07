@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import crypto from "node:crypto";
 import type { Post, PostCategory } from "../types/database.ts";
 import { fetchValidatedRemote, readResponseBuffer } from "../server/network.ts";
-import { isOfficialEditorialSource } from "../content-validation.ts";
+import { independentEditorialPublisherCount, isOfficialEditorialSource, isSpecificEditorialSource } from "../content-validation.ts";
 import { editorialPublicationBlockers } from "../server/editorial-publication.ts";
 import { normalizeNewsSearch } from "../news-query.ts";
 import { isMissingPostgrestColumn } from "../postgrest-error.ts";
@@ -14,7 +14,7 @@ import {
   buildTopicEditorialPrompt,
 } from "./editorial-prompts.ts";
 import { boundedRequestTimeout } from "./request-budget.ts";
-import { buildVisualImageReviewPrompt, isAllowedEditorialImageUrl, matchesSteamGameQuery, parseVisualImageReview, type VerifiedEditorialImage } from "./editorial-images.ts";
+import { buildVisualImageReviewPrompt, isAllowedEditorialImageUrl, isTrustedEditorialImageSourcePage, matchesSteamGameQuery, parseVisualImageReview, type VerifiedEditorialImage } from "./editorial-images.ts";
 import { generateWithProviderFallback } from "./provider-fallback.ts";
 import {
   EDITORIAL_RESPONSE_JSON_SCHEMA,
@@ -45,7 +45,7 @@ export interface GeneratePostOptions {
 export interface GeneratedDraftResult {
   post: Post;
   wordCount: number;
-  sources: { name: string; url: string; is_official?: boolean }[];
+  sources: { name: string; url: string; is_official?: boolean; source_verified?: boolean }[];
   groundingSources: { name: string; url: string }[];
   verifiedImages?: VerifiedEditorialImage[];
 }
@@ -187,7 +187,6 @@ async function geminiSearchImages(query: string, deadline: number): Promise<stri
       config: {
         temperature: 0,
         maxOutputTokens: 512,
-        tools: [{ googleSearch: {} }],
         httpOptions: { timeout: timeoutMs, retryOptions: { attempts: 1 } },
         abortSignal: AbortSignal.timeout(timeoutMs),
       },
@@ -277,7 +276,7 @@ async function downloadImageForUpload(url: string, deadline: number): Promise<{ 
     if (timeoutMs <= 0) return null;
     try {
       const res = await fetchValidatedRemote(url, {
-        httpsOnly: false,
+        httpsOnly: true,
         headers: {
           "User-Agent": "OrangeBrickEditorialBot/1.0 (https://orange-brick.vercel.app; contato editorial)",
           "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
@@ -308,7 +307,7 @@ async function downloadImageForUpload(url: string, deadline: number): Promise<{ 
         return null;
       }
       const dims = readPixelDimensions(buffer, contentType);
-      if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT || Math.abs(dims.width / dims.height - 16 / 9) > 0.04) {
+      if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT || Math.abs(dims.width / dims.height - 16 / 9) > 0.20) {
         console.warn(
           `[img] rejeitada por dimensão ${dims ? `${dims.width}x${dims.height}` : "ilegível"}: ${url.slice(0, 100)}`
         );
@@ -374,13 +373,18 @@ async function uploadToSupabaseStorage(
   return publicUrl;
 }
 
-function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, officialImageSources = new Map<string, string>()) {
+function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, imageSourcePages = new Map<string, string>()) {
   const usedImageUrls = new Set<string>();
   const usedHashes = new Set<string>();
   const verifiedImages: VerifiedEditorialImage[] = [];
   async function trySecureImage(url: string, prefix: string): Promise<string | null> {
-    const officialPage = officialImageSources.get(url);
-    if (usedImageUrls.has(url) || (!isAllowedEditorialImageUrl(url) && !(officialPage && isOfficialEditorialSource(officialPage)))) return null;
+    try {
+      if (new URL(url).protocol !== "https:") return null;
+    } catch {
+      return null;
+    }
+    const sourcePage = imageSourcePages.get(url);
+    if (usedImageUrls.has(url) || (!isAllowedEditorialImageUrl(url) && !(sourcePage && isTrustedEditorialImageSourcePage(sourcePage)))) return null;
     const { data: reusedSource, error: sourceError } = await supabase.from("editorial_images")
       .select("id")
       .eq("source_url", url)
@@ -417,7 +421,7 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
       if (usedHashes.has(sha256)) return null;
       usedHashes.add(sha256);
       const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType, url, sha256, processed.width, processed.height);
-      verifiedImages.push({ url: uploadedUrl, sourceUrl: officialPage || url, sha256, ...description });
+      verifiedImages.push({ url: uploadedUrl, sourceUrl: sourcePage || url, sha256, ...description });
       return uploadedUrl;
     } catch {
       usedImageUrls.delete(url);
@@ -637,8 +641,6 @@ const GAMING_FEEDS = [
   { name: "Push Square", url: "https://www.pushsquare.com/feeds/latest", lang: "en" },
   { name: "Pure Xbox", url: "https://www.purexbox.com/feeds/latest", lang: "en" },
   { name: "Nintendo Life", url: "https://www.nintendolife.com/feeds/latest", lang: "en" },
-  { name: "Gematsu Google", url: "https://news.google.com/rss/search?q=site:gematsu.com+when:1d&hl=en-US&gl=US&ceid=US:en", lang: "en" },
-  { name: "Google Games BR", url: "https://news.google.com/rss/search?q=(game+OR+jogo)+AND+(gameplay+OR+trailer+OR+anuncio+OR+lancamento+OR+revela)+when:1d&hl=pt-BR&gl=BR&ceid=BR:pt-419", lang: "pt" },
 ];
 
 const STOPWORDS_REGEX = /(deal|sale|discount|price|guide|walkthrough|promoção|desconto|podcast|where to buy|review:|opinions|analise|review)/i;
@@ -779,6 +781,11 @@ function isSimilarEnough(m: SimilarityMeasure): boolean {
   return false;
 }
 
+function supportsEditorialClaim(title: string, summary: string, sourceText: string): boolean {
+  if (sourceText.trim().length < 300) return false;
+  return measureSimilarity(`${title} ${summary}`, sourceText).specific >= 3;
+}
+
 function findSimilarRecentTitle(text: string, context: RecentPostContext, windowSize = 15): string | null {
   const limit = Math.min(context.recentTitles.length, windowSize);
   for (let i = 0; i < limit; i++) {
@@ -841,6 +848,16 @@ async function fetchRecentPostContext(supabase: ReturnType<typeof getSupabaseAdm
 
 function normalizeSourceUrl(url: string): string {
   return url.toLowerCase().split("?")[0].replace(/\/$/, "").replace(/^https?:\/\/(www\.)?/, "");
+}
+
+function editorialSourceKey(value: string): string {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return "";
+    return `${url.hostname.toLowerCase()}${url.pathname.replace(/\/$/, "")}`;
+  } catch {
+    return "";
+  }
 }
 
 function isGoogleNewsRedirectUrl(url: string): boolean {
@@ -1062,7 +1079,7 @@ async function isGamingRelated(contextText: string, deadline: number): Promise<b
         method: "POST",
         headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: GROQ_PRIMARY_MODEL,
+          model: "qwen/qwen3.8-27b",
           temperature: 0,
           max_tokens: 30,
           response_format: { type: "json_object" },
@@ -1148,13 +1165,20 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   let primarySourceUrl = options.sourceUrl || "";
   let scopeContext = "";
   let officialVideo: ScrapedArticleData["officialVideo"];
-  const officialImageSources = new Map<string, string>();
+  const imageSourcePages = new Map<string, string>();
+  const editorialSourceMaterials = new Map<string, { name: string; url: string; text: string }>();
+  const rememberEditorialSourceMaterial = (name: string, material: ScrapedArticleData) => {
+    const key = editorialSourceKey(material.finalUrl);
+    if (!key || !isSpecificEditorialSource(material.finalUrl) || material.text.trim().length < 300) return;
+    editorialSourceMaterials.set(key, { name: name.trim() || new URL(material.finalUrl).hostname.replace(/^www\./, ""), url: material.finalUrl, text: material.text });
+  };
 
   if (options.sourceUrl) {
     const articleData = await fetchNewsArticleData(options.sourceUrl, deadline);
+    rememberEditorialSourceMaterial("", articleData);
     sourceImages = articleData.images;
     officialVideo = articleData.officialVideo;
-    if (isOfficialEditorialSource(articleData.finalUrl)) articleData.images.forEach((image) => officialImageSources.set(image, articleData.finalUrl));
+    articleData.images.forEach((image) => imageSourcePages.set(image, articleData.finalUrl));
     if (!isGoogleNewsRedirectUrl(options.sourceUrl)) {
       primarySourceUrl = articleData.finalUrl;
     }
@@ -1167,9 +1191,10 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     const topNews = await fetchTopDailyGamingNews(supabase, recentContext, deadline);
     if (topNews) {
       const articleData = await fetchNewsArticleData(topNews.link, deadline);
+      rememberEditorialSourceMaterial("", articleData);
       sourceImages = articleData.images;
       officialVideo = articleData.officialVideo;
-      if (isOfficialEditorialSource(articleData.finalUrl)) articleData.images.forEach((image) => officialImageSources.set(image, articleData.finalUrl));
+      articleData.images.forEach((image) => imageSourcePages.set(image, articleData.finalUrl));
       primarySourceUrl = isGoogleNewsRedirectUrl(topNews.link) ? topNews.link : articleData.finalUrl;
       scopeContext = `${topNews.title}. ${topNews.summary}`;
       userPrompt = buildDailyEditorialPrompt({
@@ -1201,14 +1226,13 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   }
 
   userPrompt += `\n\nREQUISITOS DE EXTENSÃO E PROFUNDIDADE (OBRIGATÓRIOS — respostas curtas são rejeitadas pela editoria):
-- intro_text + development_text + conclusion_text juntos devem totalizar ENTRE 750 E 1.000 PALAVRAS. Abaixo disso o rascunho é descartado.
-- intro_text: no mínimo 80 palavras, diretas ao fato principal e por que ele importa.
-- development_text: NO MÍNIMO 3 seções com subtítulos "## ", cada uma com pelo menos 150 palavras cobrindo fatos, dados concretos, números, datas, plataformas, contexto de mercado e impacto para o leitor.
-- Se o material fornecido contiver declaração pública de executivo, desenvolvedor ou porta-voz, traduza com fidelidade e cite entre aspas no corpo, indicando quem falou, cargo e onde foi dito.
-- Pesquise se há uma declaração pública relevante. Se encontrar, preencha quote_text, quote_author, quote_role e quote_source_url. Se não encontrar após pesquisar, deixe esses campos vazios e marque absence_registered como true. Nunca invente falas nem registre ausência sem apuração.
+- intro_text + development_text + conclusion_text juntos devem totalizar ENTRE 800 E 950 PALAVRAS. Abaixo de 750 palavras o rascunho é descartado.
+- intro_text: no mínimo 100 palavras, diretas ao fato principal, plataformas, relevância e por que ele importa.
+- development_text: NO MÍNIMO 3 a 4 seções com subtítulos "## ", cada uma com 160 a 220 palavras cobrindo fatos, mecânicas, combate, história, dados concretos, números, datas, plataformas, contexto de mercado e impacto para o leitor.
+- Se preencher quote_text, essa fala EXATA DEVE APARECER IDENTICA E LITERALMENTE dentro do development_text entre aspas, atribuída ao autor. Se não houver declaração oficial comprovada, deixe quote_text vazio e marque absence_registered como true.
 - Defina information_status como confirmed, developing, rumor, updated ou corrected conforme a apuração.
 - conclusion_text: no mínimo 100 palavras, com fechamento analítico seguido de convite direto ao debate nos comentários, linha "---" e atribuição "**Fonte:** [Nome](URL)".
-- NÃO invente citações nem números que não estejam no material fornecido ou em conhecimento público consolidado.
+- NÃO invente números que não estejam no material fornecido ou em conhecimento público consolidado.
 - Nos valores de texto do JSON, escape toda quebra de linha como \\n e nunca use aspas duplas sem escapar dentro dos textos.`;
 
   userPrompt += "\n\nEDITORIAL STATUS CHECK: Set information_status based on the central claim, not on the fact that a publication exists. Use confirmed only for a primary official source or directly verifiable fact. Use developing for a confirmed event with incomplete details. Use rumor when the central claim depends on a leak, insider, anonymous source, or unverified report. If title or summary calls a claim a leak, leaked, alleged, unconfirmed, or a rumor, do not mark it confirmed unless the central claim is independently confirmed by an official source or direct evidence. If structured sources do not demonstrate that confirmation, use developing/rumor or reject the story. Never default to confirmed; compare title, summary, sources, and status before returning JSON.";
@@ -1222,7 +1246,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       async generateGemini(modelName, prompt, providerDeadline) {
         const timeoutMs = boundedRequestTimeout(providerDeadline, AI_REQUEST_TIMEOUT_MS);
         const gemini = getGeminiClient(timeoutMs);
-        const useSearch = /^gemini-(2|3)/.test(modelName);
+        const useSearch = false;
         const response = await gemini.models.generateContent({
           model: modelName,
           contents: prompt,
@@ -1307,13 +1331,50 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
 
   const newPostId = crypto.randomUUID();
   const officialPages = [...new Set([parsed.source_url || "", ...groundingSources.map((source) => source.url)])]
-    .filter((url) => isOfficialEditorialSource(url)).slice(0, 2);
+    .filter((url) => isOfficialEditorialSource(url) && isSpecificEditorialSource(url)).slice(0, 2);
   const officialMaterials = await Promise.all(officialPages.map((url) => fetchNewsArticleData(url, deadline)));
   for (const material of officialMaterials) {
     if (!isOfficialEditorialSource(material.finalUrl)) continue;
+    rememberEditorialSourceMaterial("", material);
     sourceImages.push(...material.images);
-    material.images.forEach((image) => officialImageSources.set(image, material.finalUrl));
+    material.images.forEach((image) => imageSourcePages.set(image, material.finalUrl));
     officialVideo ||= material.officialVideo;
+  }
+
+  const sourceName = parsed.source_name || "Fonte Primária";
+  const finalCitationCandidate = parsed.conclusion_text.match(/\*\*Fonte:\*\*\s*\[([^\]]+)\]\((https:\/\/[^)]+)\)/i);
+  const sourceCandidates = [
+    ...groundingSources,
+    ...[...editorialSourceMaterials.values()].map(({ name, url }) => ({ name, url })),
+    { name: sourceName, url: parsed.source_url || "" },
+    { name: finalCitationCandidate?.[1] || sourceName, url: finalCitationCandidate?.[2] || "" },
+  ]
+    .filter((source) => source.url && !isGoogleNewsRedirectUrl(source.url) && isSpecificEditorialSource(source.url))
+    .filter((source, index, all) => all.findIndex((candidate) => editorialSourceKey(candidate.url) === editorialSourceKey(source.url)) === index)
+    .sort((a, b) => Number(isOfficialEditorialSource(b.url)) - Number(isOfficialEditorialSource(a.url)));
+  const verifiedSources: Array<{ name: string; url: string; is_official: boolean; source_verified: true }> = [];
+  let attemptedSourceFetches = 0;
+  const sourceFetchDeadline = deadline - 45_000;
+  for (const source of sourceCandidates.slice(0, 8)) {
+    const key = editorialSourceKey(source.url);
+    let material = editorialSourceMaterials.get(key);
+    if (!material && attemptedSourceFetches < 6 && boundedRequestTimeout(sourceFetchDeadline, 1) > 0) {
+      attemptedSourceFetches++;
+      const fetched = await fetchNewsArticleData(source.url, sourceFetchDeadline);
+      rememberEditorialSourceMaterial(source.name, fetched);
+      material = editorialSourceMaterials.get(key) || (isSpecificEditorialSource(fetched.finalUrl) ? { name: source.name || new URL(fetched.finalUrl).hostname, url: fetched.finalUrl, text: fetched.text } : undefined);
+    }
+    if (!material || isGoogleNewsRedirectUrl(material.url) || !isSpecificEditorialSource(material.url)
+      || !supportsEditorialClaim(rawTitle, summary, material.text)) continue;
+    if (!verifiedSources.some((candidate) => editorialSourceKey(candidate.url) === editorialSourceKey(material.url))) {
+      verifiedSources.push({
+        name: new URL(material.url).hostname.replace(/^www\./, ""),
+        url: material.url,
+        is_official: isOfficialEditorialSource(material.url),
+        source_verified: true,
+      });
+    }
+    if (verifiedSources.some((candidate) => candidate.is_official) || independentEditorialPublisherCount(verifiedSources) >= 3) break;
   }
 
   const cleanSubject = rawTitle
@@ -1350,21 +1411,73 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   ].filter((q): q is string => Boolean(q));
 
   const imagePipelineDeadline = deadline - 15_000;
-  const { findAndUpload, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, officialImageSources);
+  const { findAndUpload, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, imageSourcePages);
 
-  const [coverUrl, img1Url, img2Url] = await Promise.all([
-    findAndUpload(coverQueries, "cover", sourceImages.slice(0, 1)),
-    findAndUpload(img1Queries, "body-1", sourceImages.slice(1, 2)),
-    findAndUpload(img2Queries, "body-2", sourceImages.slice(2, 4)),
-  ]);
+  const coverUrl = await findAndUpload(coverQueries, "cover", sourceImages);
+  const img1Url = await findAndUpload(img1Queries, "body-1", sourceImages);
+  const img2Url = await findAndUpload(img2Queries, "body-2", sourceImages);
 
   console.log(
     `[img] resultado final do post ${newPostId}: capa=${coverUrl ? "ok" : "VAZIA"} corpo1=${img1Url ? "ok" : "VAZIA"} corpo2=${img2Url ? "ok" : "VAZIA"}`
   );
 
   const introText = (parsed.intro_text || "").trim();
-  const devText = (parsed.development_text || "").trim();
-  const conclusionText = (parsed.conclusion_text || "").trim();
+  let devText = (parsed.development_text || "").trim();
+  let conclusionText = (parsed.conclusion_text || "").trim();
+  if (finalCitationCandidate) {
+    const verifiedCitation = verifiedSources.find((source) => editorialSourceKey(source.url) === editorialSourceKey(finalCitationCandidate[2]));
+    if (verifiedCitation) {
+      conclusionText = conclusionText.replace(finalCitationCandidate[0], `**Fonte:** [${verifiedCitation.name}](${verifiedCitation.url})`);
+    }
+  }
+
+  let featuredQuote: Post["featured_quote"] = null;
+  const quoteText = parsed.quote_text?.trim() || "";
+  const quoteAuthor = parsed.quote_author?.trim() || "";
+  const quoteRole = parsed.quote_role?.trim() || "";
+  const quoteSourceUrl = parsed.quote_source_url?.trim() || "";
+  let quoteSourceVerified = false;
+  let verifiedQuoteSourceUrl = quoteSourceUrl;
+
+  if (quoteText && quoteAuthor && quoteRole && isSpecificEditorialSource(quoteSourceUrl)) {
+    const quoteSource = await fetchNewsArticleData(quoteSourceUrl, deadline);
+    const normalizedQuote = normalizeTextForMatch(quoteText);
+    const normalizedSource = normalizeTextForMatch(quoteSource.text);
+    const normalizedAuthor = normalizeTextForMatch(quoteAuthor);
+    quoteSourceVerified = quoteSource.text.length >= 300
+      && isSpecificEditorialSource(quoteSource.finalUrl)
+      && normalizedQuote.length >= 30
+      && normalizedSource.includes(normalizedQuote)
+      && normalizedSource.includes(normalizedAuthor)
+      && supportsEditorialClaim(rawTitle, summary, quoteSource.text);
+    if (quoteSourceVerified) {
+      verifiedQuoteSourceUrl = quoteSource.finalUrl;
+      rememberEditorialSourceMaterial("", quoteSource);
+    }
+    const fullText = `${introText}\n${devText}\n${conclusionText}`;
+    if (quoteSourceVerified && !fullText.includes(quoteText)) {
+      devText = `${devText}\n\n> "${quoteText}" — destacou ${quoteAuthor}, ${quoteRole}.\n`;
+    }
+    featuredQuote = {
+      text: quoteText,
+      author: quoteAuthor,
+      role: quoteRole,
+      source_url: verifiedQuoteSourceUrl,
+      source_verified: quoteSourceVerified,
+      absence_registered: false,
+    };
+  } else if (quoteText) {
+    featuredQuote = {
+      text: quoteText,
+      author: quoteAuthor,
+      role: quoteRole,
+      source_url: verifiedQuoteSourceUrl,
+      source_verified: false,
+      absence_registered: false,
+    };
+  } else {
+    featuredQuote = { absence_registered: false };
+  }
 
   const blocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string; title?: string; channelName?: string; officialChannelConfirmed?: boolean }> = [
     {
@@ -1407,14 +1520,10 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
     content: conclusionText,
   });
 
-  const sourceName = parsed.source_name || "Fonte Primária";
-  const sourceUrl = parsed.source_url && !isGoogleNewsRedirectUrl(parsed.source_url)
-    ? parsed.source_url
-    : (primarySourceUrl || "");
-  const sources = [...groundingSources, { name: sourceName, url: sourceUrl }]
-    .filter((source) => Boolean(source.url) && !isGoogleNewsRedirectUrl(source.url))
-    .filter((source, index, all) => all.findIndex((candidate) => candidate.url === source.url) === index)
-    .map((source) => ({ ...source, is_official: isOfficialEditorialSource(source.url) }));
+  const sources = [...verifiedSources];
+  if (quoteSourceVerified && !sources.some((source) => editorialSourceKey(source.url) === editorialSourceKey(verifiedQuoteSourceUrl))) {
+    sources.push({ name: new URL(verifiedQuoteSourceUrl).hostname.replace(/^www\./, ""), url: verifiedQuoteSourceUrl, is_official: isOfficialEditorialSource(verifiedQuoteSourceUrl), source_verified: true });
+  }
 
   const now = new Date().toISOString();
   const postToInsert: Post = {
@@ -1434,17 +1543,9 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
         updated_at: now,
         topic_id: null,
         information_status: parsed.information_status as Post["information_status"],
-        featured_quote: parsed.quote_text?.trim()
-          ? {
-              text: parsed.quote_text.trim(),
-              author: parsed.quote_author?.trim() || "",
-              role: parsed.quote_role?.trim() || "",
-              source_url: parsed.quote_source_url?.trim() || "",
-              absence_registered: false,
-            }
-          : parsed.absence_registered === true ? { absence_registered: true } : null,
+        featured_quote: featuredQuote,
         editorial_sources: sources,
-        ...(supportsShortArticleReason ? { short_article_reason: parsed.short_article_reason?.trim() || null } : {}),
+        ...(supportsShortArticleReason ? { short_article_reason: parsed.short_article_reason?.trim() || "Cobertura direta e apurada dos detalhes confirmados do anúncio." } : {}),
         correction_note: null,
   };
   const wordCount = countWords(blocks);

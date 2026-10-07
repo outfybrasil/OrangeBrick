@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Timer } from "@/components/ui/Timer";
 import { ReactionIcon } from "@/components/reactions/ReactionIcon";
+import { resolveAvatarUrl } from "@/lib/avatar";
 
 export interface BrickTrendingItem {
   id: string;
@@ -56,7 +57,7 @@ export function BrickboardTrendingSection({ bricks }: BrickboardTrendingSectionP
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-white/15 bg-card-slate">
                     {brick.author_avatar ? (
                       <Image
-                        src={brick.author_avatar}
+                        src={resolveAvatarUrl(brick.author_avatar, brick.author_name)}
                         alt=""
                         fill
                         sizes="40px"

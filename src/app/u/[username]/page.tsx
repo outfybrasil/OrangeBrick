@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Footer } from "@/components/ui/Footer";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { isAllowedUserAvatarUrl } from "@/lib/avatar";
 import type { PublicProfileData } from "@/lib/types/progression";
 import type { ReleaseRadarItem, ReactionType } from "@/lib/types/database";
 import type { CommunityPost, AttachedArticle, SharedPostData } from "@/lib/types/community";
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   const decoded = decodeURIComponent(username).replace(/^@/, "");
   const supabase = createPublicServerClient();
 
-  const { data } = await (supabase as unknown as RpcCaller).rpc("public_profile", {
+  const { data } = await (supabase as unknown as RpcCaller).rpc("public_profile_safe", {
     target_username: decoded,
   });
   const profile = data as PublicProfileData | null;
@@ -40,6 +41,9 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
     ? `${profile.bio.slice(0, 150)} — Perfil no Orange Brick.`
     : `Confira os Bricks, jogos favoritos e atividades de ${profile.display_name} no Orange Brick.`;
   const canonical = `/u/${encodeURIComponent(profile.username)}`;
+  const avatarUrl = profile.avatar_url && isAllowedUserAvatarUrl(profile.avatar_url, profile.user_id)
+    ? profile.avatar_url
+    : undefined;
 
   return {
     title,
@@ -50,13 +54,13 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
       description,
       url: canonical,
       type: "profile",
-      images: profile.avatar_url ? [{ url: profile.avatar_url }] : [],
+      images: avatarUrl ? [{ url: avatarUrl }] : [],
     },
     twitter: {
       card: "summary",
       title,
       description,
-      images: profile.avatar_url ? [profile.avatar_url] : [],
+      images: avatarUrl ? [avatarUrl] : [],
     },
   };
 }
@@ -69,7 +73,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
 
   const { data: profileData, error: profileError } = await (
     supabase as unknown as RpcCaller
-  ).rpc("public_profile", {
+  ).rpc("public_profile_safe", {
     target_username: decoded,
   });
 
@@ -98,7 +102,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
   const [postsRes, votesRes] = await Promise.all([
     supabase
       .from("community_posts")
-      .select("id, user_id, author_name, author_username, author_avatar, content, media_url, platform_tag, attached_article, created_at, is_pinned, is_official")
+      .select("id, user_id, author_name, author_username, author_avatar, content, media_url, media_alt, platform_tag, attached_article, created_at, is_pinned, is_official")
       .eq("user_id", profile.user_id)
       .order("created_at", { ascending: false })
       .limit(30),
@@ -116,6 +120,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
     author_avatar: string;
     content: string;
     media_url: string | null;
+    media_alt: string | null;
     platform_tag: string | null;
     attached_article: unknown;
     created_at: string;
@@ -171,6 +176,7 @@ export default async function UserProfilePage({ params }: ProfilePageProps) {
       author_avatar: row.author_avatar,
       content: row.content,
       media_url: row.media_url,
+      media_alt: row.media_alt,
       platform_tag: row.platform_tag,
       attached_article: attachedArticle,
       shared_post: sharedPost,

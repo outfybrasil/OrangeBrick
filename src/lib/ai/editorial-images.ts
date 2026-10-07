@@ -1,4 +1,4 @@
-import { isOfficialEditorialSource } from "../content-validation.ts";
+import { isKnownEditorialPublisher, isOfficialEditorialSource, isSpecificEditorialSource } from "../content-validation.ts";
 
 export interface VerifiedEditorialImage {
   url: string;
@@ -8,7 +8,7 @@ export interface VerifiedEditorialImage {
   caption: string;
 }
 
-const ASSET_DOMAINS = ["steamstatic.com", "xboxservices.com", "nintendo.net", "sonyinteractive.com"];
+const OFFICIAL_ASSET_DOMAINS = ["steamstatic.com", "xboxservices.com", "nintendo.net", "sonyinteractive.com"];
 const SEARCH_WORDS = new Set("official game cover art key 4k hd gameplay screenshot screenshots action combat environment world scenery boss cinematic scene character trailer logo product hardware promotional image photo press kit".split(" "));
 
 function words(value: string): string[] {
@@ -27,12 +27,21 @@ export function isAllowedEditorialImageUrl(value: string): boolean {
   try {
     const url = new URL(value);
     if (url.protocol !== "https:") return false;
+    if (!isSpecificEditorialSource(value)) return false;
     if (/(?:header|capsule_\d+x\d+|library_\d+x\d+)\.(?:jpg|png|webp)$/i.test(url.pathname)) return false;
     return isOfficialEditorialSource(value)
-      || ASSET_DOMAINS.some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`));
+      || OFFICIAL_ASSET_DOMAINS.some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`));
   } catch {
     return false;
   }
+}
+
+export function isTrustedEditorialImageSourcePage(value: string): boolean {
+  return isSpecificEditorialSource(value) && (isOfficialEditorialSource(value) || isKnownEditorialPublisher(value));
+}
+
+export function isVerifiedEditorialImageEvidenceUrl(value: string): boolean {
+  return isAllowedEditorialImageUrl(value) || isTrustedEditorialImageSourcePage(value);
 }
 
 export function parseVisualImageReview(text: string): { alt: string; caption: string } | null {

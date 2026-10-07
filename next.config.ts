@@ -54,7 +54,7 @@ const nextConfig: NextConfig = {
       { source: "/institucional/termos", destination: "/termos", permanent: true },
       { source: "/institucional/privacidade", destination: "/privacidade", permanent: true },
       { source: "/assuntos", destination: "/noticias", permanent: true },
-      { source: "/profile/:nickname*", destination: "/u/:nickname*", permanent: true },
+      { source: "/profile/:nickname((?!setup$).*)", destination: "/u/:nickname", permanent: true },
     ];
   },
   async headers() {

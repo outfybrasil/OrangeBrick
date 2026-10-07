@@ -20,7 +20,7 @@ import { createDataClient } from "@/lib/supabase/client";
 interface BrickCardProps {
   post: CommunityPost;
   onReaction: (postId: string, type: ReactionType) => Promise<boolean>;
-  onDeletePost?: (postId: string) => void;
+  onDeletePost?: (postId: string) => Promise<void> | void;
   onEditPost?: (postId: string, newContent: string) => Promise<void> | void;
   onSharePost: (post: CommunityPost, comment: string) => Promise<void>;
   onAddComment: (postId: string, content: string, parentId?: string) => Promise<void>;
@@ -80,6 +80,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
 
   const [isDeletePostOpen, setIsDeletePostOpen] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [deletePostError, setDeletePostError] = useState<string | null>(null);
   const deletePostDialogRef = useModalDialog<HTMLDivElement>(
     isDeletePostOpen,
     () => setIsDeletePostOpen(false)
@@ -91,6 +92,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const editDialogRef = useModalDialog<HTMLDivElement>(
     isEditOpen,
     () => setIsEditOpen(false)
@@ -123,9 +125,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
     const trimmed = editContent.trim();
     if (!trimmed || trimmed.length > 280) return;
     setIsSavingEdit(true);
+    setEditError(null);
     try {
       await onEditPost(post.id, trimmed);
       setIsEditOpen(false);
+    } catch (cause) {
+      setEditError(cause instanceof Error ? cause.message : "Não foi possível salvar a publicação. Tente novamente.");
     } finally {
       setIsSavingEdit(false);
     }
@@ -265,9 +270,12 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
   const handleDeletePost = async () => {
     if (!onDeletePost) return;
     setIsDeletingPost(true);
+    setDeletePostError(null);
     try {
       await onDeletePost(post.id);
       setIsDeletePostOpen(false);
+    } catch (cause) {
+      setDeletePostError(cause instanceof Error ? cause.message : "Não foi possível apagar a publicação. Tente novamente.");
     } finally {
       setIsDeletingPost(false);
     }
@@ -438,6 +446,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                         type="button"
                         role="menuitem"
                         onClick={() => {
+                          setEditError(null);
                           setEditContent(post.content);
                           setIsEditOpen(true);
                           setIsMenuOpen(false);
@@ -455,6 +464,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                         type="button"
                         role="menuitem"
                         onClick={() => {
+                          setDeletePostError(null);
                           setIsDeletePostOpen(true);
                           setIsMenuOpen(false);
                         }}
@@ -512,7 +522,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
 
       {post.media_url && !post.attached_article && (
         <div className="relative mt-2.5 max-w-[390px] overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
-          <img loading="lazy" decoding="async" src={post.media_url} alt="Mídia do post" className="h-auto max-h-[260px] w-full object-contain" />
+          <img loading="lazy" decoding="async" src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="h-auto max-h-[260px] w-full object-contain" />
         </div>
       )}
 
@@ -918,6 +928,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
             <p id={`delete-brick-post-description-${post.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
               Esta ação não pode ser desfeita e removerá a publicação permanentemente.
             </p>
+            {deletePostError && <p role="alert" className="mt-3 text-sm text-red-300">{deletePostError}</p>}
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -976,7 +987,10 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
               <div className="relative">
                 <textarea
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={(e) => {
+                    setEditContent(e.target.value);
+                    setEditError(null);
+                  }}
                   maxLength={280}
                   rows={4}
                   placeholder="O que está acontecendo no mundo dos games?"
@@ -998,6 +1012,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                   </span>
                 </div>
               </div>
+
+              {editError && <p role="alert" className="text-sm text-red-300">{editError}</p>}
 
               <div className="flex justify-end gap-2 border-t border-white/10 pt-3">
                 <button
