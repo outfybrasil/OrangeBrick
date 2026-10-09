@@ -21,7 +21,6 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
   const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED !== "false";
   const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
   const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
-  const [eligibilityConfirmed, setEligibilityConfirmed] = useState(false);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
   const [mounted, setMounted] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -46,7 +45,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
   }, []);
 
   const handleGoogleLogin = useCallback(async () => {
-    if (!eligibilityConfirmed || isSigningIn) return;
+    if (isSigningIn) return;
     setIsSigningIn(true);
     setLoginError(null);
     const returnTo = safeReturnTo(`${window.location.pathname}${window.location.search}${window.location.hash}`);
@@ -58,7 +57,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
     } finally {
       setIsSigningIn(false);
     }
-  }, [eligibilityConfirmed, isSigningIn, onSuccess, signInWithGoogle]);
+  }, [isSigningIn, onSuccess, signInWithGoogle]);
 
   const handleQuickSwitch = useCallback(async (accountUserId: string) => {
     setSwitchingUserId(accountUserId);
@@ -189,22 +188,10 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
               <span className="h-px flex-1 bg-white/10" />
             </div>
 
-            <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-[#c8c9cf]">
-              <input
-                type="checkbox"
-                checked={eligibilityConfirmed}
-                onChange={(event) => setEligibilityConfirmed(event.target.checked)}
-                className="mt-0.5 h-5 w-5 shrink-0 accent-[#ff5e00]"
-              />
-              <span>
-                Confirmo que tenho 18 anos ou que participo com autorização e acompanhamento do meu responsável.
-              </span>
-            </label>
-
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={!eligibilityConfirmed || isSigningIn}
+              disabled={isSigningIn}
               className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#25262a] transition-colors hover:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-45"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -215,6 +202,16 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
               </svg>
               {isSigningIn ? "Conectando ao Google…" : "Cadastrar com Google"}
             </button>
+            <p className="text-center text-[11px] text-gray-500">
+              Ao continuar, você concorda com os{" "}
+              <Link href="/termos" className="text-gray-400 underline underline-offset-2 hover:text-white">
+                Termos
+              </Link>{" "}
+              e a{" "}
+              <Link href="/privacidade" className="text-gray-400 underline underline-offset-2 hover:text-white">
+                Privacidade
+              </Link>.
+            </p>
           </div>
         ) : (
           <>
@@ -296,22 +293,10 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
               </div>
             )}
 
-            <label className="mt-4 flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/15 p-3 text-xs leading-5 text-[#c8c9cf]">
-              <input
-                type="checkbox"
-                checked={eligibilityConfirmed}
-                onChange={(event) => setEligibilityConfirmed(event.target.checked)}
-                className="mt-0.5 h-5 w-5 shrink-0 accent-[#ff5e00]"
-              />
-              <span>
-                Confirmo que tenho 18 anos ou que participo com autorização e acompanhamento do meu responsável.
-              </span>
-            </label>
-
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={!eligibilityConfirmed || isSigningIn}
+              disabled={isSigningIn}
               className="mt-4 flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-[#d9d9d9] bg-white px-4 py-3 text-sm font-bold text-[#25262a] transition-colors hover:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-45"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">

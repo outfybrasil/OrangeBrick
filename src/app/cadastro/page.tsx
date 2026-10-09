@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Gamepad2, LockKeyhole, Newspaper } from "lucide-react";
 import { CredentialAuthForm } from "@/components/auth/CredentialAuthForm";
 
 export default function SignupPage() {
@@ -28,8 +29,8 @@ export default function SignupPage() {
 
           <div className="mt-8 space-y-3.5 border-t border-white/10 pt-6">
             <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-orange/30 bg-brand-orange/10 text-brand-orange font-bold">
-                🎮
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-orange/30 bg-brand-orange/10 text-brand-orange">
+                <Gamepad2 aria-hidden="true" className="size-4" strokeWidth={1.8} />
               </div>
               <div>
                 <strong className="text-white block font-bold">Identidade gamer completa:</strong>
@@ -38,8 +39,8 @@ export default function SignupPage() {
             </div>
 
             <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-bold">
-                🔒
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                <LockKeyhole aria-hidden="true" className="size-4" strokeWidth={1.8} />
               </div>
               <div>
                 <strong className="text-white block font-bold">Acesso seguro e sem paywall:</strong>
@@ -48,8 +49,8 @@ export default function SignupPage() {
             </div>
 
             <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold">
-                🕹️
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400">
+                <Newspaper aria-hidden="true" className="size-4" strokeWidth={1.8} />
               </div>
               <div>
                 <strong className="text-white block font-bold">Feed pelas suas plataformas:</strong>
