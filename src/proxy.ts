@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", policy);
 
-  if (EMAIL_AUTH_PATHS.has(pathname) && process.env.EMAIL_AUTH_ENABLED !== "true") {
+  if (EMAIL_AUTH_PATHS.has(pathname) && process.env.EMAIL_AUTH_ENABLED === "false") {
     return secureRedirect(new URL("/", request.url), policy);
   }
 

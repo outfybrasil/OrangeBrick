@@ -58,13 +58,20 @@ export function UserNav() {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setIsAuthModalOpen(true)}
-          className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl border border-brand-orange-muted/20 bg-card-slate/60 px-3 text-xs font-bold text-white transition-all hover:border-brand-orange/40 hover:bg-card-slate sm:px-4"
+          className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-card-slate/60 px-3 text-xs font-bold text-gray-200 transition-all hover:border-white/20 hover:bg-card-slate sm:px-3.5"
         >
           <svg className="w-3.5 h-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
           <span>Entrar</span>
         </button>
+
+        <Link
+          href="/cadastro"
+          className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#ff7526] sm:px-4"
+        >
+          <span>Criar conta</span>
+        </Link>
 
         <AuthModal
           isOpen={isAuthModalOpen}
