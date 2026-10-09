@@ -20,6 +20,9 @@ function authErrorMessage(message: string): string {
   if (normalized.includes("password should be")) return "A senha precisa ter pelo menos 8 caracteres.";
   if (normalized.includes("rate limit") || normalized.includes("too many requests")) return "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.";
   if (normalized.includes("signup disabled")) return "O cadastro de novas contas está temporariamente indisponível.";
+  if (normalized.includes("confirmation email") || normalized.includes("sending confirmation")) {
+    return "Erro no envio do e-mail de ativação pelo Resend. Verifique um domínio próprio no Resend ou desative temporariamente a opção 'Confirm email' no painel do Supabase para liberar cadastros.";
+  }
   return "Não foi possível concluir a autenticação. Verifique as informações e tente novamente.";
 }
 
