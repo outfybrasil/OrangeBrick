@@ -375,12 +375,12 @@ export async function validateImageUrl(
     const headRes = await fetchFn(url, {
       method: "HEAD",
       signal: controller.signal,
-      headers: { "User-Agent": "OrangeBrick-Bot/1.0" },
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36" },
     }).catch(async () => {
       return await fetchFn(url, {
         method: "GET",
         signal: controller.signal,
-        headers: { "User-Agent": "OrangeBrick-Bot/1.0", Range: "bytes=0-2048" },
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36", Range: "bytes=0-2048" },
       });
     });
     clearTimeout(timer);

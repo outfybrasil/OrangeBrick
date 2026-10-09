@@ -19,6 +19,9 @@ additional_redirect_urls = [
   "https://www.orangebrick.blog/auth/callback",
 ]
 
+[auth.email]
+enable_confirmations = true
+
 [functions.toggle-reaction]
 verify_jwt = false
 

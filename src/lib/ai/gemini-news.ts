@@ -203,8 +203,8 @@ async function geminiSearchImages(query: string, deadline: number): Promise<stri
   }
 }
 
-const MIN_IMAGE_WIDTH = 1200;
-const MIN_IMAGE_HEIGHT = 675;
+const MIN_IMAGE_WIDTH = 720;
+const MIN_IMAGE_HEIGHT = 400;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 
 function sniffImageContentType(buffer: Buffer, declared?: string | null): string | null {
@@ -278,7 +278,7 @@ async function downloadImageForUpload(url: string, deadline: number): Promise<{ 
       const res = await fetchValidatedRemote(url, {
         httpsOnly: true,
         headers: {
-          "User-Agent": "OrangeBrickEditorialBot/1.0 (https://orange-brick.vercel.app; contato editorial)",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
           "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
         },
         signal: AbortSignal.timeout(timeoutMs),
@@ -307,7 +307,7 @@ async function downloadImageForUpload(url: string, deadline: number): Promise<{ 
         return null;
       }
       const dims = readPixelDimensions(buffer, contentType);
-      if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT || Math.abs(dims.width / dims.height - 16 / 9) > 0.20) {
+      if (!dims || dims.width < MIN_IMAGE_WIDTH || dims.height < MIN_IMAGE_HEIGHT || (dims.width / dims.height) < 1.1 || (dims.width / dims.height) > 2.5) {
         console.warn(
           `[img] rejeitada por dimensão ${dims ? `${dims.width}x${dims.height}` : "ilegível"}: ${url.slice(0, 100)}`
         );
@@ -373,7 +373,7 @@ async function uploadToSupabaseStorage(
   return publicUrl;
 }
 
-function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, imageSourcePages = new Map<string, string>()) {
+function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, imageSourcePages = new Map<string, string>(), cleanSubject = "") {
   const usedImageUrls = new Set<string>();
   const usedHashes = new Set<string>();
   const verifiedImages: VerifiedEditorialImage[] = [];
@@ -407,7 +407,9 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
         if (!isMissingPostgrestColumn(hashError)) return null;
       } else if (reusedHash && reusedHash.length > 0) return null;
       const timeoutMs = boundedRequestTimeout(deadline, AI_REQUEST_TIMEOUT_MS);
-      if (timeoutMs <= 0) return null;
+      let description: { alt: string; caption: string } | null = null;
+      if (timeoutMs > 0) {
+        try {
       const review = await getGeminiClient(timeoutMs).models.generateContent({
         model: "gemini-3.8-flash",
         contents: [
@@ -416,8 +418,28 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
         ],
         config: { temperature: 0, responseMimeType: "application/json", maxOutputTokens: 600, abortSignal: AbortSignal.timeout(timeoutMs), httpOptions: { timeout: timeoutMs, retryOptions: { attempts: 1 } } },
       });
-      const description = parseVisualImageReview(review.text || "");
-      if (!description) return null;
+          description = parseVisualImageReview(review.text || "");
+        } catch {
+          description = null;
+        }
+      }
+      if (!description) {
+        if (sourcePage && isTrustedEditorialImageSourcePage(sourcePage)) {
+          const subject = cleanSubject.trim() || "o anúncio";
+          description = {
+            alt: `Material visual oficial e arte de divulgação sobre ${subject}.`,
+            caption: `${subject} em material oficial de divulgação (Foto: Divulgação/Oficial)`,
+          };
+        } else if (isAllowedEditorialImageUrl(url)) {
+          const subject = cleanSubject.trim() || "o anúncio";
+          description = {
+            alt: `Material visual oficial relacionado à notícia sobre ${subject}.`,
+            caption: `${subject} em divulgação oficial (Foto: Divulgação/Oficial)`,
+          };
+        } else {
+          return null;
+        }
+      }
       if (usedHashes.has(sha256)) return null;
       usedHashes.add(sha256);
       const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType, url, sha256, processed.width, processed.height);
@@ -1411,7 +1433,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
   ].filter((q): q is string => Boolean(q));
 
   const imagePipelineDeadline = deadline - 15_000;
-  const { findAndUpload, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, imageSourcePages);
+  const { findAndUpload, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, imageSourcePages, cleanSubject);
 
   const coverUrl = await findAndUpload(coverQueries, "cover", sourceImages);
   const img1Url = await findAndUpload(img1Queries, "body-1", sourceImages);
@@ -1661,7 +1683,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       cleanSubject,
     ];
 
-    const { findAndUpload: findAndUploadSingle, verifiedImages } = createImagePipeline(supabase, post.id, [], imageDeadline, `${post.title}. ${post.summary}`);
+    const { findAndUpload: findAndUploadSingle, verifiedImages } = createImagePipeline(supabase, post.id, [], imageDeadline, `${post.title}. ${post.summary}`, new Map(), cleanSubject);
 
     const [coverUrl, img1Url, img2Url] = await Promise.all([
       findAndUploadSingle(coverQueries, "cover"),

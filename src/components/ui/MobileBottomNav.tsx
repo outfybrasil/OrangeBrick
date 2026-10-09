@@ -11,6 +11,9 @@ export function MobileBottomNav() {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/auth") ||
     pathname === "/profile/setup" ||
+    pathname === "/primeiros-passos" ||
+    pathname === "/cadastro" ||
+    pathname === "/entrar" ||
     pathname.startsWith("/configuracoes")
   ) {
     return null;

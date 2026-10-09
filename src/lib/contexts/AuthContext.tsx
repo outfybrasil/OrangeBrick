@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { ONBOARDING_PROFILE_PATH, requiresOnboarding } from "@/lib/auth/onboarding";
 import {
   getSavedAccounts,
   saveAccount,
@@ -207,7 +208,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fetchProfile(data.session.user);
       }
       if (typeof window !== "undefined") {
-        window.location.reload();
+        if (requiresOnboarding(data.session.user.user_metadata)) {
+          window.location.replace(ONBOARDING_PROFILE_PATH);
+        } else {
+          window.location.reload();
+        }
       }
       return true;
     } catch {

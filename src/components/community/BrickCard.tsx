@@ -521,15 +521,15 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       </p>
 
       {post.media_url && !post.attached_article && (
-        <div className="relative mt-2.5 max-w-[390px] overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
-          <img loading="lazy" decoding="async" src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="h-auto max-h-[260px] w-full object-contain" />
+        <div className="relative mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
+          <img loading="lazy" decoding="async" src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="h-auto max-h-[420px] w-full object-contain" />
         </div>
       )}
 
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
+          className="group/article mt-2.5 block w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
         >
           {post.attached_article.image_url && (
             <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
@@ -595,7 +595,7 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
               {post.shared_post.original_attached_article && (
                 <Link
                   href={`/posts/${post.shared_post.original_attached_article.slug}`}
-                  className="group/article mt-2.5 block w-full max-w-[420px] overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
+                  className="group/article mt-2.5 block w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
                 >
                   {post.shared_post.original_attached_article.image_url && (
                     <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">

@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/lib/types/database";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { hasCompletedOnboarding, ONBOARDING_PENDING, ONBOARDING_PROFILE_PATH, requiresOnboarding } from "@/lib/auth/onboarding";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = safeReturnTo(searchParams.get("next"));
-  const returnTo = safeReturnTo(searchParams.get("returnTo") ?? next);
 
   if (code) {
     const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = [];
@@ -37,15 +37,30 @@ export async function GET(request: Request) {
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
+        const isPasswordRecovery = next === "/nova-senha";
+        let needsOnboarding = !isPasswordRecovery && requiresOnboarding(user.user_metadata);
 
-        const dest = profile
-          ? `${origin}${next}`
-          : `${origin}/profile/setup?returnTo=${encodeURIComponent(returnTo)}`;
+        if (!isPasswordRecovery && !needsOnboarding && !hasCompletedOnboarding(user.user_metadata)) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+          if (!profile) {
+            needsOnboarding = true;
+            await supabase.auth.updateUser({
+              data: {
+                ...user.user_metadata,
+                [ONBOARDING_PENDING]: true,
+              },
+            });
+          }
+        }
+
+        const dest = needsOnboarding
+          ? `${origin}${ONBOARDING_PROFILE_PATH}`
+          : `${origin}${next}`;
         const response = NextResponse.redirect(dest);
         for (const { name, value, options } of pendingCookies) {
           response.cookies.set(name, value, options);

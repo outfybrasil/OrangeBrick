@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { ONBOARDING_GUIDE_PATH, ONBOARDING_PENDING, ONBOARDING_PROFILE_PATH, requiresOnboarding } from "@/lib/auth/onboarding";
 import { PLATFORMS_CONFIG, PLATFORM_SLUGS, type PlatformSlug } from "@/lib/types/platform";
 
 interface CredentialAuthFormProps {
@@ -21,7 +22,7 @@ function authErrorMessage(message: string): string {
   if (normalized.includes("rate limit") || normalized.includes("too many requests")) return "Muitas tentativas em pouco tempo. Aguarde alguns instantes e tente novamente.";
   if (normalized.includes("signup disabled")) return "O cadastro de novas contas está temporariamente indisponível.";
   if (normalized.includes("confirmation email") || normalized.includes("sending confirmation")) {
-    return "Erro no envio do e-mail de ativação pelo Resend. Verifique um domínio próprio no Resend ou desative temporariamente a opção 'Confirm email' no painel do Supabase para liberar cadastros.";
+    return "Não foi possível enviar o e-mail de confirmação. Confira a configuração de envio no Supabase ou tente novamente mais tarde.";
   }
   return "Não foi possível concluir a autenticação. Verifique as informações e tente novamente.";
 }
@@ -81,6 +82,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
   const [switchingUserId, setSwitchingUserId] = useState<string | null>(null);
 
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+  const [confirmationRequired, setConfirmationRequired] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
 
@@ -157,7 +159,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         type: "signup",
         email: targetEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/brickboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(ONBOARDING_GUIDE_PATH)}`,
         },
       });
       if (resendError) throw resendError;
@@ -226,32 +228,28 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
               full_name: trimmedNickname,
               user_name: normalizedUsername,
               favorite_platforms: selectedPlatforms,
+              [ONBOARDING_PENDING]: true,
             },
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=/brickboard&returnTo=${encodeURIComponent(returnTo)}`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(ONBOARDING_GUIDE_PATH)}`,
           },
         });
 
         if (signUpError) throw signUpError;
 
         if (data.session && data.user) {
-          try {
-            await supabase.from("profiles").upsert({
-              user_id: data.user.id,
-              nickname: trimmedNickname,
-              display_name: trimmedNickname,
-              username: normalizedUsername,
-              favorite_platforms: selectedPlatforms,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-          } catch {
+          if (!data.user.email_confirmed_at) {
+            await supabase.auth.signOut();
+            setSubmittedEmail(cleanEmail);
+            setConfirmationRequired(true);
+            return;
           }
-          router.push(returnTo);
+          router.push(ONBOARDING_PROFILE_PATH);
           router.refresh();
           return;
         }
 
         setSubmittedEmail(cleanEmail);
+        setConfirmationRequired(true);
       } catch (caught) {
         setError(authErrorMessage(caught instanceof Error ? caught.message : ""));
         setErrorField("form");
@@ -263,16 +261,28 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
 
     setLoading(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
       });
 
       if (signInError) throw signInError;
 
-      router.push(returnTo);
+      if (!data.user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        setSubmittedEmail(cleanEmail);
+        setConfirmationRequired(true);
+        return;
+      }
+
+      router.push(requiresOnboarding(data.user.user_metadata) ? ONBOARDING_PROFILE_PATH : returnTo);
       router.refresh();
     } catch (caught) {
+      if (caught instanceof Error && caught.message.toLowerCase().includes("email not confirmed")) {
+        setSubmittedEmail(cleanEmail);
+        setConfirmationRequired(true);
+        return;
+      }
       setError(authErrorMessage(caught instanceof Error ? caught.message : ""));
       setErrorField("form");
     } finally {
@@ -280,7 +290,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
     }
   };
 
-  if (isSignup && submittedEmail) {
+  if (submittedEmail && (isSignup || confirmationRequired)) {
     return (
       <div className="mx-auto w-full max-w-[32rem] border border-brand-orange/30 bg-[#111217] p-6 shadow-2xl sm:p-10">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-orange/40 bg-brand-orange/10 text-brand-orange">
@@ -297,13 +307,13 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
             Confirme seu e-mail
           </h1>
           <p className="mt-3 text-sm leading-6 text-gray-300">
-            Enviamos um link de ativação para o endereço abaixo:
+            Um link de confirmação foi enviado para o endereço abaixo:
           </p>
           <div className="mt-3 inline-block rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 font-mono text-sm font-bold text-brand-orange">
             {submittedEmail}
           </div>
           <p className="mt-4 text-xs leading-5 text-gray-400">
-            Abra sua caixa de entrada (ou pasta de spam/lixo eletrônico) e clique no link para ativar seu cadastro e desbloquear votos, comentários e o Brickboard.
+            Abra sua caixa de entrada (ou a pasta de spam) e clique no link. Depois, você poderá configurar seu perfil e conhecer o BrickBoard.
           </p>
         </div>
 

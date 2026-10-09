@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         "/auth",
         "/configuracoes",
         "/post",
+        "/primeiros-passos",
         "/profile/setup",
         "/minha-orange",
         "/busca",

@@ -7,6 +7,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { createDataClient } from "@/lib/supabase/client";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import { safeReturnTo } from "@/lib/auth/return-to";
+import { hasCompletedOnboarding, ONBOARDING_GUIDE_PATH } from "@/lib/auth/onboarding";
+import { PLATFORMS_CONFIG, PLATFORM_SLUGS, type PlatformSlug } from "@/lib/types/platform";
 
 function ProfileSetupLoading() {
   return (
@@ -17,35 +19,69 @@ function ProfileSetupLoading() {
 }
 
 function ProfileSetupContent() {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading, refreshProfile } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createDataClient();
 
   const [nickname, setNickname] = useState("");
   const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [favoritePlatforms, setFavoritePlatforms] = useState<PlatformSlug[]>([]);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const returnTo = safeReturnTo(searchParams.get("returnTo"));
+  const requestedReturnTo = searchParams.get("returnTo") ?? searchParams.get("next");
+  const returnTo = safeReturnTo(requestedReturnTo, ONBOARDING_GUIDE_PATH);
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/");
+      router.replace("/entrar");
       return;
     }
-    if (profile && returnTo) {
-      router.replace(returnTo);
+    if (!user) return;
+    if (hasCompletedOnboarding(user.user_metadata)) {
+      router.replace(requestedReturnTo ? returnTo : "/configuracoes/perfil");
       return;
     }
-    if (user) {
-      const googlePic = getGoogleAvatarUrl(user) || "";
-      if (googlePic && !avatarUrl) {
-        queueMicrotask(() => setAvatarUrl(googlePic));
-      }
-    }
-  }, [user, profile, isLoading, router, avatarUrl, returnTo]);
+
+    const metadataName = typeof user.user_metadata?.full_name === "string"
+      ? user.user_metadata.full_name
+      : typeof user.user_metadata?.name === "string"
+        ? user.user_metadata.name
+        : "";
+    const metadataUsername = typeof user.user_metadata?.user_name === "string"
+      ? user.user_metadata.user_name
+      : "";
+    const metadataPlatforms = Array.isArray(user.user_metadata?.favorite_platforms)
+      ? user.user_metadata.favorite_platforms.filter((platform: unknown): platform is PlatformSlug =>
+          typeof platform === "string" && PLATFORM_SLUGS.includes(platform as PlatformSlug)
+        )
+      : [];
+    const profilePlatforms = profile?.favorite_platforms?.filter((platform): platform is PlatformSlug =>
+      PLATFORM_SLUGS.includes(platform as PlatformSlug)
+    ) || [];
+
+    const initialAvatarUrl = profile?.avatar_url || getGoogleAvatarUrl(user) || "";
+    queueMicrotask(() => {
+      setNickname((current) => current || profile?.nickname || metadataName);
+      setUsername((current) => current || metadataUsername || profile?.username || "");
+      setBio((current) => current || profile?.bio || "");
+      setFavoritePlatforms((current) => current.length
+        ? current
+        : profilePlatforms.length ? profilePlatforms : metadataPlatforms
+      );
+      if (initialAvatarUrl) setAvatarUrl((current) => current || initialAvatarUrl);
+    });
+  }, [user, profile, isLoading, router, requestedReturnTo, returnTo]);
+
+  const toggleFavoritePlatform = (platform: PlatformSlug) => {
+    setFavoritePlatforms((current) => current.includes(platform)
+      ? current.filter((item) => item !== platform)
+      : [...current, platform]
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +99,10 @@ function ProfileSetupContent() {
     setError(null);
     try {
       let durableAvatarUrl = avatarUrl.trim() || null;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sua sessão expirou. Entre novamente.");
+
       if (avatarFile) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) throw new Error("Sua sessão expirou. Entre novamente.");
         const formData = new FormData();
         formData.set("avatar", avatarFile);
         const response = await fetch("/api/user/avatar", {
@@ -78,25 +115,24 @@ function ProfileSetupContent() {
         durableAvatarUrl = result.publicUrl;
       }
 
-      const { data: usernameIsAvailable, error: availabilityError } = await supabase.rpc("username_available", {
-        candidate_username: normalizedUsername,
+      const response = await fetch("/api/user/profile", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          displayName: trimmed,
+          username: normalizedUsername,
+          bio: bio.trim() || null,
+          avatarUrl: durableAvatarUrl,
+          favoritePlatforms,
+        }),
       });
-      if (availabilityError) throw availabilityError;
-      if (!usernameIsAvailable) {
-        setError("Este nome de usuário já está em uso.");
-        setSaving(false);
-        return;
-      }
-
-      const { error: insertError } = await supabase.from("profiles").insert({
-        user_id: user!.id,
-        nickname: trimmed,
-        display_name: trimmed,
-        username: normalizedUsername,
-        avatar_url: durableAvatarUrl,
-      });
-      if (insertError) throw insertError;
-      router.push(returnTo || "/");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Não foi possível salvar seu perfil.");
+      await refreshProfile();
+      router.push(returnTo);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao salvar perfil.");
     } finally {
@@ -114,16 +150,17 @@ function ProfileSetupContent() {
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-2xl mx-auto mb-3">
             {avatarUrl ? (
-              <img loading="lazy" decoding="async" src={avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, nickname || user.email); }} />
+              <img loading="lazy" decoding="async" src={avatarUrl} alt="Prévia da foto de perfil" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" onError={(event) => { event.currentTarget.src = resolveAvatarUrl(null, nickname || user.email); }} />
             ) : (
               <span>{user.email?.[0].toUpperCase() || "?"}</span>
             )}
           </div>
-          <h1 className="text-xl font-heading font-black uppercase tracking-wider">
-            Bem-vindo ao <span className="text-brand-orange">Orange Brick</span>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-orange">Seu primeiro passo</p>
+          <h1 className="mt-2 text-xl font-heading font-black uppercase tracking-wider">
+            Configure seu perfil
           </h1>
           <p className="text-xs text-gray-400 font-body mt-1">
-            Escolha como você será conhecido dentro da comunidade.
+            Escolha como as pessoas vão reconhecer você no Orange Brick.
           </p>
         </div>
 
@@ -163,11 +200,47 @@ function ProfileSetupContent() {
           </div>
 
           <div>
+            <label htmlFor="profile-bio" className="mb-1 block text-xs font-bold uppercase text-gray-400">
+              Sobre você
+            </label>
+            <textarea
+              id="profile-bio"
+              value={bio}
+              onChange={(event) => setBio(event.target.value)}
+              placeholder="Que tipo de jogo você curte?"
+              maxLength={160}
+              rows={3}
+              className="w-full resize-none border border-brand-orange-muted/20 bg-background-void px-4 py-3 text-sm text-white outline-none transition-colors focus:border-brand-orange/50"
+            />
+            <p className="mt-1 text-right text-xs text-gray-500">{bio.length}/160</p>
+          </div>
+
+          <fieldset>
+            <legend className="mb-2 block text-xs font-bold uppercase text-gray-400">Plataformas favoritas</legend>
+            <div className="flex flex-wrap gap-2">
+              {PLATFORM_SLUGS.map((platform) => {
+                const selected = favoritePlatforms.includes(platform);
+                return (
+                  <button
+                    key={platform}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleFavoritePlatform(platform)}
+                    className={`min-h-10 border px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange ${selected ? "border-brand-orange bg-brand-orange/10 text-white" : "border-white/15 text-gray-300 hover:border-white/35"}`}
+                  >
+                    {PLATFORMS_CONFIG[platform].shortName}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <div>
             <label className="mb-1 block text-xs font-bold uppercase text-gray-400">Foto de perfil (opcional)</label>
-            <label className="flex min-h-12 cursor-pointer items-center justify-between rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/50">
+            <label className="flex min-h-12 cursor-pointer items-center justify-between rounded-xl border border-brand-orange-muted/20 bg-background-void px-4 text-sm font-semibold text-gray-200 hover:border-brand-orange/50 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-orange">
               <span>{avatarFile ? avatarFile.name : "Escolher uma foto"}</span>
               <span className="text-xs text-brand-orange">Até 4 MB</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => {
+              <input aria-label="Escolher foto de perfil" type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => {
                 const file = event.target.files?.[0] || null;
                 setAvatarFile(file);
                 if (file) setAvatarUrl(URL.createObjectURL(file));
@@ -187,7 +260,7 @@ function ProfileSetupContent() {
             disabled={saving}
             className="w-full bg-brand-orange hover:bg-brand-orange/90 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-[0_0_15px_rgba(255,94,0,0.3)] transition-all cursor-pointer disabled:opacity-50 text-sm uppercase tracking-wider"
           >
-            {saving ? "Salvando..." : "Criar Perfil"}
+            {saving ? "Salvando..." : "Salvar perfil e continuar"}
           </button>
         </form>
 
