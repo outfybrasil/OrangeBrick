@@ -82,23 +82,23 @@ export async function sendVerificationEmail({
     };
   }
 
-  const name = userName ? userName : "Gamer";
+  const name = userName ? userName : "Leitor";
   const html = baseEmailWrapper(`
-    <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 800; color: #ffffff; line-height: 1.2;">
-      Confirme seu cadastro no Orange Brick
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.3; letter-spacing: -0.02em;">
+      Confirmação de cadastro
     </h1>
-    <p style="margin: 0 0 20px 0; font-size: 15px; color: #b8bac2; line-height: 24px;">
-      Olá, <strong style="color: #ffffff;">${name}</strong>! Falta apenas um passo para ativar seu perfil, votar nas matérias, debater com a comunidade e acumular XP.
+    <p style="margin: 0 0 20px 0; font-size: 14px; color: #a1a4b0; line-height: 24px;">
+      Olá, <strong style="color: #ffffff;">${name}</strong>. Para concluir a ativação da sua conta no Orange Brick e liberar sua participação nos debates, votos e no Brickboard, confirme seu endereço de e-mail no botão abaixo.
     </p>
-    <div style="margin: 32px 0; text-align: center;">
-      <a href="${confirmationUrl}" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(255, 94, 0, 0.35);">
-        CONFIRMAR MEU E-MAIL
+    <div style="margin: 32px 0 28px 0; text-align: left;">
+      <a href="${confirmationUrl}" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.03em; text-transform: uppercase;">
+        Confirmar e-mail
       </a>
     </div>
-    <p style="margin: 24px 0 8px 0; font-size: 12px; color: #737682; line-height: 18px;">
-      Ou copie e cole o link a seguir no seu navegador:
+    <p style="margin: 24px 0 6px 0; font-size: 12px; color: #6b6e7b; line-height: 18px;">
+      Se o botão não funcionar, copie e cole o endereço abaixo no navegador:
     </p>
-    <p style="margin: 0; font-size: 11px; color: #ff7526; word-break: break-all; line-height: 16px;">
+    <p style="margin: 0; font-size: 11px; color: #ff7526; word-break: break-all; line-height: 16px; font-family: monospace;">
       ${confirmationUrl}
     </p>
   `);
@@ -107,7 +107,7 @@ export async function sendVerificationEmail({
     const data = await resend.emails.send({
       from: DEFAULT_FROM_EMAIL,
       to,
-      subject: "Ative sua conta no Orange Brick",
+      subject: "Confirme sua conta no Orange Brick",
       html,
     });
 
@@ -137,21 +137,21 @@ export async function sendPasswordResetEmail({
     };
   }
 
-  const name = userName ? userName : "Gamer";
+  const name = userName ? userName : "Leitor";
   const html = baseEmailWrapper(`
-    <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 800; color: #ffffff; line-height: 1.2;">
-      Redefinição de Senha
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.3; letter-spacing: -0.02em;">
+      Redefinição de senha
     </h1>
-    <p style="margin: 0 0 20px 0; font-size: 15px; color: #b8bac2; line-height: 24px;">
-      Olá, <strong style="color: #ffffff;">${name}</strong>. Recebemos uma solicitação para redefinir a senha da sua conta no Orange Brick.
+    <p style="margin: 0 0 20px 0; font-size: 14px; color: #a1a4b0; line-height: 24px;">
+      Olá, <strong style="color: #ffffff;">${name}</strong>. Recebemos uma solicitação para criar uma nova senha para o seu acesso ao Orange Brick.
     </p>
-    <div style="margin: 32px 0; text-align: center;">
-      <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; letter-spacing: 0.5px; box-shadow: 0 4px 16px rgba(255, 94, 0, 0.35);">
-        REDEFINIR MINHA SENHA
+    <div style="margin: 32px 0 28px 0; text-align: left;">
+      <a href="${resetUrl}" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.03em; text-transform: uppercase;">
+        Redefinir senha
       </a>
     </div>
-    <p style="margin: 24px 0 8px 0; font-size: 12px; color: #737682; line-height: 18px;">
-      Se não foi você quem solicitou, sua conta continua segura e você pode ignorar esta mensagem.
+    <p style="margin: 24px 0 6px 0; font-size: 12px; color: #6b6e7b; line-height: 18px;">
+      Se não foi você quem fez este pedido, nenhuma ação é necessária. Sua senha atual permanece inalterada.
     </p>
   `);
 
@@ -159,7 +159,7 @@ export async function sendPasswordResetEmail({
     const data = await resend.emails.send({
       from: DEFAULT_FROM_EMAIL,
       to,
-      subject: "Redefinir senha — Orange Brick",
+      subject: "Redefinição de senha — Orange Brick",
       html,
     });
 
@@ -189,21 +189,20 @@ export async function sendWelcomeEmail({
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://orangebrick.com.br";
   const html = baseEmailWrapper(`
-    <h1 style="margin: 0 0 16px 0; font-size: 24px; font-weight: 800; color: #ffffff; line-height: 1.2;">
-      Bem-vindo ao Orange Brick, ${userName}! 🎮
+    <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.3; letter-spacing: -0.02em;">
+      Acesso liberado, ${userName}.
     </h1>
-    <p style="margin: 0 0 16px 0; font-size: 15px; color: #b8bac2; line-height: 24px;">
-      Sua conta está confirmada e pronta para uso. Agora você tem acesso a todos os recursos da comunidade:
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #a1a4b0; line-height: 24px;">
+      Seu perfil no Orange Brick está ativo. A partir de agora você pode:
     </p>
-    <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #b8bac2; font-size: 14px; line-height: 22px;">
-      <li>Debata e comente nas notícias do setor de games sem moderação burocrática</li>
-      <li>Vote no Radar de Lançamentos e influencie o termômetro de hype</li>
-      <li>Salve matérias para ler depois nos seus favoritos</li>
-      <li>Construa seu perfil exclusivo no Brickboard</li>
+    <ul style="margin: 0 0 24px 0; padding-left: 20px; color: #a1a4b0; font-size: 14px; line-height: 24px;">
+      <li>Participar das discussões e comentários editoriais</li>
+      <li>Votar no Radar de Lançamentos</li>
+      <li>Salvar matérias e construir seu perfil público</li>
     </ul>
-    <div style="margin: 28px 0; text-align: center;">
-      <a href="${siteUrl}/brickboard" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; letter-spacing: 0.5px;">
-        ACESSAR O BRICKBOARD
+    <div style="margin: 28px 0; text-align: left;">
+      <a href="${siteUrl}/brickboard" target="_blank" style="display: inline-block; background-color: #ff5e00; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.03em; text-transform: uppercase;">
+        Acessar comunidade
       </a>
     </div>
   `);
@@ -212,7 +211,7 @@ export async function sendWelcomeEmail({
     const data = await resend.emails.send({
       from: DEFAULT_FROM_EMAIL,
       to,
-      subject: `Bem-vindo ao Orange Brick, ${userName}!`,
+      subject: `Acesso liberado — Orange Brick`,
       html,
     });
 
