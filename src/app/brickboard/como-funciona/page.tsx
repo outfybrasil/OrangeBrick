@@ -37,7 +37,18 @@ export default function ProgressionGuidePage() {
 
         <section className="mt-16">
           <h2 className="font-heading text-2xl font-bold">Como ganhar XP</h2>
-          <div role="region" aria-label="Tabela de ações e pontos de XP" tabIndex={0} className="mt-5 overflow-x-auto border-y border-white/10 focus-visible:outline-2 focus-visible:outline-brand-orange">
+          <dl className="mt-5 divide-y divide-white/10 border-y border-white/10 sm:hidden">
+            {actions.map(([action, xp, limit]) => (
+              <div key={action} className="py-4">
+                <dt className="text-sm font-bold text-gray-200">{action}</dt>
+                <dd className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span className="font-bold text-brand-orange">{xp}</span>
+                  <span className="text-gray-400">Limite: {limit}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div role="region" aria-label="Tabela de ações e pontos de XP" tabIndex={0} className="mt-5 hidden overflow-x-auto border-y border-white/10 focus-visible:outline-2 focus-visible:outline-brand-orange sm:block">
             <table className="w-full min-w-[32rem] text-left text-sm">
               <thead className="text-xs text-gray-500">
                 <tr><th className="py-3">Ação</th><th className="py-3">Valor</th><th className="py-3 text-right">Limite</th></tr>

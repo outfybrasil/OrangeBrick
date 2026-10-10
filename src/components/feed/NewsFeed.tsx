@@ -193,24 +193,26 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
-          className="lg:col-span-2 group relative aspect-[16/10] w-full overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
+          className="lg:col-span-2 group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:block lg:aspect-[16/10]"
         >
-          {heroPost.image_url ? (
-            <Image
-              priority
-              src={heroPost.image_url}
-              alt={heroPost.image_alt || heroPost.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 66vw"
-              className="absolute inset-0 h-full w-full object-cover object-center transform group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
-              <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
-            </div>
-          )}
+          <div className="relative aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
+            {heroPost.image_url ? (
+              <Image
+                priority
+                src={heroPost.image_url}
+                alt={heroPost.image_alt || heroPost.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 66vw"
+                className="absolute inset-0 h-full w-full object-contain object-center transition-transform duration-700 ease-out lg:object-cover lg:group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
+                <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
+              </div>
+            )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-10" />
+          </div>
+          <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:block" />
 
           <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-black">{heroBadge}</span>
@@ -218,17 +220,17 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 flex flex-col justify-end gap-1 sm:gap-2 z-20">
-            <div className="flex items-center gap-3">
+          <div className="relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0">
+            <div className="flex flex-wrap items-center gap-3">
               <Tag category={heroPost.category} />
               <Timer date={heroPost.published_at ?? ""} />
             </div>
 
-            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 line-clamp-2">
+            <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 lg:line-clamp-2">
               {heroPost.title}
             </h2>
 
-            <p className="mt-1 hidden text-sm leading-6 text-gray-200 xs:line-clamp-2">
+            <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-200">
               {heroPost.summary}
             </p>
 
@@ -253,13 +255,13 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
               className="group relative flex flex-1 flex-col overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
-                <div className="relative h-28 sm:h-32 w-full overflow-hidden flex-shrink-0 bg-[#08090C]">
+                <div className="relative aspect-video w-full overflow-hidden flex-shrink-0 bg-[#08090C] lg:aspect-auto lg:h-32">
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || post.title}
                     fill
-                    sizes="(max-width: 1024px) 50vw, 22vw"
-                    className="h-full w-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-500"
+                    sizes="(max-width: 1023px) 100vw, 33vw"
+                    className="h-full w-full object-contain object-center transition-transform duration-500 lg:object-cover lg:group-hover:scale-[1.03]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
                   <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black">

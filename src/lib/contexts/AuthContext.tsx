@@ -2,7 +2,7 @@
 
 import { createContext, use, useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
 import { createDataClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import type { Profile } from "@/lib/types/database";
 import { getGoogleAvatarUrl } from "@/lib/avatar";
 import { safeReturnTo } from "@/lib/auth/return-to";
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const syncSavedAccount = useCallback(async (authenticatedUser: User, currentProfile: Profile | null) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session?.user.id === authenticatedUser.id) {
         upsertAccountFromSession(authenticatedUser, currentProfile, session);
         setSavedAccounts(getSavedAccounts());
       }
@@ -136,27 +136,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await fetchProfile(session.user);
-      }
-      setIsLoading(false);
-    };
-    init();
+    let active = true;
+    let authEventVersion = 0;
+    let profileTimer: ReturnType<typeof setTimeout> | undefined;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const applySession = (session: Session | null) => {
+      if (!active) return;
       setUser(session?.user ?? null);
+      if (profileTimer !== undefined) clearTimeout(profileTimer);
       if (session?.user) {
-        await fetchProfile(session.user);
+        const saved = getSavedAccounts().find((account) => account.userId === session.user.id);
+        if (saved) {
+          saveAccount({ ...saved, accessToken: session.access_token, refreshToken: session.refresh_token });
+        } else {
+          upsertAccountFromSession(session.user, null, session);
+        }
+        profileTimer = setTimeout(() => {
+          if (active) void fetchProfile(session.user).catch(() => {});
+        }, 0);
       } else {
         setProfile(null);
       }
       setSavedAccounts(getSavedAccounts());
+      setIsLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      authEventVersion += 1;
+      applySession(session);
     });
 
-    return () => subscription.unsubscribe();
+    const initialVersion = authEventVersion;
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (authEventVersion === initialVersion) applySession(session);
+      } catch {
+        if (active) {
+          setSavedAccounts(getSavedAccounts());
+          setIsLoading(false);
+        }
+      }
+    };
+    void init();
+
+    return () => {
+      active = false;
+      if (profileTimer !== undefined) clearTimeout(profileTimer);
+      subscription.unsubscribe();
+    };
   }, [supabase, fetchProfile]);
 
   const signInWithGoogle = useCallback(async (returnTo = "/") => {
@@ -191,8 +219,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error || !data.session) {
-        removeSavedAccount(targetUserId);
-        setSavedAccounts(getSavedAccounts());
         return false;
       }
 
@@ -216,8 +242,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return true;
     } catch {
-      removeSavedAccount(targetUserId);
-      setSavedAccounts(getSavedAccounts());
       return false;
     }
   }, [supabase, fetchProfile]);

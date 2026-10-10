@@ -28,8 +28,9 @@ export function GradientButtonGroup({ items, ariaLabel }: GradientButtonGroupPro
             <div key={item.href} className="relative flex items-center">
               <Link
                 href={item.href}
+                aria-label={item.label === "Lançamentos" ? "Agenda de lançamentos" : item.label}
                 aria-current={item.active ? "page" : undefined}
-                className="group relative flex h-16 w-full flex-col items-center justify-center gap-1.5 px-1 text-center transition-colors select-none"
+                className="group relative flex min-h-16 w-full flex-col items-center justify-start gap-1 px-0.5 pb-1 pt-2 text-center transition-colors select-none"
               >
                 {item.active && (
                   <span
@@ -49,13 +50,13 @@ export function GradientButtonGroup({ items, ariaLabel }: GradientButtonGroupPro
                 </div>
 
                 <span
-                  className={`max-w-full truncate text-[11px] leading-none transition-colors ${
+                  className={`flex min-h-8 max-w-full items-center justify-center text-xs leading-4 transition-colors ${
                     item.active
                       ? "font-bold text-brand-orange"
                       : "font-medium text-gray-400 group-hover:text-white"
                   }`}
                 >
-                  {item.label}
+                  {item.label === "Lançamentos" ? "Agenda" : item.label === "BrickBoard" ? <span aria-hidden="true">Brick<br />Board</span> : item.label}
                 </span>
               </Link>
 

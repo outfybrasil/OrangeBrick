@@ -22,6 +22,7 @@ type HypeVoteType = ReleaseHypeVote["vote_type"];
 
 export interface GamePageClientProps {
   game: ReleaseRadarItem;
+  hasRadar?: boolean;
   initialCounts: { buy: number; watch: number; skip: number };
   initialCountsError?: boolean;
   initialUserVote?: HypeVoteType | null;
@@ -54,6 +55,7 @@ const HYPE_OPTIONS: { type: HypeVoteType; label: string; shortLabel: string }[] 
 
 export function GamePageClient({
   game,
+  hasRadar = true,
   initialCounts,
   initialCountsError = false,
   initialUserVote = null,
@@ -567,7 +569,7 @@ export function GamePageClient({
               {!reviewEditorOpen && gameReviewNotice && <p role="status" className="mt-2 text-xs text-emerald-300">{gameReviewNotice}</p>}
             </section>
 
-            <div className="border border-white/10 bg-[#12141A] p-4 rounded-xl">
+            {hasRadar && <div className="border border-white/10 bg-[#12141A] p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                   Termômetro da Comunidade
@@ -620,7 +622,7 @@ export function GamePageClient({
                   {statusNotice}
                 </p>
               )}
-            </div>
+            </div>}
           </div>
         </section>
 

@@ -28,7 +28,7 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0d0e12]/95 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
         <Link
           href="/"
           className="group flex min-h-11 shrink-0 items-center gap-2.5"
@@ -40,7 +40,7 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
             style={{ maxHeight: "32px", maxWidth: "42px", width: "auto", height: "auto" }}
             className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           />
-          <span className="hidden whitespace-nowrap text-base font-heading font-extrabold uppercase tracking-[0.1em] text-white transition-colors group-hover:text-brand-orange min-[360px]:inline sm:text-lg sm:tracking-widest">
+          <span className="hidden whitespace-nowrap text-base font-heading font-extrabold uppercase tracking-[0.1em] text-white transition-colors group-hover:text-brand-orange sm:inline sm:text-lg sm:tracking-widest">
             Orange<span className="text-brand-orange">_</span>Brick
           </span>
         </Link>

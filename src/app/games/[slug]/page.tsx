@@ -1,8 +1,9 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createPublicServerClient, createServerDataClient } from "@/lib/supabase/server";
 import { GamePageClient, type GamePageClientProps } from "./GamePageClient";
-import type { ReleaseRadarItem, ReleaseHypeVote, ReleaseHypeCount, ReleaseHypeVoteSelection, CommunityPostRow, ReactionType, GameReviewRatingAggregate, UserGameTracking } from "@/lib/types/database";
+import type { Game, ReleaseRadarItem, ReleaseHypeVote, ReleaseHypeCount, ReleaseHypeVoteSelection, CommunityPostRow, ReactionType, GameReviewRatingAggregate, UserGameTracking } from "@/lib/types/database";
 import type { CommunityPost, AttachedArticle, SharedPostData } from "@/lib/types/community";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -10,17 +11,48 @@ interface GamePageProps {
   params: Promise<{ slug: string }>;
 }
 
+const resolveGame = cache(async (slug: string): Promise<{ game: ReleaseRadarItem; hasRadar: boolean } | null> => {
+  if (!/^[a-zA-Z0-9_-]+$/.test(slug)) return null;
+  const supabase = createPublicServerClient();
+  const { data: catalogData } = await supabase.from("games").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
+  const catalogGame = catalogData as Game | null;
+  const { data: radarData } = await supabase.from("release_radar_items").select("*")
+    .or(`id.eq.${slug},topic_id.eq.${slug}${catalogGame ? `,game_id.eq.${catalogGame.id}` : ""}`)
+    .order("is_active", { ascending: false }).limit(1).maybeSingle();
+  if (radarData) return { game: radarData as ReleaseRadarItem, hasRadar: true };
+  if (!catalogGame) return null;
+  return {
+    hasRadar: false,
+    game: {
+      id: catalogGame.slug,
+      game_id: catalogGame.id,
+      game: catalogGame.name,
+      release_label: catalogGame.release_date
+        ? new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${catalogGame.release_date}T00:00:00Z`))
+        : "Data não informada",
+      release_date: catalogGame.release_date,
+      platforms: catalogGame.platforms,
+      image_url: catalogGame.hero_image_url || catalogGame.cover_image_url,
+      badge: catalogGame.release_status === "released" ? "Já lançado" : "Jogo",
+      schedule_label: "",
+      product_type: "game",
+      is_indie: false,
+      category: "upcoming",
+      post_slug: null,
+      sort_order: 0,
+      is_active: catalogGame.is_active,
+      created_at: catalogGame.created_at,
+      updated_at: catalogGame.updated_at,
+      topic_id: null,
+    },
+  };
+});
+
 export async function generateMetadata({ params }: GamePageProps): Promise<Metadata> {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  const supabase = createPublicServerClient();
-
-  const { data: gameData } = await supabase
-    .from("release_radar_items")
-    .select("game, release_label, platforms, image_url, badge")
-    .or(`id.eq.${decodedSlug},topic_id.eq.${decodedSlug}`)
-    .maybeSingle();
-  const game = gameData as ReleaseRadarItem | null;
+  const resolved = await resolveGame(decodedSlug);
+  const game = resolved?.game;
 
   if (!game) {
     return {
@@ -58,19 +90,12 @@ export default async function GamePage({ params }: GamePageProps) {
   const decodedSlug = decodeURIComponent(slug);
   const supabase = createPublicServerClient();
 
-  const { data: gameData } = await supabase
-    .from("release_radar_items")
-    .select("*")
-    .or(`id.eq.${decodedSlug},topic_id.eq.${decodedSlug}`)
-    .maybeSingle();
-
-  if (!gameData) {
-    notFound();
-  }
-
-  const game = gameData as ReleaseRadarItem;
-
-  const { data: voteCountsData, error: voteCountsError } = await supabase.rpc("get_release_hype_counts").eq("release_id", game.id);
+  const resolved = await resolveGame(decodedSlug);
+  if (!resolved) notFound();
+  const { game, hasRadar } = resolved;
+  const { data: voteCountsData, error: voteCountsError } = hasRadar
+    ? await supabase.rpc("get_release_hype_counts").eq("release_id", game.id)
+    : { data: [], error: null };
   const communityClient = await createServerDataClient();
 
   let initialGameReviewStats: GameReviewRatingAggregate = {
@@ -100,7 +125,7 @@ export default async function GamePage({ params }: GamePageProps) {
     const { data: { user } } = await communityClient.auth.getUser();
     if (user) {
       initialReviewUserId = user.id;
-      const { data: myVotes, error: myVotesError } = await communityClient.rpc("get_my_release_hype_votes").eq("release_id", game.id);
+      const { data: myVotes, error: myVotesError } = hasRadar ? await communityClient.rpc("get_my_release_hype_votes").eq("release_id", game.id) : { data: [], error: null };
       if (myVotesError) throw myVotesError;
       initialVoteUserId = user.id;
       initialUserVote = ((myVotes || []) as ReleaseHypeVoteSelection[])[0]?.vote_type || null;
@@ -236,6 +261,7 @@ export default async function GamePage({ params }: GamePageProps) {
       <GamePageClient
         key={game.id}
         game={game}
+        hasRadar={hasRadar}
         initialCounts={initialCounts}
         initialCountsError={Boolean(voteCountsError)}
         initialUserVote={initialUserVote}

@@ -13,6 +13,8 @@ export function UserNav() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const { user, profile, signOut, signOutAll, switchAccount, removeAccount, savedAccounts, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("login");
+  const emailAuthEnabled = process.env.NEXT_PUBLIC_EMAIL_AUTH_ENABLED !== "false";
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isBookmarkOpen, setIsBookmarkOpen] = useState(false);
   const [switchingUserId, setSwitchingUserId] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export function UserNav() {
     return (
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setIsAuthModalOpen(true)}
+          onClick={() => { setAuthModalTab("login"); setIsAuthModalOpen(true); }}
           className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-card-slate/60 px-3 text-xs font-bold text-gray-200 transition-all hover:border-white/20 hover:bg-card-slate sm:px-3.5"
         >
           <svg className="w-3.5 h-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -66,16 +68,27 @@ export function UserNav() {
           <span>Entrar</span>
         </button>
 
-        <Link
-          href="/cadastro"
-          className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#ff7526] sm:px-4"
-        >
-          <span>Criar conta</span>
-        </Link>
+        {emailAuthEnabled ? (
+          <Link
+            href="/cadastro"
+            className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black shadow-sm transition-all hover:bg-[#ff7526] sm:px-4"
+          >
+            <span>Criar conta</span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => { setAuthModalTab("signup"); setIsAuthModalOpen(true); }}
+            className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black transition-all hover:bg-[#ff7526] sm:px-4"
+          >
+            Criar conta
+          </button>
+        )}
 
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
+          initialTab={authModalTab}
         />
       </div>
     );

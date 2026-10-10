@@ -68,7 +68,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
         onSuccess?.();
         onClose();
       } else {
-        setLoginError("A sessão desta conta expirou. Entre novamente com suas credenciais.");
+        setLoginError("Não foi possível restaurar esta sessão. Verifique sua conexão ou entre novamente.");
       }
     } catch {
       setLoginError("Não foi possível alternar de conta. Tente novamente.");
@@ -126,7 +126,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
             {user
               ? "Alterne para outra conta salva ou acesse com uma nova conta."
               : activeTab === "signup"
-              ? "Cadastre-se para comentar, votar em lançamentos e debater com a comunidade."
+              ? emailAuthEnabled
+                ? "Cadastre-se para comentar, votar em lançamentos e debater com a comunidade."
+                : "Crie sua conta com Google para comentar, reagir e publicar."
               : emailAuthEnabled
               ? "Entre com Google ou e-mail para comentar, reagir e publicar."
               : "Entre com Google para comentar, reagir e publicar."}
@@ -162,31 +164,35 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
 
         {activeTab === "signup" ? (
           <div className="mt-5 space-y-4">
-            <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/10 p-4">
-              <div className="flex items-center gap-2 text-brand-orange font-bold text-xs uppercase tracking-wider mb-1.5">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span>Cadastro Completo por E-mail</span>
-              </div>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Não quer vincular o Google? Crie sua identidade com apelido, @username, senha e plataformas favoritas.
-              </p>
-              <button
-                type="button"
-                onClick={() => navigateToCredentialAuth("/cadastro")}
-                className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-all hover:bg-[#ff7526]"
-              >
-                <span>Abrir formulário de cadastro</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
+            {emailAuthEnabled && (
+              <>
+                <div className="rounded-xl border border-brand-orange/30 bg-brand-orange/10 p-4">
+                  <div className="flex items-center gap-2 text-brand-orange font-bold text-xs uppercase tracking-wider mb-1.5">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Cadastro Completo por E-mail</span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    Não quer vincular o Google? Crie sua identidade com apelido, @username, senha e plataformas favoritas.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigateToCredentialAuth("/cadastro")}
+                    className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-all hover:bg-[#ff7526]"
+                  >
+                    <span>Abrir formulário de cadastro</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
 
-            <div className="my-3 flex items-center gap-3 text-xs text-gray-500">
-              <span className="h-px flex-1 bg-white/10" />
-              <span>ou cadastre com Google</span>
-              <span className="h-px flex-1 bg-white/10" />
-            </div>
+                <div className="my-3 flex items-center gap-3 text-xs text-gray-500">
+                  <span className="h-px flex-1 bg-white/10" />
+                  <span>ou cadastre com Google</span>
+                  <span className="h-px flex-1 bg-white/10" />
+                </div>
+              </>
+            )}
 
             <button
               type="button"
@@ -202,16 +208,6 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
               </svg>
               {isSigningIn ? "Conectando ao Google…" : "Cadastrar com Google"}
             </button>
-            <p className="text-center text-[11px] text-gray-500">
-              Ao continuar, você concorda com os{" "}
-              <Link href="/termos" className="text-gray-400 underline underline-offset-2 hover:text-white">
-                Termos
-              </Link>{" "}
-              e a{" "}
-              <Link href="/privacidade" className="text-gray-400 underline underline-offset-2 hover:text-white">
-                Privacidade
-              </Link>.
-            </p>
           </div>
         ) : (
           <>

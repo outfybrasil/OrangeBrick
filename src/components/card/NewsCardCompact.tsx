@@ -37,9 +37,9 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        className="group relative mb-3 grid min-h-[148px] grid-cols-[100px_minmax(0,1fr)] overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 xs:grid-cols-[150px_minmax(0,1fr)] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
+        className="group relative mb-3 grid grid-cols-1 overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 sm:min-h-[148px] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
       >
-        <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block h-full overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange">
+        <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block aspect-video overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange sm:aspect-auto sm:h-full">
           {post.image_url ? (
             <>
               <Image
@@ -47,15 +47,15 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
                 alt=""
                 aria-hidden="true"
                 fill
-                sizes="(max-width: 479px) 100px, (max-width: 639px) 150px, (max-width: 767px) 200px, 220px"
-                className="scale-110 object-cover object-center opacity-45 blur-xl"
+                sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
+                className="hidden scale-110 object-cover object-center opacity-45 blur-xl sm:block"
               />
               <Image
                 src={post.image_url}
                 alt={post.image_alt || ""}
                 fill
-                sizes="(max-width: 479px) 100px, (max-width: 639px) 150px, (max-width: 767px) 200px, 220px"
-                className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
+                className="object-contain object-center transition-transform duration-500 sm:object-cover sm:group-hover:scale-105"
               />
             </>
           ) : (
@@ -70,7 +70,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
           </span>
         </Link>
 
-        <div className="flex min-w-0 flex-1 flex-col justify-between p-2.5 sm:p-3">
+        <div className="flex min-w-0 flex-1 flex-col justify-between p-4 sm:p-3">
           <div>
             <div className="mb-1.5 flex items-center justify-between gap-2">
               <Timer date={post.published_at ?? ""} />

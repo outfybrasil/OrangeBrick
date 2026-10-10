@@ -825,7 +825,7 @@ function BrickboardContent() {
 
       <button
         onClick={() => requireUser(() => setIsComposeOpen(true))}
-        className="mobile-overlay-sensitive fixed right-3 bottom-[calc(8.25rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
+        className="mobile-overlay-sensitive fixed right-3 bottom-[calc(10.25rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
         title="Criar novo Brick"
         aria-label="Criar novo Brick"
       >

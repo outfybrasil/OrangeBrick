@@ -363,7 +363,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
         </div>
       </header>
 
-      <main id="conteudo-principal" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-3xl px-2 py-4 sm:px-4 sm:py-10 watch-container">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-3xl px-4 py-4 sm:py-10 watch-container">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-gray-500">
           <ol className="flex items-center gap-1.5">
             <li><Link href="/" className="hover:text-brand-orange transition-colors">Início</Link></li>

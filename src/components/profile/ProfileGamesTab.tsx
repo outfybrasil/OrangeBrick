@@ -442,11 +442,11 @@ export function ProfileGamesTab({
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {visibleGameReviews.map((review) => (
           <article key={review.game_id} className="flex min-w-0 gap-3 rounded-sm border border-white/10 bg-[#111217] p-3">
-            <div className="w-28 shrink-0 self-start overflow-hidden rounded-sm bg-black/30 sm:w-32">
+            <Link href={`/games/${encodeURIComponent(review.game.slug)}`} aria-label={`Ver detalhes de ${review.game.name}`} className="w-28 shrink-0 self-start overflow-hidden rounded-sm bg-black/30 focus-visible:outline-2 focus-visible:outline-brand-orange sm:w-32">
               <GameCoverImage src={review.game.cover_image_url} alt={review.game.name} fit="contain" />
-            </div>
+            </Link>
             <div className="min-w-0 flex-1">
-              <h4 className="line-clamp-2 font-heading text-sm font-black uppercase text-white">{review.game.name}</h4>
+              <h4 className="line-clamp-2 font-heading text-sm font-black uppercase text-white"><Link href={`/games/${encodeURIComponent(review.game.slug)}`} className="hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{review.game.name}</Link></h4>
               <div className="mt-2 grid max-w-sm grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{isOwner ? "Sua nota" : "Nota pessoal"}</p>
