@@ -47,6 +47,7 @@ async function databaseFixture() {
   await db.exec(await readFile(new URL("../supabase/migrations/20260924000002_post_editorial_gate_fields.sql", import.meta.url), "utf8"));
   await db.exec(await readFile(new URL("../supabase/migrations/20261011234239_manual_batch_publication.sql", import.meta.url), "utf8"));
   await db.exec(await readFile(new URL("../supabase/migrations/20261012000650_telegram_image_publication.sql", import.meta.url), "utf8"));
+  await db.exec(await readFile(new URL("../supabase/migrations/20261012012454_manual_publication_column_permissions.sql", import.meta.url), "utf8"));
   for (const [index, id] of [first, second, third, fourth].entries()) {
     await db.query("insert into posts (id,slug,title,body,updated_at,created_at,scheduled_at,scheduled_by,image_url,image_alt) values ($1,$2,$3,$6,$4,$5,now(),$1,$7,'Arte oficial do jogo')", [id, `post-${index}`, `Draft ${index}`, updated, `2026-10-${10 - index}T12:00:00Z`, articleImages(id), `https://playstation.com/${id}-cover.jpg`]);
   }
@@ -108,6 +109,24 @@ test("editor publication accepts warnings but preserves original publication dat
     const edited = await db.query<{ published_at: string }>("select id,published_at::text as published_at,updated_at::text as updated_at from admin_save_editorial_post($1,$2::jsonb)", [original.id, JSON.stringify({ ...data, title: "Edited", expected_updated_at: original.updated_at })]);
     assert.equal(edited.rows[0].published_at, original.published_at);
     await assert.rejects(db.query("select id,published_at::text as published_at,updated_at::text as updated_at from admin_save_editorial_post($1,$2::jsonb)", [original.id, JSON.stringify({ ...data, expected_updated_at: updated })]), /alterada por outra pessoa/);
+  } finally { await db.close(); }
+});
+
+test("manual publication works with production column restrictions without exposing editorial metadata", async () => {
+  const db = await databaseFixture();
+  try {
+    await db.exec(`revoke select on public.posts from authenticated;
+      grant select (id,slug,title,summary,body,category,image_url,image_alt,author_name,author_tag,topic_id,
+        information_status,featured_quote,editorial_sources,correction_note,is_published,published_at,created_at,updated_at)
+        on public.posts to authenticated;`);
+    await authenticate(db);
+    await assert.rejects(db.query("select * from posts"), /permission denied/);
+    const result = await publish(db, [second, first]);
+    assert.equal(result.rows.length, 2);
+    await assert.rejects(db.query("select scheduled_at,short_article_reason from posts"), /permission denied/);
+    const data = { slug: "restricted-editor", title: "Editor post", summary: "Short", body: articleImages("restricted"), image_url: "https://playstation.com/restricted-cover.jpg", image_alt: "Arte oficial do jogo", category: "industry", author_name: "Editor", information_status: "confirmed", editorial_sources: [], is_published: true };
+    const saved = await db.query<{ id: string; updated_at: string }>("select * from admin_save_editorial_post(null,$1::jsonb)", [JSON.stringify(data)]);
+    await db.query("select * from admin_save_editorial_post($1,$2::jsonb)", [saved.rows[0].id, JSON.stringify({ ...data, expected_updated_at: saved.rows[0].updated_at })]);
   } finally { await db.close(); }
 });
 
