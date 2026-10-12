@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
-import { processNextEditorialReview } from "@/lib/server/editorial-review-jobs";
+import { isAuthorizedEditorialDispatcher, processNextEditorialReview } from "@/lib/server/editorial-review-jobs";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -10,4 +10,10 @@ export async function GET(request: Request) {
   if (!isAuthorizedCronRequest(request)) return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
   const processed = await processNextEditorialReview();
   return NextResponse.json({ processed });
+}
+
+export async function POST(request: Request) {
+  if (!await isAuthorizedEditorialDispatcher(request)) return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
+  after(async () => { await processNextEditorialReview().catch(() => {}); });
+  return NextResponse.json({ accepted: true }, { status: 202 });
 }

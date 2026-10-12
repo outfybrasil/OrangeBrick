@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import ts from "typescript";
+import * as crypto from "node:crypto";
 
 test("review workers save verified corrections as drafts and leave unverifiable or changed drafts untouched", async () => {
   const current = { id: "post", title: "Original", summary: "Old", body: "[]", is_published: false, updated_at: "2026-10-12T00:00:00Z" };
@@ -51,4 +52,27 @@ test("review workers save verified corrections as drafts and leave unverifiable 
   await exported.processNextEditorialReview!();
   assert.equal(aiCalls, count);
   assert.equal(saved[3].p_candidate, null);
+});
+
+test("the database dispatcher uses its own token and rejects missing, malformed or wrong credentials", async () => {
+  const secret = "a".repeat(64);
+  const hash = crypto.createHash("sha256").update(secret).digest("hex");
+  let reads = 0;
+  const db = { from: (table: string) => {
+    assert.equal(table, "editorial_review_dispatch_auth"); reads++;
+    return { select: () => ({ eq: () => ({ single: async () => ({ data: { secret_hash: hash }, error: null }) }) }) };
+  } };
+  const compiled = ts.transpileModule(readFileSync(new URL("../src/lib/server/editorial-review-jobs.ts", import.meta.url), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const exported: { isAuthorizedEditorialDispatcher?: (request: Request) => Promise<boolean> } = {};
+  vm.runInNewContext(compiled, {
+    exports: exported, fetch, AbortSignal, Buffer,
+    process: { env: { NEXT_PUBLIC_SUPABASE_URL: "fixture", SUPABASE_SECRET_KEY: "fixture" } },
+    require: (name: string) => name === "@supabase/supabase-js" ? { createClient: () => db } : name === "node:crypto" ? crypto : {},
+  });
+  const request = (value?: string) => new Request("https://fixture.test", { headers: value ? { authorization: `Bearer ${value}` } : {} });
+  assert.equal(await exported.isAuthorizedEditorialDispatcher!(request()), false);
+  assert.equal(await exported.isAuthorizedEditorialDispatcher!(request("invalid")), false);
+  assert.equal(reads, 0);
+  assert.equal(await exported.isAuthorizedEditorialDispatcher!(request("b".repeat(64))), false);
+  assert.equal(await exported.isAuthorizedEditorialDispatcher!(request(secret)), true);
 });

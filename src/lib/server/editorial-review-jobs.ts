@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { reviewNewsDraft } from "../ai/gemini-news.ts";
 import { validateStoredEditorialPost } from "../content-validation.ts";
 import { inspectPublicationImagesInDatabase } from "./manual-publication-images.ts";
@@ -30,6 +30,16 @@ export async function loadEditorialReviews(): Promise<EditorialReviewJob[]> {
     .order("created_at", { ascending: false }).limit(150);
   if (error) throw new Error("Não foi possível carregar o andamento das revisões.");
   return (data || []) as EditorialReviewJob[];
+}
+
+export async function isAuthorizedEditorialDispatcher(request: Request): Promise<boolean> {
+  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) return false;
+  const { data, error } = await client().from("editorial_review_dispatch_auth").select("secret_hash").eq("id", true).single();
+  if (error || typeof data?.secret_hash !== "string") return false;
+  const expected = Buffer.from(data.secret_hash, "hex");
+  const actual = createHash("sha256").update(token).digest();
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
 }
 
 export async function processNextEditorialReview(): Promise<boolean> {
