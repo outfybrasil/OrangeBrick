@@ -10,6 +10,10 @@ test("Steam lookup rejects a different game, sequel or edition", () => {
 });
 
 test("official image policy excludes stock photos, spoofed hosts and Steam thumbnails", () => {
+  for (const host of ["cms-assets.unrealengine.com", "cdn.forza.net", "www.tekken-official.jp", "xboxwire.thesourcemediaassets.com"]) {
+    assert.equal(isAllowedEditorialImageUrl(`https://${host}/official-art.jpg`), true);
+    assert.equal(isAllowedEditorialImageUrl(`https://${host}.attacker.test/official-art.jpg`), false);
+  }
   assert.equal(isAllowedEditorialImageUrl("https://images.unsplash.com/photo.jpg"), false);
   assert.equal(isAllowedEditorialImageUrl("https://playstation.com.attacker.test/art.jpg"), false);
   assert.equal(isAllowedEditorialImageUrl("https://cdn.akamai.steamstatic.com/steam/apps/1/header.jpg"), false);

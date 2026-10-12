@@ -62,6 +62,7 @@ function isValidHttpsUrl(value: string) {
 }
 
 const OFFICIAL_EDITORIAL_DOMAINS = [
+  "fortnite.com", "forza.net", "tekken-official.jp",
   "nintendo.com", "nintendo.co.jp", "playstation.com", "xbox.com", "microsoft.com", "ea.com", "ubisoft.com",
   "capcom.com", "capcom-games.com", "sega.com", "bandainamcoent.com", "square-enix.com", "square-enix-games.com",
   "rockstargames.com", "bethesda.net", "activision.com", "blizzard.com", "epicgames.com", "cdprojektred.com", "konami.com",

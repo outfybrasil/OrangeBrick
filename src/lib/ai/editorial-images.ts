@@ -9,6 +9,8 @@ export interface VerifiedEditorialImage {
 }
 
 const OFFICIAL_ASSET_DOMAINS = [
+  "unrealengine.com",
+  "xboxwire.thesourcemediaassets.com",
   "steamstatic.com",
   "steamcommunity.com",
   "xboxservices.com",
