@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse, after } from "next/server";
 import { randomUUID, timingSafeEqual } from "crypto";
 import { createServiceDataClient } from "@/lib/supabase/server";
@@ -93,7 +94,10 @@ export async function POST(request: Request) {
   if (claimStatus !== "claimed") return retryResponse();
 
   try {
-    await handleTelegramWebhook(update);
+    await handleTelegramWebhook(update, () => {
+      for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml"]) revalidatePath(path);
+      revalidatePath("/posts/[slug]", "page");
+    });
   } catch (error: unknown) {
     try {
       const { error: releaseError } = await supabase.rpc("release_telegram_webhook_update", {

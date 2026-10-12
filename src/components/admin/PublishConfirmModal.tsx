@@ -4,9 +4,14 @@ import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
 type PublishConfirmModalProps = {
   title: string;
+  notice?: string;
+  titles?: string[];
+  reviewing?: boolean;
+  canConfirm?: boolean;
   publishing: boolean;
   error: string | null;
   pendingChecklist?: string[];
+  blockers?: string[];
   showCrossPost?: boolean;
   crossPost?: boolean;
   onCrossPostChange?: (value: boolean) => void;
@@ -16,16 +21,21 @@ type PublishConfirmModalProps = {
 
 export function PublishConfirmModal({
   title,
+  notice,
+  titles = [title],
+  reviewing = false,
+  canConfirm = true,
   publishing,
   error,
   pendingChecklist = [],
+  blockers = [],
   showCrossPost = false,
   crossPost = false,
   onCrossPostChange,
   onConfirm,
   onCancel,
 }: PublishConfirmModalProps) {
-  const dialogRef = useModalDialog<HTMLElement>(true, onCancel);
+  const dialogRef = useModalDialog<HTMLElement>(true, () => { if (!publishing) onCancel(); });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-8" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !publishing && onCancel()}>
@@ -36,7 +46,7 @@ export function PublishConfirmModal({
         aria-labelledby="publish-confirmation-title"
         aria-describedby="publish-confirmation-description"
         tabIndex={-1}
-        className="w-full max-w-lg rounded-lg border border-white/10 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60 focus:outline-none"
+        className="max-h-[calc(100dvh-4rem)] w-full max-w-lg overflow-y-auto rounded-lg border border-white/10 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60 focus:outline-none"
       >
         <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400" aria-hidden="true">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -47,24 +57,28 @@ export function PublishConfirmModal({
           Confirmar publicação
         </h2>
         <p id="publish-confirmation-description" className="mt-2 text-sm leading-6 text-gray-400">
-          A matéria ficará disponível imediatamente no site. Confira o título antes de continuar.
+          As matérias ficarão disponíveis imediatamente no site. A sequência segue a ordem de seleção; a última publicada aparece primeiro.
         </p>
         <div className="mt-5 rounded-lg bg-white/[0.04] p-4">
           <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Matéria</p>
-          <p className="mt-1.5 font-heading text-sm font-bold uppercase leading-5 text-white">{title}</p>
+          <ol className="mt-1.5 list-inside list-decimal space-y-2 font-heading text-sm font-bold uppercase leading-5 text-white">{titles.map((item, index) => <li key={index}>{item}</li>)}</ol>
         </div>
+        {notice && <p className="mt-3 text-xs text-gray-300">{notice}</p>}
+        {blockers.length > 0 && <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200"><p className="font-bold">Corrija as imagens para publicar</p><ul className="mt-2 space-y-1">{blockers.map((item, index) => <li key={index}>{item}</li>)}</ul></div>}
         {pendingChecklist.length > 0 && (
           <div className="mt-4 border border-amber-500/30 bg-amber-500/10 px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-wide text-amber-300">
-              Checklist editorial pendente ({pendingChecklist.length})
+              Avisos editoriais ({pendingChecklist.length})
             </p>
             <ul className="mt-1.5 space-y-1 text-xs leading-5 text-amber-200/90">
               {pendingChecklist.map((item) => (
                 <li key={item}>· {item}</li>
               ))}
             </ul>
+            <p className="mt-3 text-sm font-bold text-amber-200">Deseja continuar a publicação mesmo com esses avisos?</p>
           </div>
         )}
+        {reviewing && <p role="status" className="mt-4 text-sm text-gray-300">Conferindo as matérias selecionadas…</p>}
         {error && (
           <div role="alert" className="mt-4 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm leading-5 text-red-200">
             {error}
@@ -97,10 +111,10 @@ export function PublishConfirmModal({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={publishing}
+            disabled={publishing || reviewing || !canConfirm || blockers.length > 0}
             className="inline-flex min-h-11 items-center justify-center rounded bg-emerald-500 px-4 text-xs font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
           >
-            {publishing ? "Publicando..." : "Publicar agora"}
+            {publishing ? "Publicando..." : pendingChecklist.length > 0 ? "Continuar e publicar" : titles.length > 1 ? `Publicar ${titles.length} matérias` : "Publicar agora"}
           </button>
         </div>
       </section>

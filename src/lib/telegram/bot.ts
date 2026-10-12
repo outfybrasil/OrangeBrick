@@ -4,6 +4,7 @@ import { generateNewsDraft, NoFreshTopicError, SimilarTopicError } from "../ai/g
 import { getSiteUrl } from "../site-url.ts";
 import { createPreviewToken } from "../preview-token.ts";
 import { validateStoredEditorialPost } from "../content-validation.ts";
+import { inspectPublicationImagesInDatabase } from "../server/manual-publication-images.ts";
 import { normalizeNewsSearch } from "../news-query.ts";
 
 export interface TelegramUpdate {
@@ -190,7 +191,7 @@ function sendTyping(chatId: number | string): void {
 }
 
 async function answerToast(cq: { id: string }, text: string, alert = true): Promise<void> {
-  await sendTelegramApi("answerCallbackQuery", { callback_query_id: cq.id, text, show_alert: alert });
+  await sendTelegramApi("answerCallbackQuery", { callback_query_id: cq.id, text: excerpt(text, 180), show_alert: alert });
 }
 
 function brtDate(date = new Date()): string {
@@ -384,6 +385,67 @@ function scheduleMenuKeyboard(postId: string): InlineKeyboard {
   return rows;
 }
 
+type PublicationReview = {
+  actor_id: string;
+  status: "pending" | "published";
+  expires_at: string;
+  images_verified: boolean;
+  posts: Array<{ id: string; updated_at: string }>;
+};
+
+async function getPublicationSelection(actorId: string): Promise<string[]> {
+  const raw = await getState(`telegram:publish-selection:${actorId}`);
+  if (!raw) return [];
+  const parsed: unknown = JSON.parse(raw);
+  return Array.isArray(parsed) ? [...new Set(parsed.filter((id): id is string => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 50) : [];
+}
+
+async function prepareTelegramPublication(cq: NonNullable<TelegramUpdate["callback_query"]>, ids: string[], actorId: string): Promise<void> {
+  if (!ids.length) { await answerToast(cq, "Selecione pelo menos uma matéria.", true); return; }
+  await answerToast(cq, "Conferindo capa e imagens…");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("posts").select("*").in("id", ids);
+  if (error) throw error;
+  const byId = new Map(((data || []) as Post[]).map((post) => [post.id, post]));
+  const posts = ids.flatMap((id) => { const post = byId.get(id); return post && !post.is_published ? [post] : []; });
+  if (!posts.length) { await sendTelegramApi("sendMessage", { chat_id: actorId, text: "As matérias selecionadas não foram encontradas ou já estão publicadas." }); return; }
+  const checks = await inspectPublicationImagesInDatabase(posts, supabase);
+  const blockers = posts.flatMap((post) => (checks.get(post.id) || []).map((message) => `${post.title}: ${message}`));
+  if (blockers.length) {
+    await sendTelegramApi("sendMessage", { chat_id: actorId, text: `⛔ Corrija a capa e as imagens antes de publicar.\n\n${blockers.slice(0, 8).map((item) => excerpt(item, 220)).join("\n")}\n\nConfira todos os detalhes no ADM.`, reply_markup: { inline_keyboard: [[{ text: "Abrir ADM", url: `${getSiteUrl()}/admin` }]] } });
+    return;
+  }
+  const key = crypto.randomUUID();
+  const review: PublicationReview = { actor_id: actorId, status: "pending", expires_at: new Date(Date.now() + 10 * 60_000).toISOString(), images_verified: true, posts: posts.map(({ id, updated_at }) => ({ id, updated_at })) };
+  await setState(`telegram:publish-review:${key}`, JSON.stringify(review));
+  const warnings = posts.flatMap((post) => validateStoredEditorialPost(post).map((message) => `${excerpt(post.title, 35)}: ${message}`));
+  const titles = posts.map((post, index) => `${index + 1}. ${escapeHtml(excerpt(post.title, 45))}`).join("\n");
+  const warningText = warnings.length ? `\n\n⚠️ <b>Avisos editoriais (${warnings.length})</b>\n${warnings.slice(0, 5).map((message) => escapeHtml(excerpt(message, 140))).join("\n")}\n\nDeseja continuar mesmo com estes avisos?` : "\n\nDeseja publicar agora?";
+  await sendTelegramApi("sendMessage", { chat_id: actorId, parse_mode: "HTML", text: `📰 <b>Confirmar publicação de ${posts.length} matéria(s)</b>\n\n${titles}\n\nA sequência segue a seleção. A última publicada aparece primeiro no site.${warningText}`, reply_markup: { inline_keyboard: [[{ text: warnings.length ? "✅ Continuar e publicar" : "✅ Publicar agora", callback_data: `pcf:${key}` }, { text: "❌ Cancelar", callback_data: `pcn:${key}` }]] } });
+}
+
+async function confirmTelegramPublication(cq: NonNullable<TelegramUpdate["callback_query"]>, key: string, actorId: string): Promise<boolean> {
+  await answerToast(cq, "Conferindo imagens e confirmando a publicação…");
+  const stateKey = `telegram:publish-review:${key}`;
+  const raw = await getState(stateKey);
+  if (!raw) { await editCard(cq, "Confirmação expirada ou cancelada. Revise as matérias novamente.", []); return false; }
+  const review = JSON.parse(raw) as PublicationReview;
+  if (review.actor_id !== actorId || Date.parse(review.expires_at) < Date.now()) { await editCard(cq, "Confirmação expirada. Revise as matérias novamente.", []); return false; }
+  const supabase = getSupabaseAdmin();
+  const { data, error: readError } = await supabase.from("posts").select("*").in("id", review.posts.map((post) => post.id));
+  if (readError) throw readError;
+  const posts = (data || []) as Post[];
+  if (review.status !== "published") {
+    const checks = await inspectPublicationImagesInDatabase(posts, supabase);
+    const blockers = posts.flatMap((post) => checks.get(post.id) || []);
+    if (blockers.length) { await editCard(cq, `⛔ A publicação foi bloqueada pelas imagens.\n\n${blockers.slice(0, 6).map((item) => escapeHtml(excerpt(item, 200))).join("\n")}\n\nCorrija no ADM e revise novamente.`, []); return false; }
+  }
+  const { error } = await supabase.rpc("telegram_publish_review", { p_review_key: stateKey, p_actor_id: actorId });
+  if (error) { await editCard(cq, `Não foi possível publicar: ${escapeHtml(error.message)}`, []); return false; }
+  await editCard(cq, `✅ <b>${review.posts.length} matéria(s) publicada(s)</b>\n\n${review.posts.map((item, index) => { const post = posts.find((post) => post.id === item.id); return `${index + 1}. ${escapeHtml(excerpt(post?.title || item.id, 60))}`; }).join("\n")}`, [[{ text: "Ver notícias no site", url: `${getSiteUrl()}/noticias` }, { text: "Ver rascunhos", callback_data: "pgd:0" }]]);
+  return true;
+}
+
 async function listDraftsPage(chatId: number | string, page: number): Promise<void> {
   const supabase = getSupabaseAdmin();
   const { data: drafts, count } = await supabase
@@ -409,9 +471,12 @@ async function listDraftsPage(chatId: number | string, page: number): Promise<vo
     listText += `${idx + 1}. <b>${escapeHtml(excerpt(d.title as string, 70))}</b>\n   🏷️ #${escapeHtml(String(d.category).toUpperCase())} | ${timeAgo(d.created_at as string)} atrás\n`;
   });
 
+  const selected = await getPublicationSelection(String(chatId));
   const keyboard: InlineKeyboard = drafts.map((d, idx) => [
-    { text: `${idx + 1}. ${excerpt(d.title as string, 45)}`, callback_data: `drw:${d.id}` },
+    { text: `${idx + 1}. ${excerpt(d.title as string, 35)}`, callback_data: `drw:${d.id}` },
+    { text: selected.includes(String(d.id)) ? "✅ Selecionada" : "☑ Selecionar", callback_data: `sel:${d.id}:${page}` },
   ]);
+  if (selected.length) keyboard.push([{ text: `🚀 Publicar selecionadas (${selected.length})`, callback_data: "bpub:" }, { text: "Limpar seleção", callback_data: "bclr:" }]);
   const nav: Array<{ text: string; callback_data: string }> = [];
   if (page > 0) nav.push({ text: "◀️", callback_data: `pgd:${page - 1}` });
   if (page + 1 < totalPages) nav.push({ text: "▶️", callback_data: `pgd:${page + 1}` });
@@ -765,13 +830,13 @@ async function brickDetailView(chatId: number | string, postId: string): Promise
   return true;
 }
 
-async function handleCallback(update: TelegramUpdate): Promise<void> {
+async function handleCallback(update: TelegramUpdate, onPublished?: () => void): Promise<void> {
   const cq = update.callback_query!;
   const fromId = String(cq.from?.id);
   const data = cq.data || "";
   const adminChatId = getAdminChatId();
 
-  if (!adminChatId || fromId !== adminChatId) {
+  if (!adminChatId || fromId !== adminChatId || String(cq.message?.chat.id) !== adminChatId) {
     await sendTelegramApi("answerCallbackQuery", {
       callback_query_id: cq.id,
       text: "⛔ Acesso negado. Apenas o administrador pode usar estes controles.",
@@ -783,39 +848,32 @@ async function handleCallback(update: TelegramUpdate): Promise<void> {
   const [action, arg1, arg2] = data.split(":");
   const supabase = getSupabaseAdmin();
 
-  if (action === "pub" && arg1) {
-    const post = await loadPost(arg1);
-    if (!post) {
-      await answerToast(cq, "Matéria não encontrada.", true);
-      return;
-    }
-    const publicationErrors = validateStoredEditorialPost(post);
-    if (publicationErrors.length > 0) {
-      await answerToast(cq, `Publicação bloqueada: ${publicationErrors.slice(0, 2).join(" ")}`, true);
-      return;
-    }
-    const now = new Date().toISOString();
-    const { data: updated, error } = await supabase
-      .from("posts")
-      .update({ is_published: true, published_at: now, scheduled_at: null, updated_at: now })
-      .eq("id", arg1)
-      .select("title, slug")
-      .single();
-
-    if (error || !updated) {
-      await answerToast(cq, `❌ Erro ao publicar: ${error?.message || "não encontrado"}`, true);
-      return;
-    }
-
-    await answerToast(cq, "🎉 Matéria publicada no Orange Brick!", true);
-    const liveUrl = `${getSiteUrl()}/posts/${updated.slug}`;
-    await editCard(cq, `${approvalText(post)}\n\n✅ <b>PUBLICADO!</b>`, [
-      [{ text: "🎉 Ver ao vivo", url: liveUrl }],
-      [
-        { text: "🚫 Despublicar", callback_data: `unp:${arg1}` },
-        { text: "🗑 Apagar", callback_data: `del:${arg1}` },
-      ],
-    ]);
+  if (action === "sel" && arg1) {
+    const { error } = await supabase.rpc("telegram_toggle_publication_selection", { p_actor_id: fromId, p_post_id: arg1 });
+    if (error) { await answerToast(cq, error.message, true); return; }
+    await answerToast(cq, "Seleção atualizada.");
+    await listDraftsPage(adminChatId, /^\d+$/.test(arg2 || "") ? Number(arg2) : 0);
+    return;
+  }
+  if (action === "bclr") {
+    await deleteState(`telegram:publish-selection:${fromId}`);
+    await answerToast(cq, "Seleção limpa.");
+    await listDraftsPage(adminChatId, 0);
+    return;
+  }
+  if (action === "pub" || action === "bpub") {
+    const ids = action === "pub" && arg1 ? [arg1] : await getPublicationSelection(fromId);
+    await prepareTelegramPublication(cq, ids, fromId);
+    return;
+  }
+  if (action === "pcn" && arg1) {
+    await deleteState(`telegram:publish-review:${arg1}`);
+    await answerToast(cq, "Publicação cancelada. Nenhuma matéria foi publicada.");
+    await editCard(cq, "Publicação cancelada. Os rascunhos foram mantidos.", [[{ text: "Voltar aos rascunhos", callback_data: "pgd:0" }]]);
+    return;
+  }
+  if (action === "pcf" && arg1) {
+    if (await confirmTelegramPublication(cq, arg1, fromId)) onPublished?.();
     return;
   }
 
@@ -1597,11 +1655,11 @@ async function consumePendingEdit(chatId: number | string, text: string): Promis
   return true;
 }
 
-export async function handleTelegramWebhook(update: TelegramUpdate) {
+export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?: () => void) {
   const adminChatId = getAdminChatId();
 
   if (update.callback_query) {
-    await handleCallback(update);
+    await handleCallback(update, onPublished);
     return;
   }
 

@@ -1,3 +1,4 @@
+import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
@@ -7,7 +8,7 @@ import {
   validateReleaseSourceUrl,
 } from "@/lib/release-images";
 import type { EditorialImage } from "@/lib/types/database";
-import { fetchValidatedRemote, readResponseBuffer } from "@/lib/server/network";
+import { fetchValidatedRemote, readResponseBuffer, readRequestFormData } from "@/lib/server/network";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -85,6 +86,7 @@ async function createStandardImage(source: Buffer, kind: ImageKind): Promise<Pro
     .toBuffer();
   const metadata = await sharp(normalized).metadata();
   if (!metadata.width || !metadata.height) throw new Error("Não foi possível ler as dimensões da imagem");
+  if (metadata.width < 1200 || metadata.height < 675) throw new Error("Use a imagem original com pelo menos 1200 × 675 pixels, sem ampliar miniaturas.");
   if (!metadata.format || !ALLOWED_FORMATS.has(metadata.format)) throw new Error("Formato de imagem incompatível");
 
   if (kind === "release") {
@@ -152,7 +154,7 @@ async function requireAdmin(request: Request) {
   if (!authorization?.startsWith("Bearer ")) return null;
   const supabase = serviceClient();
   const { data: { user } } = await supabase.auth.getUser(authorization.slice(7));
-  return user?.app_metadata?.is_admin === true ? user : null;
+  return isVerifiedAdminSession(user, authorization.slice(7)) ? user : null;
 }
 
 export async function GET(request: Request) {
@@ -223,7 +225,7 @@ export async function POST(request: Request) {
 
   try {
     const isMultipart = request.headers.get("content-type")?.includes("multipart/form-data");
-    const input = isMultipart ? await request.formData() : await request.json();
+    const input = isMultipart ? await readRequestFormData(request, MAX_SOURCE_BYTES + 64 * 1024) : await request.json();
     const value = (key: string) => isMultipart
       ? input instanceof FormData ? input.get(key) : null
       : input && typeof input === "object" ? (input as Record<string, unknown>)[key] : null;
@@ -293,7 +295,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao processar a imagem";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: message }, { status: message.includes("ultrapassa") ? 413 : 400 });
   }
 }
 
@@ -356,6 +358,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao remover a imagem";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: message }, { status: message.includes("ultrapassa") ? 413 : 400 });
   }
 }

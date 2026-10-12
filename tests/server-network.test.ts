@@ -29,3 +29,17 @@ test("enforces response size while reading the stream", async () => {
   const response = new Response(new Uint8Array(8));
   await assert.rejects(readResponseBuffer(response, 4), /tamanho máximo/);
 });
+
+test("limits multipart streams without trusting Content-Length", async () => {
+  const { readRequestFormData } = await import("../src/lib/server/network.ts");
+  const form = new FormData();
+  form.set("image", new File([new Uint8Array(1024)], "image.png", { type: "image/png" }));
+  const encoded = new Request("https://example.test/upload", { method: "POST", body: form });
+  const bytes = new Uint8Array(await encoded.arrayBuffer());
+  const oversized = new Request("https://example.test/upload", { method: "POST", body: bytes, headers: { "content-type": encoded.headers.get("content-type")! } });
+  assert.equal(oversized.headers.has("content-length"), false);
+  await assert.rejects(readRequestFormData(oversized, 256), /tamanho máximo/);
+  const valid = new Request("https://example.test/upload", { method: "POST", body: form });
+  const parsed = await readRequestFormData(valid, 4096);
+  assert.equal((parsed.get("image") as File).size, 1024);
+});

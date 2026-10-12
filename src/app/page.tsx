@@ -33,7 +33,7 @@ async function fetchLatestPosts() {
     .from("posts")
     .select(POST_LIST_COLUMNS)
     .eq("is_published", true)
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false, nullsFirst: false }).order("id", { ascending: false })
     .limit(PAGE_SIZE);
   return (data as unknown as Post[] | null) || [];
 }

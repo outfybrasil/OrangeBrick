@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
 import { isAdminUser } from "@/lib/auth";
-import { validateStoredEditorialPost } from "@/lib/content-validation";
 import { createDataClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 
@@ -92,7 +91,11 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [dashboardNow] = useState(() => Date.now());
   const [publishingId, setPublishingId] = useState<string | null>(null);
-  const [publishCandidate, setPublishCandidate] = useState<PaginatedPost | null>(null);
+  const [publishCandidates, setPublishCandidates] = useState<PaginatedPost[] | null>(null);
+  const [publicationReview, setPublicationReview] = useState<Array<PaginatedPost & { warnings: string[]; blockers: string[] }>>([]);
+  const [reviewingPublication, setReviewingPublication] = useState(false);
+  const [skippedPublications, setSkippedPublications] = useState(0);
+  const publicationReviewVersion = useRef(0);
   const [publishOnBrickboard, setPublishOnBrickboard] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [brickboardPostingId, setBrickboardPostingId] = useState<string | null>(null);
@@ -235,109 +238,78 @@ export default function AdminDashboard() {
       if (threadError) throw new Error("A publicação no Brickboard falhou.");
       setBrickboardMessage(`"${post.title}" foi publicada no Brickboard.`);
     } catch (postingError) {
-      setError(errorMessage(postingError, "Não foi possível publicar a matéria no Brickboard."));
+      const message = errorMessage(postingError, "Não foi possível publicar a matéria no Brickboard.");
+      setError(message);
+      return message;
     } finally {
       setBrickboardPostingId(null);
     }
   };
 
-  const publishPost = async (post: PaginatedPost) => {
-    setPublishingId(post.id);
-    setError(null);
+  const preparePublication = async (ids: string[]) => {
+    if (publishingId || reviewingPublication || ids.length === 0) return;
+    const version = ++publicationReviewVersion.current;
+    setPublishCandidates(ids.flatMap((id) => posts.find((post) => post.id === id) || []));
+    setPublicationReview([]);
+    setSkippedPublications(0);
+    setReviewingPublication(true);
+    setPublishOnBrickboard(false);
     setPublishError(null);
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Sessão expirada");
-      const fullPostResponse = await fetch(`/api/admin/posts/${encodeURIComponent(post.id)}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-        cache: "no-store",
+      const response = await fetch("/api/admin/posts/publish", {
+        method: "POST", headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "review", ids }),
       });
-      if (!fullPostResponse.ok) throw new Error("Não foi possível carregar o conteúdo da matéria.");
-      const { post: fullPost } = await fullPostResponse.json() as { post: Post };
-      if (!fullPost) throw new Error("Não foi possível carregar o conteúdo da matéria.");
+      const result = await response.json() as { posts?: Array<PaginatedPost & { warnings: string[]; blockers: string[] }>; skipped?: number; error?: string };
+      if (!response.ok || !result.posts) throw new Error(result.error || "Não foi possível revisar as matérias.");
+      if (version !== publicationReviewVersion.current) return;
+      setPublicationReview(result.posts);
+      setSkippedPublications(result.skipped || 0);
+      setPublishCandidates(result.posts);
+      if (result.posts.length === 0) setPublishError("As matérias selecionadas já estão publicadas.");
+    } catch (reviewError) {
+      if (version === publicationReviewVersion.current) setPublishError(errorMessage(reviewError, "Não foi possível revisar as matérias."));
+    } finally {
+      if (version === publicationReviewVersion.current) setReviewingPublication(false);
+    }
+  };
 
-      const completePost = fullPost as Pick<Post, "body" | "information_status" | "featured_quote" | "editorial_sources" | "short_article_reason" | "correction_note">;
-      const validationErrors = validateStoredEditorialPost({
-        slug: post.slug,
-        title: post.title,
-        summary: post.summary,
-        body: String(completePost.body),
-        image_url: post.image_url,
-        image_alt: post.image_alt,
-        information_status: completePost.information_status,
-        featured_quote: completePost.featured_quote,
-        editorial_sources: completePost.editorial_sources,
-        short_article_reason: completePost.short_article_reason,
-        correction_note: completePost.correction_note,
+  const publishPosts = async () => {
+    if (publishingId || reviewingPublication || publicationReview.length === 0) return;
+    setPublishingId(publicationReview[0].id);
+    setError(null);
+    setPublishError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const response = await fetch("/api/admin/posts/publish", {
+        method: "POST", headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "publish", ids: publicationReview.map((post) => post.id), reviewed: publicationReview.map(({ id, updated_at }) => ({ id, updated_at })) }),
       });
-
-      if (validationErrors.length > 0) throw new Error(validationErrors.join(" "));
-
-      const publishedAt = new Date().toISOString();
-      const { error: publishError } = await supabase
-        .from("posts")
-        .update({
-          is_published: true,
-          published_at: publishedAt,
-          updated_at: publishedAt,
-        })
-        .eq("id", post.id)
-        .select("id")
-        .single();
-
-      if (publishError) throw publishError;
-      setPosts((current) => current.map((item) => item.id === post.id ? { ...item, is_published: true, published_at: publishedAt, updated_at: publishedAt } : item));
-
+      const result = await response.json() as { posts?: Array<{ id: string; published_at: string; updated_at: string }>; error?: string };
+      if (!response.ok || !result.posts) throw new Error(result.error || "Não foi possível publicar as matérias.");
+      const published = new Map(result.posts.map((post) => [post.id, post]));
+      setPosts((current) => current.map((post) => published.has(post.id) ? { ...post, ...published.get(post.id)!, is_published: true, scheduled_at: null } : post));
+      setSelectedIds((current) => current.filter((id) => !published.has(id)));
+      const brickboardFailures: string[] = [];
       if (publishOnBrickboard) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("A matéria foi publicada, mas sua sessão expirou antes da publicação no Brickboard.");
-
-        const { data: existingThread, error: threadLookupError } = await supabase
-          .from("community_posts")
-          .select("id")
-          .eq("source_post_id", post.id)
-          .eq("is_official_thread", true)
-          .maybeSingle();
-
-        if (threadLookupError) throw new Error("A matéria foi publicada, mas não foi possível verificar o Brickboard.");
-
-        if (!existingThread) {
-          const { error: threadError } = await supabase.from("community_posts").insert({
-            user_id: user.id,
-            author_name: "Orange Brick",
-            author_avatar: "",
-            content: post.summary.slice(0, 280),
-            media_url: null,
-            platform_tag: null,
-            attached_article: {
-              id: post.id,
-              slug: post.slug,
-              title: post.title,
-              summary: post.summary,
-              image_url: post.image_url,
-              category: post.category,
-            },
-            is_official: true,
-            is_pinned: false,
-            source_post_id: post.id,
-            is_official_thread: true,
-          });
-
-          if (threadError) throw new Error("A matéria foi publicada, mas a publicação no Brickboard falhou.");
+        for (const post of publicationReview) {
+          const failure = await postPublishedArticleOnBrickboard(post);
+          if (failure) brickboardFailures.push(failure);
         }
       }
-
-      setPublishCandidate(null);
+      setBrickboardMessage(`${result.posts.length} ${result.posts.length === 1 ? "matéria publicada" : "matérias publicadas"} no site.`);
+      if (brickboardFailures.length) setError(`As matérias foram publicadas, mas houve falhas no Brickboard: ${brickboardFailures.join(" ")}`);
+      setPublishCandidates(null);
+      setPublicationReview([]);
       setPublishOnBrickboard(false);
-      setPublishError(null);
-    } catch (err: unknown) {
-      const message = errorMessage(err, "Não foi possível publicar a matéria.");
-      setError(message);
+    } catch (publicationError) {
+      const message = errorMessage(publicationError, "Não foi possível publicar as matérias.");
       setPublishError(message);
-    } finally {
-      setPublishingId(null);
-    }
+      if (message.includes("Revise a seleção")) setPublicationReview([]);
+    } finally { setPublishingId(null); }
   };
 
   const fetchPosts = useCallback(async (page: number, category: string, status: string, editor: string, search: string, sort: string) => {
@@ -619,6 +591,7 @@ export default function AdminDashboard() {
             <div className="flex flex-col gap-3 border-b border-brand-orange/25 bg-brand-orange/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
               <strong className="text-xs text-brand-orange">{selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}</strong>
               <div className="flex flex-wrap items-center gap-2">
+                <button type="button" onClick={() => void preparePublication(selectedIds)} disabled={Boolean(publishingId) || reviewingPublication || isBatchDeleting || isBatchUpdating} className="inline-flex min-h-11 items-center rounded-lg bg-emerald-500 px-3.5 text-xs font-bold text-black disabled:opacity-50">Publicar selecionadas</button>
                 <button
                   type="button"
                   onClick={() => {
@@ -780,9 +753,7 @@ export default function AdminDashboard() {
                           <button
                             type="button"
                             onClick={() => {
-                              setPublishCandidate(post);
-                              setPublishOnBrickboard(false);
-                              setPublishError(null);
+                              void preparePublication([post.id]);
                             }}
                             disabled={publishingId === post.id}
                             className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 text-xs font-bold text-white transition-colors hover:bg-emerald-400 disabled:opacity-60 active:scale-95"
@@ -887,9 +858,7 @@ export default function AdminDashboard() {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setPublishCandidate(post);
-                                  setPublishOnBrickboard(false);
-                                  setPublishError(null);
+                                  void preparePublication([post.id]);
                                 }}
                                 disabled={publishingId === post.id}
                                 className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-500 px-3 text-xs font-bold text-white transition-colors hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 disabled:cursor-wait disabled:opacity-60"
@@ -989,17 +958,27 @@ export default function AdminDashboard() {
           </div>
       </section>
 
-      {publishCandidate && (
+      {publishCandidates && (
         <PublishConfirmModal
-          title={publishCandidate.title}
-          publishing={publishingId === publishCandidate.id}
+          title={publishCandidates[0]?.title || "Carregando seleção…"}
+          titles={publishCandidates.map((post) => post.title)}
+          notice={skippedPublications ? `${skippedPublications} ${skippedPublications === 1 ? "matéria já estava publicada e ficou" : "matérias já estavam publicadas e ficaram"} fora deste lote.` : undefined}
+          publishing={Boolean(publishingId)}
+          reviewing={reviewingPublication}
+          canConfirm={publicationReview.length > 0 && !publishError && publicationReview.every((post) => post.blockers.length === 0)}
           error={publishError}
+          blockers={publicationReview.flatMap((post) => post.blockers.map((message) => `${post.title}: ${message}`))}
+          pendingChecklist={publicationReview.flatMap((post, index) => post.warnings.map((warning) => `${index + 1}. ${post.title}: ${warning}`))}
           showCrossPost
           crossPost={publishOnBrickboard}
           onCrossPostChange={setPublishOnBrickboard}
-          onConfirm={() => void publishPost(publishCandidate)}
+          onConfirm={() => void publishPosts()}
           onCancel={() => {
-            setPublishCandidate(null);
+            if (publishingId) return;
+            publicationReviewVersion.current += 1;
+            setPublishCandidates(null);
+            setPublicationReview([]);
+            setReviewingPublication(false);
             setPublishOnBrickboard(false);
             setPublishError(null);
           }}

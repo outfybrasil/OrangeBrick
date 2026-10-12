@@ -36,6 +36,7 @@ function imageRemotePatterns() {
 }
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   serverExternalPackages: ["sharp"],
   images: {

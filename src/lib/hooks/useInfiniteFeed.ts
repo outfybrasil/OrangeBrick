@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
-import { normalizeNewsSearch } from "@/lib/news-query";
+import { normalizeNewsSearch, publishedPostCursorFilter } from "@/lib/news-query";
 
 const PAGE_SIZE = 50;
 const REFRESH_INTERVAL = 120_000;
@@ -34,8 +34,8 @@ export function useInfiniteFeed(
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(initialPosts.length === PAGE_SIZE);
   const [error, setError] = useState<string | null>(null);
-  const cursorRef = useRef<string | null>(
-    initialPosts.length === PAGE_SIZE ? initialPosts[initialPosts.length - 1].created_at : null
+  const cursorRef = useRef<Pick<Post, "id" | "published_at"> | null>(
+    initialPosts.length === PAGE_SIZE ? initialPosts[initialPosts.length - 1] : null
   );
   const loadingRef = useRef(false);
 
@@ -69,7 +69,7 @@ export function useInfiniteFeed(
           .from("posts")
           .select(POST_LIST_COLUMNS)
           .eq("is_published", true)
-          .order("created_at", { ascending: false })
+          .order("published_at", { ascending: false, nullsFirst: false }).order("id", { ascending: false })
           .limit(PAGE_SIZE);
 
         if (category) {
@@ -89,7 +89,7 @@ export function useInfiniteFeed(
         }
 
         if (!isRefresh && cursorRef.current) {
-          query = query.lt("created_at", cursorRef.current);
+          query = query.or(publishedPostCursorFilter(cursorRef.current));
         }
 
         const { data, error: fetchError } = await query;
@@ -107,7 +107,7 @@ export function useInfiniteFeed(
         }
 
         setHasMore(newPosts.length === PAGE_SIZE);
-        cursorRef.current = newPosts.at(-1)?.created_at || null;
+        cursorRef.current = newPosts.at(-1) || null;
       } catch (err) {
         const msg =
           err && typeof err === "object" && "message" in err

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { isAdminUser } from "@/lib/auth";
+import { isVerifiedAdminSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     global: { headers: { Authorization: `Bearer ${token}` } },
   });
   const { data: { user } } = await supabase.auth.getUser(token);
-  if (!isAdminUser(user)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  if (!isVerifiedAdminSession(user, token)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
 
   const query = new URL(request.url).searchParams.get("q")?.trim().slice(0, 80) || "";
   if (query.length < 2) return NextResponse.json({ results: [] });

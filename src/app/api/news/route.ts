@@ -52,7 +52,7 @@ export async function GET(request: Request) {
   }
 
   const supabase = createClient(url, anonKey);
-  let query = supabase.from("posts").select(POST_LIST_COLUMNS, { count: "exact" }).eq("is_published", true).order("published_at", { ascending: false });
+  let query = supabase.from("posts").select(POST_LIST_COLUMNS, { count: "exact" }).eq("is_published", true).order("published_at", { ascending: false, nullsFirst: false }).order("id", { ascending: false });
   const category = searchParams.get("category");
   const validCategories = ["breaking", "hardware", "industry", "modding", "review", "opinion"];
   if (category && validCategories.includes(category)) {

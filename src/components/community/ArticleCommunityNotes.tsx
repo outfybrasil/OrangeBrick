@@ -1,5 +1,6 @@
 "use client";
 
+import { safeLinkUrl } from "@/lib/safe-url";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useToast } from "@/lib/contexts/ToastContext";
@@ -112,7 +113,7 @@ export function ArticleCommunityNotes({ postId }: { postId: string }) {
       setMessage("Entre na sua conta para enviar uma nota.");
       return;
     }
-    if (content.trim().length < 40 || !sourceUrl.startsWith("https://")) {
+    if (content.trim().length < 40 || !safeLinkUrl(sourceUrl.trim(), false)?.startsWith("https://")) {
       toast.error("Escreva ao menos 40 caracteres e informe uma fonte HTTPS.");
       setMessage("Escreva ao menos 40 caracteres e informe uma fonte HTTPS.");
       return;
@@ -123,7 +124,7 @@ export function ArticleCommunityNotes({ postId }: { postId: string }) {
         post_id: postId,
         user_id: user.id,
         content: content.trim(),
-        source_url: sourceUrl.trim(),
+        source_url: safeLinkUrl(sourceUrl.trim(), false)!,
       });
       if (error) throw error;
       setContent("");
@@ -200,14 +201,14 @@ export function ArticleCommunityNotes({ postId }: { postId: string }) {
         <article key={note.id} className="mt-5 border-t border-white/10 pt-5">
           <p className="text-sm leading-relaxed text-white">{note.content}</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <a
-              href={note.source_url}
+            {safeLinkUrl(note.source_url, false) && <a
+              href={safeLinkUrl(note.source_url, false)!}
               target="_blank"
               rel="noreferrer"
               className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange hover:text-white"
             >
               Consultar fonte ↗
-            </a>
+            </a>}
             <button
               type="button"
               aria-pressed={votedNotes.includes(note.id)}

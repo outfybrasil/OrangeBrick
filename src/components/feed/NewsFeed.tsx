@@ -118,27 +118,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   const isFiltering = hasRequestedFilters;
   const heroPost = !isFiltering && posts.length >= 3 ? posts[0] : null;
 
-  const sidePosts = useMemo(() => {
-    if (!heroPost || posts.length < 3) return [];
-    const candidates = posts.slice(1);
-    const chosen: Post[] = [];
-    const usedCategories = new Set<string>([heroPost.category]);
-
-    for (const p of candidates) {
-      if (chosen.length === 2) break;
-      if (!usedCategories.has(p.category)) {
-        chosen.push(p);
-        usedCategories.add(p.category);
-      }
-    }
-    for (const p of candidates) {
-      if (chosen.length === 2) break;
-      if (!chosen.some((c) => c.id === p.id)) {
-        chosen.push(p);
-      }
-    }
-    return chosen;
-  }, [heroPost, posts]);
+  const sidePosts = useMemo(() => heroPost ? posts.slice(1, 3) : [], [heroPost, posts]);
 
   const displayPosts = useMemo(() => {
     if (isFiltering || !heroPost) return posts;

@@ -158,3 +158,12 @@ export async function readResponseBuffer(response: Response, maximumBytes: numbe
 
   return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), totalBytes);
 }
+
+export async function readRequestFormData(request: Request, maximumBytes: number) {
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength && Number(declaredLength) > maximumBytes) {
+    throw new Error("A requisição ultrapassa o tamanho máximo permitido");
+  }
+  const buffer = await readResponseBuffer(new Response(request.body), maximumBytes);
+  return new Response(buffer, { headers: { "content-type": request.headers.get("content-type") || "" } }).formData();
+}

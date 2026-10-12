@@ -131,6 +131,7 @@ function EditForm() {
   const [authorName, setAuthorName] = useState("Redação");
   const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [loadedUpdatedAt, setLoadedUpdatedAt] = useState<string | null>(null);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [informationStatus, setInformationStatus] = useState<InformationStatus>("confirmed");
   const [quoteText, setQuoteText] = useState("");
@@ -186,6 +187,19 @@ function EditForm() {
     correctionNote,
     shortArticleReason,
   }), [absenceRegistered, blocks, correctionNote, imageAlt, imageUrl, informationStatus, quoteAuthor, quoteRole, quoteSourceUrl, quoteSourceVerified, quoteText, shortArticleReason, sourcesText, summary, title]);
+
+  const publicationWarnings = [...new Set([
+    ...editorialChecklist.filter((item) => !item.complete).map((item) => item.label),
+    ...validateEditorialContent({
+      slug, title: title.trim(), summary: summary.trim(), imageUrl: imageUrl.trim(), imageAlt: imageAlt.trim(),
+      blocks, shortArticleReason, absenceRegistered,
+      editorialMetadata: {
+        informationStatus,
+        quote: quoteText.trim() ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), sourceUrl: quoteSourceUrl.trim(), sourceVerified: quoteSourceVerified } : null,
+        sources: parseEditorialSources(sourcesText), correctionNote: correctionNote.trim() || null,
+      },
+    }),
+  ])];
 
   useEffect(() => {
     if (isLoading || !hasChanges) return;
@@ -314,6 +328,7 @@ function EditForm() {
           setAuthorName(typedPost.author_name);
           setAuthorTag(normalizeAuthorTag(typedPost.author_tag));
           setPublishedAt(typedPost.published_at || null);
+          setLoadedUpdatedAt(typedPost.updated_at);
           setScheduledAt(typedPost.scheduled_at || null);
           setInformationStatus(typedPost.information_status || "confirmed");
           const storedQuote = typedPost.featured_quote as { text?: string; author?: string; role?: string; source_url?: string; source_verified?: boolean; absence_registered?: boolean } | null;
@@ -450,27 +465,6 @@ function EditForm() {
 
       const parsedSources = parseEditorialSources(sourcesText);
 
-      if (isPublished) {
-        const validationErrors = validateEditorialContent({
-          slug: cleanSlug,
-          title: title.trim(),
-          summary: summary.trim(),
-          imageUrl: imageUrl.trim(),
-          imageAlt: imageAlt.trim(),
-          blocks,
-          shortArticleReason,
-          absenceRegistered,
-          editorialMetadata: {
-            informationStatus,
-            quote: quoteText.trim()
-              ? { text: quoteText.trim(), author: quoteAuthor.trim(), role: quoteRole.trim(), sourceUrl: quoteSourceUrl.trim(), sourceVerified: quoteSourceVerified }
-              : null,
-            sources: parsedSources,
-            correctionNote: correctionNote.trim() || null,
-          },
-        });
-        if (validationErrors.length > 0) throw new Error(validationErrors[0]);
-      }
 
       const bodyJson = JSON.stringify(blocks);
 
@@ -503,7 +497,19 @@ function EditForm() {
       };
 
       let savedPostId = postId;
-      if (postId) {
+      if (isPublished) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Sessão expirada");
+        const response = await fetch("/api/admin/posts/publish", {
+          method: "POST", headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "save", id: postId || null, post: { ...extendedPostData, expected_updated_at: loadedUpdatedAt } }),
+        });
+        const result = await response.json() as { posts?: Array<{ id: string }>; error?: string };
+        if (!response.ok) throw new Error(result.error || "Não foi possível publicar a matéria.");
+        const saved = result.posts?.[0];
+        if (!saved) throw new Error("Não foi possível confirmar a publicação da matéria.");
+        savedPostId = saved.id;
+      } else if (postId) {
         const { data: updatedPost, error: updateErr } = await supabase
           .from("posts")
           .update(extendedPostData)
@@ -1195,9 +1201,9 @@ function EditForm() {
           title={title}
           publishing={isSaving}
           error={error}
-          pendingChecklist={editorialChecklist.filter((item) => !item.complete).map((item) => item.label)}
+          pendingChecklist={publicationWarnings}
           onConfirm={() => void handleSave(true)}
-          onCancel={() => setShowPublishConfirm(false)}
+          onCancel={() => { if (!isSaving) setShowPublishConfirm(false); }}
         />
       )}
     </AdminShell>

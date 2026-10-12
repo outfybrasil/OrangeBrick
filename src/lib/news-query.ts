@@ -19,3 +19,10 @@ export function getNewsRateLimit(search: string) {
     ? { action: "news_search", limit: 30 }
     : { action: "news_feed", limit: 180 };
 }
+
+export function publishedPostCursorFilter(post: { id: string; published_at: string | null }): string {
+  if (!/^[0-9a-f-]+$/i.test(post.id)) throw new Error("Cursor inválido");
+  if (!post.published_at) return `and(published_at.is.null,id.lt.${post.id})`;
+  if (!/^[0-9T:+.Z-]+$/.test(post.published_at) || !Number.isFinite(Date.parse(post.published_at))) throw new Error("Cursor inválido");
+  return `published_at.lt.${post.published_at},and(published_at.eq.${post.published_at},id.lt.${post.id}),published_at.is.null`;
+}

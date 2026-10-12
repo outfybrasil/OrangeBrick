@@ -1,3 +1,4 @@
+import { safeLinkUrl } from "@/lib/safe-url";
 import type { ReactNode } from "react";
 
 export function parseInlineMarkdown(text: string): ReactNode {
@@ -27,12 +28,11 @@ export function parseInlineMarkdown(text: string): ReactNode {
     } else if (matchStr.startsWith("[") && matchStr.includes("](")) {
       const closeBracketIndex = matchStr.indexOf("]");
       const label = matchStr.slice(1, closeBracketIndex);
-      const url = matchStr.slice(closeBracketIndex + 2, -1);
+      const url = safeLinkUrl(matchStr.slice(closeBracketIndex + 2, -1));
 
-      const isInternal = url.startsWith("/") && !url.startsWith("//");
-      const isExternal = /^https?:\/\//i.test(url);
+      const isExternal = url ? /^https?:\/\//i.test(url) : false;
 
-      if (!isInternal && !isExternal) {
+      if (!url) {
         parts.push(label);
         currentIndex = tokenRegex.lastIndex;
         continue;

@@ -1,3 +1,4 @@
+import { readRequestFormData } from "@/lib/server/network";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
   if (!withinLimit) return NextResponse.json({ error: "Limite de dez imagens por hora atingido" }, { status: 429 });
 
   try {
-    const formData = await request.formData();
+    const formData = await readRequestFormData(request, MAX_MEDIA_BYTES + 64 * 1024);
     const file = formData.get("image");
     if (!(file instanceof File)) return NextResponse.json({ error: "Escolha uma imagem" }, { status: 400 });
     if (file.size > MAX_MEDIA_BYTES) return NextResponse.json({ error: "A imagem deve ter no m\u00e1ximo 4 MB" }, { status: 413 });
@@ -68,8 +69,9 @@ export async function POST(request: Request) {
     if (uploadError) return NextResponse.json({ error: "N\u00e3o foi poss\u00edvel armazenar esta imagem" }, { status: 502 });
     const { data } = supabase.storage.from("profile-images").getPublicUrl(path);
     return NextResponse.json({ publicUrl: data.publicUrl, path });
-  } catch {
-    return NextResponse.json({ error: "N\u00e3o foi poss\u00edvel processar esta imagem" }, { status: 400 });
+  } catch (error) {
+    const tooLarge = error instanceof Error && error.message.includes("ultrapassa");
+    return NextResponse.json({ error: tooLarge ? "A imagem deve ter no máximo 4 MB" : "Não foi possível processar esta imagem" }, { status: tooLarge ? 413 : 400 });
   }
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { safeLinkUrl } from "@/lib/safe-url";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -490,7 +491,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
           {editorialSignals.quote && <blockquote className="border-y border-brand-orange/40 py-7 sm:py-9">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Fala em destaque</p>
             <p className="mt-3 font-heading text-[1.25em] sm:text-[1.5em] font-bold leading-snug text-white">“{editorialSignals.quote}”</p>
-            {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{editorialSignals.quoteSourceUrl && <a href={editorialSignals.quoteSourceUrl} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">Ver fonte ↗</a>}</footer>}
+            {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{safeLinkUrl(editorialSignals.quoteSourceUrl || "", false) && <a href={safeLinkUrl(editorialSignals.quoteSourceUrl || "", false)!} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">Ver fonte ↗</a>}</footer>}
           </blockquote>}
 
           {post.information_status === "corrected" && post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-sky-300">Nota de correção</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}

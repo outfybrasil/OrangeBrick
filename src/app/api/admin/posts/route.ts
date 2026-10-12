@@ -1,3 +1,4 @@
+import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { normalizeNewsSearch, parseNewsPage } from "@/lib/news-query";
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
 
   const supabase = serviceClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !user || user.app_metadata?.is_admin !== true) {
+  if (userError || !user || !isVerifiedAdminSession(user, token)) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
@@ -84,7 +85,7 @@ export async function DELETE(request: Request) {
 
   const supabase = serviceClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !user || user.app_metadata?.is_admin !== true) {
+  if (userError || !user || !isVerifiedAdminSession(user, token)) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 

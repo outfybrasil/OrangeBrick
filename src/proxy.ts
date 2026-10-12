@@ -1,3 +1,4 @@
+import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
@@ -26,6 +27,7 @@ function contentSecurityPolicy(nonce: string) {
 function secureRedirect(url: URL, policy: string) {
   const response = NextResponse.redirect(url);
   response.headers.set("Content-Security-Policy", policy);
+  response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
 
@@ -35,6 +37,12 @@ function isProtected(pathname: string): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  let decodedPath: string;
+  try { decodedPath = decodeURIComponent(pathname); } catch { return new NextResponse(null, { status: 400 }); }
+  if (/(?:^|\/)(?:\.env(?:\.[^/]*)?|\.git|\.svn|\.aws|\.codex|\.agents|node_modules|backups?)(?:\/|$)/i.test(decodedPath)
+    || /^\/(?:backup[^/]*\.(?:zip|sql|gz|tar|bak)|package(?:-lock)?\.json|next\.config\.[^/]+)$/i.test(decodedPath)) {
+    return new NextResponse(null, { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
   const nonce = crypto.randomUUID().replace(/-/g, "");
   const policy = contentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
@@ -42,6 +50,9 @@ export async function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", policy);
+  if (/^\/(?:admin|api\/(?:admin|user|notifications)|auth)(?:\/|$)/.test(pathname)) {
+    response.headers.set("Cache-Control", "private, no-store");
+  }
 
   if (EMAIL_AUTH_PATHS.has(pathname) && process.env.EMAIL_AUTH_ENABLED === "false") {
     return secureRedirect(new URL("/", request.url), policy);
@@ -87,9 +98,16 @@ export async function proxy(request: NextRequest) {
     return secureRedirect(loginUrl, policy);
   }
 
+  if (pathname !== "/admin/seguranca") {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !isVerifiedAdminSession(user, session.access_token)) {
+      return secureRedirect(new URL("/admin/seguranca", request.url), policy);
+    }
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
 };

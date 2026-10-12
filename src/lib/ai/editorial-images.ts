@@ -84,16 +84,12 @@ export function parseVisualImageReview(text: string): { alt: string; caption: st
     const result: unknown = JSON.parse(text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/, ""));
     if (typeof result !== "object" || result === null) return null;
     const value = result as Record<string, unknown>;
-    if (value.matches_subject !== true || value.is_generic === true
-      || (typeof value.confidence === "number" && value.confidence < 0.65)
-      || typeof value.alt !== "string" || value.alt.trim().length < 15
-      || typeof value.caption !== "string" || value.caption.trim().length < 15) return null;
+    if (value.matches_subject !== true || value.is_generic !== false || value.is_authentic_material !== true
+      || typeof value.confidence !== "number" || !Number.isFinite(value.confidence) || value.confidence < 0.9
+      || typeof value.alt !== "string" || value.alt.trim().length < 25
+      || typeof value.caption !== "string" || value.caption.trim().length < 25) return null;
     if (/[\uFFFD\u4e00-\u9fff]/u.test(value.alt + value.caption)) return null;
-    let alt = value.alt.trim();
-    let caption = value.caption.trim();
-    if (alt.length < 20) alt = `${alt} — divulgação oficial.`;
-    if (caption.length < 20) caption = `${caption} (Foto: Divulgação/Oficial)`;
-    return { alt, caption };
+    return { alt: value.alt.trim(), caption: value.caption.trim() };
   } catch {
     return null;
   }

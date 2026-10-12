@@ -74,11 +74,18 @@ export default function PrivacidadePage() {
             é criado após “Permitir métricas” e é apagado quando você escolhe “Só essenciais” ou revoga a
             preferência nesta página.
           </p>
+          <p className="mt-4">
+            Ao alternar entre contas, este navegador pode guardar os perfis e as sessões das contas
+            adicionadas para facilitar o próximo acesso. Esses dados ficam neste dispositivo. Em
+            dispositivos compartilhados, remova as contas salvas ou use “Sair de todas as contas”
+            ao terminar.
+          </p>
         </section>
 
         <section>
           <h2 className="mb-3 mt-10 text-xl font-bold text-white">5. Fornecedores e compartilhamento</h2>
           <p>Dados são compartilhados na medida necessária com fornecedores que sustentam o serviço:</p>
+
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li><strong className="text-white">Supabase:</strong> autenticação, banco, armazenamento e funções de backend.</li>
             <li><strong className="text-white">Google:</strong> autenticação social escolhida pelo usuário.</li>

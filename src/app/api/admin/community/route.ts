@@ -1,3 +1,4 @@
+import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -14,7 +15,7 @@ async function requireAdmin(request: Request) {
   if (!authorization?.startsWith("Bearer ")) return null;
   const client = serviceClient();
   const { data: { user } } = await client.auth.getUser(authorization.slice(7));
-  return user?.app_metadata?.is_admin === true ? user : null;
+  return isVerifiedAdminSession(user, authorization.slice(7)) ? user : null;
 }
 
 export async function GET(request: Request) {

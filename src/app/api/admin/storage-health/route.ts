@@ -1,3 +1,4 @@
+import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
   if (!authorization?.startsWith("Bearer ")) return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
   const supabase = serviceClient();
   const { data: { user } } = await supabase.auth.getUser(authorization.slice(7));
-  if (user?.app_metadata?.is_admin !== true) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  if (!isVerifiedAdminSession(user, authorization.slice(7))) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   const [editorialFiles, profiles, { data: imageRows }] = await Promise.all([bucketFiles(supabase, "post-images"), bucketUsage(supabase, "profile-images"), supabase.from("editorial_images").select("storage_path")]);
   const tracked = new Set((imageRows || []).map((row) => row.storage_path));
   const orphans = findOrphanedEditorialFiles(editorialFiles, tracked);
@@ -63,7 +64,7 @@ export async function DELETE(request: Request) {
   if (!authorization?.startsWith("Bearer ")) return NextResponse.json({ error: "Acesso negado" }, { status: 401 });
   const supabase = serviceClient();
   const { data: { user } } = await supabase.auth.getUser(authorization.slice(7));
-  if (user?.app_metadata?.is_admin !== true) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  if (!isVerifiedAdminSession(user, authorization.slice(7))) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   let body: { paths?: unknown };
   try {
     body = await request.json() as { paths?: unknown };
