@@ -12,6 +12,7 @@ test("Telegram asks for confirmation, cancels without publishing and cannot bypa
   const messages: Array<Record<string, unknown>> = [];
   let writes = 0;
   let imageBlocked = false;
+  let reviewsQueued = 0;
   type Result = { data: unknown; error: null; count: number };
   function query(table: string) {
     let key = "";
@@ -59,10 +60,16 @@ test("Telegram asks for confirmation, cancels without publishing and cannot bypa
       if (name.includes("preview-token")) return { createPreviewToken: () => null };
       if (name.includes("content-validation")) return { validateStoredEditorialPost };
       if (name.includes("manual-publication-images")) return { inspectPublicationImagesInDatabase: async () => new Map([[id, imageBlocked ? ["A capa é obrigatória."] : []]]) };
+      if (name.includes("editorial-review-jobs")) return { enqueueEditorialReviews: async (ids: string[], actor: string, channel: string) => { assert.equal(ids.length, 1); assert.equal(ids[0], id); assert.equal(actor, "999"); assert.equal(channel, "telegram"); reviewsQueued++; return [{ id }]; } };
       return {};
     },
   });
   const click = (data: string, actor = "999") => exported.handleTelegramWebhook!({ update_id: messages.length + 1, callback_query: { id: "fixture-callback", from: { id: actor }, message: { message_id: 1, chat: { id: "999" } }, data } });
+  await click(`rev:${id}`, "other-user");
+  assert.equal(reviewsQueued, 0);
+  await click(`rev:${id}`);
+  assert.equal(reviewsQueued, 1);
+  assert.equal(writes, 0);
   const confirmation = () => {
     const message = messages.findLast(item => String(item.text || "").includes("Confirmar publicação"))!;
     const markup = message.reply_markup as { inline_keyboard: Array<Array<{ callback_data: string }>> };

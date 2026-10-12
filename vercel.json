@@ -5,6 +5,10 @@
   "installCommand": "npm install",
   "crons": [
     {
+      "path": "/api/cron/editorial-review",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/release-radar-cleanup",
       "schedule": "0 6 1 * *"
     },

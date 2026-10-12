@@ -56,9 +56,9 @@ export function matchesSteamGameQuery(query: string, gameName: string): boolean 
   const queryList = words(query);
   const nameList = words(gameName);
   if (nameList.length === 0 || queryList.length === 0) return false;
-  const qStr = queryList.join(" ");
-  const nStr = nameList.join(" ");
-  return qStr.includes(nStr) || nStr.includes(qStr) || queryList.slice(0, nameList.length).join(" ") === nStr;
+  const imageTerms = new Set(["official", "gameplay", "screenshot", "screenshots", "key", "art", "cover", "4k", "hd", "environment", "scenery", "combat", "action", "trailer"]);
+  return nameList.every((word, index) => queryList[index] === word)
+    && queryList.slice(nameList.length).every((word) => imageTerms.has(word));
 }
 
 export function isAllowedEditorialImageUrl(value: string): boolean {

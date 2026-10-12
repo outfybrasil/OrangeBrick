@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Post } from "../types/database.ts";
 import { generateNewsDraft, NoFreshTopicError, SimilarTopicError } from "../ai/gemini-news.ts";
+import { enqueueEditorialReviews } from "../server/editorial-review-jobs.ts";
 import { getSiteUrl } from "../site-url.ts";
 import { createPreviewToken } from "../preview-token.ts";
 import { validateStoredEditorialPost } from "../content-validation.ts";
@@ -296,6 +297,7 @@ function approvalKeyboard(post: Post): InlineKeyboard {
       { text: "⏰ Agendar", callback_data: `schedm:${post.id}` },
     ],
     [{ text: "👁 Prévia no site", url: previewUrl }],
+    [{ text: "🤖 Revisar e corrigir com IA", callback_data: `rev:${post.id}` }],
   ];
 }
 
@@ -477,6 +479,7 @@ async function listDraftsPage(chatId: number | string, page: number): Promise<vo
     { text: selected.includes(String(d.id)) ? "✅ Selecionada" : "☑ Selecionar", callback_data: `sel:${d.id}:${page}` },
   ]);
   if (selected.length) keyboard.push([{ text: `🚀 Publicar selecionadas (${selected.length})`, callback_data: "bpub:" }, { text: "Limpar seleção", callback_data: "bclr:" }]);
+  if (selected.length) keyboard.push([{ text: `🤖 Revisar e corrigir selecionadas (${selected.length})`, callback_data: "brev:" }]);
   const nav: Array<{ text: string; callback_data: string }> = [];
   if (page > 0) nav.push({ text: "◀️", callback_data: `pgd:${page - 1}` });
   if (page + 1 < totalPages) nav.push({ text: "▶️", callback_data: `pgd:${page + 1}` });
@@ -830,7 +833,7 @@ async function brickDetailView(chatId: number | string, postId: string): Promise
   return true;
 }
 
-async function handleCallback(update: TelegramUpdate, onPublished?: () => void): Promise<void> {
+async function handleCallback(update: TelegramUpdate, onPublished?: () => void, onReviewQueued?: () => void): Promise<void> {
   const cq = update.callback_query!;
   const fromId = String(cq.from?.id);
   const data = cq.data || "";
@@ -847,6 +850,18 @@ async function handleCallback(update: TelegramUpdate, onPublished?: () => void):
 
   const [action, arg1, arg2] = data.split(":");
   const supabase = getSupabaseAdmin();
+
+  if (action === "rev" || action === "brev") {
+    const ids = action === "rev" && arg1 ? [arg1] : await getPublicationSelection(fromId);
+    if (!ids.length) { await answerToast(cq, "Selecione pelo menos uma matéria.", true); return; }
+    await answerToast(cq, "Iniciando a revisão automática…");
+    try {
+      const jobs = await enqueueEditorialReviews(ids, fromId, "telegram");
+      onReviewQueued?.();
+      await sendTelegramApi("sendMessage", { chat_id: adminChatId, text: jobs.length ? `🤖 Revisão iniciada para ${jobs.length} matéria(s). Vou conferir fontes, texto e imagens e avisar o resultado. Nenhuma matéria será publicada automaticamente.` : "Não há rascunhos ativos nessa seleção." });
+    } catch { await sendTelegramApi("sendMessage", { chat_id: adminChatId, text: "Não foi possível iniciar a revisão automática. Tente novamente." }); }
+    return;
+  }
 
   if (action === "sel" && arg1) {
     const { error } = await supabase.rpc("telegram_toggle_publication_selection", { p_actor_id: fromId, p_post_id: arg1 });
@@ -1655,11 +1670,11 @@ async function consumePendingEdit(chatId: number | string, text: string): Promis
   return true;
 }
 
-export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?: () => void) {
+export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?: () => void, onReviewQueued?: () => void) {
   const adminChatId = getAdminChatId();
 
   if (update.callback_query) {
-    await handleCallback(update, onPublished);
+    await handleCallback(update, onPublished, onReviewQueued);
     return;
   }
 

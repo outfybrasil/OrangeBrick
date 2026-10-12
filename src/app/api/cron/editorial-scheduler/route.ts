@@ -75,6 +75,8 @@ export async function GET(request: Request) {
       })
       .eq("id", post.id)
       .eq("is_published", false)
+      .eq("updated_at", post.updated_at)
+      .eq("scheduled_at", post.scheduled_at)
       .select("id")
       .maybeSingle();
 

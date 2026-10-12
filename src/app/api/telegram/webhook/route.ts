@@ -3,10 +3,11 @@ import { NextResponse, after } from "next/server";
 import { randomUUID, timingSafeEqual } from "crypto";
 import { createServiceDataClient } from "@/lib/supabase/server";
 import { handleTelegramWebhook, notifyNewCommunityReports, type TelegramUpdate } from "@/lib/telegram/bot";
+import { processNextEditorialReview } from "@/lib/server/editorial-review-jobs";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function cleanSecret(secret?: string | null): string | null {
   if (!secret) return null;
@@ -97,6 +98,8 @@ export async function POST(request: Request) {
     await handleTelegramWebhook(update, () => {
       for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml"]) revalidatePath(path);
       revalidatePath("/posts/[slug]", "page");
+    }, () => {
+      after(async () => { await processNextEditorialReview().catch(() => {}); });
     });
   } catch (error: unknown) {
     try {
