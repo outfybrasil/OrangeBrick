@@ -63,3 +63,5 @@ supabase/.temp/
 
 .originkit/
 scratch/
+public/reels/*.mp4
+!public/reels/.gitkeep

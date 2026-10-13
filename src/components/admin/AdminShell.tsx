@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
-type AdminSection = "overview" | "editor" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
+type AdminSection = "overview" | "editor" | "reels" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -22,6 +22,16 @@ function OverviewIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M4 4h6v6H4zM14 4h6v10h-6zM4 14h6v6H4zM14 18h6v2h-6z" />
+    </svg>
+  );
+}
+
+function ReelsIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M7 3v18M17 3v18M3 8h4M3 13h4M3 18h4M17 8h4M17 13h4M17 18h4" />
+      <polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -158,6 +168,10 @@ export function AdminShell({
               <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}>
                 <ComposeIcon />
                 Nova matéria
+              </Link>
+              <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}>
+                <ReelsIcon />
+                Reels & Vídeos
               </Link>
               <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}>
                 <ImagesIcon />
@@ -434,6 +448,7 @@ export function AdminShell({
                 <div className="space-y-1">
                   <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}><OverviewIcon />Visão geral</Link>
                   <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
+                  <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
                   <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}><ImagesIcon />Biblioteca de imagens</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
                   <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>

@@ -6,6 +6,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { validateStoredEditorialPost } from "@/lib/content-validation";
 import { readResponseBuffer } from "@/lib/server/network";
 import type { Post } from "@/lib/types/database";
+import { triggerReelGeneration } from "@/lib/video/reel-service";
 
 export const runtime = "nodejs";
 
@@ -42,6 +43,10 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.rpc("admin_save_editorial_post", { p_id: body.id || null, p_post: body.post });
     if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
     refreshPublicationPages();
+    try {
+      const slug = (values.slug as string) || (Array.isArray(data) ? (data[0] as any)?.slug : (data as any)?.slug);
+      if (slug) triggerReelGeneration(slug);
+    } catch {}
     return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
   }
   if (!body || !Array.isArray(body.ids) || body.ids.length < 1 || body.ids.length > 50
@@ -82,5 +87,10 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.rpc("admin_publish_posts", { p_post_ids: ids, p_expected_updated: reviewed.map((post) => post.updated_at) });
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
   refreshPublicationPages();
+  try {
+    for (const post of (current as Post[])) {
+      if (post?.slug) triggerReelGeneration(post.slug);
+    }
+  } catch {}
   return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
 }
