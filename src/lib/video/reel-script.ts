@@ -22,7 +22,16 @@ export interface ReelScriptData {
   ctaButton: string;
 }
 
-const CANDIDATE_MODELS = ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+const CANDIDATE_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.5-flash",
+  "gemini-flash-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-lite-latest",
+];
+const MAX_ROUNDS = 3;
+const RETRY_BASE_MS = 8000;
 
 export async function generateReelScript(post: Post, apiKey: string): Promise<ReelScriptData> {
   const gemini = new GoogleGenAI({ apiKey });
@@ -100,29 +109,47 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 }`;
 
   let lastError: Error | null = null;
-  for (const model of CANDIDATE_MODELS) {
-    try {
-      const response = await gemini.models.generateContent({
-        model,
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.7,
-        },
-      });
+  const models = [...CANDIDATE_MODELS];
 
-      const raw = response.text || "{}";
+  for (let round = 0; round < MAX_ROUNDS && models.length > 0; round++) {
+    if (round > 0) {
+      const waitMs = RETRY_BASE_MS * round;
+      console.warn(`[ReelScript] Todos os modelos ocupados. Nova tentativa em ${waitMs / 1000}s (rodada ${round + 1}/${MAX_ROUNDS})...`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+
+    for (const model of [...models]) {
       try {
-        return JSON.parse(raw) as ReelScriptData;
-      } catch {
-        const cleaned = raw.replace(/```json\n?|```/g, "").trim();
-        return JSON.parse(cleaned) as ReelScriptData;
+        const response = await gemini.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            temperature: 0.7,
+          },
+        });
+
+        const script = parseScript(response.text || "");
+        return script;
+      } catch (err) {
+        lastError = err as Error;
+        const status = (err as { status?: number })?.status;
+        if (status === 404 || status === 400) {
+          models.splice(models.indexOf(model), 1);
+        }
+        console.warn(`[ReelScript] Modelo ${model} falhou (${status || lastError.message}). Tentando próximo...`);
       }
-    } catch (err) {
-      lastError = err as Error;
-      console.warn(`[ReelScript] Modelo ${model} falhou ou indisponível (${(err as any)?.status || err}). Tentando próximo...`);
     }
   }
 
   throw lastError || new Error("Falha ao gerar roteiro com todos os modelos disponíveis.");
+}
+
+function parseScript(raw: string): ReelScriptData {
+  const cleaned = raw.replace(/```json\n?|```/g, "").trim();
+  const data = JSON.parse(cleaned) as ReelScriptData;
+  if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length === 0) {
+    throw new Error("Roteiro retornado pelo Gemini está incompleto.");
+  }
+  return data;
 }
