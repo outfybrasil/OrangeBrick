@@ -8,6 +8,9 @@ function object(value: unknown): ObjectData {
 
 function operationError(value: unknown) {
   const details = JSON.stringify(value);
+  if (/APIKey_InsufficientPermissions/i.test(details)) {
+    return new Error("A chave do Composio não tem as permissões necessárias. Confira as permissões de sessões e execução de ferramentas no Composio.");
+  }
   if (/quotaExceeded|dailyLimitExceeded/i.test(details)) {
     return new Error("A cota diária da API do YouTube foi esgotada. Aguarde a renovação da cota ou configure um aplicativo Google próprio no Composio. Reconectar a conta não renova essa cota.");
   }
@@ -20,31 +23,29 @@ function operationError(value: unknown) {
   return new Error("O Composio não confirmou a operação. Confira a conexão do YouTube e tente novamente.");
 }
 
-export async function callComposio(name: string, args: Record<string, Json | undefined>, timeout = 30_000): Promise<ObjectData> {
-  const key = process.env.COMPOSIO_CONSUMER_KEY;
+async function platformRequest(path: string, body?: ObjectData, timeout = 30_000): Promise<ObjectData> {
+  const key = process.env.COMPOSIO_API_KEY;
   if (!key) throw new Error("A conexão com o YouTube ainda não foi configurada no servidor.");
-  const response = await fetch("https://connect.composio.dev/mcp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", "x-consumer-api-key": key },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } }),
+  const response = await fetch(`https://backend.composio.dev/api/v3.1/${path}`, {
+    method: body ? "POST" : "GET",
+    headers: { "Content-Type": "application/json", "x-api-key": key },
+    body: body ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(timeout),
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("O Composio não respondeu. Confira a conexão do YouTube e tente novamente.");
-  const text = await response.text();
-  const messages = response.headers.get("content-type")?.includes("application/json")
-    ? [JSON.parse(text)]
-    : text.split(/\r?\n\r?\n/).map(block => block.split(/\r?\n/).filter(line => line.startsWith("data:")).map(line => line.slice(5).trim()).join("\n")).filter(Boolean).map(value => JSON.parse(value));
-  const message = messages.find(value => value.id === 1);
-  if (!message || message.error || message.result?.isError) throw operationError(message);
-  for (const item of message.result?.content || []) {
-    if (item.type !== "text") continue;
-    let payload: ObjectData;
-    try { payload = object(JSON.parse(item.text)); } catch { continue; }
-    if (payload.successful === false || payload.error) throw operationError(payload);
-    if (payload.successful === true) return object(payload.data);
-  }
-  throw new Error("O Composio não confirmou o resultado da operação.");
+  const result = object(await response.json());
+  if (!response.ok || result.error) throw operationError(result);
+  return result;
+}
+
+export async function callComposio(name: string, args: Record<string, Json | undefined>, timeout = 30_000): Promise<ObjectData> {
+  const { session_id: session, ...argumentsData } = args;
+  if (typeof session !== "string") throw new Error("A sessão do YouTube não foi iniciada.");
+  const result = await platformRequest(`tool_router/session/${encodeURIComponent(session)}/execute_meta`, {
+    slug: name, arguments: argumentsData,
+  }, timeout);
+  if (result.result_type !== "completed") throw operationError(result);
+  return object(result.data);
 }
 
 function toolData(result: ObjectData) {
@@ -79,20 +80,27 @@ async function loadYouTubeConnection(): Promise<YouTubeConnection> {
   const account = process.env.COMPOSIO_YOUTUBE_ACCOUNT;
   const expectedChannel = process.env.COMPOSIO_YOUTUBE_CHANNEL;
   if (!account || !expectedChannel) throw new Error("O canal de destino ainda não foi configurado no servidor.");
-  const search = await callComposio("COMPOSIO_SEARCH_TOOLS", {
-    queries: [{ use_case: "Get my authenticated YouTube channel and upload a video to YouTube" }],
-    session: { generate_id: true },
-  });
-  const session = object(search.session).id;
-  if (typeof session !== "string") throw new Error("Não foi possível iniciar a conexão com o YouTube.");
-  const connections = Array.isArray(search.toolkit_connection_statuses) ? search.toolkit_connection_statuses.map(object) : [];
-  const accounts = connections.find(item => item.toolkit === "youtube")?.accounts;
-  if (!Array.isArray(accounts) || !accounts.some(item => object(item).id === account && object(item).status === "ACTIVE")) {
-    throw new Error("Reconecte o canal do YouTube no Composio.");
+  const authConfig = process.env.COMPOSIO_YOUTUBE_AUTH_CONFIG;
+  if (!authConfig) throw new Error("O aplicativo Google ainda não foi configurado no servidor.");
+  const connected = await platformRequest(`connected_accounts/${encodeURIComponent(account)}`);
+  const config = object(connected.auth_config);
+  if (connected.status !== "ACTIVE" || connected.is_disabled === true || object(connected.toolkit).slug !== "youtube" || config.id !== authConfig || config.is_composio_managed !== false || config.is_disabled === true || typeof connected.user_id !== "string") {
+    throw new Error("Confira a conexão do YouTube com seu aplicativo Google no Composio.");
   }
+  const created = await platformRequest("tool_router/session", {
+    user_id: connected.user_id,
+    toolkits: { enable: ["youtube"] },
+    auth_configs: { youtube: authConfig },
+    connected_accounts: { youtube: [account] },
+    instant: false,
+    tools: { youtube: { enable: ["YOUTUBE_GET_CHANNEL_STATISTICS", "YOUTUBE_MULTIPART_UPLOAD_VIDEO"] } },
+    manage_connections: { enable: false },
+  });
+  const session = created.session_id;
+  if (typeof session !== "string") throw new Error("Não foi possível iniciar a conexão com o YouTube.");
   const data = toolData(await callComposio("COMPOSIO_MULTI_EXECUTE_TOOL", {
     session_id: session,
-    tools: [{ tool_slug: "YOUTUBE_GET_CHANNEL_STATISTICS", account, arguments: { mine: true, part: "snippet" } }],
+    tools: [{ tool_slug: "YOUTUBE_GET_CHANNEL_STATISTICS", arguments: { mine: true, part: "snippet" } }],
     sync_response_to_workbench: false,
     current_step: "IDENTIFYING_CHANNEL",
   }));
@@ -136,7 +144,7 @@ export async function stageYouTubeVideo(session: string, signedUrl: string, jobI
 export async function uploadYouTubeVideo(connection: Awaited<ReturnType<typeof getYouTubeConnection>>, file: Awaited<ReturnType<typeof stageYouTubeVideo>>, title: string, description: string, visibility: string) {
   const data = toolData(await callComposio("COMPOSIO_MULTI_EXECUTE_TOOL", {
     session_id: connection.session,
-    tools: [{ tool_slug: "YOUTUBE_MULTIPART_UPLOAD_VIDEO", account: connection.account, arguments: { title, description, categoryId: "20", privacyStatus: visibility, videoFile: file } }],
+    tools: [{ tool_slug: "YOUTUBE_MULTIPART_UPLOAD_VIDEO", arguments: { title, description, categoryId: "20", privacyStatus: visibility, videoFile: file } }],
     sync_response_to_workbench: false,
     current_step: "UPLOADING_VIDEO",
   }, 100_000));

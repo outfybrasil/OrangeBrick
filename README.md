@@ -70,7 +70,7 @@ O workflow também pode ser iniciado manualmente para retomar a fila. Falhas sã
 
 Na aba YouTube da Central de Reels, revise título, descrição, canal e visibilidade, confirme o envio e use o botão de publicação. O padrão é privado. O YouTube ainda pode processar ou restringir a visibilidade do vídeo após recebê-lo.
 
-Configure em Production `COMPOSIO_CONSUMER_KEY` como segredo sensível do Connect MCP, `COMPOSIO_YOUTUBE_ACCOUNT` com o identificador da conexão e `COMPOSIO_YOUTUBE_CHANNEL` com o ID do canal autorizado. A integração usa `https://connect.composio.dev/mcp`; a chave de projeto da API não substitui a chave do Connect. Nunca use prefixo `NEXT_PUBLIC_` nessas variáveis. Aplique a migração `reel_youtube_publications` antes do deploy.
+Configure em Production `COMPOSIO_API_KEY` como segredo sensível da API Platform, `COMPOSIO_YOUTUBE_AUTH_CONFIG` com o aplicativo OAuth próprio do Google, `COMPOSIO_YOUTUBE_ACCOUNT` com a conexão ativa e `COMPOSIO_YOUTUBE_CHANNEL` com o ID do canal autorizado. A chave precisa permitir criar sessões e executar ferramentas. A integração fixa a conta e o aplicativo em cada sessão, com instant desativado. Nunca use prefixo `NEXT_PUBLIC_` nessas variáveis. Aplique a migração `reel_youtube_publications` antes do deploy.
 
 O histórico é acessível apenas pelo servidor após autenticação de administrador com MFA. A reserva atômica por matéria e canal impede envios duplicados, inclusive após regenerar o Reel. Falhas anteriores ao upload permitem nova tentativa. Se o envio foi iniciado e sua resposta se perdeu, o registro permanece bloqueado até conferência manual no YouTube Studio; não repita a publicação automaticamente. Nenhum vídeo é enviado apenas por gerar um Reel ou conectar a conta.
 
