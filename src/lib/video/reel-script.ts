@@ -20,6 +20,7 @@ export interface ReelScriptData {
   ctaQuestion: string;
   ctaAction: string;
   ctaButton: string;
+  ttsProvider?: "elevenlabs" | "edge-tts";
 }
 
 const CANDIDATE_MODELS = [
@@ -46,15 +47,11 @@ CONTEÚDO:
 ${post.body.slice(0, 3000)}
 
 INSTRUÇÕES DO ROTEIRO:
-1. Gancho forte nos primeiros 3 segundos que prenda a atenção imediatamente.
-2. Texto da narração fluído, natural para ser falado, sem gagueira ou clichês vazios. Total entre 60 e 90 palavras faladas.
-3. Divida o vídeo em 5 momentos visuais (Cenas):
-   - Cena 1: Gancho / Revelação bombástica
-   - Cena 2: Contexto / Grandes nomes ou estúdios envolvidos
-   - Cena 3: Principais novidades / mecânicas / mapa / detalhes
-   - Cena 4: Ponto alto (ex: personagem, gameplay, recurso incrível)
-   - Cena 5: Plataformas e data de lançamento
-4. Um Call to Action (CTA) provocativo com uma pergunta de engajamento e chamada para seguir o Orange Brick.
+1. Abra com um gancho factual nos primeiros 3 segundos, sem exageros ou linguagem sensacionalista.
+2. Escreva a narração em tom natural e direto, adequado à categoria da matéria. Para industry, hardware e breaking, mantenha linguagem jornalística e factual. Use entre 60 e 90 palavras faladas.
+3. Preserve exatamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é um total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não some números de processos distintos sem explicar que se trata de um limite máximo. Não troque “propõe” ou “pode afetar” por “fechou” ou “demitiu”.
+4. Divida o vídeo em 5 momentos visuais que correspondam aos fatos da matéria. Adapte as cenas ao tema; se não houver plataformas ou data de lançamento, use impacto, contexto ou próximos passos. Nunca invente plataformas, datas, números, decisões ou declarações.
+5. Feche com uma pergunta pertinente ao assunto e um convite curto para seguir o Orange Brick, sem chamadas genéricas como “revelação bombástica” ou “vítimas da crise”.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {

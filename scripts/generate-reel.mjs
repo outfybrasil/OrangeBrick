@@ -1,10 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { execSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { randomInt } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateReelScript } from "../src/lib/video/reel-script.ts";
-import { generateCompositionHtml } from "../src/lib/video/reel-composition.ts";
+import { generateCompositionHtml, getReelSceneStarts } from "../src/lib/video/reel-composition.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -157,7 +158,7 @@ async function run() {
   }
 
   // 3. Generate Audio (TTS)
-  console.log("\n🎙️ 3/5: Sintetizando narração em português (edge-tts)...");
+  console.log("\n🎙️ 3/5: Sintetizando narração em português (ElevenLabs ou Edge TTS)...");
   const ttsScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-tts.py");
   const pyCmd = process.platform === "win32" ? "py" : "python3";
 
@@ -173,8 +174,11 @@ async function run() {
     process.exit(1);
   }
 
+  const ttsMetadata = JSON.parse(fs.readFileSync(path.join(workDir, "tts-provider.json"), "utf-8"));
+  script.ttsProvider = ttsMetadata.provider;
   const sentences = JSON.parse(fs.readFileSync(path.join(workDir, "sentences.json"), "utf-8"));
   const voiceDuration = sentences.length ? sentences[sentences.length - 1].end : 40.0;
+  const variation = randomInt(0, 1000000);
   const totalDuration = Math.round((voiceDuration + 2.5) * 10) / 10;
   console.log(`   Duração da narração: ${voiceDuration}s (Total: ${totalDuration}s)`);
 
@@ -182,6 +186,10 @@ async function run() {
   console.log("\n🔊 4/5: Mixando áudio, trilha sonora e efeitos...");
   const mixerScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-mixer.py");
   const audioAssetsDir = path.join(ROOT_DIR, "assets", "reels", "audio");
+  fs.writeFileSync(path.join(workDir, "production.json"), JSON.stringify({
+    variation,
+    sceneStarts: getReelSceneStarts(totalDuration, variation),
+  }, null, 2));
   const masterAudio = path.join(workDir, "master_audio.m4a");
 
   const mixRes = spawnSync(pyCmd, [
@@ -222,6 +230,7 @@ async function run() {
     script,
     category: post.category,
     duration: totalDuration,
+    variation,
     sentences,
     imagePaths: localImages
   });
@@ -252,6 +261,7 @@ async function run() {
       finished_at: new Date().toISOString(),
       video_url: `/reels/${post.slug}.mp4`,
       duration: totalDuration,
+      variation,
       file_size: stats.size,
       script
     };

@@ -5,8 +5,25 @@ export interface CompositionOptions {
   script: ReelScriptData;
   category: PostCategory;
   duration: number;
+  variation?: number;
   sentences: Array<{ text: string; start: number; end: number; duration: number }>;
   imagePaths: string[]; // relative paths to images inside assets folder
+}
+
+export function getReelSceneStarts(duration: number, variation = 0): number[] {
+  const profiles = [
+    [0.18, 0.22, 0.22, 0.20, 0.18],
+    [0.16, 0.24, 0.20, 0.22, 0.18],
+    [0.20, 0.20, 0.24, 0.18, 0.18],
+    [0.17, 0.23, 0.21, 0.23, 0.16],
+  ];
+  const weights = profiles[variation % profiles.length];
+  const contentTime = duration - Math.min(Math.max(duration * 0.16, 4.5), duration * 0.3, 6.5);
+  const starts = [0];
+  for (const weight of weights) {
+    starts.push(Math.round((starts[starts.length - 1] + contentTime * weight) * 10) / 10);
+  }
+  return starts;
 }
 
 export function generateCompositionHtml(options: CompositionOptions): string {
@@ -18,21 +35,8 @@ export function generateCompositionHtml(options: CompositionOptions): string {
   const body1Img = imagePaths[1] || coverImg;
   const body2Img = imagePaths[2] || coverImg;
 
-  // Dynamic scene calculation so every scene (especially CTA) always fits regardless of speech length
-  const ctaDur = Math.max(Math.min(duration * 0.16, 6.5), 4.5);
-  const contentTime = Math.max(duration - ctaDur, 15.0);
-  const s1Dur = contentTime * 0.18;
-  const s2Dur = contentTime * 0.22;
-  const s3Dur = contentTime * 0.22;
-  const s4Dur = contentTime * 0.20;
-  const s5Dur = contentTime * 0.18;
-
-  const t0 = 0;
-  const t1 = Math.round(s1Dur * 10) / 10;
-  const t2 = Math.round((t1 + s2Dur) * 10) / 10;
-  const t3 = Math.round((t2 + s3Dur) * 10) / 10;
-  const t4 = Math.round((t3 + s4Dur) * 10) / 10;
-  const t5 = Math.round((t4 + s5Dur) * 10) / 10;
+  const variation = options.variation ?? 0;
+  const [t0, t1, t2, t3, t4, t5] = getReelSceneStarts(duration, variation);
 
   const sceneDurations = [
     { id: "scene1", start: t0, dur: t1 - t0, img: coverImg },
@@ -269,24 +273,38 @@ export function generateCompositionHtml(options: CompositionOptions): string {
         }, null, s.start);
       });
 
-      // Animate Scenes
-      tl.fromTo("#scene1", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4 }, 0);
-      tl.to("#scene1", { opacity: 0, duration: 0.35 }, ${sceneDurations[0].start + sceneDurations[0].dur - 0.35});
-
-      tl.fromTo("#scene2", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4 }, ${sceneDurations[1].start});
-      tl.to("#scene2", { opacity: 0, duration: 0.35 }, ${sceneDurations[1].start + sceneDurations[1].dur - 0.35});
-
-      tl.fromTo("#scene3", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4 }, ${sceneDurations[2].start});
-      tl.to("#scene3", { opacity: 0, duration: 0.35 }, ${sceneDurations[2].start + sceneDurations[2].dur - 0.35});
-
-      tl.fromTo("#scene4", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4 }, ${sceneDurations[3].start});
-      tl.to("#scene4", { opacity: 0, duration: 0.35 }, ${sceneDurations[3].start + sceneDurations[3].dur - 0.35});
-
-      tl.fromTo("#scene5", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.4 }, ${sceneDurations[4].start});
-      tl.to("#scene5", { opacity: 0, duration: 0.35 }, ${sceneDurations[4].start + sceneDurations[4].dur - 0.35});
-
-      tl.fromTo("#scene6", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, ${sceneDurations[5].start});
-      tl.fromTo(".cta-btn", { scale: 0.92 }, { scale: 1.05, repeat: 6, yoyo: true, duration: 0.8 }, ${sceneDurations[5].start + 0.4});
+      const scenes = ${JSON.stringify(sceneDurations)};
+      const variation = ${variation};
+      const entries = [
+        { x: 0, y: 36, scale: 1 },
+        { x: 38, y: 0, scale: 1 },
+        { x: -38, y: 0, scale: 1 },
+        { x: 0, y: 0, scale: 0.96 },
+      ];
+      scenes.forEach((scene, index) => {
+        const selector = "#" + scene.id;
+        const entry = entries[(variation + index) % entries.length];
+        const transition = Math.min(0.38 + (variation % 3) * 0.07, scene.dur / 4);
+        tl.fromTo(selector, { opacity: 0 }, { opacity: 1, duration: transition }, scene.start);
+        tl.fromTo(selector + " > *", entry, {
+          x: 0, y: 0, scale: 1, duration: transition, ease: "power2.out",
+        }, scene.start);
+        if (index < scenes.length - 1) {
+          tl.to(selector, { opacity: 0, duration: transition }, scene.start + scene.dur - transition);
+        }
+        if (index < 4) {
+          const direction = (variation + index) % 2 ? 1 : -1;
+          tl.fromTo(selector + " img", {
+            scale: direction === 1 ? 1.02 : 1.10, xPercent: -direction,
+          }, {
+            scale: direction === 1 ? 1.10 : 1.02, xPercent: direction,
+            duration: scene.dur, ease: "none",
+          }, scene.start);
+        }
+      });
+      tl.fromTo(".cta-btn", { scale: 0.96 }, {
+        scale: 1, duration: 0.6, ease: "power2.out",
+      }, ${t5 + 0.4});
 
       tl.seek(0);
     </script>

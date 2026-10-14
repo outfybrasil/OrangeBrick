@@ -101,11 +101,14 @@ export function generateSocialCopys(post: {
   const title = plainText(post.title);
   const summary = plainText(post.summary) || title;
   const articleUrl = `https://orangebrick.blog/posts/${post.slug}`;
+  const attribution = post.script?.ttsProvider === "elevenlabs" ? "elevenlabs.io" : "";
   const description = `${summary}\n\nLeia a matéria: ${articleUrl}`;
   const titleCharacters = Array.from(title);
-  const youtubeTitle = titleCharacters.length > 100
-    ? `${titleCharacters.slice(0, 99).join("").replace(/\s+\S*$/, "").trimEnd()}…`
-    : title;
+  const youtubeSuffix = attribution ? " | elevenlabs.io" : "";
+  const titleBudget = 100 - Array.from(youtubeSuffix).length;
+  const youtubeTitle = `${titleCharacters.length > titleBudget
+    ? `${titleCharacters.slice(0, titleBudget - 1).join("").replace(/\s+\S*$/, "").trimEnd()}…`
+    : title}${youtubeSuffix}`;
   const categoryTags: Record<string, string[]> = {
     breaking: ["Notícias de games"],
     hardware: ["Hardware"],
@@ -114,13 +117,43 @@ export function generateSocialCopys(post: {
     review: ["Análise de jogos"],
     opinion: ["Opinião"],
   };
+  const subjectHashtags: Array<[RegExp, string]> = [
+    [/\bubisoft\b/i, "Ubisoft"],
+    [/\bredlynx\b/i, "RedLynx"],
+    [/\btrials\b/i, "Trials"],
+    [/\b(?:singapore|singapura)\b/i, "UbisoftSingapore"],
+    [/\b(?:ps\s*plus|playstation\s*plus)\b/i, "PSPlus"],
+    [/\bxbox\s+nano\b/i, "XboxNano"],
+    [/\bcrash\s+keys\b/i, "CrashKeys"],
+    [/\bzero\s+escape\b/i, "ZeroEscape"],
+    [/\b(?:gta\s*(?:6|vi)|grand\s+theft\s+auto\s*(?:6|vi))\b/i, "GTA6"],
+    [/\b(?:playstation|ps[45])\b/i, "PlayStation"],
+    [/\bxbox\b/i, "Xbox"],
+    [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
+    [/\bsteam\b/i, "Steam"],
+  ];
+  const categoryHashtags: Record<string, string> = {
+    breaking: "NoticiasDeGames",
+    hardware: "Hardware",
+    industry: "IndustriaDosGames",
+    modding: "Modding",
+    review: "AnaliseDeJogos",
+    opinion: "OpiniaoGamer",
+  };
+  const subjects = subjectHashtags
+    .filter(([pattern]) => pattern.test(`${title} ${summary}`))
+    .slice(0, 3)
+    .map(([, hashtag]) => hashtag);
+  const hashtags = [...new Set([...subjects, categoryHashtags[post.category] || "Games", "OrangeBrick", "Shorts"])]
+    .map(hashtag => `#${hashtag}`)
+    .join(" ");
 
   return {
-    instagram: { caption: description, hashtags: [] },
-    tiktok: { caption: summary, hashtags: [] },
+    instagram: { caption: `${description}${attribution ? `\n\n${attribution}` : ""}`, hashtags: [] },
+    tiktok: { caption: `${summary}${attribution ? `\n\n${attribution}` : ""}`, hashtags: [] },
     youtube: {
       title: youtubeTitle,
-      description,
+      description: `${description}\n\n${hashtags}`,
       tags: ["Orange Brick", ...(categoryTags[post.category] || [])],
     },
   };

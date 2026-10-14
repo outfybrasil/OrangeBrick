@@ -1,4 +1,6 @@
 import argparse
+import json
+import random
 import shutil
 import subprocess
 import sys
@@ -21,54 +23,67 @@ def get_ffmpeg():
 def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float = None):
     ffmpeg = get_ffmpeg()
     voice = work_dir / "voice.mp3"
-    bgm = assets_dir / "bgm.mp3"
-    impact = assets_dir / "impact.wav"
-    whoosh = assets_dir / "whoosh.wav"
-    coin = assets_dir / "coin.wav"
-    powerup = assets_dir / "powerup.wav"
-
     if not voice.exists():
         print(f"Error: {voice} not found.")
         sys.exit(1)
 
-    fade_st = round(max(total_duration - 2.5, 5.0), 1) if total_duration else 40.0
-    voice_pad = f",apad=whole_dur={total_duration}" if total_duration else ""
-
-    # Dynamic delay markers based on total duration
+    plan_path = work_dir / "production.json"
+    plan = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path.exists() else {}
+    rng = random.Random(plan.get("variation", 0))
     d = total_duration or 42.0
-    sfx2_ms = int(d * 0.16 * 1000)
-    sfx3_ms = int(d * 0.35 * 1000)
-    sfx4_ms = int(d * 0.55 * 1000)
-    sfx5_ms = int(d * 0.72 * 1000)
-    sfx6_ms = int(max(d - 4.5, 0) * 1000)
+    starts = plan.get("sceneStarts", [0, d * .16, d * .35, d * .55, d * .72, d - 4.5])
+    tracks = sorted(assets_dir.glob("bgm*.mp3"))
+    bgm = rng.choice(tracks) if tracks else None
+    effects = [name for name in ("impact", "whoosh", "coin", "powerup")
+               if (assets_dir / f"{name}.wav").exists()]
+    selected_starts = [starts[0], *rng.sample(starts[1:-1], min(2, len(starts[1:-1]))), starts[-1]]
+    selected_starts.sort()
+    cmd = [ffmpeg, "-y", "-i", str(voice)]
+    filters = [f"[0:a]aresample=48000,volume=1.2,apad,atrim=duration={d},asplit=2[v][side]"]
+    labels = ["[v]"]
+    input_index = 1
+    if bgm:
+        cmd.extend(["-stream_loop", "-1", "-i", str(bgm)])
+        offset = rng.choice([0, 8, 16, 24])
+        gain = rng.choice([0.10, 0.12, 0.14])
+        filters.append(
+            f"[{input_index}:a]aresample=48000,atrim=start={offset}:duration={d},"
+            f"asetpts=PTS-STARTPTS,volume={gain},afade=t=in:d=0.8,"
+            f"afade=t=out:st={max(d - 2.5, 0)}:d=2.5[music]"
+        )
+        filters.append("[music][side]sidechaincompress=threshold=0.025:ratio=6:attack=15:release=300[m]")
+        labels.append("[m]")
+        input_index += 1
+    else:
+        filters.append("[side]anullsink")
 
-    # Filter complex to mix voice, ducked background music and keyframe SFX
-    filter_complex = (
-        f"[0:a]volume=1.2{voice_pad}[v];"
-        f"[1:a]volume=0.18,afade=t=out:st={fade_st}:d=2.5[m];"
-        f"[2:a]adelay=100|100,volume=0.4[sfx1];"
-        f"[3:a]adelay={sfx2_ms}|{sfx2_ms},volume=0.3[sfx2];"
-        f"[4:a]adelay={sfx3_ms}|{sfx3_ms},volume=0.35[sfx3];"
-        f"[5:a]adelay={sfx4_ms}|{sfx4_ms},volume=0.35[sfx4];"
-        f"[3:a]adelay={sfx5_ms}|{sfx5_ms},volume=0.3[sfx5];"
-        f"[2:a]adelay={sfx6_ms}|{sfx6_ms},volume=0.4[sfx6];"
-        "[v][m][sfx1][sfx2][sfx3][sfx4][sfx5][sfx6]amix=inputs=8:duration=first:dropout_transition=2[aout]"
+    previous = None
+    for start in selected_starts:
+        choices = [effect for effect in effects if effect != previous] or effects
+        if not choices:
+            break
+        effect = rng.choice(choices)
+        previous = effect
+        cmd.extend(["-i", str(assets_dir / f"{effect}.wav")])
+        delay = int(max(start, 0.08) * 1000)
+        gain = rng.choice([0.12, 0.16, 0.20])
+        label = f"sfx{input_index}"
+        filters.append(
+            f"[{input_index}:a]aresample=48000,atrim=duration=1.2,"
+            f"asetpts=PTS-STARTPTS,afade=t=out:st=0.8:d=0.4,"
+            f"volume={gain},adelay={delay}:all=1[{label}]"
+        )
+        labels.append(f"[{label}]")
+        input_index += 1
+
+    filters.append(
+        "".join(labels) + f"amix=inputs={len(labels)}:duration=first:"
+        "dropout_transition=0:normalize=0,alimiter=limit=0.95:level=false:latency=true[aout]"
     )
-
-    cmd = [
-        ffmpeg, "-y",
-        "-i", str(voice),
-        "-i", str(bgm),
-        "-i", str(impact),
-        "-i", str(whoosh),
-        "-i", str(coin),
-        "-i", str(powerup),
-        "-filter_complex", filter_complex,
-        "-map", "[aout]",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        str(out_path)
-    ]
+    cmd.extend([
+        "-filter_complex", ";".join(filters), "-map", "[aout]",
+        "-t", str(d), "-c:a", "aac", "-b:a", "192k", str(out_path)
+    ])
 
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode == 0:
