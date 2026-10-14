@@ -67,11 +67,7 @@ def main():
     parser.add_argument("--out-dir", required=True)
     args = parser.parse_args()
 
-    text_input = args.text
-    if Path(text_input).exists():
-        text_input = Path(text_input).read_text(encoding="utf-8")
-
-    asyncio.run(run_tts(text_input, args.voice, args.rate, Path(args.out_dir)))
+    asyncio.run(run_tts(args.text, args.voice, args.rate, Path(args.out_dir)))
 
 if __name__ == "__main__":
     main()

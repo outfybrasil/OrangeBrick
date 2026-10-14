@@ -178,7 +178,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Corpo da requisição inválido" }, { status: 400 });
   }
 
-  const { slug } = body;
+  const slug = body?.slug;
   if (typeof slug !== "string" || slug.length > 200 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return NextResponse.json({ error: "Slug da matéria é obrigatório" }, { status: 400 });
   }

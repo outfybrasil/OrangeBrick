@@ -71,6 +71,7 @@ export default function AdminReelsPage() {
 
       const data = await res.json();
       setItems(data.items || []);
+      setSelectedReel((current) => current ? data.items?.find((item: AdminReelItem) => item.slug === current.slug) || current : null);
       setError(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro ao conectar com o servidor.");
@@ -125,6 +126,7 @@ export default function AdminReelsPage() {
           item.slug === slug ? { ...item, status: "generating", started_at: new Date().toISOString() } : item
         )
       );
+      setSelectedReel((current) => current?.slug === slug ? { ...current, status: "generating" } : current);
     } catch (err: unknown) {
       const message = err instanceof Error && err.name === "TimeoutError"
         ? "O servidor demorou para confirmar a geração. Atualize a lista antes de tentar novamente."
@@ -193,7 +195,7 @@ export default function AdminReelsPage() {
     >
       {/* TOAST DE FEEDBACK */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-brand-orange/40 bg-[#12141c] px-4 py-3 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-2">
+        <div role="status" className="fixed bottom-6 right-6 z-[60] flex items-center gap-2 rounded-xl border border-brand-orange/40 bg-[#12141c] px-4 py-3 text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-bottom-2">
           <span>{toastMessage}</span>
         </div>
       )}
@@ -535,9 +537,10 @@ export default function AdminReelsPage() {
                 <button
                   type="button"
                   onClick={() => handleGenerate(selectedReel.slug)}
+                  disabled={selectedReel.status === "generating" || triggeringSlug === selectedReel.slug}
                   className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-[11px] font-bold text-gray-400 hover:text-white hover:bg-white/10"
                 >
-                  Regerar este vídeo com IA
+                  {selectedReel.status === "generating" || triggeringSlug === selectedReel.slug ? "Processando..." : "Regerar este vídeo com IA"}
                 </button>
               </div>
             </div>

@@ -52,10 +52,11 @@ async function run() {
       process.stdout.write(`Reel ${job.id}: ${result}\n`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Falha ao gerar Reel.";
-      const { error: saveError } = await supabase.from("reel_jobs").update({ status: "failed", error: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", job.id).eq("lock_token", token).eq("status", "running");
+      const { data: failed, error: saveError } = await supabase.from("reel_jobs").update({ status: "failed", error: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", job.id).eq("lock_token", token).eq("status", "running").select("id");
       if (saveError) throw new Error("Falha ao registrar o erro da geração.");
-      if (uploadedPath) await supabase.storage.from(REEL_BUCKET).remove([uploadedPath]);
+      if (uploadedPath && failed?.length) await supabase.storage.from(REEL_BUCKET).remove([uploadedPath]);
       process.stderr.write(`Reel ${job.id}: ${message}\n`);
+      process.exitCode = 1;
     }
   }
   const { count, error } = await supabase.from("reel_jobs").select("id", { count: "exact", head: true }).eq("status", "queued");
