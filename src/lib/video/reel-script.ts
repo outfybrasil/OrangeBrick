@@ -48,10 +48,10 @@ ${post.body.slice(0, 3000)}
 
 INSTRUÇÕES DO ROTEIRO:
 1. Abra com um gancho factual nos primeiros 3 segundos, sem exageros ou linguagem sensacionalista.
-2. Escreva a narração em tom natural e direto, adequado à categoria da matéria. Para industry, hardware e breaking, mantenha linguagem jornalística e factual. Use entre 60 e 90 palavras faladas.
+2. Escreva a narração em tom natural e direto, adequado à categoria da matéria. Para industry, hardware e breaking, mantenha linguagem jornalística e factual. Use entre 50 e 75 palavras faladas e termine com: "Quer ver a matéria completa? Acesse orangebrick.blog."
 3. Preserve exatamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é um total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não some números de processos distintos sem explicar que se trata de um limite máximo. Não troque “propõe” ou “pode afetar” por “fechou” ou “demitiu”.
 4. Divida o vídeo em 5 momentos visuais que correspondam aos fatos da matéria. Adapte as cenas ao tema; se não houver plataformas ou data de lançamento, use impacto, contexto ou próximos passos. Nunca invente plataformas, datas, números, decisões ou declarações.
-5. Feche com uma pergunta pertinente ao assunto e um convite curto para seguir o Orange Brick, sem chamadas genéricas como “revelação bombástica” ou “vítimas da crise”.
+5. Feche com uma pergunta pertinente ao assunto e convide a pessoa a ler a matéria completa em orangebrick.blog. A chamada para acessar o site deve ser falada no fim da narração.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {
@@ -59,7 +59,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
   "headline": "TÍTULO DE IMPACTO EM MAIÚSCULAS",
   "subHeadline": "SUBTÍTULO EM DESTAQUE",
   "badge": "BADGE DA NOTÍCIA (ex: NOVIDADE BGS 2026, OFICIAL, LANÇAMENTO)",
-  "narrationText": "Texto completo que será narrado de 35 a 45 segundos em português brasileiro.",
+  "narrationText": "Texto completo de 35 a 45 segundos em português brasileiro, terminando com: Quer ver a matéria completa? Acesse orangebrick.blog.",
   "scenes": [
     {
       "id": "scene1",
@@ -100,9 +100,9 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
       "imageIndex": 1
     }
   ],
-  "ctaQuestion": "Pergunta para os comentários?",
-  "ctaAction": "Comenta aí e segue o Orange Brick!",
-  "ctaButton": "SEGUIR @ORANGEBRICK"
+  "ctaQuestion": "Quer ler a matéria completa?",
+  "ctaAction": "Acesse orangebrick.blog",
+  "ctaButton": "LEIA A MATÉRIA COMPLETA"
 }`;
 
   let lastError: Error | null = null;
@@ -148,5 +148,14 @@ function parseScript(raw: string): ReelScriptData {
   if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length === 0) {
     throw new Error("Roteiro retornado pelo Gemini está incompleto.");
   }
+  const narrationTail = data.narrationText.trim().slice(-180);
+  const includesArticleCta = /mat[eé]ria completa[\s\S]{0,120}orangebrick\.blog[.!?]*$/i.test(narrationTail);
+  if (!includesArticleCta) {
+    const narration = data.narrationText.trim().replace(/[\s.!?]+$/, "");
+    data.narrationText = `${narration}. Quer ver a matéria completa? Acesse orangebrick.blog.`;
+  }
+  data.ctaQuestion = "Quer ler a matéria completa?";
+  data.ctaAction = "Acesse orangebrick.blog";
+  data.ctaButton = "LEIA A MATÉRIA COMPLETA";
   return data;
 }

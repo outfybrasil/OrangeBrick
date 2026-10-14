@@ -33,7 +33,13 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
     d = total_duration or 42.0
     starts = plan.get("sceneStarts", [0, d * .16, d * .35, d * .55, d * .72, d - 4.5])
     tracks = sorted(assets_dir.glob("bgm*.mp3"))
-    bgm = rng.choice(tracks) if tracks else None
+    track_groups = {}
+    for track in tracks:
+        group = "shadow" if track.stem.startswith("bgm_shadow") else track.stem
+        track_groups.setdefault(group, []).append(track)
+    track_groups = [track_groups[group] for group in sorted(track_groups)]
+    selected_group = rng.choice(track_groups) if track_groups else []
+    bgm = rng.choice(selected_group) if selected_group else None
     effects = [name for name in ("impact", "whoosh", "coin", "powerup")
                if (assets_dir / f"{name}.wav").exists()]
     selected_starts = [starts[0], *rng.sample(starts[1:-1], min(2, len(starts[1:-1]))), starts[-1]]
@@ -42,16 +48,17 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
     filters = [f"[0:a]aresample=48000,volume=1.2,apad,atrim=duration={d},asplit=2[v][side]"]
     labels = ["[v]"]
     input_index = 1
+    selected_effects = []
     if bgm:
         cmd.extend(["-stream_loop", "-1", "-i", str(bgm)])
         offset = rng.choice([0, 8, 16, 24])
-        gain = rng.choice([0.10, 0.12, 0.14])
         filters.append(
             f"[{input_index}:a]aresample=48000,atrim=start={offset}:duration={d},"
-            f"asetpts=PTS-STARTPTS,volume={gain},afade=t=in:d=0.8,"
+            f"asetpts=PTS-STARTPTS,loudnorm=I=-24:TP=-4:LRA=7,aresample=48000,"
+            f"volume=1.0,afade=t=in:d=0.8,"
             f"afade=t=out:st={max(d - 2.5, 0)}:d=2.5[music]"
         )
-        filters.append("[music][side]sidechaincompress=threshold=0.025:ratio=6:attack=15:release=300[m]")
+        filters.append("[music][side]sidechaincompress=threshold=0.08:ratio=3:attack=20:release=420[m]")
         labels.append("[m]")
         input_index += 1
     else:
@@ -64,6 +71,7 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
             break
         effect = rng.choice(choices)
         previous = effect
+        selected_effects.append(effect)
         cmd.extend(["-i", str(assets_dir / f"{effect}.wav")])
         delay = int(max(start, 0.08) * 1000)
         gain = rng.choice([0.12, 0.16, 0.20])
@@ -75,6 +83,13 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
         )
         labels.append(f"[{label}]")
         input_index += 1
+
+    plan["backgroundMusic"] = bgm.name if bgm else None
+    plan["soundEffects"] = selected_effects
+    if plan_path.exists():
+        plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    print(f"Background music: {bgm.name if bgm else 'none'}")
+    print(f"Sound effects: {', '.join(selected_effects) if selected_effects else 'none'}")
 
     filters.append(
         "".join(labels) + f"amix=inputs={len(labels)}:duration=first:"
