@@ -6,6 +6,20 @@ function object(value: unknown): ObjectData {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value as ObjectData : {};
 }
 
+function operationError(value: unknown) {
+  const details = JSON.stringify(value);
+  if (/quotaExceeded|dailyLimitExceeded/i.test(details)) {
+    return new Error("A cota diária da API do YouTube foi esgotada. Aguarde a renovação da cota ou configure um aplicativo Google próprio no Composio. Reconectar a conta não renova essa cota.");
+  }
+  if (/uploadLimitExceeded/i.test(details)) {
+    return new Error("O canal atingiu o limite de envios do YouTube. Aguarde a liberação de novos envios no YouTube Studio.");
+  }
+  if (/insufficientPermissions|insufficient.*scope|invalid_grant|UNAUTHENTICATED/i.test(details)) {
+    return new Error("A conexão não tem autorização suficiente. Reconecte o YouTube no Composio e conceda as permissões solicitadas.");
+  }
+  return new Error("O Composio não confirmou a operação. Confira a conexão do YouTube e tente novamente.");
+}
+
 export async function callComposio(name: string, args: Record<string, Json | undefined>, timeout = 30_000): Promise<ObjectData> {
   const key = process.env.COMPOSIO_CONSUMER_KEY;
   if (!key) throw new Error("A conexão com o YouTube ainda não foi configurada no servidor.");
@@ -22,12 +36,12 @@ export async function callComposio(name: string, args: Record<string, Json | und
     ? [JSON.parse(text)]
     : text.split(/\r?\n\r?\n/).map(block => block.split(/\r?\n/).filter(line => line.startsWith("data:")).map(line => line.slice(5).trim()).join("\n")).filter(Boolean).map(value => JSON.parse(value));
   const message = messages.find(value => value.id === 1);
-  if (!message || message.error || message.result?.isError) throw new Error("O Composio recusou a operação. Confira a conexão e as permissões do YouTube.");
+  if (!message || message.error || message.result?.isError) throw operationError(message);
   for (const item of message.result?.content || []) {
     if (item.type !== "text") continue;
     let payload: ObjectData;
     try { payload = object(JSON.parse(item.text)); } catch { continue; }
-    if (payload.successful === false || payload.error) throw new Error("A operação no YouTube falhou. Confira a conexão e os limites de envio do canal.");
+    if (payload.successful === false || payload.error) throw operationError(payload);
     if (payload.successful === true) return object(payload.data);
   }
   throw new Error("O Composio não confirmou o resultado da operação.");
@@ -36,11 +50,32 @@ export async function callComposio(name: string, args: Record<string, Json | und
 function toolData(result: ObjectData) {
   const rows = Array.isArray(result.results) ? result.results : [];
   const response = object(object(rows[0]).response);
-  if (response.successful !== true) throw new Error("O YouTube não confirmou a operação. Confira as permissões e a cota do canal.");
+  if (response.successful !== true) throw operationError(response);
   return object(response.data);
 }
 
-export async function getYouTubeConnection() {
+type YouTubeConnection = { account: string; session: string; channel: { id: string; title: string; url: string } };
+let cachedConnection: { value: YouTubeConnection; expiresAt: number } | undefined;
+let pendingConnection: Promise<YouTubeConnection> | undefined;
+let connectionFailure: { error: Error; expiresAt: number } | undefined;
+
+export async function getYouTubeConnection(forceRefresh = false): Promise<YouTubeConnection> {
+  if (connectionFailure && connectionFailure.expiresAt > Date.now()) throw connectionFailure.error;
+  if (!forceRefresh && cachedConnection && cachedConnection.expiresAt > Date.now()) return cachedConnection.value;
+  if (pendingConnection) return pendingConnection;
+  pendingConnection = loadYouTubeConnection().then(value => {
+    cachedConnection = { value, expiresAt: Date.now() + 5 * 60_000 };
+    connectionFailure = undefined;
+    return value;
+  }).catch(error => {
+    cachedConnection = undefined;
+    connectionFailure = { error: error instanceof Error ? error : new Error("Falha ao conectar ao YouTube."), expiresAt: Date.now() + 60_000 };
+    throw connectionFailure.error;
+  }).finally(() => { pendingConnection = undefined; });
+  return pendingConnection;
+}
+
+async function loadYouTubeConnection(): Promise<YouTubeConnection> {
   const account = process.env.COMPOSIO_YOUTUBE_ACCOUNT;
   const expectedChannel = process.env.COMPOSIO_YOUTUBE_CHANNEL;
   if (!account || !expectedChannel) throw new Error("O canal de destino ainda não foi configurado no servidor.");

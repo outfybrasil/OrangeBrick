@@ -93,71 +93,36 @@ export function generateSocialCopys(post: {
   category: string;
   script?: ReelScriptData | null;
 }): SocialCopys {
-  const cleanTitle = post.title.trim().toUpperCase();
-  const summary = post.summary.trim();
-  const hook = post.script?.hook ? `🔥 ${post.script.hook}\n\n` : "";
-  const question = post.script?.ctaQuestion || "O que você achou dessa novidade? Deixa sua opinião nos comentários!";
-
+  const plainText = (value: string) => value
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  const title = plainText(post.title);
+  const summary = plainText(post.summary) || title;
+  const articleUrl = `https://orangebrick.blog/posts/${post.slug}`;
+  const description = `${summary}\n\nLeia a matéria: ${articleUrl}`;
+  const titleCharacters = Array.from(title);
+  const youtubeTitle = titleCharacters.length > 100
+    ? `${titleCharacters.slice(0, 99).join("").replace(/\s+\S*$/, "").trimEnd()}…`
+    : title;
   const categoryTags: Record<string, string[]> = {
-    breaking: ["plantao", "noticias", "urgente", "furodejornalismo"],
-    hardware: ["hardware", "pcgamer", "consoles", "tecnologia"],
-    industry: ["industriagamer", "mercado", "gamesbusiness"],
-    modding: ["modding", "gamemods", "custompc"],
-    review: ["analise", "review", "gameplay"],
-    opinion: ["opiniao", "debate", "comunidade"]
+    breaking: ["Notícias de games"],
+    hardware: ["Hardware"],
+    industry: ["Indústria de games"],
+    modding: ["Modding"],
+    review: ["Análise de jogos"],
+    opinion: ["Opinião"],
   };
 
-  const extraTags = categoryTags[post.category] || ["games"];
-
-  // Instagram
-  const igHashtags = [
-    "#orangebrick",
-    "#games",
-    "#noticiasgames",
-    "#gamingbrasil",
-    "#gamer",
-    "#playstation",
-    "#xbox",
-    "#pcgaming",
-    ...extraTags.map(t => `#${t}`)
-  ];
-
-  const igCaption = `${hook}🎮 ${cleanTitle}\n\n${summary}\n\n💬 ${question}\n\n🔗 Matéria completa com todos os detalhes no link da bio: orangebrick.blog/posts/${post.slug}\n\n📲 Siga @orangebrick para o melhor jornalismo independente de games!\n\n${igHashtags.join(" ")}`;
-
-  // TikTok
-  const ttHashtags = [
-    "#games",
-    "#noticiasgames",
-    "#gamer",
-    "#fyp",
-    "#foryou",
-    "#gamesbrasil",
-    "#viral",
-    ...extraTags.map(t => `#${t}`)
-  ];
-
-  const ttCaption = `${cleanTitle} 🕹️💥\n\n${summary}\n\n💬 ${question}\nSegue aí pra não perder nada! 👇\n\n${ttHashtags.join(" ")}`;
-
-  // YouTube Shorts
-  const rawYtTitle = `${cleanTitle} #Shorts`;
-  const ytTitle = rawYtTitle.length > 95 ? `${rawYtTitle.slice(0, 91)}... #Shorts` : rawYtTitle;
-
-  const ytDescription = `${cleanTitle}\n\n${summary}\n\n📰 Leia a apuração completa no portal Orange Brick:\nhttps://orangebrick.blog/posts/${post.slug}\n\n🔔 Inscreva-se no canal para acompanhar novidades diárias de games e tecnologia.\n\n#Shorts #Games #NoticiasGames #OrangeBrick`;
-
   return {
-    instagram: {
-      caption: igCaption,
-      hashtags: igHashtags
-    },
-    tiktok: {
-      caption: ttCaption,
-      hashtags: ttHashtags
-    },
+    instagram: { caption: description, hashtags: [] },
+    tiktok: { caption: summary, hashtags: [] },
     youtube: {
-      title: ytTitle,
-      description: ytDescription,
-      tags: ["Shorts", "Games", "Orange Brick", "Notícias de Games", ...extraTags]
-    }
+      title: youtubeTitle,
+      description,
+      tags: ["Orange Brick", ...(categoryTags[post.category] || [])],
+    },
   };
 }
 

@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       || !["private", "unlisted", "public"].includes(body.visibility)) {
       return reply({ error: "Revise o título (até 100 caracteres), a descrição (até 5.000) e confirme o envio. Não use os caracteres < e >." }, 400);
     }
-    const connection = await getYouTubeConnection();
+    const connection = await getYouTubeConnection(true);
     if (body.channelId !== connection.channel.id) return reply({ error: "O canal de destino mudou. Atualize a conexão antes de enviar." }, 409);
     const db = getReelAdmin();
     const { data: jobData, error: jobError } = await db.from("reel_jobs").select("*").eq("post_id", body.postId).order("created_at", { ascending: false }).limit(1).maybeSingle();

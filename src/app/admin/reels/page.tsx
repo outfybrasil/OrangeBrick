@@ -604,7 +604,7 @@ export default function AdminReelsPage() {
                 {activeTab === "instagram" && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-gray-300">Legenda Pronta com Gancho e Hashtags:</p>
+                      <p className="text-xs font-bold text-gray-300">Legenda:</p>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(selectedReel.copys.instagram.caption, "ig-caption")}
@@ -630,7 +630,7 @@ export default function AdminReelsPage() {
                 {activeTab === "tiktok" && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-gray-300">Texto Otimizado para o Algoritmo For You:</p>
+                      <p className="text-xs font-bold text-gray-300">Descrição:</p>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(selectedReel.copys.tiktok.caption, "tt-caption")}
