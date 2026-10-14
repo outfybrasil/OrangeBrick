@@ -66,6 +66,14 @@ Configure `REELS_GITHUB_TOKEN` como segredo de Production na Vercel, com permiss
 
 O workflow também pode ser iniciado manualmente para retomar a fila. Falhas são registradas por matéria; pedidos expirados podem ser refeitos pelo painel. Não há envio automático de vídeo ao Telegram nesse executor. Em desenvolvimento, a geração continua local; use `REELS_REMOTE=true` para testar a integração remota.
 
+### Envio de Reels ao YouTube
+
+Na aba YouTube da Central de Reels, revise título, descrição, canal e visibilidade, confirme o envio e use o botão de publicação. O padrão é privado. O YouTube ainda pode processar ou restringir a visibilidade do vídeo após recebê-lo.
+
+Configure em Production `COMPOSIO_CONSUMER_KEY` como segredo sensível do Connect MCP, `COMPOSIO_YOUTUBE_ACCOUNT` com o identificador da conexão e `COMPOSIO_YOUTUBE_CHANNEL` com o ID do canal autorizado. A integração usa `https://connect.composio.dev/mcp`; a chave de projeto da API não substitui a chave do Connect. Nunca use prefixo `NEXT_PUBLIC_` nessas variáveis. Aplique a migração `reel_youtube_publications` antes do deploy.
+
+O histórico é acessível apenas pelo servidor após autenticação de administrador com MFA. A reserva atômica por matéria e canal impede envios duplicados, inclusive após regenerar o Reel. Falhas anteriores ao upload permitem nova tentativa. Se o envio foi iniciado e sua resposta se perdeu, o registro permanece bloqueado até conferência manual no YouTube Studio; não repita a publicação automaticamente. Nenhum vídeo é enviado apenas por gerar um Reel ou conectar a conta.
+
 Configure `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para clientes públicos e `SUPABASE_SECRET_KEY` somente no servidor, além do domínio definitivo em `NEXT_PUBLIC_SITE_URL`. As chaves `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` continuam como compatibilidade durante a migração; nunca exponha uma chave secreta no navegador ou em variável com prefixo `NEXT_PUBLIC_`.
 
 Também configure `CRON_SECRET` com um valor aleatório forte para autorizar a limpeza mensal do Radar.

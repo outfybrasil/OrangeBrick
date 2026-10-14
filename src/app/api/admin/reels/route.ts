@@ -26,6 +26,7 @@ export interface AdminReelItem {
   created_at: string;
   status: "ready" | "generating" | "failed" | "pending";
   video_url?: string;
+  reel_job_id?: string;
   duration?: number;
   file_size?: number;
   started_at?: string;
@@ -138,6 +139,7 @@ export async function GET(request: Request) {
       created_at: post.created_at || "",
       status,
       video_url: videoUrl,
+      reel_job_id: job?.id,
       duration,
       file_size: fileSize,
       started_at: manifestItem?.started_at,

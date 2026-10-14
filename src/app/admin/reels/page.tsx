@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { YouTubePublisher } from "@/components/admin/YouTubePublisher";
 import { createDataClient } from "@/lib/supabase/client";
 import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
 import type { AdminReelItem } from "@/app/api/admin/reels/route";
@@ -38,7 +39,7 @@ export default function AdminReelsPage() {
   
   // Modal de Assistente Social
   const [selectedReel, setSelectedReel] = useState<AdminReelItem | null>(null);
-  const [activeTab, setActiveTab] = useState<"instagram" | "tiktok" | "youtube">("instagram");
+  const [activeTab, setActiveTab] = useState<"instagram" | "tiktok" | "youtube">("youtube");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Status de geração individual
@@ -491,7 +492,7 @@ export default function AdminReelsPage() {
       {selectedReel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-6 backdrop-blur-md animate-in fade-in duration-200">
           <div
-            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-[#0e1017] shadow-2xl lg:flex-row"
+            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-y-auto rounded-3xl border border-white/15 bg-[#0e1017] shadow-2xl lg:flex-row lg:overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* BOTÃO FECHAR */}
@@ -505,7 +506,7 @@ export default function AdminReelsPage() {
             </button>
 
             {/* COLUNA ESQUERDA: PLAYER VERTICAL 9:16 */}
-            <div className="flex flex-col items-center justify-center border-b border-white/10 bg-black/60 p-4 lg:w-[380px] lg:border-b-0 lg:border-r">
+            <div className="flex shrink-0 flex-col items-center justify-center border-b border-white/10 bg-black/60 p-4 lg:w-[380px] lg:border-b-0 lg:border-r">
               <div className="relative aspect-[9/16] w-[260px] max-w-full overflow-hidden rounded-2xl border-2 border-white/10 bg-black shadow-2xl">
                 {selectedReel.video_url ? (
                   <video
@@ -546,7 +547,7 @@ export default function AdminReelsPage() {
             </div>
 
             {/* COLUNA DIREITA: ASSISTENTE DE COPYS PRONTAS */}
-            <div className="flex flex-1 flex-col overflow-y-auto p-5 sm:p-7">
+            <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-7 lg:overflow-y-auto">
               <div>
                 <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-black uppercase text-brand-orange">
                   Assistente de Publicação
@@ -560,7 +561,7 @@ export default function AdminReelsPage() {
               </div>
 
               {/* SELETOR DE REDE SOCIAL */}
-              <div className="mt-5 flex gap-2 border-b border-white/10 pb-3">
+              <div className="mt-5 flex flex-wrap gap-2 border-b border-white/10 pb-3">
                 <button
                   type="button"
                   onClick={() => setActiveTab("instagram")}
@@ -653,49 +654,14 @@ export default function AdminReelsPage() {
                 )}
 
                 {activeTab === "youtube" && (
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <p className="text-xs font-bold text-gray-300">Título do Short (&lt; 100 caracteres):</p>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selectedReel.copys.youtube.title, "yt-title")}
-                          className="flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-white/20"
-                        >
-                          {copiedKey === "yt-title" ? "Copiado! ✓" : "Copiar Título"}
-                        </button>
-                      </div>
-                      <input
-                        readOnly
-                        type="text"
-                        value={selectedReel.copys.youtube.title}
-                        className="w-full rounded-xl border border-white/10 bg-[#07080c] px-3.5 py-2 text-xs font-mono text-white focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <p className="text-xs font-bold text-gray-300">Descrição Completa com Link da Matéria:</p>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(selectedReel.copys.youtube.description, "yt-desc")}
-                          className="flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-white/20"
-                        >
-                          {copiedKey === "yt-desc" ? "Copiado! ✓" : "Copiar Descrição"}
-                        </button>
-                      </div>
-                      <textarea
-                        readOnly
-                        rows={6}
-                        value={selectedReel.copys.youtube.description}
-                        className="w-full rounded-xl border border-white/10 bg-[#07080c] p-3.5 text-xs font-mono leading-relaxed text-gray-200 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-3 text-[11px] text-red-200">
-                      💡 <strong>Dica de Postagem:</strong> No YouTube Studio, envie como vídeo normal. O YouTube detecta automaticamente a proporção 9:16 e o cataloga como Short oficial.
-                    </div>
-                  </div>
+                  <YouTubePublisher
+                    key={`${selectedReel.id}:${selectedReel.reel_job_id}`}
+                    postId={selectedReel.id}
+                    reelJobId={selectedReel.reel_job_id}
+                    initialTitle={selectedReel.copys.youtube.title}
+                    initialDescription={selectedReel.copys.youtube.description}
+                    ready={selectedReel.status === "ready"}
+                  />
                 )}
               </div>
             </div>

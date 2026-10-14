@@ -1,5 +1,20 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export interface ReelYouTubePublication {
+  id: string;
+  post_id: string;
+  reel_job_id: string;
+  channel_id: string;
+  status: "preparing" | "uploading" | "uploaded" | "unknown" | "failed";
+  title: string;
+  description: string;
+  visibility: "public" | "unlisted" | "private";
+  video_id: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ReelJob {
   id: string;
   post_id: string;
@@ -21,6 +36,12 @@ export interface ReelJob {
 export interface Database {
   public: {
     Tables: {
+        reel_youtube_publications: {
+          Row: ReelYouTubePublication;
+          Insert: Omit<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error"> & Partial<Pick<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error">>;
+          Update: Partial<ReelYouTubePublication>;
+          Relationships: [];
+        };
       posts: {
         Row: Post;
         Insert: PostInsert;
