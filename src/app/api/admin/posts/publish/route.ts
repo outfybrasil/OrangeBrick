@@ -1,6 +1,6 @@
 import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
 import { revalidatePath } from "next/cache";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import { validateStoredEditorialPost } from "@/lib/content-validation";
@@ -43,10 +43,15 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.rpc("admin_save_editorial_post", { p_id: body.id || null, p_post: body.post });
     if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
     refreshPublicationPages();
-    try {
-      const slug = (values.slug as string) || (Array.isArray(data) ? (data[0] as any)?.slug : (data as any)?.slug);
-      if (slug) triggerReelGeneration(slug);
-    } catch {}
+    after(async () => {
+      try {
+        const saved = (Array.isArray(data) ? data[0] : data) as { slug?: string } | null;
+        const slug = typeof values.slug === "string" ? values.slug : saved?.slug;
+        if (slug) await triggerReelGeneration(slug);
+      } catch (error) {
+        console.error("[Reels] Falha ao solicitar vídeo após publicação:", error);
+      }
+    });
     return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
   }
   if (!body || !Array.isArray(body.ids) || body.ids.length < 1 || body.ids.length > 50
@@ -87,10 +92,9 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.rpc("admin_publish_posts", { p_post_ids: ids, p_expected_updated: reviewed.map((post) => post.updated_at) });
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
   refreshPublicationPages();
-  try {
-    for (const post of (current as Post[])) {
-      if (post?.slug) triggerReelGeneration(post.slug);
-    }
-  } catch {}
+  after(async () => {
+    const results = await Promise.allSettled((current as Post[]).filter((post) => post.slug).map((post) => triggerReelGeneration(post.slug)));
+    for (const result of results) if (result.status === "rejected") console.error("[Reels] Falha ao solicitar vídeo após publicação:", result.reason);
+  });
   return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
 }

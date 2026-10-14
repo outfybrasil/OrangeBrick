@@ -1,5 +1,23 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+export interface ReelJob {
+  id: string;
+  post_id: string;
+  expected_updated_at: string;
+  status: "queued" | "running" | "ready" | "failed" | "skipped";
+  attempts: number;
+  lock_token: string | null;
+  lease_until: string | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  storage_path: string | null;
+  duration: number | null;
+  file_size: number | null;
+  script: Json | null;
+  error: string | null;
+}
+
 export interface Database {
   public: {
     Tables: {

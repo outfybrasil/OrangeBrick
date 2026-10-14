@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import type { ReelScriptData } from "./reel-script";
+import { enqueueRemoteReel, usesRemoteReels } from "./reel-remote";
 
 export interface ReelManifestItem {
   slug: string;
@@ -51,6 +52,7 @@ export function saveManifest(manifest: Record<string, ReelManifestItem>) {
     fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), "utf-8");
   } catch (err) {
     console.error("[ReelService] Erro ao salvar manifest:", err);
+    throw new Error("Não foi possível salvar o estado da geração do Reel.");
   }
 }
 
@@ -162,8 +164,11 @@ export function generateSocialCopys(post: {
 let isProcessingQueue = false;
 const reelQueue: string[] = [];
 
-export function triggerReelGeneration(slug: string): { queued: boolean; message: string } {
-  if (!slug) return { queued: false, message: "Slug inválido" };
+export async function triggerReelGeneration(slug: string): Promise<{ queued: boolean; message: string }> {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) {
+    return { queued: false, message: "Slug inválido" };
+  }
+  if (usesRemoteReels()) return enqueueRemoteReel(slug);
 
   const manifest = getManifest();
   const current = manifest[slug];
@@ -199,14 +204,13 @@ function processReelQueue() {
   if (!nextSlug) return;
 
   isProcessingQueue = true;
-  console.log(`[ReelQueue] 🎬 Iniciando renderização para: ${nextSlug}`);
 
   const scriptPath = path.resolve(process.cwd(), "scripts", "generate-reel.mjs");
   const nodeBin = process.execPath;
 
   const child = spawn(nodeBin, [
     "--experimental-strip-types",
-    "--env-file=.env.local",
+    ...(fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ["--env-file=.env.local"] : []),
     scriptPath,
     nextSlug
   ], {
@@ -228,7 +232,6 @@ function processReelQueue() {
   child.on("close", (code) => {
     isProcessingQueue = false;
     if (code === 0) {
-      console.log(`[ReelQueue] ✅ Concluído com sucesso para: ${nextSlug}`);
       const fileInfo = checkReelFile(nextSlug);
       updateReelStatus(nextSlug, {
         status: "ready",

@@ -1,0 +1,42 @@
+name: reel-generator
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: orangebrick-reel-renderer
+  cancel-in-progress: false
+
+jobs:
+  render:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      REELS_GITHUB_REPOSITORY: ${{ github.repository }}
+      REELS_GITHUB_REF: master
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - name: Instalar dependências
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python3 -m pip install edge-tts==7.3.1
+          npx playwright install --with-deps chromium
+      - name: Processar fila e armazenar vídeos
+        run: node --experimental-strip-types scripts/reel-worker.mjs

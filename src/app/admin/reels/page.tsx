@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { createDataClient } from "@/lib/supabase/client";
 import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
@@ -73,15 +72,16 @@ export default function AdminReelsPage() {
       const data = await res.json();
       setItems(data.items || []);
       setError(null);
-    } catch (err: any) {
-      if (!isSilent) setError(err.message || "Erro ao conectar com o servidor.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao conectar com o servidor.");
     } finally {
       if (!isSilent) setIsLoading(false);
     }
   }, [supabase]);
 
   useEffect(() => {
-    loadReels();
+    const timer = window.setTimeout(() => void loadReels(), 0);
+    return () => window.clearTimeout(timer);
   }, [loadReels]);
 
   // Polling automático caso haja reels em geração
@@ -98,9 +98,10 @@ export default function AdminReelsPage() {
 
   const handleGenerate = async (slug: string) => {
     setTriggeringSlug(slug);
+    setError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
 
       const res = await fetch("/api/admin/reels", {
         method: "POST",
@@ -109,22 +110,27 @@ export default function AdminReelsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ slug }),
+        signal: AbortSignal.timeout(30_000),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Erro ao iniciar geração");
+      const result = await res.json().catch(() => null);
+      if (!res.ok || result?.queued !== true) {
+        throw new Error(result?.error || result?.message || "O servidor não confirmou o início da geração. Atualize a lista antes de tentar novamente.");
       }
 
-      showToast(`🎬 Renderização iniciada para "${slug}". O vídeo estará pronto em instantes!`);
+      showToast(result.message || "Geração solicitada. Acompanhe o andamento na lista.");
       // Atualiza estado local imediatamente para feedback instantâneo
       setItems((prev) =>
         prev.map((item) =>
           item.slug === slug ? { ...item, status: "generating", started_at: new Date().toISOString() } : item
         )
       );
-    } catch (err: any) {
-      showToast(`❌ Falha: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.name === "TimeoutError"
+        ? "O servidor demorou para confirmar a geração. Atualize a lista antes de tentar novamente."
+        : err instanceof Error ? err.message : "Não foi possível iniciar a geração.";
+      setError(message);
+      showToast(message);
     } finally {
       setTriggeringSlug(null);
     }
@@ -312,7 +318,7 @@ export default function AdminReelsPage() {
 
       {/* ESTADO DE ERRO */}
       {error && (
-        <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-sm text-red-300">
+        <div role="alert" className="mb-6 rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-sm text-red-300">
           <p className="font-bold">Aviso:</p>
           <p>{error}</p>
         </div>

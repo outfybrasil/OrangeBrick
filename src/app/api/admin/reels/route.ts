@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import type { Post } from "@/lib/types/database";
+import { getRemoteReels, usesRemoteReels } from "@/lib/video/reel-remote";
 import {
   getManifest,
   checkReelFile,
@@ -67,24 +68,47 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Erro ao buscar matérias" }, { status: 500 });
   }
 
-  const manifest = getManifest();
+  const remote = usesRemoteReels();
+  let remoteReels: Awaited<ReturnType<typeof getRemoteReels>> = new Map();
+  if (remote) {
+    try {
+      remoteReels = await getRemoteReels(posts.map((post) => post.id));
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Erro ao consultar Reels." }, { status: 503 });
+    }
+  }
+  const manifest = remote ? {} : getManifest();
 
   const items: AdminReelItem[] = posts.map((post: Partial<Post>) => {
     const slug = post.slug || "";
-    const fileInfo = checkReelFile(slug);
-    const manifestItem = manifest[slug] as ReelManifestItem | undefined;
+    const job = remoteReels.get(post.id || "");
+    const fileInfo = remote ? { exists: false, url: undefined, size: undefined } : checkReelFile(slug);
+    const manifestItem: ReelManifestItem | undefined = job ? {
+      slug,
+      status: job.status === "queued" || job.status === "running" ? "generating" : job.status === "skipped" ? "failed" : job.status,
+      video_url: job.video_url,
+      duration: job.duration ?? undefined,
+      file_size: job.file_size ?? undefined,
+      started_at: job.started_at || job.created_at,
+      finished_at: job.finished_at ?? undefined,
+      error: job.error ?? undefined,
+      script: job.script as unknown as ReelManifestItem["script"],
+    } : manifest[slug];
 
     let status: AdminReelItem["status"] = "pending";
-    let videoUrl = fileInfo.url || manifestItem?.video_url;
-    let fileSize = fileInfo.size || manifestItem?.file_size;
-    let duration = manifestItem?.duration;
+    const videoUrl = fileInfo.url || manifestItem?.video_url;
+    const fileSize = fileInfo.size || manifestItem?.file_size;
+    const duration = manifestItem?.duration;
     let errorMsg = manifestItem?.error;
 
-    if (fileInfo.exists) {
+    if (job?.status === "ready" && !videoUrl) {
+      status = "failed";
+      errorMsg = "O vídeo está indisponível no armazenamento. Gere novamente.";
+    } else if (fileInfo.exists || (job?.status === "ready" && videoUrl)) {
       status = "ready";
     } else if (manifestItem?.status === "generating") {
       const started = manifestItem.started_at ? new Date(manifestItem.started_at).getTime() : 0;
-      if (Date.now() - started < 12 * 60 * 1000) {
+      if (Date.now() - started < (remote ? 60 : 12) * 60 * 1000) {
         status = "generating";
       } else {
         status = "failed";
@@ -155,11 +179,15 @@ export async function POST(request: Request) {
   }
 
   const { slug } = body;
-  if (!slug || typeof slug !== "string") {
+  if (typeof slug !== "string" || slug.length > 200 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return NextResponse.json({ error: "Slug da matéria é obrigatório" }, { status: 400 });
   }
 
-  const result = triggerReelGeneration(slug);
-
-  return NextResponse.json(result);
+  try {
+    const result = await triggerReelGeneration(slug);
+    return NextResponse.json(result, { status: result.queued ? 202 : 409 });
+  } catch (error) {
+    console.error("[Reels] Falha ao iniciar geração:", error);
+    return NextResponse.json({ queued: false, error: error instanceof Error ? error.message : "Não foi possível iniciar a geração do Reel. Tente novamente." }, { status: 503 });
+  }
 }

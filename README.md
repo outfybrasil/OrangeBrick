@@ -58,6 +58,14 @@ npm run admin:create
 
 ## Produção
 
+### Reels no site publicado
+
+Na Vercel, a API registra a solicitação em `reel_jobs` e aciona `.github/workflows/reel-generator.yml`. O executor instala Python, FFmpeg e Chromium, renderiza o vídeo e envia o MP4 ao bucket privado `editorial-reels`. O painel consulta o banco e recebe links temporários de uma hora para reprodução e download. A geração exige uma matéria publicada e não arquivada.
+
+Configure `REELS_GITHUB_TOKEN` como segredo de Production na Vercel, com permissão de escrita em Actions no repositório. Os padrões são `REELS_GITHUB_REPOSITORY=outfybrasil/OrangeBrick` e `REELS_GITHUB_REF=master`. No GitHub Actions, configure os segredos `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e `GEMINI_API_KEY`. Aplique a migração `20261014190000_reel_worker_integration.sql` antes de implantar o código.
+
+O workflow também pode ser iniciado manualmente para retomar a fila. Falhas são registradas por matéria; pedidos expirados podem ser refeitos pelo painel. Não há envio automático de vídeo ao Telegram nesse executor. Em desenvolvimento, a geração continua local; use `REELS_REMOTE=true` para testar a integração remota.
+
 Configure `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` para clientes públicos e `SUPABASE_SECRET_KEY` somente no servidor, além do domínio definitivo em `NEXT_PUBLIC_SITE_URL`. As chaves `NEXT_PUBLIC_SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` continuam como compatibilidade durante a migração; nunca exponha uma chave secreta no navegador ou em variável com prefixo `NEXT_PUBLIC_`.
 
 Também configure `CRON_SECRET` com um valor aleatório forte para autorizar a limpeza mensal do Radar.
