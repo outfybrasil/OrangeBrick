@@ -7,6 +7,9 @@ const PROTECTED_PREFIXES = ["/admin"];
 const EMAIL_AUTH_PATHS = new Set(["/cadastro", "/entrar", "/recuperar-senha", "/nova-senha"]);
 
 function contentSecurityPolicy(nonce: string) {
+  const mediaOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : "";
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
@@ -15,7 +18,7 @@ function contentSecurityPolicy(nonce: string) {
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://plausible.io https://*.plausible.io",
     "frame-src 'self' https://www.youtube-nocookie.com",
-    "media-src 'self'",
+    `media-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
     "object-src 'none'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
