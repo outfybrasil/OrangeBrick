@@ -16,6 +16,7 @@ import { useComments } from "@/lib/hooks/useComments";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { Footer } from "@/components/ui/Footer";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { BookmarkIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
 import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
 import { createDataClient } from "@/lib/supabase/client";
@@ -197,7 +198,6 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
   const router = useRouter();
   const supabase = useMemo(() => createDataClient(), []);
   const { user } = useAuth();
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const { toggleBookmark, isBookmarked } = useBookmarks();
   const bookmarked = isBookmarked(post.id);
   const { counts, userReaction, isPending, error: reactionError, toggleReaction } = useReactions({
@@ -356,10 +356,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
             onClick={() => router.push("/")}
           >
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" style={{ maxHeight: "28px", maxWidth: "38px", width: "auto", height: "auto" }} className="h-6 sm:h-8 w-auto max-h-8 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0" />
-            <span className="hidden sm:inline text-base font-heading font-black text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors whitespace-nowrap">
-              Orange<span className="text-brand-orange">_</span>Brick
-            </span>
+            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-6 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
+            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
           </button>
         </div>
       </header>

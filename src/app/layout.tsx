@@ -14,6 +14,7 @@ import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
 import { AccessibilityMenu } from "@/components/ui/AccessibilityMenu";
 import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 import { cn } from "@/lib/utils";
+import Script from "next/script";
 import "./globals.css";
 
 const headingFont = Outfit({
@@ -102,8 +103,16 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={cn("h-full", "antialiased", headingFont.variable, subtitleFont.variable, bodyFont.variable, monoFont.variable, geist.variable)}
+      suppressHydrationWarning
     >
       <body className="min-h-dvh flex flex-col bg-background-void text-white font-body">
+        <Script
+          id="orange-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"||saved==="dark"?saved:window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}})();`,
+          }}
+        />
         <a
           id="link-pular-conteudo"
           href="#conteudo-principal"

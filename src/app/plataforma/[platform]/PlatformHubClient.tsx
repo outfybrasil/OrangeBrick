@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { PlatformConfig } from "@/lib/types/platform";
 import { PlatformBar } from "@/components/feed/PlatformBar";
 import { NewsFeed } from "@/components/feed/NewsFeed";
@@ -14,7 +15,6 @@ interface PlatformHubClientProps {
 }
 
 export function PlatformHubClient({ config }: PlatformHubClientProps) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -30,15 +30,8 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/10 py-3 sm:py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
           <Link href="/" aria-label="Ir para a página inicial" className="group flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-xl sm:gap-3">
-            <img
-              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-              alt="Orange Brick Logo Icon"
-              style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
-              className="h-8 sm:h-9 w-auto object-contain transform group-hover:scale-[1.05] transition-transform duration-300 shrink-0"
-            />
-            <span className="hidden sm:inline text-xl sm:text-2xl font-heading font-extrabold text-white uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 shrink-0 whitespace-nowrap">
-              Orange<span className="text-brand-orange">_</span>Brick
-            </span>
+            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-300 group-hover:scale-[1.05]" /></span>
+            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-300 group-hover:scale-[1.05] sm:h-6" /></span>
           </Link>
 
           {/* BARRA DE PESQUISA EXPANDIDA NO CENTRO */}

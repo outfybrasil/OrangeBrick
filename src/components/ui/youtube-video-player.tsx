@@ -55,7 +55,7 @@ export function YouTubePlayer({ videoId, title, className, thumbnailClassName }:
           <button
             type="button"
             onClick={() => setPlaying(true)}
-            className="absolute inset-0 h-full w-full focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
+            className="theme-video-overlay absolute inset-0 h-full w-full focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-orange"
             aria-label={`Reproduzir ${title}`}
           >
             <img

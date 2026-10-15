@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SearchBox } from "@/components/ui/SearchBox";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { UserNav } from "@/components/auth/UserNav";
 
 const NAV_LINKS = [
@@ -19,7 +20,6 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderProps) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const pathname = usePathname();
 
   const isLinkActive = (href: string) => {
@@ -35,15 +35,8 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
           className="group flex min-h-11 shrink-0 items-center gap-2.5"
           aria-label="Ir para a página inicial do Orange Brick"
         >
-          <img
-            src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-            alt=""
-            style={{ maxHeight: "32px", maxWidth: "42px", width: "auto", height: "auto" }}
-            className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-          />
-          <span className="hidden whitespace-nowrap text-base font-heading font-extrabold uppercase tracking-[0.1em] text-white transition-colors group-hover:text-brand-orange sm:inline sm:text-lg sm:tracking-widest">
-            Orange<span className="text-brand-orange">_</span>Brick
-          </span>
+          <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
+          <span className="hidden sm:block"><BrandLogo alt="" className="h-5 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
         </Link>
 
         {variant === "full" && (

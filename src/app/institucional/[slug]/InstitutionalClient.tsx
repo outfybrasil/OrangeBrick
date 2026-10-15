@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Footer } from "@/components/ui/Footer";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { invokeFunction } from "@/lib/supabase/functions";
 
 type InstitutionalSlug = "termos" | "privacidade" | "anuncie";
@@ -120,15 +121,14 @@ function LawSection({ type }: { type: Exclude<InstitutionalSlug, "anuncie"> }) {
 }
 
 export function InstitutionalClient({ slug }: { slug: InstitutionalSlug }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   return (
     <div className="min-h-dvh bg-background-void text-white font-mono">
       <header className="border-b border-white/10 bg-card-slate/20 py-4">
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="text-xs text-gray-400 hover:text-white">← Voltar para a home</Link>
           <Link href="/" className="flex items-center gap-3">
-            <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick" className="h-8 sm:h-9 w-auto max-h-9 object-contain shrink-0" />
-            <span className="font-black uppercase">Orange<span className="text-brand-orange">_</span>Brick</span>
+            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto" /></span>
+            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto" /></span>
           </Link>
         </div>
       </header>

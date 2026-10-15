@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isAdminUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 function LockIcon() {
   return (
@@ -16,7 +17,6 @@ function LockIcon() {
 }
 
 export default function AdminLogin() {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -66,15 +66,7 @@ export default function AdminLogin() {
       <section className="relative hidden overflow-hidden border-r border-white/[0.07] bg-[#15161d] p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
         
         <Link href="/" className="relative flex w-fit items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
-          <img loading="lazy" decoding="async"
-            src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-            alt=""
-            style={{ maxHeight: "40px", maxWidth: "56px", width: "auto", height: "auto" }}
-            className="h-10 w-auto max-w-14 object-contain"
-          />
-          <span className="font-heading text-xl font-black uppercase">
-            Orange<span className="text-brand-orange">_</span>Brick
-          </span>
+          <BrandLogo alt="Orange Brick" className="h-7 w-auto" />
         </Link>
 
         <div className="relative max-w-lg">
@@ -97,15 +89,7 @@ export default function AdminLogin() {
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center justify-between lg:hidden">
             <Link href="/" className="flex min-h-11 items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
-              <img loading="lazy" decoding="async"
-                src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-                alt="Orange Brick"
-                style={{ maxHeight: "36px", maxWidth: "48px", width: "auto", height: "auto" }}
-                className="h-9 w-auto max-w-12 object-contain"
-              />
-              <span className="font-heading text-base font-black uppercase">
-                Orange<span className="text-brand-orange">_</span>Brick
-              </span>
+              <BrandLogo alt="Orange Brick" className="h-5 w-auto" />
             </Link>
             <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-bold text-gray-400">Admin</span>
           </div>

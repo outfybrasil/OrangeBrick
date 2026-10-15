@@ -90,7 +90,7 @@ export function resolveAvatarUrl(avatarUrl?: string | null, authorName?: string 
   const raw = (avatarUrl || "").trim();
 
   if (isOfficial) {
-    return "/logos/Logo Tijolo Quebrado.PNG";
+    return "/logos/orange-brick-icon.png";
   }
 
   if (raw.startsWith("/") && !raw.startsWith("//") && !raw.includes("\\")) {

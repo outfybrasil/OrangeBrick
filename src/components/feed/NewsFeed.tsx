@@ -201,7 +201,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
           </div>
 
-          <div className="relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0 lg:bg-gradient-to-t lg:from-black/95 lg:via-black/85 lg:to-transparent lg:pt-12">
+          <div className="theme-news-image-overlay relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0 lg:bg-gradient-to-t lg:from-black/95 lg:via-black/85 lg:to-transparent lg:pt-12">
             <div className="flex flex-wrap items-center gap-3">
               <Tag category={heroPost.category} />
               <Timer date={heroPost.published_at ?? ""} />

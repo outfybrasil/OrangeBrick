@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 type AdminSection = "overview" | "publications" | "metrics" | "editor" | "reels" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
 
@@ -107,7 +108,6 @@ export function AdminShell({
   status,
   wide = false,
 }: AdminShellProps) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const drawerRef = useModalDialog<HTMLElement>(mobileMenuOpen, () => setMobileMenuOpen(false));
@@ -139,19 +139,9 @@ export function AdminShell({
       {/* SIDEBAR DESKTOP */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] xl:flex">
         {/* LOGO */}
-        <div className="flex min-h-16 items-center gap-3 border-b border-white/10 px-5">
-          <img
-            src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-            alt=""
-            style={{ maxHeight: "28px", maxWidth: "36px", width: "auto", height: "auto" }}
-            className="h-7 w-auto max-w-10 object-contain"
-          />
-          <div>
-            <p className="font-heading text-sm font-black uppercase tracking-wider text-white">
-              ORANGE<span className="text-brand-orange">_</span>BRICK
-            </p>
-            <p className="text-xs text-gray-500 font-semibold">Redação</p>
-          </div>
+        <div className="flex min-h-16 flex-col items-start justify-center gap-1 border-b border-white/10 px-5">
+          <BrandLogo alt="Orange Brick" className="h-5 w-auto" />
+          <p className="text-xs font-semibold text-gray-500">Redação</p>
         </div>
 
         {/* NAV ITEMS */}
@@ -270,12 +260,7 @@ export function AdminShell({
                 </svg>
               </button>
               <Link href="/admin" className="flex items-center gap-2">
-                <img
-                  src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-                  alt=""
-                  style={{ maxHeight: "22px", maxWidth: "28px", width: "auto", height: "auto" }}
-                  className="h-6 w-auto object-contain"
-                />
+                <BrandLogo alt="" variant="mark" className="h-5 w-auto" />
                 <span className="font-heading text-xs font-black uppercase tracking-wider text-white">
                   ADMIN<span className="text-brand-orange">_</span>OB
                 </span>
@@ -418,17 +403,9 @@ export function AdminShell({
             {/* DRAWER HEADER */}
             <div className="flex min-h-14 items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2.5">
-                <img
-                  src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-                  alt=""
-                  style={{ maxHeight: "26px", maxWidth: "34px", width: "auto", height: "auto" }}
-                  className="h-6 w-auto object-contain"
-                />
-                <div>
-                  <p className="font-heading text-xs font-black uppercase tracking-wider text-white">
-                    ORANGE<span className="text-brand-orange">_</span>BRICK
-                  </p>
-                  <p className="text-xs text-gray-500 font-semibold">Painel Administrativo</p>
+                <div className="flex flex-col gap-1">
+                  <BrandLogo alt="Orange Brick" className="h-4 w-auto" />
+                  <p className="text-xs font-semibold text-gray-500">Painel Administrativo</p>
                 </div>
               </div>
               <button

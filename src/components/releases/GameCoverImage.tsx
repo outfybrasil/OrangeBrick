@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 interface GameCoverImageProps {
   src?: string | null;
@@ -11,7 +12,6 @@ interface GameCoverImageProps {
 }
 
 export function GameCoverImage({ src, alt, className = "", fit = "cover", priority = false }: GameCoverImageProps) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
@@ -21,11 +21,7 @@ export function GameCoverImage({ src, alt, className = "", fit = "cover", priori
         aria-label={alt}
       >
         <div aria-hidden="true" className="absolute inset-0 opacity-15 bg-[radial-gradient(#FF5E00_1px,transparent_1px)] [background-size:16px_16px]" />
-        <img
-          src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-          alt=""
-          className="h-10 w-auto opacity-70 mb-2 object-contain"
-        />
+        <BrandLogo alt="" variant="mark" className="mb-2 h-10 w-auto opacity-70" />
         <span className="font-heading text-xs font-black uppercase tracking-wider text-brand-orange">
           Orange Brick
         </span>

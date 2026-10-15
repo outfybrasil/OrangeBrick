@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Footer } from "@/components/ui/Footer";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { createDataClient } from "@/lib/supabase/client";
@@ -105,7 +106,6 @@ interface ReleasesPageClientProps {
 export function ReleasesPageClient({ initialReleases, initialHypeCounts }: ReleasesPageClientProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>(initialReleases ?? []);
   const [isLoadingReleases, setIsLoadingReleases] = useState(!initialReleases);
@@ -398,15 +398,8 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
             ← Voltar para a Home
           </button>
           <Link href="/" className="group flex items-center gap-2">
-            <img
-              src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`}
-              alt="Orange Brick"
-              style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }}
-              className="h-7 sm:h-8 w-auto max-h-8 max-w-11 object-contain transform group-hover:scale-105 transition-transform duration-200 shrink-0"
-            />
-            <span className="font-heading text-base sm:text-lg font-black tracking-wider text-white uppercase group-hover:text-brand-orange transition-colors whitespace-nowrap">
-              Orange<span className="text-brand-orange">_</span>Brick
-            </span>
+            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
+            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-200 group-hover:scale-105 sm:h-6" /></span>
           </Link>
         </div>
       </header>

@@ -21,6 +21,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const PLATFORM_TABS = [
   { id: "TODOS", label: "Todos" },
@@ -32,7 +33,6 @@ const PLATFORM_TABS = [
 ];
 
 function BrickboardContent() {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, profile } = useAuth();
@@ -287,8 +287,8 @@ function BrickboardContent() {
               </Link>
             )}
             <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5">
-              <img src={`${basePath}/logos/Logo Tijolo Quebrado.PNG`} alt="Orange Brick Logo Icon" style={{ maxHeight: "32px", maxWidth: "44px", width: "auto", height: "auto" }} className="h-8 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-105" />
-              <span className="hidden whitespace-nowrap font-heading text-lg font-extrabold uppercase tracking-wider text-white transition-colors group-hover:text-brand-orange sm:inline">Orange<span className="text-brand-orange">_</span>Brick</span>
+              <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
+              <span className="hidden sm:block"><BrandLogo alt="" className="h-5 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
             </Link>
           </div>
 
