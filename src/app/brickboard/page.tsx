@@ -65,6 +65,8 @@ function BrickboardContent() {
   const [inlineMediaUrl, setInlineMediaUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const openFilters = () => { setFiltersOpen(true); window.requestAnimationFrame(() => document.getElementById("brickboard-search")?.focus()); };
   const [selectedPlatform, setSelectedPlatform] = useState<string>("TODOS");
   const [preAttachedArticle, setPreAttachedArticle] = useState<AttachedArticle | null>(() => {
     if (attachSlug && attachTitle) {
@@ -290,22 +292,7 @@ function BrickboardContent() {
             </Link>
           </div>
 
-          <div className="flex-1 max-w-md hidden md:block">
-            <label htmlFor="brickboard-search" className="sr-only">Buscar conversas</label>
-            <div className="relative">
-              <svg aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                id="brickboard-search"
-                type="search"
-                value={searchQuery}
-                onChange={(event) => { setSearchQuery(event.target.value); setVisiblePostCount(8); }}
-                placeholder="Buscar conversas e leitores..."
-                className="min-h-9 w-full border border-white/10 bg-white/[0.04] px-9 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange/40 focus:bg-white/[0.06]"
-              />
-            </div>
-          </div>
+          <button type="button" onClick={openFilters} className="hidden min-h-11 items-center rounded-lg border border-white/10 px-4 text-xs font-semibold text-gray-300 hover:text-white md:inline-flex">Buscar e filtrar</button>
 
           <div className="flex shrink-0 items-center gap-2">
             {user && userProgress && (
@@ -414,7 +401,7 @@ function BrickboardContent() {
         {/* TABS + PLATFORM FILTERS */}
         <div className="mb-5">
           <div className="flex items-center justify-between border-b border-white/10">
-            <nav className="flex items-center" aria-label="Seções do Brickboard">
+            <nav className="flex min-w-0 items-center overflow-x-auto" aria-label="Seções do Brickboard">
               {([
                 { id: "latest", label: "Recentes" },
                 { id: "following", label: "Seguindo" },
@@ -433,31 +420,24 @@ function BrickboardContent() {
                 </button>
               ))}
             </nav>
-            <span className="hidden pb-1 text-xs text-gray-500 sm:block">
-              {displayPosts.length} {displayPosts.length === 1 ? "conversa encontrada" : "conversas encontradas"}
-            </span>
+
           </div>
 
-          <div className="mt-1 flex items-center gap-0.5 overflow-x-auto border-b border-white/10 pb-2 scrollbar-none">
-            {PLATFORM_TABS.map((platform) => (
-              <button
-                key={platform.id}
-                onClick={() => { setSelectedPlatform(platform.id); setVisiblePostCount(8); }}
-                aria-pressed={selectedPlatform === platform.id}
-                className={`min-h-9 shrink-0 px-3 text-xs font-medium transition-colors whitespace-nowrap ${
-                  selectedPlatform === platform.id
-                    ? "bg-white/10 text-white"
-                    : "text-gray-500 hover:text-gray-300"
-                }`}
-              >
-                {platform.label} <span className="ml-1 tabular-nums text-gray-500">({platformCounts[platform.id] || 0})</span>
-              </button>
-            ))}
+          <div className="mt-3 flex min-w-0 items-center gap-3">
+            <button id="brickboard-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="brickboard-filters" onClick={() => setFiltersOpen(value => !value)} className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-3 text-xs font-bold ${selectedPlatform !== "TODOS" || searchQuery.trim() ? "border-brand-orange/40 text-brand-orange" : "border-white/15 text-gray-300"}`}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
+              Filtros{(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0) > 0 ? ` (${(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0)})` : ""}
+            </button>
+            <div className="min-w-0 flex-1"><p className="truncate text-xs text-gray-400">{selectedPlatform === "TODOS" ? "Todas as plataformas" : PLATFORM_TABS.find(platform => platform.id === selectedPlatform)?.label || selectedPlatform}{searchQuery.trim() ? ` · Busca: ${searchQuery.trim()}` : ""}</p><p role="status" className="mt-1 text-xs text-gray-500">{displayPosts.length} {displayPosts.length === 1 ? "conversa encontrada" : "conversas encontradas"}</p></div>
+          </div>
+          <div id="brickboard-filters" hidden={!filtersOpen} className="mt-3 rounded-xl border border-white/10 bg-[#111217] p-4">
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(10rem,15rem)]">
+              <div className="min-w-0"><label htmlFor="brickboard-search" className="mb-2 block text-xs font-semibold text-gray-300">Buscar conversas e leitores</label><input id="brickboard-search" type="search" value={searchQuery} maxLength={120} onChange={event => { setSearchQuery(event.target.value); setVisiblePostCount(8); }} placeholder="Digite um assunto ou nome" className="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange" /></div>
+              <div className="min-w-0"><label htmlFor="brickboard-platform" className="mb-2 block text-xs font-semibold text-gray-300">Plataforma</label><select id="brickboard-platform" value={selectedPlatform} onChange={event => { setSelectedPlatform(event.target.value); setVisiblePostCount(8); }} className="min-h-11 w-full rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange">{PLATFORM_TABS.map(platform => <option key={platform.id} value={platform.id}>{platform.label} ({platformCounts[platform.id] || 0})</option>)}</select></div>
+            </div>
+            <div className="mt-3 flex flex-wrap justify-end gap-2">{(selectedPlatform !== "TODOS" || searchQuery.trim()) && <button type="button" onClick={() => { setSelectedPlatform("TODOS"); setSearchQuery(""); setVisiblePostCount(8); }} className="min-h-11 rounded-lg px-3 text-xs font-semibold text-gray-400 hover:text-white">Limpar busca e plataforma</button>}<button type="button" onClick={() => { setFiltersOpen(false); document.getElementById("brickboard-filter-toggle")?.focus(); }} className="min-h-11 rounded-lg border border-white/15 px-3 text-xs font-semibold text-white">Ver conversas</button></div>
           </div>
 
-          <p className="mt-2 text-right text-xs text-gray-500 sm:hidden">
-            {displayPosts.length} {displayPosts.length === 1 ? "conversa encontrada" : "conversas encontradas"}
-          </p>
         </div>
 
         {articleSlug && (
@@ -507,7 +487,7 @@ function BrickboardContent() {
               <button
                 type="button"
                 onClick={() => {
-                  document.getElementById("brickboard-search")?.focus();
+                  openFilters();
                 }}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-medium text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-white text-left"
               >

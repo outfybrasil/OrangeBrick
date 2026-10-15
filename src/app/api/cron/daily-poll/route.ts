@@ -5,6 +5,7 @@ import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 90;
 
 export async function GET(request: Request) {
   if (!isAuthorizedCronRequest(request)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
