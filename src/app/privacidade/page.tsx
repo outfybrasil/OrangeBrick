@@ -14,7 +14,7 @@ export default function PrivacidadePage() {
         <header className="border-b border-white/10 pb-8">
           <p className="text-sm font-bold text-brand-orange">Privacidade no Orange Brick</p>
           <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">Política de Privacidade</h1>
-          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 25 de setembro de 2026</p>
+          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 15 de outubro de 2026</p>
         </header>
 
         <PrivacyControls />
@@ -39,7 +39,7 @@ export default function PrivacidadePage() {
             <li><strong className="text-white">Contato:</strong> nome, e-mail, assunto e mensagem enviados pelo formulário.</li>
             <li><strong className="text-white">Newsletter:</strong> endereço de e-mail informado para receber comunicações editoriais.</li>
             <li><strong className="text-white">Segurança:</strong> registros técnicos, agente do navegador e hash de IP usado para limitar abuso. O hash reduz a exposição do IP, mas continua sendo tratado como dado pessoal quando puder ser relacionado a uma pessoa.</li>
-            <li><strong className="text-white">Métricas opcionais:</strong> com sua permissão, um identificador aleatório do dispositivo reconhece reações e leituras. Ele não contém nome ou e-mail.</li>
+            <li><strong className="text-white">Métricas opcionais:</strong> com sua permissão, um identificador aleatório do dispositivo reconhece reações, leituras e acessos às páginas públicas. Os relatórios administrativos mostram totais, evolução diária e páginas mais visitadas. Não registramos termos de busca, nome ou e-mail nessas métricas, e não medimos páginas do ADM.</li>
             <li><strong className="text-white">Notificações push:</strong> endereço técnico da assinatura e chaves fornecidas pelo navegador quando você ativa o recurso.</li>
           </ul>
           <p className="mt-4">

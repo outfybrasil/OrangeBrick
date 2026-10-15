@@ -123,9 +123,9 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
 
   const displayPosts = useMemo(() => {
     if (isFiltering || !heroPost) return posts;
-    const heroId = heroPost.id;
-    return posts.filter((p) => p.id !== heroId);
-  }, [isFiltering, heroPost, posts]);
+    const highlightedIds = new Set([heroPost.id, ...sidePosts.map((post) => post.id)]);
+    return posts.filter((post) => !highlightedIds.has(post.id));
+  }, [isFiltering, heroPost, sidePosts, posts]);
 
   const topPosts = !isFiltering ? displayPosts.slice(0, 8) : displayPosts.slice(0, 6);
   const lowerPosts = !isFiltering ? [] : displayPosts.slice(6);

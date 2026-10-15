@@ -7,6 +7,7 @@ import { ToastProvider } from "@/lib/contexts/ToastContext";
 import { ToastContainer } from "@/components/ui/ToastContainer";
 import { GlobalSearchShortcut } from "@/components/ui/GlobalSearchShortcut";
 import { CookieConsent } from "@/components/ui/CookieConsent";
+import { AudienceTracker } from "@/components/ui/AudienceTracker";
 import { Analytics } from "@/components/ui/Analytics";
 import { getSiteUrl } from "@/lib/site-url";
 import { MobileBottomNav } from "@/components/ui/MobileBottomNav";
@@ -140,6 +141,7 @@ export default function RootLayout({
         <AccessibilityMenu />
         <CookieConsent />
         <Analytics />
+        <AudienceTracker />
       </body>
     </html>
   );
