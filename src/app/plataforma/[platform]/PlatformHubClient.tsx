@@ -30,8 +30,7 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/10 py-3 sm:py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-2 gap-y-2 px-3 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
           <Link href="/" aria-label="Ir para a página inicial" className="group flex min-h-11 min-w-11 shrink-0 items-center gap-2 rounded-xl sm:gap-3">
-            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-300 group-hover:scale-[1.05]" /></span>
-            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-300 group-hover:scale-[1.05] sm:h-6" /></span>
+            <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-300 group-hover:scale-[1.05] sm:h-6 sm:w-auto" />
           </Link>
 
           {/* BARRA DE PESQUISA EXPANDIDA NO CENTRO */}

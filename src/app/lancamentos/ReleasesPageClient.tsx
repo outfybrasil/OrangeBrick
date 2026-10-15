@@ -398,8 +398,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
             ← Voltar para a Home
           </button>
           <Link href="/" className="group flex items-center gap-2">
-            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
-            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-200 group-hover:scale-105 sm:h-6" /></span>
+            <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-200 group-hover:scale-105 sm:h-6 sm:w-auto" />
           </Link>
         </div>
       </header>

@@ -287,8 +287,7 @@ function BrickboardContent() {
               </Link>
             )}
             <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5">
-              <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
-              <span className="hidden sm:block"><BrandLogo alt="" className="h-5 w-auto transition-transform duration-300 group-hover:scale-105" /></span>
+              <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-300 group-hover:scale-105 sm:h-5 sm:w-auto" />
             </Link>
           </div>
 

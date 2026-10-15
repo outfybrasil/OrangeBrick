@@ -127,8 +127,7 @@ export function InstitutionalClient({ slug }: { slug: InstitutionalSlug }) {
         <div className="max-w-5xl mx-auto px-4 flex items-center justify-between">
           <Link href="/" className="text-xs text-gray-400 hover:text-white">← Voltar para a home</Link>
           <Link href="/" className="flex items-center gap-3">
-            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-7 w-auto" /></span>
-            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto" /></span>
+            <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] sm:h-5 sm:w-auto" />
           </Link>
         </div>
       </header>

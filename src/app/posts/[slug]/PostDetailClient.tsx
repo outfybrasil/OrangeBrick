@@ -356,8 +356,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
             onClick={() => router.push("/")}
           >
-            <span className="sm:hidden"><BrandLogo alt="" variant="mark" className="h-6 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
-            <span className="hidden sm:block"><BrandLogo alt="Orange Brick" className="h-5 w-auto transition-transform duration-200 group-hover:scale-105" /></span>
+            <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-200 group-hover:scale-105 sm:h-5 sm:w-auto" />
           </button>
         </div>
       </header>
