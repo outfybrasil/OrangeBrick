@@ -9,6 +9,8 @@ function imageRemotePatterns() {
     .filter((hostname) => /^[a-z0-9.-]+$/.test(hostname));
   const hostnames = [
     "static.wikia.nocookie.net",
+    "www.rockstargames.com",
+    "media-rockstargames-com.akamaized.net",
     "xboxwire.thesourcemediaassets.com",
     "tse1.mm.bing.net",
     "cdn.mos.cms.futurecdn.net",

@@ -13,6 +13,7 @@ import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats } from "@
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
+import { selectFeaturedNews } from "@/lib/news-query";
 import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
 
@@ -116,9 +117,9 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   };
 
   const isFiltering = hasRequestedFilters;
-  const heroPost = !isFiltering && posts.length >= 3 ? posts[0] : null;
+  const heroPost = !isFiltering && posts.length >= 3 ? selectFeaturedNews(posts) : null;
 
-  const sidePosts = useMemo(() => heroPost ? posts.slice(1, 3) : [], [heroPost, posts]);
+  const sidePosts = useMemo(() => heroPost ? posts.filter((post) => post.id !== heroPost.id).slice(0, 2) : [], [heroPost, posts]);
 
   const displayPosts = useMemo(() => {
     if (isFiltering || !heroPost) return posts;

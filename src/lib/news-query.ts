@@ -26,3 +26,11 @@ export function publishedPostCursorFilter(post: { id: string; published_at: stri
   if (!/^[0-9T:+.Z-]+$/.test(post.published_at) || !Number.isFinite(Date.parse(post.published_at))) throw new Error("Cursor inválido");
   return `published_at.lt.${post.published_at},and(published_at.eq.${post.published_at},id.lt.${post.id}),published_at.is.null`;
 }
+
+export function selectFeaturedNews<T extends { is_featured?: boolean | null; featured_priority?: number | null }>(posts: T[]): T | null {
+  let featured: T | null = null;
+  for (const post of posts) {
+    if (post.is_featured && (!featured || (post.featured_priority ?? 0) > (featured.featured_priority ?? 0))) featured = post;
+  }
+  return featured || posts[0] || null;
+}

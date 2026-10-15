@@ -351,7 +351,7 @@ export interface Database {
 }
 
 export const POST_LIST_COLUMNS =
-  "id, slug, title, summary, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at";
+  "id, slug, title, summary, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, is_featured, featured_priority";
 
 export const POST_DETAIL_PUBLIC_COLUMNS =
   "id, slug, title, summary, body, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, updated_at, topic_id, information_status, featured_quote, editorial_sources, correction_note, is_featured, featured_priority";
