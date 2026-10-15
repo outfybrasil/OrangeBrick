@@ -519,7 +519,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
 
         {relatedPosts.length > 0 && (
           <section className="mt-10">
-            <h2 className="font-heading text-lg font-black uppercase text-white mb-4">Matérias relacionadas</h2>
+            <h2 className="font-heading text-lg font-black uppercase text-white">Matérias relacionadas</h2>
+            <p className="mb-4 mt-2 text-sm text-gray-400">Continue acompanhando este assunto.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {relatedPosts.map((rp) => (
                 <a key={rp.id} href={`/posts/${rp.slug}`} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { SearchBox } from "@/components/ui/SearchBox";
 import { Footer } from "@/components/ui/Footer";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import { normalizeNewsSearch } from "@/lib/news-query";
-import { POST_LIST_COLUMNS, type CommunityPostRow, type Post, type Profile, type ReleaseRadarItem } from "@/lib/types/database";
+import { POST_LIST_COLUMNS, type CommunityPostRow, type Game, type Post, type Profile, type ReleaseRadarItem } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -54,18 +55,20 @@ export default async function SearchPage({
             .select("*")
             .ilike("content", pattern)
             .limit(16),
+          supabase.from("games").select("id,name,slug").eq("is_active", true).ilike("name", pattern).order("name").limit(12),
         ])
       : [];
   const posts = (results[0]?.data || []) as Post[];
   const releases = (results[1]?.data || []) as ReleaseRadarItem[];
   const profiles = (results[2]?.data || []) as Profile[];
   const bricks = (results[3]?.data || []) as CommunityPostRow[];
-  const total = posts.length + releases.length + profiles.length + bricks.length;
+  const games = (results[4]?.data || []) as Pick<Game, "id" | "name" | "slug">[];
+  const total = posts.length + releases.length + profiles.length + bricks.length + games.length;
 
   const tabs = [
     { id: "all", label: "Tudo", count: total },
     { id: "posts", label: "Notícias", count: posts.length },
-    { id: "releases", label: "Jogos", count: releases.length },
+    { id: "releases", label: "Jogos", count: releases.length + games.length },
     { id: "bricks", label: "Bricks", count: bricks.length },
     { id: "profiles", label: "Leitores", count: profiles.length },
   ];
@@ -81,27 +84,7 @@ export default async function SearchPage({
           Encontre tudo.
         </h1>
 
-        <form className="mt-6 flex max-w-3xl gap-2" method="GET" action="/busca">
-          <div className="relative min-w-0 flex-1">
-            <input
-              type="search"
-              inputMode="search"
-              name="q"
-              defaultValue={query}
-              minLength={2}
-              required
-              placeholder="Matéria, jogo, leitor ou conversa"
-              aria-label="Buscar matérias, jogos, leitores ou conversas"
-              className="min-h-12 w-full rounded-xl border border-white/15 bg-card-slate/40 px-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-brand-orange/60"
-            />
-          </div>
-          <button
-            type="submit"
-            className="min-h-12 shrink-0 rounded-xl bg-brand-orange px-6 text-xs font-black uppercase text-black transition-colors hover:bg-brand-orange/90 active:scale-95"
-          >
-            Buscar
-          </button>
-        </form>
+        <div className="mt-6 max-w-3xl"><SearchBox key={query} initialQuery={query} /></div>
 
         {query && (
           <div className="mt-6 space-y-4">
@@ -189,6 +172,12 @@ export default async function SearchPage({
                   </p>
                 </Link>
               ))}
+            </ResultSection>
+          )}
+
+          {(currentTab === "all" || currentTab === "releases") && (
+            <ResultSection title="Jogos no catálogo" error={Boolean(results[4]?.error)} retryHref={`/busca?q=${encodeURIComponent(query)}`}>
+              {games.map(game => <Link key={game.id} href={`/games/${game.slug}`} className="block border-t border-white/10 py-4 text-sm font-bold text-white transition-colors hover:text-brand-orange"><Highlight value={game.name} query={query} /></Link>)}
             </ResultSection>
           )}
 

@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { PostArticle } from "./PostDetailClient";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
-import { POST_DETAIL_PUBLIC_COLUMNS, type Post, type PostStats, type PostCategory, type ReactionType } from "@/lib/types/database";
+import { POST_DETAIL_PUBLIC_COLUMNS, type Post, type PostStats, type ReactionType } from "@/lib/types/database";
 import { getSiteUrl } from "@/lib/site-url";
+import { relatedArticles } from "@/lib/content-discovery";
 import { verifyPreviewToken } from "@/lib/preview-token";
 
 export const dynamic = "force-dynamic";
@@ -59,17 +60,16 @@ function getStats(postId: string): Promise<PostStats> {
   return getStatsCached(postId);
 }
 
-async function getRelatedPosts(postId: string, category: PostCategory): Promise<Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at">[]> {
-  const serviceClient = createServiceRoleClient();
-  const { data } = await serviceClient
-    .from("posts")
-    .select("id,slug,title,summary,image_url,category,published_at")
-    .eq("is_published", true)
-    .eq("category", category)
-    .neq("id", postId)
-    .order("published_at", { ascending: false })
-    .limit(4);
-  return (data || []) as Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at">[];
+async function getRelatedPosts(post: Post) {
+  const client = createPublicServerClient();
+  type RelatedPost = Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at" | "topic_id">;
+  const columns = "id,slug,title,summary,image_url,category,published_at,topic_id";
+  const recentQuery = client.from("posts").select(columns).eq("is_published", true).neq("id", post.id).order("published_at", { ascending: false }).limit(80).abortSignal(AbortSignal.timeout(5000)).returns<RelatedPost[]>();
+  const topicQuery = post.topic_id
+    ? client.from("posts").select(columns).eq("is_published", true).eq("topic_id", post.topic_id).neq("id", post.id).order("published_at", { ascending: false }).limit(20).abortSignal(AbortSignal.timeout(5000)).returns<RelatedPost[]>()
+    : Promise.resolve({ data: [] });
+  const [recent, topic] = await Promise.all([recentQuery, topicQuery]);
+  return relatedArticles(post, [...(topic.data || []), ...(recent.data || [])]);
 }
 
 export async function generateMetadata({ params, searchParams }: PostPageProps): Promise<Metadata> {
@@ -108,7 +108,7 @@ export default async function PostPage({ params, searchParams }: PostPageProps) 
   if (!post) notFound();
   const [stats, relatedPosts] = await Promise.all([
     getStats(post.id),
-    getRelatedPosts(post.id, post.category),
+    getRelatedPosts(post),
   ]);
   const siteUrl = getSiteUrl();
   const newsArticleJsonLd = {

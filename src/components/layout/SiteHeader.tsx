@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SearchBox } from "@/components/ui/SearchBox";
 import { UserNav } from "@/components/auth/UserNav";
 
 const NAV_LINKS = [
@@ -46,23 +47,7 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
         </Link>
 
         {variant === "full" && (
-          <form action="/busca" method="get" role="search" className="relative mx-4 hidden w-full max-w-xs flex-1 lg:block">
-            <label htmlFor="site-search" className="sr-only">Buscar notícias</label>
-            <input
-              id="site-search"
-              name="q"
-              type="search"
-              data-site-search-input
-              defaultValue={searchQuery}
-              key={`site-header-${searchQuery}`}
-              aria-label="Buscar notícias (atalho / ou Ctrl+K)"
-              placeholder="Buscar no Orange Brick   /"
-              className="h-9 w-full border border-white/10 bg-white/[0.04] pl-9 pr-3 text-xs text-white outline-none transition-all placeholder:text-gray-500 focus:border-brand-orange/40 focus:bg-white/[0.06]"
-            />
-            <svg className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </form>
+          <div className="relative mx-4 hidden w-full max-w-xs flex-1 lg:block"><SearchBox key={`site-header-${searchQuery}`} initialQuery={searchQuery} compact /></div>
         )}
 
         <nav className="ml-auto flex shrink-0 items-center gap-1" aria-label="Navegação principal">
