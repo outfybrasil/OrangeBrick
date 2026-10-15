@@ -169,12 +169,12 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
     const heroBadge = isHeroToday ? "Matéria do dia" : "Em destaque";
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8 lg:h-[clamp(26rem,32vw,34rem)] lg:grid-rows-[minmax(0,1fr)]">
         <Link
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
-          className="lg:col-span-2 group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:block lg:aspect-[16/10]"
+          className="lg:col-span-2 group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:block lg:min-h-0 lg:h-full"
         >
           <div className="relative aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
             {heroPost.image_url ? (
@@ -193,7 +193,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             )}
 
           </div>
-          <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/95 via-black/40 to-transparent lg:block" />
+          <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 via-black/25 to-transparent lg:block" />
 
           <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-black">{heroBadge}</span>
@@ -201,7 +201,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
           </div>
 
-          <div className="relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0">
+          <div className="relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0 lg:bg-gradient-to-t lg:from-black/95 lg:via-black/85 lg:to-transparent lg:pt-12">
             <div className="flex flex-wrap items-center gap-3">
               <Tag category={heroPost.category} />
               <Timer date={heroPost.published_at ?? ""} />
@@ -226,17 +226,17 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
           </div>
         </Link>
 
-        <div className="flex flex-col gap-3 lg:gap-4">
+        <div className="flex flex-col gap-3 lg:grid lg:min-h-0 lg:grid-rows-2 lg:gap-4">
           {sidePosts.map((post) => (
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
               data-home-event="article"
               data-home-target={post.slug}
-              className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
-                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:w-full lg:rounded-none lg:aspect-auto lg:h-32">
+                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:w-full lg:rounded-none lg:aspect-auto lg:h-[44%]">
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || post.title}
@@ -252,7 +252,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                   </span>
                 </div>
               )}
-              <div className={`relative z-20 flex min-w-0 flex-1 flex-col justify-between py-3 pr-3 lg:p-3.5 ${post.image_url ? "" : "pl-3"}`}>
+              <div className={`relative z-20 flex min-w-0 flex-1 flex-col justify-between py-3 pr-3 lg:min-h-0 lg:overflow-hidden lg:p-3 ${post.image_url ? "" : "pl-3"}`}>
                 <div>
                   <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
                     <span className={post.image_url ? "lg:hidden" : ""}><Tag category={post.category} /></span>
@@ -262,7 +262,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                     {post.title}
                   </h3>
                   {post.summary && (
-                    <p className="mt-1 hidden text-xs leading-relaxed text-gray-400 lg:line-clamp-2">
+                    <p className="mt-1 hidden text-xs leading-relaxed text-gray-400 lg:line-clamp-1">
                       {post.summary}
                     </p>
                   )}
