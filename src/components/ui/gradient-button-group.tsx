@@ -8,6 +8,7 @@ export interface GradientButtonGroupItem {
   iconActive: string;
   iconInactive: string;
   active: boolean;
+  featured?: boolean;
 }
 
 interface GradientButtonGroupProps {
@@ -32,26 +33,26 @@ export function GradientButtonGroup({ items, ariaLabel }: GradientButtonGroupPro
                 aria-current={item.active ? "page" : undefined}
                 className="group relative flex min-h-16 w-full flex-col items-center justify-start gap-1 px-0.5 pb-1 pt-2 text-center transition-colors select-none"
               >
-                {item.active && (
+                {item.active && !item.featured && (
                   <span
                     aria-hidden="true"
                     className="absolute -top-1.5 h-1 w-6 rounded-full bg-brand-orange shadow-[0_2px_8px_rgba(255,94,0,0.6)] animate-fade-in"
                   />
                 )}
 
-                <div className="relative flex h-6 w-6 items-center justify-center">
+                <div className={item.featured ? `relative -mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-orange shadow-[0_4px_18px_rgba(255,94,0,0.3)] transition-transform group-hover:scale-105 group-active:scale-95 ${item.active ? "ring-2 ring-brand-orange/50 ring-offset-2 ring-offset-[#090a0f]" : ""}` : "relative flex h-6 w-6 items-center justify-center"}>
                   <img
-                    src={item.active ? item.iconActive : item.iconInactive}
+                    src={item.active || item.featured ? item.iconActive : item.iconInactive}
                     alt=""
-                    className={`h-5 w-5 object-contain transition-transform duration-200 ${
-                      item.active ? "scale-105" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"
+                    className={`${item.featured ? "h-7 w-7 brightness-0" : "h-5 w-5"} object-contain transition-transform duration-200 ${
+                      item.featured ? "" : item.active ? "scale-105" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"
                     }`}
                   />
                 </div>
 
                 <span
                   className={`flex min-h-8 max-w-full items-center justify-center text-xs leading-4 transition-colors ${
-                    item.active
+                    item.active || item.featured
                       ? "font-bold text-brand-orange"
                       : "font-medium text-gray-400 group-hover:text-white"
                   }`}

@@ -35,18 +35,19 @@ export function MobileBottomNav() {
       iconActive: `${basePath}/icons/nav/news-active.png`,
     },
     {
+      href: "/brickboard",
+      label: "BrickBoard",
+      featured: true,
+      active: pathname.startsWith("/brickboard"),
+      iconInactive: `${basePath}/icons/nav/brickboard-inactive.png`,
+      iconActive: `${basePath}/icons/nav/brickboard-active.png`,
+    },
+    {
       href: "/lancamentos",
       label: "Lançamentos",
       active: pathname.startsWith("/lancamentos") || pathname.startsWith("/games/"),
       iconInactive: `${basePath}/icons/nav/releases-inactive.png`,
       iconActive: `${basePath}/icons/nav/releases-active.png`,
-    },
-    {
-      href: "/brickboard",
-      label: "BrickBoard",
-      active: pathname.startsWith("/brickboard"),
-      iconInactive: `${basePath}/icons/nav/brickboard-inactive.png`,
-      iconActive: `${basePath}/icons/nav/brickboard-active.png`,
     },
     {
       href: "/meu-brick",
