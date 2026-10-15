@@ -3,7 +3,7 @@
 import { safeLinkUrl } from "@/lib/safe-url";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
 import { CommentList } from "@/components/comments/CommentList";
@@ -524,7 +524,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               {relatedPosts.map((rp) => (
                 <a key={rp.id} href={`/posts/${rp.slug}`} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">
                   {rp.image_url ? (
-                    <img src={rp.image_url} alt="" className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
+                    <Image src={rp.image_url} alt={rp.title} width={96} height={64} className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
                   ) : (
                     <div className="h-16 w-24 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-xs text-gray-600">Sem capa</div>
                   )}

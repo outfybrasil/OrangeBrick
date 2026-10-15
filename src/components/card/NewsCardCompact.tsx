@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { useState } from "react";
 import { Timer } from "@/components/ui/Timer";
 import { useReactions } from "@/lib/hooks/useReactions";
@@ -52,7 +52,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
               />
               <Image
                 src={post.image_url}
-                alt={post.image_alt || ""}
+                alt={post.image_alt || post.title}
                 fill
                 sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
                 className="object-contain object-center transition-transform duration-500 sm:object-cover sm:group-hover:scale-105"

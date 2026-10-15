@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 
-type AdminSection = "overview" | "metrics" | "editor" | "reels" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
+type AdminSection = "overview" | "publications" | "metrics" | "editor" | "reels" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -165,6 +165,7 @@ export function AdminShell({
                 <OverviewIcon />
                 Visão geral
               </Link>
+              <Link href="/admin/publicacoes" className={navClass("publications")} aria-current={active === "publications" ? "page" : undefined}><ComposeIcon />Publicações</Link>
               <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
               <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}>
                 <ComposeIcon />
@@ -448,7 +449,8 @@ export function AdminShell({
                 </p>
                 <div className="space-y-1">
                   <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}><OverviewIcon />Visão geral</Link>
-                  <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
+                  <Link href="/admin/publicacoes" className={navClass("publications")} aria-current={active === "publications" ? "page" : undefined}><ComposeIcon />Publicações</Link>
+              <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
               <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
                   <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}><ImagesIcon />Biblioteca de imagens</Link>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
 import { NewsFeedEmpty } from "./NewsFeedEmpty";
@@ -226,43 +226,43 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
           </div>
         </Link>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 lg:gap-4">
           {sidePosts.map((post) => (
             <Link
               key={post.id}
               href={`/posts/${post.slug}`}
               data-home-event="article"
               data-home-target={post.slug}
-              className="group relative flex flex-1 flex-col overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
-                <div className="relative aspect-video w-full overflow-hidden flex-shrink-0 bg-[#08090C] lg:aspect-auto lg:h-32">
+                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:w-full lg:rounded-none lg:aspect-auto lg:h-32">
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || post.title}
                     fill
-                    sizes="(max-width: 1023px) 100vw, 33vw"
+                    sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw"
                     className="h-full w-full object-contain object-center transition-transform duration-500 lg:object-cover lg:group-hover:scale-[1.03]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                  <span className="absolute bottom-0 left-0 z-20 rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black">
+                  <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 to-transparent lg:block" />
+                  <span className="absolute bottom-0 left-0 z-20 hidden rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black lg:block">
                     {CATEGORY_CONFIG[post.category]?.label || post.category}
                     <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                     <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
                   </span>
                 </div>
               )}
-              <div className="p-3.5 flex flex-col justify-between flex-1 relative z-20">
+              <div className={`relative z-20 flex min-w-0 flex-1 flex-col justify-between py-3 pr-3 lg:p-3.5 ${post.image_url ? "" : "pl-3"}`}>
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    {!post.image_url && <Tag category={post.category} />}
-                    <Timer date={post.published_at ?? ""} />
+                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                    <span className={post.image_url ? "lg:hidden" : ""}><Tag category={post.category} /></span>
+                    <span className="hidden sm:block"><Timer date={post.published_at ?? ""} /></span>
                   </div>
-                  <h3 className="line-clamp-2 font-heading text-sm font-bold leading-snug text-white transition-colors duration-200 group-hover:text-brand-orange">
+                  <h3 className="line-clamp-3 font-heading text-sm font-bold leading-snug text-white transition-colors lg:line-clamp-2 duration-200 group-hover:text-brand-orange">
                     {post.title}
                   </h3>
                   {post.summary && (
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-400">
+                    <p className="mt-1 hidden text-xs leading-relaxed text-gray-400 lg:line-clamp-2">
                       {post.summary}
                     </p>
                   )}

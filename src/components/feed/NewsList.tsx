@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { Tag } from "@/components/ui/Tag";
 import type { Post } from "@/lib/types/database";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import type { Post, PostStats } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 

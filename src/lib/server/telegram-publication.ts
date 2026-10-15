@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { getSiteUrl } from "@/lib/site-url";
-import { sendTelegramMessageWithRetry } from "@/lib/telegram/bot";
+import { sendTelegramApi } from "@/lib/telegram/bot";
+import { confirmedTelegramDelivery } from "@/lib/publication-status";
 
 const NOTICE_PREFIX = "telegram:publication:";
 const STALE_DELIVERY_MS = 120_000;
@@ -48,8 +49,12 @@ export async function deliverPublicationNotice(postId: string): Promise<boolean>
   if (stateError || !state) throw stateError || new Error("Aviso de publicação não foi registrado.");
   if (state.value === "sent") return true;
   if (state.value === "cancelled") return false;
-  if (state.value !== "pending" && !(state.value.startsWith("sending:")
-    && Date.now() - Date.parse(state.updated_at) > STALE_DELIVERY_MS)) return false;
+  if (state.value.startsWith("sending:") && Date.now() - Date.parse(state.updated_at) > STALE_DELIVERY_MS) {
+    const { error: recoveryError } = await supabase.from("bot_state").update({ value: "unknown", updated_at: new Date().toISOString() }).eq("key", key).eq("value", state.value).eq("updated_at", state.updated_at);
+    if (recoveryError) throw recoveryError;
+    return false;
+  }
+  if (!["pending", "failed"].includes(state.value)) return false;
 
   const { data: post, error: postError } = await supabase.from("posts")
     .select("title,slug,is_published").eq("id", postId).maybeSingle();
@@ -67,20 +72,20 @@ export async function deliverPublicationNotice(postId: string): Promise<boolean>
   if (claimError) throw claimError;
   if (!claimed) return false;
 
-  const notified = await sendTelegramMessageWithRetry({
+  const result = !process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_ADMIN_CHAT_ID ? "failed" : await confirmedTelegramDelivery(() => sendTelegramApi("sendMessage", {
     chat_id: process.env.TELEGRAM_ADMIN_CHAT_ID,
     text: `✅ <b>Matéria publicada</b>\n\n${escapeHtml(post.title)}\n\n${escapeHtml(`${getSiteUrl()}/posts/${post.slug}`)}`,
     parse_mode: "HTML",
     disable_web_page_preview: true,
-  });
+  }));
   const { data: saved, error: saveError } = await supabase.from("bot_state")
-    .update({ value: notified ? "sent" : "pending", updated_at: new Date().toISOString() })
+    .update({ value: result, updated_at: new Date().toISOString() })
     .eq("key", key)
     .eq("value", claimValue)
     .select("key")
     .maybeSingle();
   if (saveError || !saved) throw saveError || new Error("Estado da notificação não foi atualizado.");
-  return notified;
+  return result === "sent";
 }
 
 export async function retryPendingPublicationNotices(maxDeliveries = 2): Promise<number> {
@@ -90,6 +95,7 @@ export async function retryPendingPublicationNotices(maxDeliveries = 2): Promise
     .like("key", `${NOTICE_PREFIX}%`)
     .neq("value", "sent")
     .neq("value", "cancelled")
+    .neq("value", "unknown")
     .order("updated_at", { ascending: true })
     .limit(20);
   if (error) throw error;

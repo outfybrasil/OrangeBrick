@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AdminAttention } from "@/components/admin/AdminAttention";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
 import { isAdminUser } from "@/lib/auth";
@@ -564,6 +565,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* CORPO DA PÁGINA (TABELA + SIDEBAR DE WIDGETS) */}
+      <AdminAttention />
       {(reviewNotice || reviewJobs.length > 0) && (
         <section aria-label="Revisão automática" className="mb-6 rounded-xl border border-white/10 bg-[#0e0f14] p-4">
           <h2 className="font-heading text-base font-bold text-white">Revisão automática</h2>

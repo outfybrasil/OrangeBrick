@@ -54,6 +54,13 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [refresh]);
 
+  useEffect(() => {
+    if (!publication || !["preparing", "uploading"].includes(publication.status)) return;
+    const controller = new AbortController();
+    const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refresh(controller.signal); }, 15_000);
+    return () => { controller.abort(); window.clearInterval(timer); };
+  }, [publication, refresh]);
+
   const blocked = publication && publication.status !== "failed";
   const busy = sending || publication?.status === "preparing" || publication?.status === "uploading";
   const fieldClass = "mt-1 w-full rounded-lg border border-white/20 bg-[#07080c] px-3 py-2 text-base text-white focus-visible:outline-2 focus-visible:outline-brand-orange sm:text-sm disabled:opacity-60";
@@ -126,7 +133,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
             <span>Revisei o vídeo e os textos. Confirmo o envio {visibility === "public" ? "público" : visibility === "unlisted" ? "não listado" : "privado"} para {channel?.title || "o canal conectado"}.</span>
           </label>
           <button type="submit" disabled={!ready || !reelJobId || !channel || loading || sending || !confirmed || !title.trim()} className="min-h-11 w-full rounded-lg bg-brand-orange px-4 py-3 font-bold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-not-allowed disabled:opacity-50">
-            {sending ? "Enviando vídeo…" : visibility === "public" ? "Publicar no YouTube" : "Enviar para o YouTube"}
+            {sending ? "Enviando vídeo…" : publication?.status === "failed" ? "Tentar novamente só no YouTube" : visibility === "public" ? "Publicar no YouTube" : "Enviar para o YouTube"}
           </button>
           {!ready && <p className="text-gray-300">Aguarde a geração do Reel terminar.</p>}
           {ready && !reelJobId && <p className="text-gray-300">Gere este Reel no site publicado para enviá-lo pelo painel.</p>}

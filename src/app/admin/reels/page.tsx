@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { YouTubePublisher } from "@/components/admin/YouTubePublisher";
 import { createDataClient } from "@/lib/supabase/client";
@@ -28,8 +29,10 @@ function formatDate(dateStr?: string | null) {
   }
 }
 
-export default function AdminReelsPage() {
+function AdminReelsContent() {
   const supabase = useMemo(() => createDataClient(), []);
+  const requestedPost = useSearchParams().get("postId");
+  const openedRequestedPost = useRef<string | null>(null);
   const [items, setItems] = useState<AdminReelItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +88,15 @@ export default function AdminReelsPage() {
     const timer = window.setTimeout(() => void loadReels(), 0);
     return () => window.clearTimeout(timer);
   }, [loadReels]);
+
+  useEffect(() => {
+    if (!requestedPost) { openedRequestedPost.current = null; return; }
+    if (openedRequestedPost.current === requestedPost) return;
+    const item = items.find(item => item.id === requestedPost);
+    if (!item) return;
+    openedRequestedPost.current = requestedPost;
+    queueMicrotask(() => { setSelectedReel(item); setActiveTab("youtube"); });
+  }, [items, requestedPost]);
 
   // Polling automático caso haja reels em geração
   useEffect(() => {
@@ -670,4 +682,8 @@ export default function AdminReelsPage() {
       )}
     </AdminShell>
   );
+}
+
+export default function AdminReelsPage() {
+  return <Suspense fallback={<p role="status" className="p-6 text-sm text-gray-400">Carregando Reels…</p>}><AdminReelsContent /></Suspense>;
 }
