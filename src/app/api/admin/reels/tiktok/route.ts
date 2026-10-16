@@ -19,14 +19,16 @@ async function authorized(request: Request) {
 
 async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallbackId?: string): Promise<{ accountId?: string; hasDirectPublish: boolean }> {
   try {
-    const res = await fetch(`https://backend.composio.dev/api/v3.1/connected_accounts?user_uuid=${encodeURIComponent(userId)}&toolkit_slug=tiktok`, {
+    const res = await fetch(`https://backend.composio.dev/api/v3.1/connected_accounts?user_uuid=${encodeURIComponent(userId)}`, {
       headers: { "x-api-key": apiKey },
       signal: AbortSignal.timeout(10_000),
       cache: "no-store",
     });
     if (!res.ok) return { accountId: fallbackId, hasDirectPublish: false };
     const json = await res.json();
-    const items = (json?.items || []) as Array<{ id: string; status: string; scope?: string; data?: { scope?: string }; params?: { scope?: string } }>;
+    const rawItems = (json?.items || []) as Array<{ id: string; status: string; toolkit?: { slug?: string }; appName?: string; scope?: string; data?: { scope?: string }; params?: { scope?: string } }>;
+    const items = rawItems.filter(i => (i.toolkit?.slug === "tiktok" || i.appName === "tiktok" || i.id === fallbackId));
+
     const activeWithPublish = items.find(i => {
       const scope = i.scope || i.data?.scope || i.params?.scope || "";
       return i.status === "ACTIVE" && scope.includes("video.publish");
