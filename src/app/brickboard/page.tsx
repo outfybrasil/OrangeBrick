@@ -239,12 +239,18 @@ function BrickboardContent() {
   }, [posts]);
 
   const suggestedProfiles = useMemo(() => {
-    const seen = new Set<string>();
-    if (user?.id) seen.add(user.id);
+    const seenUsers = new Set<string>();
+    const seenUsernames = new Set<string>();
+    if (user?.id) seenUsers.add(user.id);
+    if (profile?.username) seenUsernames.add(profile.username.toLowerCase());
     const result: { id: string; name: string; username: string; avatar: string | null }[] = [];
     for (const p of posts) {
-      if (!p.author_username || seen.has(p.author_username.toLowerCase())) continue;
-      seen.add(p.author_username.toLowerCase());
+      if (!p.author_username) continue;
+      const uId = p.user_id;
+      const uName = p.author_username.toLowerCase();
+      if ((uId && seenUsers.has(uId)) || seenUsernames.has(uName)) continue;
+      if (uId) seenUsers.add(uId);
+      seenUsernames.add(uName);
       result.push({
         id: p.user_id || p.id,
         name: p.author_name,
@@ -254,7 +260,7 @@ function BrickboardContent() {
       if (result.length >= 3) break;
     }
     return result;
-  }, [posts, user]);
+  }, [posts, user?.id, profile?.username]);
 
   const xpProgress = userProgress ? levelProgress(userProgress.progress.lifetime_xp, userProgress.progress.level) : 0;
   const avatarUrl = user
