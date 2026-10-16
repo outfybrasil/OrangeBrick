@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createDataClient } from "@/lib/supabase/client";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
 
 interface PulsePost {
   id: string;
@@ -80,7 +81,10 @@ export function CommunityPulse() {
     <section aria-labelledby="community-pulse-title" className="border-y border-white/10 py-6 my-6">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-0.5 text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">Comunidade Gamer</p>
+          <div className="mb-0.5 flex items-center gap-1.5">
+            <BrickboardLogo variant="mark" alt="" className="size-3.5 shrink-0" />
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">Comunidade Gamer</p>
+          </div>
           <h2 id="community-pulse-title" className="font-heading text-xl font-black text-white sm:text-2xl">
             A conversa continua no BrickBoard
           </h2>

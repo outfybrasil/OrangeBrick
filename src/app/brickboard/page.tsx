@@ -21,7 +21,7 @@ import { useToast } from "@/lib/contexts/ToastContext";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
-import { BrandLogo } from "@/components/ui/BrandLogo";
+import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
 
 const PLATFORM_TABS = [
   { id: "TODOS", label: "Todos" },
@@ -286,8 +286,8 @@ function BrickboardContent() {
                 </span>
               </Link>
             )}
-            <Link href="/" className="group flex min-h-11 shrink-0 items-center gap-2.5">
-              <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-300 group-hover:scale-105 sm:h-5 sm:w-auto" />
+            <Link href="/brickboard" className="group flex min-h-11 shrink-0 items-center gap-2.5" aria-label="BrickBoard — Página inicial da comunidade">
+              <BrickboardLogo alt="BrickBoard" className="h-5 w-auto transition-transform duration-300 group-hover:scale-105 sm:h-6" />
             </Link>
           </div>
 
@@ -364,7 +364,7 @@ function BrickboardContent() {
         <section className="mb-4 flex flex-col gap-3 border-b border-brand-orange/20 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-1 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
+              <BrickboardLogo variant="mark" alt="" className="size-4 shrink-0" />
               <span className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">BrickBoard · Rede Gamer</span>
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-black leading-tight tracking-tight text-white">

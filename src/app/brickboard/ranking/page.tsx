@@ -6,6 +6,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { divisionLabel, formatXp } from "@/lib/progression";
 import { resolveAvatarUrl } from "@/lib/avatar";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
 import type { LeaderboardEntry } from "@/lib/types/progression";
 
 type ActiveSeason = { name: string; slug: string; starts_at: string; ends_at: string };
@@ -138,7 +139,10 @@ function PageHeader({ title }: { title: string }) {
   return (
     <header className="border-b border-white/10">
       <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/brickboard" className="flex min-h-11 items-center text-xs font-bold text-gray-300 hover:text-white">← Brickboard</Link>
+        <Link href="/brickboard" className="flex min-h-11 items-center gap-2 text-xs font-bold text-gray-300 hover:text-white">
+          <BrickboardLogo variant="mark" alt="" className="size-4 shrink-0" />
+          <span>← Brickboard</span>
+        </Link>
         <span className="font-heading text-sm font-black">{title}</span>
       </div>
     </header>

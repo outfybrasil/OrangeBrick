@@ -1,12 +1,21 @@
+import { BrickboardLogo, type BrickboardLogoProps } from "./BrickboardLogo";
+
+export { BrickboardLogo, type BrickboardLogoProps };
+
 interface BrandLogoProps {
   alt: string;
   className?: string;
   loading?: "eager" | "lazy";
   variant?: "full" | "mark";
+  brand?: "orange-brick" | "brickboard";
 }
 
-export function BrandLogo({ alt, className = "", loading = "eager", variant = "full" }: BrandLogoProps) {
+export function BrandLogo({ alt, className = "", loading = "eager", variant = "full", brand = "orange-brick" }: BrandLogoProps) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+  if (brand === "brickboard") {
+    return <BrickboardLogo alt={alt} className={className} loading={loading} variant={variant} />;
+  }
 
   if (variant === "mark") {
     return (
