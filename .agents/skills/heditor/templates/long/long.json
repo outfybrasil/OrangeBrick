@@ -1,0 +1,23 @@
+{
+  "mode": "long",
+  "format": "16:9",
+  "kind": "aula",
+  "style": "creative",
+  "style_overrides": {},
+  "fps": 30,
+  "source": "/path/to/recording.mp4",
+  "range": [0, 0],
+  "exclude": [],
+  "layout_source": {"screen": null, "camera": null},
+  "camera_width": 1280,
+  "camera_focus": null,
+  "asr": {"model": "small", "chunk_s": 300, "lang": "pt", "prompt": ""},
+  "edl": {"max_pause": 0.55, "keep_pause": 0.30, "sentence_pause": 0.42, "fillers": true},
+  "captions": {"burn": true},
+  "censor": {},
+  "callout_stopwords": [],
+  "intro": {"duration": 3.0, "title": "", "subtitle": "", "kicker": ""},
+  "cta": {"kind": "youtube", "duration": 10},
+  "loudness": {"lufs": -14.0, "true_peak": -1.0},
+  "render": {"segment_max_s": 60, "workers": 2, "crf": 17}
+}

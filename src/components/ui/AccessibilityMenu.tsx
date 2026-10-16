@@ -21,9 +21,7 @@ function applyPreferences(preferences: Preferences) {
 }
 
 function applyThemePreference(preference: ThemePreference) {
-  const theme = preference === "system"
-    ? window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-    : preference;
+  const theme = preference === "light" ? "light" : "dark";
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
 }

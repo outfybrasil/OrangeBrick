@@ -61,7 +61,9 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
     return () => { controller.abort(); window.clearInterval(timer); };
   }, [publication, refresh]);
 
-  const blocked = publication && publication.status !== "failed";
+  const [isReposting, setIsReposting] = useState(false);
+
+  const blocked = publication && publication.status !== "failed" && !isReposting;
   const busy = sending || publication?.status === "preparing" || publication?.status === "uploading";
   const fieldClass = "mt-1 w-full rounded-lg border border-white/20 bg-[#07080c] px-3 py-2 text-base text-white focus-visible:outline-2 focus-visible:outline-brand-orange sm:text-sm disabled:opacity-60";
 
@@ -74,11 +76,14 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
       const response = await fetch("/api/admin/reels/youtube", {
         method: "POST",
         headers: { Authorization: `Bearer ${await token()}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, reelJobId, channelId: channel.id, title, description, visibility, confirmed }),
+        body: JSON.stringify({ postId, reelJobId, channelId: channel.id, title, description, visibility, confirmed, repost: isReposting }),
         signal: AbortSignal.timeout(295_000),
       });
       const data = await response.json().catch(() => null);
-      if (data?.publication) setPublication(data.publication);
+      if (data?.publication) {
+        setPublication(data.publication);
+        setIsReposting(false);
+      }
       if (!response.ok) throw new Error(data?.error || "O servidor não confirmou o envio. Atualize o histórico antes de tentar novamente.");
       if (!data?.publication) throw new Error("O servidor não confirmou o resultado. Atualize o histórico.");
     } catch (error) {
@@ -102,19 +107,51 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
         <button type="button" disabled={loading || sending} onClick={() => void refresh()} className="min-h-11 px-3 text-sm text-gray-200 underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-brand-orange disabled:opacity-50">Atualizar conexão</button>
       </div>
       {error && <p role="alert" className="text-red-300">{error}</p>}
-      {publication?.status === "uploaded" ? (
-        <div role="status" className="space-y-2 text-gray-200">
+      {publication?.status === "uploaded" && !isReposting ? (
+        <div role="status" className="space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-gray-200">
           <p className="font-bold text-emerald-300">Vídeo recebido pelo YouTube.</p>
-          <p>O processamento e a visibilidade final podem ser acompanhados no YouTube Studio.</p>
-          {publication.video_id && <a className="inline-flex min-h-11 items-center text-brand-orange underline underline-offset-4" target="_blank" rel="noopener noreferrer" href={`https://www.youtube.com/watch?v=${publication.video_id}`}>Abrir vídeo no YouTube</a>}
+          <p className="text-xs text-gray-300">O processamento e a visibilidade final podem ser acompanhados no YouTube Studio.</p>
+          {publication.video_id && (
+            <a className="inline-flex min-h-9 items-center text-xs font-bold text-brand-orange underline underline-offset-4" target="_blank" rel="noopener noreferrer" href={`https://www.youtube.com/watch?v=${publication.video_id}`}>
+              Abrir vídeo no YouTube ↗
+            </a>
+          )}
+          <div className="border-t border-white/10 pt-3">
+            <button
+              type="button"
+              onClick={() => { setIsReposting(true); setConfirmed(false); }}
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
+            >
+              🔄 Apagou do canal? Repostar vídeo no YouTube
+            </button>
+          </div>
         </div>
       ) : blocked ? (
         <div role="status" className="space-y-2 text-gray-200">
           <p>{publication.status === "unknown" ? "O resultado do envio precisa ser conferido no YouTube Studio." : "Envio registrado. Aguarde a confirmação e atualize o histórico."}</p>
           <p>Um novo envio está bloqueado para evitar vídeos duplicados.</p>
+          <button
+            type="button"
+            onClick={() => { setIsReposting(true); setConfirmed(false); }}
+            className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
+          >
+            🔄 Forçar repostagem no YouTube
+          </button>
         </div>
       ) : (
         <>
+          {isReposting && (
+            <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+              <span>Modo de repostagem ativo. Preencha e confirme o reenvio abaixo.</span>
+              <button
+                type="button"
+                onClick={() => setIsReposting(false)}
+                className="font-bold underline hover:text-white"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
           <label className="block text-gray-200">Título <span className="text-gray-400">({title.length}/100)</span>
             <input required maxLength={100} value={title} disabled={sending} onChange={event => { setTitle(event.target.value); setConfirmed(false); }} className={fieldClass} />
           </label>
@@ -130,10 +167,14 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
           </label>
           <label className="flex min-h-11 items-start gap-3 text-gray-200">
             <input type="checkbox" checked={confirmed} disabled={sending || !channel} onChange={event => setConfirmed(event.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-brand-orange" />
-            <span>Revisei o vídeo e os textos. Confirmo o envio {visibility === "public" ? "público" : visibility === "unlisted" ? "não listado" : "privado"} para {channel?.title || "o canal conectado"}.</span>
+            <span>
+              {isReposting
+                ? `Confirmo que o vídeo anterior foi apagado no YouTube e desejo reenviá-lo agora em modo ${visibility === "public" ? "público" : visibility === "unlisted" ? "não listado" : "privado"} para ${channel?.title || "o canal conectado"}.`
+                : `Revisei o vídeo e os textos. Confirmo o envio ${visibility === "public" ? "público" : visibility === "unlisted" ? "não listado" : "privado"} para ${channel?.title || "o canal conectado"}.`}
+            </span>
           </label>
           <button type="submit" disabled={!ready || !reelJobId || !channel || loading || sending || !confirmed || !title.trim()} className="min-h-11 w-full rounded-lg bg-brand-orange px-4 py-3 font-bold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-not-allowed disabled:opacity-50">
-            {sending ? "Enviando vídeo…" : publication?.status === "failed" ? "Tentar novamente só no YouTube" : visibility === "public" ? "Publicar no YouTube" : "Enviar para o YouTube"}
+            {sending ? "Enviando vídeo…" : isReposting ? "Confirmar e Repostar no YouTube" : publication?.status === "failed" ? "Tentar novamente só no YouTube" : visibility === "public" ? "Publicar no YouTube" : "Enviar para o YouTube"}
           </button>
           {!ready && <p className="text-gray-300">Aguarde a geração do Reel terminar.</p>}
           {ready && !reelJobId && <p className="text-gray-300">Gere este Reel no site publicado para enviá-lo pelo painel.</p>}

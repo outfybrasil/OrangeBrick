@@ -61,6 +61,17 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Cada bloco deve armazenar a URL original do YouTube e um título acessível que identifique jogo e finalidade do vídeo.
 - Validar o ID do vídeo e confirmar título, canal oficial e disponibilidade antes de salvar. A exibição deve usar `youtube-nocookie.com`, proporção 16:9 e carregamento tardio.
 
+## Vídeos gerados com IA e crescimento orgânico
+
+- Todo vídeo criado ou editado com IA deve ser planejado para atrair atenção, manter retenção e incentivar compartilhamentos e seguidores, respeitando o tema e a identidade da página.
+- Definir antes da produção o público, a plataforma, o formato e a ideia central. Adaptar duração, proporção, ritmo, legendas e chamada para ação ao canal escolhido.
+- Abrir com um gancho visual ou narrativo claro nos primeiros segundos; desenvolver uma única ideia com progressão, cortes e mudanças visuais que mantenham o interesse; entregar o resultado ou a resposta prometida antes do fim.
+- Usar narração, texto na tela, imagens e trilha para facilitar o entendimento mesmo sem áudio. Manter texto legível em dispositivos móveis e não cobrir elementos importantes da interface da plataforma.
+- Criar título e descrição com palavras-chave naturais sobre o assunto, uma promessa fiel ao conteúdo e contexto suficiente para descoberta. Usar chamada para comentar, compartilhar ou seguir quando fizer sentido, sem repetir pedidos nem recorrer a hashtags genéricas em excesso.
+- Criar séries e formatos reconhecíveis quando isso ajudar a transformar visualizações em audiência recorrente; cada vídeo deve fazer sentido por conta própria.
+- Usar curiosidade e emoção sem clickbait: não prometer algo que o vídeo não entrega, fabricar fatos ou reações, ou esconder contexto importante. Viralização não é garantida.
+- Antes de entregar, conferir se o gancho corresponde ao vídeo, se o ritmo não tem trechos dispensáveis, se a mensagem é compreensível sem áudio, se a descrição representa o conteúdo e se a chamada para ação combina com o objetivo da página.
+
 ## 📅 Game Release Dates & Official Cover Art Standards
 
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**

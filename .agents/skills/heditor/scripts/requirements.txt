@@ -1,0 +1,8 @@
+numpy>=1.26
+pillow>=10
+faster-whisper>=1.1
+mediapipe>=0.10.14
+opencv-contrib-python>=4.9
+onnxruntime>=1.18
+playwright>=1.45
+pytest>=8

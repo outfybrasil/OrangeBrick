@@ -14,6 +14,8 @@ export interface ReelManifestItem {
   finished_at?: string;
   failed_at?: string;
   error?: string;
+  style?: string;
+  variation?: number;
   script?: ReelScriptData;
 }
 
@@ -100,15 +102,16 @@ export function generateSocialCopys(post: {
     .trim();
   const title = plainText(post.title);
   const summary = plainText(post.summary) || title;
+  const hook = plainText(post.script?.hook || title);
+  const question = plainText(post.script?.ctaQuestion || "Qual é a sua opinião sobre essa notícia?");
   const articleUrl = `https://orangebrick.blog/posts/${post.slug}`;
   const attribution = post.script?.ttsProvider === "elevenlabs" ? "elevenlabs.io" : "";
-  const description = `${summary}\n\nLeia a matéria: ${articleUrl}`;
-  const titleCharacters = Array.from(title);
   const youtubeSuffix = attribution ? " | elevenlabs.io" : "";
-  const titleBudget = 100 - Array.from(youtubeSuffix).length;
-  const youtubeTitle = `${titleCharacters.length > titleBudget
-    ? `${titleCharacters.slice(0, titleBudget - 1).join("").replace(/\s+\S*$/, "").trimEnd()}…`
-    : title}${youtubeSuffix}`;
+  const youtubeTitleBudget = 100 - Array.from(youtubeSuffix).length;
+  const youtubeTitleCharacters = Array.from(hook);
+  const youtubeTitle = `${youtubeTitleCharacters.length > youtubeTitleBudget
+    ? `${youtubeTitleCharacters.slice(0, youtubeTitleBudget - 1).join("").replace(/\s+\S*$/, "").trimEnd()}…`
+    : hook}${youtubeSuffix}`;
   const categoryTags: Record<string, string[]> = {
     breaking: ["Notícias de games"],
     hardware: ["Hardware"],
@@ -127,34 +130,81 @@ export function generateSocialCopys(post: {
     [/\bcrash\s+keys\b/i, "CrashKeys"],
     [/\bzero\s+escape\b/i, "ZeroEscape"],
     [/\b(?:gta\s*(?:6|vi)|grand\s+theft\s+auto\s*(?:6|vi))\b/i, "GTA6"],
-    [/\b(?:playstation|ps[45])\b/i, "PlayStation"],
-    [/\bxbox\b/i, "Xbox"],
+    [/\b(?:playstation|ps[45]|sony)\b/i, "PlayStation"],
+    [/\b(?:xbox|microsoft)\b/i, "Xbox"],
     [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
     [/\bsteam\b/i, "Steam"],
+    [/\bkutaragi\b/i, "KenKutaragi"],
+    [/\b(?:disco|m[ií]dia\s+f[ií]sica)\b/i, "MidiaFisica"],
+    [/\bhoyo(?:verse)?\b/i, "Hoyoverse"],
+    [/\belden\s*ring\b/i, "EldenRing"],
+    [/\bgame\s*pass\b/i, "GamePass"],
+    [/\bcapcom\b/i, "Capcom"],
+    [/\bkonami\b/i, "Konami"],
+    [/\bvalve\b/i, "Valve"],
+    [/\bpc\s*gamer\b/i, "PCGamer"],
+    [/\bremake\b/i, "Remake"],
+    [/\bremaster\b/i, "Remaster"],
   ];
   const categoryHashtags: Record<string, string> = {
     breaking: "NoticiasDeGames",
-    hardware: "Hardware",
+    hardware: "HardwareGamer",
     industry: "IndustriaDosGames",
-    modding: "Modding",
+    modding: "ModdingGamer",
     review: "AnaliseDeJogos",
     opinion: "OpiniaoGamer",
   };
+  const searchableCopy = `${title} ${summary} ${hook}`;
   const subjects = subjectHashtags
-    .filter(([pattern]) => pattern.test(`${title} ${summary}`))
-    .slice(0, 3)
+    .filter(([pattern]) => pattern.test(searchableCopy))
+    .slice(0, 2)
     .map(([, hashtag]) => hashtag);
-  const hashtags = [...new Set([...subjects, categoryHashtags[post.category] || "Games", "OrangeBrick", "Shorts"])]
-    .map(hashtag => `#${hashtag}`)
-    .join(" ");
+  const hashtagNames = [...new Set([
+    ...subjects,
+    categoryHashtags[post.category] || "Games",
+    "OrangeBrick",
+    "Games",
+  ])].slice(0, 5);
+  const instagramHashtags = hashtagNames.map((hashtag) => `#${hashtag}`);
+  const tiktokHashtags = hashtagNames.map((hashtag) => `#${hashtag.toLowerCase()}`);
+  const repeatedSummary = summary.toLocaleLowerCase("pt-BR").includes(hook.toLocaleLowerCase("pt-BR"));
+  const coreCopy = [hook, ...(repeatedSummary ? [] : [summary]), question];
+  const instagramCaption = [
+    ...coreCopy,
+    "Siga @OrangeBrick para acompanhar as próximas notícias de games.",
+    ...(attribution ? [attribution] : []),
+    instagramHashtags.join(" "),
+  ].filter(Boolean).join("\n\n");
+  const tiktokCaption = [
+    ...coreCopy,
+    "Siga @OrangeBrick para acompanhar os próximos passos.",
+    ...(attribution ? [attribution] : []),
+    tiktokHashtags.join(" "),
+  ].filter(Boolean).join("\n\n");
+  const youtubeHashtags = hashtagNames.map((hashtag) => `#${hashtag}`).join(" ");
+  const youtubeDescription = [
+    hook,
+    ...(repeatedSummary ? [] : [summary]),
+    question,
+    "Inscreva-se no canal para acompanhar mais notícias e os próximos passos.",
+    `Leia a matéria completa: ${articleUrl}`,
+    attribution,
+    youtubeHashtags,
+  ].filter(Boolean).join("\n\n");
 
   return {
-    instagram: { caption: `${description}${attribution ? `\n\n${attribution}` : ""}`, hashtags: [] },
-    tiktok: { caption: `${summary}${attribution ? `\n\n${attribution}` : ""}`, hashtags: [] },
+    instagram: {
+      caption: instagramCaption,
+      hashtags: instagramHashtags,
+    },
+    tiktok: {
+      caption: tiktokCaption,
+      hashtags: tiktokHashtags,
+    },
     youtube: {
       title: youtubeTitle,
-      description: `${description}\n\n${hashtags}`,
-      tags: ["Orange Brick", ...(categoryTags[post.category] || [])],
+      description: youtubeDescription,
+      tags: ["Orange Brick", ...(categoryTags[post.category] || []), ...subjects],
     },
   };
 }

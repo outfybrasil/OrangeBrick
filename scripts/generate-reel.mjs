@@ -5,7 +5,7 @@ import { randomInt } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateReelScript } from "../src/lib/video/reel-script.ts";
-import { generateCompositionHtml, getReelSceneStarts } from "../src/lib/video/reel-composition.ts";
+import { generateCompositionHtml, getReelSceneStarts, resolveVisualStyle } from "../src/lib/video/reel-composition.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +15,8 @@ const args = process.argv.slice(2);
 let targetSlug = args.find((a) => !a.startsWith("--"));
 const isLatest = args.includes("--latest");
 const sendTelegram = args.includes("--telegram");
+const styleFlag = args.find((a) => a.startsWith("--style="));
+const forcedStyle = styleFlag ? styleFlag.split("=")[1] : (args.includes("--style") ? args[args.indexOf("--style") + 1] : undefined);
 
 console.log("\n🎬 Orange Brick — Gerador de Vídeos Curtos (Reels / Shorts)");
 console.log("=========================================================\n");
@@ -179,8 +181,10 @@ async function run() {
   const sentences = JSON.parse(fs.readFileSync(path.join(workDir, "sentences.json"), "utf-8"));
   const voiceDuration = sentences.length ? sentences[sentences.length - 1].end : 40.0;
   const variation = randomInt(0, 1000000);
+  const visualStyle = resolveVisualStyle(variation, forcedStyle);
   const totalDuration = Math.round((voiceDuration + 2.5) * 10) / 10;
   console.log(`   Duração da narração: ${voiceDuration}s (Total: ${totalDuration}s)`);
+  console.log(`   🎨 Estilo visual selecionado: ${visualStyle.toUpperCase()}${forcedStyle ? " (forçado via CLI)" : " (aleatório)"}`);
 
   // 4. Mix Audio (Voice + BGM + SFX)
   console.log("\n🔊 4/5: Mixando áudio, trilha sonora e efeitos...");
@@ -188,6 +192,7 @@ async function run() {
   const audioAssetsDir = path.join(ROOT_DIR, "assets", "reels", "audio");
   fs.writeFileSync(path.join(workDir, "production.json"), JSON.stringify({
     variation,
+    style: visualStyle,
     sceneStarts: getReelSceneStarts(totalDuration, variation),
   }, null, 2));
   const masterAudio = path.join(workDir, "master_audio.m4a");
@@ -206,7 +211,7 @@ async function run() {
   }
 
   // 5. Render Video with HyperFrames
-  console.log("\n🎥 5/5: Construindo composição e renderizando em 1080x1920 (HyperFrames)...");
+  console.log(`\n🎥 5/5: Construindo composição [${visualStyle.toUpperCase()}] e renderizando em 1080x1920 (HyperFrames)...`);
   
   // Copy assets into composition folder
   const compAssetsDir = path.join(compDir, "assets");
@@ -231,6 +236,7 @@ async function run() {
     category: post.category,
     duration: totalDuration,
     variation,
+    style: visualStyle,
     sentences,
     imagePaths: localImages
   });
@@ -262,6 +268,7 @@ async function run() {
       video_url: `/reels/${post.slug}.mp4`,
       duration: totalDuration,
       variation,
+      style: visualStyle,
       file_size: stats.size,
       script
     };

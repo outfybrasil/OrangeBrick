@@ -34,11 +34,18 @@ const CANDIDATE_MODELS = [
 const MAX_ROUNDS = 3;
 const RETRY_BASE_MS = 8000;
 
+function fitText(value: string, limit: number) {
+  const text = value.replace(/\s+/g, " ").trim();
+  const characters = Array.from(text);
+  if (characters.length <= limit) return text;
+  const clipped = characters.slice(0, limit - 1).join("").replace(/\s+\S*$/, "").trimEnd();
+  return `${clipped || characters.slice(0, limit - 1).join("").trimEnd()}…`;
+}
+
 export async function generateReelScript(post: Post, apiKey: string): Promise<ReelScriptData> {
   const gemini = new GoogleGenAI({ apiKey });
 
-  const prompt = `Você é um editor sênior de vídeos curtos (Reels, TikTok, Shorts) especializado em games e tecnologia para o canal "Orange Brick".
-Crie um roteiro dinâmico, enérgico e viral de 35 a 45 segundos baseado na seguinte matéria:
+  const prompt = `Você é editor de vídeos curtos de games para o Orange Brick. Crie um roteiro vertical de 25 a 35 segundos que capture atenção, mantenha retenção e transforme espectadores em seguidores, sem prometer viralização nem usar clickbait.
 
 TÍTULO: ${post.title}
 CATEGORIA: ${post.category}
@@ -46,20 +53,23 @@ RESUMO: ${post.summary}
 CONTEÚDO:
 ${post.body.slice(0, 3000)}
 
-INSTRUÇÕES DO ROTEIRO:
-1. Abra com um gancho factual nos primeiros 3 segundos, sem exageros ou linguagem sensacionalista.
-2. Escreva a narração em tom natural e direto, adequado à categoria da matéria. Para industry, hardware e breaking, mantenha linguagem jornalística e factual. Use entre 50 e 75 palavras faladas e termine com: "Quer ver a matéria completa? Acesse orangebrick.blog."
-3. Preserve exatamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é um total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não some números de processos distintos sem explicar que se trata de um limite máximo. Não troque “propõe” ou “pode afetar” por “fechou” ou “demitiu”.
-4. Divida o vídeo em 5 momentos visuais que correspondam aos fatos da matéria. Adapte as cenas ao tema; se não houver plataformas ou data de lançamento, use impacto, contexto ou próximos passos. Nunca invente plataformas, datas, números, decisões ou declarações.
-5. Feche com uma pergunta pertinente ao assunto e convide a pessoa a ler a matéria completa em orangebrick.blog. A chamada para acessar o site deve ser falada no fim da narração.
+REGRAS:
+1. A primeira fala deve ser o gancho, com um fato concreto, consequência ou dúvida real que o próprio vídeo responde. Repita a mesma ideia na primeira tela. Comece direto, sem vinheta, saudação ou apresentação do canal.
+2. Conte uma única história nesta ordem: gancho, fato principal, contexto que muda a leitura, impacto para quem joga e conclusão. Use surpresa, curiosidade ou debate apenas quando os fatos sustentarem esse ângulo. Entregue a resposta antes do fim; não esconda informação para forçar retenção.
+3. Escreva de 55 a 75 palavras faladas em português brasileiro natural. Use frases curtas, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
+4. Termine com uma pergunta específica que convide a comentar e uma chamada curta para seguir o Orange Brick. Não direcione a fala para fora da plataforma nem repita pedidos de engajamento.
+5. Preserve rigorosamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não misture números de processos diferentes nem transforme “propõe” ou “pode afetar” em “fechou” ou “demitiu”.
+6. Crie exatamente 5 cenas alinhadas à narração: revelação, detalhe principal, contexto, impacto e conclusão/próximo passo. Só mostre plataformas, datas, números, decisões e declarações que apareçam na matéria. Se um dado não existir, use contexto ou impacto; nunca invente nem preencha com informação genérica.
+7. Escreva textos de tela curtos e legíveis no celular: gancho com até 55 caracteres; títulos de cena com até 36; destaques com até 48; tags com até 18; no máximo 3 pílulas curtas por cena. Use pílulas apenas para fatos confirmados. Evite repetir a mesma frase em todas as telas.
+8. A pergunta final deve ser específica ao assunto. A chamada final deve convidar a seguir @OrangeBrick para acompanhar notícias ou próximos passos, sem prometer frequência ou resultado.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {
   "hook": "Frase de gancho curta para o topo",
   "headline": "TÍTULO DE IMPACTO EM MAIÚSCULAS",
   "subHeadline": "SUBTÍTULO EM DESTAQUE",
-  "badge": "BADGE DA NOTÍCIA (ex: NOVIDADE BGS 2026, OFICIAL, LANÇAMENTO)",
-  "narrationText": "Texto completo de 35 a 45 segundos em português brasileiro, terminando com: Quer ver a matéria completa? Acesse orangebrick.blog.",
+  "badge": "CATEGORIA",
+  "narrationText": "Narração curta, factual e com pergunta e convite para seguir no final",
   "scenes": [
     {
       "id": "scene1",
@@ -93,16 +103,16 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
     },
     {
       "id": "scene5",
-      "headline": "PLATAFORMAS E DATA",
-      "highlight": "DISPONÍVEL EM BREVE",
-      "tag": "LANÇAMENTO",
-      "pills": ["PS5", "XBOX", "PC"],
+      "headline": "CONCLUSÃO OU PRÓXIMO PASSO",
+      "highlight": "IMPACTO CONFIRMADO",
+      "tag": "CONTEXTO",
+      "pills": ["FATO CONFIRMADO"],
       "imageIndex": 1
     }
   ],
-  "ctaQuestion": "Quer ler a matéria completa?",
-  "ctaAction": "Acesse orangebrick.blog",
-  "ctaButton": "LEIA A MATÉRIA COMPLETA"
+  "ctaQuestion": "Pergunta específica sobre o impacto para quem joga?",
+  "ctaAction": "Siga @OrangeBrick para acompanhar os próximos passos",
+  "ctaButton": "SIGA @ORANGEBRICK"
 }`;
 
   let lastError: Error | null = null;
@@ -145,17 +155,38 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 function parseScript(raw: string): ReelScriptData {
   const cleaned = raw.replace(/```json\n?|```/g, "").trim();
   const data = JSON.parse(cleaned) as ReelScriptData;
-  if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length === 0) {
+  if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length !== 5) {
     throw new Error("Roteiro retornado pelo Gemini está incompleto.");
   }
-  const narrationTail = data.narrationText.trim().slice(-180);
-  const includesArticleCta = /mat[eé]ria completa[\s\S]{0,120}orangebrick\.blog[.!?]*$/i.test(narrationTail);
-  if (!includesArticleCta) {
-    const narration = data.narrationText.trim().replace(/[\s.!?]+$/, "");
-    data.narrationText = `${narration}. Quer ver a matéria completa? Acesse orangebrick.blog.`;
+  const narrationWords = data.narrationText.trim().split(/\s+/).length;
+  if (narrationWords < 45 || narrationWords > 90) {
+    throw new Error("Roteiro retornado pelo Gemini está fora da duração esperada.");
   }
-  data.ctaQuestion = "Quer ler a matéria completa?";
-  data.ctaAction = "Acesse orangebrick.blog";
-  data.ctaButton = "LEIA A MATÉRIA COMPLETA";
+  data.hook = fitText(data.hook || data.scenes[0]?.headline || data.headline || "", 55);
+  if (!data.hook || /frase de gancho/i.test(data.hook)) throw new Error("Roteiro retornado pelo Gemini não tem um gancho válido.");
+  data.headline = fitText(data.headline || data.hook, 48);
+  data.subHeadline = fitText(data.subHeadline || "", 64);
+  data.badge = fitText(data.badge || "GAMES", 24);
+  data.scenes = data.scenes.map((scene, index) => ({
+    ...scene,
+    id: `scene${index + 1}`,
+    headline: fitText(scene.headline || "", 36),
+    highlight: fitText(scene.highlight || "", 48),
+    tag: fitText(scene.tag || "", 18),
+    pills: Array.isArray(scene.pills) ? scene.pills.slice(0, 3).map((pill) => fitText(pill, 18)) : [],
+  }));
+  if (data.scenes.some((scene) => !scene.headline || !scene.tag)) {
+    throw new Error("Roteiro retornado pelo Gemini tem cenas sem texto essencial.");
+  }
+  data.narrationText = data.narrationText.trim().replace(/\s*(?:Quer ver a mat[eé]ria completa\?\s*)?Acesse orangebrick\.blog\.?\s*$/i, "").trim();
+  if (!/\b(?:siga|segue)\b[\s\S]{0,100}orange\s*brick/i.test(data.narrationText.slice(-180))) {
+    data.narrationText = `${data.narrationText.replace(/[\s.!?]+$/, "")}. Siga o Orange Brick para mais notícias de games.`;
+  }
+  data.ctaQuestion = fitText(data.ctaQuestion || "", 56);
+  if (!data.ctaQuestion.endsWith("?") || /pergunta específica|impacto para quem joga/i.test(data.ctaQuestion)) {
+    data.ctaQuestion = "O que você acha dessa mudança?";
+  }
+  data.ctaAction = "Siga @OrangeBrick para acompanhar notícias de games";
+  data.ctaButton = "SIGA @ORANGEBRICK";
   return data;
 }

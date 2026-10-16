@@ -1,0 +1,217 @@
+{
+  "nodusfall-revelado-co-op-dark-fantasy-da-hoyo-com-elden-ring": {
+    "slug": "nodusfall-revelado-co-op-dark-fantasy-da-hoyo-com-elden-ring",
+    "status": "ready",
+    "finished_at": "2026-10-14T17:57:16.472Z",
+    "video_url": "/reels/nodusfall-revelado-co-op-dark-fantasy-da-hoyo-com-elden-ring.mp4",
+    "duration": 38.1,
+    "file_size": 4579385,
+    "script": {
+      "hook": "A criadora de Genshin Impact vai lançar um Elden Ring gratuito?",
+      "headline": "NODUSFALL É ANUNCIADO",
+      "subHeadline": "O NOVO DARK FANTASY CO-OP DA HOYOVERSE",
+      "badge": "BREAKING NEWS",
+      "narrationText": "A criadora de Genshin Impact acabou de anunciar Nodusfall! Um RPG de ação cooperativo free-to-play que mistura a dificuldade de Elden Ring com as caçadas insanas de Monster Hunter. Você joga com um Weaver, enfrentando chefes colossais em mundo aberto, com troca de classes em tempo real e zero sistema gacha. O foco é total em cosméticos! Vem para PC e PlayStation 5, mas ainda sem data de lançamento oficial. E aí, você vai encarar essa nova aventura com os amigos? Comenta aqui embaixo e segue o Orange Brick para não perder nada!",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "A REVELAÇÃO DA HOYOVERSE",
+          "highlight": "ELDEN RING COM MONSTER HUNTER",
+          "tag": "BREAKING",
+          "imageIndex": 0
+        },
+        {
+          "id": "scene2",
+          "headline": "UNIVERSO DARK FANTASY",
+          "highlight": "MUNDO ABERTO CO-OP",
+          "tag": "GAMESCOM 2026",
+          "imageIndex": 1
+        },
+        {
+          "id": "scene3",
+          "headline": "MECÂNICAS ÉPICAS",
+          "highlight": "COMBATE INTENSO E FLUIDO",
+          "tag": "GAMEPLAY",
+          "pills": [
+            "Até 4 Jogadores",
+            "Loadouts em Tempo Real",
+            "Chefes Colossais"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "ADEUS AO SISTEMA GACHA",
+          "highlight": "PROGRESSÃO 100% JUSTA",
+          "tag": "GRÁTIS PARA JOGAR",
+          "pills": [
+            "Zero Gacha",
+            "Personagens por Missão",
+            "Apenas Cosméticos"
+          ],
+          "imageIndex": 2
+        },
+        {
+          "id": "scene5",
+          "headline": "ONDE E QUANDO JOGAR",
+          "highlight": "LANÇAMENTO CONFIRMADO",
+          "tag": "PLATAFORMAS",
+          "pills": [
+            "PC",
+            "PlayStation 5",
+            "Sem Data Definida"
+          ],
+          "imageIndex": 1
+        }
+      ],
+      "ctaQuestion": "Você vai jogar Nodusfall no lançamento?",
+      "ctaAction": "Comenta aí e segue o Orange Brick!",
+      "ctaButton": "SEGUIR @ORANGEBRICK"
+    }
+  },
+  "ubisoft-propoe-fechar-redlynx-e-afeta-70-postos-em-singapura": {
+    "slug": "ubisoft-propoe-fechar-redlynx-e-afeta-70-postos-em-singapura",
+    "status": "ready",
+    "finished_at": "2026-10-14T20:50:51.405Z",
+    "video_url": "/reels/ubisoft-propoe-fechar-redlynx-e-afeta-70-postos-em-singapura.mp4",
+    "duration": 38.6,
+    "variation": 642067,
+    "file_size": 22786278,
+    "script": {
+      "hook": "Ubisoft propõe fechar estúdio e reduz equipe em Singapura.",
+      "headline": "MUDANÇAS NA UBISOFT",
+      "subHeadline": "RedLynx e Singapura são afetadas por reestruturação",
+      "badge": "INDÚSTRIA",
+      "narrationText": "A Ubisoft anunciou mudanças em duas equipes de desenvolvimento nesta quarta-feira. A empresa propôs o encerramento das atividades da RedLynx, na Finlândia, medida que ainda depende de negociações locais e pode atingir até cinquenta e duas posições. Simultaneamente, a companhia confirmou que setenta cargos foram afetados na Ubisoft Singapore. Ambas as ações fazem parte de uma revisão mais ampla das operações e da sustentabilidade dos estúdios da marca. Quer ver a matéria completa? Acesse orangebrick.blog.",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "REESTRUTURAÇÃO GLOBAL",
+          "highlight": "Novas mudanças na Ubisoft",
+          "tag": "INDÚSTRIA",
+          "imageIndex": 0
+        },
+        {
+          "id": "scene2",
+          "headline": "FUTURO DA REDLYNX",
+          "highlight": "Proposta de encerramento na Finlândia",
+          "tag": "ESTÚDIO",
+          "imageIndex": 0
+        },
+        {
+          "id": "scene3",
+          "headline": "IMPACTO EM SINGAPURA",
+          "highlight": "Setenta posições afetadas",
+          "tag": "AJUSTE",
+          "pills": [
+            "70 cargos",
+            "Singapura",
+            "Produção"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "NEGOCIAÇÕES EM ANDAMENTO",
+          "highlight": "Processo local obrigatório",
+          "tag": "CONTEXTO",
+          "pills": [
+            "Finlândia",
+            "Negociação",
+            "Avaliação"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene5",
+          "headline": "PRÓXIMOS PASSOS",
+          "highlight": "Sustentabilidade dos estúdios",
+          "tag": "MERCADO",
+          "pills": [
+            "Revisão",
+            "Projetos",
+            "Operações"
+          ],
+          "imageIndex": 0
+        }
+      ],
+      "ctaQuestion": "Quer ler a matéria completa?",
+      "ctaAction": "Acesse orangebrick.blog",
+      "ctaButton": "LEIA A MATÉRIA COMPLETA",
+      "ttsProvider": "edge-tts"
+    }
+  },
+  "kutaragi-defende-fim-dos-discos-fisicos-no-playstation": {
+    "slug": "kutaragi-defende-fim-dos-discos-fisicos-no-playstation",
+    "status": "ready",
+    "finished_at": "2026-10-16T16:16:14.672Z",
+    "video_url": "/reels/kutaragi-defende-fim-dos-discos-fisicos-no-playstation.mp4",
+    "duration": 30.3,
+    "variation": 380493,
+    "style": "manchete",
+    "file_size": 7689735,
+    "script": {
+      "hook": "O criador do PlayStation defende o fim dos discos no PS5.",
+      "headline": "KUTARAGI DEFENDE O FIM DOS DISCOS NO PS5",
+      "sub_headline": "Transição digital da Sony até 2028 gera debates na indústria",
+      "badge": "INDUSTRY",
+      "narrationText": "Ken Kutaragi, conhecido como o Pai do PlayStation, afirmou que manter discos físicos virou uma ilusão psicológica e não faz sentido econômico. O executivo defende a transição da Sony para o formato digital até o final da década. Para ele, custos logísticos tornaram a mídia física inviável. Você concorda com o fim dos jogos em disco? Quer ver a matéria completa? Acesse orangebrick.blog.",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "FIM DOS DISCOS",
+          "highlight": "Kutaragi se posiciona",
+          "tag": "MERCADO",
+          "imageIndex": 0
+        },
+        {
+          "id": "scene2",
+          "headline": "VISÃO DA SONY",
+          "highlight": "Transição digital",
+          "tag": "INDÚSTRIA",
+          "imageIndex": 0
+        },
+        {
+          "id": "scene3",
+          "headline": "ILUSÃO DE POSSE",
+          "highlight": "Foco na nuvem",
+          "tag": "ANÁLISE",
+          "pills": [
+            "Digital",
+            "Praticidade",
+            "Nuvem"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "CUSTO LOGÍSTICO",
+          "highlight": "Fim da produção física",
+          "tag": "NEGÓCIOS",
+          "pills": [
+            "Logística",
+            "Blu-ray",
+            "Economia"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene5",
+          "headline": "LEIA NO SITE",
+          "highlight": "Cobertura completa",
+          "tag": "ORANGE BRICK",
+          "pills": [
+            "PS5",
+            "Sony",
+            "Notícia"
+          ],
+          "imageIndex": 0
+        }
+      ],
+      "ctaQuestion": "Quer ler a matéria completa?",
+      "ctaAction": "Acesse orangebrick.blog",
+      "ctaButton": "LEIA A MATÉRIA COMPLETA",
+      "ttsProvider": "edge-tts"
+    }
+  }
+}

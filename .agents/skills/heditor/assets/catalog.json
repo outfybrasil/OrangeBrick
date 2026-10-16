@@ -1,0 +1,1276 @@
+{
+ "license": {
+  "music": "Mixkit Stock Music Free License https://mixkit.co/license/#musicFree",
+  "sfx": "Mixkit Sound Effects Free License https://mixkit.co/license/#sfxFree",
+  "note": "Files are downloaded by setup from Mixkit's official CDN to the user's machine. They are not redistributed in this repository."
+ },
+ "music": [
+  {
+   "id": 31,
+   "title": "Dreaming Big",
+   "artist": "Ahjay Stelino",
+   "url": "https://assets.mixkit.co/music/31/31.mp3",
+   "duration_s": 110.42,
+   "mood": "inspiring piano/strings, triumph",
+   "tags": [
+    "Film Score",
+    "Uplifting",
+    "Triumphant",
+    "Piano",
+    "Strings",
+    "Family",
+    "Fantasy"
+   ],
+   "drop_s": 3,
+   "lift_s": 73,
+   "source_page": "https://mixkit.co/free-stock-music/mood/hopeful/"
+  },
+  {
+   "id": 33,
+   "title": "Motivating Mornings",
+   "artist": "Ahjay Stelino",
+   "url": "https://assets.mixkit.co/music/33/33.mp3",
+   "duration_s": 96.24,
+   "mood": "motivational, bass/drums/brass",
+   "tags": [
+    "Corporate Music",
+    "Propulsive",
+    "Driving",
+    "Bass",
+    "Brass",
+    "Fashion"
+   ],
+   "drop_s": null,
+   "lift_s": 12,
+   "source_page": "https://mixkit.co/free-stock-music/mood/motivational/"
+  },
+  {
+   "id": 82,
+   "title": "Keeping Fit",
+   "artist": "Ahjay Stelino",
+   "url": "https://assets.mixkit.co/music/82/82.mp3",
+   "duration_s": 98.77,
+   "mood": "chiptune / quirky game groove",
+   "tags": [
+    "EDM",
+    "Quirky",
+    "Futuristic",
+    "Bass",
+    "Synth",
+    "Technology",
+    "Industry"
+   ],
+   "drop_s": 3,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/chiptune/"
+  },
+  {
+   "id": 126,
+   "title": "Trap Electro Vibes",
+   "artist": "Alejandro Magaña (A. M.)",
+   "url": "https://assets.mixkit.co/music/126/126.mp3",
+   "duration_s": 115.78,
+   "mood": "drum & bass, aggressive, propulsive",
+   "tags": [
+    "Drum & Bass",
+    "Aggressive",
+    "Propulsive",
+    "Bass",
+    "Drums",
+    "Extreme Sports",
+    "Action"
+   ],
+   "drop_s": null,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/electronic/"
+  },
+  {
+   "id": 167,
+   "title": "Brainiac",
+   "artist": "Alejandro Magaña (A. M.)",
+   "url": "https://assets.mixkit.co/music/167/167.mp3",
+   "duration_s": 106.37,
+   "mood": "mechanical futuristic electronic",
+   "tags": [
+    "Electronic",
+    "Mechanical",
+    "Futuristic",
+    "Drums",
+    "Sound Effects",
+    "City",
+    "Investigation"
+   ],
+   "drop_s": null,
+   "lift_s": 74,
+   "source_page": "https://mixkit.co/free-stock-music/electronica/"
+  },
+  {
+   "id": 187,
+   "title": "Mountains",
+   "artist": "Andrew Ev",
+   "url": "https://assets.mixkit.co/music/187/187.mp3",
+   "duration_s": 277.32,
+   "mood": "uplifting electronic, hopeful build",
+   "tags": [
+    "Electronica",
+    "Hopeful",
+    "Bass",
+    "Drums",
+    "Relaxation",
+    "Corporate"
+   ],
+   "drop_s": 3,
+   "lift_s": 47,
+   "source_page": "https://mixkit.co/free-stock-music/uplifting/"
+  },
+  {
+   "id": 282,
+   "title": "Sweet September",
+   "artist": "Arulo",
+   "url": "https://assets.mixkit.co/music/282/282.mp3",
+   "duration_s": 98.69,
+   "mood": "lo-fi hip hop, calm",
+   "tags": [
+    "Hip Hop",
+    "Chillout",
+    "Relaxed",
+    "Calm",
+    "Bass",
+    "Drums",
+    "Melodic",
+    "Relaxation"
+   ],
+   "drop_s": 3,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/lo-fi/"
+  },
+  {
+   "id": 293,
+   "title": "Lord Knows",
+   "artist": "Arulo",
+   "url": "https://assets.mixkit.co/music/293/293.mp3",
+   "duration_s": 102.97,
+   "mood": "serious trap, focus",
+   "tags": [
+    "Trap",
+    "Serious",
+    "Determined",
+    "Bass",
+    "Drums",
+    "City",
+    "Reality TV"
+   ],
+   "drop_s": 11,
+   "lift_s": 11,
+   "source_page": "https://mixkit.co/free-stock-music/hip-hop/"
+  },
+  {
+   "id": 369,
+   "title": "Need for speed",
+   "artist": "Arulo",
+   "url": "https://assets.mixkit.co/music/369/369.mp3",
+   "duration_s": 97.79,
+   "mood": "trap, serious, determined",
+   "tags": [
+    "Trap",
+    "Serious",
+    "Determined",
+    "Bass",
+    "Drums",
+    "City",
+    "Reality TV"
+   ],
+   "drop_s": null,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/hip-hop/"
+  },
+  {
+   "id": 568,
+   "title": "Focus on Yourself",
+   "artist": "Eugenio Mininni",
+   "url": "https://assets.mixkit.co/music/568/568.mp3",
+   "duration_s": 285.92,
+   "mood": "tense electronic, technology",
+   "tags": [
+    "Electronica",
+    "Disturbing",
+    "Tension",
+    "Bass",
+    "Sound Effects",
+    "Technology",
+    "Medical"
+   ],
+   "drop_s": null,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/electronic/"
+  },
+  {
+   "id": 597,
+   "title": "Vertigo",
+   "artist": "Eugenio Mininni",
+   "url": "https://assets.mixkit.co/music/597/597.mp3",
+   "duration_s": 190.59,
+   "mood": "tense, stealthy investigation",
+   "tags": [
+    "Film Score",
+    "Disturbing",
+    "Stealth",
+    "Bass",
+    "Electric Guitar",
+    "Investigation"
+   ],
+   "drop_s": 5,
+   "lift_s": 57,
+   "source_page": "https://mixkit.co/free-stock-music/cinematic/"
+  },
+  {
+   "id": 623,
+   "title": "Deep Urban",
+   "artist": "Eugenio Mininni",
+   "url": "https://assets.mixkit.co/music/623/623.mp3",
+   "duration_s": 288.69,
+   "mood": "tech house, hypnotic, driving",
+   "tags": [
+    "House",
+    "Tech House",
+    "Hypnotic",
+    "Driving",
+    "Bass",
+    "Drums",
+    "Technology",
+    "Corporate"
+   ],
+   "drop_s": null,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/tech/"
+  },
+  {
+   "id": 677,
+   "title": "Epical Drums 02",
+   "artist": "Grigoriy Nuzhny",
+   "url": "https://assets.mixkit.co/music/677/677.mp3",
+   "duration_s": 123.04,
+   "mood": "dramatic trailer, escalation",
+   "tags": [
+    "Percussion Trailer",
+    "Sound Elements",
+    "Restless",
+    "Dramatic",
+    "Drums",
+    "Percussion",
+    "Motivational"
+   ],
+   "drop_s": 3,
+   "lift_s": 58,
+   "source_page": "https://mixkit.co/free-stock-music/cinematic/"
+  },
+  {
+   "id": 680,
+   "title": "Epical Drums 05",
+   "artist": "Grigoriy Nuzhny",
+   "url": "https://assets.mixkit.co/music/680/680.mp3",
+   "duration_s": 102.4,
+   "mood": "cinematic hybrid percussion, restless",
+   "tags": [
+    "Orchestral Hybrid",
+    "Film Score",
+    "Restless",
+    "Dramatic",
+    "Brass",
+    "Drums",
+    "Motivational"
+   ],
+   "drop_s": 3,
+   "lift_s": null,
+   "source_page": "https://mixkit.co/free-stock-music/cinematic/"
+  },
+  {
+   "id": 686,
+   "title": "Epical Drums 06",
+   "artist": "Grigoriy Nuzhny",
+   "url": "https://assets.mixkit.co/music/686/686.mp3",
+   "duration_s": 102.66,
+   "mood": "epic trailer drums, reveal",
+   "tags": [
+    "Sound Elements",
+    "Percussion Trailer",
+    "Restless",
+    "Percussion",
+    "Action",
+    "Thriller"
+   ],
+   "drop_s": 28,
+   "lift_s": 81,
+   "source_page": "https://mixkit.co/free-stock-music/mood/dramatic/"
+  },
+  {
+   "id": 871,
+   "title": "Fright Night",
+   "artist": "Michael Ramir C.",
+   "url": "https://assets.mixkit.co/music/871/871.mp3",
+   "duration_s": 101.33,
+   "mood": "dramatic suspense, mystery",
+   "tags": [
+    "Film Score",
+    "Dramatic",
+    "Mysterious",
+    "Percussion",
+    "Piano",
+    "Thriller"
+   ],
+   "drop_s": null,
+   "lift_s": 21,
+   "source_page": "https://mixkit.co/free-stock-music/cinematic/"
+  },
+  {
+   "id": 955,
+   "title": "I Believe 2",
+   "artist": "Michael Ramir C.",
+   "url": "https://assets.mixkit.co/music/955/955.mp3",
+   "duration_s": 104.05,
+   "mood": "emotional piano/strings, hope",
+   "tags": [
+    "Film Score",
+    "Emotional",
+    "Piano",
+    "Strings",
+    "Family"
+   ],
+   "drop_s": 6,
+   "lift_s": 30,
+   "source_page": "https://mixkit.co/free-stock-music/mood/hopeful/"
+  },
+  {
+   "id": 1117,
+   "title": "Proud of You",
+   "artist": "Michael Ramir C.",
+   "url": "https://assets.mixkit.co/music/1117/1117.mp3",
+   "duration_s": 104.05,
+   "mood": "confident uplifting rock, victory",
+   "tags": [
+    "Rock",
+    "Confident",
+    "Bass",
+    "Drums",
+    "Motivational",
+    "Cars"
+   ],
+   "drop_s": null,
+   "lift_s": 82,
+   "source_page": "https://mixkit.co/free-stock-music/mood/uplifting/"
+  }
+ ],
+ "sfx": {
+  "alarm_clock": [
+   {
+    "id": 1003,
+    "title": "Morning clock alarm",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1003/1003-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "alarm_short": [
+   {
+    "id": 993,
+    "title": "Classic short alarm",
+    "url": "https://assets.mixkit.co/active_storage/sfx/993/993.wav",
+    "trim": [
+     "head",
+     0.6
+    ]
+   }
+  ],
+  "applause_short": [
+   {
+    "id": 354,
+    "title": "Audience light applause",
+    "url": "https://assets.mixkit.co/active_storage/sfx/354/354.wav",
+    "trim": [
+     "head",
+     2.5
+    ]
+   },
+   {
+    "id": 523,
+    "title": "Animated small group applause",
+    "url": "https://assets.mixkit.co/active_storage/sfx/523/523.wav",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "bass_impact": [
+   {
+    "id": 2299,
+    "title": "Short bass hit",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2299/2299.wav",
+    "trim": [
+     "head",
+     1.4
+    ]
+   },
+   {
+    "id": 2902,
+    "title": "Movie impact intro presentation",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2902/2902.wav",
+    "trim": [
+     "head",
+     1.4
+    ]
+   }
+  ],
+  "cage_or_metal_slam": [
+   {
+    "id": 201,
+    "title": "Prison metal door close",
+    "url": "https://assets.mixkit.co/active_storage/sfx/201/201.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "camera_flash": [
+   {
+    "id": 1133,
+    "title": "Camera shutter click",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1133/1133.wav",
+    "trim": [
+     "head",
+     0.4
+    ]
+   },
+   {
+    "id": 1430,
+    "title": "Camera shutter hard click",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1430/1430.wav",
+    "trim": [
+     "head",
+     0.4
+    ]
+   }
+  ],
+  "camera_shutter": [
+   {
+    "id": 1133,
+    "title": "Camera shutter click",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1133/1133-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "chair_squeak": [
+   {
+    "id": 1016,
+    "title": "Chair seat wood squeak",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1016/1016-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "click": [
+   {
+    "id": 1117,
+    "title": "Classic click",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1117/1117.wav",
+    "trim": [
+     "head",
+     0.3
+    ]
+   }
+  ],
+  "clock_tick": [
+   {
+    "id": 1063,
+    "title": "Fast wall clock ticking",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1063/1063-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "coins": [
+   {
+    "id": 1993,
+    "title": "Clinking coins",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1993/1993-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "copy_paste_multiply": [
+   {
+    "id": 2359,
+    "title": "Silly pop cluster",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2359/2359.wav",
+    "trim": [
+     "head",
+     0.5
+    ]
+   }
+  ],
+  "crowd_cheer_short": [
+   {
+    "id": 459,
+    "title": "Male crowd cheering short",
+    "url": "https://assets.mixkit.co/active_storage/sfx/459/459.wav",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "crowd_murmur": [
+   {
+    "id": 455,
+    "title": "Male crowd whispering voices",
+    "url": "https://assets.mixkit.co/active_storage/sfx/455/455.wav",
+    "trim": [
+     "head",
+     8.5
+    ]
+   }
+  ],
+  "cymbal_swell": [
+   {
+    "id": 576,
+    "title": "Atmospheric wind drum roll swoosh",
+    "url": "https://assets.mixkit.co/active_storage/sfx/576/576-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "data_beep": [
+   {
+    "id": 2866,
+    "title": "Digital quick tone",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "door_open": [
+   {
+    "id": 1523,
+    "title": "Heavy sliding door",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1523/1523.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "door_slam": [
+   {
+    "id": 194,
+    "title": "Slamming a door",
+    "url": "https://assets.mixkit.co/active_storage/sfx/194/194-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "drum_roll": [
+   {
+    "id": 566,
+    "title": "Drum Roll",
+    "url": "https://assets.mixkit.co/active_storage/sfx/566/566-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "error": [
+   {
+    "id": 946,
+    "title": "Wrong answer fail notification",
+    "url": "https://assets.mixkit.co/active_storage/sfx/946/946.wav",
+    "trim": [
+     "head",
+     0.55
+    ]
+   }
+  ],
+  "error_ding": [
+   {
+    "id": 2964,
+    "title": "System beep buzzer fail",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2964/2964.wav",
+    "trim": [
+     "head",
+     0.6
+    ]
+   }
+  ],
+  "fast_forward": [
+   {
+    "id": 1096,
+    "title": "Reel to reel fast forward",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1096/1096.wav",
+    "trim": [
+     "head",
+     0.68
+    ]
+   }
+  ],
+  "footsteps": [
+   {
+    "id": 543,
+    "title": "Footsteps in a tunnel loop",
+    "url": "https://assets.mixkit.co/active_storage/sfx/543/543-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "game_coin": [
+   {
+    "id": 2069,
+    "title": "Winning a coin, video game",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2069/2069.wav",
+    "trim": [
+     "head",
+     0.9
+    ]
+   }
+  ],
+  "glass_break": [
+   {
+    "id": 759,
+    "title": "Glass break with hammer thud",
+    "url": "https://assets.mixkit.co/active_storage/sfx/759/759-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "glass_crack": [
+   {
+    "id": 759,
+    "title": "Glass break with hammer thud",
+    "url": "https://assets.mixkit.co/active_storage/sfx/759/759.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "glitch": [
+   {
+    "id": 2595,
+    "title": "Small electric glitch",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2595/2595.wav",
+    "trim": [
+     "head",
+     0.45
+    ]
+   },
+   {
+    "id": 2946,
+    "title": "Virtual quick glitch",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2946/2946.wav",
+    "trim": [
+     "head",
+     0.45
+    ]
+   }
+  ],
+  "heartbeat": [
+   {
+    "id": 493,
+    "title": "Fast Heartbeat",
+    "url": "https://assets.mixkit.co/active_storage/sfx/493/493-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "human_gasp": [
+   {
+    "id": 966,
+    "title": "Male astonished gasp",
+    "url": "https://assets.mixkit.co/active_storage/sfx/966/966-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "key_turn": [
+   {
+    "id": 2842,
+    "title": "Door key in door lock",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2842/2842.wav",
+    "trim": [
+     "head",
+     1.0
+    ]
+   }
+  ],
+  "keyboard": [
+   {
+    "id": 2534,
+    "title": "Keyboard  key presses",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2534/2534.wav",
+    "trim": [
+     "head",
+     0.42
+    ]
+   }
+  ],
+  "level_up": [
+   {
+    "id": 2062,
+    "title": "Game experience level increased",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2062/2062.wav",
+    "trim": [
+     "head",
+     1.3
+    ]
+   }
+  ],
+  "lightbulb_ding": [
+   {
+    "id": 871,
+    "title": "Fairy magic sparkle",
+    "url": "https://assets.mixkit.co/active_storage/sfx/871/871.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "lock_click": [
+   {
+    "id": 2857,
+    "title": "Gear fast lock tap",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2857/2857-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "magic_sparkle": [
+   {
+    "id": 871,
+    "title": "Fairy magic sparkle",
+    "url": "https://assets.mixkit.co/active_storage/sfx/871/871.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "magic_transition": [
+   {
+    "id": 2638,
+    "title": "Magic transition sweep presentation",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2638/2638-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "message_received": [
+   {
+    "id": 2357,
+    "title": "Bubble pop up alert notification",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2357/2357.wav",
+    "trim": [
+     "head",
+     0.38
+    ]
+   }
+  ],
+  "message_sent": [
+   {
+    "id": 166,
+    "title": "Fast small sweep transition",
+    "url": "https://assets.mixkit.co/active_storage/sfx/166/166.wav",
+    "trim": [
+     "head",
+     0.6
+    ]
+   }
+  ],
+  "mouse_click": [
+   {
+    "id": 2997,
+    "title": "Clear mouse clicks",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2997/2997-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "newspaper": [
+   {
+    "id": 1105,
+    "title": "Big paper page turn",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1105/1105.wav",
+    "trim": [
+     "head",
+     0.8
+    ]
+   }
+  ],
+  "notify": [
+   {
+    "id": 933,
+    "title": "Bell notification",
+    "url": "https://assets.mixkit.co/active_storage/sfx/933/933.wav",
+    "trim": [
+     "head",
+     0.8
+    ]
+   },
+   {
+    "id": 2354,
+    "title": "Message pop alert",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
+    "trim": [
+     "head",
+     0.8
+    ]
+   }
+  ],
+  "ocean_wave_whoosh": [
+   {
+    "id": 1202,
+    "title": "Sea wave noise",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1202/1202.wav",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "padlock_unlock": [
+   {
+    "id": 2842,
+    "title": "Door key in door lock",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2842/2842.wav",
+    "trim": [
+     "head",
+     1.0
+    ]
+   },
+   {
+    "id": 2853,
+    "title": "Safe lock",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2853/2853.wav",
+    "trim": [
+     "head",
+     1.0
+    ]
+   }
+  ],
+  "page_turn": [
+   {
+    "id": 1104,
+    "title": "Page turn single",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1104/1104-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "pen_write": [
+   {
+    "id": 2367,
+    "title": "Writing with a pen on paper",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2367/2367-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "phone_notification": [
+   {
+    "id": 2354,
+    "title": "Message pop alert",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "pop": [
+   {
+    "id": 2356,
+    "title": "Dry pop up notification alert",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2356/2356.wav",
+    "trim": [
+     "head",
+     0.5
+    ]
+   },
+   {
+    "id": 2925,
+    "title": "Soap bubble sound",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2925/2925.wav",
+    "trim": [
+     "head",
+     0.5
+    ]
+   }
+  ],
+  "power_up": [
+   {
+    "id": 3164,
+    "title": "Video game power up",
+    "url": "https://assets.mixkit.co/active_storage/sfx/3164/3164.wav",
+    "trim": [
+     "head",
+     0.75
+    ]
+   }
+  ],
+  "progress_complete": [
+   {
+    "id": 2068,
+    "title": "Achievement completed",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2068/2068.wav",
+    "trim": [
+     "head",
+     1.6
+    ]
+   }
+  ],
+  "record_scratch": [
+   {
+    "id": 704,
+    "title": "Vinyl stop fast scratch",
+    "url": "https://assets.mixkit.co/active_storage/sfx/704/704.wav",
+    "trim": [
+     "head",
+     0.62
+    ]
+   }
+  ],
+  "retro_computer_beep": [
+   {
+    "id": 1084,
+    "title": "Repeating arcade beep",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1084/1084.wav",
+    "trim": [
+     "head",
+     0.5
+    ]
+   }
+  ],
+  "reverse_impact": [
+   {
+    "id": 784,
+    "title": "Reverse cinematic impact trailer",
+    "url": "https://assets.mixkit.co/active_storage/sfx/784/784-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "rewind": [
+   {
+    "id": 1092,
+    "title": "Fast tape rewind cinematic transition",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1092/1092.wav",
+    "trim": [
+     "head",
+     1.0
+    ]
+   },
+   {
+    "id": 1091,
+    "title": "Tape rewind transition",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1091/1091.wav",
+    "trim": [
+     "head",
+     1.0
+    ]
+   }
+  ],
+  "riser": [
+   {
+    "id": 790,
+    "title": "Cinematic trailer riser",
+    "url": "https://assets.mixkit.co/active_storage/sfx/790/790.wav",
+    "trim": [
+     "tail",
+     0.62
+    ]
+   }
+  ],
+  "robot_processing": [
+   {
+    "id": 3122,
+    "title": "Technology computer calculations",
+    "url": "https://assets.mixkit.co/active_storage/sfx/3122/3122-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "scan": [
+   {
+    "id": 2847,
+    "title": "Data scaner",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2847/2847.wav",
+    "trim": [
+     "head",
+     0.95
+    ]
+   }
+  ],
+  "slot_machine_reel": [
+   {
+    "id": 1933,
+    "title": "Arcade slot machine wheel",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1933/1933.wav",
+    "trim": [
+     "head",
+     0.5
+    ]
+   }
+  ],
+  "sonar_ping": [
+   {
+    "id": 1583,
+    "title": "Futuristic radar ping",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1583/1583.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "spotlight_on": [
+   {
+    "id": 2582,
+    "title": "Quick switch click",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2582/2582.wav",
+    "trim": [
+     "head",
+     0.6
+    ]
+   }
+  ],
+  "stamp": [
+   {
+    "id": 2182,
+    "title": "Wood hard hit",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2182/2182.wav",
+    "trim": [
+     "head",
+     0.42
+    ]
+   },
+   {
+    "id": 2995,
+    "title": "Stapling paper",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2995/2995.wav",
+    "trim": [
+     "head",
+     0.42
+    ]
+   }
+  ],
+  "sub_drop": [
+   {
+    "id": 2300,
+    "title": "Knocking sub bass",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2300/2300-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "success": [
+   {
+    "id": 2865,
+    "title": "Success software tone",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2865/2865.wav",
+    "trim": [
+     "head",
+     1.2
+    ]
+   }
+  ],
+  "success_chime": [
+   {
+    "id": 952,
+    "title": "Correct answer reward",
+    "url": "https://assets.mixkit.co/active_storage/sfx/952/952-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "swipe": [
+   {
+    "id": 2627,
+    "title": "Fast swipe zoom",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2627/2627-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "tape_stop": [
+   {
+    "id": 711,
+    "title": "Vinyl record slow down",
+    "url": "https://assets.mixkit.co/active_storage/sfx/711/711-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "trailer_hit": [
+   {
+    "id": 2908,
+    "title": "Movie trailer epic impact",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2908/2908-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   },
+   {
+    "id": 563,
+    "title": "Drum deep impact",
+    "url": "https://assets.mixkit.co/active_storage/sfx/563/563-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "tv_news_sting": [
+   {
+    "id": 1151,
+    "title": "Intro news sound",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1151/1151.wav",
+    "trim": [
+     "head",
+     2.2
+    ]
+   }
+  ],
+  "typewriter": [
+   {
+    "id": 1379,
+    "title": "Data short input on typewriter",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1379/1379.wav",
+    "trim": [
+     "head",
+     1.6
+    ]
+   },
+   {
+    "id": 1368,
+    "title": "Typewriter return bell",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1368/1368.wav",
+    "trim": [
+     "head",
+     1.6
+    ]
+   }
+  ],
+  "typing_fast": [
+   {
+    "id": 1392,
+    "title": "Fast laptop keyboard typing",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1392/1392-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "water_pour": [
+   {
+    "id": 2826,
+    "title": "Pouring water in a glass",
+    "url": "https://assets.mixkit.co/active_storage/sfx/2826/2826-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "water_splash": [
+   {
+    "id": 1311,
+    "title": "Water splash",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1311/1311-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ],
+  "whoosh": [
+   {
+    "id": 1490,
+    "title": "Fast whoosh transition",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1490/1490.wav",
+    "trim": [
+     "head",
+     0.9
+    ]
+   },
+   {
+    "id": 1492,
+    "title": "Cinematic whoosh fast transition",
+    "url": "https://assets.mixkit.co/active_storage/sfx/1492/1492.wav",
+    "trim": [
+     "head",
+     0.9
+    ]
+   }
+  ],
+  "wrong_buzzer": [
+   {
+    "id": 948,
+    "title": "Wrong answer bass buzzer",
+    "url": "https://assets.mixkit.co/active_storage/sfx/948/948-preview.mp3",
+    "trim": [
+     "head",
+     2.5
+    ]
+   }
+  ]
+ }
+}

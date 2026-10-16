@@ -580,14 +580,48 @@ html[data-theme="light"] .brand-logo-dark {
   display: none;
 }
 
+html[data-theme="light"] body {
+  background-color: var(--theme-background, #f3f4f6) !important;
+  color: var(--theme-text-primary, #202228) !important;
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4,
+html[data-theme="light"] h5,
+html[data-theme="light"] h6 {
+  color: var(--theme-text-primary, #202228);
+}
+
+html[data-theme="light"] .bg-background-void,
+html[data-theme="light"] [class*="bg-background-void"] {
+  background-color: var(--theme-background, #f3f4f6) !important;
+}
+
 html[data-theme="light"] .text-white,
 html[data-theme="light"] .text-gray-100,
-html[data-theme="light"] .text-gray-200 {
-  color: var(--theme-text-primary) !important;
+html[data-theme="light"] .text-gray-200,
+html[data-theme="light"] .text-zinc-50,
+html[data-theme="light"] .text-zinc-100,
+html[data-theme="light"] .text-zinc-200,
+html[data-theme="light"] .text-slate-50,
+html[data-theme="light"] .text-slate-100,
+html[data-theme="light"] .text-slate-200,
+html[data-theme="light"] .text-neutral-50,
+html[data-theme="light"] .text-neutral-100,
+html[data-theme="light"] .text-neutral-200 {
+  color: var(--theme-text-primary, #202228) !important;
 }
 
 html[data-theme="light"] .text-gray-300,
 html[data-theme="light"] .text-gray-400,
+html[data-theme="light"] .text-zinc-300,
+html[data-theme="light"] .text-zinc-400,
+html[data-theme="light"] .text-slate-300,
+html[data-theme="light"] .text-slate-400,
+html[data-theme="light"] .text-neutral-300,
+html[data-theme="light"] .text-neutral-400,
 html[data-theme="light"] .text-\[\#d2d3d8\],
 html[data-theme="light"] .text-\[\#b8bac2\],
 html[data-theme="light"] .text-\[\#bfc1c9\],
@@ -598,13 +632,15 @@ html[data-theme="light"] .text-\[\#aeb0b8\],
 html[data-theme="light"] .text-\[\#a6a7ad\],
 html[data-theme="light"] .text-\[\#a1a2a9\],
 html[data-theme="light"] .text-\[\#aaa\] {
-  color: var(--theme-text-secondary) !important;
+  color: var(--theme-text-secondary, #4d5561) !important;
 }
 
 html[data-theme="light"] .text-gray-500,
 html[data-theme="light"] .text-gray-600,
-html[data-theme="light"] [class*="placeholder:text-gray-"]::placeholder {
-  color: var(--theme-text-tertiary) !important;
+html[data-theme="light"] [class*="placeholder:text-gray-"]::placeholder,
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: var(--theme-text-tertiary, #626b77) !important;
 }
 
 html[data-theme="light"] .text-brand-orange:not(.bg-brand-orange),
@@ -620,8 +656,9 @@ html[data-theme="light"] .text-\[\#ff985d\] {
 html[data-theme="light"] [class*="bg-[#0"],
 html[data-theme="light"] [class*="bg-[#1"],
 html[data-theme="light"] [class*="bg-[#2"],
-html[data-theme="light"] [class*="bg-[#303137"] {
-  background-color: var(--theme-card) !important;
+html[data-theme="light"] [class*="bg-[#303137"],
+html[data-theme="light"] .bg-card-slate {
+  background-color: var(--theme-card, #ffffff) !important;
 }
 
 html[data-theme="light"] [class*="bg-[#25D366"] {
@@ -633,7 +670,7 @@ html[data-theme="light"] [class*="bg-[#26A5E4"] {
 }
 
 html[data-theme="light"] [class*="bg-white/"] {
-  background-color: var(--theme-hover) !important;
+  background-color: var(--theme-hover, rgba(28, 33, 42, 0.06)) !important;
 }
 
 html[data-theme="light"] [class*="hover:bg-white/"]:hover {
@@ -641,11 +678,27 @@ html[data-theme="light"] [class*="hover:bg-white/"]:hover {
 }
 
 html[data-theme="light"] [class*="border-white/"] {
-  border-color: var(--theme-border) !important;
+  border-color: var(--theme-border, rgba(28, 33, 42, 0.16)) !important;
+}
+
+html[data-theme="light"] [class*="ring-white/"] {
+  --tw-ring-color: var(--theme-border, rgba(28, 33, 42, 0.16)) !important;
+}
+
+html[data-theme="light"] [class*="divide-white/"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--theme-border, rgba(28, 33, 42, 0.16)) !important;
 }
 
 html[data-theme="light"] [class*="hover:text-white"]:hover {
-  color: var(--theme-text-primary) !important;
+  color: var(--theme-text-primary, #202228) !important;
+}
+
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  background-color: #ffffff !important;
+  color: var(--theme-text-primary, #202228) !important;
+  border-color: var(--theme-border, rgba(28, 33, 42, 0.2)) !important;
 }
 
 html[data-theme="light"] .bg-brand-orange.text-white,
@@ -654,18 +707,30 @@ html[data-theme="light"] .bg-brand-orange\/80.text-white {
   color: #111111 !important;
 }
 
-html[data-theme="light"] [class*="bg-black/"].text-white,
-html[data-theme="light"] [class*="bg-black/"] .text-white,
-html[data-theme="light"] [class*="from-black/"]:not([class*="lg:from-black/"]) .text-white {
+html[data-theme="light"] [class*="bg-black/1"],
+html[data-theme="light"] [class*="bg-black/2"],
+html[data-theme="light"] [class*="bg-black/3"],
+html[data-theme="light"] [class*="bg-black/4"] {
+  background-color: rgba(28, 33, 42, 0.05) !important;
+}
+
+html[data-theme="light"] [class*="bg-black/7"].text-white,
+html[data-theme="light"] [class*="bg-black/8"].text-white,
+html[data-theme="light"] [class*="bg-black/9"].text-white,
+html[data-theme="light"] [class*="bg-black/7"] .text-white,
+html[data-theme="light"] [class*="bg-black/8"] .text-white,
+html[data-theme="light"] [class*="bg-black/9"] .text-white,
+html[data-theme="light"] .bg-black .text-white,
+html[data-theme="light"] .theme-video-overlay .text-white {
   color: #ffffff !important;
 }
 
-html[data-theme="light"] [class*="bg-black/"].text-gray-300,
-html[data-theme="light"] [class*="bg-black/"].text-gray-400,
-html[data-theme="light"] [class*="bg-black/"] .text-gray-300,
-html[data-theme="light"] [class*="bg-black/"] .text-gray-400,
-html[data-theme="light"] [class*="from-black/"]:not([class*="lg:from-black/"]) .text-gray-300,
-html[data-theme="light"] [class*="from-black/"]:not([class*="lg:from-black/"]) .text-gray-400 {
+html[data-theme="light"] [class*="bg-black/7"].text-gray-300,
+html[data-theme="light"] [class*="bg-black/8"].text-gray-300,
+html[data-theme="light"] [class*="bg-black/9"].text-gray-300,
+html[data-theme="light"] [class*="bg-black/7"] .text-gray-300,
+html[data-theme="light"] [class*="bg-black/8"] .text-gray-300,
+html[data-theme="light"] [class*="bg-black/9"] .text-gray-300 {
   color: #d1d5db !important;
 }
 

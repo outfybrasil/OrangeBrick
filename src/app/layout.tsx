@@ -93,7 +93,12 @@ export const metadata: Metadata = {
     images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "Orange Brick Logo" }],
   },
   twitter: { card: "summary_large_image", title: "Orange Brick — notícias de games, hardware e indústria", description: "Notícias de games, hardware, indústria e modding." },
-  verification: { google: ["1MwU6xe9hs6pdkfLkjZq-plADLtEYNW9IqCq0th5l74", "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs"] },
+  verification: {
+    google: ["1MwU6xe9hs6pdkfLkjZq-plADLtEYNW9IqCq0th5l74", "Wrom7GWTekisbRXoXMyr2ADfnHBD-Z1ljBevtvE0lBs"],
+    other: {
+      "tiktok-developers-site-verification": "wOZXVcnRMIfBR1xKYxVTtX1IS9hQr3qR",
+    },
+  },
 };
 
 export default function RootLayout({
@@ -112,7 +117,7 @@ export default function RootLayout({
           id="orange-theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"||saved==="dark"?saved:window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}})();`,
+            __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}})();`,
           }}
         />
         <a

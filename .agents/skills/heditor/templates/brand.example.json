@@ -1,0 +1,17 @@
+{
+  "name": "Your Brand",
+  "handle": "@yourhandle",
+  "logo": null,
+  "lang": "pt",
+  "follow": "Seguir",
+  "following": "Seguindo",
+  "comment": "Conta nos comentários",
+  "colors": {
+    "bg": "#050a14",
+    "bg2": "#081626",
+    "accent": "#edc580",
+    "accent2": "#7dd3fc",
+    "alert": "#ff3d57",
+    "ok": "#7dffb0"
+  }
+}

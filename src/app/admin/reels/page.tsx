@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState, useRef, Suspense } from "rea
 import { useSearchParams } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { YouTubePublisher } from "@/components/admin/YouTubePublisher";
+import { InstagramPublisher } from "@/components/admin/InstagramPublisher";
+import { TikTokPublisher } from "@/components/admin/TikTokPublisher";
 import { createDataClient } from "@/lib/supabase/client";
 import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
 import type { AdminReelItem } from "@/app/api/admin/reels/route";
@@ -614,55 +616,25 @@ function AdminReelsContent() {
               {/* CONTEÚDO DA ABA ATIVA */}
               <div className="mt-4 flex-1">
                 {activeTab === "instagram" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-gray-300">Legenda:</p>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(selectedReel.copys.instagram.caption, "ig-caption")}
-                        className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-black text-white hover:bg-white/20"
-                      >
-                        {copiedKey === "ig-caption" ? "Copiado! ✓" : "Copiar Legenda"}
-                      </button>
-                    </div>
-
-                    <textarea
-                      readOnly
-                      rows={9}
-                      value={selectedReel.copys.instagram.caption}
-                      className="w-full rounded-xl border border-white/10 bg-[#07080c] p-3.5 text-xs font-mono leading-relaxed text-gray-200 focus:outline-none"
-                    />
-
-                    <div className="rounded-xl border border-purple-500/20 bg-purple-950/10 p-3 text-[11px] text-purple-200">
-                      💡 <strong>Dica de Postagem:</strong> Abra o app do Instagram, selecione o vídeo baixado e cole essa legenda. O link na bio direciona para a matéria completa no Orange Brick.
-                    </div>
-                  </div>
+                  <InstagramPublisher
+                    key={`ig:${selectedReel.id}:${selectedReel.reel_job_id || selectedReel.slug}`}
+                    postId={selectedReel.id}
+                    videoUrl={selectedReel.video_url}
+                    initialCaption={selectedReel.copys.instagram.caption}
+                    hashtags={selectedReel.copys.instagram.hashtags}
+                    ready={selectedReel.status === "ready"}
+                  />
                 )}
 
                 {activeTab === "tiktok" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold text-gray-300">Descrição:</p>
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(selectedReel.copys.tiktok.caption, "tt-caption")}
-                        className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-black text-white hover:bg-white/20"
-                      >
-                        {copiedKey === "tt-caption" ? "Copiado! ✓" : "Copiar Texto TikTok"}
-                      </button>
-                    </div>
-
-                    <textarea
-                      readOnly
-                      rows={7}
-                      value={selectedReel.copys.tiktok.caption}
-                      className="w-full rounded-xl border border-white/10 bg-[#07080c] p-3.5 text-xs font-mono leading-relaxed text-gray-200 focus:outline-none"
-                    />
-
-                    <div className="rounded-xl border border-pink-500/20 bg-pink-950/10 p-3 text-[11px] text-pink-200">
-                      💡 <strong>Dica de Postagem:</strong> No TikTok Studio ou no app móvel, cole a descrição acima e selecione o som original do vídeo (a narração e mixagem já vêm embutidas no arquivo).
-                    </div>
-                  </div>
+                  <TikTokPublisher
+                    key={`tt:${selectedReel.id}:${selectedReel.reel_job_id || selectedReel.slug}`}
+                    postId={selectedReel.id}
+                    videoUrl={selectedReel.video_url}
+                    initialCaption={selectedReel.copys.tiktok.caption}
+                    hashtags={selectedReel.copys.tiktok.hashtags}
+                    ready={selectedReel.status === "ready"}
+                  />
                 )}
 
                 {activeTab === "youtube" && (

@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# heditor command-line helper. Run `heditor help`.
+set -euo pipefail
+HEDITOR_HOME="${HEDITOR_HOME:-$HOME/.heditor}"
+SKILL_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+if [[ -f "$HEDITOR_HOME/env.sh" ]]; then . "$HEDITOR_HOME/env.sh"; fi
+KIT="$SKILL_DIR/scripts/reelkit"
+# build.py/prepare.py import the kit through HEDITOR_KIT: always point it at the kit next to this script, so a
+# second checkout (a branch, a fork) never mixes its CLI with another checkout's kit from env.sh.
+export HEDITOR_KIT="$KIT" HEDITOR_SKILL="$SKILL_DIR"
+PY="${HEDITOR_PY:-$HEDITOR_HOME/venv/bin/python}"
+HF="${HEDITOR_HYPERFRAMES:-npx --yes hyperframes@0.8.147}"
+cmd="${1:-help}"; shift || true
+
+need_work() { [[ -n "${1:-}" ]] || { echo "usage: heditor $cmd <work_dir> ..."; exit 2; }; }
+
+case "$cmd" in
+  setup)   bash "$SKILL_DIR/scripts/setup.sh" "$@" ;;
+  doctor)  "$PY" "$SKILL_DIR/scripts/doctor.py" ;;
+  new)     # heditor new <work_dir> <source_video>   |   heditor new --long <work> <video> [--format 16:9] [--style X]
+           if [[ " $* " == *" --long "* ]]; then
+             args=(); for a in "$@"; do [[ "$a" == "--long" ]] || args+=("$a"); done
+             exec "$PY" "$KIT/long_cli.py" new "${args[@]}"
+           fi
+           need_work "${1:-}"; W="$(mkdir -p "$1" && cd "$1" && pwd)"; SRC="${2:-}"
+           mkdir -p "$W/qa" "$W/composition"
+           [[ -e "$W/composition/package.json" ]] || cp "$SKILL_DIR/templates/composition-package.json" "$W/composition/package.json"
+           for f in prepare.py build.py DESIGN.md; do [[ -e "$W/$f" ]] || cp "$SKILL_DIR/templates/$f" "$W/$f"; done
+           [[ -n "$SRC" ]] && sed -i.bak "s#^SOURCE = .*#SOURCE = \"$(readlink -f "$SRC")\"#" "$W/prepare.py" && rm -f "$W/prepare.py.bak"
+           echo "created $W (edit prepare.py BLOCKS, then: heditor prepare $W)" ;;
+  probe)   # heditor probe <source_video> [seconds...]  -> frames to locate the speaker/camera
+           SRC="$1"; shift; OUT="${PROBE_DIR:-./probe}"; mkdir -p "$OUT"
+           ffprobe -v error -show_entries format=duration:stream=width,height,r_frame_rate -of compact "$SRC"
+           for t in "${@:-5 30 60}"; do ffmpeg -v error -y -ss "$t" -i "$SRC" -frames:v 1 "$OUT/frame-$t.jpg"; echo "$OUT/frame-$t.jpg"; done ;;
+  transcribe) # heditor transcribe <source_video> <start_s> <duration_s> <out.json> [prompt]
+           "$PY" "$KIT/asr_window.py" "$@" ;;
+  prepare) need_work "${1:-}"; (cd "$1" && "$PY" prepare.py) ;;
+  words)   need_work "${1:-}"; "$PY" "$KIT/transcribe_cut.py" "$@" ;;
+  gaps)    # heditor gaps <work_dir> [max_gap_s] [min_report_s] -> dead air left in the assembled voice
+           need_work "${1:-}"; "$PY" "$KIT/gaps.py" "$@" ;;
+  produce) # heditor produce <work_dir> <music:ID|track.mp3> <drop_s>
+           need_work "${1:-}"; "$PY" "$KIT/produce.py" "$@" ;;
+  lint)    need_work "${1:-}"; (cd "$1/composition" && $HF lint) ;;
+  preview) # heditor preview <work_dir> <t1,t2,...> [sheet.jpg]
+           need_work "${1:-}"; "$PY" "$KIT/preview.py" "${3:-sheet.jpg}" "$2" "$1" ;;
+  test)    need_work "${1:-}"; CUT_WORK="$(cd "$1" && pwd)" "$PY" -m pytest -q "$KIT/test_cut.py" ;;
+  render)  # heditor render <work_dir> [workers]
+           need_work "${1:-}"; mkdir -p "$1/render"
+           export FFMPEG_ENCODE_TIMEOUT_MS="${FFMPEG_ENCODE_TIMEOUT_MS:-3600000}"   # heavy styles on busy machines; set PRODUCER_ENABLE_CHUNKED_ENCODE=true if it still times out
+           (cd "$1/composition" && $HF render --fps 30 --quality high --crf 17 --workers "${2:-2}" --strict --no-best-effort --output ../render/render.mp4) ;;
+  finalize) # heditor finalize <work_dir> <final_name.mp4> [auto|t1,t2,...]
+           need_work "${1:-}"; "$PY" "$KIT/finalize.py" "$1" "$2" "${3:-auto}" ;;
+  asr-check) need_work "${1:-}"; "$PY" "$KIT/asr_check.py" "$1" ;;
+  matte|depth|look|hands|plane) # layered / 2.5D helpers (depthkit); see references/depth-and-3d.md
+           [[ "$cmd" == plane ]] || need_work "${1:-}"; "$PY" "$KIT/layers.py" "$cmd" "$@" ;;
+  styles)  ls "$SKILL_DIR/references/styles" | sed 's/\.md$//' | grep -v INDEX ;;
+  formats) "$PY" "$KIT/long_cli.py" formats ;;
+  long)    # long-form pipeline (classes, lives, YouTube) in any format profile; see references/long-form.md
+           "$PY" "$KIT/long_cli.py" "$@" ;;
+  help|*)  cat <<EOF
+heditor - creative video editing for AI agents (vertical Reels and long-form videos in any format)
+
+  heditor setup [--no-audio] [--whisper small,medium]   install tools + assets (idempotent)
+  heditor doctor                                         check the environment
+  heditor styles                                         list the named styles
+  heditor probe <video> [t...]                           frames to locate the speaker/camera
+  heditor transcribe <video> <start> <dur> <out.json>    word-timed ASR of a window (use 0 and full length for all)
+  heditor new <work> [video]                             scaffold a cut (prepare.py, build.py, DESIGN.md)
+  heditor prepare <work>                                 cut speech + camera from the source (runs prepare.py)
+  heditor words <work> [prompt]                          ASR of the assembled cut -> words.json/words-reviewed.json
+  heditor gaps <work> [max_s]                            dead air left in the cut (fails if a pause > 0.45 s)
+  heditor produce <work> <music:ID|file> <drop_s>        build composition + voice-first mix (runs build.py)
+  heditor lint <work>                                    HyperFrames lint (must be 0 errors)
+  heditor preview <work> <t1,t2,...> [sheet.jpg]         frame previews + contact sheet in <work>/qa
+  heditor test <work>                                    integrity tests (captions, CTA, balance, numbers)
+  heditor render <work> [workers]                        render MP4 with HyperFrames
+  heditor finalize <work> <name.mp4>                     mux master audio + verification + 40-frame sheet
+  heditor asr-check <work>                               ASR of final mix vs clean voice (masking check)
+
+Formats and long form (classes, lives, YouTube; see references/long-form.md):
+  heditor formats                                        format profiles (9:16, 16:9, 16:9-4k, 1:1, 4:5)
+  heditor new --long <work> <video> [--format 16:9] [--style X] [--kind aula|live|youtube] [--range a,b]
+  heditor long transcribe|edl|apply|chapters|layouts|produce|lint|preview|render|finalize|qa|subs|sync|estimate|styles <work> ...
+                                                         run `heditor long help` for every subcommand
+
+Layered / 2.5D (depthkit, see references/depth-and-3d.md):
+  heditor matte <work> [multiclass|selfie]               speaker alpha: camera-alpha.webm + matte-person.mp4
+  heditor depth <work> [fps]                             relative depth map: depth.mp4 + depth-still.png
+  heditor look <work> fog|edges|edges-rgb|dots [#hex]     depth fog, contour scan, edge scan, point cloud
+  heditor hands <work> [t0] [t1]                         hand landmarks -> qa/hands-<t0>.json
+  heditor plane <w> <h> x1,y1 x2,y2 x3,y3 x4,y4           CSS matrix3d pinning a w x h element onto 4 points
+EOF
+  ;;
+esac

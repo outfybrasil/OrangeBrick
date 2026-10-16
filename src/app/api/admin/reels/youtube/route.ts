@@ -71,10 +71,15 @@ export async function POST(request: Request) {
     if (jobError || !job || job.status !== "ready" || !job.storage_path) return reply({ error: "Aguarde o Reel ficar pronto antes de enviar." }, 409);
     if (body.reelJobId !== job.id) return reply({ error: "O Reel foi atualizado. Abra novamente a prévia e revise o vídeo antes de enviar." }, 409);
     const existing = await publicationHistory(body.postId, connection.channel.id);
-    if (existing && existing.status !== "failed") return reply({ error: "Este Reel já foi enviado ou tem um envio em andamento. Confira o histórico antes de repetir.", publication: existing }, 409);
+    if (existing && ["preparing", "uploading"].includes(existing.status)) {
+      return reply({ error: "O envio deste Reel já está em andamento. Aguarde.", publication: existing }, 409);
+    }
+    if (existing && existing.status !== "failed" && !body.repost) {
+      return reply({ error: "Este Reel já foi enviado ou tem um envio em andamento. Confira o histórico antes de repetir.", publication: existing }, 409);
+    }
     const record = { post_id: body.postId, reel_job_id: job.id, channel_id: connection.channel.id, status: "preparing", title: body.title.trim(), description: body.description, visibility: body.visibility, error: null, updated_at: new Date().toISOString() };
     const claim = existing
-      ? await db.from("reel_youtube_publications").update(record).eq("id", existing.id).eq("status", "failed").select("id").maybeSingle()
+      ? await db.from("reel_youtube_publications").update(record).eq("id", existing.id).select("id").maybeSingle()
       : await db.from("reel_youtube_publications").insert(record).select("id").single();
     if (claim.error || !claim.data) return reply({ error: "Não foi possível reservar o envio. Atualize o histórico para evitar duplicação." }, 409);
     publicationId = claim.data.id;
@@ -96,5 +101,20 @@ export async function POST(request: Request) {
       await getReelAdmin().from("reel_youtube_publications").update({ status: videoId ? "uploaded" : uploadStarted ? "unknown" : "failed", video_id: videoId || null, error: message, updated_at: new Date().toISOString() }).eq("id", publicationId);
     }
     return reply({ error: message, videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined }, 503);
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    if (!await authorized(request)) return reply({ error: "Faça login como administrador para acessar." }, 403);
+    const postId = new URL(request.url).searchParams.get("postId");
+    if (!postId || !uuid.test(postId)) return reply({ error: "Matéria inválida." }, 400);
+    const connection = await getYouTubeConnection();
+    const db = getReelAdmin();
+    const { error } = await db.from("reel_youtube_publications").delete().eq("post_id", postId).eq("channel_id", connection.channel.id);
+    if (error) throw new Error("Não foi possível redefinir o histórico de envio.");
+    return reply({ success: true, message: "Histórico de envio redefinido com sucesso." });
+  } catch (error) {
+    return reply({ error: error instanceof Error ? error.message : "Erro ao resetar histórico." }, 500);
   }
 }
