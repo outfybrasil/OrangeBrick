@@ -27,7 +27,7 @@ async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallba
     if (!res.ok) return { accountId: fallbackId, hasDirectPublish: false };
     const json = await res.json();
     const rawItems = (json?.items || []) as Array<{ id: string; status: string; toolkit?: { slug?: string }; appName?: string; scope?: string; data?: { scope?: string }; params?: { scope?: string } }>;
-    const items = rawItems.filter(i => (i.toolkit?.slug === "tiktok" || i.appName === "tiktok" || i.id === fallbackId));
+    const items = rawItems.filter(i => (i.toolkit?.slug === "tiktok" || i.appName === "tiktok"));
 
     const activeWithPublish = items.find(i => {
       const scope = i.scope || i.data?.scope || i.params?.scope || "";
