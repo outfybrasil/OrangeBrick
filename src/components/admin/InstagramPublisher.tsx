@@ -24,6 +24,8 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
   const [serverAccountId, setServerAccountId] = useState("");
   const [customToken, setCustomToken] = useState("");
   const [customAccountId, setCustomAccountId] = useState("");
+  const [isReposting, setIsReposting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   const token = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -37,8 +39,16 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
       const savedAccountId = localStorage.getItem("ob_ig_account_id") || "";
       if (savedToken) setCustomToken(savedToken);
       if (savedAccountId) setCustomAccountId(savedAccountId);
+      const savedPub = localStorage.getItem(`ob_ig_pub_${postId}`);
+      if (savedPub) {
+        const parsed = JSON.parse(savedPub);
+        if (parsed?.mediaId) {
+          setPublishedMediaId(parsed.mediaId);
+          setStatus("published");
+        }
+      }
     } catch {}
-  }, []);
+  }, [postId]);
 
   const checkStatus = useCallback(async () => {
     try {
@@ -87,7 +97,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
 
   async function handlePublish(event: React.FormEvent) {
     event.preventDefault();
-    if (!videoUrl || !ready || status === "sending" || status === "polling") return;
+    if (!videoUrl || !ready || status === "sending" || status === "polling" || !confirmed) return;
 
     setStatus("sending");
     setError(null);
@@ -114,8 +124,15 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
         throw new Error(data?.error || "Erro ao publicar no Instagram.");
       }
 
+      const mediaId = data?.mediaId || "ok";
       setStatus("published");
-      setPublishedMediaId(data.mediaId || "ok");
+      setPublishedMediaId(mediaId);
+      setIsReposting(false);
+      setConfirmed(false);
+
+      try {
+        localStorage.setItem(`ob_ig_pub_${postId}`, JSON.stringify({ mediaId, publishedAt: new Date().toISOString() }));
+      } catch {}
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Falha na comunicação com o Instagram.");
@@ -187,97 +204,162 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
         </div>
       )}
 
-      <div>
-        <div className="flex items-center justify-between pb-1.5">
-          <label className="text-xs font-bold text-gray-300">Legenda do Reels:</label>
-          <div className="flex items-center gap-2">
-            <span className={`text-[11px] font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
-              {caption.length}/2200
-            </span>
-            <button
-              type="button"
-              onClick={copyCaption}
-              className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/20"
-            >
-              {copied ? "Copiado! ✓" : "Copiar"}
-            </button>
-          </div>
-        </div>
-        <textarea
-          rows={6}
-          maxLength={2200}
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          className="w-full rounded-xl border border-white/15 bg-[#07080c] p-3 text-xs font-mono leading-relaxed text-gray-100 outline-none focus:border-purple-500"
-        />
-
-        {hashtags.length > 0 && (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] uppercase font-bold text-gray-400">Hashtags:</span>
-            {hashtags.map((tag) => {
-              const active = caption.includes(tag);
-              return (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleHashtag(tag)}
-                  className={`rounded-md px-2 py-0.5 text-[11px] font-mono transition-colors ${
-                    active
-                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
-                      : "bg-white/5 text-gray-400 border border-white/10 hover:border-white/20"
-                  }`}
-                >
-                  {tag} {active ? "✓" : "+"}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       {error && (
         <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-xs text-red-200">
           <strong>Falha:</strong> {error}
         </div>
       )}
 
-      {status === "published" && (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3 text-xs text-emerald-200 flex flex-wrap items-center justify-between gap-2">
-          <span>✓ <strong>Reels publicado no Instagram!</strong> Media ID: {publishedMediaId}</span>
-          <button
-            type="button"
-            onClick={() => setStatus("idle")}
-            className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
-          >
-            🔄 Repostar no Instagram
-          </button>
+      {status === "published" && !isReposting ? (
+        <div role="status" className="space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-gray-200">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 font-bold">✓</span>
+            <p className="font-bold text-emerald-300">Reels publicado no Instagram com sucesso!</p>
+          </div>
+          <p className="text-xs text-gray-300">
+            O vídeo foi enviado para o perfil conectado e o processamento final está sendo concluído pelo Instagram.
+          </p>
+          {publishedMediaId && (
+            <p className="text-xs font-mono text-gray-400">
+              Media ID: <span className="text-gray-200 font-bold">{publishedMediaId}</span>
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a
+              href="https://business.facebook.com/latest/reels_composer"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-9 items-center text-xs font-bold text-brand-orange underline underline-offset-4"
+            >
+              Abrir Meta Business Suite ↗
+            </a>
+          </div>
+          <div className="border-t border-white/10 pt-3">
+            <button
+              type="button"
+              onClick={() => {
+                setIsReposting(true);
+                setConfirmed(false);
+              }}
+              className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
+            >
+              🔄 Apagou do perfil? Repostar vídeo no Instagram
+            </button>
+          </div>
         </div>
+      ) : (
+        <form onSubmit={handlePublish} className="space-y-4">
+          {isReposting && (
+            <div className="flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200">
+              <span>Modo de repostagem ativo. Preencha e confirme o reenvio abaixo.</span>
+              <button
+                type="button"
+                onClick={() => setIsReposting(false)}
+                className="font-bold underline hover:text-white"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+
+          <div>
+            <div className="flex items-center justify-between pb-1.5">
+              <label className="text-xs font-bold text-gray-300">Legenda do Reels:</label>
+              <div className="flex items-center gap-2">
+                <span className={`text-[11px] font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
+                  {caption.length}/2200
+                </span>
+                <button
+                  type="button"
+                  onClick={copyCaption}
+                  className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/20"
+                >
+                  {copied ? "Copiado! ✓" : "Copiar"}
+                </button>
+              </div>
+            </div>
+            <textarea
+              rows={6}
+              maxLength={2200}
+              value={caption}
+              onChange={(e) => {
+                setCaption(e.target.value);
+                setConfirmed(false);
+              }}
+              className="w-full rounded-xl border border-white/15 bg-[#07080c] p-3 text-xs font-mono leading-relaxed text-gray-100 outline-none focus:border-purple-500"
+            />
+
+            {hashtags.length > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Hashtags:</span>
+                {hashtags.map((tag) => {
+                  const active = caption.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        toggleHashtag(tag);
+                        setConfirmed(false);
+                      }}
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-mono transition-colors ${
+                        active
+                          ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                          : "bg-white/5 text-gray-400 border border-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      {tag} {active ? "✓" : "+"}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <label className="flex min-h-11 items-start gap-3 text-gray-200">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              disabled={status === "sending" || !isConfigured}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="mt-1 h-5 w-5 shrink-0 accent-brand-orange"
+            />
+            <span className="text-xs">
+              {isReposting
+                ? "Confirmo que o vídeo anterior foi apagado no Instagram e desejo reenviá-lo agora para o perfil conectado."
+                : "Revisei o vídeo e a legenda. Confirmo a publicação no perfil conectado do Instagram."}
+            </span>
+          </label>
+
+          <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+            <button
+              type="submit"
+              disabled={!ready || status === "sending" || !confirmed || !caption.trim()}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 py-2.5 text-xs font-black uppercase text-white shadow-lg transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {status === "sending"
+                ? "Processando no Instagram..."
+                : isReposting
+                ? "Confirmar e Repostar no Instagram"
+                : "Publicar no Instagram (API)"}
+            </button>
+
+            <a
+              href="https://business.facebook.com/latest/reels_composer"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={copyCaption}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-gray-200 hover:bg-white/10 hover:text-white"
+            >
+              Abrir Meta Business Suite ↗
+            </a>
+          </div>
+
+          <p className="text-[11px] text-gray-400">
+            Dica: Ao clicar em &ldquo;Abrir Meta Business Suite&rdquo;, a legenda com as hashtags é copiada automaticamente para sua área de transferência.
+          </p>
+        </form>
       )}
-
-      <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-        <button
-          type="button"
-          onClick={handlePublish}
-          disabled={!ready || status === "sending" || status === "polling"}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 py-2.5 text-xs font-black uppercase text-white shadow-lg transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-        >
-          {status === "sending" ? "Processando no Instagram..." : status === "published" ? "Publicar Novamente (API)" : "Publicar no Instagram (API)"}
-        </button>
-
-        <a
-          href="https://business.facebook.com/latest/reels_composer"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={copyCaption}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-gray-200 hover:bg-white/10 hover:text-white"
-        >
-          Abrir Meta Business Suite ↗
-        </a>
-      </div>
-
-      <p className="text-[11px] text-gray-400">
-        Dica: Ao clicar em &ldquo;Abrir Meta Business Suite&rdquo;, a legenda com as hashtags é copiada automaticamente para sua área de transferência.
-      </p>
     </div>
   );
 }

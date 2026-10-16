@@ -17,26 +17,6 @@ async function authorized(request: Request) {
   return !error && isVerifiedAdminSession(user, token);
 }
 
-async function resolveTikTokComposio(): Promise<{ token?: string }> {
-  const apiKey = process.env.COMPOSIO_API_KEY;
-  const accountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
-  if (!apiKey || !accountId) return {};
-  try {
-    const res = await fetch(`https://backend.composio.dev/api/v3.1/connected_accounts/${encodeURIComponent(accountId)}`, {
-      headers: { "x-api-key": apiKey },
-      signal: AbortSignal.timeout(10_000),
-      cache: "no-store",
-    });
-    if (!res.ok) return {};
-    const json = await res.json();
-    const data = (json?.data || json?.connection_data || json?.params || {}) as Record<string, unknown>;
-    const token = (data.access_token || data.token || json?.access_token) as string | undefined;
-    return { token };
-  } catch {
-    return {};
-  }
-}
-
 export async function GET(request: Request) {
   try {
     if (!await authorized(request)) {
@@ -51,6 +31,30 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return reply({ error: error instanceof Error ? error.message : "Erro ao consultar status do TikTok." }, 500);
+  }
+}
+
+async function uploadChunks(uploadUrl: string, buffer: Buffer, chunkSize: number, totalChunks: number) {
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = (i === totalChunks - 1) ? buffer.length - 1 : (start + chunkSize - 1);
+    const chunk = buffer.subarray(start, end + 1);
+
+    const res = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "video/mp4",
+        "Content-Range": `bytes ${start}-${end}/${buffer.length}`,
+        "Content-Length": String(chunk.length),
+      },
+      body: new Uint8Array(chunk),
+      signal: AbortSignal.timeout(120_000),
+    });
+
+    if (!res.ok && res.status !== 206 && res.status !== 201) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Falha no upload do vídeo para o TikTok (${res.status}): ${text.slice(0, 200)}`);
+    }
   }
 }
 
@@ -83,6 +87,28 @@ export async function POST(request: Request) {
       absoluteVideoUrl = `${siteUrl}${absoluteVideoUrl}`;
     }
 
+    const videoFetchRes = await fetch(absoluteVideoUrl, {
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (!videoFetchRes.ok) {
+      return reply({
+        error: `Não foi possível carregar o vídeo para envio (${videoFetchRes.status}).`,
+      }, 400);
+    }
+    const videoArrayBuffer = await videoFetchRes.arrayBuffer();
+    const videoBuffer = Buffer.from(videoArrayBuffer);
+    const videoSize = videoBuffer.length;
+    if (videoSize === 0) {
+      return reply({ error: "Arquivo de vídeo vazio." }, 400);
+    }
+
+    let chunkSize = videoSize;
+    let totalChunkCount = 1;
+    if (videoSize > 64_000_000) {
+      chunkSize = 10_000_000;
+      totalChunkCount = Math.floor(videoSize / chunkSize);
+    }
+
     const privacyLevel = ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"].includes(body.privacyLevel)
       ? body.privacyLevel
       : "PUBLIC_TO_EVERYONE";
@@ -97,15 +123,21 @@ export async function POST(request: Request) {
         video_cover_timestamp_ms: 1000,
       },
       source_info: {
-        source: "PULL_FROM_URL",
-        video_url: absoluteVideoUrl,
+        source: "FILE_UPLOAD",
+        video_size: videoSize,
+        chunk_size: chunkSize,
+        total_chunk_count: totalChunkCount,
       },
     };
 
+    let publishId: string | null = null;
+    let uploadUrl: string | null = null;
+    let lastError: string | null = null;
+
     if (apiKey && accountId && !customAccessToken) {
       for (const endpoint of [
-        "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/",
         "https://open.tiktokapis.com/v2/post/publish/video/init/",
+        "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/",
       ]) {
         try {
           const proxyRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
@@ -129,52 +161,65 @@ export async function POST(request: Request) {
 
           const proxyJson = await proxyRes.json().catch(() => null);
           const inner = proxyJson?.data;
-          const publishId = inner?.data?.publish_id;
+          const foundPublishId = inner?.data?.publish_id || inner?.publish_id || proxyJson?.data?.publish_id;
+          const foundUploadUrl = inner?.data?.upload_url || inner?.upload_url || proxyJson?.data?.upload_url;
 
-          if (proxyRes.ok && publishId) {
-            return reply({
-              success: true,
-              publishId,
-              message: "Vídeo enviado com sucesso para o TikTok via Composio!",
-            });
+          if (proxyRes.ok && foundUploadUrl) {
+            publishId = foundPublishId || "ok";
+            uploadUrl = foundUploadUrl;
+            break;
           }
 
-          if (inner?.error?.message && !/scope/i.test(inner.error.message)) {
-            return reply({ error: inner.error.message, details: inner.error }, 400);
+          if (inner?.error?.message) {
+            lastError = inner.error.message;
           }
-        } catch {}
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : "Erro ao conectar com Composio";
+        }
+      }
+    } else if (customAccessToken) {
+      for (const endpoint of [
+        "https://open.tiktokapis.com/v2/post/publish/video/init/",
+        "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/",
+      ]) {
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${customAccessToken}`,
+              "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(30_000),
+          });
+
+          const data = await response.json().catch(() => null);
+          if (response.ok && data?.data?.upload_url) {
+            publishId = data.data.publish_id || "ok";
+            uploadUrl = data.data.upload_url;
+            break;
+          }
+          if (data?.error?.message) {
+            lastError = data.error.message;
+          }
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : "Erro na requisição ao TikTok";
+        }
       }
     }
 
-    if (!customAccessToken) {
+    if (!uploadUrl) {
       return reply({
-        error: "Falha ao enviar para o TikTok via Composio. Verifique se o perfil foi autorizado na conexão.",
+        error: lastError || "Falha ao iniciar envio para o TikTok. Verifique as permissões da conta.",
       }, 400);
     }
 
-    const response = await fetch("https://open.tiktokapis.com/v2/post/publish/video/init/", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${customAccessToken}`,
-        "Content-Type": "application/json; charset=UTF-8",
-      },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(30_000),
-    });
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok || (data?.error && data.error.code !== "ok")) {
-      const msg = data?.error?.message || "Falha ao enviar publicação para o TikTok.";
-      return reply({ error: msg, details: data?.error }, 400);
-    }
-
-    const publishId = data?.data?.publish_id;
+    await uploadChunks(uploadUrl, videoBuffer, chunkSize, totalChunkCount);
 
     return reply({
       success: true,
       publishId,
-      message: "Vídeo enviado com sucesso para a fila de publicação do TikTok!",
+      message: "Vídeo enviado com sucesso para o TikTok!",
     });
   } catch (error) {
     return reply({
