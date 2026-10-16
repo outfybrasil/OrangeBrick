@@ -17,17 +17,79 @@ async function authorized(request: Request) {
   return !error && isVerifiedAdminSession(user, token);
 }
 
+async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallbackId?: string): Promise<{ accountId?: string; hasDirectPublish: boolean }> {
+  try {
+    const res = await fetch(`https://backend.composio.dev/api/v3.1/connected_accounts?user_uuid=${encodeURIComponent(userId)}&toolkit_slug=tiktok`, {
+      headers: { "x-api-key": apiKey },
+      signal: AbortSignal.timeout(10_000),
+      cache: "no-store",
+    });
+    if (!res.ok) return { accountId: fallbackId, hasDirectPublish: false };
+    const json = await res.json();
+    const items = (json?.items || []) as Array<{ id: string; status: string; scope?: string; data?: { scope?: string }; params?: { scope?: string } }>;
+    const activeWithPublish = items.find(i => {
+      const scope = i.scope || i.data?.scope || i.params?.scope || "";
+      return i.status === "ACTIVE" && scope.includes("video.publish");
+    });
+    if (activeWithPublish) {
+      return { accountId: activeWithPublish.id, hasDirectPublish: true };
+    }
+    const activeAny = items.find(i => i.status === "ACTIVE");
+    const scope = activeAny?.scope || activeAny?.data?.scope || activeAny?.params?.scope || "";
+    return { accountId: activeAny?.id || fallbackId, hasDirectPublish: scope.includes("video.publish") };
+  } catch {
+    return { accountId: fallbackId, hasDirectPublish: false };
+  }
+}
+
 export async function GET(request: Request) {
   try {
     if (!await authorized(request)) {
       return reply({ error: "Faça login como administrador para acessar." }, 403);
     }
-    const composioConfigured = Boolean(process.env.COMPOSIO_API_KEY && process.env.COMPOSIO_TIKTOK_ACCOUNT);
+
+    const url = new URL(request.url);
+    const apiKey = process.env.COMPOSIO_API_KEY;
+    const authConfigId = process.env.COMPOSIO_TIKTOK_AUTH_CONFIG || "ac_wVLrwhnpKQqe";
+    const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
+
+    if (url.searchParams.get("action") === "link") {
+      if (!apiKey) return reply({ error: "Composio não configurado." }, 400);
+
+      const linkRes = await fetch("https://backend.composio.dev/api/v3.1/connected_accounts/link", {
+        method: "POST",
+        headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ auth_config_id: authConfigId, user_id: composioUserId }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const linkJson = await linkRes.json().catch(() => null);
+      if (!linkRes.ok || !linkJson?.redirect_url) {
+        return reply({ error: linkJson?.error?.message || "Não foi possível gerar link de conexão." }, 400);
+      }
+      return reply({
+        redirectUrl: linkJson.redirect_url,
+        connectedAccountId: linkJson.connected_account_id,
+      });
+    }
+
+    const composioConfigured = Boolean(apiKey && process.env.COMPOSIO_TIKTOK_ACCOUNT);
     const hasEnvToken = Boolean(process.env.TIKTOK_ACCESS_TOKEN || composioConfigured);
+
+    let hasDirectPublish = false;
+    let resolvedAccountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
+
+    if (apiKey) {
+      const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, resolvedAccountId);
+      hasDirectPublish = resolved.hasDirectPublish;
+      if (resolved.accountId) resolvedAccountId = resolved.accountId;
+    }
+
     return reply({
       configured: hasEnvToken || composioConfigured,
       hasEnvToken,
       composioConfigured,
+      hasDirectPublish,
+      accountId: resolvedAccountId,
     });
   } catch (error) {
     return reply({ error: error instanceof Error ? error.message : "Erro ao consultar status do TikTok." }, 500);
@@ -71,9 +133,14 @@ export async function POST(request: Request) {
 
     const caption = typeof body.caption === "string" ? body.caption.trim().slice(0, 2200) : "";
     const apiKey = process.env.COMPOSIO_API_KEY;
-    const accountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
     const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
     const customAccessToken = body.accessToken?.trim() || process.env.TIKTOK_ACCESS_TOKEN;
+
+    let accountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
+    if (apiKey && !customAccessToken) {
+      const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, accountId);
+      if (resolved.accountId) accountId = resolved.accountId;
+    }
 
     if (!customAccessToken && (!apiKey || !accountId)) {
       return reply({
@@ -134,83 +201,68 @@ export async function POST(request: Request) {
     let uploadUrl: string | null = null;
     let lastError: string | null = null;
 
+    const directPostEndpoint = "https://open.tiktokapis.com/v2/post/publish/video/init/";
+
     if (apiKey && accountId && !customAccessToken) {
-      for (const endpoint of [
-        "https://open.tiktokapis.com/v2/post/publish/video/init/",
-        "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/",
-      ]) {
-        try {
-          const proxyRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
-            method: "POST",
-            headers: {
-              "x-api-key": apiKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              connected_account_id: accountId,
-              user_id: composioUserId,
-              endpoint,
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json; charset=UTF-8",
-              },
-              body: payload,
-            }),
-            signal: AbortSignal.timeout(45_000),
-          });
+      const proxyRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          connected_account_id: accountId,
+          user_id: composioUserId,
+          endpoint: directPostEndpoint,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+          body: payload,
+        }),
+        signal: AbortSignal.timeout(45_000),
+      });
 
-          const proxyJson = await proxyRes.json().catch(() => null);
-          const inner = proxyJson?.data;
-          const foundPublishId = inner?.data?.publish_id || inner?.publish_id || proxyJson?.data?.publish_id;
-          const foundUploadUrl = inner?.data?.upload_url || inner?.upload_url || proxyJson?.data?.upload_url;
+      const proxyJson = await proxyRes.json().catch(() => null);
+      const inner = proxyJson?.data;
+      const foundPublishId = inner?.data?.publish_id || inner?.publish_id || proxyJson?.data?.publish_id;
+      const foundUploadUrl = inner?.data?.upload_url || inner?.upload_url || proxyJson?.data?.upload_url;
 
-          if (proxyRes.ok && foundUploadUrl) {
-            publishId = foundPublishId || "ok";
-            uploadUrl = foundUploadUrl;
-            break;
-          }
-
-          if (inner?.error?.message) {
-            lastError = inner.error.message;
-          }
-        } catch (err) {
-          lastError = err instanceof Error ? err.message : "Erro ao conectar com Composio";
-        }
+      if (proxyRes.ok && foundUploadUrl) {
+        publishId = foundPublishId || "ok";
+        uploadUrl = foundUploadUrl;
+      } else {
+        lastError = inner?.error?.message || proxyJson?.error?.message || "Falha na inicialização da postagem direta.";
       }
     } else if (customAccessToken) {
-      for (const endpoint of [
-        "https://open.tiktokapis.com/v2/post/publish/video/init/",
-        "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/",
-      ]) {
-        try {
-          const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${customAccessToken}`,
-              "Content-Type": "application/json; charset=UTF-8",
-            },
-            body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(30_000),
-          });
+      const response = await fetch(directPostEndpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${customAccessToken}`,
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(30_000),
+      });
 
-          const data = await response.json().catch(() => null);
-          if (response.ok && data?.data?.upload_url) {
-            publishId = data.data.publish_id || "ok";
-            uploadUrl = data.data.upload_url;
-            break;
-          }
-          if (data?.error?.message) {
-            lastError = data.error.message;
-          }
-        } catch (err) {
-          lastError = err instanceof Error ? err.message : "Erro na requisição ao TikTok";
-        }
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.data?.upload_url) {
+        publishId = data.data.publish_id || "ok";
+        uploadUrl = data.data.upload_url;
+      } else {
+        lastError = data?.error?.message || "Falha ao conectar com o TikTok.";
       }
     }
 
     if (!uploadUrl) {
+      if (/scope/i.test(lastError || "")) {
+        return reply({
+          error: "A conta do TikTok ainda não autorizou a postagem direta no feed (video.publish). Clique em 'Autorizar Postagem Direta' para liberar as publicações automáticas com legendas.",
+          requiresAuth: true,
+        }, 403);
+      }
       return reply({
-        error: lastError || "Falha ao iniciar envio para o TikTok. Verifique as permissões da conta.",
+        error: lastError || "Falha ao iniciar envio para o TikTok.",
       }, 400);
     }
 
@@ -219,7 +271,7 @@ export async function POST(request: Request) {
     return reply({
       success: true,
       publishId,
-      message: "Vídeo enviado com sucesso para o TikTok!",
+      message: "Vídeo publicado com sucesso diretamente no TikTok!",
     });
   } catch (error) {
     return reply({
