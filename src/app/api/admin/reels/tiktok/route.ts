@@ -199,68 +199,85 @@ export async function POST(request: Request) {
 
     let publishId: string | null = null;
     let uploadUrl: string | null = null;
+    let isDirect = false;
     let lastError: string | null = null;
 
-    const directPostEndpoint = "https://open.tiktokapis.com/v2/post/publish/video/init/";
+    const endpoints = [
+      { url: "https://open.tiktokapis.com/v2/post/publish/video/init/", direct: true },
+      { url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false },
+    ];
 
     if (apiKey && accountId && !customAccessToken) {
-      const proxyRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
-        method: "POST",
-        headers: {
-          "x-api-key": apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          connected_account_id: accountId,
-          user_id: composioUserId,
-          endpoint: directPostEndpoint,
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-          },
-          body: payload,
-        }),
-        signal: AbortSignal.timeout(45_000),
-      });
+      for (const ep of endpoints) {
+        try {
+          const proxyRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
+            method: "POST",
+            headers: {
+              "x-api-key": apiKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              connected_account_id: accountId,
+              user_id: composioUserId,
+              endpoint: ep.url,
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json; charset=UTF-8",
+              },
+              body: payload,
+            }),
+            signal: AbortSignal.timeout(45_000),
+          });
 
-      const proxyJson = await proxyRes.json().catch(() => null);
-      const inner = proxyJson?.data;
-      const foundPublishId = inner?.data?.publish_id || inner?.publish_id || proxyJson?.data?.publish_id;
-      const foundUploadUrl = inner?.data?.upload_url || inner?.upload_url || proxyJson?.data?.upload_url;
+          const proxyJson = await proxyRes.json().catch(() => null);
+          const inner = proxyJson?.data;
+          const foundPublishId = inner?.data?.publish_id || inner?.publish_id || proxyJson?.data?.publish_id;
+          const foundUploadUrl = inner?.data?.upload_url || inner?.upload_url || proxyJson?.data?.upload_url;
 
-      if (proxyRes.ok && foundUploadUrl) {
-        publishId = foundPublishId || "ok";
-        uploadUrl = foundUploadUrl;
-      } else {
-        lastError = inner?.error?.message || proxyJson?.error?.message || "Falha na inicialização da postagem direta.";
+          if (proxyRes.ok && foundUploadUrl) {
+            publishId = foundPublishId || "ok";
+            uploadUrl = foundUploadUrl;
+            isDirect = ep.direct;
+            break;
+          }
+
+          if (inner?.error?.message) {
+            lastError = inner.error.message;
+          }
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : "Erro na chamada do Composio";
+        }
       }
     } else if (customAccessToken) {
-      const response = await fetch(directPostEndpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${customAccessToken}`,
-          "Content-Type": "application/json; charset=UTF-8",
-        },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(30_000),
-      });
+      for (const ep of endpoints) {
+        try {
+          const response = await fetch(ep.url, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${customAccessToken}`,
+              "Content-Type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(30_000),
+          });
 
-      const data = await response.json().catch(() => null);
-      if (response.ok && data?.data?.upload_url) {
-        publishId = data.data.publish_id || "ok";
-        uploadUrl = data.data.upload_url;
-      } else {
-        lastError = data?.error?.message || "Falha ao conectar com o TikTok.";
+          const data = await response.json().catch(() => null);
+          if (response.ok && data?.data?.upload_url) {
+            publishId = data.data.publish_id || "ok";
+            uploadUrl = data.data.upload_url;
+            isDirect = ep.direct;
+            break;
+          }
+          if (data?.error?.message) {
+            lastError = data.error.message;
+          }
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : "Erro na requisição ao TikTok";
+        }
       }
     }
 
     if (!uploadUrl) {
-      if (/scope/i.test(lastError || "")) {
-        return reply({
-          error: "A conta do TikTok ainda não autorizou a postagem direta no feed (video.publish). Clique em 'Autorizar Postagem Direta' para liberar as publicações automáticas com legendas.",
-          requiresAuth: true,
-        }, 403);
-      }
       return reply({
         error: lastError || "Falha ao iniciar envio para o TikTok.",
       }, 400);
@@ -271,7 +288,10 @@ export async function POST(request: Request) {
     return reply({
       success: true,
       publishId,
-      message: "Vídeo publicado com sucesso diretamente no TikTok!",
+      isDirect,
+      message: isDirect
+        ? "Vídeo publicado com sucesso diretamente no TikTok!"
+        : "Vídeo recebido pelo TikTok (Caixa de Entrada / Rascunhos). A legenda foi copiada para sua área de transferência!",
     });
   } catch (error) {
     return reply({

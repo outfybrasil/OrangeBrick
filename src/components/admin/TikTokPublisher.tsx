@@ -19,14 +19,13 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   const [disableDuet, setDisableDuet] = useState(false);
   const [disableStitch, setDisableStitch] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "published" | "error">("idle");
+  const [isDirectPost, setIsDirectPost] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [publishId, setPublishId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [configuredOnServer, setConfiguredOnServer] = useState(false);
   const [composioConfigured, setComposioConfigured] = useState(false);
-  const [hasDirectPublish, setHasDirectPublish] = useState(false);
-  const [loadingAuthLink, setLoadingAuthLink] = useState(false);
   const [customToken, setCustomToken] = useState("");
   const [isReposting, setIsReposting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -46,6 +45,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
         const parsed = JSON.parse(savedPub);
         if (parsed?.publishId) {
           setPublishId(parsed.publishId);
+          setIsDirectPost(Boolean(parsed.isDirect));
           setStatus("published");
         }
       }
@@ -61,7 +61,6 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       if (response.ok) {
         setConfiguredOnServer(Boolean(data.configured));
         setComposioConfigured(Boolean(data.composioConfigured));
-        setHasDirectPublish(Boolean(data.hasDirectPublish));
       }
     } catch {}
   }, [token]);
@@ -76,25 +75,6 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       localStorage.setItem("ob_tiktok_access_token", customToken.trim());
       setShowConfig(false);
     } catch {}
-  };
-
-  const openAuthLink = async () => {
-    setLoadingAuthLink(true);
-    try {
-      const response = await fetch("/api/admin/reels/tiktok?action=link", {
-        headers: { Authorization: `Bearer ${await token()}` },
-      });
-      const data = await response.json();
-      if (data?.redirectUrl) {
-        window.open(data.redirectUrl, "_blank", "noopener,noreferrer");
-      } else {
-        alert(data?.error || "Erro ao obter link de autorização.");
-      }
-    } catch (err) {
-      alert("Falha ao abrir autorização.");
-    } finally {
-      setLoadingAuthLink(false);
-    }
   };
 
   const copyCaption = () => {
@@ -123,6 +103,8 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
     setError(null);
 
     try {
+      copyCaption();
+
       const res = await fetch("/api/admin/reels/tiktok", {
         method: "POST",
         headers: {
@@ -148,13 +130,20 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       }
 
       const finalPublishId = data?.publishId || "ok";
+      const isDirect = Boolean(data?.isDirect);
+
       setStatus("published");
       setPublishId(finalPublishId);
+      setIsDirectPost(isDirect);
       setIsReposting(false);
       setConfirmed(false);
 
       try {
-        localStorage.setItem(`ob_tt_pub_${postId}`, JSON.stringify({ publishId: finalPublishId, publishedAt: new Date().toISOString() }));
+        localStorage.setItem(`ob_tt_pub_${postId}`, JSON.stringify({
+          publishId: finalPublishId,
+          isDirect,
+          publishedAt: new Date().toISOString()
+        }));
       } catch {}
     } catch (err) {
       setStatus("error");
@@ -172,56 +161,25 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
           <div>
             <p className="font-bold text-white">TikTok Content Posting</p>
             <p className="text-xs text-gray-400">
-              {hasDirectPublish ? (
-                <span className="text-cyan-400 font-bold">● Postagem Direta no Feed Pronta</span>
-              ) : composioConfigured ? (
-                <span className="text-amber-400">● Conectado (Requer autorização de Postagem Direta)</span>
+              {composioConfigured ? (
+                <span className="text-cyan-400">● Conectado via Composio</span>
               ) : isConfigured ? (
                 <span className="text-cyan-400">● Conexão TikTok API pronta</span>
               ) : (
-                <span className="text-amber-400">● Requer autorização da conta</span>
+                <span className="text-amber-400">● Requer configuração da conta</span>
               )}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {!hasDirectPublish && composioConfigured && (
-            <button
-              type="button"
-              disabled={loadingAuthLink}
-              onClick={openAuthLink}
-              className="rounded-lg bg-cyan-400 px-2.5 py-1 text-xs font-bold text-black shadow-sm transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
-            >
-              {loadingAuthLink ? "Abrindo..." : "🔗 Autorizar Postagem Direta"}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowConfig(!showConfig)}
-            className="rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            {showConfig ? "Ocultar Chaves" : "Configurar API"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowConfig(!showConfig)}
+          className="rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          {showConfig ? "Ocultar Chaves" : "Configurar API"}
+        </button>
       </div>
-
-      {!hasDirectPublish && composioConfigured && (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 flex flex-wrap items-center justify-between gap-2">
-          <span>
-            ⚠️ <strong>Postagem Direta pendente:</strong> Para postar direto no feed com legendas e hashtags automáticas (sem ir para os rascunhos do app), autorize a permissão <strong>video.publish</strong> no TikTok.
-          </span>
-          <button
-            type="button"
-            disabled={loadingAuthLink}
-            onClick={openAuthLink}
-            className="rounded-lg bg-amber-400 px-3 py-1 font-bold text-black hover:bg-amber-300 disabled:opacity-50"
-          >
-            Autorizar Agora ↗
-          </button>
-        </div>
-      )}
 
       {showConfig && (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 space-y-3">
@@ -249,17 +207,8 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-xs text-red-200 space-y-2">
-          <p><strong>Falha:</strong> {error}</p>
-          {/scope|autoriz/i.test(error) && (
-            <button
-              type="button"
-              onClick={openAuthLink}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-400 px-3 py-1 font-bold text-black hover:bg-cyan-300"
-            >
-              🔗 Conectar Permissão de Postagem Direta no TikTok ↗
-            </button>
-          )}
+        <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3 text-xs text-red-200">
+          <strong>Falha:</strong> {error}
         </div>
       )}
 
@@ -267,10 +216,14 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
         <div role="status" className="space-y-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 text-gray-200">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 font-bold">✓</span>
-            <p className="font-bold text-cyan-300">Vídeo publicado com sucesso diretamente no TikTok!</p>
+            <p className="font-bold text-cyan-300">
+              {isDirectPost ? "Vídeo publicado com sucesso diretamente no TikTok!" : "Vídeo recebido pelo TikTok com sucesso!"}
+            </p>
           </div>
           <p className="text-xs text-gray-300">
-            O Reels foi enviado com legenda, hashtags e configurações de privacidade diretamente para o seu feed do TikTok.
+            {isDirectPost
+              ? "O Reels foi publicado diretamente no seu feed do TikTok com legendas e hashtags."
+              : "O vídeo foi enviado para o seu aplicativo do TikTok (Caixa de Entrada / Rascunhos). A legenda e hashtags foram copiadas automaticamente para sua área de transferência para colar no app!"}
           </p>
           {publishId && (
             <p className="text-xs font-mono text-gray-400">
@@ -278,11 +231,19 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             </p>
           )}
           <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={copyCaption}
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300 hover:bg-cyan-400/20"
+            >
+              {copied ? "Legenda Copiada! ✓" : "📋 Copiar Legenda e Hashtags"}
+            </button>
+
             <a
               href="https://www.tiktok.com/creator-center/upload"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-9 items-center text-xs font-bold text-cyan-400 underline underline-offset-4"
+              className="inline-flex min-h-8 items-center text-xs font-bold text-gray-300 underline underline-offset-4"
             >
               Abrir TikTok Studio Web ↗
             </a>
@@ -437,7 +398,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             <span className="text-xs">
               {isReposting
                 ? "Confirmo que o vídeo anterior foi apagado no TikTok e desejo reenviá-lo agora para a conta conectada."
-                : "Revisei o vídeo e a legenda. Confirmo a publicação direta no feed do TikTok."}
+                : "Revisei o vídeo e a legenda. Confirmo a publicação no TikTok."}
             </span>
           </label>
 
@@ -448,10 +409,10 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-pink-500 py-2.5 text-xs font-black uppercase text-black shadow-lg transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "sending"
-                ? "Publicando direto no TikTok..."
+                ? "Enviando para o TikTok..."
                 : isReposting
                 ? "Confirmar e Repostar no TikTok"
-                : "Publicar no TikTok (Feed Direto)"}
+                : "Publicar no TikTok"}
             </button>
 
             <a
@@ -466,7 +427,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
           </div>
 
           <p className="text-[11px] text-gray-400">
-            Dica: Ao clicar em &ldquo;Abrir TikTok Studio Web&rdquo;, o texto e as hashtags são copiados automaticamente para a sua área de transferência.
+            Ao publicar, a legenda e hashtags são copiadas automaticamente para sua área de transferência para facilidade no celular.
           </p>
         </form>
       )}
