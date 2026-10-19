@@ -47,6 +47,7 @@ next-env.d.ts
 
 # temp artifacts
 session-*.md
+codex-session-*.md
 .impeccable/
 /tmp/backups/
 /tmp/
