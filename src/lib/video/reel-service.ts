@@ -37,6 +37,7 @@ export interface SocialCopys {
 }
 
 const MANIFEST_PATH = path.resolve(process.cwd(), "public", "reels", "manifest.json");
+const INSTAGRAM_PROFILE_URL = "https://www.instagram.com/ob.labs/";
 
 export function getManifest(): Record<string, ReelManifestItem> {
   try {
@@ -172,13 +173,13 @@ export function generateSocialCopys(post: {
   const coreCopy = [hook, ...(repeatedSummary ? [] : [summary]), question];
   const instagramCaption = [
     ...coreCopy,
-    "Siga @OrangeBrick para acompanhar as próximas notícias de games.",
+    `Leia a matéria completa no site: ${articleUrl}`,
     ...(attribution ? [attribution] : []),
     instagramHashtags.join(" "),
   ].filter(Boolean).join("\n\n");
   const tiktokCaption = [
     ...coreCopy,
-    "Siga @OrangeBrick para acompanhar os próximos passos.",
+    "Siga o Orange Brick para acompanhar os próximos passos.",
     ...(attribution ? [attribution] : []),
     tiktokHashtags.join(" "),
   ].filter(Boolean).join("\n\n");
@@ -188,7 +189,7 @@ export function generateSocialCopys(post: {
     ...(repeatedSummary ? [] : [summary]),
     question,
     "Inscreva-se no canal para acompanhar mais notícias e os próximos passos.",
-    `Leia a matéria completa: ${articleUrl}`,
+    `Siga @ob.labs no Instagram: ${INSTAGRAM_PROFILE_URL}`,
     attribution,
     youtubeHashtags,
   ].filter(Boolean).join("\n\n");

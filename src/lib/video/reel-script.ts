@@ -61,7 +61,7 @@ REGRAS:
 5. Preserve rigorosamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não misture números de processos diferentes nem transforme “propõe” ou “pode afetar” em “fechou” ou “demitiu”.
 6. Crie exatamente 5 cenas alinhadas à narração: revelação, detalhe principal, contexto, impacto e conclusão/próximo passo. Só mostre plataformas, datas, números, decisões e declarações que apareçam na matéria. Se um dado não existir, use contexto ou impacto; nunca invente nem preencha com informação genérica.
 7. Escreva textos de tela curtos e legíveis no celular: gancho com até 55 caracteres; títulos de cena com até 36; destaques com até 48; tags com até 18; no máximo 3 pílulas curtas por cena. Use pílulas apenas para fatos confirmados. Evite repetir a mesma frase em todas as telas.
-8. A pergunta final deve ser específica ao assunto. A chamada final deve convidar a seguir @OrangeBrick para acompanhar notícias ou próximos passos, sem prometer frequência ou resultado.
+8. A pergunta final deve ser específica ao assunto. A chamada final deve convidar a seguir @ob.labs no Instagram para acompanhar notícias ou próximos passos, sem prometer frequência ou resultado.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {
@@ -111,8 +111,8 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
     }
   ],
   "ctaQuestion": "Pergunta específica sobre o impacto para quem joga?",
-  "ctaAction": "Siga @OrangeBrick para acompanhar os próximos passos",
-  "ctaButton": "SIGA @ORANGEBRICK"
+  "ctaAction": "Siga @ob.labs no Instagram para acompanhar os próximos passos",
+  "ctaButton": "SIGA @OB.LABS"
 }`;
 
   let lastError: Error | null = null;
@@ -179,14 +179,15 @@ function parseScript(raw: string): ReelScriptData {
     throw new Error("Roteiro retornado pelo Gemini tem cenas sem texto essencial.");
   }
   data.narrationText = data.narrationText.trim().replace(/\s*(?:Quer ver a mat[eé]ria completa\?\s*)?Acesse orangebrick\.blog\.?\s*$/i, "").trim();
-  if (!/\b(?:siga|segue)\b[\s\S]{0,100}orange\s*brick/i.test(data.narrationText.slice(-180))) {
-    data.narrationText = `${data.narrationText.replace(/[\s.!?]+$/, "")}. Siga o Orange Brick para mais notícias de games.`;
+  data.narrationText = data.narrationText.replace(/@OrangeBrick/gi, "@ob.labs");
+  if (!/\b(?:siga|segue)\b[\s\S]{0,100}@ob\.labs/i.test(data.narrationText.slice(-180))) {
+    data.narrationText = `${data.narrationText.replace(/[\s.!?]+$/, "")}. Siga @ob.labs no Instagram para mais notícias de games.`;
   }
   data.ctaQuestion = fitText(data.ctaQuestion || "", 56);
   if (!data.ctaQuestion.endsWith("?") || /pergunta específica|impacto para quem joga/i.test(data.ctaQuestion)) {
     data.ctaQuestion = "O que você acha dessa mudança?";
   }
-  data.ctaAction = "Siga @OrangeBrick para acompanhar notícias de games";
-  data.ctaButton = "SIGA @ORANGEBRICK";
+  data.ctaAction = "Siga @ob.labs no Instagram para acompanhar notícias de games";
+  data.ctaButton = "SIGA @OB.LABS";
   return data;
 }
