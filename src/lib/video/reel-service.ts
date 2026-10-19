@@ -14,6 +14,7 @@ export interface ReelManifestItem {
   finished_at?: string;
   failed_at?: string;
   error?: string;
+  pid?: number;
   style?: string;
   variation?: number;
   script?: ReelScriptData;
@@ -221,10 +222,14 @@ export async function triggerReelGeneration(slug: string): Promise<{ queued: boo
   const manifest = getManifest();
   const current = manifest[slug];
 
-  // Se já está gerando há menos de 10 minutos, não duplica
   if (current?.status === "generating" && current.started_at) {
     const elapsed = Date.now() - new Date(current.started_at).getTime();
-    if (elapsed < 10 * 60 * 1000) {
+    let processRunning = false;
+    if (current.pid) {
+      try { process.kill(current.pid, 0); processRunning = true; }
+      catch { processRunning = false; }
+    }
+    if (processRunning || (reelQueue.includes(slug) && elapsed < 60 * 60 * 1000)) {
       return { queued: false, message: "Vídeo já está sendo processado" };
     }
   }
@@ -233,7 +238,8 @@ export async function triggerReelGeneration(slug: string): Promise<{ queued: boo
   updateReelStatus(slug, {
     status: "generating",
     started_at: new Date().toISOString(),
-    error: undefined
+    error: undefined,
+    pid: undefined,
   });
 
   if (!reelQueue.includes(slug)) {
@@ -267,32 +273,46 @@ function processReelQueue() {
     cwd: process.cwd()
   });
 
+  updateReelStatus(nextSlug, { pid: child.pid });
+
   let output = "";
 
   child.stdout?.on("data", (data) => {
-    output += data.toString();
+    output = (output + data.toString()).slice(-4000);
   });
 
   child.stderr?.on("data", (data) => {
-    output += data.toString();
+    output = (output + data.toString()).slice(-4000);
+  });
+
+  let spawnError: Error | undefined;
+  child.once("error", (error) => {
+    spawnError = error;
   });
 
   child.on("close", (code) => {
     isProcessingQueue = false;
-    if (code === 0) {
+    if (code === 0 && checkReelFile(nextSlug).exists) {
       const fileInfo = checkReelFile(nextSlug);
       updateReelStatus(nextSlug, {
         status: "ready",
+        pid: undefined,
         finished_at: new Date().toISOString(),
         video_url: `/reels/${nextSlug}.mp4`,
         file_size: fileInfo.size
       });
     } else {
-      console.error(`[ReelQueue] ❌ Falha no Reel de ${nextSlug} (código ${code}):\n${output.slice(-500)}`);
+      const reason = spawnError
+        ? `Não foi possível iniciar o renderizador: ${spawnError.message}`
+        : code === 0
+          ? "O renderizador terminou sem criar um vídeo válido."
+          : `O renderizador terminou com código ${code ?? "desconhecido"}. Consulte os logs do servidor.`;
+      console.error(`[ReelQueue] Falha no Reel de ${nextSlug}: ${reason}\n${output.slice(-500)}`);
       updateReelStatus(nextSlug, {
         status: "failed",
+        pid: undefined,
         failed_at: new Date().toISOString(),
-        error: `Processo finalizou com código ${code}. Verifique os logs.`
+        error: reason
       });
     }
 

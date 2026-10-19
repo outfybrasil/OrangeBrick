@@ -27,10 +27,19 @@ export function publishedPostCursorFilter(post: { id: string; published_at: stri
   return `published_at.lt.${post.published_at},and(published_at.eq.${post.published_at},id.lt.${post.id}),published_at.is.null`;
 }
 
-export function selectFeaturedNews<T extends { is_featured?: boolean | null; featured_priority?: number | null }>(posts: T[]): T | null {
+export function saoPauloNewsDate(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+export function selectFeaturedNews<T extends { is_featured?: boolean | null; featured_priority?: number | null; published_at?: string | null }>(posts: T[], today?: string): T | null {
   let featured: T | null = null;
+  let latestToday: T | null = null;
   for (const post of posts) {
-    if (post.is_featured && (!featured || (post.featured_priority ?? 0) > (featured.featured_priority ?? 0))) featured = post;
+    if (today && (!post.published_at || saoPauloNewsDate(post.published_at) !== today)) continue;
+    if (!latestToday || (post.published_at || "") > (latestToday.published_at || "")) latestToday = post;
+    if (post.is_featured && (!featured || (post.featured_priority ?? 0) > (featured.featured_priority ?? 0) || (post.featured_priority ?? 0) === (featured.featured_priority ?? 0) && (post.published_at || "") > (featured.published_at || ""))) featured = post;
   }
-  return featured || posts[0] || null;
+  return featured || latestToday;
 }

@@ -13,6 +13,7 @@ import { NewsList } from "@/components/feed/NewsList";
 import { createPublicServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
+import { saoPauloNewsDate, selectFeaturedNews } from "@/lib/news-query";
 
 export const dynamic = "force-dynamic";
 
@@ -154,20 +155,13 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   let secondaryPosts: Post[] = [];
   let remainingPosts: Post[] = [];
 
-  if (allPosts.length > 0) {
-    const featuredIndex = allPosts.findIndex(
-      (p) => Boolean(p.is_featured) || p.category === "breaking"
-    );
-    if (featuredIndex >= 0) {
-      heroPost = allPosts[featuredIndex];
-      const withoutHero = allPosts.filter((_, idx) => idx !== featuredIndex);
-      secondaryPosts = withoutHero.slice(0, 3);
-      remainingPosts = withoutHero.slice(3);
-    } else {
-      heroPost = allPosts[0];
-      secondaryPosts = allPosts.slice(1, 4);
-      remainingPosts = allPosts.slice(4);
-    }
+  heroPost = selectFeaturedNews(allPosts, saoPauloNewsDate(new Date()));
+  if (heroPost) {
+    const withoutHero = allPosts.filter((post) => post.id !== heroPost?.id);
+    secondaryPosts = withoutHero.slice(0, 3);
+    remainingPosts = withoutHero.slice(3);
+  } else {
+    remainingPosts = allPosts;
   }
 
   const candidateIds = allPosts.map((p) => p.id);

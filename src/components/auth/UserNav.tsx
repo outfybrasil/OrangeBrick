@@ -144,7 +144,7 @@ export function UserNav() {
             </div>
 
             <Link
-              href={`/profile/${encodeURIComponent(profile?.username || displayName)}`}
+              href={profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick"}
               onClick={() => setIsDropdownOpen(false)}
               className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white"
             >

@@ -196,6 +196,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps) {
   const router = useRouter();
+  const hasBodyMedia = useMemo(() => parseEditorialBlocks(post.body).some((block) => block.type === "image" || block.type === "video"), [post.body]);
   const supabase = useMemo(() => createDataClient(), []);
   const { user } = useAuth();
   const { toggleBookmark, isBookmarked } = useBookmarks();
@@ -468,7 +469,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             </div>
           </div>
 
-{post.image_url && (
+{post.image_url && !hasBodyMedia && (
             <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-2xl bg-[#08090C] my-6">
               <Image
                 src={post.image_url}

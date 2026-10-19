@@ -15,9 +15,10 @@ import type { Post, PostCategory } from "@/lib/types/database";
 
 interface HomePageClientProps {
   initialPosts: Post[];
+  featuredDay: string;
 }
 
-export function HomePageClient({ initialPosts }: HomePageClientProps) {
+export function HomePageClient({ initialPosts, featuredDay }: HomePageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as PostCategory | null;
@@ -56,6 +57,7 @@ export function HomePageClient({ initialPosts }: HomePageClientProps) {
         <HomeEngagementTracker />
 
         <NewsFeed
+          featuredDay={featuredDay}
           headingLevel="h1"
           category={activeCategory}
           activeTag={activeTag}

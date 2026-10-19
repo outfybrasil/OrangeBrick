@@ -61,7 +61,7 @@ export function NewsCardMedia({ src, alt, category }: NewsCardMediaProps) {
         fill
         sizes="(max-width: 767px) 100vw, 50vw"
         className={`
-          z-0 object-cover transform scale-100 group-hover:scale-105 transition-transform duration-500
+          z-0 object-contain object-center p-1 transition-transform duration-500 group-hover:scale-[1.01]
           ${isBreaking ? "glitch-img" : ""}
         `}
         onError={() => setHasError(true)}

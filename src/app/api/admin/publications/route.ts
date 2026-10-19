@@ -3,7 +3,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { createPublicServerClient, createServiceDataClient } from "@/lib/supabase/server";
 import { readResponseBuffer } from "@/lib/server/network";
 import { deliverPublicationNotice } from "@/lib/server/telegram-publication";
-import { telegramDelivery, youtubeDelivery, unavailableDelivery, type TelegramNotice, type YouTubeDelivery } from "@/lib/publication-status";
+import { socialDelivery, telegramDelivery, youtubeDelivery, unavailableDelivery, type SocialDelivery, type TelegramNotice, type YouTubeDelivery } from "@/lib/publication-status";
 import { getRateLimitWindowStart } from "@/lib/server/rate-limit";
 
 export const runtime = "nodejs";
@@ -26,17 +26,20 @@ export async function GET(request: Request) {
   if (error) return reply({ error: "Não foi possível carregar o acompanhamento." }, 503);
   const ids = (posts || []).map(post => post.id as string);
   if (!ids.length) return reply({ items: [], page, pages: Math.max(1, Math.ceil((count || 0) / 20)), warnings: [], checkedAt: new Date().toISOString() });
-  const [telegram, youtube] = await Promise.all([
+  const [telegram, youtube, social] = await Promise.all([
     db.from("bot_state").select("key,value,updated_at").in("key", ids.map(id => `telegram:publication:${id}`)).abortSignal(AbortSignal.timeout(8000)),
     db.from("reel_youtube_publications").select("post_id,status,updated_at,video_id,visibility").in("post_id", ids).order("updated_at", { ascending: false }).abortSignal(AbortSignal.timeout(8000)),
+    db.from("reel_social_publications").select("post_id,platform,status,updated_at,external_id,error").in("post_id", ids).abortSignal(AbortSignal.timeout(8000)),
   ]);
   const notices = new Map((telegram.data || []).map(row => [String(row.key).replace("telegram:publication:", ""), row as TelegramNotice]));
   const publications = new Map<string, YouTubeDelivery>();
   for (const row of youtube.data || []) if (!publications.has(String(row.post_id))) publications.set(String(row.post_id), row as YouTubeDelivery);
+  const socialPublications = new Map<string, SocialDelivery>();
+  for (const row of social.data || []) socialPublications.set(`${row.post_id}:${row.platform}`, row as SocialDelivery);
   return reply({
-    items: (posts || []).map(post => ({ id: post.id, title: post.title, slug: post.slug, site: post.is_published ? "published" : post.scheduled_at ? "scheduled" : "draft", publishedAt: post.published_at, telegram: telegram.error ? unavailableDelivery() : telegramDelivery(notices.get(String(post.id)) || null), youtube: youtube.error ? unavailableDelivery() : youtubeDelivery(publications.get(String(post.id)) || null) })),
+    items: (posts || []).map(post => ({ id: post.id, title: post.title, slug: post.slug, site: post.is_published ? "published" : post.scheduled_at ? "scheduled" : "draft", publishedAt: post.published_at, telegram: telegram.error ? unavailableDelivery() : telegramDelivery(notices.get(String(post.id)) || null), youtube: youtube.error ? unavailableDelivery() : youtubeDelivery(publications.get(String(post.id)) || null), instagram: social.error ? unavailableDelivery() : socialDelivery(socialPublications.get(`${post.id}:instagram`) || null, "instagram"), tiktok: social.error ? unavailableDelivery() : socialDelivery(socialPublications.get(`${post.id}:tiktok`) || null, "tiktok") })),
     page, pages: Math.max(1, Math.ceil((count || 0) / 20)), checkedAt: new Date().toISOString(),
-    warnings: [telegram.error && "A consulta do Telegram está indisponível.", youtube.error && "A consulta do YouTube está indisponível."].filter(Boolean),
+    warnings: [telegram.error && "A consulta do Telegram está indisponível.", youtube.error && "A consulta do YouTube está indisponível.", social.error && "A consulta do Instagram e TikTok está indisponível."].filter(Boolean),
   });
 }
 

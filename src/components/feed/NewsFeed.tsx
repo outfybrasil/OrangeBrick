@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useMemo, useState, useCallback, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
@@ -9,7 +9,7 @@ import { NewsFeedEmpty } from "./NewsFeedEmpty";
 import { NewsSidebar } from "./NewsSidebar";
 import { useInfiniteFeed } from "@/lib/hooks/useInfiniteFeed";
 import { usePostStats } from "@/lib/hooks/usePostStats";
-import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats } from "@/lib/types/database";
+import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats, type ReactionType } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
@@ -18,6 +18,7 @@ import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
 
 interface NewsFeedProps {
+  featuredDay?: string;
   headingLevel?: "h1" | "h2";
   category: PostCategory | null;
   platformSlug?: PlatformSlug | null;
@@ -44,7 +45,7 @@ const EMPTY_STATS: PostStats = {
   userReaction: null,
 };
 
-export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts }: NewsFeedProps) {
+export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts, featuredDay }: NewsFeedProps) {
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
@@ -99,7 +100,33 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   }, [rawPosts, platformSlug, searchQuery, activeTag]);
 
   const rawPostIds = useMemo(() => rawPosts.map((post) => post.id), [rawPosts]);
-  const stats = usePostStats(rawPostIds);
+  const fetchedStats = usePostStats(rawPostIds);
+  const [localStats, setLocalStats] = useState<Record<string, { reactions: Record<ReactionType, number>; userReaction: ReactionType | null }>>({});
+
+  const stats = useMemo(() => {
+    if (Object.keys(localStats).length === 0) return fetchedStats;
+    const merged = { ...fetchedStats };
+    for (const [id, override] of Object.entries(localStats)) {
+      if (merged[id]) {
+        merged[id] = {
+          ...merged[id],
+          reactions: override.reactions,
+          userReaction: override.userReaction,
+        };
+      }
+    }
+    return merged;
+  }, [fetchedStats, localStats]);
+
+  const handleReactionChange = useCallback((postId: string, counts: Record<ReactionType, number>, userReaction: ReactionType | null) => {
+    setLocalStats((prev) => ({
+      ...prev,
+      [postId]: {
+        reactions: counts,
+        userReaction,
+      },
+    }));
+  }, []);
 
   useEffect(() => {
     const saved = sessionStorage.getItem("orange-feed-scroll");
@@ -117,7 +144,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   };
 
   const isFiltering = hasRequestedFilters;
-  const heroPost = !isFiltering && posts.length >= 3 ? selectFeaturedNews(posts) : null;
+  const heroPost = !isFiltering && featuredDay && posts.length >= 3 ? selectFeaturedNews(posts, featuredDay) : null;
 
   const sidePosts = useMemo(() => heroPost ? posts.filter((post) => post.id !== heroPost.id).slice(0, 2) : [], [heroPost, posts]);
 
@@ -162,30 +189,22 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   const renderHeroSection = () => {
     if (isFiltering || !heroPost || sidePosts.length < 2) return null;
 
-    const isHeroToday = Boolean(
-      heroPost.published_at &&
-      new Date(heroPost.published_at).toDateString() === new Date().toDateString()
-    );
-    const heroBadge = isHeroToday ? "Matéria do dia" : "Em destaque";
+    const heroBadge = "Matéria do dia";
 
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8 lg:h-[clamp(26rem,32vw,34rem)] lg:grid-rows-[minmax(0,1fr)]">
+      <div className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Link
           href={`/posts/${heroPost.slug}`}
           data-home-event="article"
           data-home-target={heroPost.slug}
-          className="lg:col-span-2 group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:block lg:min-h-0 lg:h-full"
+          className="group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:col-span-2"
         >
-          <div className="relative aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
+          <div className="relative aspect-video w-full overflow-hidden bg-black">
             {heroPost.image_url ? (
-              <Image
-                priority
-                src={heroPost.image_url}
-                alt={heroPost.image_alt || heroPost.title}
-                fill
-                sizes="(max-width: 1024px) 100vw, 66vw"
-                className="absolute inset-0 h-full w-full object-contain object-center transition-transform duration-700 ease-out lg:object-cover lg:group-hover:scale-[1.02]"
-              />
+              <>
+                <Image src={heroPost.image_url} alt="" aria-hidden="true" fill sizes="(max-width: 1024px) 100vw, 66vw" className="scale-110 object-cover opacity-35 blur-2xl" />
+                <Image priority src={heroPost.image_url} alt={heroPost.image_alt || heroPost.title} fill sizes="(max-width: 1024px) 100vw, 66vw" className="object-contain object-center p-2 transition-transform duration-700 ease-out group-hover:scale-[1.01] sm:p-3" />
+              </>
             ) : (
               <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
                 <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
@@ -193,15 +212,13 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             )}
 
           </div>
-          <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 via-black/25 to-transparent lg:block" />
-
           <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-black">{heroBadge}</span>
             <span aria-hidden="true" className="absolute -right-4 top-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
             <span aria-hidden="true" className="absolute -bottom-4 left-0 size-4 rounded-tl-[16px] shadow-[-5px_-5px_0_4px_#FF5E00]" />
           </div>
 
-          <div className="theme-news-image-overlay relative z-20 flex flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6 lg:absolute lg:inset-x-0 lg:bottom-0 lg:bg-gradient-to-t lg:from-black/95 lg:via-black/85 lg:to-transparent lg:pt-12">
+          <div className="theme-news-image-overlay relative z-20 flex flex-1 flex-col justify-end gap-1 p-4 sm:gap-2 sm:p-6">
             <div className="flex flex-wrap items-center gap-3">
               <Tag category={heroPost.category} />
               <Timer date={heroPost.published_at ?? ""} />
@@ -226,7 +243,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
           </div>
         </Link>
 
-        <div className="flex flex-col gap-3 lg:grid lg:min-h-0 lg:grid-rows-2 lg:gap-4">
+        <div className="flex flex-col gap-3 lg:grid lg:grid-rows-2 lg:gap-4">
           {sidePosts.map((post) => (
             <Link
               key={post.id}
@@ -236,13 +253,14 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
               className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
-                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:w-full lg:rounded-none lg:aspect-auto lg:h-[44%]">
+                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[44%] lg:w-full lg:rounded-none lg:aspect-auto">
+                  <Image src={post.image_url} alt="" aria-hidden="true" fill sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw" className="scale-110 object-cover opacity-30 blur-xl" />
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || post.title}
                     fill
                     sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw"
-                    className="h-full w-full object-contain object-center transition-transform duration-500 lg:object-cover lg:group-hover:scale-[1.03]"
+                    className="h-full w-full object-contain object-center transition-transform duration-500 lg:group-hover:scale-[1.01]"
                   />
                   <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 to-transparent lg:block" />
                   <span className="absolute bottom-0 left-0 z-20 hidden rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black lg:block">
@@ -343,6 +361,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
                   headingLevel={headingLevel === "h1" ? "h2" : "h3"}
+                  onReactionChange={handleReactionChange}
                 />
               ))}
             </div>
@@ -376,6 +395,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                   post={post}
                   stats={stats[post.id] || EMPTY_STATS}
                   headingLevel={headingLevel === "h1" ? "h2" : "h3"}
+                  onReactionChange={handleReactionChange}
                 />
               ))}
             </div>

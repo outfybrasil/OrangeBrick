@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import { getReelAdmin } from "@/lib/video/reel-remote";
 import { getSiteUrl } from "@/lib/site-url";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
+import { hasSocialDelivery, recordManualSocialDelivery } from "@/lib/video/reel-social-delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 180;
@@ -46,14 +48,33 @@ async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallba
 
 export async function GET(request: Request) {
   try {
-    if (!await authorized(request)) {
+    const automatic = isAuthorizedCronRequest(request);
+    if (!automatic && !await authorized(request)) {
       return reply({ error: "Faça login como administrador para acessar." }, 403);
     }
 
     const url = new URL(request.url);
+    if (automatic && url.searchParams.get("action") !== "status") return reply({ error: "Consulta automatica invalida." }, 403);
     const apiKey = process.env.COMPOSIO_API_KEY;
     const authConfigId = process.env.COMPOSIO_TIKTOK_AUTH_CONFIG || "ac_wVLrwhnpKQqe";
     const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
+
+    if (url.searchParams.get("action") === "status") {
+      const publishId = url.searchParams.get("publishId") || "";
+      if (!/^[\w~.-]{1,100}$/.test(publishId) || !apiKey) return reply({ error: "Envio do TikTok inválido ou integração indisponível." }, 400);
+      const account = await resolveActiveTikTokAccount(apiKey, composioUserId, process.env.COMPOSIO_TIKTOK_ACCOUNT);
+      if (!account.accountId) return reply({ error: "Conta TikTok indisponível." }, 503);
+      const statusResponse = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
+        method: "POST",
+        headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ connected_account_id: account.accountId, user_id: composioUserId, endpoint: "https://open.tiktokapis.com/v2/post/publish/status/fetch/", method: "POST", headers: { "Content-Type": "application/json; charset=UTF-8" }, body: { publish_id: publishId } }),
+        signal: AbortSignal.timeout(30_000),
+      });
+      const statusData = await statusResponse.json().catch(() => null);
+      const result = statusData?.data?.data || statusData?.data;
+      if (!statusResponse.ok || result?.error?.code && result.error.code !== "ok" || typeof result?.status !== "string") return reply({ error: "O TikTok não confirmou o estado da publicação." }, 503);
+      return reply({ status: result.status, reason: result.fail_reason || null, postIds: result.publicaly_available_post_id || [] });
+    }
 
     if (url.searchParams.get("action") === "link") {
       if (!apiKey) return reply({ error: "Composio não configurado." }, 400);
@@ -124,15 +145,17 @@ async function uploadChunks(uploadUrl: string, buffer: Buffer, chunkSize: number
 
 export async function POST(request: Request) {
   try {
-    if (!await authorized(request)) {
+    const automatic = isAuthorizedCronRequest(request);
+    if (!automatic && !await authorized(request)) {
       return reply({ error: "Faça login como administrador para acessar." }, 403);
     }
 
     const body = await request.json().catch(() => null);
-    if (!body || typeof body.videoUrl !== "string" || !body.videoUrl.trim()) {
+    if (!body || automatic && body.autoPublic !== true || typeof body.videoUrl !== "string" || !body.videoUrl.trim()) {
       return reply({ error: "URL do vídeo é obrigatória." }, 400);
     }
 
+    if (!automatic && await hasSocialDelivery(body.postId, "tiktok")) return reply({ error: "Este Reel ja tem um envio registrado no TikTok. Confira o acompanhamento antes de repetir." }, 409);
     const caption = typeof body.caption === "string" ? body.caption.trim().slice(0, 2200) : "";
     const apiKey = process.env.COMPOSIO_API_KEY;
     const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
@@ -142,6 +165,7 @@ export async function POST(request: Request) {
     if (apiKey && !customAccessToken) {
       const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, accountId);
       if (resolved.accountId) accountId = resolved.accountId;
+      if (automatic && !resolved.hasDirectPublish) return reply({ error: "A conta TikTok não autorizou publicação direta. Reconecte com o escopo video.publish." }, 409);
     }
 
     if (!customAccessToken && (!apiKey || !accountId)) {
@@ -206,7 +230,7 @@ export async function POST(request: Request) {
 
     const endpoints = [
       { url: "https://open.tiktokapis.com/v2/post/publish/video/init/", direct: true },
-      { url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false },
+      ...(!automatic ? [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false }] : []),
     ];
 
     if (apiKey && accountId && !customAccessToken) {
@@ -286,6 +310,8 @@ export async function POST(request: Request) {
     }
 
     await uploadChunks(uploadUrl, videoBuffer, chunkSize, totalChunkCount);
+
+    if (!automatic) await recordManualSocialDelivery(body.postId, "tiktok", isDirect && publishId && publishId !== "ok" ? "submitted" : "unknown", publishId, isDirect ? null : "Enviado manualmente para a caixa de entrada do TikTok.").catch(() => false);
 
     return reply({
       success: true,

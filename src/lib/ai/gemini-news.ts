@@ -53,7 +53,7 @@ export interface GeneratedDraftResult {
 }
 
 const AI_REQUEST_TIMEOUT_MS = 35_000;
-const EDITORIAL_GENERATION_DEADLINE_MS = 150_000;
+const EDITORIAL_GENERATION_DEADLINE_MS = 220_000;
 
 function getGeminiClient(timeoutMs = AI_REQUEST_TIMEOUT_MS): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -202,32 +202,39 @@ async function fetchMultiSourceCandidates(query: string, deadline: number, sourc
   return unique;
 }
 
-async function geminiSearchImages(query: string, deadline: number): Promise<string[]> {
+async function geminiSearchImages(query: string, deadline: number, imageSourcePages: Map<string, string>): Promise<string[]> {
   try {
     if (boundedRequestTimeout(deadline, AI_REQUEST_TIMEOUT_MS) <= 0) return [];
     const response = await generateGeminiWithFallback(deadline, AI_REQUEST_TIMEOUT_MS, (timeoutMs) => ({
       contents: `Find official material specifically depicting: ${query}. Search publisher, studio, platform or official press sites. Never use stock photos, generic gaming setups, controllers unrelated to the topic, AI images, fan art or another game. Return ONLY a JSON array of up to 5 direct HTTPS image URLs (jpg/png/webp), at least 1200x675, from official domains. Prefer gameplay, key art, product photos or company/game logos appropriate to the subject.`,
       config: {
         temperature: 0,
+        tools: [{ googleSearch: {} }],
         maxOutputTokens: 512,
         httpOptions: { timeout: timeoutMs, retryOptions: { attempts: 1 } },
         abortSignal: AbortSignal.timeout(timeoutMs),
       },
     }));
-    if (!response.text) return [];
-    const text = response.text.trim();
+    const pages = [...new Set((response.candidates || []).flatMap((candidate) => candidate.groundingMetadata?.groundingChunks?.map((chunk) => chunk.web?.uri).filter((url): url is string => Boolean(url)) || []))]
+      .filter((url) => isTrustedEditorialImageSourcePage(url)).slice(0, 4);
+    const pagesWithImages = await Promise.all(pages.map(async (page) => ({ page, article: await fetchNewsArticleData(page, Math.min(deadline, Date.now() + 12_000)) })));
+    const discovered = pagesWithImages.flatMap(({ page, article }) => article.images.map((url) => {
+      imageSourcePages.set(url, article.finalUrl || page);
+      return url;
+    }));
+    const text = response.text?.trim() || "";
     const urlRegex = /https?:\/\/[^\s"')]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s"')]*)?/gi;
     const urls = text.match(urlRegex) || [];
     console.log(`[img] Gemini search para "${query.slice(0, 50)}": ${urls.length} URLs encontradas`);
-    return urls.slice(0, 5);
+    return [...new Set([...discovered, ...urls])].slice(0, 20);
   } catch (err) {
     console.warn(`[img] Gemini search falhou: ${err instanceof Error ? err.message.slice(0, 100) : err}`);
     return [];
   }
 }
 
-const MIN_IMAGE_WIDTH = 720;
-const MIN_IMAGE_HEIGHT = 400;
+const MIN_IMAGE_WIDTH = 1200;
+const MIN_IMAGE_HEIGHT = 675;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 
 function sniffImageContentType(buffer: Buffer, declared?: string | null): string | null {
@@ -396,25 +403,27 @@ async function uploadToSupabaseStorage(
   return publicUrl;
 }
 
-function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, imageSourcePages = new Map<string, string>(), cleanSubject = "", strictVisual = false) {
+function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, postId: string, sourceImages: string[], deadline: number, context: string, imageSourcePages = new Map<string, string>()) {
   const usedImageUrls = new Set<string>();
+  const attemptedImageUrls = new Set<string>();
   const usedHashes = new Set<string>();
   const verifiedImages: VerifiedEditorialImage[] = [];
-  async function trySecureImage(url: string, prefix: string): Promise<string | null> {
+  async function trySecureImage(url: string, prefix: string, searchDeadline = deadline): Promise<string | null> {
     try {
       if (new URL(url).protocol !== "https:") return null;
     } catch {
       return null;
     }
     const sourcePage = imageSourcePages.get(url);
-    if (usedImageUrls.has(url) || (!isAllowedEditorialImageUrl(url) && !(sourcePage && isTrustedEditorialImageSourcePage(sourcePage)))) return null;
+    if (usedImageUrls.has(url) || attemptedImageUrls.has(url) || (!isAllowedEditorialImageUrl(url) && !(sourcePage && isTrustedEditorialImageSourcePage(sourcePage)))) return null;
+    attemptedImageUrls.add(url);
     const { data: reusedSource, error: sourceError } = await supabase.from("editorial_images")
       .select("id")
       .eq("source_url", url)
       .limit(1);
     if (sourceError || (reusedSource && reusedSource.length > 0)) return null;
     usedImageUrls.add(url);
-    const processed = await downloadImageForUpload(url, deadline);
+    const processed = await downloadImageForUpload(url, searchDeadline);
     if (!processed) {
       usedImageUrls.delete(url);
       return null;
@@ -430,9 +439,9 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
         if (!isMissingPostgrestColumn(hashError)) return null;
       } else if (reusedHash && reusedHash.length > 0) return null;
       let description: { alt: string; caption: string } | null = null;
-      if (boundedRequestTimeout(deadline, AI_REQUEST_TIMEOUT_MS) > 0) {
+      if (boundedRequestTimeout(searchDeadline, AI_REQUEST_TIMEOUT_MS) > 0) {
         try {
-          const review = await generateGeminiWithFallback(deadline, AI_REQUEST_TIMEOUT_MS, (timeoutMs) => ({
+          const review = await generateGeminiWithFallback(searchDeadline, AI_REQUEST_TIMEOUT_MS, (timeoutMs) => ({
             contents: [
               { text: buildVisualImageReviewPrompt(context) },
               { inlineData: { data: processed.buffer.toString("base64"), mimeType: processed.contentType } },
@@ -444,27 +453,11 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
           description = null;
         }
       }
-      if (!description) {
-        if (strictVisual) return null;
-        if (sourcePage && isTrustedEditorialImageSourcePage(sourcePage)) {
-          const subject = cleanSubject.trim() || "o anúncio";
-          description = {
-            alt: `Material visual oficial e arte de divulgação sobre ${subject}.`,
-            caption: `${subject} em material oficial de divulgação (Foto: Divulgação/Oficial)`,
-          };
-        } else if (isAllowedEditorialImageUrl(url)) {
-          const subject = cleanSubject.trim() || "o anúncio";
-          description = {
-            alt: `Material visual oficial relacionado à notícia sobre ${subject}.`,
-            caption: `${subject} em divulgação oficial (Foto: Divulgação/Oficial)`,
-          };
-        } else {
-          return null;
-        }
-      }
+      if (!description) return null;
       if (usedHashes.has(sha256)) return null;
       usedHashes.add(sha256);
-      const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType, url, sha256, processed.width, processed.height);
+      const evidenceSource = sourcePage && isTrustedEditorialImageSourcePage(sourcePage) ? sourcePage : url;
+      const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType, evidenceSource, sha256, processed.width, processed.height);
       verifiedImages.push({ url: uploadedUrl, sourceUrl: sourcePage || url, sha256, ...description });
       return uploadedUrl;
     } catch {
@@ -473,29 +466,29 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
     }
   }
 
-  async function findAndUpload(queries: string[], prefix: string, extraSources: string[] = []): Promise<string> {
+  async function findAndUpload(queries: string[], prefix: string, extraSources: string[] = [], searchDeadline = deadline): Promise<string> {
     for (const url of extraSources) {
-      if (boundedRequestTimeout(deadline, 1) <= 0) return "";
-      const uploadedUrl = await trySecureImage(url, prefix);
+      if (boundedRequestTimeout(searchDeadline, 1) <= 0) return "";
+      const uploadedUrl = await trySecureImage(url, prefix, searchDeadline);
       if (uploadedUrl) return uploadedUrl;
     }
 
     for (const q of queries) {
-      if (boundedRequestTimeout(deadline, 1) <= 0) return "";
-      const candidates = await fetchMultiSourceCandidates(q, deadline, sourceImages);
+      if (boundedRequestTimeout(searchDeadline, 1) <= 0) return "";
+      const candidates = await fetchMultiSourceCandidates(q, searchDeadline, sourceImages);
       for (const url of candidates) {
-        if (boundedRequestTimeout(deadline, 1) <= 0) return "";
-        const uploadedUrl = await trySecureImage(url, prefix);
+        if (boundedRequestTimeout(searchDeadline, 1) <= 0) return "";
+        const uploadedUrl = await trySecureImage(url, prefix, searchDeadline);
         if (uploadedUrl) return uploadedUrl;
       }
     }
 
     for (const q of queries) {
-      if (boundedRequestTimeout(deadline, 1) <= 0) return "";
-      const geminiUrls = await geminiSearchImages(q, deadline);
+      if (boundedRequestTimeout(searchDeadline, 1) <= 0) return "";
+      const geminiUrls = await geminiSearchImages(q, searchDeadline, imageSourcePages);
       for (const url of geminiUrls) {
-        if (boundedRequestTimeout(deadline, 1) <= 0) return "";
-        const uploadedUrl = await trySecureImage(url, prefix);
+        if (boundedRequestTimeout(searchDeadline, 1) <= 0) return "";
+        const uploadedUrl = await trySecureImage(url, prefix, searchDeadline);
         if (uploadedUrl) return uploadedUrl;
       }
     }
@@ -1512,7 +1505,7 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
   ].filter((q): q is string => Boolean(q));
 
   const imagePipelineDeadline = deadline - 15_000;
-  const { findAndUpload, retainImage, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, imageSourcePages, cleanSubject, Boolean(options.reviewPost));
+  const { findAndUpload, retainImage, verifiedImages } = createImagePipeline(getSupabaseAdmin(imagePipelineDeadline), newPostId, sourceImages, imagePipelineDeadline, `${rawTitle}. ${summary}`, imageSourcePages);
 
   const existingImages = options.reviewPost ? parseEditorialBlocks(options.reviewPost.body).filter((block) => block.type === "image") : [];
   const retainedCover = options.reviewPost ? await retainImage(options.reviewPost.image_url || "") : null;
@@ -1522,9 +1515,13 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
     const retained = await retainImage(block.url);
     if (retained) retainedBody.push(retained);
   }
-  const coverUrl = retainedCover || await findAndUpload(coverQueries, "cover", sourceImages);
-  const img1Url = retainedBody[0] || await findAndUpload(img1Queries, "body-1", sourceImages);
-  const img2Url = retainedBody[1] || await findAndUpload(img2Queries, "body-2", sourceImages);
+  const imageSearchStartedAt = Date.now();
+  const imageSearchBudget = Math.max(0, imagePipelineDeadline - imageSearchStartedAt);
+  const coverDeadline = imageSearchStartedAt + imageSearchBudget * 0.45;
+  const firstBodyDeadline = imageSearchStartedAt + imageSearchBudget * 0.75;
+  const coverUrl = retainedCover || await findAndUpload(coverQueries, "cover", sourceImages, coverDeadline);
+  const img1Url = retainedBody[0] || await findAndUpload(img1Queries, "body-1", sourceImages, firstBodyDeadline);
+  const img2Url = retainedBody[1] || await findAndUpload(img2Queries, "body-2", sourceImages, imagePipelineDeadline);
 
   console.log(
     `[img] resultado final do post ${newPostId}: capa=${coverUrl ? "ok" : "VAZIA"} corpo1=${img1Url ? "ok" : "VAZIA"} corpo2=${img2Url ? "ok" : "VAZIA"}`
@@ -1711,9 +1708,14 @@ export async function reviewNewsDraft(post: Post): Promise<GeneratedDraftResult>
       if (url && isSpecificEditorialSource(url) && !supplied.some((source) => source.url === url)) supplied.push({ name: chunk.web?.title || new URL(url).hostname, url });
     }
   } catch {}
-  const source = supplied[0];
-  if (!source) throw new Error("Nenhuma fonte específica pôde ser encontrada. Adicione uma fonte e tente novamente.");
-  return generateNewsDraft({ sourceUrl: source.url, category: post.category, force: true, reviewPost: { ...post, editorial_sources: supplied.slice(0, 6) } });
+  const candidates = supplied.filter((source, index) => isSpecificEditorialSource(source.url) && supplied.findIndex((item) => item.url === source.url) === index).slice(0, 8);
+  if (!candidates.length) throw new Error("Nenhuma fonte específica pôde ser encontrada. Adicione uma fonte e tente novamente.");
+  const checked = await Promise.all(candidates.map(async (source) => ({ source, article: await fetchNewsArticleData(source.url, Date.now() + 15_000) })));
+  const readable = checked.filter(({ article }) => isSpecificEditorialSource(article.finalUrl) && article.text.trim().length >= 300);
+  if (!readable.length) throw new Error("Nenhuma das fontes encontradas pôde ser lida. Adicione ao menos um link específico e acessível à matéria.");
+  const source = readable.find(({ source }) => isOfficialEditorialSource(source.url)) || readable[0];
+  const orderedSources = [source.source, ...candidates.filter((candidate) => candidate.url !== source.source.url)];
+  return generateNewsDraft({ sourceUrl: source.source.url, category: post.category, force: true, reviewPost: { ...post, editorial_sources: orderedSources.slice(0, 8) } });
 }
 
 export async function fixPostImages(target?: string): Promise<Post[]> {
@@ -1792,7 +1794,7 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       cleanSubject,
     ];
 
-    const { findAndUpload: findAndUploadSingle, verifiedImages } = createImagePipeline(supabase, post.id, [], imageDeadline, `${post.title}. ${post.summary}`, new Map(), cleanSubject);
+    const { findAndUpload: findAndUploadSingle, verifiedImages } = createImagePipeline(supabase, post.id, [], imageDeadline, `${post.title}. ${post.summary}`);
 
     const [coverUrl, img1Url, img2Url] = await Promise.all([
       findAndUploadSingle(coverQueries, "cover"),

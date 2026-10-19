@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import { getReelAdmin } from "@/lib/video/reel-remote";
 import { getSiteUrl } from "@/lib/site-url";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
+import { hasSocialDelivery, recordManualSocialDelivery } from "@/lib/video/reel-social-delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -59,15 +61,17 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    if (!await authorized(request)) {
+    const automatic = isAuthorizedCronRequest(request);
+    if (!automatic && !await authorized(request)) {
       return reply({ error: "Faça login como administrador para acessar." }, 403);
     }
 
     const body = await request.json().catch(() => null);
-    if (!body || typeof body.videoUrl !== "string" || !body.videoUrl.trim()) {
+    if (!body || automatic && body.autoPublic !== true || typeof body.videoUrl !== "string" || !body.videoUrl.trim()) {
       return reply({ error: "URL do vídeo é obrigatória." }, 400);
     }
 
+    if (!automatic && await hasSocialDelivery(body.postId, "instagram")) return reply({ error: "Este Reel ja tem um envio registrado no Instagram. Confira o acompanhamento antes de repetir." }, 409);
     const caption = typeof body.caption === "string" ? body.caption.trim() : "";
     const apiKey = process.env.COMPOSIO_API_KEY;
     const composioAccount = process.env.COMPOSIO_INSTAGRAM_ACCOUNT;
@@ -179,6 +183,7 @@ export async function POST(request: Request) {
         return reply({ error: errorMsg, details: publishJson }, 400);
       }
 
+      if (!automatic) await recordManualSocialDelivery(body.postId, "instagram", "published", mediaId).catch(() => false);
       return reply({
         success: true,
         mediaId,
@@ -259,6 +264,7 @@ export async function POST(request: Request) {
       return reply({ error: msg, details: publishData?.error }, 400);
     }
 
+    if (!automatic) await recordManualSocialDelivery(body.postId, "instagram", "published", publishData.id).catch(() => false);
     return reply({
       success: true,
       mediaId: publishData.id,

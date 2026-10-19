@@ -11,6 +11,7 @@ interface UseReactionsOptions {
   initial: Record<ReactionType, number>;
   initialUserReaction?: ReactionType | null;
   hydrate?: boolean;
+  onReactionChange?: (counts: Record<ReactionType, number>, userReaction: ReactionType | null) => void;
 }
 
 interface ToggleReactionResponse {
@@ -18,7 +19,7 @@ interface ToggleReactionResponse {
   counts: Record<ReactionType, number>;
 }
 
-export function useReactions({ postId, initial, initialUserReaction = null, hydrate = false }: UseReactionsOptions) {
+export function useReactions({ postId, initial, initialUserReaction = null, hydrate = false, onReactionChange }: UseReactionsOptions) {
   const deviceId = useDeviceId();
   const pendingRef = useRef(false);
   const [counts, setCounts] = useState(initial);
@@ -57,13 +58,14 @@ export function useReactions({ postId, initial, initialUserReaction = null, hydr
       });
       setCounts(result.counts);
       setUserReaction(result.activeReaction);
+      onReactionChange?.(result.counts, result.activeReaction);
     } catch (cause) {
       setError(getCommunityErrorMessage(cause));
     } finally {
       pendingRef.current = false;
       setIsPending(false);
     }
-  }, [deviceId, postId]);
+  }, [deviceId, onReactionChange, postId]);
 
   return { counts, isPending, error, toggleReaction, userReaction };
 }

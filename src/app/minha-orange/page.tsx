@@ -11,7 +11,7 @@ export default function MyBrickRedirectPage() {
   useEffect(() => {
     if (isLoading) return;
     if (profile?.username) {
-      router.replace(`/profile/${encodeURIComponent(profile.username)}`);
+      router.replace(`/u/${encodeURIComponent(profile.username)}`);
       return;
     }
     router.replace(user ? "/profile/setup" : "/");

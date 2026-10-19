@@ -178,6 +178,13 @@ export function extractEntities(article: EditorialArticleContext): {
       gameAliases.push("gta vi", "grand theft auto vi", "gta 6");
     }
   }
+  if (!game) {
+    const namedRelease = normTitle.match(/^([a-z0-9][a-z0-9' .:-]{2,59}?)\s+(?:chega|ganha|estreia|recebe|tera|tem)\b/);
+    if (namedRelease && namedRelease[1].trim().split(/\s+/).length <= 5) {
+      game = namedRelease[1].trim();
+      gameAliases = [game];
+    }
+  }
 
   let company = article.company;
   if (!company) {

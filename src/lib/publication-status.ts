@@ -2,6 +2,17 @@ export type DeliveryState = "not_requested" | "queued" | "sending" | "received" 
 export type DeliveryStatus = { state: DeliveryState; label: string; canRetry: boolean; updatedAt: string | null; detail: string; url?: string };
 export type TelegramNotice = { value: string; updated_at: string };
 export type YouTubeDelivery = { status: string; updated_at: string; video_id: string | null; visibility: string };
+export type SocialDelivery = { status: string; updated_at: string; external_id: string | null; error: string | null };
+
+export function socialDelivery(publication: SocialDelivery | null, platform: "instagram" | "tiktok"): DeliveryStatus {
+  const base = { canRetry: false, updatedAt: publication?.updated_at || null, detail: platform === "tiktok" ? "Envio direto ao TikTok." : "Envio do Reel ao Instagram." };
+  if (!publication) return { ...base, state: "not_requested", label: "Não solicitado" };
+  if (publication.status === "published") return { ...base, state: "received", label: "Publicado" };
+  if (publication.status === "processing") return { ...base, state: "sending", label: "Enviando" };
+  if (publication.status === "submitted") return { ...base, state: "queued", label: "Aguardando confirmação", detail: "O vídeo foi enviado; a rede ainda está processando a publicação." };
+  if (publication.status === "failed") return { ...base, state: "failed", label: "Bloqueado", detail: publication.error || "A rede recusou o envio." };
+  return { ...base, state: "unknown", label: "A conferir", detail: publication.error || "Confira a conta antes de tentar novamente para evitar duplicação." };
+}
 
 export function telegramDelivery(notice: TelegramNotice | null, now = Date.now()): DeliveryStatus {
   const base = { canRetry: false, updatedAt: notice?.updated_at || null, detail: "Aviso de publicação enviado ao administrador." };

@@ -15,6 +15,7 @@ import { AccessibilityMenu } from "@/components/ui/AccessibilityMenu";
 import { PwaInstallBanner } from "@/components/PwaInstallBanner";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const headingFont = Outfit({
@@ -101,11 +102,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html
       lang="pt-BR"
@@ -116,6 +119,7 @@ export default function RootLayout({
         <Script
           id="orange-theme-init"
           strategy="beforeInteractive"
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}})();`,
           }}

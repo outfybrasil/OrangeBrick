@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { SearchBox } from "@/components/ui/SearchBox";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { UserNav } from "@/components/auth/UserNav";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 const NAV_LINKS = [
   { href: "/", label: "Início" },
   { href: "/noticias", label: "Notícias" },
   { href: "/lancamentos", label: "Lançamentos" },
   { href: "/brickboard", label: "BrickBoard" },
-  { href: "/meu-brick", label: "Meu Brick" },
 ];
 
 interface SiteHeaderProps {
@@ -21,6 +21,9 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderProps) {
   const pathname = usePathname();
+  const { profile } = useAuth();
+  const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
+  const navLinks = [...NAV_LINKS, { href: myProfileHref, label: "Meu Brick" }];
 
   const isLinkActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -54,7 +57,7 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
             </svg>
           </Link>
 
-          {NAV_LINKS.map((link) => {
+          {navLinks.map((link) => {
             const active = isLinkActive(link.href);
             return (
               <Link

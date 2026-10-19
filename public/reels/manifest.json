@@ -213,5 +213,98 @@
       "ctaButton": "LEIA A MATÉRIA COMPLETA",
       "ttsProvider": "edge-tts"
     }
+  },
+  "faraway-ganha-data-de-lancamento-oficial-e-chega-em-novembro": {
+    "slug": "faraway-ganha-data-de-lancamento-oficial-e-chega-em-novembro",
+    "status": "generating",
+    "started_at": "2026-10-19T18:43:00.024Z"
+  },
+  "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay": {
+    "slug": "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay",
+    "status": "generating",
+    "started_at": "2026-10-19T18:42:58.026Z"
+  },
+  "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas": {
+    "slug": "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas",
+    "status": "generating",
+    "started_at": "2026-10-19T18:42:58.407Z"
+  },
+  "lancamentos-da-semana-trazem-call-of-duty-e-final-fantasy": {
+    "slug": "lancamentos-da-semana-trazem-call-of-duty-e-final-fantasy",
+    "status": "generating",
+    "started_at": "2026-10-19T18:42:59.326Z"
+  },
+  "saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus": {
+    "slug": "saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus",
+    "status": "ready",
+    "finished_at": "2026-10-19T19:03:10.029Z",
+    "video_url": "/reels/saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus.mp4",
+    "duration": 32.2,
+    "variation": 697904,
+    "style": "neon_minimal",
+    "file_size": 25541928,
+    "script": {
+      "hook": "Saros: Zenith chegou de graça ao PS5 com oito chefes",
+      "headline": "SAROS: ZENITH CHEGA GRÁTIS",
+      "subHeadline": "Atualização traz chefes em sequência e New Game+",
+      "badge": "BREAKING",
+      "narrationText": "Saros: Zenith já está disponível de graça no PlayStation 5. A atualização da Housemarque traz o modo Overlord Rush com oito chefes em sequência, além do New Game+ chamado Eclipse Layers e opções de acessibilidade para facilitar o combate. A expansão atende tanto quem busca desafio quanto quem queria retomar a campanha. Você vai encarar os oito chefes seguidos ou prefere o modo acessível? Siga @OrangeBrick para acompanhar as novidades.",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "ATUALIZAÇÃO GRATUITA",
+          "highlight": "Saros: Zenith no PS5",
+          "tag": "LANÇAMENTO",
+          "imageIndex": 0,
+          "pills": []
+        },
+        {
+          "id": "scene2",
+          "headline": "OITO CHEFES EM SEQUÊNCIA",
+          "highlight": "Modo Overlord Rush",
+          "tag": "JOGABILIDADE",
+          "imageIndex": 1,
+          "pills": []
+        },
+        {
+          "id": "scene3",
+          "headline": "NOVO NEW GAME+",
+          "highlight": "Eclipse Layers em Carcosa",
+          "tag": "CONTEÚDO",
+          "pills": [
+            "Nova camada",
+            "Modificadores",
+            "Armadura"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "COMBATE ACESSÍVEL",
+          "highlight": "Novas opções de velocidade",
+          "tag": "IMPACTO",
+          "pills": [
+            "Para novos…",
+            "Comandos ajustados",
+            "Sem custos extras"
+          ],
+          "imageIndex": 1
+        },
+        {
+          "id": "scene5",
+          "headline": "DISPONÍVEL AGORA",
+          "highlight": "Baixe no PlayStation 5",
+          "tag": "PRÓXIMO PASSO",
+          "pills": [
+            "Atualização…"
+          ],
+          "imageIndex": 0
+        }
+      ],
+      "ctaQuestion": "Você vai encarar o desafio dos oito chefes seguidos?",
+      "ctaAction": "Siga @OrangeBrick para acompanhar notícias de games",
+      "ctaButton": "SIGA @ORANGEBRICK",
+      "ttsProvider": "edge-tts"
+    }
   }
 }

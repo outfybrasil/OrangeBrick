@@ -50,6 +50,7 @@ session-*.md
 .impeccable/
 /tmp/backups/
 /tmp/
+/.tmp/
 supabase/.temp/
 *.docx
 *.png

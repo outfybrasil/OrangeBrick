@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-type AdminSection = "overview" | "publications" | "metrics" | "editor" | "reels" | "images" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
+type AdminSection = "overview" | "publications" | "metrics" | "editor" | "reels" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -45,15 +45,6 @@ function ComposeIcon() {
   );
 }
 
-function ImagesIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
-      <circle cx="9" cy="10" r="1.5" />
-      <path d="m5.5 17 4.5-4 3 2.5 2.5-2 3 3.5" />
-    </svg>
-  );
-}
 
 function ReleasesIcon() {
   return (
@@ -164,10 +155,6 @@ export function AdminShell({
               <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}>
                 <ReelsIcon />
                 Reels & Vídeos
-              </Link>
-              <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}>
-                <ImagesIcon />
-                Biblioteca de imagens
               </Link>
               <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
                 <ReleasesIcon />
@@ -320,7 +307,7 @@ export function AdminShell({
         aria-label="Navegação rápida mobile"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0b0e]/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-2xl xl:hidden"
       >
-        <div className="grid grid-cols-5 items-center gap-1">
+        <div className="grid grid-cols-4 items-center gap-1">
           <Link
             href="/admin"
             className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
@@ -345,28 +332,17 @@ export function AdminShell({
             <span>Escrever</span>
           </Link>
 
-          <Link
-            href="/admin/images"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
-              active === "images"
-                ? "bg-brand-orange/15 text-brand-orange"
-                : "text-gray-400 hover:text-white active:scale-95"
-            }`}
-          >
-            <ImagesIcon />
-            <span>Mídias</span>
-          </Link>
 
           <Link
-            href="/admin/releases"
+            href="/admin/reels"
             className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
-              active === "releases"
+              active === "reels"
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
             }`}
           >
-            <ReleasesIcon />
-            <span>Radar</span>
+            <ReelsIcon />
+            <span>Reels</span>
           </Link>
 
           <button
@@ -430,7 +406,6 @@ export function AdminShell({
               <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
               <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
-                  <Link href="/admin/images" className={navClass("images")} aria-current={active === "images" ? "page" : undefined}><ImagesIcon />Biblioteca de imagens</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
                   <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>
                   <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}><ProgressionIcon />Progressão</Link>

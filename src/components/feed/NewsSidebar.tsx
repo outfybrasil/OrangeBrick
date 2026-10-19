@@ -11,13 +11,23 @@ interface NewsSidebarProps {
 }
 
 export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
-  const topHypePosts = [...posts.slice(3)]
+  const topHypePosts = [...posts]
     .sort((a, b) => {
       const statsA = stats[a.id];
       const statsB = stats[b.id];
-      const scoreA = (statsA?.reactions.hype || 0) * 2 + (statsA?.views || 0);
-      const scoreB = (statsB?.reactions.hype || 0) * 2 + (statsB?.views || 0);
-      return scoreB - scoreA;
+      const hypeA = statsA?.reactions.hype || 0;
+      const hypeB = statsB?.reactions.hype || 0;
+      if (hypeB !== hypeA) {
+        return hypeB - hypeA;
+      }
+      const viewsA = statsA?.views || 0;
+      const viewsB = statsB?.views || 0;
+      if (viewsB !== viewsA) {
+        return viewsB - viewsA;
+      }
+      const dateA = new Date(a.published_at || a.created_at || 0).getTime();
+      const dateB = new Date(b.published_at || b.created_at || 0).getTime();
+      return dateB - dateA;
     })
     .slice(0, 4);
 
@@ -74,7 +84,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                           alt={post.image_alt || post.title}
                           fill
                           sizes="76px"
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                          className="h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-[1.01]"
                         />
                       </div>
                     ) : (

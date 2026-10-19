@@ -24,9 +24,9 @@ export interface ReelScriptData {
 }
 
 const CANDIDATE_MODELS = [
+  "gemini-3.5-flash",
   "gemini-3.8-flash",
   "gemini-3.7-flash",
-  "gemini-3.5-flash",
   "gemini-flash-latest",
   "gemini-3.5-flash-lite",
   "gemini-flash-lite-latest",
@@ -43,7 +43,7 @@ function fitText(value: string, limit: number) {
 }
 
 export async function generateReelScript(post: Post, apiKey: string): Promise<ReelScriptData> {
-  const gemini = new GoogleGenAI({ apiKey });
+  const gemini = new GoogleGenAI({ apiKey, httpOptions: { timeout: 45_000, retryOptions: { attempts: 1 } } });
 
   const prompt = `Você é editor de vídeos curtos de games para o Orange Brick. Crie um roteiro vertical de 25 a 35 segundos que capture atenção, mantenha retenção e transforme espectadores em seguidores, sem prometer viralização nem usar clickbait.
 

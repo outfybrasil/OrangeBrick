@@ -19,6 +19,7 @@ import { createDataClient } from "@/lib/supabase/client";
 
 interface BrickCardProps {
   post: CommunityPost;
+  compactArticle?: boolean;
   onReaction: (postId: string, type: ReactionType) => Promise<boolean>;
   onDeletePost?: (postId: string) => Promise<void> | void;
   onEditPost?: (postId: string, newContent: string) => Promise<void> | void;
@@ -40,7 +41,7 @@ const reportReasons = [
   "Outro conteúdo inadequado",
 ];
 
-export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
+export function BrickCard({ post, compactArticle = false, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
   const { user } = useAuth();
   const { toggleSaveBrick, isBrickSaved } = useSavedBricks();
   const isSaved = isBrickSaved(post.id);
@@ -516,11 +517,13 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
         </div>
       </div>
 
-      <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-base">
-        <SpoilerText>{post.content}</SpoilerText>
-      </p>
+      {post.content.trim() && (
+        <p className="max-w-[72ch] whitespace-pre-line break-words font-body text-sm leading-7 text-gray-200 sm:text-base">
+          <SpoilerText>{post.content}</SpoilerText>
+        </p>
+      )}
 
-      {post.media_url && !post.attached_article && (
+      {post.media_url && !post.attached_article && !post.shared_post && (
         <div className="relative mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
           <img loading="lazy" decoding="async" src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="h-auto max-h-[420px] w-full object-contain" />
         </div>
@@ -529,27 +532,27 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       {post.attached_article && (
         <Link
           href={`/posts/${post.attached_article.slug}`}
-          className="group/article mt-2.5 block w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
+          className={`group/article mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C] ${compactArticle ? "flex items-center" : "block"}`}
         >
           {post.attached_article.image_url && (
-            <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
+            <div className={compactArticle ? "relative h-20 w-24 shrink-0 overflow-hidden border-r border-white/10 bg-black/60 sm:w-28" : "relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60"}>
               <img
                 loading="lazy"
                 decoding="async"
                 src={post.attached_article.image_url}
                 alt={post.attached_article.title}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover/article:scale-[1.02]"
+                className="h-full w-full object-contain transition-transform duration-300 group-hover/article:scale-[1.02]"
               />
             </div>
           )}
-          <div className="p-3 sm:p-3.5 space-y-1">
+          <div className="min-w-0 space-y-1 p-3 sm:p-3.5">
             <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
-              {post.attached_article.category || "Orange Brick"}
+              {compactArticle ? "Matéria compartilhada" : post.attached_article.category || "Orange Brick"}
             </span>
             <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
               {post.attached_article.title}
             </h5>
-            {post.attached_article.summary && (
+            {!compactArticle && post.attached_article.summary && (
               <p className="line-clamp-2 font-body text-xs leading-relaxed text-gray-300">
                 {post.attached_article.summary}
               </p>
@@ -559,24 +562,38 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
       )}
 
       {post.shared_post && (
-        <div className="space-y-3 border-y border-emerald-500/25 bg-[#0D0F14]/70 py-3 sm:py-3.5">
+        <div className="space-y-2.5 border-y border-white/10 py-3 sm:py-3.5">
           <div className="flex items-center gap-2">
-            <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-3.5 h-3.5 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span className="break-words text-xs font-subtitle font-bold uppercase tracking-wider text-emerald-400">
+            <span className="break-words text-xs font-subtitle font-bold text-gray-400">
               Republicado de {post.shared_post.original_author_name}
             </span>
           </div>
-          <div className="flex gap-2.5 items-start">
+          <Link
+            href={`/brickboard?post=${encodeURIComponent(post.shared_post.original_post_id)}`}
+            aria-label={`Abrir publicação original de ${post.shared_post.original_author_name}`}
+            className="group flex min-w-0 items-start gap-3 border border-white/10 bg-white/[0.02] p-3 transition-colors hover:border-brand-orange/40 hover:bg-white/[0.04]"
+          >
             <img loading="lazy" decoding="async"
               src={resolveAvatarUrl(post.shared_post.original_author_avatar, post.shared_post.original_author_name, post.shared_post.original_is_official)}
-              alt={post.shared_post.original_author_name}
+              alt=""
+              aria-hidden="true"
               onError={(e) => { (e.target as HTMLImageElement).src = "/icons/default-avatar.png"; }}
-              style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", borderRadius: "9999px", objectFit: "cover" }}
-              className="border border-emerald-500/30 shrink-0 mt-0.5 bg-[#08090C]"
+              style={{ width: "30px", height: "30px", minWidth: "30px", minHeight: "30px", maxWidth: "30px", maxHeight: "30px", borderRadius: "9999px", objectFit: "cover" }}
+              className="mt-0.5 shrink-0 border border-white/15 bg-[#08090C]"
             />
-            <div className="flex-1 min-w-0">
+            {post.shared_post.original_attached_article?.image_url && (
+              <img
+                loading="lazy"
+                decoding="async"
+                src={post.shared_post.original_attached_article.image_url}
+                alt=""
+                className="h-16 w-20 shrink-0 object-contain sm:w-24"
+              />
+            )}
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-subtitle font-bold text-white">
                   {post.shared_post.original_author_name}
@@ -588,41 +605,16 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-300 font-body leading-relaxed mt-1 whitespace-pre-line break-words">
-                {post.shared_post.original_content}
-              </p>
-
               {post.shared_post.original_attached_article && (
-                <Link
-                  href={`/posts/${post.shared_post.original_attached_article.slug}`}
-                  className="group/article mt-2.5 block w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C]"
-                >
-                  {post.shared_post.original_attached_article.image_url && (
-                    <div className="relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60">
-                      <img loading="lazy" decoding="async"
-                        src={post.shared_post.original_attached_article.image_url}
-                        alt={post.shared_post.original_attached_article.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover/article:scale-[1.02]"
-                      />
-                    </div>
-                  )}
-                  <div className="p-2.5 sm:p-3 space-y-1">
-                    <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
-                      {post.shared_post.original_attached_article.category || "Matéria Citada"}
-                    </span>
-                    <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
-                      {post.shared_post.original_attached_article.title}
-                    </h5>
-                    {post.shared_post.original_attached_article.summary && (
-                      <p className="line-clamp-2 font-body text-xs leading-relaxed text-gray-300">
-                        {post.shared_post.original_attached_article.summary}
-                      </p>
-                    )}
-                  </div>
-                </Link>
+                <span className="mt-1 block truncate text-xs font-semibold text-brand-orange">
+                  Matéria: {post.shared_post.original_attached_article.title}
+                </span>
               )}
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-gray-400 transition-colors group-hover:text-white">
+                Abrir publicação original <span aria-hidden="true">→</span>
+              </span>
             </div>
-          </div>
+          </Link>
         </div>
       )}
 
@@ -648,8 +640,8 @@ export function BrickCard({ post, onReaction, onDeletePost, onEditPost, onShareP
 
       {isShareOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-2.5">
-          <p className="text-xs font-subtitle text-gray-400">
-            Adicione seu comentário ao republicar:
+          <p className="text-xs font-subtitle leading-relaxed text-gray-400">
+            Seu comentário fica em destaque; a publicação original aparece compacta, sem repetir a imagem.
           </p>
           <form onSubmit={handleSubmitShare} className="flex flex-col gap-2 xs:flex-row">
             <input

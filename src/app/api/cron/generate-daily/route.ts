@@ -7,6 +7,8 @@ import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 import { isMissingPostgrestRelation } from "@/lib/postgrest-error";
 import { claimEditorialSlot, isScheduledEditorialSlot, type EditorialSlotStore } from "@/lib/server/editorial-slot";
 import { editorialPublicationBlockers } from "@/lib/server/editorial-publication";
+import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
+import { triggerReelGeneration } from "@/lib/video/reel-service";
 import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
 import { buildCoverAbsenceTelegramMessage } from "@/lib/editorial-cover";
 
@@ -110,7 +112,8 @@ export async function GET(request: Request) {
     }
 
     const result = await generateNewsDraft();
-    const blockers = editorialPublicationBlockers(result);
+    const imageChecks = await inspectPublicationImagesInDatabase([result.post], supabase);
+    const blockers = [...new Set([...editorialPublicationBlockers(result), ...(imageChecks.get(result.post.id) || [])])];
     if (blockers.length > 0) {
       await setSlotState(supabase, slotKey, `draft:${result.post.id}`);
       slotStateTransitioned = true;
@@ -142,12 +145,19 @@ export async function GET(request: Request) {
     const postUrl = `${getSiteUrl()}/posts/${result.post.slug}`;
     const telegramNotified = await deliverPublicationNotice(result.post.id);
     if (!telegramNotified) console.error("Matéria publicada, mas o Telegram não confirmou a notificação.");
+    let reelQueued = false;
+    try {
+      reelQueued = (await triggerReelGeneration(result.post.slug)).queued;
+    } catch (error) {
+      console.error("Falha ao solicitar Reel da matéria publicada:", error);
+    }
     return NextResponse.json({
       ok: true,
       published: true,
       postId: result.post.id,
       url: postUrl,
       telegramNotified,
+      reelQueued,
       wordCount: result.wordCount,
     });
   } catch (error: unknown) {

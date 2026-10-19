@@ -14,6 +14,7 @@ import { BrickCard } from "@/components/community/BrickCard";
 import { createDataClient } from "@/lib/supabase/client";
 import { getCommunityCommentLikeSummaries } from "@/lib/community-comment-likes";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useSavedBricks } from "@/lib/hooks/useSavedBricks";
 import type { PublicProfileData } from "@/lib/types/progression";
 import type { ProfileGameReview, ReleaseRadarItem, ReactionType } from "@/lib/types/database";
@@ -27,6 +28,17 @@ interface ProfileViewProps {
   initialGameReviews: ProfileGameReview[];
   allRadarMap?: Record<string, ReleaseRadarItem>;
 }
+
+const PROFILE_TABS_BY_HASH: Record<string, ProfileActiveTab> = {
+  bricks: "bricks",
+  posts: "bricks",
+  replies: "replies",
+  games: "games",
+  jogos: "games",
+  reposts: "reposts",
+  saved: "saved",
+  salvos: "saved",
+};
 
 export function ProfileView({
   initialProfile,
@@ -58,6 +70,7 @@ export function ProfileView({
   const [followModalLoading, setFollowModalLoading] = useState(false);
   const [followModalError, setFollowModalError] = useState<string | null>(null);
 
+  const { bookmarks, toggleBookmark } = useBookmarks();
   const { savedBricks } = useSavedBricks();
 
   const loadFollowsData = useCallback(async () => {
@@ -249,8 +262,24 @@ export function ProfileView({
     }
   }, [hasLoadedReplies, initialProfile.user_id, loadingReplies, supabase]);
 
+  useEffect(() => {
+    const syncTabFromHash = () => {
+      const tab = PROFILE_TABS_BY_HASH[window.location.hash.slice(1).toLowerCase()];
+      if (!tab || (tab === "saved" && !isOwner)) return;
+      setActiveTab(tab);
+      if (tab === "replies") void loadReplies();
+    };
+
+    syncTabFromHash();
+    window.addEventListener("hashchange", syncTabFromHash);
+    return () => window.removeEventListener("hashchange", syncTabFromHash);
+  }, [isOwner, loadReplies]);
+
   const handleTabChange = (tab: ProfileActiveTab) => {
     setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${tab}`);
+    }
     if (tab === "replies") void loadReplies();
   };
 
@@ -578,23 +607,43 @@ export function ProfileView({
 
                 {activeTab === "saved" && isOwner && (
                   <div>
-                    {savedBricks.length === 0 ? (
+                    {savedBricks.length === 0 && bookmarks.length === 0 ? (
                       <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
-                        Nenhum Brick salvo ainda.
+                        Nenhum item salvo ainda.
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {savedBricks.map((brick) => (
-                          <BrickCard
-                            key={brick.id}
-                            post={brick}
-                            onReaction={handleReaction}
-                            onSharePost={handleSharePost}
-                            onAddComment={handleAddComment}
-                            onDeleteComment={handleDeleteComment}
-                            getComments={getComments}
-                          />
-                        ))}
+                      <div className="space-y-6">
+                        {bookmarks.length > 0 && (
+                          <section className="space-y-2.5">
+                            <h2 className="font-heading text-xs font-bold uppercase tracking-wider text-gray-400">Matérias salvas ({bookmarks.length})</h2>
+                            {bookmarks.map((bookmark) => (
+                              <div key={bookmark.id} className="flex items-center justify-between gap-3 border border-white/10 bg-[#111217] p-4">
+                                <Link href={`/posts/${bookmark.slug}`} className="min-w-0 flex-1 truncate text-sm font-bold text-white transition-colors hover:text-brand-orange">
+                                  {bookmark.title}
+                                </Link>
+                                <button type="button" onClick={() => toggleBookmark(bookmark)} className="min-h-11 shrink-0 px-2 text-xs font-semibold text-gray-400 transition-colors hover:text-red-300">
+                                  Remover
+                                </button>
+                              </div>
+                            ))}
+                          </section>
+                        )}
+                        {savedBricks.length > 0 && (
+                          <section className="space-y-2.5">
+                            <h2 className="font-heading text-xs font-bold uppercase tracking-wider text-gray-400">Bricks salvos ({savedBricks.length})</h2>
+                            {savedBricks.map((brick) => (
+                              <BrickCard
+                                key={brick.id}
+                                post={brick}
+                                onReaction={handleReaction}
+                                onSharePost={handleSharePost}
+                                onAddComment={handleAddComment}
+                                onDeleteComment={handleDeleteComment}
+                                getComments={getComments}
+                              />
+                            ))}
+                          </section>
+                        )}
                       </div>
                     )}
                   </div>

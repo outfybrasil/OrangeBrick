@@ -131,6 +131,8 @@ function EditForm() {
   const [authorName, setAuthorName] = useState("Redação");
   const [authorTag, setAuthorTag] = useState(AUTHOR_TAGS.breaking);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isSavingFeatured, setIsSavingFeatured] = useState(false);
   const [loadedUpdatedAt, setLoadedUpdatedAt] = useState<string | null>(null);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [informationStatus, setInformationStatus] = useState<InformationStatus>("confirmed");
@@ -328,6 +330,7 @@ function EditForm() {
           setAuthorName(typedPost.author_name);
           setAuthorTag(normalizeAuthorTag(typedPost.author_tag));
           setPublishedAt(typedPost.published_at || null);
+          setIsFeatured(typedPost.is_featured === true);
           setLoadedUpdatedAt(typedPost.updated_at);
           setScheduledAt(typedPost.scheduled_at || null);
           setInformationStatus(typedPost.information_status || "confirmed");
@@ -444,6 +447,25 @@ function EditForm() {
     copy[nextIndex] = item;
     setBlocks(copy);
     setHasChanges(true);
+  };
+
+  const changeFeatured = async () => {
+    if (!postId || !publishedAt || isSavingFeatured) return;
+    try {
+      setIsSavingFeatured(true);
+      setError(null);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada");
+      const response = await fetch(`/api/admin/posts/${encodeURIComponent(postId)}`, { method: "PATCH", headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ featured: !isFeatured }) });
+      const result = await response.json() as { post?: { is_featured: boolean; updated_at: string }; error?: string };
+      if (!response.ok || !result.post) throw new Error(result.error || "Não foi possível atualizar o destaque");
+      setIsFeatured(result.post.is_featured);
+      setLoadedUpdatedAt(result.post.updated_at);
+    } catch (err) {
+      setError(errorMessage(err, "Não foi possível atualizar o destaque"));
+    } finally {
+      setIsSavingFeatured(false);
+    }
   };
 
   const handleSave = async (isPublished: boolean) => {
@@ -1009,6 +1031,15 @@ function EditForm() {
                 </select>
               </div>
             </div>
+
+            {publishedAt && (
+              <div className="border-t border-white/10 pt-3">
+                <button type="button" onClick={() => void changeFeatured()} disabled={isSavingFeatured} className="min-h-10 w-full rounded border border-brand-orange/40 px-3 text-xs font-bold text-brand-orange hover:bg-brand-orange/10 disabled:opacity-50">
+                  {isSavingFeatured ? "Atualizando destaque…" : isFeatured ? "Remover destaque do dia" : "Definir como matéria do dia"}
+                </button>
+                <p className="mt-2 text-xs leading-relaxed text-gray-400">O destaque vale apenas no dia da publicação, pelo horário de Brasília. Sem escolha manual, aparece a matéria mais recente do dia.</p>
+              </div>
+            )}
 
             {!publishedAt && (
               <div>

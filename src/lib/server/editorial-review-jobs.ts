@@ -77,7 +77,7 @@ export async function processNextEditorialReview(): Promise<boolean> {
   } catch (error) {
     candidate = null;
     const message = error instanceof Error ? error.message : "";
-    remaining = [/^(A checagem factual|A prova citada|A apuração|Nenhuma fonte específica|Não foi possível ler uma fonte|A matéria não está disponível)/.test(message)
+    remaining = [/^(A checagem factual|A prova citada|A apuração|Nenhuma fonte específica|Nenhuma das fontes encontradas|Não foi possível ler uma fonte|A matéria não está disponível)/.test(message)
       ? message : "A IA ou uma das fontes não respondeu com uma correção verificável. O rascunho original foi mantido; tente novamente ou revise manualmente."];
   }
   const report = { title, changes, remaining };

@@ -11,15 +11,16 @@ import { CommentsDrawer } from "@/components/comments/CommentsDrawer";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { HypeIcon } from "@/components/reactions/HypeIcon";
 import { ReactionsError } from "@/components/reactions/ReactionsError";
-import { CATEGORY_CONFIG, type Post, type PostStats } from "@/lib/types/database";
+import { CATEGORY_CONFIG, type Post, type PostStats, type ReactionType } from "@/lib/types/database";
 
 interface NewsCardCompactProps {
   post: Post;
   stats: PostStats;
   headingLevel?: "h2" | "h3";
+  onReactionChange?: (postId: string, counts: Record<ReactionType, number>, userReaction: ReactionType | null) => void;
 }
 
-export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCompactProps) {
+export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionChange }: NewsCardCompactProps) {
   const { user } = useAuth();
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -30,6 +31,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
     postId: post.id,
     initial: stats.reactions,
     initialUserReaction: stats.userReaction,
+    onReactionChange: (newCounts, newUserReaction) => onReactionChange?.(post.id, newCounts, newUserReaction),
   });
 
   return (
@@ -55,7 +57,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3" }: NewsCardCo
                 alt={post.image_alt || post.title}
                 fill
                 sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
-                className="object-contain object-center transition-transform duration-500 sm:object-cover sm:group-hover:scale-105"
+                className="object-contain object-center transition-transform duration-500 sm:group-hover:scale-[1.01]"
               />
             </>
           ) : (

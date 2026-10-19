@@ -5,9 +5,12 @@ import { validateStoredEditorialPost } from "@/lib/content-validation";
 import type { Post } from "@/lib/types/database";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
+import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
+import { triggerReelGeneration } from "@/lib/video/reel-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 function serviceClient() {
   return createClient(
@@ -43,7 +46,7 @@ export async function GET(request: Request) {
   const failures: { id: string; error: string }[] = [];
 
   for (const post of scheduledPosts || []) {
-    const validationErrors = validateStoredEditorialPost(post as Post);
+    const validationErrors = [...validateStoredEditorialPost(post as Post), ...((await inspectPublicationImagesInDatabase([post as Post], supabase)).get(post.id) || [])];
     if (validationErrors.length > 0) {
       const { error: unscheduleError } = await supabase
         .from("posts")
@@ -87,6 +90,11 @@ export async function GET(request: Request) {
     if (!publishedPost) continue;
 
     published.push(post.id);
+    try {
+      await triggerReelGeneration(post.slug);
+    } catch (error) {
+      failures.push({ id: post.id, error: `Publicada, mas o Reel não entrou na fila: ${error instanceof Error ? error.message : "falha desconhecida"}` });
+    }
     try {
       if (!await deliverPublicationNotice(post.id)) {
         failures.push({ id: post.id, error: "Publicada, mas o Telegram não confirmou o aviso; reenvio pendente." });

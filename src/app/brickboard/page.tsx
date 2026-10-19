@@ -34,6 +34,7 @@ const PLATFORM_TABS = [
 
 function BrickboardContent() {
   const searchParams = useSearchParams();
+  const targetPostId = searchParams.get("post");
   const router = useRouter();
   const { user, profile } = useAuth();
   const { follows, toggleFollow } = useFollowPreferences();
@@ -48,7 +49,7 @@ function BrickboardContent() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { posts, poll, isVoting, pollVoteError, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed();
+  const { posts, poll, isVoting, pollVoteError, isLoaded, operationError, clearOperationError, addPost, deletePost, editPost, sharePost, toggleReaction, votePoll, addComment, deleteComment, toggleCommentLike, getComments } = useCommunityFeed({ post: targetPostId });
   const isPollExpired = Boolean(poll?.ends_at && new Date(poll.ends_at).getTime() <= now);
 
   const [activeTab, setActiveTab] = useState<"latest" | "following" | "trending">("latest");
@@ -57,7 +58,6 @@ function BrickboardContent() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const articleSlug = searchParams.get("article");
   const topicId = searchParams.get("topic");
-  const targetPostId = searchParams.get("post");
   const attachSlug = searchParams.get("attach");
   const attachTitle = searchParams.get("title");
   const [isComposeOpen, setIsComposeOpen] = useState(Boolean(attachSlug && attachTitle));
@@ -138,6 +138,15 @@ function BrickboardContent() {
     }
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
+  const articlePreviewOwners = new Map<string, { postId: string; isOfficial: boolean }>();
+  for (const post of displayPosts) {
+    const slug = post.attached_article?.slug;
+    if (!slug) continue;
+    const current = articlePreviewOwners.get(slug);
+    if (!current || (post.is_official && !current.isOfficial)) {
+      articlePreviewOwners.set(slug, { postId: post.id, isOfficial: Boolean(post.is_official) });
+    }
+  }
   const visiblePosts = displayPosts.slice(0, visiblePostCount);
 
   useEffect(() => {
@@ -260,7 +269,7 @@ function BrickboardContent() {
       if (result.length >= 3) break;
     }
     return result;
-  }, [posts, user?.id, profile?.username]);
+  }, [posts, user, profile]);
 
   const xpProgress = userProgress ? levelProgress(userProgress.progress.lifetime_xp, userProgress.progress.level) : 0;
   const avatarUrl = user
@@ -270,6 +279,7 @@ function BrickboardContent() {
         profile?.is_official
       )
     : "";
+  const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
 
   return (
     <>
@@ -277,7 +287,7 @@ function BrickboardContent() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex shrink-0 items-center gap-4">
             {user && userProgress && (
-              <Link href="/meu-brick" className="group hidden min-h-11 items-center gap-2.5 border-r border-white/10 pr-4 lg:flex" aria-label={`Abrir Meu Brick, nível ${userProgress.progress.level}`}>
+              <Link href={myProfileHref} className="group hidden min-h-11 items-center gap-2.5 border-r border-white/10 pr-4 lg:flex" aria-label={`Abrir Meu Brick, nível ${userProgress.progress.level}`}>
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="" className="size-8 shrink-0 rounded-full border border-brand-orange/40 object-cover" referrerPolicy="no-referrer" />
                 ) : (
@@ -302,7 +312,7 @@ function BrickboardContent() {
           <div className="flex shrink-0 items-center gap-2">
             {user && userProgress && (
               <Link
-                href="/meu-brick"
+                href={myProfileHref}
                 aria-label={`Abrir Meu Brick. Nível ${userProgress.progress.level}`}
                 title={`Nível ${userProgress.progress.level} · ${Math.round(xpProgress)}% do caminho`}
                 className="flex min-h-9 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-2.5 text-xs font-black text-brand-orange transition-colors hover:bg-brand-orange hover:text-white lg:hidden"
@@ -327,7 +337,7 @@ function BrickboardContent() {
       <main id="conteudo-principal" className="mx-auto min-h-dvh w-full min-w-0 max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {user && userProgress && (
           <Link
-            href="/meu-brick"
+            href={myProfileHref}
             className="mb-5 flex min-h-16 items-center gap-3 border-y border-white/10 bg-white/[0.025] px-3 py-2.5 transition-colors active:bg-white/[0.06] lg:hidden"
             aria-label={`Abrir Meu Brick. Nível ${userProgress.progress.level}, ${Math.round(xpProgress)}% de progresso`}
           >
@@ -503,7 +513,7 @@ function BrickboardContent() {
                 <span>Explorar</span>
               </button>
               <Link
-                href="/meu-brick#salvos"
+                href={`${myProfileHref}#saved`}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-medium text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-white"
               >
                 <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -512,7 +522,7 @@ function BrickboardContent() {
                 <span>Salvos</span>
               </Link>
               <Link
-                href="/meu-brick"
+                href={myProfileHref}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-medium text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-white"
               >
                 <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -649,6 +659,7 @@ function BrickboardContent() {
                     <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28 content-visibility-auto">
                       <BrickCard
                         post={post}
+                        compactArticle={Boolean(post.attached_article && articlePreviewOwners.get(post.attached_article.slug)?.postId !== post.id)}
                         onReaction={async (postId, type) => {
                           const res = await toggleReaction(postId, type);
                           void trackXp();
@@ -850,7 +861,7 @@ function BrickboardContent() {
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <Footer />
-      <BackToTop />
+      <BackToTop aboveFloatingAction />
     </>
   );
 }

@@ -4,6 +4,7 @@ import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
 import { getSiteUrl } from "@/lib/site-url";
+import { saoPauloNewsDate } from "@/lib/news-query";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -73,7 +74,7 @@ export default async function HomePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-orange border-t-transparent" />
         </div>
       }>
-        <HomePageClient initialPosts={initialPosts} />
+        <HomePageClient initialPosts={initialPosts} featuredDay={saoPauloNewsDate(new Date())} />
       </Suspense>
     </div>
   );

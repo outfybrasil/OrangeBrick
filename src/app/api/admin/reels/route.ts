@@ -109,7 +109,17 @@ export async function GET(request: Request) {
       status = "ready";
     } else if (manifestItem?.status === "generating") {
       const started = manifestItem.started_at ? new Date(manifestItem.started_at).getTime() : 0;
-      if (Date.now() - started < (remote ? 60 : 12) * 60 * 1000) {
+      let processRunning = true;
+      if (!remote && manifestItem.pid) {
+        try { process.kill(manifestItem.pid, 0); }
+        catch { processRunning = false; }
+      }
+      if (remote && job?.status === "queued") {
+        status = "generating";
+      } else if (!processRunning) {
+        status = "failed";
+        errorMsg = "O processo de renderização foi encerrado. Gere o Reel novamente.";
+      } else if (Date.now() - started < 60 * 60 * 1000) {
         status = "generating";
       } else {
         status = "failed";

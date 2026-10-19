@@ -3,6 +3,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import type { ReelJob, ReelYouTubePublication } from "@/lib/types/database";
 import { getReelAdmin, REEL_BUCKET } from "@/lib/video/reel-remote";
 import { getYouTubeConnection, stageYouTubeVideo, uploadYouTubeVideo } from "@/lib/video/reel-youtube";
+import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -54,9 +55,10 @@ export async function POST(request: Request) {
   let uploadStarted = false;
   let videoId: string | undefined;
   try {
-    if (!await authorized(request)) return reply({ error: "Faça login como administrador e confirme a autenticação em duas etapas." }, 403);
+    const automatic = isAuthorizedCronRequest(request);
+    if (!automatic && !await authorized(request)) return reply({ error: "Faça login como administrador e confirme a autenticação em duas etapas." }, 403);
     const body = await request.json().catch(() => null);
-    if (!body || typeof body.postId !== "string" || !uuid.test(body.postId) || body.confirmed !== true
+    if (!body || automatic && body.autoPublic !== true || typeof body.postId !== "string" || !uuid.test(body.postId) || body.confirmed !== true
       || typeof body.reelJobId !== "string" || !uuid.test(body.reelJobId)
       || typeof body.title !== "string" || !body.title.trim() || body.title.length > 100 || /[<>]/.test(body.title)
       || typeof body.description !== "string" || body.description.length > 5000 || /[<>]/.test(body.description)

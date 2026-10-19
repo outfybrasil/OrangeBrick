@@ -11,7 +11,6 @@ export function editorialPublicationBlockers(result: GeneratedDraftResult): stri
   const blockers = validateStoredEditorialPost(result.post);
   if (result.post.title.trim().length > 70) blockers.push("Título acima de 70 caracteres.");
   if (result.post.summary.trim().length > 180) blockers.push("Resumo acima de 180 caracteres.");
-  if (result.wordCount < 750 || result.wordCount > 1000) blockers.push("Texto fora de 750 a 1.000 palavras.");
 
   let blocks: Array<{ type?: string; url?: string; alt?: string; caption?: string }> = [];
   try {
@@ -26,6 +25,7 @@ export function editorialPublicationBlockers(result: GeneratedDraftResult): stri
   }
 
   const bodyImages = blocks.filter((block) => block.type === "image");
+  if (bodyImages.length < 2) blockers.push("A matéria precisa de duas imagens internas distintas além da capa.");
   const imageUrls = [result.post.image_url, ...bodyImages.map((block) => block.url)]
     .filter((url): url is string => typeof url === "string" && Boolean(url.trim()));
 

@@ -14,6 +14,7 @@ const ROOT_DIR = path.resolve(__dirname, "..");
 const args = process.argv.slice(2);
 let targetSlug = args.find((a) => !a.startsWith("--"));
 const isLatest = args.includes("--latest");
+let activeSlug;
 const sendTelegram = args.includes("--telegram");
 const styleFlag = args.find((a) => a.startsWith("--style="));
 const forcedStyle = styleFlag ? styleFlag.split("=")[1] : (args.includes("--style") ? args[args.indexOf("--style") + 1] : undefined);
@@ -98,6 +99,7 @@ async function run() {
 
   console.log(`📌 Post encontrado: ${post.title}`);
   console.log(`📂 Categoria: ${post.category} | Slug: ${post.slug}\n`);
+  activeSlug = post.slug;
 
   // Atualiza status no manifest
   const manifestPath = path.join(ROOT_DIR, "public", "reels", "manifest.json");
@@ -310,5 +312,19 @@ async function run() {
 
 run().catch((err) => {
   console.error("\n❌ Erro fatal durante a execução:", err);
+  if (activeSlug) {
+    const manifestPath = path.join(ROOT_DIR, "public", "reels", "manifest.json");
+    try {
+      const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf-8")) : {};
+      manifest[activeSlug] = {
+        ...manifest[activeSlug],
+        slug: activeSlug,
+        status: "failed",
+        failed_at: new Date().toISOString(),
+        error: String(err?.message || err).slice(0, 500),
+      };
+      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
+    } catch {}
+  }
   process.exit(1);
 });

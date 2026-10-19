@@ -2,10 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { GradientButtonGroup } from "@/components/ui/gradient-button-group";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { profile } = useAuth();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
 
   if (
     pathname.startsWith("/admin") ||
@@ -50,7 +53,7 @@ export function MobileBottomNav() {
       iconActive: `${basePath}/icons/nav/releases-active.png`,
     },
     {
-      href: "/meu-brick",
+      href: myProfileHref,
       label: "Meu Brick",
       active: pathname.startsWith("/meu-brick") || pathname.startsWith("/profile/") || pathname.startsWith("/u/"),
       iconInactive: `${basePath}/icons/nav/profile-inactive.png`,
