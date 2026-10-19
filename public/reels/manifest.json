@@ -223,10 +223,76 @@
   },
   "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay": {
     "slug": "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay",
-    "status": "failed",
-    "started_at": "2026-10-19T19:22:22.610Z",
-    "failed_at": "2026-10-19T19:24:15.718Z",
-    "error": "O renderizador terminou com código 1. Consulte os logs do servidor."
+    "status": "ready",
+    "finished_at": "2026-10-19T19:48:55.497Z",
+    "video_url": "/reels/peak-chega-aos-consoles-em-22-de-outubro-com-crossplay.mp4",
+    "duration": 29.3,
+    "variation": 107149,
+    "style": "neon_minimal",
+    "file_size": 13905924,
+    "script": {
+      "hook": "PEAK chega aos consoles com crossplay em 22 de outubro",
+      "headline": "PEAK CHEGA AOS CONSOLES EM OUTUBRO",
+      "subHeadline": "Jogo cooperativo de escalada estreia com crossplay",
+      "badge": "BREAKING",
+      "narrationText": "O jogo cooperativo de escalada PEAK chega ao PlayStation 5, Xbox Series e Nintendo Switch 2 em 22 de outubro. Lançado inicialmente para PC em 2025, o título traz todas as atualizações de conteúdo acumuladas e confirma jogo cruzado entre plataformas para grupos de até quatro pessoas. Com quem você vai tentar chegar ao topo? Siga @OrangeBrick para acompanhar as novidades.",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "ESTREIA NOS CONSOLES",
+          "highlight": "22 de outubro",
+          "tag": "DATA CONFIRMADA",
+          "imageIndex": 0,
+          "pills": []
+        },
+        {
+          "id": "scene2",
+          "headline": "PLATAFORMAS CONFIRMADAS",
+          "highlight": "PS5, Xbox e Switch 2",
+          "tag": "EXPANSÃO",
+          "imageIndex": 1,
+          "pills": []
+        },
+        {
+          "id": "scene3",
+          "headline": "JOGO CRUZADO",
+          "highlight": "Até 4 jogadores juntos",
+          "tag": "MULTIPLAYER",
+          "pills": [
+            "Crossplay ativado",
+            "Grupos mistos",
+            "Sem barreiras"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "CONTEÚDO ATUALIZADO",
+          "highlight": "Versões completas",
+          "tag": "NOVIDADES",
+          "pills": [
+            "Biomas recentes",
+            "Itens inclusos",
+            "Paridade com PC"
+          ],
+          "imageIndex": 1
+        },
+        {
+          "id": "scene5",
+          "headline": "PRÓXIMO PASSO",
+          "highlight": "Marque a data",
+          "tag": "LANÇAMENTO",
+          "pills": [
+            "Outubro de 2026"
+          ],
+          "imageIndex": 0
+        }
+      ],
+      "ctaQuestion": "Com quem você vai tentar chegar ao topo em PEAK?",
+      "ctaAction": "Siga @OrangeBrick para acompanhar notícias de games",
+      "ctaButton": "SIGA @ORANGEBRICK",
+      "ttsProvider": "edge-tts"
+    }
   },
   "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas": {
     "slug": "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas",

@@ -37,19 +37,22 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   }, [supabase]);
 
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem("ob_tiktok_access_token") || "";
-      if (savedToken) setCustomToken(savedToken);
-      const savedPub = localStorage.getItem(`ob_tt_pub_${postId}`);
-      if (savedPub) {
-        const parsed = JSON.parse(savedPub);
-        if (parsed?.publishId) {
-          setPublishId(parsed.publishId);
-          setIsDirectPost(Boolean(parsed.isDirect));
-          setStatus("published");
+    const timer = window.setTimeout(() => {
+      try {
+        const savedToken = localStorage.getItem("ob_tiktok_access_token") || "";
+        if (savedToken) setCustomToken(savedToken);
+        const savedPub = localStorage.getItem(`ob_tt_pub_${postId}`);
+        if (savedPub) {
+          const parsed = JSON.parse(savedPub);
+          if (parsed?.publishId) {
+            setPublishId(parsed.publishId);
+            setIsDirectPost(Boolean(parsed.isDirect));
+            setStatus("published");
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [postId]);
 
   const checkStatus = useCallback(async () => {

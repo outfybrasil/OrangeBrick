@@ -1,0 +1,85 @@
+{
+  "name": "Orange Brick",
+  "short_name": "Orange Brick",
+  "description": "Notícias de games, hardware e indústria, direto ao ponto.",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "background_color": "#08090C",
+  "theme_color": "#FFFFFF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-inverted-192.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-inverted-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-inverted-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Últimas Notícias",
+      "short_name": "Notícias",
+      "description": "Confira as notícias mais recentes do mundo dos games",
+      "url": "/?utm_source=pwa_shortcut&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/shortcut-news-inverted.png?v=1",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mais Hypadas",
+      "short_name": "Em Alta",
+      "description": "Matérias mais curtidas e quentes do momento",
+      "url": "/?sort=hyped&utm_source=pwa_shortcut&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/shortcut-hype-inverted.png?v=1",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Reels & Vídeos",
+      "short_name": "Reels",
+      "description": "Assista aos resumos em vídeo e reels",
+      "url": "/reels?utm_source=pwa_shortcut&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/shortcut-reels-inverted.png?v=1",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Meu Brick",
+      "short_name": "Meu Brick",
+      "description": "Acesse seu perfil, matérias salvas e configurações",
+      "url": "/meu-brick?utm_source=pwa_shortcut&utm_medium=shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcuts/shortcut-brick-inverted.png?v=1",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

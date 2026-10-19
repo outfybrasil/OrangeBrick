@@ -121,7 +121,7 @@ export default async function RootLayout({
           strategy="beforeInteractive"
           nonce={nonce}
           dangerouslySetInnerHTML={{
-            __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}})();`,
+            __html: `(()=>{try{const saved=localStorage.getItem("orange-theme");const theme=saved==="light"?"light":"dark";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme}catch{document.documentElement.dataset.theme="dark";document.documentElement.style.colorScheme="dark"}try{const appIcon=localStorage.getItem("ob_app_icon");if(appIcon==="inverted"){document.cookie="ob_app_icon=inverted;path=/;max-age=31536000;SameSite=Lax";const m=document.querySelector('link[rel="manifest"]');if(m)m.setAttribute("href","/manifest-inverted.json");const a=document.querySelector('link[rel="apple-touch-icon"]');if(a)a.setAttribute("href","/icons/apple-touch-icon-inverted.png");}}catch{}})();`,
           }}
         />
         <a

@@ -34,20 +34,23 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
   }, [supabase]);
 
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem("ob_meta_access_token") || "";
-      const savedAccountId = localStorage.getItem("ob_ig_account_id") || "";
-      if (savedToken) setCustomToken(savedToken);
-      if (savedAccountId) setCustomAccountId(savedAccountId);
-      const savedPub = localStorage.getItem(`ob_ig_pub_${postId}`);
-      if (savedPub) {
-        const parsed = JSON.parse(savedPub);
-        if (parsed?.mediaId) {
-          setPublishedMediaId(parsed.mediaId);
-          setStatus("published");
+    const timer = window.setTimeout(() => {
+      try {
+        const savedToken = localStorage.getItem("ob_meta_access_token") || "";
+        const savedAccountId = localStorage.getItem("ob_ig_account_id") || "";
+        if (savedToken) setCustomToken(savedToken);
+        if (savedAccountId) setCustomAccountId(savedAccountId);
+        const savedPub = localStorage.getItem(`ob_ig_pub_${postId}`);
+        if (savedPub) {
+          const parsed = JSON.parse(savedPub);
+          if (parsed?.mediaId) {
+            setPublishedMediaId(parsed.mediaId);
+            setStatus("published");
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [postId]);
 
   const checkStatus = useCallback(async () => {

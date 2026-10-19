@@ -45,7 +45,6 @@ function AdminReelsContent() {
   // Modal de Assistente Social
   const [selectedReel, setSelectedReel] = useState<AdminReelItem | null>(null);
   const [activeTab, setActiveTab] = useState<"instagram" | "tiktok" | "youtube">("youtube");
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Status de geração individual
   const [triggeringSlug, setTriggeringSlug] = useState<string | null>(null);
@@ -189,17 +188,6 @@ function AdminReelsContent() {
       showToast(message);
     } finally {
       setCancellingSlug(null);
-    }
-  };
-
-  const copyToClipboard = async (text: string, key: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedKey(key);
-      showToast("Copiado com sucesso!");
-      setTimeout(() => setCopiedKey((c) => (c === key ? null : c)), 2000);
-    } catch {
-      showToast("Não foi possível copiar automaticamente.");
     }
   };
 

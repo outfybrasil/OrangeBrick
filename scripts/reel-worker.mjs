@@ -7,6 +7,41 @@ import { getReelAdmin, REEL_BUCKET, dispatchReelWorker } from "../src/lib/video/
 const supabase = getReelAdmin();
 const root = process.cwd();
 const deadline = Date.now() + 20 * 60_000;
+const siteUrl = (process.env.REELS_SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://orangebrick.blog").replace(/\/+$/, "");
+
+async function publishSocial(postId, jobId) {
+  if (!process.env.CRON_SECRET) {
+    process.stdout.write(`Reel ${jobId}: CRON_SECRET ausente, publicação automática ignorada.\n`);
+    return;
+  }
+  const url = new URL("/api/cron/reel-social", siteUrl);
+  url.searchParams.set("postId", postId);
+  url.searchParams.set("jobId", jobId);
+  for (let attempt = 0; attempt < 6; attempt++) {
+    let result;
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(280_000),
+      });
+      result = await response.json().catch(() => null);
+      if (!response.ok) {
+        process.stderr.write(`Reel ${jobId}: publicação automática indisponível (${response.status}) ${result?.error || ""}\n`);
+        return;
+      }
+    } catch (error) {
+      process.stderr.write(`Reel ${jobId}: falha ao acionar a publicação automática: ${error instanceof Error ? error.message : "erro desconhecido"}\n`);
+      return;
+    }
+    if (!result || result.processed === false) {
+      process.stdout.write(`Reel ${jobId}: redes ${result?.platform ? `${result.platform} ${result.status}` : "sem pendências"}\n`);
+      return;
+    }
+    process.stdout.write(`Reel ${jobId}: redes ${result.platform} ${result.status}${result.error ? ` (${result.error})` : ""}\n`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+}
 
 function render(slug) {
   return new Promise((resolve, reject) => {
@@ -50,6 +85,7 @@ async function run() {
       if (finishError) throw new Error(finishError.message);
       if (result !== "ready") await supabase.storage.from(REEL_BUCKET).remove([storagePath]);
       process.stdout.write(`Reel ${job.id}: ${result}\n`);
+      if (result === "ready") await publishSocial(job.post_id, job.id);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Falha ao gerar Reel.";
       const { data: failed, error: saveError } = await supabase.from("reel_jobs").update({ status: "failed", error: message.slice(0, 500), finished_at: new Date().toISOString() }).eq("id", job.id).eq("lock_token", token).eq("status", "running").select("id");

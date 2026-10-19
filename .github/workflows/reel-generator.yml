@@ -25,6 +25,8 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       REELS_GITHUB_REPOSITORY: ${{ github.repository }}
       REELS_GITHUB_REF: master
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      REELS_SITE_URL: ${{ vars.REELS_SITE_URL || 'https://orangebrick.blog' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:

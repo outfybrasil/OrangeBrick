@@ -340,9 +340,16 @@ function processReelQueue() {
   });
 
   child.on("close", (code) => {
+    const wasCancelled = cancelledReelChildren.has(child);
+
     isProcessingQueue = false;
-    currentRunningChild = null;
-    currentRunningSlug = null;
+    if (currentRunningChild === child) currentRunningChild = null;
+    if (currentRunningSlug === nextSlug) currentRunningSlug = null;
+
+    if (wasCancelled) {
+      if (reelQueue.length > 0) setTimeout(processReelQueue, 2000);
+      return;
+    }
 
     if (code === 0 && checkReelFile(nextSlug).exists) {
       const fileInfo = checkReelFile(nextSlug);
@@ -354,12 +361,21 @@ function processReelQueue() {
         file_size: fileInfo.size
       });
     } else {
-      const reason = spawnError
+      const outputTail = output
+        .replace(/\x1b\[[0-9;]*m/g, "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .slice(-4)
+        .join(" | ")
+        .slice(-400);
+      const baseReason = spawnError
         ? `Não foi possível iniciar o renderizador: ${spawnError.message}`
         : code === 0
           ? "O renderizador terminou sem criar um vídeo válido."
-          : `O renderizador terminou com código ${code ?? "desconhecido"}. Consulte os logs do servidor.`;
-      console.error(`[ReelQueue] Falha no Reel de ${nextSlug}: ${reason}\n${output.slice(-500)}`);
+          : `O renderizador terminou com código ${code ?? "desconhecido"}.`;
+      const reason = outputTail ? `${baseReason} ${outputTail}` : `${baseReason} Consulte os logs do servidor.`;
+      console.error(`[ReelQueue] Falha no Reel de ${nextSlug}: ${reason}\n${output.slice(-1500)}`);
       updateReelStatus(nextSlug, {
         status: "failed",
         pid: undefined,

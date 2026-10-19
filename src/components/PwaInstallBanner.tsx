@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CONSENT_CHANGE_EVENT, getConsent } from "@/lib/consent";
+import { useAppIcon } from "@/lib/app-icon";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,6 +13,8 @@ export function PwaInstallBanner() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+  const { appIcon, setAppIcon } = useAppIcon();
+  const isInverted = appIcon === "inverted";
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -69,18 +72,19 @@ export function PwaInstallBanner() {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-orange/40 bg-brand-orange/20 text-brand-orange">
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-              <rect x="5" y="2" width="14" height="20" rx="2" />
-              <path d="M9 18h6M12 6v7m0 0 3-3m-3 3-3-3" />
-            </svg>
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-[#0D0E12] p-1.5 shadow-inner">
+            <img
+              src={isInverted ? "/icons/icon-inverted-192.png?v=3" : "/icons/icon-192.png?v=3"}
+              alt="Orange Brick"
+              className="h-full w-full rounded-lg object-contain"
+            />
           </div>
           <div>
             <h4 id="pwa-title" className="font-subtitle text-sm font-bold text-white">
               Instalar App Orange Brick
             </h4>
             <p className="text-xs text-gray-300 font-body mt-0.5">
-              Acesse notícias e a comunidade direto da sua tela inicial.
+              Notícias direto da sua tela inicial com widgets de atalho.
             </p>
           </div>
         </div>
@@ -94,6 +98,30 @@ export function PwaInstallBanner() {
             <path d="M6 6l12 12M18 6 6 18" />
           </svg>
         </button>
+      </div>
+
+      <div className="flex items-center justify-between rounded-xl border border-white/5 bg-black/30 px-3 py-1.5 text-xs">
+        <span className="text-[11px] text-gray-400">Estilo do ícone:</span>
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => setAppIcon("default")}
+            className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+              !isInverted ? "bg-brand-orange text-white" : "bg-white/5 text-gray-400 hover:text-white"
+            }`}
+          >
+            Laranja
+          </button>
+          <button
+            type="button"
+            onClick={() => setAppIcon("inverted")}
+            className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+              isInverted ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:text-white"
+            }`}
+          >
+            Invertido
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 pt-1">

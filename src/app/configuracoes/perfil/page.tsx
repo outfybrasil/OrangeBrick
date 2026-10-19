@@ -6,6 +6,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getGoogleAvatarUrl, isAllowedUserAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
+import { AppIconCustomizer } from "@/components/ui/AppIconCustomizer";
 
 const platforms = ["PS5", "Xbox Series", "Switch 2", "PC", "Mobile"];
 const categories = ["breaking", "hardware", "industry", "modding", "review", "opinion"];
@@ -716,6 +717,10 @@ export default function ProfileSettingsPage() {
                   </fieldset>
                 </>
               )}
+            </SettingsSection>
+
+            <SettingsSection title="Ícone do App & Atalhos (PWA)" id="atalhos-app">
+              <AppIconCustomizer />
             </SettingsSection>
 
             <SettingsSection title="Privacidade da conta">
