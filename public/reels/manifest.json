@@ -223,8 +223,10 @@
   },
   "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay": {
     "slug": "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay",
-    "status": "generating",
-    "started_at": "2026-10-19T19:22:22.610Z"
+    "status": "failed",
+    "started_at": "2026-10-19T19:22:22.610Z",
+    "failed_at": "2026-10-19T19:24:15.718Z",
+    "error": "O renderizador terminou com código 1. Consulte os logs do servidor."
   },
   "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas": {
     "slug": "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas",
