@@ -56,3 +56,28 @@ export async function getRemoteReels(postIds: string[]) {
   }
   return new Map(jobs.map((job) => [job.post_id, { ...job, video_url: job.storage_path ? urls.get(job.storage_path) : undefined }]));
 }
+
+export async function cancelRemoteReel(slug: string): Promise<{ success: boolean; message: string }> {
+  const supabase = getReelAdmin();
+  const { data: post, error: postErr } = await supabase.from("posts").select("id").eq("slug", slug).maybeSingle();
+  if (postErr || !post) {
+    return { success: false, message: "Matéria não encontrada." };
+  }
+
+  const { error } = await supabase
+    .from("reel_jobs")
+    .update({
+      status: "failed",
+      error: "Geração cancelada pelo usuário.",
+      finished_at: new Date().toISOString(),
+      lease_until: null,
+    })
+    .eq("post_id", post.id)
+    .in("status", ["queued", "running"]);
+
+  if (error) {
+    throw new Error(`Falha ao cancelar: ${error.message}`);
+  }
+
+  return { success: true, message: "Geração remota cancelada com sucesso." };
+}

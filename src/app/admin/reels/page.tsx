@@ -49,6 +49,7 @@ function AdminReelsContent() {
 
   // Status de geração individual
   const [triggeringSlug, setTriggeringSlug] = useState<string | null>(null);
+  const [cancellingSlug, setCancellingSlug] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = useCallback((msg: string) => {
@@ -150,6 +151,44 @@ function AdminReelsContent() {
       showToast(message);
     } finally {
       setTriggeringSlug(null);
+    }
+  };
+
+  const handleCancel = async (slug: string) => {
+    setCancellingSlug(slug);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const res = await fetch("/api/admin/reels", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ slug }),
+      });
+
+      const result = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(result?.error || result?.message || "Não foi possível cancelar a geração.");
+      }
+
+      showToast(result.message || "Geração cancelada com sucesso!");
+      setItems((prev) =>
+        prev.map((item) =>
+          item.slug === slug ? { ...item, status: "failed", error: "Geração cancelada pelo usuário." } : item
+        )
+      );
+      setSelectedReel((current) => current?.slug === slug ? { ...current, status: "failed", error: "Geração cancelada pelo usuário." } : current);
+      void loadReels(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Não foi possível cancelar a geração.";
+      setError(message);
+      showToast(message);
+    } finally {
+      setCancellingSlug(null);
     }
   };
 
@@ -481,18 +520,33 @@ function AdminReelsContent() {
                         </svg>
                       </a>
                     </div>
+                  ) : isGenerating ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled
+                        className="flex-1 rounded-lg border border-amber-500/30 bg-amber-500/20 px-3 py-2 text-center text-xs font-black uppercase text-amber-300 cursor-not-allowed"
+                      >
+                        {cancellingSlug === item.slug ? "Cancelando..." : "Processando..."}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={cancellingSlug === item.slug}
+                        onClick={() => handleCancel(item.slug)}
+                        className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-extrabold text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200 hover:border-red-500/60"
+                        title="Cancelar geração deste Reel"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   ) : (
                     <button
                       type="button"
-                      disabled={isGenerating}
+                      disabled={triggeringSlug === item.slug}
                       onClick={() => handleGenerate(item.slug)}
-                      className={`w-full rounded-lg px-3 py-2 text-center text-xs font-black uppercase transition-all ${
-                        isGenerating
-                          ? "cursor-not-allowed bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                          : "bg-white/[0.08] text-white hover:bg-brand-orange hover:text-black border border-white/10"
-                      }`}
+                      className="w-full rounded-lg px-3 py-2 text-center text-xs font-black uppercase transition-all bg-white/[0.08] text-white hover:bg-brand-orange hover:text-black border border-white/10"
                     >
-                      {isGenerating ? "Processando..." : "Gerar Reel com IA"}
+                      {triggeringSlug === item.slug ? "Iniciando..." : item.status === "failed" ? "Tentar Novamente" : "Gerar Reel com IA"}
                     </button>
                   )}
                 </div>
@@ -549,14 +603,25 @@ function AdminReelsContent() {
                   Baixar Vídeo (MP4)
                 </a>
 
-                <button
-                  type="button"
-                  onClick={() => handleGenerate(selectedReel.slug)}
-                  disabled={selectedReel.status === "generating" || triggeringSlug === selectedReel.slug}
-                  className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-[11px] font-bold text-gray-400 hover:text-white hover:bg-white/10"
-                >
-                  {selectedReel.status === "generating" || triggeringSlug === selectedReel.slug ? "Processando..." : "Regerar este vídeo com IA"}
-                </button>
+                {selectedReel.status === "generating" ? (
+                  <button
+                    type="button"
+                    onClick={() => handleCancel(selectedReel.slug)}
+                    disabled={cancellingSlug === selectedReel.slug}
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 py-1.5 text-[11px] font-bold text-red-300 hover:text-white hover:bg-red-500/20 transition-colors"
+                  >
+                    {cancellingSlug === selectedReel.slug ? "Cancelando..." : "Cancelar criação do Reel"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleGenerate(selectedReel.slug)}
+                    disabled={triggeringSlug === selectedReel.slug}
+                    className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-[11px] font-bold text-gray-400 hover:text-white hover:bg-white/10"
+                  >
+                    {triggeringSlug === selectedReel.slug ? "Processando..." : "Regerar este vídeo com IA"}
+                  </button>
+                )}
               </div>
             </div>
 

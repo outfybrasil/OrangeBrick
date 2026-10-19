@@ -8,6 +8,7 @@ import {
   checkReelFile,
   generateSocialCopys,
   triggerReelGeneration,
+  cancelReel,
   type ReelManifestItem,
   type SocialCopys,
 } from "@/lib/video/reel-service";
@@ -203,3 +204,46 @@ export async function POST(request: Request) {
     return NextResponse.json({ queued: false, error: error instanceof Error ? error.message : "Não foi possível iniciar a geração do Reel. Tente novamente." }, { status: 503 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!token) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    }
+  );
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+  if (authError || !isVerifiedAdminSession(user, token)) {
+    return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+  }
+
+  let body: { slug?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Corpo da requisição inválido" }, { status: 400 });
+  }
+
+  const slug = body?.slug;
+  if (typeof slug !== "string" || !slug) {
+    return NextResponse.json({ error: "Slug da matéria é obrigatório" }, { status: 400 });
+  }
+
+  try {
+    const result = await cancelReel(slug);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("[Reels] Falha ao cancelar geração:", error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : "Erro ao cancelar geração." },
+      { status: 500 }
+    );
+  }
+}
+

@@ -45,6 +45,7 @@ const OFFICIAL_ASSET_DOMAINS = [
   "videogameschronicle.com",
   "pushsquare.com",
   "purexbox.com",
+  "virtastic.app",
   "nintendolife.com",
 ];
 

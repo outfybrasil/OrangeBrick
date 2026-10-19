@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import type { ReelScriptData } from "./reel-script";
-import { enqueueRemoteReel, usesRemoteReels } from "./reel-remote";
+import { enqueueRemoteReel, cancelRemoteReel, usesRemoteReels } from "./reel-remote";
 
 export interface ReelManifestItem {
   slug: string;
@@ -211,6 +211,8 @@ export function generateSocialCopys(post: {
 }
 
 let isProcessingQueue = false;
+let currentRunningChild: ChildProcess | null = null;
+let currentRunningSlug: string | null = null;
 const reelQueue: string[] = [];
 
 export async function triggerReelGeneration(slug: string): Promise<{ queued: boolean; message: string }> {
@@ -234,7 +236,6 @@ export async function triggerReelGeneration(slug: string): Promise<{ queued: boo
     }
   }
 
-  // Marca como gerando no manifest
   updateReelStatus(slug, {
     status: "generating",
     started_at: new Date().toISOString(),
@@ -249,6 +250,50 @@ export async function triggerReelGeneration(slug: string): Promise<{ queued: boo
   processReelQueue();
 
   return { queued: true, message: "Geração iniciada com sucesso" };
+}
+
+export function cancelReelGeneration(slug: string): { success: boolean; message: string } {
+  const queueIndex = reelQueue.indexOf(slug);
+  if (queueIndex !== -1) {
+    reelQueue.splice(queueIndex, 1);
+  }
+
+  if (currentRunningSlug === slug && currentRunningChild) {
+    try {
+      currentRunningChild.kill("SIGTERM");
+    } catch {}
+    currentRunningChild = null;
+    currentRunningSlug = null;
+    isProcessingQueue = false;
+  }
+
+  const manifest = getManifest();
+  const current = manifest[slug];
+  if (current?.pid) {
+    try {
+      process.kill(current.pid);
+    } catch {}
+  }
+
+  updateReelStatus(slug, {
+    status: "failed",
+    pid: undefined,
+    failed_at: new Date().toISOString(),
+    error: "Geração cancelada pelo usuário.",
+  });
+
+  if (reelQueue.length > 0 && !isProcessingQueue) {
+    setTimeout(processReelQueue, 1000);
+  }
+
+  return { success: true, message: "Geração de Reel cancelada com sucesso." };
+}
+
+export async function cancelReel(slug: string): Promise<{ success: boolean; message: string }> {
+  if (usesRemoteReels()) {
+    return cancelRemoteReel(slug);
+  }
+  return cancelReelGeneration(slug);
 }
 
 function processReelQueue() {
@@ -273,6 +318,9 @@ function processReelQueue() {
     cwd: process.cwd()
   });
 
+  currentRunningChild = child;
+  currentRunningSlug = nextSlug;
+
   updateReelStatus(nextSlug, { pid: child.pid });
 
   let output = "";
@@ -292,6 +340,9 @@ function processReelQueue() {
 
   child.on("close", (code) => {
     isProcessingQueue = false;
+    currentRunningChild = null;
+    currentRunningSlug = null;
+
     if (code === 0 && checkReelFile(nextSlug).exists) {
       const fileInfo = checkReelFile(nextSlug);
       updateReelStatus(nextSlug, {
@@ -316,7 +367,6 @@ function processReelQueue() {
       });
     }
 
-    // Processa o próximo da fila se houver
     if (reelQueue.length > 0) {
       setTimeout(processReelQueue, 2000);
     }

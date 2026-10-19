@@ -216,23 +216,29 @@
   },
   "faraway-ganha-data-de-lancamento-oficial-e-chega-em-novembro": {
     "slug": "faraway-ganha-data-de-lancamento-oficial-e-chega-em-novembro",
-    "status": "generating",
-    "started_at": "2026-10-19T18:43:00.024Z"
+    "status": "failed",
+    "started_at": "2026-10-19T18:43:00.024Z",
+    "failed_at": "2026-10-19T19:22:14.008Z",
+    "error": "Geração cancelada pelo usuário."
   },
   "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay": {
     "slug": "peak-chega-aos-consoles-em-22-de-outubro-com-crossplay",
     "status": "generating",
-    "started_at": "2026-10-19T18:42:58.026Z"
+    "started_at": "2026-10-19T19:22:22.610Z"
   },
   "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas": {
     "slug": "xbox-se-aproxima-do-aniversario-de-25-anos-com-rumores-e-expectativas",
-    "status": "generating",
-    "started_at": "2026-10-19T18:42:58.407Z"
+    "status": "failed",
+    "started_at": "2026-10-19T18:42:58.407Z",
+    "failed_at": "2026-10-19T19:22:11.700Z",
+    "error": "Geração cancelada pelo usuário."
   },
   "lancamentos-da-semana-trazem-call-of-duty-e-final-fantasy": {
     "slug": "lancamentos-da-semana-trazem-call-of-duty-e-final-fantasy",
-    "status": "generating",
-    "started_at": "2026-10-19T18:42:59.326Z"
+    "status": "failed",
+    "started_at": "2026-10-19T18:42:59.326Z",
+    "failed_at": "2026-10-19T19:22:12.718Z",
+    "error": "Geração cancelada pelo usuário."
   },
   "saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus": {
     "slug": "saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus",
