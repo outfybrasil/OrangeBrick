@@ -214,6 +214,7 @@ let isProcessingQueue = false;
 let currentRunningChild: ChildProcess | null = null;
 let currentRunningSlug: string | null = null;
 const reelQueue: string[] = [];
+const cancelledReelChildren = new WeakSet<ChildProcess>();
 
 export async function triggerReelGeneration(slug: string): Promise<{ queued: boolean; message: string }> {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) {
@@ -258,18 +259,18 @@ export function cancelReelGeneration(slug: string): { success: boolean; message:
     reelQueue.splice(queueIndex, 1);
   }
 
-  if (currentRunningSlug === slug && currentRunningChild) {
+  const activeChild = currentRunningSlug === slug ? currentRunningChild : null;
+
+  if (activeChild) {
+    cancelledReelChildren.add(activeChild);
     try {
-      currentRunningChild.kill("SIGTERM");
+      activeChild.kill("SIGTERM");
     } catch {}
-    currentRunningChild = null;
-    currentRunningSlug = null;
-    isProcessingQueue = false;
   }
 
   const manifest = getManifest();
   const current = manifest[slug];
-  if (current?.pid) {
+  if (current?.pid && !activeChild) {
     try {
       process.kill(current.pid);
     } catch {}

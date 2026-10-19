@@ -31,10 +31,6 @@
     {
       "path": "/api/cron/editorial-scheduler",
       "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/cron/reel-social",
-      "schedule": "*/15 * * * *"
     }
   ]
 }
