@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
+import type { ReelSocialPublication, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 
 interface TikTokPublisherProps {
   postId: string;
@@ -9,19 +10,19 @@ interface TikTokPublisherProps {
   initialCaption: string;
   hashtags?: string[];
   ready: boolean;
+  socialPublication?: ReelSocialPublication;
+  onDeliveryStatusChange?: (status: ReelSocialStatus, error?: string | null, externalId?: string | null) => void;
 }
 
-export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [], ready }: TikTokPublisherProps) {
+type TikTokPublisherStatus = "idle" | "sending" | "submitted" | "published" | "unknown" | "error";
+
+export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [], ready, socialPublication, onDeliveryStatusChange }: TikTokPublisherProps) {
+  const inFlight = useRef(false);
   const supabase = useMemo(() => createDataClient(), []);
   const [caption, setCaption] = useState(initialCaption);
-  const [privacyLevel, setPrivacyLevel] = useState<"PUBLIC_TO_EVERYONE" | "MUTUAL_FOLLOW_FRIENDS" | "SELF_ONLY">("PUBLIC_TO_EVERYONE");
-  const [disableComment, setDisableComment] = useState(false);
-  const [disableDuet, setDisableDuet] = useState(false);
-  const [disableStitch, setDisableStitch] = useState(false);
-  const [status, setStatus] = useState<"idle" | "sending" | "published" | "error">("idle");
-  const [isDirectPost, setIsDirectPost] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [publishId, setPublishId] = useState<string | null>(null);
+  const [statusOverride, setStatusOverride] = useState<TikTokPublisherStatus | null>(null);
+  const [errorOverride, setErrorOverride] = useState<string | null | undefined>(undefined);
+  const [publishIdOverride, setPublishIdOverride] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [configuredOnServer, setConfiguredOnServer] = useState(false);
@@ -29,6 +30,18 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   const [customToken, setCustomToken] = useState("");
   const [isReposting, setIsReposting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const publicationStatus: TikTokPublisherStatus = isReposting && socialPublication?.status === "published"
+    ? "idle"
+    : socialPublication?.status === "published" ? "published"
+      : socialPublication?.status === "processing" ? "sending"
+        : socialPublication?.status === "submitted" ? "submitted"
+          : socialPublication?.status === "unknown" ? "unknown"
+            : socialPublication?.status === "failed" ? "error" : "idle";
+  const status = statusOverride ?? publicationStatus;
+  const error = errorOverride !== undefined
+    ? errorOverride
+    : status === "error" ? socialPublication?.error || "O TikTok recusou ou não confirmou a publicação." : null;
+  const publishId = publishIdOverride ?? socialPublication?.external_id ?? null;
 
   const token = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -41,15 +54,6 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       try {
         const savedToken = localStorage.getItem("ob_tiktok_access_token") || "";
         if (savedToken) setCustomToken(savedToken);
-        const savedPub = localStorage.getItem(`ob_tt_pub_${postId}`);
-        if (savedPub) {
-          const parsed = JSON.parse(savedPub);
-          if (parsed?.publishId) {
-            setPublishId(parsed.publishId);
-            setIsDirectPost(Boolean(parsed.isDirect));
-            setStatus("published");
-          }
-        }
       } catch {}
     }, 0);
     return () => window.clearTimeout(timer);
@@ -81,9 +85,10 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   };
 
   const copyCaption = () => {
-    navigator.clipboard.writeText(caption);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void navigator.clipboard.writeText(caption).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => setCopied(false));
   };
 
   const toggleHashtag = (tag: string) => {
@@ -100,10 +105,13 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
 
   async function handlePublish(event: React.FormEvent) {
     event.preventDefault();
-    if (!videoUrl || !ready || status === "sending" || !confirmed) return;
+    if (inFlight.current || !videoUrl || !ready || status === "sending" || !confirmed) return;
 
-    setStatus("sending");
-    setError(null);
+    inFlight.current = true;
+    setStatusOverride("sending");
+    setErrorOverride(null);
+    onDeliveryStatusChange?.("processing");
+    let deliveryStatus: ReelSocialStatus = "unknown";
 
     try {
       copyCaption();
@@ -116,12 +124,10 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
         },
         body: JSON.stringify({
           postId,
+          repost: isReposting,
+          confirmed,
           videoUrl,
           caption,
-          privacyLevel,
-          disableComment,
-          disableDuet,
-          disableStitch,
           accessToken: customToken.trim() || undefined,
         }),
       });
@@ -129,28 +135,26 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        deliveryStatus = data?.deliveryStatus === "failed" ? "failed" : data?.deliveryStatus === "unknown" ? "unknown" : "failed";
         throw new Error(data?.error || "Erro ao publicar no TikTok.");
       }
 
       const finalPublishId = data?.publishId || "ok";
-      const isDirect = Boolean(data?.isDirect);
+      deliveryStatus = data?.deliveryStatus === "submitted" ? "submitted" : "unknown";
 
-      setStatus("published");
-      setPublishId(finalPublishId);
-      setIsDirectPost(isDirect);
+      setStatusOverride(deliveryStatus === "submitted" ? "submitted" : "unknown");
+      setPublishIdOverride(finalPublishId);
       setIsReposting(false);
       setConfirmed(false);
+      onDeliveryStatusChange?.(deliveryStatus, null, finalPublishId);
 
-      try {
-        localStorage.setItem(`ob_tt_pub_${postId}`, JSON.stringify({
-          publishId: finalPublishId,
-          isDirect,
-          publishedAt: new Date().toISOString()
-        }));
-      } catch {}
     } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Falha na comunicação com o TikTok.");
+      const message = err instanceof Error ? err.message : "Falha na comunicação com o TikTok.";
+      setStatusOverride("error");
+      setErrorOverride(message);
+      onDeliveryStatusChange?.(deliveryStatus, message);
+    } finally {
+      inFlight.current = false;
     }
   }
 
@@ -162,7 +166,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             TT
           </span>
           <div>
-            <p className="font-bold text-white">TikTok Content Posting</p>
+            <p className="font-bold text-white">Rascunho no TikTok</p>
             <p className="text-xs text-gray-400">
               {composioConfigured ? (
                 <span className="text-cyan-400">● Conectado via Composio</span>
@@ -186,7 +190,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
 
       {showConfig && (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 space-y-3">
-          <p className="text-xs font-bold text-cyan-200">Configurações da TikTok API (Direct Post)</p>
+          <p className="text-xs font-bold text-cyan-200">Configurações de envio de rascunho</p>
           <div>
             <label className="text-[11px] font-bold text-gray-300">TikTok Access Token (Bearer):</label>
             <input
@@ -215,18 +219,28 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
         </div>
       )}
 
-      {status === "published" && !isReposting ? (
-        <div role="status" className="space-y-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 text-gray-200">
+      {(status === "published" || status === "submitted" || status === "unknown") && !isReposting ? (
+        <div role="status" className={`space-y-3 rounded-xl border p-4 text-gray-200 ${status === "published" ? "border-emerald-500/30 bg-emerald-950/20" : status === "submitted" ? "border-amber-500/30 bg-amber-950/20" : "border-white/15 bg-white/[0.04]"}`}>
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 font-bold">✓</span>
-            <p className="font-bold text-cyan-300">
-              {isDirectPost ? "Vídeo publicado com sucesso diretamente no TikTok!" : "Vídeo recebido pelo TikTok com sucesso!"}
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full ${status === "published" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>
+              {status === "published" ? (
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m5 12 4 4L19 6" />
+                </svg>
+              ) : (
+                <span className="h-2 w-2 rounded-full bg-current" />
+              )}
+            </span>
+            <p className={`font-bold ${status === "published" ? "text-emerald-300" : "text-amber-200"}`}>
+              {status === "published" ? "Vídeo publicado com sucesso no TikTok." : status === "submitted" ? "Vídeo enviado para finalizar no TikTok." : "Envio ainda sem confirmação no TikTok."}
             </p>
           </div>
           <p className="text-xs text-gray-300">
-            {isDirectPost
-              ? "O Reels foi publicado diretamente no seu feed do TikTok com legendas e hashtags."
-              : "O vídeo foi enviado para o seu aplicativo do TikTok (Caixa de Entrada / Rascunhos). A legenda e hashtags foram copiadas automaticamente para sua área de transferência para colar no app!"}
+            {status === "published"
+              ? "A plataforma confirmou a publicação no perfil."
+              : status === "submitted"
+                ? "Abra a notificação na caixa de entrada do TikTok para revisar e publicar. A legenda e as hashtags estão disponíveis para copiar."
+                : socialPublication?.error || "Confira o vídeo no TikTok antes de tentar enviar novamente."}
           </p>
           {publishId && (
             <p className="text-xs font-mono text-gray-400">
@@ -251,18 +265,23 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               Abrir TikTok Studio Web ↗
             </a>
           </div>
-          <div className="border-t border-white/10 pt-3">
-            <button
-              type="button"
-              onClick={() => {
-                setIsReposting(true);
-                setConfirmed(false);
-              }}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
-            >
-              🔄 Apagou da conta? Repostar vídeo no TikTok
-            </button>
-          </div>
+          {status === "published" && (
+            <div className="border-t border-white/10 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsReposting(true);
+                  setStatusOverride("idle");
+                  setErrorOverride(null);
+                  setPublishIdOverride(null);
+                  setConfirmed(false);
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
+              >
+                Repostar vídeo no TikTok
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <form onSubmit={handlePublish} className="space-y-4">
@@ -271,7 +290,12 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               <span>Modo de repostagem ativo. Preencha e confirme o reenvio abaixo.</span>
               <button
                 type="button"
-                onClick={() => setIsReposting(false)}
+                onClick={() => {
+                  setIsReposting(false);
+                  setStatusOverride(null);
+                  setErrorOverride(undefined);
+                  setPublishIdOverride(null);
+                }}
                 className="font-bold underline hover:text-white"
               >
                 Cancelar
@@ -333,62 +357,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-bold text-gray-300">Visibilidade do Vídeo:</label>
-              <select
-                value={privacyLevel}
-                onChange={(e) => {
-                  setPrivacyLevel(e.target.value as "PUBLIC_TO_EVERYONE" | "MUTUAL_FOLLOW_FRIENDS" | "SELF_ONLY");
-                  setConfirmed(false);
-                }}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-[#07080c] px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
-              >
-                <option value="PUBLIC_TO_EVERYONE">Público (Todos)</option>
-                <option value="MUTUAL_FOLLOW_FRIENDS">Amigos / Seguidores mútuos</option>
-                <option value="SELF_ONLY">Privado (Apenas eu)</option>
-              </select>
-            </div>
-
-            <div className="space-y-1.5 pt-1 sm:pt-4">
-              <label className="flex items-center gap-2 text-xs text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={!disableComment}
-                  onChange={(e) => {
-                    setDisableComment(!e.target.checked);
-                    setConfirmed(false);
-                  }}
-                  className="rounded border-white/20 accent-cyan-400"
-                />
-                Permitir Comentários
-              </label>
-              <label className="flex items-center gap-2 text-xs text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={!disableDuet}
-                  onChange={(e) => {
-                    setDisableDuet(!e.target.checked);
-                    setConfirmed(false);
-                  }}
-                  className="rounded border-white/20 accent-cyan-400"
-                />
-                Permitir Duetos
-              </label>
-              <label className="flex items-center gap-2 text-xs text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={!disableStitch}
-                  onChange={(e) => {
-                    setDisableStitch(!e.target.checked);
-                    setConfirmed(false);
-                  }}
-                  className="rounded border-white/20 accent-cyan-400"
-                />
-                Permitir Costura (Stitch)
-              </label>
-            </div>
-          </div>
+          <p className="text-xs text-gray-300">O vídeo será enviado para a caixa de entrada do TikTok. Abra a notificação no aplicativo, cole a legenda e as hashtags e finalize a publicação.</p>
 
           <label className="flex min-h-11 items-start gap-3 text-gray-200">
             <input
@@ -400,8 +369,8 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             />
             <span className="text-xs">
               {isReposting
-                ? "Confirmo que o vídeo anterior foi apagado no TikTok e desejo reenviá-lo agora para a conta conectada."
-                : "Revisei o vídeo e a legenda. Confirmo a publicação no TikTok."}
+                ? "Confirmo que o vídeo anterior foi apagado no TikTok e desejo enviar um novo rascunho para a conta conectada."
+                : "Revisei o vídeo. Confirmo o envio como rascunho para finalizar no TikTok."}
             </span>
           </label>
 
@@ -414,8 +383,8 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               {status === "sending"
                 ? "Enviando para o TikTok..."
                 : isReposting
-                ? "Confirmar e Repostar no TikTok"
-                : "Publicar no TikTok"}
+                ? "Confirmar novo rascunho no TikTok"
+                : "Enviar rascunho ao TikTok"}
             </button>
 
             <a
@@ -430,7 +399,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
           </div>
 
           <p className="text-[11px] text-gray-400">
-            Ao publicar, a legenda e hashtags são copiadas automaticamente para sua área de transferência para facilidade no celular.
+            A legenda e as hashtags devem ser coladas no TikTok ao finalizar a publicação.
           </p>
         </form>
       )}

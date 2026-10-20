@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
+import type { ReelSocialPublication, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 
 interface InstagramPublisherProps {
   postId: string;
@@ -9,14 +10,19 @@ interface InstagramPublisherProps {
   initialCaption: string;
   hashtags?: string[];
   ready: boolean;
+  socialPublication?: ReelSocialPublication;
+  onDeliveryStatusChange?: (status: ReelSocialStatus, error?: string | null, externalId?: string | null) => void;
 }
 
-export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags = [], ready }: InstagramPublisherProps) {
+type InstagramPublisherStatus = "idle" | "sending" | "polling" | "published" | "error";
+
+export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags = [], ready, socialPublication, onDeliveryStatusChange }: InstagramPublisherProps) {
+  const inFlight = useRef(false);
   const supabase = useMemo(() => createDataClient(), []);
   const [caption, setCaption] = useState(initialCaption);
-  const [status, setStatus] = useState<"idle" | "sending" | "polling" | "published" | "error">("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [publishedMediaId, setPublishedMediaId] = useState<string | null>(null);
+  const [statusOverride, setStatusOverride] = useState<InstagramPublisherStatus | null>(null);
+  const [errorOverride, setErrorOverride] = useState<string | null | undefined>(undefined);
+  const [publishedMediaIdOverride, setPublishedMediaIdOverride] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [configuredOnServer, setConfiguredOnServer] = useState(false);
@@ -26,6 +32,16 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
   const [customAccountId, setCustomAccountId] = useState("");
   const [isReposting, setIsReposting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const publicationStatus: InstagramPublisherStatus = isReposting && socialPublication?.status === "published"
+    ? "idle"
+    : socialPublication?.status === "published" ? "published"
+      : socialPublication?.status === "processing" ? "polling"
+        : socialPublication?.status === "failed" || socialPublication?.status === "unknown" ? "error" : "idle";
+  const status = statusOverride ?? publicationStatus;
+  const error = errorOverride !== undefined
+    ? errorOverride
+    : status === "error" ? socialPublication?.error || "Confira o estado da publicação antes de tentar novamente." : null;
+  const publishedMediaId = publishedMediaIdOverride ?? socialPublication?.external_id ?? null;
 
   const token = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -40,14 +56,6 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
         const savedAccountId = localStorage.getItem("ob_ig_account_id") || "";
         if (savedToken) setCustomToken(savedToken);
         if (savedAccountId) setCustomAccountId(savedAccountId);
-        const savedPub = localStorage.getItem(`ob_ig_pub_${postId}`);
-        if (savedPub) {
-          const parsed = JSON.parse(savedPub);
-          if (parsed?.mediaId) {
-            setPublishedMediaId(parsed.mediaId);
-            setStatus("published");
-          }
-        }
       } catch {}
     }, 0);
     return () => window.clearTimeout(timer);
@@ -100,10 +108,13 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
 
   async function handlePublish(event: React.FormEvent) {
     event.preventDefault();
-    if (!videoUrl || !ready || status === "sending" || status === "polling" || !confirmed) return;
+    if (inFlight.current || !videoUrl || !ready || status === "sending" || status === "polling" || !confirmed) return;
 
-    setStatus("sending");
-    setError(null);
+    inFlight.current = true;
+    setStatusOverride("sending");
+    setErrorOverride(null);
+    onDeliveryStatusChange?.("processing");
+    let deliveryStatus: ReelSocialStatus = "unknown";
 
     try {
       const res = await fetch("/api/admin/reels/instagram", {
@@ -114,6 +125,8 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
         },
         body: JSON.stringify({
           postId,
+          repost: isReposting,
+          confirmed,
           videoUrl,
           caption,
           accessToken: customToken.trim() || undefined,
@@ -124,21 +137,25 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        deliveryStatus = data?.deliveryStatus === "unknown" ? "unknown" : "failed";
         throw new Error(data?.error || "Erro ao publicar no Instagram.");
       }
 
       const mediaId = data?.mediaId || "ok";
-      setStatus("published");
-      setPublishedMediaId(mediaId);
+      deliveryStatus = "published";
+      setStatusOverride("published");
+      setPublishedMediaIdOverride(mediaId);
       setIsReposting(false);
       setConfirmed(false);
+      onDeliveryStatusChange?.("published", null, mediaId);
 
-      try {
-        localStorage.setItem(`ob_ig_pub_${postId}`, JSON.stringify({ mediaId, publishedAt: new Date().toISOString() }));
-      } catch {}
     } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Falha na comunicação com o Instagram.");
+      const message = err instanceof Error ? err.message : "Falha na comunicação com o Instagram.";
+      setStatusOverride("error");
+      setErrorOverride(message);
+      onDeliveryStatusChange?.(deliveryStatus, message);
+    } finally {
+      inFlight.current = false;
     }
   }
 
@@ -242,6 +259,9 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
               type="button"
               onClick={() => {
                 setIsReposting(true);
+                setStatusOverride("idle");
+                setErrorOverride(null);
+                setPublishedMediaIdOverride(null);
                 setConfirmed(false);
               }}
               className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
@@ -257,7 +277,12 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
               <span>Modo de repostagem ativo. Preencha e confirme o reenvio abaixo.</span>
               <button
                 type="button"
-                onClick={() => setIsReposting(false)}
+                onClick={() => {
+                  setIsReposting(false);
+                  setStatusOverride(null);
+                  setErrorOverride(undefined);
+                  setPublishedMediaIdOverride(null);
+                }}
                 className="font-bold underline hover:text-white"
               >
                 Cancelar
@@ -323,7 +348,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
             <input
               type="checkbox"
               checked={confirmed}
-              disabled={status === "sending" || !isConfigured}
+              disabled={status === "sending" || status === "polling" || !isConfigured}
               onChange={(e) => setConfirmed(e.target.checked)}
               className="mt-1 h-5 w-5 shrink-0 accent-brand-orange"
             />
@@ -337,7 +362,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
           <div className="flex flex-col gap-2 pt-2 sm:flex-row">
             <button
               type="submit"
-              disabled={!ready || status === "sending" || !confirmed || !caption.trim()}
+              disabled={!ready || status === "sending" || status === "polling" || !confirmed || !caption.trim()}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 py-2.5 text-xs font-black uppercase text-white shadow-lg transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "sending"

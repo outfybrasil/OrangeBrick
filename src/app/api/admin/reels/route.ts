@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isVerifiedAdminSession } from "@/lib/auth";
-import type { Post } from "@/lib/types/database";
+import type { Post, ReelYouTubePublication } from "@/lib/types/database";
 import { getRemoteReels, usesRemoteReels } from "@/lib/video/reel-remote";
 import {
   getManifest,
@@ -12,6 +12,7 @@ import {
   type ReelManifestItem,
   type SocialCopys,
 } from "@/lib/video/reel-service";
+import type { ReelSocialPublication, ReelSocialPlatform, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,7 @@ export interface AdminReelItem {
   finished_at?: string;
   error?: string;
   copys: SocialCopys;
+  socialPublications: Partial<Record<ReelSocialPlatform, ReelSocialPublication>>;
 }
 
 export async function GET(request: Request) {
@@ -68,6 +70,52 @@ export async function GET(request: Request) {
 
   if (postsError || !posts) {
     return NextResponse.json({ error: "Erro ao buscar matérias" }, { status: 500 });
+  }
+
+  const { data: socialRows, error: socialError } = posts.length
+    ? await editorial.from("reel_social_publications").select("post_id,platform,status,external_id,error,updated_at").in("post_id", posts.map((post) => post.id))
+    : { data: [], error: null };
+
+  if (socialError) {
+    return NextResponse.json({ error: "Erro ao buscar o status das publicações sociais." }, { status: 500 });
+  }
+
+  const socialByPostId = new Map<string, Partial<Record<ReelSocialPlatform, ReelSocialPublication>>>();
+  for (const row of socialRows || []) {
+    if (row.platform !== "instagram" && row.platform !== "tiktok" && row.platform !== "youtube") continue;
+    const platform = row.platform as ReelSocialPlatform;
+    const publications = socialByPostId.get(row.post_id) || {};
+    publications[platform] = row as ReelSocialPublication;
+    socialByPostId.set(row.post_id, publications);
+  }
+
+  const { data: youtubeRows, error: youtubeError } = posts.length
+    ? await editorial.from("reel_youtube_publications").select("post_id,status,visibility,video_id,error,updated_at").in("post_id", posts.map((post) => post.id)).order("updated_at", { ascending: false })
+    : { data: [], error: null };
+
+  if (youtubeError) {
+    return NextResponse.json({ error: "Erro ao buscar o histórico de publicação do YouTube." }, { status: 500 });
+  }
+
+  const youtubePosts = new Set<string>();
+  for (const row of youtubeRows || []) {
+    if (youtubePosts.has(row.post_id)) continue;
+    youtubePosts.add(row.post_id);
+    const youtube = row as Pick<ReelYouTubePublication, "status" | "visibility" | "video_id" | "error" | "updated_at">;
+    const status: ReelSocialStatus = youtube.status === "uploaded"
+      ? youtube.visibility === "public" ? "published" : "submitted"
+      : youtube.status === "preparing" || youtube.status === "uploading" ? "processing"
+        : youtube.status === "failed" ? "failed" : "unknown";
+    const publications = socialByPostId.get(row.post_id) || {};
+    publications.youtube = {
+      platform: "youtube",
+      status,
+      external_id: youtube.video_id,
+      error: youtube.error,
+      updated_at: youtube.updated_at,
+      visibility: youtube.visibility,
+    };
+    socialByPostId.set(row.post_id, publications);
   }
 
   const remote = usesRemoteReels();
@@ -157,6 +205,7 @@ export async function GET(request: Request) {
       finished_at: manifestItem?.finished_at,
       error: errorMsg,
       copys,
+      socialPublications: socialByPostId.get(post.id || "") || {},
     };
   });
 

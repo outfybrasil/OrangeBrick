@@ -5,6 +5,8 @@ import { getReelAdmin, REEL_BUCKET } from "@/lib/video/reel-remote";
 import { getYouTubeConnection, stageYouTubeVideo, uploadYouTubeVideo } from "@/lib/video/reel-youtube";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
 
+import { beginSocialDelivery, finishSocialDelivery, type SocialDeliveryClaim } from "@/lib/video/reel-social-delivery";
+
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
@@ -51,8 +53,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let deliveryClaim: SocialDeliveryClaim | null = null;
   let publicationId: string | undefined;
   let uploadStarted = false;
+  let publicUpload = false;
   let videoId: string | undefined;
   try {
     const automatic = isAuthorizedCronRequest(request);
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
       || !["private", "unlisted", "public"].includes(body.visibility)) {
       return reply({ error: "Revise o título (até 100 caracteres), a descrição (até 5.000) e confirme o envio. Não use os caracteres < e >." }, 400);
     }
+    publicUpload = body.visibility === "public";
     const connection = await getYouTubeConnection(true);
     if (body.channelId !== connection.channel.id) return reply({ error: "O canal de destino mudou. Atualize a conexão antes de enviar." }, 409);
     const db = getReelAdmin();
@@ -76,14 +81,16 @@ export async function POST(request: Request) {
     if (existing && ["preparing", "uploading"].includes(existing.status)) {
       return reply({ error: "O envio deste Reel já está em andamento. Aguarde.", publication: existing }, 409);
     }
-    if (existing && existing.status !== "failed" && !body.repost) {
+    if (existing && existing.status !== "failed" && !(body.repost === true && existing.status === "uploaded")) {
       return reply({ error: "Este Reel já foi enviado ou tem um envio em andamento. Confira o histórico antes de repetir.", publication: existing }, 409);
     }
+    deliveryClaim = await beginSocialDelivery(body.postId, "youtube", { automatic, repost: body.repost === true && body.confirmed === true });
+    if (!deliveryClaim) return reply({ error: "Este Reel já tem um envio no YouTube. Confira o histórico antes de repetir." }, 409);
     const record = { post_id: body.postId, reel_job_id: job.id, channel_id: connection.channel.id, status: "preparing", title: body.title.trim(), description: body.description, visibility: body.visibility, error: null, updated_at: new Date().toISOString() };
     const claim = existing
-      ? await db.from("reel_youtube_publications").update(record).eq("id", existing.id).select("id").maybeSingle()
+      ? await db.from("reel_youtube_publications").update(record).eq("id", existing.id).eq("status", existing.status).eq("updated_at", existing.updated_at).select("id").maybeSingle()
       : await db.from("reel_youtube_publications").insert(record).select("id").single();
-    if (claim.error || !claim.data) return reply({ error: "Não foi possível reservar o envio. Atualize o histórico para evitar duplicação." }, 409);
+    if (claim.error || !claim.data) throw new Error("Não foi possível reservar o envio. Atualize o histórico para evitar duplicação.");
     publicationId = claim.data.id;
     const { data: signed, error: signError } = await db.storage.from(REEL_BUCKET).createSignedUrl(job.storage_path, 900);
     if (signError || !signed) throw new Error("O vídeo não está disponível no armazenamento.");
@@ -94,6 +101,7 @@ export async function POST(request: Request) {
     videoId = await uploadYouTubeVideo(connection, file, record.title, record.description, record.visibility);
     const { data: saved, error: saveError } = await db.from("reel_youtube_publications").update({ status: "uploaded", video_id: videoId, updated_at: new Date().toISOString() }).eq("id", publicationId).select("*").single();
     if (saveError) throw new Error("O vídeo foi recebido pelo YouTube, mas o histórico não pôde ser atualizado.");
+    await finishSocialDelivery(deliveryClaim, record.visibility === "public" ? "published" : "submitted", videoId);
     return reply({ publication: saved as ReelYouTubePublication });
   } catch (error) {
     const message = uploadStarted
@@ -102,7 +110,8 @@ export async function POST(request: Request) {
     if (publicationId) {
       await getReelAdmin().from("reel_youtube_publications").update({ status: videoId ? "uploaded" : uploadStarted ? "unknown" : "failed", video_id: videoId || null, error: message, updated_at: new Date().toISOString() }).eq("id", publicationId);
     }
-    return reply({ error: message, videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined }, 503);
+    if (deliveryClaim) await finishSocialDelivery(deliveryClaim, videoId ? publicUpload ? "published" : "submitted" : uploadStarted ? "unknown" : "failed", videoId || null, message).catch(() => {});
+    return reply({ deliveryStatus: uploadStarted ? "unknown" : "failed", error: message, videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined }, 503);
   }
 }
 
@@ -113,6 +122,8 @@ export async function DELETE(request: Request) {
     if (!postId || !uuid.test(postId)) return reply({ error: "Matéria inválida." }, 400);
     const connection = await getYouTubeConnection();
     const db = getReelAdmin();
+    const existing = await publicationHistory(postId, connection.channel.id);
+    if (existing && ["preparing", "uploading", "unknown"].includes(existing.status)) return reply({ error: "Confira o envio no YouTube antes de redefinir o historico." }, 409);
     const { error } = await db.from("reel_youtube_publications").delete().eq("post_id", postId).eq("channel_id", connection.channel.id);
     if (error) throw new Error("Não foi possível redefinir o histórico de envio.");
     return reply({ success: true, message: "Histórico de envio redefinido com sucesso." });

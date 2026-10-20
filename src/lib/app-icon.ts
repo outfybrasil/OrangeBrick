@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 export type AppIconPreference = "default" | "inverted";
 
@@ -64,38 +64,32 @@ export function setAppIconPreference(pref: AppIconPreference) {
   window.dispatchEvent(new CustomEvent(APP_ICON_CHANGE_EVENT, { detail: pref }));
 }
 
+function subscribeAppIcon(onChange: () => void) {
+  const handleStorageChange = (event: StorageEvent) => {
+    if (event.key === APP_ICON_KEY) onChange();
+  };
+
+  window.addEventListener(APP_ICON_CHANGE_EVENT, onChange);
+  window.addEventListener("storage", handleStorageChange);
+
+  return () => {
+    window.removeEventListener(APP_ICON_CHANGE_EVENT, onChange);
+    window.removeEventListener("storage", handleStorageChange);
+  };
+}
+
+function getServerAppIconPreference(): AppIconPreference {
+  return "default";
+}
+
 export function useAppIcon() {
-  const [appIcon, setAppIcon] = useState<AppIconPreference>("default");
+  const appIcon = useSyncExternalStore(subscribeAppIcon, getAppIconPreference, getServerAppIconPreference);
 
   useEffect(() => {
-    const initial = getAppIconPreference();
-    setAppIcon(initial);
-    applyAppIcon(initial);
-
-    const handleCustomChange = (e: Event) => {
-      const detail = (e as CustomEvent<AppIconPreference>).detail;
-      if (detail) setAppIcon(detail);
-    };
-
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === APP_ICON_KEY) {
-        const next = e.newValue === "inverted" ? "inverted" : "default";
-        setAppIcon(next);
-        applyAppIcon(next);
-      }
-    };
-
-    window.addEventListener(APP_ICON_CHANGE_EVENT, handleCustomChange);
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener(APP_ICON_CHANGE_EVENT, handleCustomChange);
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
+    applyAppIcon(appIcon);
+  }, [appIcon]);
 
   const updateAppIcon = (next: AppIconPreference) => {
-    setAppIcon(next);
     setAppIconPreference(next);
   };
 

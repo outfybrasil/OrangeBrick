@@ -3,7 +3,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { getReelAdmin } from "@/lib/video/reel-remote";
 import { getSiteUrl } from "@/lib/site-url";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
-import { hasSocialDelivery, recordManualSocialDelivery } from "@/lib/video/reel-social-delivery";
+import { beginSocialDelivery, finishSocialDelivery, type SocialDeliveryClaim } from "@/lib/video/reel-social-delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 180;
@@ -19,64 +19,31 @@ async function authorized(request: Request) {
   return !error && isVerifiedAdminSession(user, token);
 }
 
-async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallbackId?: string): Promise<{ accountId?: string; hasDirectPublish: boolean }> {
+async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallbackId?: string): Promise<{ accountId?: string; hasUpload: boolean }> {
   try {
     const res = await fetch(`https://backend.composio.dev/api/v3.1/connected_accounts?user_uuid=${encodeURIComponent(userId)}`, {
       headers: { "x-api-key": apiKey },
       signal: AbortSignal.timeout(10_000),
       cache: "no-store",
     });
-    if (!res.ok) return { accountId: fallbackId, hasDirectPublish: false };
+    if (!res.ok) return { accountId: fallbackId, hasUpload: false };
     const json = await res.json();
     const rawItems = (json?.items || []) as Array<{ id: string; status: string; toolkit?: { slug?: string }; appName?: string; scope?: string; data?: { scope?: string }; params?: { scope?: string } }>;
     const items = rawItems.filter(i => (i.toolkit?.slug === "tiktok" || i.appName === "tiktok"));
 
-    const activeWithPublish = items.find(i => {
+    const activeWithUpload = items.find(i => {
       const scope = i.scope || i.data?.scope || i.params?.scope || "";
-      return i.status === "ACTIVE" && scope.includes("video.publish");
+      return i.status === "ACTIVE" && scope.includes("video.upload");
     });
-    if (activeWithPublish) {
-      return { accountId: activeWithPublish.id, hasDirectPublish: true };
+    if (activeWithUpload) {
+      return { accountId: activeWithUpload.id, hasUpload: true };
     }
     const activeAny = items.find(i => i.status === "ACTIVE");
     const scope = activeAny?.scope || activeAny?.data?.scope || activeAny?.params?.scope || "";
-    return { accountId: activeAny?.id || fallbackId, hasDirectPublish: scope.includes("video.publish") };
+    return { accountId: activeAny?.id || fallbackId, hasUpload: scope.includes("video.upload") };
   } catch {
-    return { accountId: fallbackId, hasDirectPublish: false };
+    return { accountId: fallbackId, hasUpload: false };
   }
-}
-
-async function queryTikTokCreatorPrivacyOptions(apiKey: string | undefined, userId: string, accountId: string | undefined, accessToken: string): Promise<string[]> {
-  const endpoint = "https://open.tiktokapis.com/v2/post/publish/creator_info/query/";
-  const useComposio = Boolean(apiKey && accountId && !accessToken);
-  const response = useComposio
-    ? await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
-        method: "POST",
-        headers: { "x-api-key": apiKey as string, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          connected_account_id: accountId,
-          user_id: userId,
-          endpoint,
-          method: "POST",
-          headers: { "Content-Type": "application/json; charset=UTF-8" },
-          body: { fields: ["creator_username", "privacy_level_options", "comment_disabled", "duet_disabled", "stitch_disabled", "max_video_post_duration_sec"] },
-        }),
-        signal: AbortSignal.timeout(30_000),
-      })
-    : await fetch(endpoint, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json; charset=UTF-8" },
-        body: JSON.stringify({ fields: ["creator_username", "privacy_level_options", "comment_disabled", "duet_disabled", "stitch_disabled", "max_video_post_duration_sec"] }),
-        signal: AbortSignal.timeout(30_000),
-      });
-  const json = await response.json().catch(() => null);
-  const result = json?.data?.data || json?.data || json;
-  const privacyOptions = result?.data?.privacy_level_options || result?.privacy_level_options;
-  const errorMessage = result?.error?.message || json?.error?.message;
-  if (!response.ok || result?.error?.code && result.error.code !== "ok" || !Array.isArray(privacyOptions) || privacyOptions.length === 0) {
-    throw new Error(errorMessage || "O TikTok não retornou as opções atuais de privacidade do criador.");
-  }
-  return privacyOptions;
 }
 
 export async function GET(request: Request) {
@@ -128,12 +95,12 @@ export async function GET(request: Request) {
       });
     }
 
-    let hasDirectPublish = false;
+    let hasUpload = false;
     let resolvedAccountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
 
     if (apiKey) {
       const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, resolvedAccountId);
-      hasDirectPublish = resolved.hasDirectPublish;
+      hasUpload = resolved.hasUpload;
       if (resolved.accountId) resolvedAccountId = resolved.accountId;
     }
 
@@ -144,7 +111,7 @@ export async function GET(request: Request) {
       configured: hasEnvToken || composioConfigured,
       hasEnvToken,
       composioConfigured,
-      hasDirectPublish,
+      hasUpload,
       accountId: resolvedAccountId,
     });
   } catch (error) {
@@ -177,6 +144,7 @@ async function uploadChunks(uploadUrl: string, buffer: Buffer, chunkSize: number
 }
 
 export async function POST(request: Request) {
+  let deliveryClaim: SocialDeliveryClaim | null = null;
   try {
     const automatic = isAuthorizedCronRequest(request);
     if (!automatic && !await authorized(request)) {
@@ -188,28 +156,32 @@ export async function POST(request: Request) {
       return reply({ error: "URL do vídeo é obrigatória." }, 400);
     }
 
-    if (!automatic && await hasSocialDelivery(body.postId, "tiktok")) return reply({ error: "Este Reel ja tem um envio registrado no TikTok. Confira o acompanhamento antes de repetir." }, 409);
-    const caption = typeof body.caption === "string" ? body.caption.trim().slice(0, 2200) : "";
+    deliveryClaim = await beginSocialDelivery(body.postId, "tiktok", { automatic, repost: body.repost === true && body.confirmed === true });
+    if (!deliveryClaim) return reply({ error: "Este Reel já tem um envio no TikTok. Confira os rascunhos antes de repetir.", deliveryStatus: "unknown" }, 409);
+
+    const fail = async (error: string, statusCode: number, deliveryStatus: "failed" | "unknown" = "failed") => {
+      if (deliveryClaim) await finishSocialDelivery(deliveryClaim, deliveryStatus, null, error);
+      return reply({ error, deliveryStatus }, statusCode);
+    };
+
     const apiKey = process.env.COMPOSIO_API_KEY;
     const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
     const manualAccessToken = body.accessToken?.trim() || process.env.TIKTOK_ACCESS_TOKEN || "";
 
     let accountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
-    let hasDirectPublish = false;
+    let hasUpload = false;
     if (apiKey) {
       const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, accountId);
       if (resolved.accountId) accountId = resolved.accountId;
-      hasDirectPublish = resolved.hasDirectPublish;
+      hasUpload = resolved.hasUpload;
     }
 
-    const useComposio = Boolean(apiKey && accountId && hasDirectPublish);
+    const useComposio = Boolean(apiKey && accountId && hasUpload);
     const customAccessToken = useComposio ? "" : manualAccessToken;
-    if (automatic && !useComposio && !customAccessToken) return reply({ error: "A conta TikTok não autorizou publicação direta. Reconecte com o escopo video.publish." }, 409);
+    if (!useComposio && !customAccessToken && apiKey && accountId) return fail("A conta TikTok não autorizou o envio de rascunhos. Reconecte com o escopo video.upload.", 400);
 
     if (!useComposio && !customAccessToken) {
-      return reply({
-        error: "Token do TikTok não configurado. Informe o Access Token do TikTok ou configure COMPOSIO_TIKTOK_ACCOUNT.",
-      }, 400);
+      return fail("Token do TikTok não configurado. Informe o Access Token do TikTok ou configure COMPOSIO_TIKTOK_ACCOUNT.", 400);
     }
 
     let absoluteVideoUrl = body.videoUrl.trim();
@@ -222,15 +194,13 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(60_000),
     });
     if (!videoFetchRes.ok) {
-      return reply({
-        error: `Não foi possível carregar o vídeo para envio (${videoFetchRes.status}).`,
-      }, 400);
+      return fail(`Não foi possível carregar o vídeo para envio (${videoFetchRes.status}).`, 400);
     }
     const videoArrayBuffer = await videoFetchRes.arrayBuffer();
     const videoBuffer = Buffer.from(videoArrayBuffer);
     const videoSize = videoBuffer.length;
     if (videoSize === 0) {
-      return reply({ error: "Arquivo de vídeo vazio." }, 400);
+      return fail("Arquivo de vídeo vazio.", 400);
     }
 
     let chunkSize = videoSize;
@@ -240,26 +210,7 @@ export async function POST(request: Request) {
       totalChunkCount = Math.floor(videoSize / chunkSize);
     }
 
-    const privacyLevel = typeof body.privacyLevel === "string" ? body.privacyLevel : "PUBLIC_TO_EVERYONE";
-    let creatorPrivacyOptions: string[];
-    try {
-      creatorPrivacyOptions = await queryTikTokCreatorPrivacyOptions(useComposio ? apiKey : undefined, composioUserId, useComposio ? accountId : undefined, customAccessToken);
-    } catch (error) {
-      return reply({ error: error instanceof Error ? error.message : "Não foi possível consultar as opções de privacidade do TikTok." }, 400);
-    }
-    if (!creatorPrivacyOptions.includes(privacyLevel)) {
-      return reply({ error: `Privacidade inválida para esta conta. Opções retornadas pelo TikTok: ${creatorPrivacyOptions.join(", ")}.` }, 400);
-    }
-
     const payload = {
-      post_info: {
-        title: caption,
-        privacy_level: privacyLevel,
-        disable_duet: Boolean(body.disableDuet),
-        disable_comment: Boolean(body.disableComment),
-        disable_stitch: Boolean(body.disableStitch),
-        video_cover_timestamp_ms: 1000,
-      },
       source_info: {
         source: "FILE_UPLOAD",
         video_size: videoSize,
@@ -270,13 +221,9 @@ export async function POST(request: Request) {
 
     let publishId: string | null = null;
     let uploadUrl: string | null = null;
-    let isDirect = false;
     let lastError: string | null = null;
 
-    const endpoints = [
-      { url: "https://open.tiktokapis.com/v2/post/publish/video/init/", direct: true },
-      ...(!automatic && body.allowInboxFallback === true ? [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false }] : []),
-    ];
+    const endpoints = [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/" }];
 
     if (apiKey && accountId && !customAccessToken) {
       for (const ep of endpoints) {
@@ -308,7 +255,6 @@ export async function POST(request: Request) {
           if (proxyRes.ok && foundUploadUrl) {
             publishId = foundPublishId || "ok";
             uploadUrl = foundUploadUrl;
-            isDirect = ep.direct;
             break;
           }
 
@@ -336,7 +282,6 @@ export async function POST(request: Request) {
           if (response.ok && data?.data?.upload_url) {
             publishId = data.data.publish_id || "ok";
             uploadUrl = data.data.upload_url;
-            isDirect = ep.direct;
             break;
           }
           if (data?.error?.message) {
@@ -349,27 +294,30 @@ export async function POST(request: Request) {
     }
 
     if (!uploadUrl) {
-      return reply({
-        error: lastError || "Falha ao iniciar envio para o TikTok.",
-      }, 400);
+      const message = lastError || "Falha ao iniciar envio para o TikTok.";
+      return fail(message, 400);
     }
 
     await uploadChunks(uploadUrl, videoBuffer, chunkSize, totalChunkCount);
 
-    if (!automatic) await recordManualSocialDelivery(body.postId, "tiktok", isDirect && publishId && publishId !== "ok" ? "submitted" : "unknown", publishId, isDirect ? null : "Enviado manualmente para a caixa de entrada do TikTok.").catch(() => false);
+    const deliveryStatus = publishId && publishId !== "ok" ? "submitted" : "unknown";
+    await finishSocialDelivery(deliveryClaim, deliveryStatus, publishId);
 
     return reply({
       success: true,
       publishId,
-      isDirect,
-      directError: isDirect ? null : lastError,
-      message: isDirect
-        ? "Vídeo publicado com sucesso diretamente no TikTok!"
-        : "Vídeo recebido pelo TikTok (Caixa de Entrada / Rascunhos). A legenda foi copiada para sua área de transferência!",
+      isDirect: false,
+      deliveryStatus,
+      message: "Vídeo enviado para a caixa de entrada do TikTok. Abra a notificação no aplicativo, revise a legenda e finalize a publicação.",
     });
   } catch (error) {
+    if (deliveryClaim) {
+      const message = error instanceof Error ? error.message : "Erro inesperado ao postar no TikTok.";
+      await finishSocialDelivery(deliveryClaim, "unknown", null, message).catch(() => {});
+    }
     return reply({
       error: error instanceof Error ? error.message : "Erro inesperado ao postar no TikTok.",
+      ...(deliveryClaim ? { deliveryStatus: "unknown" } : {}),
     }, 500);
   }
 }

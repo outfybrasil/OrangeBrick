@@ -15,7 +15,7 @@ type Platform = "instagram" | "tiktok" | "youtube";
 type Delivery = { post_id: string; platform: Platform; status: string; external_id: string | null };
 type ReelAdmin = ReturnType<typeof getReelAdmin>;
 
-const platforms: Platform[] = ["instagram", "tiktok", "youtube"];
+const platforms: Platform[] = ["youtube", "instagram", "tiktok"];
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function platformRequest(platform: Platform, body: Record<string, unknown>) {
@@ -27,7 +27,7 @@ async function platformRequest(platform: Platform, body: Record<string, unknown>
     signal: AbortSignal.timeout(220_000),
   });
   const result = await response.json().catch(() => null);
-  if (!response.ok) throw Object.assign(new Error(typeof result?.error === "string" ? result.error : `A rede ${platform} não confirmou o envio.`), { httpStatus: response.status });
+  if (!response.ok) throw Object.assign(new Error(typeof result?.error === "string" ? result.error : `A rede ${platform} não confirmou o envio.`), { httpStatus: response.status, deliveryStatus: result?.deliveryStatus });
   return result;
 }
 
@@ -38,9 +38,6 @@ function pickPost(post: Post | undefined, job: ReelJob, activatedAt?: string) {
 }
 
 async function publishPlatform(db: ReelAdmin, post: Post, job: ReelJob, platform: Platform, storagePath: string) {
-  const { error: claimError } = await db.from("reel_social_publications").insert({ post_id: post.id, platform, reel_job_id: job.id, status: "processing" });
-  if (claimError?.code === "23505") return { claimed: false as const, fatal: false };
-  if (claimError) return { claimed: false as const, fatal: true };
   try {
     const { data: signed, error: signError } = await db.storage.from(REEL_BUCKET).createSignedUrl(storagePath, 3600);
     if (signError || !signed?.signedUrl) throw new Error("O Reel não está disponível no armazenamento.");
@@ -48,17 +45,23 @@ async function publishPlatform(db: ReelAdmin, post: Post, job: ReelJob, platform
     const body = platform === "instagram"
       ? { postId: post.id, videoUrl: signed.signedUrl, caption: copy.instagram.caption }
       : platform === "tiktok"
-        ? { postId: post.id, videoUrl: signed.signedUrl, caption: copy.tiktok.caption, privacyLevel: "PUBLIC_TO_EVERYONE" }
+        ? { postId: post.id, videoUrl: signed.signedUrl, caption: copy.tiktok.caption }
         : { postId: post.id, reelJobId: job.id, channelId: (await getYouTubeConnection()).channel.id, title: copy.youtube.title, description: copy.youtube.description, visibility: "public", confirmed: true };
     const result = await platformRequest(platform, body);
     const externalId = platform === "instagram" ? result.mediaId : platform === "tiktok" ? result.publishId : result.publication?.video_id;
-    const status = platform === "tiktok" ? externalId && externalId !== "ok" && result.isDirect === true ? "submitted" : "unknown" : platform === "youtube" ? externalId ? "submitted" : "unknown" : externalId ? "published" : "unknown";
-    await db.from("reel_social_publications").update({ status, external_id: externalId || null, error: status === "unknown" ? "O destino não confirmou a publicação pública. Confira a conta antes de repetir." : null, updated_at: new Date().toISOString() }).eq("post_id", post.id).eq("platform", platform).eq("status", "processing");
+    const youtubePublication = platform === "youtube" ? result.publication as { status?: string; visibility?: string } | undefined : undefined;
+    const status = platform === "tiktok"
+      ? externalId && externalId !== "ok" ? "submitted" : "unknown"
+      : platform === "youtube"
+        ? youtubePublication?.status === "uploaded" ? youtubePublication.visibility === "public" ? "published" : "submitted"
+          : youtubePublication?.status === "preparing" || youtubePublication?.status === "uploading" ? "processing"
+            : youtubePublication?.status === "failed" ? "failed" : "unknown"
+        : externalId ? "published" : "unknown";
     return { claimed: true as const, status, error: null as string | null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha desconhecida no envio.";
-    const status = error && typeof error === "object" && "httpStatus" in error && error.httpStatus === 409 ? "failed" : "unknown";
-    await db.from("reel_social_publications").update({ status, error: message.slice(0, 500), updated_at: new Date().toISOString() }).eq("post_id", post.id).eq("platform", platform).eq("status", "processing");
+    if (error && typeof error === "object" && "httpStatus" in error && error.httpStatus === 409) return { claimed: false as const };
+    const status = error && typeof error === "object" && "deliveryStatus" in error && error.deliveryStatus === "failed" ? "failed" : "unknown";
     return { claimed: true as const, status, error: message };
   }
 }
@@ -94,23 +97,26 @@ async function publishNext(db: ReelAdmin, jobs: ReelJob[], activatedAt?: string)
   ]);
   if (postsResult.error || deliveriesResult.error) return NextResponse.json({ error: "Não foi possível conferir as publicações." }, { status: 503 });
   const posts = new Map(((postsResult.data || []) as Post[]).map((post) => [post.id, post]));
-  const deliveries = new Set(((deliveriesResult.data || []) as Delivery[]).map((row) => `${row.post_id}:${row.platform}`));
+  const deliveries = new Map(((deliveriesResult.data || []) as Delivery[]).map((row) => [`${row.post_id}:${row.platform}`, row]));
 
   for (const job of jobs) {
     const storagePath = job.storage_path;
     if (!storagePath) continue;
     const post = pickPost(posts.get(job.post_id), job, activatedAt);
     if (!post) continue;
+    const activeDelivery = platforms.map(platform => deliveries.get(`${post.id}:${platform}`)).find(delivery => delivery?.status === "processing");
+    if (activeDelivery) return NextResponse.json({ processed: false, postId: post.id, platform: activeDelivery.platform, status: "processing" });
     for (const platform of platforms) {
-      if (deliveries.has(`${post.id}:${platform}`)) continue;
+      const delivery = deliveries.get(`${post.id}:${platform}`);
+      if (delivery) continue;
       if (platform === "youtube") {
-        const { data: existing } = await db.from("reel_youtube_publications").select("id").eq("post_id", post.id).limit(1);
+        const { data: existing } = await db.from("reel_youtube_publications").select("id,status").eq("post_id", post.id).limit(1);
+        if (existing?.some((row) => row.status === "preparing" || row.status === "uploading")) return NextResponse.json({ processed: false, postId: post.id, platform, status: "processing" });
         if (existing?.length) continue;
       }
       const outcome = await publishPlatform(db, post, job, platform, storagePath);
       if (!outcome.claimed) {
-        if (outcome.fatal) return NextResponse.json({ error: "Não foi possível reservar o envio às redes." }, { status: 503 });
-        continue;
+        return NextResponse.json({ processed: false, postId: post.id, platform, status: "processing" });
       }
       return NextResponse.json({ postId: post.id, platform, status: outcome.status, ...(outcome.error ? { error: outcome.error } : {}) });
     }
@@ -119,17 +125,16 @@ async function publishNext(db: ReelAdmin, jobs: ReelJob[], activatedAt?: string)
 }
 
 async function batchPublish(db: ReelAdmin, activatedAt: string) {
+  const { data: jobs, error: jobsError } = await db.from("reel_jobs").select("*").eq("status", "ready").gte("created_at", activatedAt).order("created_at", { ascending: true }).limit(50);
+  if (jobsError) return NextResponse.json({ error: "Não foi possível consultar a fila de Reels." }, { status: 503 });
+  const result = jobs?.length ? await publishNext(db, jobs as ReelJob[], activatedAt) : null;
+  if (result) return result;
   const poll = await pollTikTokStatus(db);
   if (poll) {
     if ("warning" in poll) return NextResponse.json({ postId: poll.postId, platform: "tiktok", status: "submitted", warning: poll.warning });
     return NextResponse.json({ postId: poll.postId, platform: "tiktok", status: poll.status });
   }
-
-  const { data: jobs, error: jobsError } = await db.from("reel_jobs").select("*").eq("status", "ready").gte("created_at", activatedAt).order("created_at", { ascending: true }).limit(50);
-  if (jobsError || !jobs?.length) return NextResponse.json({ processed: false, error: jobsError?.message });
-
-  const result = await publishNext(db, jobs as ReelJob[], activatedAt);
-  return result ?? NextResponse.json({ processed: false });
+  return NextResponse.json({ processed: false });
 }
 
 async function targetedPublish(db: ReelAdmin, postId: string, jobId: string | null) {
@@ -148,18 +153,21 @@ async function targetedPublish(db: ReelAdmin, postId: string, jobId: string | nu
 
   const { data: deliveriesData, error: deliveriesError } = await db.from("reel_social_publications").select("post_id,platform,status,external_id").eq("post_id", postId);
   if (deliveriesError) return NextResponse.json({ error: "Não foi possível conferir as publicações." }, { status: 503 });
-  const deliveries = new Set(((deliveriesData || []) as Delivery[]).map((row) => `${row.post_id}:${row.platform}`));
+  const deliveries = new Map(((deliveriesData || []) as Delivery[]).map((row) => [`${row.post_id}:${row.platform}`, row]));
+  const activeDelivery = platforms.map(platform => deliveries.get(`${post.id}:${platform}`)).find(delivery => delivery?.status === "processing");
+  if (activeDelivery) return NextResponse.json({ processed: false, postId: post.id, platform: activeDelivery.platform, status: "processing" });
 
   for (const platform of platforms) {
-    if (deliveries.has(`${post.id}:${platform}`)) continue;
+    const delivery = deliveries.get(`${post.id}:${platform}`);
+    if (delivery) continue;
     if (platform === "youtube") {
-      const { data: existing } = await db.from("reel_youtube_publications").select("id").eq("post_id", post.id).limit(1);
+      const { data: existing } = await db.from("reel_youtube_publications").select("id,status").eq("post_id", post.id).limit(1);
+      if (existing?.some((row) => row.status === "preparing" || row.status === "uploading")) return NextResponse.json({ processed: false, postId: post.id, platform, status: "processing" });
       if (existing?.length) continue;
     }
     const outcome = await publishPlatform(db, post, job, platform, storagePath);
     if (!outcome.claimed) {
-      if (outcome.fatal) return NextResponse.json({ error: "Não foi possível reservar o envio às redes." }, { status: 503 });
-      continue;
+      return NextResponse.json({ processed: false, postId: post.id, platform, status: "processing" });
     }
     return NextResponse.json({ postId: post.id, platform, status: outcome.status, ...(outcome.error ? { error: outcome.error } : {}) });
   }
@@ -169,6 +177,9 @@ async function targetedPublish(db: ReelAdmin, postId: string, jobId: string | nu
     if ("warning" in poll) return NextResponse.json({ processed: false, postId: poll.postId, platform: "tiktok", status: "submitted", warning: poll.warning });
     return NextResponse.json({ processed: false, postId: poll.postId, platform: "tiktok", status: poll.status });
   }
+  const { data: pendingTikTok, error: pendingTikTokError } = await db.from("reel_social_publications").select("external_id").eq("post_id", postId).eq("platform", "tiktok").eq("status", "submitted").maybeSingle();
+  if (pendingTikTokError) return NextResponse.json({ error: "Não foi possível consultar a confirmação do TikTok." }, { status: 503 });
+  if (pendingTikTok?.external_id) return NextResponse.json({ processed: false, postId, platform: "tiktok", status: pendingTikTok.external_id.startsWith("v_inbox_") ? "draft" : "submitted" });
   return NextResponse.json({ processed: false, postId });
 }
 

@@ -3,7 +3,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { getReelAdmin } from "@/lib/video/reel-remote";
 import { getSiteUrl } from "@/lib/site-url";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
-import { hasSocialDelivery, recordManualSocialDelivery } from "@/lib/video/reel-social-delivery";
+import { beginSocialDelivery, finishSocialDelivery, type SocialDeliveryClaim } from "@/lib/video/reel-social-delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -60,6 +60,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let deliveryClaim: SocialDeliveryClaim | null = null;
+  let deliveredMediaId: string | null = null;
   try {
     const automatic = isAuthorizedCronRequest(request);
     if (!automatic && !await authorized(request)) {
@@ -71,7 +73,6 @@ export async function POST(request: Request) {
       return reply({ error: "URL do vídeo é obrigatória." }, 400);
     }
 
-    if (!automatic && await hasSocialDelivery(body.postId, "instagram")) return reply({ error: "Este Reel ja tem um envio registrado no Instagram. Confira o acompanhamento antes de repetir." }, 409);
     const caption = typeof body.caption === "string" ? body.caption.trim() : "";
     const apiKey = process.env.COMPOSIO_API_KEY;
     const composioAccount = process.env.COMPOSIO_INSTAGRAM_ACCOUNT;
@@ -79,10 +80,19 @@ export async function POST(request: Request) {
     const customAccessToken = body.accessToken?.trim() || process.env.INSTAGRAM_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN;
     const customAccountId = body.accountId?.trim() || process.env.INSTAGRAM_ACCOUNT_ID || process.env.META_INSTAGRAM_ACCOUNT_ID;
 
+    deliveryClaim = await beginSocialDelivery(body.postId, "instagram", { automatic, repost: body.repost === true && body.confirmed === true });
+    if (!deliveryClaim) return reply({ error: "Este Reel já tem um envio no Instagram. Confira o histórico antes de repetir.", deliveryStatus: "unknown" }, 409);
+
+    const fail = async (payload: Record<string, unknown>, statusCode: number, deliveryStatus: "failed" | "unknown" = "failed") => {
+      if (deliveryClaim) {
+        const message = typeof payload.error === "string" ? payload.error : "Falha ao publicar no Instagram.";
+        await finishSocialDelivery(deliveryClaim, deliveryStatus, null, message);
+      }
+      return reply({ ...payload, deliveryStatus }, statusCode);
+    };
+
     if (!customAccessToken && (!apiKey || !composioAccount)) {
-      return reply({
-        error: "Credenciais do Instagram não configuradas. Preencha o Token de Acesso e o ID da Conta ou vincule sua conta no Composio (COMPOSIO_INSTAGRAM_ACCOUNT).",
-      }, 400);
+      return fail({ error: "Credenciais do Instagram não configuradas. Preencha o Token de Acesso e o ID da Conta ou vincule sua conta no Composio (COMPOSIO_INSTAGRAM_ACCOUNT)." }, 400);
     }
 
     let absoluteVideoUrl = body.videoUrl.trim();
@@ -92,7 +102,8 @@ export async function POST(request: Request) {
     }
 
     if (apiKey && composioAccount && !customAccessToken) {
-      const resolvedIgId = customAccountId || await getInstagramIdViaProxy(apiKey, composioAccount, composioUserId) || "28903874005934257";
+      const resolvedIgId = customAccountId || await getInstagramIdViaProxy(apiKey, composioAccount, composioUserId);
+      if (!resolvedIgId) return fail({ error: "Não foi possível confirmar a conta de destino do Instagram. Atualize a conexão antes de enviar." }, 503);
 
       const createRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
         method: "POST",
@@ -117,7 +128,7 @@ export async function POST(request: Request) {
 
       if (!createRes.ok || !containerId) {
         const errorMsg = createJson?.error?.message || createJson?.data?.error?.message || "Falha ao criar o container de Reels no Instagram.";
-        return reply({ error: errorMsg, details: createJson }, 400);
+        return fail({ error: errorMsg, details: createJson }, 400);
       }
 
       let isFinished = false;
@@ -145,7 +156,7 @@ export async function POST(request: Request) {
         }
 
         if (code === "ERROR") {
-          return reply({
+          return fail({
             error: "O Instagram reportou erro no processamento do vídeo.",
             details: pollJson,
           }, 400);
@@ -153,10 +164,10 @@ export async function POST(request: Request) {
       }
 
       if (!isFinished) {
-        return reply({
+        return fail({
           error: "Tempo limite aguardando processamento do Instagram. O vídeo ainda pode estar sendo processado no Meta.",
           containerId,
-        }, 504);
+        }, 504, "unknown");
       }
 
       const publishRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
@@ -180,10 +191,11 @@ export async function POST(request: Request) {
 
       if (!publishRes.ok || !mediaId) {
         const errorMsg = publishJson?.error?.message || publishJson?.data?.error?.message || "Falha ao publicar o Reels no Instagram.";
-        return reply({ error: errorMsg, details: publishJson }, 400);
+        return fail({ error: errorMsg, details: publishJson }, 502, "unknown");
       }
 
-      if (!automatic) await recordManualSocialDelivery(body.postId, "instagram", "published", mediaId).catch(() => false);
+      deliveredMediaId = mediaId;
+      await finishSocialDelivery(deliveryClaim, "published", mediaId);
       return reply({
         success: true,
         mediaId,
@@ -207,7 +219,7 @@ export async function POST(request: Request) {
     const containerData = await containerResponse.json().catch(() => null);
     if (!containerResponse.ok || !containerData?.id) {
       const msg = containerData?.error?.message || "Falha ao criar o container de Reels no Instagram.";
-      return reply({ error: msg, details: containerData?.error }, 400);
+      return fail({ error: msg, details: containerData?.error }, 400);
     }
 
     const containerId = containerData.id as string;
@@ -234,7 +246,7 @@ export async function POST(request: Request) {
       }
 
       if (code === "ERROR") {
-        return reply({
+        return fail({
           error: "O Instagram reportou erro no processamento do vídeo.",
           details: statusData,
         }, 400);
@@ -242,10 +254,10 @@ export async function POST(request: Request) {
     }
 
     if (!isFinished) {
-      return reply({
+      return fail({
         error: "Tempo limite aguardando processamento do Instagram. O vídeo ainda pode estar sendo processado no Meta.",
         containerId,
-      }, 504);
+      }, 504, "unknown");
     }
 
     const publishUrl = new URL(`https://graph.facebook.com/v21.0/${encodeURIComponent(customAccountId!)}/media_publish`);
@@ -261,10 +273,11 @@ export async function POST(request: Request) {
     const publishData = await publishResponse.json().catch(() => null);
     if (!publishResponse.ok || !publishData?.id) {
       const msg = publishData?.error?.message || "Falha ao publicar o Reels no Instagram.";
-      return reply({ error: msg, details: publishData?.error }, 400);
+      return fail({ error: msg, details: publishData?.error }, 502, "unknown");
     }
 
-    if (!automatic) await recordManualSocialDelivery(body.postId, "instagram", "published", publishData.id).catch(() => false);
+    deliveredMediaId = publishData.id;
+    await finishSocialDelivery(deliveryClaim, "published", publishData.id);
     return reply({
       success: true,
       mediaId: publishData.id,
@@ -272,8 +285,13 @@ export async function POST(request: Request) {
       message: "Reels publicado no Instagram com sucesso!",
     });
   } catch (error) {
+    if (deliveryClaim) {
+      const message = error instanceof Error ? error.message : "Erro inesperado ao postar no Instagram.";
+      await finishSocialDelivery(deliveryClaim, deliveredMediaId ? "published" : "unknown", deliveredMediaId, message).catch(() => {});
+    }
     return reply({
       error: error instanceof Error ? error.message : "Erro inesperado ao postar no Instagram.",
+      ...(deliveryClaim ? { deliveryStatus: "unknown" } : {}),
     }, 500);
   }
 }

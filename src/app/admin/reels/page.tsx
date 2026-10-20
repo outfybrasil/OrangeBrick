@@ -9,6 +9,7 @@ import { TikTokPublisher } from "@/components/admin/TikTokPublisher";
 import { createDataClient } from "@/lib/supabase/client";
 import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
 import type { AdminReelItem } from "@/app/api/admin/reels/route";
+import type { ReelSocialPlatform, ReelSocialPublication, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 
 function formatBytes(bytes?: number) {
   if (!bytes) return "—";
@@ -29,6 +30,82 @@ function formatDate(dateStr?: string | null) {
   } catch {
     return dateStr;
   }
+}
+
+function InstagramMark({ id, published }: { id: string; published: boolean }) {
+  const gradientId = `instagram-gradient-${id}`;
+  const color = published ? `url(#${gradientId})` : "currentColor";
+
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={gradientId} x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FEDA75" />
+          <stop offset="0.35" stopColor="#FA7E1E" />
+          <stop offset="0.65" stopColor="#D62976" />
+          <stop offset="1" stopColor="#4F5BD5" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke={color} strokeWidth="2" />
+      <circle cx="12" cy="12" r="4" stroke={color} strokeWidth="2" />
+      <circle cx="17.5" cy="6.5" r="1" fill={color} />
+    </svg>
+  );
+}
+
+function TikTokMark({ published }: { published: boolean }) {
+  const shape = "M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.57 4.22 1.08 1.4 2.62 2.42 4.13 3.21.01 1.36 0 2.73-.01 4.09-1.7-.14-3.41-.77-4.9-1.71-.61-.38-1.18-.83-1.73-1.31-.04 2.86.02 5.71-.04 8.57-.09 1.37-.54 2.77-1.32 3.9-1.28 1.88-3.43 3.11-5.7 3.21-1.37.08-2.77-.21-3.99-.85-2.06-1.11-3.55-3.2-3.93-5.51-.42-2.38.27-4.96 1.85-6.87 1.76-1.85 4.38-2.79 6.92-2.33.02 1.54.05 3.08.03 4.62-1.04-.33-2.19-.25-3.14.26-.7.37-1.29.96-1.63 1.68-.29.59-.4 1.26-.32 1.91.13 1.29 1.07 2.47 2.32 2.85 1.01.31 2.19.02 2.94-.72.57-.55.86-1.37.86-2.16.02-4.11.03-8.22.03-12.33-.01-1.53-.03-3.07-.01-4.6-.01-1.53-.03-3.07-.01-4.6z";
+
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+      {published ? (
+        <>
+          <path d={shape} transform="translate(-0.8 0.25)" fill="#25F4EE" />
+          <path d={shape} transform="translate(0.8 -0.25)" fill="#FE2C55" />
+        </>
+      ) : null}
+      <path d={shape} fill={published ? "#FFFFFF" : "currentColor"} />
+    </svg>
+  );
+}
+
+function YouTubeMark({ published }: { published: boolean }) {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8Z" fill={published ? "#FF0033" : "currentColor"} />
+      <path d="m9.5 8.5 6.5 3.5-6.5 3.5v-7Z" fill={published ? "#FFFFFF" : "#0e1017"} />
+    </svg>
+  );
+}
+
+function SocialPublicationBadge({ platform, publication, id }: { platform: ReelSocialPlatform; publication?: ReelSocialPublication; id: string }) {
+  const labels: Record<ReelSocialStatus | "idle", string> = {
+    idle: "Não publicado",
+    processing: "Publicando",
+    submitted: "Aguardando",
+    published: "Publicado",
+    failed: "Falhou",
+    unknown: "Conferir",
+  };
+  const status = publication?.status || "idle";
+  const platformLabel = platform === "instagram" ? "Instagram" : platform === "tiktok" ? "TikTok" : "YouTube";
+  const statusLabel = status === "submitted" && platform === "youtube" && publication?.visibility && publication.visibility !== "public" ? "Não público" : status === "submitted" && platform === "tiktok" && publication?.external_id?.startsWith("v_inbox_") ? "Finalizar no TikTok" : labels[status];
+  const stateTextClass = status === "published" ? "text-emerald-300" : status === "failed" ? "text-red-300" : status === "processing" ? "text-amber-300" : "text-gray-400";
+
+  return (
+    <span
+      className="inline-flex min-h-9 items-center gap-1.5 border border-white/10 px-2"
+      aria-label={`${platformLabel}: ${statusLabel}`}
+      title={publication?.error || `${platformLabel}: ${statusLabel}`}
+    >
+      <span className={status === "published" ? "text-white" : "text-gray-500"}>
+        {platform === "instagram" ? <InstagramMark id={id} published={status === "published"} /> : platform === "tiktok" ? <TikTokMark published={status === "published"} /> : <YouTubeMark published={status === "published"} />}
+      </span>
+      <span className="text-xs font-semibold text-gray-300">{platformLabel}</span>
+      {status === "processing" && <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />}
+      <span className={`text-xs font-semibold ${stateTextClass}`}>{statusLabel}</span>
+    </span>
+  );
 }
 
 function AdminReelsContent() {
@@ -86,6 +163,28 @@ function AdminReelsContent() {
     }
   }, [supabase]);
 
+  const refreshReelsSilently = useCallback(() => { void loadReels(true); }, [loadReels]);
+
+  const updateSocialPublication = useCallback((postId: string, platform: "instagram" | "tiktok", status: ReelSocialStatus, error: string | null = null, externalId: string | null = null) => {
+    const updateItem = (item: AdminReelItem): AdminReelItem => ({
+      ...item,
+      socialPublications: {
+        ...item.socialPublications,
+        [platform]: {
+          platform,
+          status,
+          external_id: externalId ?? item.socialPublications[platform]?.external_id ?? null,
+          error,
+          updated_at: new Date().toISOString(),
+        },
+      },
+    });
+
+    setItems((current) => current.map((item) => item.id === postId ? updateItem(item) : item));
+    setSelectedReel((current) => current?.id === postId ? updateItem(current) : current);
+    if (status !== "processing") void loadReels(true);
+  }, [loadReels]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => void loadReels(), 0);
     return () => window.clearTimeout(timer);
@@ -110,6 +209,14 @@ function AdminReelsContent() {
     }, 4000);
 
     return () => clearInterval(interval);
+  }, [items, loadReels]);
+
+  useEffect(() => {
+    const hasSocialActivity = items.some((item) => Object.values(item.socialPublications).some((publication) => publication?.status === "processing" || publication?.status === "submitted" && !(publication.platform === "tiktok" && publication.external_id?.startsWith("v_inbox_")) && !(publication.platform === "youtube" && publication.visibility && publication.visibility !== "public")));
+    if (!hasSocialActivity) return;
+
+    const interval = window.setInterval(() => void loadReels(true), 10_000);
+    return () => window.clearInterval(interval);
   }, [items, loadReels]);
 
   const handleGenerate = async (slug: string) => {
@@ -275,7 +382,7 @@ function AdminReelsContent() {
           <p className="text-xs font-bold uppercase tracking-wider text-brand-orange">Automação de Publicação</p>
           <p className="mt-1 font-heading text-xl font-black text-white">ATIVADA ⚡</p>
           <p className="mt-2 text-xs text-gray-300">
-            Ao publicar qualquer notícia, o vídeo é gerado em background.
+            Quando o Reel termina, a publicação segue YouTube, Instagram e TikTok.
           </p>
         </div>
       </div>
@@ -468,6 +575,14 @@ function AdminReelsContent() {
                         <span>⏱️ {item.duration ? `${item.duration}s` : "35s"}</span>
                         <span>💾 {formatBytes(item.file_size)}</span>
                         <span className="text-emerald-400 font-bold">1080×1920</span>
+                      </div>
+                    )}
+
+                    {isReady && (
+                      <div className="mt-3 flex flex-wrap gap-2 border-t border-white/5 pt-3" aria-label="Status de publicação">
+                        <SocialPublicationBadge id={item.id} platform="youtube" publication={item.socialPublications.youtube} />
+                        <SocialPublicationBadge id={item.id} platform="instagram" publication={item.socialPublications.instagram} />
+                        <SocialPublicationBadge id={item.id} platform="tiktok" publication={item.socialPublications.tiktok} />
                       </div>
                     )}
 
@@ -676,6 +791,8 @@ function AdminReelsContent() {
                     initialCaption={selectedReel.copys.instagram.caption}
                     hashtags={selectedReel.copys.instagram.hashtags}
                     ready={selectedReel.status === "ready"}
+                    socialPublication={selectedReel.socialPublications.instagram}
+                    onDeliveryStatusChange={(status, error, externalId) => updateSocialPublication(selectedReel.id, "instagram", status, error || null, externalId || null)}
                   />
                 )}
 
@@ -687,6 +804,8 @@ function AdminReelsContent() {
                     initialCaption={selectedReel.copys.tiktok.caption}
                     hashtags={selectedReel.copys.tiktok.hashtags}
                     ready={selectedReel.status === "ready"}
+                    socialPublication={selectedReel.socialPublications.tiktok}
+                    onDeliveryStatusChange={(status, error, externalId) => updateSocialPublication(selectedReel.id, "tiktok", status, error || null, externalId || null)}
                   />
                 )}
 
@@ -698,6 +817,7 @@ function AdminReelsContent() {
                     initialTitle={selectedReel.copys.youtube.title}
                     initialDescription={selectedReel.copys.youtube.description}
                     ready={selectedReel.status === "ready"}
+                    onPublicationUpdate={refreshReelsSilently}
                   />
                 )}
               </div>

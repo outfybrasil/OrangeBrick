@@ -17,7 +17,7 @@ async function publishSocial(postId, jobId) {
   const url = new URL("/api/cron/reel-social", siteUrl);
   url.searchParams.set("postId", postId);
   url.searchParams.set("jobId", jobId);
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < 12; attempt++) {
     let result;
     try {
       const response = await fetch(url, {
@@ -34,12 +34,18 @@ async function publishSocial(postId, jobId) {
       process.stderr.write(`Reel ${jobId}: falha ao acionar a publicação automática: ${error instanceof Error ? error.message : "erro desconhecido"}\n`);
       return;
     }
-    if (!result || result.processed === false) {
+    const waitingForTikTok = result?.processed === false && result.platform === "tiktok" && result.status === "submitted";
+    if (!result || result.processed === false && !waitingForTikTok) {
       process.stdout.write(`Reel ${jobId}: redes ${result?.platform ? `${result.platform} ${result.status}` : "sem pendências"}\n`);
       return;
     }
+    if (waitingForTikTok) {
+      process.stdout.write(`Reel ${jobId}: TikTok aguardando confirmacao\n`);
+      if (attempt < 11) await new Promise((resolve) => setTimeout(resolve, 30_000));
+      continue;
+    }
     process.stdout.write(`Reel ${jobId}: redes ${result.platform} ${result.status}${result.error ? ` (${result.error})` : ""}\n`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (attempt < 11) await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 }
 

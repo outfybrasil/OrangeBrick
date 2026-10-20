@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createDataClient } from "@/lib/supabase/client";
 import type { ReelYouTubePublication } from "@/lib/types/database";
 
 type Channel = { id: string; title: string; url: string };
 
-export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescription, ready }: {
+export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescription, ready, onPublicationUpdate }: {
   postId: string; reelJobId?: string; initialTitle: string; initialDescription: string; ready: boolean;
+  onPublicationUpdate?: () => void;
 }) {
+  const inFlight = useRef(false);
   const supabase = useMemo(() => createDataClient(), []);
   const [title, setTitle] = useState(initialTitle.slice(0, 100));
   const [description, setDescription] = useState(initialDescription.slice(0, 5000));
@@ -37,6 +39,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
       if (signal?.aborted) return;
       setChannel(data.channel);
       setPublication(data.publication);
+      onPublicationUpdate?.();
       setError(null);
     } catch (error) {
       if (!signal?.aborted) {
@@ -46,7 +49,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
-  }, [postId, token]);
+  }, [onPublicationUpdate, postId, token]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,7 +72,8 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!channel || sending || blocked || !confirmed) return;
+    if (inFlight.current || !channel || sending || blocked || !confirmed) return;
+    inFlight.current = true;
     setSending(true);
     setError(null);
     try {
@@ -83,6 +87,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
       if (data?.publication) {
         setPublication(data.publication);
         setIsReposting(false);
+        onPublicationUpdate?.();
       }
       if (!response.ok) throw new Error(data?.error || "O servidor não confirmou o envio. Atualize o histórico antes de tentar novamente.");
       if (!data?.publication) throw new Error("O servidor não confirmou o resultado. Atualize o histórico.");
