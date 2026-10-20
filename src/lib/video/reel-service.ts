@@ -142,6 +142,7 @@ export function generateSocialCopys(post: {
     [/\bsaros\b/i, "Saros"],
     [/\bfaraway\b/i, "Faraway"],
     [/\bedgerunners?\b/i, "CyberpunkEdgerunners"],
+    [/\bcyberpunk\s*2077\b/i, "Cyberpunk2077"],
     [/\bcyberpunk\b/i, "Cyberpunk"],
     [/\bhideo\s+kojima\b/i, "HideoKojima"],
     [/\b(?:call\s+of\s+duty|cod)\b/i, "CallOfDuty"],
@@ -184,6 +185,12 @@ export function generateSocialCopys(post: {
     opinion: "OpiniaoDeGames",
   };
   const searchableCopy = `${title} ${summary} ${hook}`;
+  const platformTags = [
+    ...(/\b(?:playstation|ps[45])\b/i.test(searchableCopy) ? ["PlayStation"] : []),
+    ...(/\bxbox\b/i.test(searchableCopy) ? ["Xbox"] : []),
+    ...(/\bswitch\s*2\b/i.test(searchableCopy) ? ["NintendoSwitch2"] : /\b(?:nintendo|switch)\b/i.test(searchableCopy) ? ["Nintendo"] : []),
+    ...(/\b(?:pc|steam)\b/i.test(searchableCopy) ? ["PCGaming"] : []),
+  ];
   const subjectTags = subjectHashtags
     .filter(([pattern]) => pattern.test(searchableCopy))
     .slice(0, 2)
@@ -196,7 +203,7 @@ export function generateSocialCopys(post: {
   const selectedSubjectTags = subjectTags.length === 2 && relatedSubjectPairs.has(subjectTags.join("|"))
     ? subjectTags
     : subjectTags.slice(0, 1);
-  const ignoredSlugWords = new Set(["para", "como", "sobre", "depois", "antes", "entre", "noticia", "noticias", "games", "game", "chega", "chegam", "ganha", "ganham", "recebe", "recebem", "anuncia", "anunciam", "confirma", "confirmam", "revela", "revelam", "novo", "nova", "novos", "novas", "oficial", "data", "lancamento", "jogo", "jogos"]);
+  const ignoredSlugWords = new Set(["para", "como", "sobre", "depois", "antes", "entre", "noticia", "noticias", "news", "games", "game", "chega", "chegam", "ganha", "ganham", "recebe", "recebem", "anuncia", "anunciam", "confirma", "confirmam", "revela", "revelam", "novo", "nova", "novos", "novas", "oficial", "data", "lancamento", "jogo", "jogos"]);
   const fallbackTopic = post.slug
     .toLocaleLowerCase("pt-BR")
     .split("-")
@@ -206,10 +213,14 @@ export function generateSocialCopys(post: {
     ...(selectedSubjectTags.length === 0 && fallbackTopic ? [`${fallbackTopic[0].toLocaleUpperCase("pt-BR")}${fallbackTopic.slice(1)}`] : []),
   ])].slice(0, 2);
   const categoryHashtag = categoryHashtags[post.category] || "NoticiasDeGames";
-  const instagramHashtagNames = [...new Set([...subjects, categoryHashtag, "OrangeBrick"])].slice(0, 4);
-  const youtubeHashtagNames = [...new Set([subjects[0] || categoryHashtag, categoryHashtag, "OrangeBrick"])].slice(0, 3);
+  const newsTags = ["breaking", "hardware", "industry"].includes(post.category) ? ["NoticiasDeGames"] : [];
+  const uniqueHashtags = (names: string[]) => [...new Map(names.map(name => [name.toLocaleLowerCase("pt-BR"), name])).values()];
+  const contextTags = uniqueHashtags([...subjects.slice(0, 1), ...platformTags]).slice(0, 2);
+  const instagramHashtagNames = uniqueHashtags([...contextTags, "games", "news", "GamesBrasil", ...newsTags, categoryHashtag, "OrangeBrick"]).slice(0, 5);
+  const tiktokHashtagNames = uniqueHashtags([...contextTags, "games", "news", "GamingBrasil", ...newsTags, categoryHashtag, "OrangeBrick"]).slice(0, 5);
+  const youtubeHashtagNames = uniqueHashtags([...subjects, ...platformTags.slice(0, 3), "games", "news", "GamesBrasil", ...newsTags, "OrangeBrick", categoryHashtag]).slice(0, 10);
   const instagramHashtags = instagramHashtagNames.map((hashtag) => `#${hashtag}`);
-  const tiktokHashtags = instagramHashtagNames.map((hashtag) => `#${hashtag.toLocaleLowerCase("pt-BR")}`);
+  const tiktokHashtags = tiktokHashtagNames.map((hashtag) => `#${hashtag.toLocaleLowerCase("pt-BR")}`);
   const coreCopy = [hook, supportingSummary];
   const commentPrompt = `Responda nos comentários: ${question}`;
   const instagramCaption = [
