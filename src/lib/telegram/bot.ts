@@ -103,9 +103,9 @@ export async function sendTelegramApi(method: string, body: Record<string, unkno
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(12000),
   });
-  const data = (await res.json()) as { ok: boolean; error_code?: number; description?: string; result?: unknown };
+  const data = (await res.json()) as { ok: boolean; error_code?: number; description?: string; parameters?: { retry_after?: number }; result?: unknown };
   if (!data.ok) {
-    console.error(`Erro na API do Telegram (${method}):`, data);
+    console.error(`Erro na API do Telegram (${method}):`, data.error_code || "sem código", data.description || "sem detalhe");
   }
   return data;
 }
@@ -116,17 +116,26 @@ export async function sendTelegramMessageWithRetry(body: Record<string, unknown>
       const response = await sendTelegramApi("sendMessage", body);
       if (response.ok) return true;
       if (response.error_code && response.error_code < 500 && response.error_code !== 429) return false;
+      if (response.error_code === 429 && response.parameters?.retry_after && response.parameters.retry_after > 10) return false;
+      const retryDelay = response.error_code === 429 && response.parameters?.retry_after
+        ? response.parameters.retry_after * 1000
+        : 1000 * (attempt + 1);
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, retryDelay));
     } catch {
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
     }
-    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
   }
   return false;
 }
 
 export async function notifyAdmin(html: string): Promise<void> {
   const chatId = getAdminChatId();
-  if (!chatId) return;
-  await sendTelegramApi("sendMessage", { chat_id: chatId, text: html, parse_mode: "HTML" }).catch(() => {});
+  if (!chatId) {
+    console.error("TELEGRAM_ADMIN_CHAT_ID não configurado; aviso administrativo não enviado.");
+    return;
+  }
+  const sent = await sendTelegramMessageWithRetry({ chat_id: chatId, text: html, parse_mode: "HTML" });
+  if (!sent) console.error("Telegram não confirmou o aviso administrativo após as tentativas disponíveis.");
 }
 
 interface BotCommandDef {

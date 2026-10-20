@@ -42,10 +42,26 @@ function fitText(value: string, limit: number) {
   return `${clipped || characters.slice(0, limit - 1).join("").trimEnd()}…`;
 }
 
+function contextualCommentQuestion(post: Post): string {
+  const releaseTitle = post.title.match(/^(.*?)\s+(?:chega|estreia|lança|recebe|ganha)\b/i)?.[1]?.trim();
+  if (
+    releaseTitle &&
+    post.category === "breaking" &&
+    /\b(?:estreia|lançamento|data de lançamento|chega em)\b/i.test(post.summary) &&
+    !/\b(?:playstation|ps[45]|xbox|nintendo|switch|sony|microsoft|ubisoft|steam)\b/i.test(releaseTitle)
+  ) {
+    return `Você pretende jogar ${fitText(releaseTitle, 22)} no lançamento?`;
+  }
+  if (/\b(?:preço|valor|custa|custará)\b/i.test(post.summary)) return "Esse preço mudaria sua decisão de compra?";
+  if (/\b(?:demissões|fechamento|fechar|encerrar|aquisição)\b/i.test(post.summary)) return "Como essa decisão pode afetar os jogos do estúdio?";
+  if (/\b(?:atualização|patch|correção)\b/i.test(post.summary)) return "Essa mudança melhora sua experiência?";
+  return "Qual detalhe dessa notícia mais impacta você como jogador?";
+}
+
 export async function generateReelScript(post: Post, apiKey: string): Promise<ReelScriptData> {
   const gemini = new GoogleGenAI({ apiKey, httpOptions: { timeout: 45_000, retryOptions: { attempts: 1 } } });
 
-  const prompt = `Você é editor de vídeos curtos de games para o Orange Brick. Crie um roteiro vertical de 25 a 35 segundos que capture atenção, mantenha retenção e transforme espectadores em seguidores, sem prometer viralização nem usar clickbait.
+  const prompt = `Você é editor de vídeos curtos de games para o Orange Brick. Crie um roteiro vertical de 25 a 35 segundos que capture atenção, mantenha retenção e incentive participação e audiência recorrente, sem prometer viralização nem usar clickbait.
 
 TÍTULO: ${post.title}
 CATEGORIA: ${post.category}
@@ -57,11 +73,11 @@ REGRAS:
 1. A primeira fala deve ser o gancho, com um fato concreto, consequência ou dúvida real que o próprio vídeo responde. Repita a mesma ideia na primeira tela. Comece direto, sem vinheta, saudação ou apresentação do canal.
 2. Conte uma única história nesta ordem: gancho, fato principal, contexto que muda a leitura, impacto para quem joga e conclusão. Use surpresa, curiosidade ou debate apenas quando os fatos sustentarem esse ângulo. Entregue a resposta antes do fim; não esconda informação para forçar retenção.
 3. Escreva de 55 a 75 palavras faladas em português brasileiro natural. Use frases curtas, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
-4. Termine com uma pergunta específica que convide a comentar e uma chamada curta para seguir o Orange Brick. Não direcione a fala para fora da plataforma nem repita pedidos de engajamento.
+4. Termine com uma pergunta específica sobre o assunto que convide a comentar. Não peça para seguir, curtir, salvar e compartilhar ao mesmo tempo; a fala deve ter um único CTA de conversa. As chamadas para seguir e acessar a matéria ficam nas descrições específicas de cada plataforma.
 5. Preserve rigorosamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não misture números de processos diferentes nem transforme “propõe” ou “pode afetar” em “fechou” ou “demitiu”.
 6. Crie exatamente 5 cenas alinhadas à narração: revelação, detalhe principal, contexto, impacto e conclusão/próximo passo. Só mostre plataformas, datas, números, decisões e declarações que apareçam na matéria. Se um dado não existir, use contexto ou impacto; nunca invente nem preencha com informação genérica.
 7. Escreva textos de tela curtos e legíveis no celular: gancho com até 55 caracteres; títulos de cena com até 36; destaques com até 48; tags com até 18; no máximo 3 pílulas curtas por cena. Use pílulas apenas para fatos confirmados. Evite repetir a mesma frase em todas as telas.
-8. A pergunta final deve ser específica ao assunto. A chamada final deve convidar a seguir @ob.labs no Instagram para acompanhar notícias ou próximos passos, sem prometer frequência ou resultado.
+8. A pergunta final e o CTA devem ser específicos ao assunto. Convide a pessoa a responder nos comentários, sem prometer frequência ou resultado e sem direcionar para outra plataforma.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {
@@ -111,8 +127,8 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
     }
   ],
   "ctaQuestion": "Pergunta específica sobre o impacto para quem joga?",
-  "ctaAction": "Siga @ob.labs no Instagram para acompanhar os próximos passos",
-  "ctaButton": "SIGA @OB.LABS"
+  "ctaAction": "Comente sua resposta para continuar a conversa",
+  "ctaButton": "COMENTE ABAIXO"
 }`;
 
   let lastError: Error | null = null;
@@ -136,7 +152,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
           },
         });
 
-        const script = parseScript(response.text || "");
+        const script = parseScript(response.text || "", post);
         return script;
       } catch (err) {
         lastError = err as Error;
@@ -152,7 +168,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
   throw lastError || new Error("Falha ao gerar roteiro com todos os modelos disponíveis.");
 }
 
-function parseScript(raw: string): ReelScriptData {
+function parseScript(raw: string, post: Post): ReelScriptData {
   const cleaned = raw.replace(/```json\n?|```/g, "").trim();
   const data = JSON.parse(cleaned) as ReelScriptData;
   if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length !== 5) {
@@ -178,16 +194,25 @@ function parseScript(raw: string): ReelScriptData {
   if (data.scenes.some((scene) => !scene.headline || !scene.tag)) {
     throw new Error("Roteiro retornado pelo Gemini tem cenas sem texto essencial.");
   }
-  data.narrationText = data.narrationText.trim().replace(/\s*(?:Quer ver a mat[eé]ria completa\?\s*)?Acesse orangebrick\.blog\.?\s*$/i, "").trim();
+  data.narrationText = data.narrationText.trim()
+    .replace(/\s*(?:Quer ver a mat[eé]ria completa\?\s*)?Acesse orangebrick\.blog\.?\s*$/i, "")
+    .replace(/\s*Siga @ob\.labs no Instagram para mais notícias de games\.?\s*$/i, "")
+    .replace(/\s*(?:O que você acha dessa mudança|Qual é a sua opinião sobre essa notícia|O que essa notícia muda para quem joga)\?\s*$/i, "")
+    .trim();
   data.narrationText = data.narrationText.replace(/@OrangeBrick/gi, "@ob.labs");
-  if (!/\b(?:siga|segue)\b[\s\S]{0,100}@ob\.labs/i.test(data.narrationText.slice(-180))) {
-    data.narrationText = `${data.narrationText.replace(/[\s.!?]+$/, "")}. Siga @ob.labs no Instagram para mais notícias de games.`;
-  }
   data.ctaQuestion = fitText(data.ctaQuestion || "", 56);
-  if (!data.ctaQuestion.endsWith("?") || /pergunta específica|impacto para quem joga/i.test(data.ctaQuestion)) {
-    data.ctaQuestion = "O que você acha dessa mudança?";
+  if (
+    !data.ctaQuestion.endsWith("?") ||
+    /pergunta específica|impacto para quem joga/i.test(data.ctaQuestion) ||
+    /^(?:o que você acha dessa mudança|qual é a sua opinião sobre essa notícia|o que essa notícia muda para quem joga)\?$/i.test(data.ctaQuestion)
+  ) {
+    data.ctaQuestion = fitText(contextualCommentQuestion(post), 56);
   }
-  data.ctaAction = "Siga @ob.labs no Instagram para acompanhar notícias de games";
-  data.ctaButton = "SIGA @OB.LABS";
+  if (!data.narrationText.toLocaleLowerCase("pt-BR").includes(data.ctaQuestion.toLocaleLowerCase("pt-BR"))) {
+    const narrationCore = data.narrationText.replace(/[\s.!?]+$/, "").trim();
+    data.narrationText = `${narrationCore ? `${narrationCore}. ` : ""}${data.ctaQuestion}`;
+  }
+  data.ctaAction = "Comente sua resposta para continuar a conversa";
+  data.ctaButton = "COMENTE ABAIXO";
   return data;
 }

@@ -465,10 +465,10 @@ export function generateCompositionHtml(options: CompositionOptions): string {
               ${escapeHtml(script.ctaQuestion || "O que você acha?")}
             </h2>
             <p style="font-size: 34px; color: #a1a1aa; margin-top: 20px;">
-              💬 ${escapeHtml(script.ctaAction || "Siga @ob.labs no Instagram para mais notícias de games")}
+              💬 ${escapeHtml(script.ctaAction || "Comente sua resposta para continuar a conversa")}
             </p>
             <div class="cta-btn">
-              <span>🟠 ${escapeHtml(script.ctaButton || "SIGA @OB.LABS")}</span>
+              <span>🟠 ${escapeHtml(script.ctaButton || "COMENTE ABAIXO")}</span>
             </div>
           </div>
         </div>

@@ -46,6 +46,39 @@ async function resolveActiveTikTokAccount(apiKey: string, userId: string, fallba
   }
 }
 
+async function queryTikTokCreatorPrivacyOptions(apiKey: string | undefined, userId: string, accountId: string | undefined, accessToken: string): Promise<string[]> {
+  const endpoint = "https://open.tiktokapis.com/v2/post/publish/creator_info/query/";
+  const useComposio = Boolean(apiKey && accountId && !accessToken);
+  const response = useComposio
+    ? await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
+        method: "POST",
+        headers: { "x-api-key": apiKey as string, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          connected_account_id: accountId,
+          user_id: userId,
+          endpoint,
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=UTF-8" },
+          body: { fields: ["creator_username", "privacy_level_options", "comment_disabled", "duet_disabled", "stitch_disabled", "max_video_post_duration_sec"] },
+        }),
+        signal: AbortSignal.timeout(30_000),
+      })
+    : await fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json; charset=UTF-8" },
+        body: JSON.stringify({ fields: ["creator_username", "privacy_level_options", "comment_disabled", "duet_disabled", "stitch_disabled", "max_video_post_duration_sec"] }),
+        signal: AbortSignal.timeout(30_000),
+      });
+  const json = await response.json().catch(() => null);
+  const result = json?.data?.data || json?.data || json;
+  const privacyOptions = result?.data?.privacy_level_options || result?.privacy_level_options;
+  const errorMessage = result?.error?.message || json?.error?.message;
+  if (!response.ok || result?.error?.code && result.error.code !== "ok" || !Array.isArray(privacyOptions) || privacyOptions.length === 0) {
+    throw new Error(errorMessage || "O TikTok não retornou as opções atuais de privacidade do criador.");
+  }
+  return privacyOptions;
+}
+
 export async function GET(request: Request) {
   try {
     const automatic = isAuthorizedCronRequest(request);
@@ -95,9 +128,6 @@ export async function GET(request: Request) {
       });
     }
 
-    const composioConfigured = Boolean(apiKey && process.env.COMPOSIO_TIKTOK_ACCOUNT);
-    const hasEnvToken = Boolean(process.env.TIKTOK_ACCESS_TOKEN || composioConfigured);
-
     let hasDirectPublish = false;
     let resolvedAccountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
 
@@ -106,6 +136,9 @@ export async function GET(request: Request) {
       hasDirectPublish = resolved.hasDirectPublish;
       if (resolved.accountId) resolvedAccountId = resolved.accountId;
     }
+
+    const composioConfigured = Boolean(apiKey && resolvedAccountId);
+    const hasEnvToken = Boolean(process.env.TIKTOK_ACCESS_TOKEN || composioConfigured);
 
     return reply({
       configured: hasEnvToken || composioConfigured,
@@ -159,16 +192,21 @@ export async function POST(request: Request) {
     const caption = typeof body.caption === "string" ? body.caption.trim().slice(0, 2200) : "";
     const apiKey = process.env.COMPOSIO_API_KEY;
     const composioUserId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
-    const customAccessToken = body.accessToken?.trim() || process.env.TIKTOK_ACCESS_TOKEN;
+    const manualAccessToken = body.accessToken?.trim() || process.env.TIKTOK_ACCESS_TOKEN || "";
 
     let accountId = process.env.COMPOSIO_TIKTOK_ACCOUNT;
-    if (apiKey && !customAccessToken) {
+    let hasDirectPublish = false;
+    if (apiKey) {
       const resolved = await resolveActiveTikTokAccount(apiKey, composioUserId, accountId);
       if (resolved.accountId) accountId = resolved.accountId;
-      if (automatic && !resolved.hasDirectPublish) return reply({ error: "A conta TikTok não autorizou publicação direta. Reconecte com o escopo video.publish." }, 409);
+      hasDirectPublish = resolved.hasDirectPublish;
     }
 
-    if (!customAccessToken && (!apiKey || !accountId)) {
+    const useComposio = Boolean(apiKey && accountId && hasDirectPublish);
+    const customAccessToken = useComposio ? "" : manualAccessToken;
+    if (automatic && !useComposio && !customAccessToken) return reply({ error: "A conta TikTok não autorizou publicação direta. Reconecte com o escopo video.publish." }, 409);
+
+    if (!useComposio && !customAccessToken) {
       return reply({
         error: "Token do TikTok não configurado. Informe o Access Token do TikTok ou configure COMPOSIO_TIKTOK_ACCOUNT.",
       }, 400);
@@ -202,9 +240,16 @@ export async function POST(request: Request) {
       totalChunkCount = Math.floor(videoSize / chunkSize);
     }
 
-    const privacyLevel = ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"].includes(body.privacyLevel)
-      ? body.privacyLevel
-      : "PUBLIC_TO_EVERYONE";
+    const privacyLevel = typeof body.privacyLevel === "string" ? body.privacyLevel : "PUBLIC_TO_EVERYONE";
+    let creatorPrivacyOptions: string[];
+    try {
+      creatorPrivacyOptions = await queryTikTokCreatorPrivacyOptions(useComposio ? apiKey : undefined, composioUserId, useComposio ? accountId : undefined, customAccessToken);
+    } catch (error) {
+      return reply({ error: error instanceof Error ? error.message : "Não foi possível consultar as opções de privacidade do TikTok." }, 400);
+    }
+    if (!creatorPrivacyOptions.includes(privacyLevel)) {
+      return reply({ error: `Privacidade inválida para esta conta. Opções retornadas pelo TikTok: ${creatorPrivacyOptions.join(", ")}.` }, 400);
+    }
 
     const payload = {
       post_info: {
@@ -230,7 +275,7 @@ export async function POST(request: Request) {
 
     const endpoints = [
       { url: "https://open.tiktokapis.com/v2/post/publish/video/init/", direct: true },
-      ...(!automatic ? [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false }] : []),
+      ...(!automatic && body.allowInboxFallback === true ? [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", direct: false }] : []),
     ];
 
     if (apiKey && accountId && !customAccessToken) {
@@ -317,6 +362,7 @@ export async function POST(request: Request) {
       success: true,
       publishId,
       isDirect,
+      directError: isDirect ? null : lastError,
       message: isDirect
         ? "Vídeo publicado com sucesso diretamente no TikTok!"
         : "Vídeo recebido pelo TikTok (Caixa de Entrada / Rascunhos). A legenda foi copiada para sua área de transferência!",
