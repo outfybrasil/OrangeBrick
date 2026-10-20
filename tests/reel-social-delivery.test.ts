@@ -24,7 +24,14 @@ function database() {
   };
   const db = {
     auth: { getUser: async () => ({ data: { user: {} }, error: null }) },
-    storage: { from: () => ({ createSignedUrl: async () => ({ data: { signedUrl: "https://media.example/video.mp4" }, error: null }) }) },
+    storage: { from: () => ({
+      createSignedUrl: async () => ({ data: { signedUrl: "https://media.example/video.mp4" }, error: null }),
+      createSignedUrls: async (paths: string[]) => ({ data: paths.map(path => ({ path, signedUrl: `https://media.example/${path}` })), error: null }),
+    }) },
+    rpc: async (name: string) => {
+      assert.equal(name, "list_reel_jobs");
+      return { data: structuredClone(tables.reel_jobs), error: null };
+    },
     from(table: string) {
       let operation = "select";
       let payload: Row = {};
@@ -330,4 +337,71 @@ test("automation dispatches YouTube then Instagram then TikTok once each", async
   }
   assert.deepEqual(calls, ["youtube", "instagram", "tiktok"]);
   assert.equal(tables.reel_social_publications.length, 3);
+});
+
+test("Reels use shared storage by default locally and on Vercel", () => {
+  for (const env of [{}, { VERCEL: "1" }, { VERCEL: "1", REELS_REMOTE: "false" }]) {
+    const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, undefined, env as Record<string, string>);
+    assert.equal((remote.usesRemoteReels as () => boolean)(), true);
+  }
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, undefined, { REELS_REMOTE: "false" });
+  assert.equal((remote.usesRemoteReels as () => boolean)(), false);
+});
+
+test("localhost and production list the same remote Reel without reading local video files", async () => {
+  const { db, mocks } = setup();
+  const items: unknown[] = [];
+  const deployments: Array<Record<string, string>> = [{}, { VERCEL: "1" }];
+  for (const deployment of deployments) {
+    const env = { NEXT_PUBLIC_SUPABASE_URL: "https://db.example", SUPABASE_SERVICE_ROLE_KEY: "key", ...deployment };
+    const supabase = { createClient: () => db };
+    const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": supabase }, undefined, env);
+    const route = loadModule("src/app/api/admin/reels/route.ts", {
+      ...mocks,
+      "@supabase/supabase-js": supabase,
+      "@/lib/video/reel-remote": remote,
+      "@/lib/video/reel-service": {
+        getManifest: () => { throw new Error("Unexpected local manifest read"); },
+        checkReelFile: () => { throw new Error("Unexpected local video read"); },
+        generateSocialCopys: () => ({}),
+      },
+    }, undefined, env);
+    const response = await (route.GET as (request: Request) => Promise<Response>)(new Request("https://site.example/api/admin/reels", { headers: { authorization: "Bearer admin" } }));
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.items[0].status, "ready");
+    assert.equal(body.items[0].reel_job_id, jobId);
+    assert.equal(body.items[0].video_url, "https://media.example/video.mp4");
+    items.push(body.items);
+  }
+  assert.deepEqual(items[0], items[1]);
+});
+
+test("localhost forwards generation to the official queue when the worker token exists only there", async () => {
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async (input, init) => {
+    assert.equal(String(input), "https://orange-brick.vercel.app/api/admin/reels");
+    assert.equal(init?.method, "POST");
+    assert.equal((init?.headers as Record<string, string>).Authorization, "Bearer admin-token");
+    assert.equal((init?.headers as Record<string, string>)["X-Orangebrick-Reel-Relay"], "1");
+    assert.deepEqual(JSON.parse(String(init?.body)), { slug: "example" });
+    assert.equal(init?.redirect, "error");
+    return Response.json({ queued: true, message: "Queued" }, { status: 202 });
+  });
+  const result = await (remote.enqueueRemoteReel as (slug: string, token: string) => Promise<{ queued: boolean }>)("example", "admin-token");
+  assert.equal(result.queued, true);
+});
+
+test("failed official queue requests never fall back to rendering another local copy", async () => {
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async () => Response.json({ error: "Session expired" }, { status: 403 }));
+  await assert.rejects((remote.enqueueRemoteReel as (slug: string, token: string) => Promise<unknown>)("example", "expired-token"), /Session expired/);
+});
+
+test("official queue connection failures report an uncertain request without retrying", async () => {
+  let attempts = 0;
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async () => {
+    attempts++;
+    throw new TypeError("fetch failed");
+  });
+  await assert.rejects((remote.enqueueRemoteReel as (slug: string, token: string) => Promise<unknown>)("example", "admin-token"), /Atualize a lista/);
+  assert.equal(attempts, 1);
 });

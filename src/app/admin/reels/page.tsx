@@ -252,6 +252,8 @@ function AdminReelsContent() {
     } catch (err: unknown) {
       const message = err instanceof Error && err.name === "TimeoutError"
         ? "O servidor demorou para confirmar a geração. Atualize a lista antes de tentar novamente."
+        : err instanceof TypeError && /fetch|network/i.test(err.message)
+          ? "Não foi possível conectar ao servidor de Reels. Atualize a lista antes de tentar novamente para conferir se a solicitação foi recebida."
         : err instanceof Error ? err.message : "Não foi possível iniciar a geração.";
       setError(message);
       showToast(message);

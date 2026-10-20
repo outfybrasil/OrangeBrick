@@ -246,7 +246,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await triggerReelGeneration(slug);
+    const result = await triggerReelGeneration(slug, token);
     return NextResponse.json(result, { status: result.queued ? 202 : 409 });
   } catch (error) {
     console.error("[Reels] Falha ao iniciar geração:", error);
