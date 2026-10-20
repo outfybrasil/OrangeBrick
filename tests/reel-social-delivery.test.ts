@@ -377,31 +377,33 @@ test("localhost and production list the same remote Reel without reading local v
   assert.deepEqual(items[0], items[1]);
 });
 
-test("localhost forwards generation to the official queue when the worker token exists only there", async () => {
-  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async (input, init) => {
-    assert.equal(String(input), "https://orange-brick.vercel.app/api/admin/reels");
+test("local generation reserves the shared job and dispatches the official GitHub worker once", async () => {
+  const { db } = setup();
+  let reservations = 0;
+  let dispatches = 0;
+  const shared = {
+    ...db,
+    rpc: async (name: string, args: Record<string, string>) => {
+      assert.equal(name, "enqueue_reel");
+      assert.equal(args.p_slug, "example");
+      reservations++;
+      return { data: [{ id: jobId, status: "queued" }], error: null };
+    },
+  };
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": { createClient: () => shared } }, async (input, init) => {
+    dispatches++;
+    assert.equal(String(input), "https://api.github.com/repos/outfybrasil/OrangeBrick/actions/workflows/reel-generator.yml/dispatches");
     assert.equal(init?.method, "POST");
-    assert.equal((init?.headers as Record<string, string>).Authorization, "Bearer admin-token");
-    assert.equal((init?.headers as Record<string, string>)["X-Orangebrick-Reel-Relay"], "1");
-    assert.deepEqual(JSON.parse(String(init?.body)), { slug: "example" });
-    assert.equal(init?.redirect, "error");
-    return Response.json({ queued: true, message: "Queued" }, { status: 202 });
-  });
-  const result = await (remote.enqueueRemoteReel as (slug: string, token: string) => Promise<{ queued: boolean }>)("example", "admin-token");
+    assert.deepEqual(JSON.parse(String(init?.body)), { ref: "master" });
+    return new Response(null, { status: 204 });
+  }, { NEXT_PUBLIC_SUPABASE_URL: "https://db.example", SUPABASE_SERVICE_ROLE_KEY: "key", REELS_GITHUB_TOKEN: "worker-token" });
+  const result = await (remote.enqueueRemoteReel as (slug: string) => Promise<{ queued: boolean }>)("example");
   assert.equal(result.queued, true);
+  assert.equal(reservations, 1);
+  assert.equal(dispatches, 1);
 });
 
-test("failed official queue requests never fall back to rendering another local copy", async () => {
-  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async () => Response.json({ error: "Session expired" }, { status: 403 }));
-  await assert.rejects((remote.enqueueRemoteReel as (slug: string, token: string) => Promise<unknown>)("example", "expired-token"), /Session expired/);
-});
-
-test("official queue connection failures report an uncertain request without retrying", async () => {
-  let attempts = 0;
-  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, async () => {
-    attempts++;
-    throw new TypeError("fetch failed");
-  });
-  await assert.rejects((remote.enqueueRemoteReel as (slug: string, token: string) => Promise<unknown>)("example", "admin-token"), /Atualize a lista/);
-  assert.equal(attempts, 1);
+test("missing local worker credentials stop before reserving or rendering another copy", async () => {
+  const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} });
+  await assert.rejects((remote.enqueueRemoteReel as (slug: string) => Promise<unknown>)("example"), /REELS_GITHUB_TOKEN/);
 });

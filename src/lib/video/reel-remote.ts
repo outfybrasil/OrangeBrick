@@ -24,29 +24,7 @@ export async function dispatchReelWorker(token = process.env.REELS_GITHUB_TOKEN)
   if (!response.ok) throw new Error(`O GitHub não confirmou a execução dos Reels (HTTP ${response.status}). Confira as permissões e o workflow.`);
 }
 
-export async function enqueueRemoteReel(slug: string, adminToken?: string) {
-  if (process.env.VERCEL !== "1" && !process.env.REELS_GITHUB_TOKEN && adminToken) {
-    const site = new URL(process.env.REELS_SITE_URL || "https://orange-brick.vercel.app");
-    if (site.protocol !== "https:" || site.username || site.password || ["localhost", "127.0.0.1", "[::1]"].includes(site.hostname)) {
-      throw new Error("Configure REELS_SITE_URL com o endereço HTTPS do site oficial.");
-    }
-    const response = await fetch(new URL("/api/admin/reels", site), {
-      method: "POST",
-      headers: { Authorization: `Bearer ${adminToken}`, "Content-Type": "application/json", "X-Orangebrick-Reel-Relay": "1" },
-      body: JSON.stringify({ slug }),
-      cache: "no-store",
-      redirect: "error",
-      signal: AbortSignal.timeout(20_000),
-    }).catch(() => {
-      throw new Error("Não foi possível conectar à fila oficial de Reels. Atualize a lista antes de tentar novamente para conferir se a solicitação foi recebida.");
-    });
-    const result = await response.json().catch(() => null);
-    if (typeof result?.queued !== "boolean" || typeof result?.message !== "string") {
-      throw new Error(result?.error || "O site oficial não confirmou a solicitação do Reel.");
-    }
-    if (!response.ok && response.status !== 409) throw new Error(result.error || result.message);
-    return { queued: result.queued, message: result.message };
-  }
+export async function enqueueRemoteReel(slug: string) {
   if (!process.env.REELS_GITHUB_TOKEN) throw new Error("O executor de Reels não está configurado. Configure REELS_GITHUB_TOKEN no servidor.");
   const supabase = getReelAdmin();
   const { data, error } = await supabase.rpc("enqueue_reel", { p_slug: slug });

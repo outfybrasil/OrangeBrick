@@ -51,7 +51,6 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         has: [{ type: "host", value: "orange-brick.vercel.app" }],
-        missing: [{ type: "header", key: "x-orangebrick-reel-relay", value: "1" }],
         destination: "https://orangebrick.blog/:path*",
         permanent: true,
       },

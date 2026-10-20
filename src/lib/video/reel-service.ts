@@ -259,11 +259,11 @@ let currentRunningSlug: string | null = null;
 const reelQueue: string[] = [];
 const cancelledReelChildren = new WeakSet<ChildProcess>();
 
-export async function triggerReelGeneration(slug: string, adminToken?: string): Promise<{ queued: boolean; message: string }> {
+export async function triggerReelGeneration(slug: string): Promise<{ queued: boolean; message: string }> {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) {
     return { queued: false, message: "Slug inválido" };
   }
-  if (usesRemoteReels()) return enqueueRemoteReel(slug, adminToken);
+  if (usesRemoteReels()) return enqueueRemoteReel(slug);
 
   const manifest = getManifest();
   const current = manifest[slug];
