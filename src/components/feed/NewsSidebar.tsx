@@ -84,7 +84,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                           alt={post.image_alt || post.title}
                           fill
                           sizes="76px"
-                          className="h-full w-full object-contain object-center transition-transform duration-300 group-hover:scale-[1.01]"
+                          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
                         />
                       </div>
                     ) : (

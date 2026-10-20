@@ -43,23 +43,13 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionCh
       >
         <Link href={`/posts/${post.slug}`} aria-label={`Ler ${post.title}`} className="relative block aspect-video overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange sm:aspect-auto sm:h-full">
           {post.image_url ? (
-            <>
-              <Image
-                src={post.image_url}
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
-                className="hidden scale-110 object-cover object-center opacity-45 blur-xl sm:block"
-              />
-              <Image
-                src={post.image_url}
-                alt={post.image_alt || post.title}
-                fill
-                sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
-                className="object-contain object-center transition-transform duration-500 sm:group-hover:scale-[1.01]"
-              />
-            </>
+            <Image
+              src={post.image_url}
+              alt={post.image_alt || post.title}
+              fill
+              sizes="(max-width: 639px) 100vw, (max-width: 767px) 200px, 220px"
+              className="object-cover object-center transition-transform duration-500 sm:group-hover:scale-[1.02]"
+            />
           ) : (
             <div className="flex h-full items-center justify-center bg-card-slate">
               <span className="text-xs text-gray-500">Sem mídia</span>

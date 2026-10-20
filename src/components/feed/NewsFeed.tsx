@@ -201,10 +201,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
         >
           <div className="relative aspect-video w-full overflow-hidden bg-black">
             {heroPost.image_url ? (
-              <>
-                <Image src={heroPost.image_url} alt="" aria-hidden="true" fill sizes="(max-width: 1024px) 100vw, 66vw" className="scale-110 object-cover opacity-35 blur-2xl" />
-                <Image priority src={heroPost.image_url} alt={heroPost.image_alt || heroPost.title} fill sizes="(max-width: 1024px) 100vw, 66vw" className="object-contain object-center p-2 transition-transform duration-700 ease-out group-hover:scale-[1.01] sm:p-3" />
-              </>
+              <Image priority src={heroPost.image_url} alt={heroPost.image_alt || heroPost.title} fill sizes="(max-width: 1024px) 100vw, 66vw" className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]" />
             ) : (
               <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
                 <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
@@ -253,14 +250,13 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
               className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               {post.image_url && (
-                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[44%] lg:w-full lg:rounded-none lg:aspect-auto">
-                  <Image src={post.image_url} alt="" aria-hidden="true" fill sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw" className="scale-110 object-cover opacity-30 blur-xl" />
+                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[48%] lg:w-full lg:rounded-none lg:aspect-auto">
                   <Image loading="lazy" decoding="async"
                     src={post.image_url}
                     alt={post.image_alt || post.title}
                     fill
                     sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw"
-                    className="h-full w-full object-contain object-center transition-transform duration-500 lg:group-hover:scale-[1.01]"
+                    className="h-full w-full object-cover object-center transition-transform duration-500 lg:group-hover:scale-[1.02]"
                   />
                   <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 to-transparent lg:block" />
                   <span className="absolute bottom-0 left-0 z-20 hidden rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black lg:block">
