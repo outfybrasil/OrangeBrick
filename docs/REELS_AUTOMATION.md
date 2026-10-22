@@ -1,5 +1,7 @@
 ﻿# 🎬 Automação de Vídeos Curtos (Reels / TikTok / Shorts) — Orange Brick
 
+> **Documento histórico.** A referência atual é [`REELS_E_REDES_SOCIAIS.md`](./REELS_E_REDES_SOCIAIS.md). Alguns números e caminhos deste arquivo estão desatualizados, incluindo duração, rate do TTS e regras de copy.
+
 Este módulo permite transformar automaticamente qualquer matéria publicada ou rascunho do Orange Brick em um **vídeo vertical 1080×1920**, com motion graphics no padrão HyperFrames + GSAP, narração em português por IA (TTS), trilha sonora adaptativa, efeitos sonoros (SFX) e legendas sincronizadas.
 
 ---

@@ -11,6 +11,14 @@ Portal editorial em Next.js 16 com Supabase para dados, autenticação, armazena
 
 GitHub Pages não é compatível com esta arquitetura porque entrega apenas arquivos estáticos. O workflow do repositório executa a validação; o deploy do aplicativo deve ser configurado no provedor do Next.js.
 
+## Documentação
+
+- [Reels e Redes Sociais](docs/REELS_E_REDES_SOCIAIS.md) — referência completa de geração, copys e publicação.
+- [Handoff 22/10/2026](docs/HANDOFF_2026-10-22.md) — estado atual, próximos passos e cuidados.
+- [Automação de Reels](docs/REELS_AUTOMATION.md) — documento histórico.
+- [PRD de Reels](docs/REELS_PRD.md) — PRD histórico.
+- [Diretrizes editoriais](AGENTS.md) — tom, imagens, fontes e padrões de conteúdo.
+
 ## Desenvolvimento
 
 Copie `.env.example` para `.env.local`, preencha as variáveis e execute:

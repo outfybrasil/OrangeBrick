@@ -1,6 +1,8 @@
 # 🎬 PRD & Documentação Técnica — Automação de Reels & Shorts
 **Portal Orange Brick | Versão 1.2 — Outubro 2026**
 
+> **Documento histórico.** A referência atual é [`REELS_E_REDES_SOCIAIS.md`](./REELS_E_REDES_SOCIAIS.md). Este PRD contém caminhos locais antigos, regras de copy anteriores e números que não refletem mais o código.
+
 Este documento detalha a arquitetura, o fluxo de automação, os endpoints de API e as opções de expansão do ecossistema de vídeos curtos verticais (1080×1920) do **Orange Brick**, formatado para consulta rápida no desktop ou via **Codex no celular**.
 
 ---
