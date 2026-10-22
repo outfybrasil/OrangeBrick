@@ -1,0 +1,33 @@
+name: db-migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: Caminho do arquivo SQL dentro de supabase/migrations
+        required: true
+        default: supabase/migrations/20261022230000_telegram_archived_guard.sql
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Aplicar migration
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          FILE: ${{ github.event.inputs.file }}
+        run: |
+          psql "$SUPABASE_DB_URL?sslmode=require" -v ON_ERROR_STOP=1 -f "$FILE"
+      - name: Verificar guards aplicados
+        if: contains(github.event.inputs.file, 'telegram_archived_guard')
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          found=$(psql "$SUPABASE_DB_URL?sslmode=require" -t -A -c "select count(*) from pg_catalog.pg_proc p join pg_catalog.pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname in ('telegram_publish_review','telegram_toggle_publication_selection') and p.prosrc like '%archived_at%'")
+          echo "funcoes com guard de archived_at: $found"
+          test "$found" = "2"
