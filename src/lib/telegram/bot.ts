@@ -52,6 +52,20 @@ interface PendingEdit {
   field: "title" | "summary";
 }
 
+export type TelegramBackgroundScheduler = (task: () => Promise<void>) => void;
+
+async function runScheduled(schedule: TelegramBackgroundScheduler | undefined, task: () => Promise<void>): Promise<void> {
+  if (schedule) {
+    schedule(task);
+    return;
+  }
+  await task();
+}
+
+function hasCorruptedText(value: string): boolean {
+  return /[\u3400-\u4dbf\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\ufffd]/u.test(value);
+}
+
 const BRT_TZ = "America/Sao_Paulo";
 const CATEGORIES: Array<Post["category"]> = ["breaking", "hardware", "industry", "modding", "review", "opinion"];
 const CATEGORY_LABELS: Record<string, string> = {
@@ -418,7 +432,7 @@ async function prepareTelegramPublication(cq: NonNullable<TelegramUpdate["callba
   const { data, error } = await supabase.from("posts").select("*").in("id", ids);
   if (error) throw error;
   const byId = new Map(((data || []) as Post[]).map((post) => [post.id, post]));
-  const posts = ids.flatMap((id) => { const post = byId.get(id); return post && !post.is_published ? [post] : []; });
+  const posts = ids.flatMap((id) => { const post = byId.get(id); return post && !post.is_published && !post.archived_at ? [post] : []; });
   if (!posts.length) { await sendTelegramApi("sendMessage", { chat_id: actorId, text: "As matérias selecionadas não foram encontradas ou já estão publicadas." }); return; }
   const checks = await inspectPublicationImagesInDatabase(posts, supabase);
   const blockers = posts.flatMap((post) => (checks.get(post.id) || []).map((message) => `${post.title}: ${message}`));
@@ -435,13 +449,13 @@ async function prepareTelegramPublication(cq: NonNullable<TelegramUpdate["callba
   await sendTelegramApi("sendMessage", { chat_id: actorId, parse_mode: "HTML", text: `📰 <b>Confirmar publicação de ${posts.length} matéria(s)</b>\n\n${titles}\n\nA sequência segue a seleção. A última publicada aparece primeiro no site.${warningText}`, reply_markup: { inline_keyboard: [[{ text: warnings.length ? "✅ Continuar e publicar" : "✅ Publicar agora", callback_data: `pcf:${key}` }, { text: "❌ Cancelar", callback_data: `pcn:${key}` }]] } });
 }
 
-async function confirmTelegramPublication(cq: NonNullable<TelegramUpdate["callback_query"]>, key: string, actorId: string): Promise<boolean> {
+async function confirmTelegramPublication(cq: NonNullable<TelegramUpdate["callback_query"]>, key: string, actorId: string): Promise<Post[] | null> {
   await answerToast(cq, "Conferindo imagens e confirmando a publicação…");
   const stateKey = `telegram:publish-review:${key}`;
   const raw = await getState(stateKey);
-  if (!raw) { await editCard(cq, "Confirmação expirada ou cancelada. Revise as matérias novamente.", []); return false; }
+  if (!raw) { await editCard(cq, "Confirmação expirada ou cancelada. Revise as matérias novamente.", []); return null; }
   const review = JSON.parse(raw) as PublicationReview;
-  if (review.actor_id !== actorId || Date.parse(review.expires_at) < Date.now()) { await editCard(cq, "Confirmação expirada. Revise as matérias novamente.", []); return false; }
+  if (review.actor_id !== actorId || Date.parse(review.expires_at) < Date.now()) { await editCard(cq, "Confirmação expirada. Revise as matérias novamente.", []); return null; }
   const supabase = getSupabaseAdmin();
   const { data, error: readError } = await supabase.from("posts").select("*").in("id", review.posts.map((post) => post.id));
   if (readError) throw readError;
@@ -449,12 +463,15 @@ async function confirmTelegramPublication(cq: NonNullable<TelegramUpdate["callba
   if (review.status !== "published") {
     const checks = await inspectPublicationImagesInDatabase(posts, supabase);
     const blockers = posts.flatMap((post) => checks.get(post.id) || []);
-    if (blockers.length) { await editCard(cq, `⛔ A publicação foi bloqueada pelas imagens.\n\n${blockers.slice(0, 6).map((item) => escapeHtml(excerpt(item, 200))).join("\n")}\n\nCorrija no ADM e revise novamente.`, []); return false; }
+    if (blockers.length) { await editCard(cq, `⛔ A publicação foi bloqueada pelas imagens.\n\n${blockers.slice(0, 6).map((item) => escapeHtml(excerpt(item, 200))).join("\n")}\n\nCorrija no ADM e revise novamente.`, []); return null; }
+  } else {
+    await editCard(cq, `✅ <b>${review.posts.length} matéria(s) publicada(s)</b>\n\n${review.posts.map((item, index) => { const post = posts.find((post) => post.id === item.id); return `${index + 1}. ${escapeHtml(excerpt(post?.title || item.id, 60))}`; }).join("\n")}`, [[{ text: "Ver notícias no site", url: `${getSiteUrl()}/noticias` }, { text: "Ver rascunhos", callback_data: "pgd:0" }]]);
+    return null;
   }
   const { error } = await supabase.rpc("telegram_publish_review", { p_review_key: stateKey, p_actor_id: actorId });
-  if (error) { await editCard(cq, `Não foi possível publicar: ${escapeHtml(error.message)}`, []); return false; }
+  if (error) { await editCard(cq, `Não foi possível publicar: ${escapeHtml(error.message)}`, []); return null; }
   await editCard(cq, `✅ <b>${review.posts.length} matéria(s) publicada(s)</b>\n\n${review.posts.map((item, index) => { const post = posts.find((post) => post.id === item.id); return `${index + 1}. ${escapeHtml(excerpt(post?.title || item.id, 60))}`; }).join("\n")}`, [[{ text: "Ver notícias no site", url: `${getSiteUrl()}/noticias` }, { text: "Ver rascunhos", callback_data: "pgd:0" }]]);
-  return true;
+  return posts;
 }
 
 async function listDraftsPage(chatId: number | string, page: number): Promise<void> {
@@ -463,6 +480,7 @@ async function listDraftsPage(chatId: number | string, page: number): Promise<vo
     .from("posts")
     .select("id, title, slug, category, created_at", { count: "exact" })
     .eq("is_published", false)
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
     .range(page * DRAFT_PAGE_SIZE, page * DRAFT_PAGE_SIZE + DRAFT_PAGE_SIZE - 1);
 
@@ -842,7 +860,7 @@ async function brickDetailView(chatId: number | string, postId: string): Promise
   return true;
 }
 
-async function handleCallback(update: TelegramUpdate, onPublished?: () => void, onReviewQueued?: () => void): Promise<void> {
+async function handleCallback(update: TelegramUpdate, onPublished?: (posts: Post[]) => void, onReviewQueued?: () => void, schedule?: TelegramBackgroundScheduler): Promise<void> {
   const cq = update.callback_query!;
   const fromId = String(cq.from?.id);
   const data = cq.data || "";
@@ -897,7 +915,8 @@ async function handleCallback(update: TelegramUpdate, onPublished?: () => void, 
     return;
   }
   if (action === "pcf" && arg1) {
-    if (await confirmTelegramPublication(cq, arg1, fromId)) onPublished?.();
+    const publishedPosts = await confirmTelegramPublication(cq, arg1, fromId);
+    if (publishedPosts) onPublished?.(publishedPosts);
     return;
   }
 
@@ -1042,7 +1061,7 @@ async function handleCallback(update: TelegramUpdate, onPublished?: () => void, 
     await answerToast(
       cq,
       arg2 === "t"
-        ? `Envie o novo título (até 160 caracteres).\nAtual: ${excerpt(post.title, 80)}`
+        ? `Envie o novo título (até 70 caracteres).\nAtual: ${excerpt(post.title, 80)}`
         : `Envie o novo resumo (até 300 caracteres).\nAtual: ${excerpt(post.summary || "", 120)}`,
       true,
     );
@@ -1135,26 +1154,28 @@ async function handleCallback(update: TelegramUpdate, onPublished?: () => void, 
 
   if (action === "confirma_gen" && arg1) {
     await answerToast(cq, "Gerando matéria mesmo com similaridade...", false);
-    await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n⏳ <b>Gerando matéria...</b>`, []);
-    try {
-      let result;
-      if (arg1 === "hoje") {
-        result = await generateNewsDraft({ force: true });
-      } else if (arg1 === "gerar" && arg2) {
-        const topic = decodeURIComponent(arg2);
-        result = await generateNewsDraft({ topic, force: true });
-      } else if (arg1 === "url" && arg2) {
-        const url = decodeURIComponent(arg2);
-        result = await generateNewsDraft({ sourceUrl: url, force: true });
+    await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n⏳ <b>Gerando matéria...</b>\nVou enviar o cartão aqui quando terminar.`, []);
+    await runScheduled(schedule, async () => {
+      try {
+        let result;
+        if (arg1 === "hoje") {
+          result = await generateNewsDraft({ force: true });
+        } else if (arg1 === "gerar" && arg2) {
+          const topic = decodeURIComponent(arg2);
+          result = await generateNewsDraft({ topic, force: true });
+        } else if (arg1 === "url" && arg2) {
+          const url = decodeURIComponent(arg2);
+          result = await generateNewsDraft({ sourceUrl: url, force: true });
+        }
+        if (result) {
+          await sendPostForApproval(result.post, result.wordCount);
+          await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n✅ <b>Matéria gerada com sucesso!</b>`, []);
+        }
+      } catch (err: unknown) {
+        const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
+        await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n❌ <b>Falha ao gerar:</b>\n<code>${escapeHtml(msgErr)}</code>`, []);
       }
-      if (result) {
-        await sendPostForApproval(result.post, result.wordCount);
-        await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n✅ <b>Matéria gerada com sucesso!</b>`, []);
-      }
-    } catch (err: unknown) {
-      const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
-      await editCard(cq, `${cq.message?.caption || cq.message?.text || ""}\n\n❌ <b>Falha ao gerar:</b>\n<code>${escapeHtml(msgErr)}</code>`, []);
-    }
+    });
     return;
   }
 
@@ -1281,7 +1302,7 @@ async function cmdUserLookup(chatId: number | string, term: string): Promise<voi
   await sendTelegramApi("sendMessage", { chat_id: chatId, text: await userCard(profile), parse_mode: "HTML" });
 }
 
-async function handleCommand(chatId: number | string, command: string, args: string): Promise<void> {
+async function handleCommand(chatId: number | string, command: string, args: string, schedule?: TelegramBackgroundScheduler): Promise<void> {
   if (command === "start" || command === "ajuda" || command === "help") {
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
@@ -1507,36 +1528,38 @@ async function handleCommand(chatId: number | string, command: string, args: str
     sendTyping(chatId);
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
-      text: "🛠 <b>Iniciando correção e busca de imagens em alta definição...</b>\nAguarde alguns instantes enquanto processo as fotos.",
+      text: "🛠 <b>Iniciando correção e busca de imagens em alta definição...</b>\nVou enviar aqui os cartões das matérias corrigidas em alguns minutos.",
       parse_mode: "HTML",
     });
-    try {
-      const { fixPostImages } = await import("../ai/gemini-news.ts");
-      const fixedPosts = await fixPostImages(args || undefined);
-      if (fixedPosts.length === 0) {
+    await runScheduled(schedule, async () => {
+      try {
+        const { fixPostImages } = await import("../ai/gemini-news.ts");
+        const fixedPosts = await fixPostImages(args || undefined);
+        if (fixedPosts.length === 0) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: "✅ Nenhuma matéria pendente de correção foi encontrada. Todas já possuem imagens válidas!",
+            parse_mode: "HTML",
+          });
+          return;
+        }
+        for (const post of fixedPosts) {
+          await sendPostForApproval(post);
+        }
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: "✅ Nenhuma matéria pendente de correção foi encontrada. Todas já possuem imagens válidas!",
+          text: `🎉 <b>Correção concluída!</b>\nForam corrigidas <b>${fixedPosts.length}</b> matéria(s) com capa e imagens internas em 16:9.`,
           parse_mode: "HTML",
         });
-        return;
+      } catch (err: unknown) {
+        const msgErr = err instanceof Error ? err.message : "Erro ao corrigir imagens";
+        await sendTelegramApi("sendMessage", {
+          chat_id: chatId,
+          text: `❌ Falha ao corrigir imagens:\n<code>${escapeHtml(msgErr)}</code>`,
+          parse_mode: "HTML",
+        });
       }
-      for (const post of fixedPosts) {
-        await sendPostForApproval(post);
-      }
-      await sendTelegramApi("sendMessage", {
-        chat_id: chatId,
-        text: `🎉 <b>Correção concluída!</b>\nForam corrigidas <b>${fixedPosts.length}</b> matéria(s) com capa e imagens internas em 16:9.`,
-        parse_mode: "HTML",
-      });
-    } catch (err: unknown) {
-      const msgErr = err instanceof Error ? err.message : "Erro ao corrigir imagens";
-      await sendTelegramApi("sendMessage", {
-        chat_id: chatId,
-        text: `❌ Falha ao corrigir imagens:\n<code>${escapeHtml(msgErr)}</code>`,
-        parse_mode: "HTML",
-      });
-    }
+    });
     return;
   }
 
@@ -1544,45 +1567,47 @@ async function handleCommand(chatId: number | string, command: string, args: str
     sendTyping(chatId);
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
-      text: "🤖 <b>Gemini pesquisando as notícias mais importantes do dia...</b>\nAguarde cerca de 20 a 30 segundos.",
+      text: "🤖 <b>Gemini pesquisando as notícias mais importantes do dia...</b>\nVou enviar o cartão da matéria aqui em 1 a 3 minutos.",
       parse_mode: "HTML",
     });
-    try {
-      const result = await generateNewsDraft();
-      await sendPostForApproval(result.post, result.wordCount);
-    } catch (err: unknown) {
-      if (err instanceof SimilarTopicError) {
-        const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
-        await sendTelegramApi("sendMessage", {
-          chat_id: chatId,
-          text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
-          parse_mode: "HTML",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: "✅ Sim, gerar mesmo assim", callback_data: "confirma_gen:hoje:" },
-                { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+    await runScheduled(schedule, async () => {
+      try {
+        const result = await generateNewsDraft();
+        await sendPostForApproval(result.post, result.wordCount);
+      } catch (err: unknown) {
+        if (err instanceof SimilarTopicError) {
+          const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
+            parse_mode: "HTML",
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "✅ Sim, gerar mesmo assim", callback_data: "confirma_gen:hoje:" },
+                  { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+                ],
               ],
-            ],
-          },
-        });
-        return;
-      }
-      if (err instanceof NoFreshTopicError) {
+            },
+          });
+          return;
+        }
+        if (err instanceof NoFreshTopicError) {
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `📭 <b>Nenhuma pauta inédita no momento.</b>\n${escapeHtml(err.message)}\n\nUse <code>/gerar [tema]</code> para cobrir um assunto específico.`,
+            parse_mode: "HTML",
+          });
+          return;
+        }
+        const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
         await sendTelegramApi("sendMessage", {
           chat_id: chatId,
-          text: `📭 <b>Nenhuma pauta inédita no momento.</b>\n${escapeHtml(err.message)}\n\nUse <code>/gerar &lt;tema&gt;</code> para cobrir um assunto específico.`,
+          text: `❌ Falha ao gerar matéria do dia:\n<code>${escapeHtml(msgErr)}</code>`,
           parse_mode: "HTML",
         });
-        return;
       }
-      const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
-      await sendTelegramApi("sendMessage", {
-        chat_id: chatId,
-        text: `❌ Falha ao gerar matéria do dia:\n<code>${escapeHtml(msgErr)}</code>`,
-        parse_mode: "HTML",
-      });
-    }
+    });
     return;
   }
 
@@ -1598,37 +1623,39 @@ async function handleCommand(chatId: number | string, command: string, args: str
     sendTyping(chatId);
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
-      text: `🤖 <b>Gemini redigindo matéria sobre:</b>\n"<i>${escapeHtml(args)}</i>"...\nAguarde um instante.`,
+      text: `🤖 <b>Gemini redigindo matéria sobre:</b>\n"<i>${escapeHtml(args)}</i>"...\nVou enviar o cartão aqui em 1 a 3 minutos.`,
       parse_mode: "HTML",
     });
-    try {
-      const result = await generateNewsDraft({ topic: args });
-      await sendPostForApproval(result.post, result.wordCount);
-    } catch (err: unknown) {
-      if (err instanceof SimilarTopicError) {
-        const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
-        await sendTelegramApi("sendMessage", {
-          chat_id: chatId,
-          text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
-          parse_mode: "HTML",
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: "✅ Sim, gerar mesmo assim", callback_data: `confirma_gen:gerar:${encodeURIComponent(args)}` },
-                { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+    await runScheduled(schedule, async () => {
+      try {
+        const result = await generateNewsDraft({ topic: args });
+        await sendPostForApproval(result.post, result.wordCount);
+      } catch (err: unknown) {
+        if (err instanceof SimilarTopicError) {
+          const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
+          await sendTelegramApi("sendMessage", {
+            chat_id: chatId,
+            text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
+            parse_mode: "HTML",
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  { text: "✅ Sim, gerar mesmo assim", callback_data: `confirma_gen:gerar:${encodeURIComponent(args)}` },
+                  { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+                ],
               ],
-            ],
-          },
-        });
-        return;
+            },
+          });
+          return;
+        }
+        if (err instanceof NoFreshTopicError) {
+          await sendTelegramApi("sendMessage", { chat_id: chatId, text: `♻️ <b>Matéria não criada.</b>\n${escapeHtml(err.message)}`, parse_mode: "HTML" });
+          return;
+        }
+        const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
+        await sendTelegramApi("sendMessage", { chat_id: chatId, text: `❌ Falha ao gerar matéria:\n<code>${escapeHtml(msgErr)}</code>`, parse_mode: "HTML" });
       }
-      if (err instanceof NoFreshTopicError) {
-        await sendTelegramApi("sendMessage", { chat_id: chatId, text: `♻️ <b>Matéria não criada.</b>\n${escapeHtml(err.message)}`, parse_mode: "HTML" });
-        return;
-      }
-      const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
-      await sendTelegramApi("sendMessage", { chat_id: chatId, text: `❌ Falha ao gerar matéria:\n<code>${escapeHtml(msgErr)}</code>`, parse_mode: "HTML" });
-    }
+    });
     return;
   }
 
@@ -1651,12 +1678,20 @@ async function consumePendingEdit(chatId: number | string, text: string): Promis
     return false;
   }
   const value = text.trim();
-  const limits: Record<PendingEdit["field"], [number, number]> = { title: [5, 160], summary: [10, 300] };
+  const limits: Record<PendingEdit["field"], [number, number]> = { title: [5, 70], summary: [10, 300] };
   const [min, max] = limits[pending.field];
   if (value.length < min || value.length > max) {
     await sendTelegramApi("sendMessage", {
       chat_id: chatId,
       text: `⚠️ Texto deve ter entre ${min} e ${max} caracteres. Tente novamente ou use /cancel.`,
+      parse_mode: "HTML",
+    });
+    return true;
+  }
+  if (hasCorruptedText(value)) {
+    await sendTelegramApi("sendMessage", {
+      chat_id: chatId,
+      text: "⚠️ O texto contém caracteres corrompidos ou proibidos. Tente novamente ou use /cancel.",
       parse_mode: "HTML",
     });
     return true;
@@ -1679,11 +1714,11 @@ async function consumePendingEdit(chatId: number | string, text: string): Promis
   return true;
 }
 
-export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?: () => void, onReviewQueued?: () => void) {
+export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?: (posts: Post[]) => void, onReviewQueued?: () => void, schedule?: TelegramBackgroundScheduler) {
   const adminChatId = getAdminChatId();
 
   if (update.callback_query) {
-    await handleCallback(update, onPublished, onReviewQueued);
+    await handleCallback(update, onPublished, onReviewQueued, schedule);
     return;
   }
 
@@ -1720,7 +1755,7 @@ export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?
     }
 
     if (command) {
-      await handleCommand(chatId, command, commandArgs);
+      await handleCommand(chatId, command, commandArgs, schedule);
       return;
     }
 
@@ -1728,45 +1763,47 @@ export async function handleTelegramWebhook(update: TelegramUpdate, onPublished?
       sendTyping(chatId);
       await sendTelegramApi("sendMessage", {
         chat_id: chatId,
-        text: "🤖 <b>Gemini analisando a URL e gerando a matéria com fotos oficiais...</b>\nAguarde cerca de 20 segundos.",
+        text: "🤖 <b>Gemini analisando a URL e gerando a matéria com fotos oficiais...</b>\nVou enviar o cartão aqui em 1 a 3 minutos.",
         parse_mode: "HTML",
       });
-      try {
-        const result = await generateNewsDraft({ sourceUrl: rawText });
-        await sendPostForApproval(result.post, result.wordCount);
-      } catch (err: unknown) {
-        if (err instanceof SimilarTopicError) {
-          const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
-          await sendTelegramApi("sendMessage", {
-            chat_id: chatId,
-            text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
-            parse_mode: "HTML",
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  { text: "✅ Sim, gerar mesmo assim", callback_data: `confirma_gen:url:${encodeURIComponent(rawText)}` },
-                  { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+      await runScheduled(schedule, async () => {
+        try {
+          const result = await generateNewsDraft({ sourceUrl: rawText });
+          await sendPostForApproval(result.post, result.wordCount);
+        } catch (err: unknown) {
+          if (err instanceof SimilarTopicError) {
+            const similarList = err.similarTitles.map((t) => `• ${escapeHtml(t)}`).join("\n");
+            await sendTelegramApi("sendMessage", {
+              chat_id: chatId,
+              text: `⚠️ <b>Atenção: matérias similares já publicadas</b>\n\n${escapeHtml(err.message)}\n\n<b>Matérias encontradas:</b>\n${similarList}\n\nDeseja seguir com a geração mesmo assim?`,
+              parse_mode: "HTML",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: "✅ Sim, gerar mesmo assim", callback_data: `confirma_gen:url:${encodeURIComponent(rawText)}` },
+                    { text: "❌ Cancelar", callback_data: "cancela_gen:" },
+                  ],
                 ],
-              ],
-            },
-          });
-          return;
-        }
-        if (err instanceof NoFreshTopicError) {
+              },
+            });
+            return;
+          }
+          if (err instanceof NoFreshTopicError) {
+            await sendTelegramApi("sendMessage", {
+              chat_id: chatId,
+              text: `♻️ <b>Matéria não criada: esse assunto já foi coberto.</b>\n${escapeHtml(err.message)}`,
+              parse_mode: "HTML",
+            });
+            return;
+          }
+          const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
           await sendTelegramApi("sendMessage", {
             chat_id: chatId,
-            text: `♻️ <b>Matéria não criada: esse assunto já foi coberto.</b>\n${escapeHtml(err.message)}`,
+            text: `❌ Falha ao gerar notícia a partir do link:\n<code>${escapeHtml(msgErr)}</code>`,
             parse_mode: "HTML",
           });
-          return;
         }
-        const msgErr = err instanceof Error ? err.message : "Erro desconhecido";
-        await sendTelegramApi("sendMessage", {
-          chat_id: chatId,
-          text: `❌ Falha ao gerar notícia a partir do link:\n<code>${escapeHtml(msgErr)}</code>`,
-          parse_mode: "HTML",
-        });
-      }
+      });
       return;
     }
 

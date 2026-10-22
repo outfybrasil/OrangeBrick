@@ -1,9 +1,9 @@
-import { revalidatePath } from "next/cache";
 import { NextResponse, after } from "next/server";
 import { randomUUID, timingSafeEqual } from "crypto";
 import { createServiceDataClient } from "@/lib/supabase/server";
 import { handleTelegramWebhook, notifyNewCommunityReports, type TelegramUpdate } from "@/lib/telegram/bot";
 import { processNextEditorialReview } from "@/lib/server/editorial-review-jobs";
+import { refreshPublishedPages, runPostPublicationEffects } from "@/lib/server/publication-effects";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,27 +15,15 @@ function cleanSecret(secret?: string | null): string | null {
   return cleaned.length > 0 ? cleaned : null;
 }
 
-const KNOWN_WEBHOOK_SECRETS = Array.from(
-  new Set(
-    [
-      cleanSecret(process.env.TELEGRAM_WEBHOOK_SECRET),
-      "1f2725c54ecd74eb41a2331c45fa6db4",
-    ].filter((s): s is string => Boolean(s))
-  )
-);
-
 function verifyWebhookSecret(request: Request): string | null {
+  const expected = cleanSecret(process.env.TELEGRAM_WEBHOOK_SECRET);
+  if (!expected) return "Webhook do Telegram não configurado.";
   const provided = cleanSecret(request.headers.get("x-telegram-bot-api-secret-token"));
-  if (provided) {
-    const providedBuffer = Buffer.from(provided, "utf8");
-    const isMatch = KNOWN_WEBHOOK_SECRETS.some((secret) => {
-      const expectedBuffer = Buffer.from(secret, "utf8");
-      return (
-        providedBuffer.length === expectedBuffer.length &&
-        timingSafeEqual(providedBuffer, expectedBuffer)
-      );
-    });
-    return isMatch ? null : "Token secreto do webhook inválido.";
+  if (!provided) return "Token secreto do webhook ausente.";
+  const providedBuffer = Buffer.from(provided, "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  if (providedBuffer.length !== expectedBuffer.length || !timingSafeEqual(providedBuffer, expectedBuffer)) {
+    return "Token secreto do webhook inválido.";
   }
   return null;
 }
@@ -95,12 +83,28 @@ export async function POST(request: Request) {
   if (claimStatus !== "claimed") return retryResponse();
 
   try {
-    await handleTelegramWebhook(update, () => {
-      for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml"]) revalidatePath(path);
-      revalidatePath("/posts/[slug]", "page");
+    await handleTelegramWebhook(update, (publishedPosts) => {
+      refreshPublishedPages();
+      after(async () => {
+        for (const post of publishedPosts) {
+          try {
+            const effects = await runPostPublicationEffects(supabase, post, {
+              deliverNotice: false,
+              reel: true,
+              push: true,
+              brickboardThread: post.publish_to_brickboard && post.scheduled_by
+                ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }
+                : null,
+            });
+            if (effects.failures.length) console.error(`Efeitos pós-publicação de ${post.slug}:`, effects.failures.join(" | "));
+          } catch (error) {
+            console.error(`Falha nos efeitos pós-publicação de ${post.slug}:`, error);
+          }
+        }
+      });
     }, () => {
       after(async () => { await processNextEditorialReview().catch(() => {}); });
-    });
+    }, (task) => { after(task); });
   } catch (error: unknown) {
     try {
       const { error: releaseError } = await supabase.rpc("release_telegram_webhook_update", {

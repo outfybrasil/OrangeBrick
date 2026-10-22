@@ -17,8 +17,9 @@ test("publication review reads restricted editorial columns only after verified 
     exports: exported, Response, Request, Buffer, Date, Map, Set,
     process: { env: { NEXT_PUBLIC_SUPABASE_URL: "https://fixture.supabase.co", NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "public-fixture", SUPABASE_SECRET_KEY: "service-fixture" } },
     require: (name: string) => {
-      if (name === "next/server") return { NextResponse: { json: Response.json } };
+      if (name === "next/server") return { after: () => {}, NextResponse: { json: Response.json } };
       if (name === "next/cache") return { revalidatePath: () => {} };
+      if (name.includes("publication-effects")) return { refreshPublishedPages: () => {}, runPostPublicationEffects: async () => ({ failures: [], telegramNotified: true, reelQueued: true }) };
       if (name.includes("/auth")) return { isVerifiedAdminSession: () => allowed };
       if (name.includes("content-validation")) return { validateStoredEditorialPost: () => ["Resumo curto"] };
       if (name.includes("server/network")) return { readResponseBuffer: async (response: Response) => Buffer.from(await response.arrayBuffer()) };

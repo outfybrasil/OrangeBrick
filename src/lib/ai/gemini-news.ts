@@ -1582,7 +1582,7 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
       absence_registered: false,
     };
   } else {
-    featuredQuote = { absence_registered: options.reviewPost ? parsed.absence_registered : false };
+    featuredQuote = { absence_registered: parsed.absence_registered === true };
   }
 
   const blocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string; title?: string; channelName?: string; officialChannelConfirmed?: boolean }> = [
@@ -1632,6 +1632,7 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
   }
 
   const now = new Date().toISOString();
+  const wordCount = countWords(blocks);
   const postToInsert: Post = {
         id: newPostId,
         slug,
@@ -1651,10 +1652,9 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
         information_status: parsed.information_status as Post["information_status"],
         featured_quote: featuredQuote,
         editorial_sources: sources,
-        ...(supportsShortArticleReason ? { short_article_reason: parsed.short_article_reason?.trim() || "Cobertura direta e apurada dos detalhes confirmados do anúncio." } : {}),
+        ...(supportsShortArticleReason && wordCount < 700 ? { short_article_reason: parsed.short_article_reason?.trim() || "Cobertura direta e apurada dos detalhes confirmados do anúncio." } : {}),
         correction_note: null,
   };
-  const wordCount = countWords(blocks);
   const blockers = editorialPublicationBlockers({
     post: postToInsert,
     wordCount,
@@ -1803,57 +1803,45 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
     ]);
     if (!coverUrl || !img1Url || !img2Url) continue;
 
-    let parsedBlocks: Array<{ id?: string; type: string; content?: string; url?: string; alt?: string; caption?: string }> = [];
-    try {
-      parsedBlocks = typeof post.body === "string" ? JSON.parse(post.body) : post.body || [];
-    } catch {
-      parsedBlocks = [];
+    const parsedBlocks = parseEditorialBlocks(post.body);
+    const image1Block = {
+      type: "image" as const,
+      url: img1Url,
+      alt: verifiedImages.find((image) => image.url === img1Url)?.alt || "",
+      caption: verifiedImages.find((image) => image.url === img1Url)?.caption || "",
+    };
+    const image2Block = {
+      type: "image" as const,
+      url: img2Url,
+      alt: verifiedImages.find((image) => image.url === img2Url)?.alt || "",
+      caption: verifiedImages.find((image) => image.url === img2Url)?.caption || "",
+    };
+
+    const newBlocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string; title?: string; channelName?: string; officialChannelConfirmed?: boolean }> = [];
+    let placedImages = 0;
+    for (const block of parsedBlocks) {
+      if (block.type === "video") {
+        newBlocks.push({ id: `block-${newBlocks.length}`, type: "video", url: block.url, title: block.title, channelName: block.channelName, officialChannelConfirmed: block.officialChannelConfirmed });
+        continue;
+      }
+      if (block.type === "text") {
+        newBlocks.push({ id: `block-${newBlocks.length}`, type: "text", content: block.content });
+        if (placedImages === 0) {
+          newBlocks.push({ ...image1Block, id: `block-${newBlocks.length}` });
+          placedImages++;
+        } else if (placedImages === 1) {
+          newBlocks.push({ ...image2Block, id: `block-${newBlocks.length}` });
+          placedImages++;
+        }
+      }
     }
-
-    const textBlocks = parsedBlocks.filter((b) => b.type === "text");
-    const introText = textBlocks[0]?.content || post.summary || "";
-    const devText = textBlocks[1]?.content || `## Detalhes e Novidades de ${cleanSubject}\n\nA matéria foi atualizada com detalhes completos e novas imagens oficiais de jogabilidade.`;
-    const conclusionText = textBlocks[2]?.content || textBlocks[textBlocks.length - 1]?.content || `O que você achou dessa novidade? Participe do debate deixando sua opinião nos comentários abaixo!\n\n---\n\nFonte: [Orange Brick News](https://orange-brick.vercel.app)`;
-
-    const newBlocks: Array<{ id: string; type: string; content?: string; url?: string; alt?: string; caption?: string }> = [
-      {
-        id: "block-0",
-        type: "text",
-        content: introText,
-      },
-    ];
-
-    if (img1Url) {
-      newBlocks.push({
-        id: `block-${newBlocks.length}`,
-        type: "image",
-        url: img1Url,
-        alt: verifiedImages.find((image) => image.url === img1Url)?.alt || "",
-        caption: verifiedImages.find((image) => image.url === img1Url)?.caption || "",
-      });
+    if (placedImages === 0) {
+      newBlocks.push({ id: `block-${newBlocks.length}`, type: "text", content: post.summary || "" });
+      newBlocks.push({ ...image1Block, id: `block-${newBlocks.length}` });
+      newBlocks.push({ ...image2Block, id: `block-${newBlocks.length}` });
+    } else if (placedImages === 1) {
+      newBlocks.push({ ...image2Block, id: `block-${newBlocks.length}` });
     }
-
-    newBlocks.push({
-      id: `block-${newBlocks.length}`,
-      type: "text",
-      content: devText,
-    });
-
-    if (img2Url) {
-      newBlocks.push({
-        id: `block-${newBlocks.length}`,
-        type: "image",
-        url: img2Url,
-        alt: verifiedImages.find((image) => image.url === img2Url)?.alt || "",
-        caption: verifiedImages.find((image) => image.url === img2Url)?.caption || "",
-      });
-    }
-
-    newBlocks.push({
-      id: `block-${newBlocks.length}`,
-      type: "text",
-      content: conclusionText,
-    });
 
     const now = new Date().toISOString();
     const { data: updated, error } = await supabase
@@ -1869,6 +1857,11 @@ export async function fixPostImages(target?: string): Promise<Post[]> {
       .single();
 
     if (!error && updated) {
+      const { error: linkError } = await supabase
+        .from("editorial_images")
+        .update({ post_id: post.id, updated_at: now })
+        .in("public_url", [coverUrl, img1Url, img2Url]);
+      if (linkError) console.error("Falha ao vincular imagens corrigidas à matéria:", linkError);
       updatedPosts.push(updated as Post);
     }
   }

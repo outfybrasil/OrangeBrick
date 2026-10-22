@@ -1,19 +1,13 @@
 import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
-import { revalidatePath } from "next/cache";
 import { after, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import { validateStoredEditorialPost } from "@/lib/content-validation";
 import { readResponseBuffer } from "@/lib/server/network";
 import type { Post } from "@/lib/types/database";
-import { triggerReelGeneration } from "@/lib/video/reel-service";
+import { refreshPublishedPages, runPostPublicationEffects } from "@/lib/server/publication-effects";
 
 export const runtime = "nodejs";
-
-function refreshPublicationPages() {
-  for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml"]) revalidatePath(path);
-  revalidatePath("/posts/[slug]", "page");
-}
 
 export async function POST(request: Request) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
@@ -42,14 +36,25 @@ export async function POST(request: Request) {
     if (imageErrors.length) return NextResponse.json({ error: `Corrija as imagens antes de publicar: ${imageErrors.join(" ")}`, blockers: imageErrors }, { status: 422 });
     const { data, error } = await supabase.rpc("admin_save_editorial_post", { p_id: body.id || null, p_post: body.post });
     if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
-    refreshPublicationPages();
+    refreshPublishedPages();
     after(async () => {
       try {
-        const saved = (Array.isArray(data) ? data[0] : data) as { slug?: string } | null;
+        const saved = (Array.isArray(data) ? data[0] : data) as { id?: string; slug?: string } | null;
         const slug = typeof values.slug === "string" ? values.slug : saved?.slug;
-        if (slug) await triggerReelGeneration(slug);
+        if (saved?.id && slug) {
+          const effects = await runPostPublicationEffects(editorial, {
+            id: saved.id,
+            slug,
+            title: String(values.title || ""),
+            summary: String(values.summary || ""),
+            image_url: typeof values.image_url === "string" ? values.image_url : null,
+            category: typeof values.category === "string" ? values.category : null,
+            topic_id: null,
+          }, { queueNotice: true, deliverNotice: true, reel: true, push: true });
+          if (effects.failures.length) console.error(`[Publicação] Efeitos pós-publicação de ${slug}:`, effects.failures.join(" | "));
+        }
       } catch (error) {
-        console.error("[Reels] Falha ao solicitar vídeo após publicação:", error);
+        console.error("[Publicação] Falha nos efeitos pós-publicação:", error);
       }
     });
     return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
@@ -91,16 +96,25 @@ export async function POST(request: Request) {
   if (imageErrors.length) return NextResponse.json({ error: `Corrija as imagens antes de publicar: ${imageErrors.join(" ")}`, blockers: imageErrors }, { status: 422 });
   const { data, error } = await supabase.rpc("admin_publish_posts", { p_post_ids: ids, p_expected_updated: reviewed.map((post) => post.updated_at) });
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
-  refreshPublicationPages();
+  refreshPublishedPages();
   after(async () => {
     const orderedPosts = [...(current as Post[])]
       .filter((post) => post.slug)
       .sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
     for (const post of orderedPosts) {
       try {
-        await triggerReelGeneration(post.slug);
+        const effects = await runPostPublicationEffects(editorial, post, {
+          queueNotice: true,
+          deliverNotice: true,
+          reel: true,
+          push: true,
+          brickboardThread: post.publish_to_brickboard && post.scheduled_by
+            ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }
+            : null,
+        });
+        if (effects.failures.length) console.error(`[Publicação] Efeitos pós-publicação de ${post.slug}:`, effects.failures.join(" | "));
       } catch (error) {
-        console.error(`[Reels] Falha ao solicitar geração após publicação de ${post.slug}:`, error);
+        console.error(`[Publicação] Falha nos efeitos pós-publicação de ${post.slug}:`, error);
       }
     }
   });

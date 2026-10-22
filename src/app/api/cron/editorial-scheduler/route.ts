@@ -4,9 +4,9 @@ import { notifyAdmin } from "@/lib/telegram/bot";
 import { validateStoredEditorialPost } from "@/lib/content-validation";
 import type { Post } from "@/lib/types/database";
 import { isAuthorizedCronRequest } from "@/lib/server/cron-auth";
-import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
+import { queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
 import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
-import { triggerReelGeneration } from "@/lib/video/reel-service";
+import { refreshPublishedPages, runPostPublicationEffects } from "@/lib/server/publication-effects";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,6 +20,10 @@ function serviceClient() {
   );
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&" + "amp;").replace(/</g, "&" + "lt;").replace(/>/g, "&" + "gt;");
+}
+
 export async function GET(request: Request) {
   if (!isAuthorizedCronRequest(request)) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
@@ -27,145 +31,100 @@ export async function GET(request: Request) {
 
   const supabase = serviceClient();
   const now = new Date().toISOString();
-  await retryPendingPublicationNotices().catch((error) => {
-    console.error("Falha ao reenviar avisos pendentes:", error);
-  });
-  const { data: scheduledPosts, error: loadError } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("is_published", false)
-    .is("archived_at", null)
-    .not("scheduled_at", "is", null)
-    .lte("scheduled_at", now);
 
-  if (loadError) {
-    return NextResponse.json({ error: "Falha ao carregar matérias agendadas" }, { status: 500 });
-  }
-
-  const published: string[] = [];
-  const failures: { id: string; error: string }[] = [];
-
-  for (const post of scheduledPosts || []) {
-    const validationErrors = [...validateStoredEditorialPost(post as Post), ...((await inspectPublicationImagesInDatabase([post as Post], supabase)).get(post.id) || [])];
-    if (validationErrors.length > 0) {
-      const { error: unscheduleError } = await supabase
-        .from("posts")
-        .update({ scheduled_at: null, scheduled_by: null, updated_at: now })
-        .eq("id", post.id);
-      failures.push({
-        id: post.id,
-        error: `${validationErrors.join(" ")}${unscheduleError ? ` Não foi possível remover o agendamento: ${unscheduleError.message}` : " O agendamento foi removido para revisão editorial."}`,
-      });
-      continue;
-    }
-
-    try {
-      await queuePublicationNotice(post.id);
-    } catch {
-      failures.push({ id: post.id, error: "Aviso do Telegram não pôde ser registrado; publicação adiada." });
-      continue;
-    }
-
-    const publishedAt = new Date().toISOString();
-    const { data: publishedPost, error: publishError } = await supabase
+  try {
+    await retryPendingPublicationNotices().catch((error) => {
+      console.error("Falha ao reenviar avisos pendentes:", error);
+    });
+    const { data: scheduledPosts, error: loadError } = await supabase
       .from("posts")
-      .update({
-        is_published: true,
-        published_at: publishedAt,
-        scheduled_at: null,
-        scheduled_by: null,
-        updated_at: publishedAt,
-      })
-      .eq("id", post.id)
+      .select("*")
       .eq("is_published", false)
-      .eq("updated_at", post.updated_at)
-      .eq("scheduled_at", post.scheduled_at)
-      .select("id")
-      .maybeSingle();
+      .is("archived_at", null)
+      .not("scheduled_at", "is", null)
+      .lte("scheduled_at", now);
 
-    if (publishError) {
-      failures.push({ id: post.id, error: publishError.message });
-      continue;
-    }
-    if (!publishedPost) continue;
-
-    published.push(post.id);
-    try {
-      await triggerReelGeneration(post.slug);
-    } catch (error) {
-      failures.push({ id: post.id, error: `Publicada, mas o Reel não entrou na fila: ${error instanceof Error ? error.message : "falha desconhecida"}` });
-    }
-    try {
-      if (!await deliverPublicationNotice(post.id)) {
-        failures.push({ id: post.id, error: "Publicada, mas o Telegram não confirmou o aviso; reenvio pendente." });
-      }
-    } catch {
-      failures.push({ id: post.id, error: "Publicada, mas o aviso do Telegram ficou pendente de reenvio." });
+    if (loadError) {
+      console.error("Falha ao carregar matérias agendadas:", loadError.message);
+      await notifyAdmin(`⚠️ <b>Scheduler não conseguiu carregar os agendamentos.</b>\n<code>${escapeHtml(loadError.message.slice(0, 200))}</code>`).catch(() => {});
+      return NextResponse.json({ error: "Falha ao carregar matérias agendadas" }, { status: 500 });
     }
 
-    if (post.publish_to_brickboard && post.scheduled_by) {
-      const { data: existingThread } = await supabase
-        .from("community_posts")
-        .select("id")
-        .eq("source_post_id", post.id)
-        .eq("is_official_thread", true)
-        .maybeSingle();
-      if (!existingThread) {
-        const { error: threadError } = await supabase.from("community_posts").insert({
-          user_id: post.scheduled_by,
-          author_name: "Orange Brick",
-          author_avatar: "",
-          content: (post.brickboard_copy || post.summary).slice(0, 280),
-          attached_article: {
-            id: post.id,
-            slug: post.slug,
-            title: post.title,
-            summary: post.summary,
-            image_url: post.image_url,
-            category: post.category,
-            topic_id: post.topic_id,
-          },
-          topic_id: post.topic_id,
-          source_post_id: post.id,
-          is_official_thread: true,
+    const published: string[] = [];
+    const failures: { id: string; error: string }[] = [];
+
+    for (const post of scheduledPosts || []) {
+      const validationErrors = [...validateStoredEditorialPost(post as Post), ...((await inspectPublicationImagesInDatabase([post as Post], supabase)).get(post.id) || [])];
+      if (validationErrors.length > 0) {
+        const { error: unscheduleError } = await supabase
+          .from("posts")
+          .update({ scheduled_at: null, scheduled_by: null, updated_at: now })
+          .eq("id", post.id);
+        failures.push({
+          id: post.id,
+          error: `${validationErrors.join(" ")}${unscheduleError ? ` Não foi possível remover o agendamento: ${unscheduleError.message}` : " O agendamento foi removido para revisão editorial."}`,
         });
-        if (threadError) {
-          failures.push({ id: post.id, error: threadError.message });
-        }
+        continue;
+      }
+
+      try {
+        await queuePublicationNotice(post.id);
+      } catch {
+        failures.push({ id: post.id, error: "Aviso do Telegram não pôde ser registrado; publicação adiada." });
+        continue;
+      }
+
+      const publishedAt = new Date().toISOString();
+      const { data: publishedPost, error: publishError } = await supabase
+        .from("posts")
+        .update({
+          is_published: true,
+          published_at: publishedAt,
+          scheduled_at: null,
+          scheduled_by: null,
+          updated_at: publishedAt,
+        })
+        .eq("id", post.id)
+        .eq("is_published", false)
+        .eq("updated_at", post.updated_at)
+        .eq("scheduled_at", post.scheduled_at)
+        .select("id")
+        .maybeSingle();
+
+      if (publishError) {
+        failures.push({ id: post.id, error: publishError.message });
+        continue;
+      }
+      if (!publishedPost) continue;
+
+      published.push(post.id);
+      refreshPublishedPages();
+      const effects = await runPostPublicationEffects(supabase, post as Post, {
+        deliverNotice: true,
+        reel: true,
+        push: true,
+        brickboardThread: post.publish_to_brickboard && post.scheduled_by
+          ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }
+          : null,
+      });
+      for (const failure of effects.failures) {
+        failures.push({ id: post.id, error: `Publicada, mas ${failure}` });
       }
     }
 
-    const serviceRoleKey = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!;
-    try {
-      const pushResponse = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${serviceRoleKey}`,
-          apikey: serviceRoleKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: post.title,
-          body: post.summary,
-          url: `/posts/${post.slug}`,
-          tag: `news-${post.slug}`,
-          kind: "news",
-        }),
-        signal: AbortSignal.timeout(12000),
-      });
-      if (!pushResponse.ok) throw new Error("push_unavailable");
-    } catch {
-      failures.push({ id: post.id, error: "Publicada, mas o push agendado falhou" });
+    if (failures.length > 0) {
+      const detail = failures
+        .slice(0, 5)
+        .map((failure) => `• <code>${failure.id}</code>: ${failure.error.replace(/</g, "&" + "lt;")}`)
+        .join("\n");
+      await notifyAdmin(`⚠️ <b>Scheduler publicou com ${failures.length} falha(s).</b>\n${detail}`).catch(() => {});
     }
-  }
 
-  if (failures.length > 0) {
-    const detail = failures
-      .slice(0, 5)
-      .map((failure) => `• <code>${failure.id}</code>: ${failure.error.replace(/</g, "&lt;")}`)
-      .join("\n");
-    await notifyAdmin(`⚠️ <b>Scheduler publicou com ${failures.length} falha(s).</b>\n${detail}`).catch(() => {});
+    return NextResponse.json({ published, failures, checked_at: now });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "falha desconhecida";
+    console.error("Falha no scheduler editorial:", error);
+    await notifyAdmin(`❌ <b>Scheduler editorial falhou.</b>\n<code>${escapeHtml(message.slice(0, 300))}</code>`).catch(() => {});
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  return NextResponse.json({ published, failures, checked_at: now });
 }

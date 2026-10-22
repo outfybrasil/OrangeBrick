@@ -8,7 +8,17 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   if (!isAuthorizedCronRequest(request)) return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
-  const processed = await processNextEditorialReview();
+  const deadline = Date.now() + 240_000;
+  let processed = 0;
+  while (processed < 5 && Date.now() < deadline) {
+    try {
+      if (!(await processNextEditorialReview())) break;
+      processed++;
+    } catch (error) {
+      console.error("Falha ao processar revisão editorial:", error instanceof Error ? error.message : "erro_desconhecido");
+      break;
+    }
+  }
   return NextResponse.json({ processed });
 }
 

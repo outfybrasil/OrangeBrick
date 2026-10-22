@@ -8,8 +8,8 @@ import { isMissingPostgrestRelation } from "@/lib/postgrest-error";
 import { claimEditorialSlot, isScheduledEditorialSlot, type EditorialSlotStore } from "@/lib/server/editorial-slot";
 import { editorialPublicationBlockers } from "@/lib/server/editorial-publication";
 import { inspectPublicationImagesInDatabase } from "@/lib/server/manual-publication-images";
-import { triggerReelGeneration } from "@/lib/video/reel-service";
-import { deliverPublicationNotice, queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
+import { queuePublicationNotice, retryPendingPublicationNotices } from "@/lib/server/telegram-publication";
+import { refreshPublishedPages, runPostPublicationEffects } from "@/lib/server/publication-effects";
 import { buildCoverAbsenceTelegramMessage } from "@/lib/editorial-cover";
 
 export const dynamic = "force-dynamic";
@@ -143,21 +143,16 @@ export async function GET(request: Request) {
       console.error("Falha ao registrar publicação do horário editorial:", error);
     });
     const postUrl = `${getSiteUrl()}/posts/${result.post.slug}`;
-    const telegramNotified = await deliverPublicationNotice(result.post.id);
-    if (!telegramNotified) console.error("Matéria publicada, mas o Telegram não confirmou a notificação.");
-    let reelQueued = false;
-    try {
-      reelQueued = (await triggerReelGeneration(result.post.slug)).queued;
-    } catch (error) {
-      console.error("Falha ao solicitar Reel da matéria publicada:", error);
-    }
+    refreshPublishedPages();
+    const effects = await runPostPublicationEffects(supabase, result.post, { deliverNotice: true, reel: true, push: true });
+    if (effects.failures.length) console.error(`Efeitos pós-publicação de ${result.post.slug}:`, effects.failures.join(" | "));
     return NextResponse.json({
       ok: true,
       published: true,
       postId: result.post.id,
       url: postUrl,
-      telegramNotified,
-      reelQueued,
+      telegramNotified: effects.telegramNotified,
+      reelQueued: effects.reelQueued,
       wordCount: result.wordCount,
     });
   } catch (error: unknown) {
