@@ -70,10 +70,13 @@ export async function GET(request: Request) {
         body: JSON.stringify({ connected_account_id: account.accountId, user_id: composioUserId, endpoint: "https://open.tiktokapis.com/v2/post/publish/status/fetch/", method: "POST", headers: { "Content-Type": "application/json; charset=UTF-8" }, body: { publish_id: publishId } }),
         signal: AbortSignal.timeout(30_000),
       });
-      const statusData = await statusResponse.json().catch(() => null);
+      const statusText = await statusResponse.text();
+      const statusData = (() => { try { return JSON.parse(statusText); } catch { return null; } })();
       const result = statusData?.data?.data || statusData?.data;
       if (!statusResponse.ok || result?.error?.code && result.error.code !== "ok" || typeof result?.status !== "string") return reply({ error: "O TikTok não confirmou o estado da publicação." }, 503);
-      return reply({ status: result.status, reason: result.fail_reason || null, postIds: result.publicaly_available_post_id || [] });
+      const ids = statusText.match(/"publicaly_available_post_id"\s*:\s*\[([^\]]*)\]/)?.[1] || "";
+      const postIds = [...ids.matchAll(/"?(\d{15,25})"?/g)].map(match => match[1]);
+      return reply({ status: result.status, reason: result.fail_reason || null, postIds });
     }
 
     if (url.searchParams.get("action") === "link") {

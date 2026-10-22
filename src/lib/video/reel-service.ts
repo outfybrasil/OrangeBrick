@@ -138,8 +138,8 @@ export function generateSocialCopys(post: {
   const supportingSummary = summaryAfterHook
     ? `${summaryAfterHook[0].toLocaleUpperCase("pt-BR")}${summaryAfterHook.slice(1)}`
     : summary === hook ? "" : summary;
-  const articleUrl = `https://orangebrick.blog/posts/${post.slug}`;
-  const trackedArticleUrl = (source: string, medium: string) => `${articleUrl}?utm_source=${source}&utm_medium=${medium}&utm_campaign=reel`;
+  const articleUrl = `https://orangebrick.blog/reels/${encodeURIComponent(post.slug)}`;
+  const trackedArticleUrl = (source: string, medium: string) => `${articleUrl}?utm_source=${source}&utm_medium=${medium}&utm_campaign=reel&utm_content=${encodeURIComponent(post.slug)}`;
   const attribution = post.script?.ttsProvider === "elevenlabs" ? "Narração: elevenlabs.io" : "";
   const seriesByCategory: Record<string, { label: string; hashtag: string }> = {
     breaking: { label: "Plantão OB", hashtag: "PlantaoOB" },
@@ -165,6 +165,8 @@ export function generateSocialCopys(post: {
     opinion: ["Opinião"],
   };
   const subjectHashtags: Array<[RegExp, string]> = [
+    [/\bfinal\s+fantasy\s*(?:vii|7)\b/i, "FinalFantasyVII"],
+    [/\bgame\s*pass\b/i, "GamePass"],
     [/\bsaros\b/i, "Saros"],
     [/\bfaraway\b/i, "Faraway"],
     [/\bedgerunners?\b/i, "CyberpunkEdgerunners"],
@@ -186,21 +188,20 @@ export function generateSocialCopys(post: {
     [/\bcrash\s+keys\b/i, "CrashKeys"],
     [/\bzero\s+escape\b/i, "ZeroEscape"],
     [/\b(?:gta\s*(?:6|vi)|grand\s+theft\s+auto\s*(?:6|vi))\b/i, "GTA6"],
-    [/\b(?:playstation|ps[45]|sony)\b/i, "PlayStation"],
-    [/\b(?:xbox|microsoft)\b/i, "Xbox"],
-    [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
-    [/\bsteam\b/i, "Steam"],
     [/\bkutaragi\b/i, "KenKutaragi"],
     [/\b(?:disco|m[ií]dia\s+f[ií]sica)\b/i, "MidiaFisica"],
     [/\bhoyo(?:verse)?\b/i, "Hoyoverse"],
     [/\belden\s*ring\b/i, "EldenRing"],
-    [/\bgame\s*pass\b/i, "GamePass"],
     [/\bcapcom\b/i, "Capcom"],
     [/\bkonami\b/i, "Konami"],
     [/\bvalve\b/i, "Valve"],
     [/\bpc\s*gamer\b/i, "PCGamer"],
     [/\bremake\b/i, "Remake"],
     [/\bremaster\b/i, "Remaster"],
+    [/\b(?:playstation|ps[45]|sony)\b/i, "PlayStation"],
+    [/\b(?:xbox|microsoft)\b/i, "Xbox"],
+    [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
+    [/\bsteam\b/i, "Steam"],
   ];
   const categoryHashtags: Record<string, string> = {
     breaking: "NoticiasDeGames",
@@ -225,6 +226,7 @@ export function generateSocialCopys(post: {
     "CyberpunkEdgerunners|Cyberpunk",
     "CallOfDuty|ModernWarfare4",
     "OcarinaOfTime|Zelda",
+    "FinalFantasyVII|GamePass",
   ]);
   const selectedSubjectTags = subjectTags.length === 2 && relatedSubjectPairs.has(subjectTags.join("|"))
     ? subjectTags
@@ -241,7 +243,7 @@ export function generateSocialCopys(post: {
   const categoryHashtag = categoryHashtags[post.category] || "NoticiasDeGames";
   const newsTags = ["breaking", "hardware", "industry"].includes(post.category) ? ["NoticiasDeGames"] : [];
   const uniqueHashtags = (names: string[]) => [...new Map(names.map(name => [name.toLocaleLowerCase("pt-BR"), name])).values()];
-  const contextTags = uniqueHashtags([...subjects.slice(0, 1), ...platformTags]).slice(0, 2);
+  const contextTags = uniqueHashtags([...subjects, ...platformTags]).slice(0, 2);
   const baseHashtags = uniqueHashtags([...contextTags, series.hashtag, "OrangeBrick", categoryHashtag, ...newsTags, "GamesBrasil"]);
   const instagramHashtagNames = baseHashtags.slice(0, 5);
   const tiktokHashtagNames = baseHashtags.slice(0, 5);

@@ -8,11 +8,33 @@ export interface ReelYouTubePublication {
   status: "preparing" | "uploading" | "uploaded" | "unknown" | "failed";
   title: string;
   description: string;
+  tags: string[];
+  verified_tags: string[];
+  tags_verified_at: string | null;
+  tags_match: boolean | null;
   visibility: "public" | "unlisted" | "private";
   video_id: string | null;
   error: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ReelSocialMetrics {
+  post_id: string;
+  platform: "instagram" | "tiktok" | "youtube";
+  captured_on: string;
+  captured_at: string;
+  views: number | null;
+  reach: number | null;
+  average_watch_milliseconds: number | null;
+  watch_time_milliseconds: number | null;
+  likes: number | null;
+  comments: number | null;
+  shares: number | null;
+  saves: number | null;
+  follows: number | null;
+  interactions: number | null;
+  error: string | null;
 }
 
 export interface ReelJob {
@@ -38,7 +60,7 @@ export interface Database {
     Tables: {
         reel_youtube_publications: {
           Row: ReelYouTubePublication;
-          Insert: Omit<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error"> & Partial<Pick<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error">>;
+          Insert: Omit<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error" | "verified_tags" | "tags_verified_at" | "tags_match"> & Partial<Pick<ReelYouTubePublication, "id" | "created_at" | "updated_at" | "video_id" | "error" | "verified_tags" | "tags_verified_at" | "tags_match">>;
           Update: Partial<ReelYouTubePublication>;
           Relationships: [];
         };
@@ -46,6 +68,24 @@ export interface Database {
         Row: Post;
         Insert: PostInsert;
         Update: Partial<PostInsert>;
+        Relationships: [];
+      };
+      reel_social_publications: {
+        Row: { post_id: string; platform: "instagram" | "tiktok" | "youtube"; reel_job_id: string; status: "processing" | "submitted" | "published" | "failed" | "unknown"; external_id: string | null; platform_media_id: string | null; error: string | null; created_at: string; updated_at: string };
+        Insert: { post_id: string; platform: "instagram" | "tiktok" | "youtube"; reel_job_id: string; status: "processing" | "submitted" | "published" | "failed" | "unknown"; external_id?: string | null; platform_media_id?: string | null; error?: string | null; created_at?: string; updated_at?: string };
+        Update: { post_id?: string; platform?: "instagram" | "tiktok" | "youtube"; reel_job_id?: string; status?: "processing" | "submitted" | "published" | "failed" | "unknown"; external_id?: string | null; platform_media_id?: string | null; error?: string | null; created_at?: string; updated_at?: string };
+        Relationships: [];
+      };
+      reel_social_metrics: {
+        Row: ReelSocialMetrics;
+        Insert: Omit<ReelSocialMetrics, "captured_at"> & Partial<Pick<ReelSocialMetrics, "captured_at">>;
+        Update: Partial<ReelSocialMetrics>;
+        Relationships: [];
+      };
+      reel_social_clicks: {
+        Row: { id: string; post_id: string; platform: "instagram" | "tiktok" | "youtube"; clicked_at: string };
+        Insert: { id?: string; post_id: string; platform: "instagram" | "tiktok" | "youtube"; clicked_at?: string };
+        Update: { id?: string; post_id?: string; platform?: "instagram" | "tiktok" | "youtube"; clicked_at?: string };
         Relationships: [];
       };
       editorial_images: {
@@ -306,6 +346,10 @@ export interface Database {
       get_release_hype_counts: {
         Args: Record<string, never>;
         Returns: ReleaseHypeCount[];
+      };
+      admin_reel_social_click_counts: {
+        Args: { p_days: number };
+        Returns: { post_id: string; platform: string; clicks: number }[];
       };
       get_my_release_hype_votes: {
         Args: Record<string, never>;

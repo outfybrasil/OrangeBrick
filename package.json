@@ -27,7 +27,8 @@
     "news:daily": "node --experimental-strip-types --env-file=.env.local scripts/generate-news.mjs",
     "telegram:setup": "node --env-file=.env.local scripts/setup-telegram-webhook.mjs",
     "reel:generate": "node --experimental-strip-types --env-file=.env.local scripts/generate-reel.mjs",
-    "reel:latest": "node --experimental-strip-types --env-file=.env.local scripts/generate-reel.mjs --latest"
+    "reel:latest": "node --experimental-strip-types --env-file=.env.local scripts/generate-reel.mjs --latest",
+    "reel:verify-youtube-tags": "node --experimental-strip-types --env-file=.env.local scripts/verify-youtube-reel-tags.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.17.1",

@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     }
     deliveryClaim = await beginSocialDelivery(body.postId, "youtube", { automatic, repost: body.repost === true && body.confirmed === true });
     if (!deliveryClaim) return reply({ error: "Este Reel já tem um envio no YouTube. Confira o histórico antes de repetir." }, 409);
-    const record = { post_id: body.postId, reel_job_id: job.id, channel_id: connection.channel.id, status: "preparing", title: body.title.trim(), description: body.description, visibility: body.visibility, error: null, updated_at: new Date().toISOString() };
+    const record = { post_id: body.postId, reel_job_id: job.id, channel_id: connection.channel.id, status: "preparing", title: body.title.trim(), description: body.description, tags, visibility: body.visibility, error: null, updated_at: new Date().toISOString() };
     const claim = existing
       ? await db.from("reel_youtube_publications").update(record).eq("id", existing.id).eq("status", existing.status).eq("updated_at", existing.updated_at).select("id").maybeSingle()
       : await db.from("reel_youtube_publications").insert(record).select("id").single();

@@ -93,7 +93,7 @@ async function loadYouTubeConnection(): Promise<YouTubeConnection> {
     auth_configs: { youtube: authConfig },
     connected_accounts: { youtube: [account] },
     instant: false,
-    tools: { youtube: { enable: ["YOUTUBE_GET_CHANNEL_STATISTICS", "YOUTUBE_MULTIPART_UPLOAD_VIDEO"] } },
+    tools: { youtube: { enable: ["YOUTUBE_GET_CHANNEL_STATISTICS", "YOUTUBE_MULTIPART_UPLOAD_VIDEO", "YOUTUBE_GET_VIDEO_DETAILS_BATCH", "YOUTUBE_QUERY_ANALYTICS"] } },
     manage_connections: { enable: false },
   });
   const session = created.session_id;

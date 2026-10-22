@@ -380,5 +380,79 @@
       "ctaButton": "SIGA @ORANGEBRICK",
       "ttsProvider": "edge-tts"
     }
+  },
+  "we-were-here-tomorrow-chega-com-coop-assimetrico-e-crossplay": {
+    "slug": "we-were-here-tomorrow-chega-com-coop-assimetrico-e-crossplay",
+    "status": "ready",
+    "finished_at": "2026-10-20T20:30:25.096Z",
+    "video_url": "/reels/we-were-here-tomorrow-chega-com-coop-assimetrico-e-crossplay.mp4",
+    "duration": 29.4,
+    "variation": 725435,
+    "style": "cinema",
+    "file_size": 15914452,
+    "script": {
+      "hook": "We Were Here Tomorrow chegou com crossplay e PT-BR",
+      "headline": "NOVO WE WERE HERE É LANÇADO",
+      "subHeadline": "CROSSPLAY E DUBLAGEM PT-BR",
+      "badge": "BREAKING",
+      "narrationText": "We Were Here Tomorrow foi lançado com crossplay total e dublagem em português do Brasil. O novo capítulo da Total Mayhem Games chegou hoje ao PC, PlayStation 5 e Xbox Series. A franquia troca os castelos medievais pelo complexo científico Norček Industries. A comunicação por rádio segue vital, agora com enigmas que alteram passado e futuro. Quem vai ser a sua dupla nesse mistério?",
+      "scenes": [
+        {
+          "id": "scene1",
+          "headline": "LANÇAMENTO CONFIRMADO",
+          "highlight": "Chegou com crossplay total e dublagem PT-BR",
+          "tag": "LANÇAMENTO",
+          "imageIndex": 0,
+          "pills": []
+        },
+        {
+          "id": "scene2",
+          "headline": "DISPONÍVEL HOJE",
+          "highlight": "Chega para PC, PS5 e Xbox Series X|S",
+          "tag": "PLATAFORMAS",
+          "imageIndex": 1,
+          "pills": []
+        },
+        {
+          "id": "scene3",
+          "headline": "NOVO CENÁRIO NA SÉRIE",
+          "highlight": "Sai o castelo, entra a Norček Industries",
+          "tag": "AMBIENTAÇÃO",
+          "pills": [
+            "Antártida",
+            "Norček Industries",
+            "Retrô-futurista"
+          ],
+          "imageIndex": 0
+        },
+        {
+          "id": "scene4",
+          "headline": "ENIGMAS TEMPORAIS",
+          "highlight": "Ações no passado afetam o futuro do parceiro",
+          "tag": "GAMEPLAY",
+          "pills": [
+            "Walkie-talkie",
+            "Co-op assimétrico",
+            "Causa e efeito"
+          ],
+          "imageIndex": 1
+        },
+        {
+          "id": "scene5",
+          "headline": "HORA DE JOGAR",
+          "highlight": "Já disponível para encarar com sua dupla",
+          "tag": "CO-OP ATIVO",
+          "pills": [
+            "Crossplay ativo",
+            "Áudio em PT-BR"
+          ],
+          "imageIndex": 0
+        }
+      ],
+      "ctaQuestion": "Quem vai ser a sua dupla nesse mistério?",
+      "ctaAction": "Comente sua resposta para continuar a conversa",
+      "ctaButton": "COMENTE ABAIXO",
+      "ttsProvider": "edge-tts"
+    }
   }
 }

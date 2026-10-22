@@ -76,7 +76,7 @@ test("social copy uses a platform-specific CTA, article link, and focused hashta
     },
   });
 
-  assert.match(copy.instagram.caption, /Matéria completa no link da bio: https:\/\/orangebrick\.blog\/posts\/saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus\?utm_source=instagram&utm_medium=reel&utm_campaign=reel/);
+  assert.match(copy.instagram.caption, /Matéria completa no link da bio: https:\/\/orangebrick\.blog\/reels\/saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus\?utm_source=instagram&utm_medium=reel&utm_campaign=reel&utm_content=saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus/);
   assert.match(copy.instagram.caption, /Responda nos comentários: Você enfrentaria oito chefes sem pausa\?/);
   assert.match(copy.instagram.caption, /Siga @ob\.labs/);
   assert.doesNotMatch(copy.instagram.caption, /instagram\.com/);
@@ -84,7 +84,7 @@ test("social copy uses a platform-specific CTA, article link, and focused hashta
   assert.doesNotMatch(copy.tiktok.caption, /orangebrick\.blog/);
   assert.match(copy.tiktok.caption, /Responda nos comentários: Você enfrentaria oito chefes sem pausa\?/);
   assert.match(copy.tiktok.caption, /Siga para acompanhar/);
-  assert.match(copy.youtube.description, /Leia a matéria completa: https:\/\/orangebrick\.blog\/posts\/saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus\?utm_source=youtube&utm_medium=short&utm_campaign=reel/);
+  assert.match(copy.youtube.description, /Leia a matéria completa: https:\/\/orangebrick\.blog\/reels\/saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus\?utm_source=youtube&utm_medium=short&utm_campaign=reel&utm_content=saros-zenith-chega-gratis-com-chefes-em-sequencia-e-new-game-plus/);
   assert.match(copy.youtube.description, /Inscreva-se no canal/);
   assert.doesNotMatch(copy.youtube.description, /Instagram: @ob\.labs/);
   assert.match(copy.youtube.description, /Responda nos comentários: Você enfrentaria oito chefes sem pausa\?/);
@@ -173,6 +173,78 @@ test("YouTube title prioritizes the hook without TTS attribution", () => {
   assert.doesNotMatch(copy.youtube.title, /elevenlabs/i);
   assert.ok(Array.from(copy.youtube.title).length <= 70);
   assert.match(copy.youtube.description, /Narração: elevenlabs\.io/);
+});
+
+test("Game Pass copy prioritizes the game and service over Xbox and tracks each article", () => {
+  const generate = loadGenerateSocialCopys();
+  const slug = "final-fantasy-vii-game-pass";
+  const copy = generate({
+    title: "Final Fantasy VII Remake chega ao Xbox Game Pass",
+    summary: "Microsoft confirma Final Fantasy VII Remake Intergrade no Game Pass.",
+    slug,
+    category: "breaking",
+  });
+
+  assert.equal(copy.instagram.hashtags[0], "#FinalFantasyVII");
+  assert.equal(copy.instagram.hashtags[1], "#GamePass");
+  assert.equal(copy.tiktok.hashtags[0], "#finalfantasyvii");
+  assert.equal(copy.tiktok.hashtags[1], "#gamepass");
+  for (const text of [copy.instagram.caption, copy.youtube.description]) {
+    const link = text.match(/https:\/\/orangebrick\.blog\/reels\/\S+/)?.[0];
+    assert.ok(link);
+    const url = new URL(link);
+    assert.equal(url.searchParams.get("utm_content"), slug);
+    assert.equal(url.searchParams.get("utm_campaign"), "reel");
+  }
+});
+
+test("bio redirects track the latest public article and fall back safely without caching", async () => {
+  const compiled = ts.transpileModule(readFileSync(new URL("../src/app/reels/route.ts", import.meta.url), "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  for (const result of ["article", "empty", "error", "throw"]) {
+    const filters: string[] = [];
+    const clicks: Array<{ post_id: string; platform: string }> = [];
+    const query = {
+      select: () => query,
+      eq: (key: string, value: unknown) => { filters.push(`${key}=${value}`); return query; },
+      is: (key: string, value: unknown) => { filters.push(`${key}=${value}`); return query; },
+      lte: (key: string) => { filters.push(key); return query; },
+      order: () => query,
+      limit: () => query,
+      maybeSingle: async () => {
+        if (result === "throw") throw new Error("Network unavailable");
+        return { data: result === "article" ? { id: "post-id", slug: "final-fantasy-vii" } : null, error: result === "error" ? { message: "Unavailable" } : null };
+      },
+    };
+    const exported: { GET?: (request: Request) => Promise<Response> } = {};
+    vm.runInNewContext(compiled, {
+      exports: exported, URL, Date,
+      require: (name: string) => {
+        if (name === "next/server") return { NextResponse: { redirect: (url: URL, status: number) => new Response(null, { status, headers: { Location: url.href } }) } };
+        if (name === "@/lib/supabase/server") return { createPublicServerClient: () => ({ from: () => query }) };
+        if (name === "@/lib/video/reel-remote") return { getReelAdmin: () => ({ from: () => ({ insert: async (row: { post_id: string; platform: string }) => { clicks.push(row); return { error: null }; } }) }) };
+        throw new Error(`Unexpected dependency: ${name}`);
+      },
+    });
+    const response = await exported.GET!(new Request("https://orangebrick.blog/reels?utm_source=tiktok&redirect=https://example.com"));
+    const destination = new URL(response.headers.get("Location")!);
+    assert.equal(response.status, 307);
+    assert.equal(response.headers.get("Cache-Control"), "no-store");
+    assert.equal(destination.origin, "https://orangebrick.blog");
+    assert.equal(destination.pathname, result === "article" ? "/posts/final-fantasy-vii" : "/noticias");
+    assert.equal(destination.searchParams.get("utm_content"), result === "article" ? "final-fantasy-vii" : null);
+    assert.equal(destination.searchParams.get("utm_source"), "tiktok");
+    assert.equal(destination.searchParams.get("utm_medium"), "bio");
+    assert.equal(clicks.length, result === "article" ? 1 : 0);
+    if (result === "article") {
+      assert.equal(clicks[0].post_id, "post-id");
+      assert.equal(clicks[0].platform, "tiktok");
+    }
+    assert.ok(filters.includes("is_published=true"));
+    assert.ok(filters.includes("archived_at=null"));
+    assert.ok(filters.includes("published_at"));
+  }
 });
 
 test("new reel scripts replace generic CTAs with a contextual question and comment prompt", async () => {

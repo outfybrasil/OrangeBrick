@@ -81,7 +81,7 @@ async function pollTikTokStatus(db: ReelAdmin, postId?: string): Promise<{ postI
     const result = await response.json().catch(() => null);
     if (!response.ok) throw new Error(result?.error || "O TikTok não confirmou o estado do vídeo.");
     const status = result.status === "PUBLISH_COMPLETE" ? "published" : result.status === "FAILED" ? "failed" : "submitted";
-    await db.from("reel_social_publications").update({ status, error: status === "failed" ? String(result.reason || "O TikTok recusou a publicação.") : null, updated_at: new Date().toISOString() }).eq("post_id", pending.post_id).eq("platform", "tiktok").eq("status", "submitted");
+    await db.from("reel_social_publications").update({ status, platform_media_id: status === "published" && Array.isArray(result.postIds) ? result.postIds[0] || null : null, error: status === "failed" ? String(result.reason || "O TikTok recusou a publicação.") : null, updated_at: new Date().toISOString() }).eq("post_id", pending.post_id).eq("platform", "tiktok").eq("status", "submitted");
     if (status === "submitted") return null;
     return { postId: pending.post_id, status };
   } catch (error) {

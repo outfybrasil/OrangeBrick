@@ -87,6 +87,7 @@ triggerReelGeneration(slug)
 | `src/lib/video/reel-remote.ts` | Fila, Storage e dispatch remoto |
 | `src/app/api/admin/reels/route.ts` | Lista, disparo e cancelamento no admin |
 | `src/app/api/cron/reel-social/route.ts` | Publicação social automática e fallback |
+| `src/app/api/cron/reel-metrics/route.ts` | Coleta diária de métricas e conferência de tags do YouTube |
 | `src/lib/video/reel-social-delivery.ts` | Reserva atômica e status de entrega |
 | `src/lib/video/reel-youtube.ts` | Integração YouTube via Composio |
 | `src/app/admin/reels/page.tsx` | Central de Reels e assistente social |
@@ -326,13 +327,19 @@ Isso faz o fluxo normal publicar nas três redes logo após a renderização.
 
 ### 4.2 Cron de fallback
 
-`vercel.json` agenda:
+`vercel.json` agenda o fallback para os mesmos três horários das matérias:
 
 ```text
-0 9 * * *  ->  /api/cron/reel-social
+0 14 * * * -> /api/cron/reel-social  (11h BRT)
+0 20 * * * -> /api/cron/reel-social  (17h BRT)
+0 23 * * * -> /api/cron/reel-social  (20h BRT)
 ```
 
-9h UTC = 6h de Brasília. O cron é uma rede de segurança para jobs que o worker não conseguiu publicar. No modo `batchPublish`, a rota processa uma plataforma por invocação e retorna. Se o worker falhar e o fallback for a única via, um Reel pode levar até 3 dias para sair nas três redes. Validar se esse comportamento é aceitável.
+Os horários do Vercel usam UTC. O cron é uma rede de segurança para jobs que o worker não conseguiu publicar. No modo `batchPublish`, a rota processa uma plataforma por invocação e retorna. O worker normal continua publicando logo após renderizar; o fallback avança até três entregas por dia.
+
+`/api/cron/reel-metrics` roda às 20h de Brasília e grava um snapshot diário dos Reels publicados nos últimos 90 dias. Instagram fornece visualizações, alcance, média e tempo total assistidos, curtidas, comentários, compartilhamentos, salvamentos e interações. TikTok fornece visualizações, curtidas, comentários e compartilhamentos depois da finalização manual no aplicativo. YouTube fornece visualizações, curtidas e comentários pela Data API; retenção média, inscritos ganhos e compartilhamentos usam YouTube Analytics. Métricas indisponíveis pela plataforma aparecem vazias.
+
+Os links sociais passam por `/reels/<slug>` antes de abrir a matéria, permitindo contar cliques sem armazenar identificadores pessoais. A rota `/reels` é uma opção para o link da bio e encaminha à matéria mais recente.
 
 A automação só considera matérias publicadas depois de `reel_social_automation.activated_at`. A linha dessa tabela é criada pela migration `20261019190000_reel_social_automation.sql`. Se a linha não existir, a rota responde que a automação não está instalada.
 
@@ -495,54 +502,19 @@ Antes do fallback, a função tenta usar a pergunta fornecida pelo roteiro. Se e
 
 ### 5.5 Links e UTM
 
-URL base:
+As URLs diretas de Instagram e YouTube usam a matéria correspondente e incluem utm_source, utm_medium, utm_campaign e utm_content com o slug. TikTok mantém a orientação para abrir o link da bio.
 
-```text
-https://orangebrick.blog/posts/<slug>
-```
+A rota /reels redireciona para a matéria publicada mais recente. Os links da bio podem usar utm_source=instagram ou utm_source=tiktok e recebem utm_medium=bio, utm_campaign=reel e utm_content com o slug. A rota /reels/<slug> direciona para uma matéria específica e registra o clique da plataforma. O domínio principal orangebrick.blog já é suficiente para levar visitantes ao site; usar /reels com UTM é opcional e acrescenta o redirecionamento à matéria recente e a atribuição da origem.
 
-Instagram:
-
-```text
-?utm_source=instagram&utm_medium=reel&utm_campaign=reel
-```
-
-YouTube:
-
-```text
-?utm_source=youtube&utm_medium=short&utm_campaign=reel
-```
-
-TikTok não recebe URL na legenda; a copy diz “Matéria completa no link da bio.”
-
-O UTM atual não tem `utm_content`, então todos os Reels de uma plataforma entram na mesma campanha. A inclusão de `utm_content=<slug>` está no roadmap.
+Se quiser encaminhar quem clica na bio diretamente à matéria mais recente e medir a origem do tráfego, configure manualmente o link correspondente: https://orangebrick.blog/reels?utm_source=instagram no Instagram ou https://orangebrick.blog/reels?utm_source=tiktok no TikTok. O link base https://orangebrick.blog já atende ao direcionamento para o site.
 
 ### 5.6 Hashtags
 
-A base é montada nesta ordem:
+A seleção dá prioridade às hashtags do jogo, franquia ou assunto antes das hashtags de plataforma. Depois entram a série, OrangeBrick, categoria e GamesBrasil, respeitando o limite de cinco hashtags por plataforma.
 
-1. assuntos e plataformas (`contextTags`, no máximo 2);
-2. hashtag da série;
-3. `OrangeBrick`;
-4. hashtag da categoria;
-5. `NoticiasDeGames` para `breaking`, `hardware` e `industry`;
-6. `GamesBrasil`.
+TikTok converte hashtags para minúsculas e duplicatas são removidas sem diferenciar maiúsculas de minúsculas. Não são usadas hashtags genéricas de algoritmo como #fyp ou #viral.
 
-Regras:
-
-- Instagram e TikTok usam as 5 primeiras.
-- YouTube prefixa `Shorts` e usa as 5 primeiras.
-- TikTok converte tudo para minúsculas.
-- Hashtags duplicadas são removidas sem diferenciar maiúsculas de minúsculas.
-- Não são usadas hashtags genéricas de algoritmo como `#fyp` ou `#viral`.
-
-Mapa de assuntos:
-
-- o código tem uma lista fixa de assunto → hashtag em `subjectHashtags`;
-- exemplos: `Saros`, `Faraway`, `Cyberpunk2077`, `GTA6`, `PlayStation`, `Xbox`, `Nintendo`, `Steam`, `GamePass`, `EldenRing`, `Capcom`, `Konami`, `Valve`, `Remake`, `Remaster`;
-- se não houver assunto conhecido, usa a primeira palavra útil do slug.
-
-Limitação atual: como a plataforma também entra em `contextTags`, notícias de plataforma podem consumir uma das duas vagas e deixar o jogo/franquia de fora. O exemplo do Game Pass saiu com `#Xbox` e sem `#GamePass`.
+O mapa subjectHashtags contém assuntos como Saros, Cyberpunk2077, GTA6, PlayStation, Xbox, Nintendo, GamePass, EldenRing, Capcom, Konami e Valve. Quando não há assunto conhecido, o código usa a primeira palavra útil do slug.
 
 ### 5.7 YouTube: título e tags
 
@@ -701,6 +673,7 @@ Migrations relevantes:
 - `20261014190000_reel_worker_integration.sql`
 - `20261014190703_reel_youtube_publications.sql`
 - `20261019190000_reel_social_automation.sql`
+- `20261022220000_reel_social_metrics.sql`
 
 ### `reel_jobs`
 
@@ -739,10 +712,15 @@ A presença da linha ativa a automação. Não existe flag `enabled` separada.
 | `reel_job_id` | Job do Reel |
 | `status` | `processing`, `submitted`, `published`, `failed`, `unknown` |
 | `external_id` | ID externo/mídia/publish ID |
+| `platform_media_id` | ID público do vídeo TikTok depois da finalização no app |
 | `error` | Erro |
 | `created_at`, `updated_at` | Auditoria |
 
 Chave primária: `(post_id, platform)`.
+
+### `reel_social_metrics` e `reel_social_clicks`
+
+`reel_social_metrics` guarda snapshots por Reel, plataforma e dia de Brasília. Mantém visualizações, alcance, tempo assistido, curtidas, comentários, compartilhamentos, salvamentos, seguidores ganhos, interações e erro da coleta. `reel_social_clicks` conta acessos aos links com UTM que passam pelos redirecionamentos próprios do Orange Brick.
 
 ### `reel_youtube_publications`
 
@@ -755,12 +733,15 @@ Chave primária: `(post_id, platform)`.
 | `status` | `preparing`, `uploading`, `uploaded`, `unknown`, `failed` |
 | `title` | Título enviado |
 | `description` | Descrição enviada |
+| `tags` | Tags enviadas no upload |
+| `verified_tags` | Tags lidas do vídeo publicado |
+| `tags_verified_at`, `tags_match` | Auditoria da conferência em produção |
 | `visibility` | `public`, `unlisted`, `private` |
 | `video_id` | ID no YouTube |
 | `error` | Erro |
 | `created_at`, `updated_at` | Auditoria |
 
-Unique: `(post_id, channel_id)`. Não há coluna `tags`.
+Unique: `(post_id, channel_id)`. A migration `20261022220000_reel_social_metrics.sql` adiciona e persiste `tags`, `verified_tags`, `tags_verified_at` e `tags_match`.
 
 ### Storage
 
@@ -795,6 +776,7 @@ Unique: `(post_id, channel_id)`. Não há coluna `tags`.
 | `/api/admin/reels/youtube` | `POST` | Faz upload no YouTube |
 | `/api/admin/reels/youtube?postId=...` | `DELETE` | Redefine histórico do YouTube |
 | `/api/cron/reel-social` | `GET` | Publicação automática/fallback |
+| `/api/cron/reel-metrics` | `GET` | Snapshot diário e auditoria das tags do YouTube |
 
 ### Painel
 
@@ -964,6 +946,7 @@ O CLI local não publica nas redes automaticamente. Ele gera o MP4, atualiza o m
 npm run typecheck
 npm run lint
 npm run build
+npm run reel:verify-youtube-tags
 npm test
 node --test --experimental-strip-types tests/reel-social-copy.test.ts
 node --test --experimental-strip-types tests/reel-social-delivery.test.ts
@@ -1011,101 +994,52 @@ Os testes de `reel-social-delivery` cobrem:
 
 ## 11. Problemas conhecidos e riscos
 
+O código desta continuação prepara cron, redirects, snapshots de métricas, contagem de cliques e auditoria das tags do YouTube. As migrations locais `20261014190000`, `20261019190000` e `20261022220000` foram aplicadas e conferidas no histórico remoto. O deploy de produção Vercel está `READY` em `orangebrick.blog`, e os crons do `vercel.json` foram aceitos. O time Vercel é Hobby, cuja execução pode variar até 59 minutos dentro da hora programada. A conexão PostgreSQL direta do Supabase CLI recebe resets, por isso o histórico e a aplicação foram feitos pela Management API autenticada. O deploy isolado deixou de fora os arquivos locais ignorados, incluindo o manifest e os vídeos preexistentes. O vídeo apagado `4qts9h5TUOY` foi substituído pelo repost `JFgzkN0ROlc`, confirmado no canal correto e associado à matéria. As tags foram aplicadas e a auditoria confirmou 17/17 vídeos, sem divergências. Um snapshot do novo vídeo registrou 112 visualizações, 2 curtidas e 0 comentários em 22/10. No TikTok, a listagem e a consulta pública confirmaram os IDs reais dos seis vídeos mais recentes e de Faraway; os sete IDs foram associados às matérias e as métricas de 22/10 foram salvas. O status do envio antigo de Faraway ainda retorna `SEND_TO_USER_INBOX`, mas o vídeo público correspondente está confirmado pela listagem e pela consulta.
+
 ### Alta prioridade
 
-1. **Link na bio não é automatizado.**
-   - As legendas dizem “link na bio”, mas não há rotina que atualize a bio do Instagram/TikTok.
-   - Criar uma página fixa (`/reels` ou `/ultimo`) que sempre leva à matéria mais recente ou ao Reel atual.
-
-2. **Hashtags podem priorizar plataforma em vez do jogo.**
-   - O exemplo do Game Pass saiu com `#Xbox` e sem `#GamePass`.
-   - Ajustar a ordem para priorizar jogo/franquia antes de plataforma.
-
-3. **CTA de follow não existe dentro do vídeo.**
-   - O roteiro proíbe pedir follow; a legenda pede.
-   - Testar um end card curto com `Siga @ob.labs`, sem sacrificar retenção.
-
-4. **UTM sem `utm_content`.**
-   - Todos os Reels de uma plataforma compartilham a mesma campanha.
-   - Adicionar `utm_content=<slug>` ou `utm_content=<job_id>` para atribuição individual.
-
-5. **Falta de métricas sociais.**
-   - O sistema sabe se publicou, mas não acompanha views, retenção, follows, saves, shares, visitas ao perfil e cliques.
-   - Sem isso, a otimização de gancho/capa vira achismo.
+1. Opcional: trocar o link da bio pelas URLs da seção 5.5 para encaminhar à matéria mais recente e atribuir o tráfego por plataforma; o domínio orangebrick.blog já está na bio.
+2. Testar uma chamada para seguir no encerramento do Reel e comparar retenção e seguidores ganhos quando as métricas estiverem disponíveis.
 
 ### Média prioridade
 
-6. **Fallback do cron é lento.**
-   - O worker normal publica as três redes em loop.
-   - Se o worker falhar, o cron diário processa uma plataforma por invocação; o fallback pode levar até 3 dias.
-
-7. **TikTok é semi-automático.**
-   - O vídeo cai na inbox; a publicação final depende de ação no app.
-   - O status pode ficar `submitted` ou `unknown` por um tempo.
-
-8. **Edições de copy no painel não persistem.**
-   - O cron regenera a copy.
-   - Para uma copy customizada, publique manualmente ou implemente persistência.
-
-9. **Tags do YouTube não são auditáveis.**
-   - `reel_youtube_publications` não tem coluna de tags.
-   - As tags são enviadas, mas não ficam salvas.
-
-10. **Suporte a `tags` no Composio não foi validado em produção.**
-    - O código envia `tags` em `YOUTUBE_MULTIPART_UPLOAD_VIDEO`.
-    - Confirmar com um upload real e com a documentação da ferramenta.
-
-11. **Documentos antigos desatualizados.**
-    - `REELS_AUTOMATION.md` fala em +6% de rate, 30–45s e caminhos antigos.
-    - `REELS_PRD.md` tem caminhos locais antigos e exemplos de copy desatualizados.
-    - Use este documento como referência.
+4. Os seis TikToks mais recentes e Faraway estão publicados. Os IDs públicos foram reconciliados pela descrição/título dos vídeos, e as métricas de visualizações, curtidas, comentários e compartilhamentos foram salvas. O status antigo de envio de Faraway pode continuar mostrando `SEND_TO_USER_INBOX`; a publicação pública está confirmada pelos endpoints de listagem e consulta.
+5. Edições de copy no painel não persistem; o cron regenera a copy a partir da matéria e do roteiro.
+6. Publicações com status unknown devem ser conferidas manualmente antes de qualquer nova tentativa.
+7. REELS_AUTOMATION.md e REELS_PRD.md preservam detalhes históricos; este documento é a referência atual.
 
 ### Baixa prioridade
 
-12. **`reel_jobs.telegram_status` não é usado pelo worker remoto.**
-    - O envio de Telegram é opcional e local (`--telegram`).
-
-13. **`public/reels/manifest.json` é versionado.**
-    - Evite commitar entradas geradas por testes locais.
-
-14. **Não há pausa explícita da automação.**
-    - A automação é ativada pela existência da linha em `reel_social_automation`.
-    - Para pausar, ajuste o cron ou remova a linha com cuidado.
-
----
+9. reel_jobs.telegram_status não é usado pelo worker remoto; o envio do Telegram é opcional e local.
+10. public/reels/manifest.json é versionado; evite incluir entradas geradas por testes locais.
+11. A automação é controlada pela linha em reel_social_automation. Para pausá-la, ajuste o cron ou remova a linha com cuidado.
 
 ## 12. Roadmap sugerido
 
-### P0 — impacto imediato
+### P0 - ativação e aprendizado
 
 | Item | Por quê | Esforço |
 |---|---|---|
-| Página fixa de link na bio | Cumpre a promessa das legendas | Baixo |
-| `utm_content` por slug | Mede cada Reel | Baixo |
-| Ajustar prioridade das hashtags | Coloca jogo/franquia na frente | Baixo |
-| Testar CTA de follow no vídeo | Converte view em seguidor | Médio |
-| Definir horário/fallback do cron | Evita publicação em horário ruim | Baixo |
-| Painel de métricas sociais | Permite decidir com dados | Médio |
+| Migrations e crons de fallback/métricas | Aplicados e ativos nos horários editoriais | Concluído |
+| Conferir tags no YouTube | Repost associado; 17/17 vídeos conferem, sem divergências | Concluído |
+| Opcional: apontar as bios para `/reels` com UTM | Direciona para a matéria mais recente com atribuição; o domínio base já está na bio | Baixo |
+| Testar CTA de follow com dados de retenção | Mede conversão sem prejudicar a permanência | Médio |
 
-### P1 — crescimento
+### P1 - crescimento
 
-- A/B de gancho e capa.
+- Testes A/B de gancho e capa.
 - Playlists no YouTube/TikTok e coleções no Instagram.
 - Stories com link, carrossel-resumo e community post.
-- Resposta a comentários e vídeo-resposta no TikTok.
+- Respostas a comentários e vídeo-resposta no TikTok.
 - Comentário fixado com pergunta.
-- Colaborações/duets/stitches.
+- Colaborações, duets e stitches.
 
-### P2 — escala
+### P2 - escala
 
-- Ingestão automática de métricas por plataforma.
 - Thumbnails específicas por plataforma.
 - Persistência de copies customizadas.
-- Coluna de tags no histórico do YouTube.
-- Corrigir as 9 falhas antigas do suite.
-- Rotina de retry com confirmação humana para `unknown`.
-
----
+- Corrigir as nove falhas antigas do suite.
+- Rotina de retry com confirmação humana para status unknown.
 
 ## 13. Runbook
 
@@ -1214,6 +1148,7 @@ Os testes de `reel-social-delivery` cobrem:
 - `supabase/migrations/20261014190000_reel_worker_integration.sql`
 - `supabase/migrations/20261014190703_reel_youtube_publications.sql`
 - `supabase/migrations/20261019190000_reel_social_automation.sql`
+- `supabase/migrations/20261022220000_reel_social_metrics.sql`
 
 ### Testes
 

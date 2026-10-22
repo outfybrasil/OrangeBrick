@@ -34,7 +34,19 @@
     },
     {
       "path": "/api/cron/reel-social",
-      "schedule": "0 9 * * *"
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/reel-social",
+      "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/reel-social",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/reel-metrics",
+      "schedule": "0 23 * * *"
     }
   ]
 }
