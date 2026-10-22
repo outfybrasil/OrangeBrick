@@ -43,6 +43,16 @@ def save_timing_files(out_dir: Path, sentences, provider: str):
         print(f"DURATION: {sentences[-1]['end']}s")
 
 
+def validate_transcript(expected_text, sentences):
+    def tokenize(value):
+        return re.findall(r"[^\W_]+(?:['’][^\W_]+)?", value.casefold(), flags=re.UNICODE)
+
+    expected_words = tokenize(expected_text)
+    generated_words = tokenize(" ".join(sentence["text"] for sentence in sentences))
+    if not sentences or not expected_words or generated_words != expected_words:
+        raise ValueError("A voz sintetizada não corresponde ao roteiro completo. A renderização foi interrompida.")
+
+
 def generate_elevenlabs(text: str, out_dir: Path, api_key: str, voice_id: str):
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/with-timestamps"
     payload = json.dumps({
@@ -126,6 +136,7 @@ async def run_tts(text: str, voice: str, rate: str, out_dir: Path):
     if api_key and voice_id:
         try:
             sentences = generate_elevenlabs(text, out_dir, api_key, voice_id)
+            validate_transcript(text, sentences)
             provider = "elevenlabs"
         except Exception as error:
             reason = str(error.code) if isinstance(error, urllib.error.HTTPError) else type(error).__name__
@@ -135,6 +146,7 @@ async def run_tts(text: str, voice: str, rate: str, out_dir: Path):
         print("ElevenLabs não configurado; usando a voz gratuita de fallback.")
         sentences = await generate_edge_tts(text, voice, rate, out_dir)
 
+    validate_transcript(text, sentences)
     save_timing_files(out_dir, sentences, provider)
 
 

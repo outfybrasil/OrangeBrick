@@ -46,7 +46,7 @@ async function publishPlatform(db: ReelAdmin, post: Post, job: ReelJob, platform
       ? { postId: post.id, videoUrl: signed.signedUrl, caption: copy.instagram.caption }
       : platform === "tiktok"
         ? { postId: post.id, videoUrl: signed.signedUrl, caption: copy.tiktok.caption }
-        : { postId: post.id, reelJobId: job.id, channelId: (await getYouTubeConnection()).channel.id, title: copy.youtube.title, description: copy.youtube.description, visibility: "public", confirmed: true };
+        : { postId: post.id, reelJobId: job.id, channelId: (await getYouTubeConnection()).channel.id, title: copy.youtube.title, description: copy.youtube.description, tags: copy.youtube.tags, visibility: "public", confirmed: true };
     const result = await platformRequest(platform, body);
     const externalId = platform === "instagram" ? result.mediaId : platform === "tiktok" ? result.publishId : result.publication?.video_id;
     const youtubePublication = platform === "youtube" ? result.publication as { status?: string; visibility?: string } | undefined : undefined;

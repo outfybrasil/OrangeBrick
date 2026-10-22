@@ -9,6 +9,7 @@ import {
   generateSocialCopys,
   triggerReelGeneration,
   cancelReel,
+  getLocalReelQueueStatus,
   type ReelManifestItem,
   type SocialCopys,
 } from "@/lib/video/reel-service";
@@ -32,8 +33,15 @@ export interface AdminReelItem {
   duration?: number;
   file_size?: number;
   started_at?: string;
+  queued_at?: string;
   finished_at?: string;
   error?: string;
+  is_queued?: boolean;
+  queue_position?: number;
+  attempts?: number;
+  expected_duration_seconds?: number;
+  estimated_remaining_seconds?: number;
+  eta_updated_at?: string;
   copys: SocialCopys;
   socialPublications: Partial<Record<ReelSocialPlatform, ReelSocialPublication>>;
 }
@@ -128,6 +136,26 @@ export async function GET(request: Request) {
     }
   }
   const manifest = remote ? {} : getManifest();
+  let activeQueue: Array<{ id: string; post_id: string; status: string; attempts: number; created_at: string; started_at: string | null }> = [];
+  let expectedDurationSeconds = 12 * 60;
+  if (remote) {
+    const [queueResult, historyResult] = await Promise.all([
+      editorial.from("reel_jobs").select("id,post_id,status,attempts,created_at,started_at").in("status", ["queued", "running"]).order("created_at", { ascending: true }),
+      editorial.from("reel_jobs").select("started_at,finished_at").eq("status", "ready").order("finished_at", { ascending: false }).limit(15),
+    ]);
+    activeQueue = (queueResult.data || []) as typeof activeQueue;
+    const durations = (historyResult.data || [])
+      .filter((job) => job.started_at && job.finished_at)
+      .map((job) => (new Date(job.finished_at!).getTime() - new Date(job.started_at!).getTime()) / 1000)
+      .filter((duration) => Number.isFinite(duration) && duration > 0 && duration <= 60 * 60)
+      .sort((a, b) => a - b);
+    if (durations.length) expectedDurationSeconds = durations[Math.floor(durations.length / 2)];
+  }
+  const etaUpdatedAt = new Date().toISOString();
+  const activeRunningJob = activeQueue.find((candidate) => candidate.status === "running");
+  const activeRunningElapsedSeconds = activeRunningJob?.started_at
+    ? Math.max(0, (Date.now() - new Date(activeRunningJob.started_at).getTime()) / 1000)
+    : 0;
 
   const items: AdminReelItem[] = posts.map((post: Partial<Post>) => {
     const slug = post.slug || "";
@@ -139,7 +167,8 @@ export async function GET(request: Request) {
       video_url: job.video_url,
       duration: job.duration ?? undefined,
       file_size: job.file_size ?? undefined,
-      started_at: job.started_at || job.created_at,
+      started_at: job.started_at ?? undefined,
+      queued_at: job.status === "queued" ? job.created_at : undefined,
       finished_at: job.finished_at ?? undefined,
       error: job.error ?? undefined,
       script: job.script as unknown as ReelManifestItem["script"],
@@ -185,6 +214,15 @@ export async function GET(request: Request) {
       category: post.category || "breaking",
       script: manifestItem?.script,
     });
+    const localProgress = remote ? null : getLocalReelQueueStatus(slug, manifest);
+    const queueIndex = job ? activeQueue.findIndex((candidate) => candidate.id === job.id) : -1;
+    const queuePosition = remote
+      ? queueIndex >= 0 ? queueIndex + 1 : undefined
+      : localProgress?.queuePosition;
+    const isQueued = remote ? job?.status === "queued" : localProgress?.isQueued;
+    const etaSeconds = remote
+      ? queuePosition ? Math.max(0, queuePosition * expectedDurationSeconds - activeRunningElapsedSeconds) : undefined
+      : localProgress?.estimatedRemainingSeconds;
 
     return {
       id: post.id || slug,
@@ -202,8 +240,15 @@ export async function GET(request: Request) {
       duration,
       file_size: fileSize,
       started_at: manifestItem?.started_at,
+      queued_at: job?.status === "queued" ? job.created_at : manifestItem?.queued_at,
       finished_at: manifestItem?.finished_at,
       error: errorMsg,
+      is_queued: !!isQueued,
+      queue_position: queuePosition,
+      attempts: job?.attempts,
+      expected_duration_seconds: remote ? expectedDurationSeconds : localProgress?.expectedDurationSeconds,
+      estimated_remaining_seconds: etaSeconds,
+      eta_updated_at: etaSeconds === undefined ? undefined : etaUpdatedAt,
       copys,
       socialPublications: socialByPostId.get(post.id || "") || {},
     };

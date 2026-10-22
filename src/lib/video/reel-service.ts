@@ -11,6 +11,7 @@ export interface ReelManifestItem {
   duration?: number;
   file_size?: number;
   started_at?: string;
+  queued_at?: string;
   finished_at?: string;
   failed_at?: string;
   error?: string;
@@ -37,7 +38,6 @@ export interface SocialCopys {
 }
 
 const MANIFEST_PATH = path.resolve(process.cwd(), "public", "reels", "manifest.json");
-const INSTAGRAM_PROFILE_URL = "https://www.instagram.com/ob.labs/";
 
 export function getManifest(): Record<string, ReelManifestItem> {
   try {
@@ -103,19 +103,35 @@ export function generateSocialCopys(post: {
     .replace(/\s+/g, " ")
     .trim();
   const title = plainText(post.title);
-  const summary = plainText(post.summary) || title;
-  const hook = plainText(post.script?.hook || title);
+  const danglingEnding = /\b(?:de|do|da|dos|das|em|no|na|nos|nas|para|por|com|que|e|ou|mas|a|o|as|os|um|uma|seu|sua|seus|suas|entre|sobre|até|após|antes|durante)\s*[.!?]*$/iu;
+  const hasIncompleteEnding = (value: string) => /…|\.{3}/u.test(value) || value.split(/(?<=[.!?])\s+/u).some((sentence) => danglingEnding.test(sentence.trim()));
+  const completeTitle = hasIncompleteEnding(title) ? "Veja a matéria completa." : title;
+  const rawSummary = plainText(post.summary);
+  const summary = rawSummary && !hasIncompleteEnding(rawSummary) ? rawSummary : completeTitle;
+  const rawHook = plainText(post.script?.hook || title);
+  const hook = hasIncompleteEnding(rawHook) ? completeTitle : rawHook;
+  const narration = plainText(post.script?.narrationText || "");
+  const narrationWords = narration ? narration.split(/\s+/).length : 0;
+  const narrationIsComplete = narrationWords >= 75 && narrationWords <= 95 && /[.!?]$/u.test(narration) && !hasIncompleteEnding(narration);
   const suppliedQuestion = plainText(post.script?.ctaQuestion || "");
-  const releaseTitle = title.match(/^(.*?)\s+(?:chega|estreia|lança|recebe|ganha)\b/i)?.[1]?.trim();
+  const releaseTitle = completeTitle.match(/^(.*?)\s+(?:chega|estreia|lança|recebe|ganha)\b/i)?.[1]?.trim();
   const releaseQuestion = releaseTitle && post.category === "breaking" &&
     /\b(?:estreia|lançamento|data de lançamento|chega em)\b/i.test(summary) &&
     !/\b(?:playstation|ps[45]|xbox|nintendo|switch|sony|microsoft|ubisoft|steam)\b/i.test(releaseTitle)
     ? `Você pretende jogar ${releaseTitle} no lançamento?`
     : "";
+  const fallbackQuestions: Record<string, string> = {
+    breaking: "O que essa notícia muda para você como jogador?",
+    hardware: "Esse hardware entra na sua lista de compras?",
+    industry: "Como essa decisão pode afetar os próximos jogos?",
+    modding: "Você levaria essa modificação a sério?",
+    review: "Você daria uma chance a esse jogo?",
+    opinion: "Você concorda com essa leitura?",
+  };
   const genericQuestion = /^(?:o que você acha dessa mudança|qual é a sua opinião sobre essa notícia|o que essa notícia muda para quem joga)\?$/i;
-  const question = suppliedQuestion && !genericQuestion.test(suppliedQuestion)
+  const question = suppliedQuestion && suppliedQuestion.endsWith("?") && !hasIncompleteEnding(suppliedQuestion) && !genericQuestion.test(suppliedQuestion)
     ? suppliedQuestion
-    : releaseQuestion || "Que impacto essa notícia teria para você como jogador?";
+    : releaseQuestion || fallbackQuestions[post.category] || "Que impacto essa notícia teria para você como jogador?";
   const hookPrefix = hook.replace(/[.!?…]+$/, "").trim();
   const escapedHookPrefix = hookPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const summaryAfterHook = summary.replace(new RegExp(`^${escapedHookPrefix}(?=$|[\\s,;:!?])[,;:!?\\s]*`, "iu"), "").trim();
@@ -123,13 +139,23 @@ export function generateSocialCopys(post: {
     ? `${summaryAfterHook[0].toLocaleUpperCase("pt-BR")}${summaryAfterHook.slice(1)}`
     : summary === hook ? "" : summary;
   const articleUrl = `https://orangebrick.blog/posts/${post.slug}`;
-  const attribution = post.script?.ttsProvider === "elevenlabs" ? "elevenlabs.io" : "";
-  const youtubeSuffix = attribution ? " | elevenlabs.io" : "";
-  const youtubeTitleBudget = 100 - Array.from(youtubeSuffix).length;
-  const youtubeTitleCharacters = Array.from(hook);
-  const youtubeTitle = `${youtubeTitleCharacters.length > youtubeTitleBudget
-    ? `${youtubeTitleCharacters.slice(0, youtubeTitleBudget - 1).join("").replace(/\s+\S*$/, "").trimEnd()}…`
-    : hook}${youtubeSuffix}`;
+  const trackedArticleUrl = (source: string, medium: string) => `${articleUrl}?utm_source=${source}&utm_medium=${medium}&utm_campaign=reel`;
+  const attribution = post.script?.ttsProvider === "elevenlabs" ? "Narração: elevenlabs.io" : "";
+  const seriesByCategory: Record<string, { label: string; hashtag: string }> = {
+    breaking: { label: "Plantão OB", hashtag: "PlantaoOB" },
+    hardware: { label: "Hard News OB", hashtag: "HardNewsOB" },
+    industry: { label: "Radar OB", hashtag: "RadarOB" },
+    modding: { label: "Gambiarra OB", hashtag: "GambiarraOB" },
+    review: { label: "Review OB", hashtag: "ReviewOB" },
+    opinion: { label: "Opinião OB", hashtag: "OpiniaoOB" },
+  };
+  const series = seriesByCategory[post.category] || { label: "Orange Brick", hashtag: "OrangeBrick" };
+  const seriesLine = `${series.label} — Orange Brick`;
+  const youtubeTitleSource = Array.from(hook).length <= 70 ? hook : completeTitle;
+  const youtubeTitleCharacters = Array.from(youtubeTitleSource);
+  const youtubeTitle = youtubeTitleCharacters.length <= 70
+    ? youtubeTitleSource
+    : `${youtubeTitleCharacters.slice(0, 69).join("").replace(/\s+\S*$/, "").trimEnd()}…`;
   const categoryTags: Record<string, string[]> = {
     breaking: ["Notícias de games"],
     hardware: ["Hardware"],
@@ -216,33 +242,39 @@ export function generateSocialCopys(post: {
   const newsTags = ["breaking", "hardware", "industry"].includes(post.category) ? ["NoticiasDeGames"] : [];
   const uniqueHashtags = (names: string[]) => [...new Map(names.map(name => [name.toLocaleLowerCase("pt-BR"), name])).values()];
   const contextTags = uniqueHashtags([...subjects.slice(0, 1), ...platformTags]).slice(0, 2);
-  const instagramHashtagNames = uniqueHashtags([...contextTags, "games", "news", "GamesBrasil", ...newsTags, categoryHashtag, "OrangeBrick"]).slice(0, 5);
-  const tiktokHashtagNames = uniqueHashtags([...contextTags, "games", "news", "GamingBrasil", ...newsTags, categoryHashtag, "OrangeBrick"]).slice(0, 5);
-  const youtubeHashtagNames = uniqueHashtags([...subjects, ...platformTags.slice(0, 3), "games", "news", "GamesBrasil", ...newsTags, "OrangeBrick", categoryHashtag]).slice(0, 10);
+  const baseHashtags = uniqueHashtags([...contextTags, series.hashtag, "OrangeBrick", categoryHashtag, ...newsTags, "GamesBrasil"]);
+  const instagramHashtagNames = baseHashtags.slice(0, 5);
+  const tiktokHashtagNames = baseHashtags.slice(0, 5);
+  const youtubeHashtagNames = uniqueHashtags(["Shorts", ...baseHashtags]).slice(0, 5);
   const instagramHashtags = instagramHashtagNames.map((hashtag) => `#${hashtag}`);
   const tiktokHashtags = tiktokHashtagNames.map((hashtag) => `#${hashtag.toLocaleLowerCase("pt-BR")}`);
-  const coreCopy = [hook, supportingSummary];
-  const commentPrompt = `Responda nos comentários: ${question}`;
+  const coreCopy = narrationIsComplete ? [narration] : [hook, supportingSummary];
+  const commentPrompt = narrationIsComplete ? "" : `Responda nos comentários: ${question}`;
   const instagramCaption = [
     ...coreCopy,
     commentPrompt,
-    `Leia a matéria completa: ${articleUrl}`,
-    ...(attribution ? [attribution] : []),
+    `Matéria completa no link da bio: ${trackedArticleUrl("instagram", "reel")}`,
+    "Siga @ob.labs para acompanhar as próximas notícias.",
+    seriesLine,
+    attribution,
     instagramHashtags.join(" "),
   ].filter(Boolean).join("\n\n");
   const tiktokCaption = [
     ...coreCopy,
     commentPrompt,
-    `Matéria completa: ${articleUrl}`,
-    ...(attribution ? [attribution] : []),
+    "Matéria completa no link da bio.",
+    "Siga para acompanhar as próximas notícias.",
+    seriesLine,
+    attribution,
     tiktokHashtags.join(" "),
   ].filter(Boolean).join("\n\n");
   const youtubeHashtags = youtubeHashtagNames.map((hashtag) => `#${hashtag}`).join(" ");
   const youtubeDescription = [
-    hook,
-    supportingSummary,
+    ...coreCopy,
     commentPrompt,
-    `Siga no Instagram: @ob.labs — ${INSTAGRAM_PROFILE_URL}`,
+    `Leia a matéria completa: ${trackedArticleUrl("youtube", "short")}`,
+    "Inscreva-se no canal para acompanhar as próximas notícias.",
+    seriesLine,
     attribution,
     youtubeHashtags,
   ].filter(Boolean).join("\n\n");
@@ -259,7 +291,7 @@ export function generateSocialCopys(post: {
     youtube: {
       title: youtubeTitle,
       description: youtubeDescription,
-      tags: [...new Set(["Orange Brick", ...(categoryTags[post.category] || []), ...subjects])],
+      tags: [...new Set(["Orange Brick", "Shorts", series.label, ...(categoryTags[post.category] || []), ...subjects, ...platformTags])].slice(0, 15),
     },
   };
 }
@@ -269,6 +301,31 @@ let currentRunningChild: ChildProcess | null = null;
 let currentRunningSlug: string | null = null;
 const reelQueue: string[] = [];
 const cancelledReelChildren = new WeakSet<ChildProcess>();
+
+export function getLocalReelQueueStatus(slug: string, manifest = getManifest()) {
+  const queueIndex = reelQueue.indexOf(slug);
+  const isQueued = queueIndex !== -1;
+  const isRunning = currentRunningSlug === slug;
+  const queuePosition = isRunning ? 1 : isQueued ? queueIndex + (currentRunningSlug ? 2 : 1) : undefined;
+  const durations = Object.values(manifest)
+    .filter((item) => item.status === "ready" && item.started_at && item.finished_at)
+    .map((item) => (new Date(item.finished_at!).getTime() - new Date(item.started_at!).getTime()) / 1000)
+    .filter((duration) => Number.isFinite(duration) && duration > 0 && duration <= 60 * 60)
+    .sort((a, b) => a - b);
+  const expectedDurationSeconds = durations.length ? durations[Math.floor(durations.length / 2)] : 12 * 60;
+  const runningItem = currentRunningSlug ? manifest[currentRunningSlug] : undefined;
+  const runningElapsedSeconds = runningItem?.started_at
+    ? Math.max(0, (Date.now() - new Date(runningItem.started_at).getTime()) / 1000)
+    : 0;
+
+  return {
+    isQueued,
+    queuePosition,
+    expectedDurationSeconds,
+    estimatedRemainingSeconds: queuePosition ? Math.max(0, queuePosition * expectedDurationSeconds - runningElapsedSeconds) : undefined,
+    etaUpdatedAt: new Date().toISOString(),
+  };
+}
 
 export async function triggerReelGeneration(slug: string): Promise<{ queued: boolean; message: string }> {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 200) {
@@ -294,6 +351,7 @@ export async function triggerReelGeneration(slug: string): Promise<{ queued: boo
   updateReelStatus(slug, {
     status: "generating",
     started_at: new Date().toISOString(),
+    queued_at: new Date().toISOString(),
     error: undefined,
     pid: undefined,
   });
@@ -376,7 +434,7 @@ function processReelQueue() {
   currentRunningChild = child;
   currentRunningSlug = nextSlug;
 
-  updateReelStatus(nextSlug, { pid: child.pid });
+  updateReelStatus(nextSlug, { pid: child.pid, started_at: new Date().toISOString(), queued_at: undefined });
 
   let output = "";
 

@@ -32,6 +32,41 @@ function formatDate(dateStr?: string | null) {
   }
 }
 
+function formatCountdown(seconds?: number) {
+  if (seconds === undefined) return "calculando";
+  const remaining = Math.max(0, Math.ceil(seconds));
+  const hours = Math.floor(remaining / 3600);
+  const minutes = Math.floor((remaining % 3600) / 60);
+  const rest = remaining % 60;
+  if (hours) return `${hours}h ${minutes}min`;
+  if (minutes) return `${minutes}min ${rest}s`;
+  return `${rest}s`;
+}
+
+function getElapsedSeconds(timestamp: string | undefined, now: number) {
+  if (!timestamp) return undefined;
+  const start = new Date(timestamp).getTime();
+  return Number.isFinite(start) ? Math.max(0, Math.floor((now - start) / 1000)) : undefined;
+}
+
+function getEstimatedRemainingSeconds(item: AdminReelItem, now: number) {
+  if (item.estimated_remaining_seconds === undefined) return undefined;
+  const updatedAt = item.eta_updated_at ? new Date(item.eta_updated_at).getTime() : now;
+  const elapsed = Number.isFinite(updatedAt) ? Math.max(0, (now - updatedAt) / 1000) : 0;
+  return Math.max(0, item.estimated_remaining_seconds - elapsed);
+}
+
+function isReelStalled(item: AdminReelItem, now: number) {
+  const expected = item.expected_duration_seconds || 12 * 60;
+  if (item.is_queued) {
+    const queuedSeconds = getElapsedSeconds(item.queued_at, now);
+    const expectedWait = expected * Math.max(1, item.queue_position || 1) + 10 * 60;
+    return queuedSeconds !== undefined && queuedSeconds > Math.max(expectedWait, 30 * 60);
+  }
+  const elapsedSeconds = getElapsedSeconds(item.started_at, now);
+  return elapsedSeconds !== undefined && elapsedSeconds > Math.max(expected * 2, 30 * 60);
+}
+
 function InstagramMark({ id, published }: { id: string; published: boolean }) {
   const gradientId = `instagram-gradient-${id}`;
   const color = published ? `url(#${gradientId})` : "currentColor";
@@ -127,6 +162,7 @@ function AdminReelsContent() {
   const [triggeringSlug, setTriggeringSlug] = useState<string | null>(null);
   const [cancellingSlug, setCancellingSlug] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [clock, setClock] = useState(() => Date.now());
   const hasGeneratingReel = items.some((item) => item.status === "generating") || triggeringSlug !== null;
 
   const showToast = useCallback((msg: string) => {
@@ -213,6 +249,12 @@ function AdminReelsContent() {
   }, [items, loadReels]);
 
   useEffect(() => {
+    if (!hasGeneratingReel) return;
+    const interval = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [hasGeneratingReel]);
+
+  useEffect(() => {
     const hasSocialActivity = items.some((item) => Object.values(item.socialPublications).some((publication) => publication?.status === "processing" || publication?.status === "submitted" && !(publication.platform === "tiktok" && publication.external_id?.startsWith("v_inbox_")) && !(publication.platform === "youtube" && publication.visibility && publication.visibility !== "public")));
     if (!hasSocialActivity) return;
 
@@ -244,12 +286,31 @@ function AdminReelsContent() {
 
       showToast(result.message || "Geração solicitada. Acompanhe o andamento na lista.");
       // Atualiza estado local imediatamente para feedback instantâneo
+      const queuedAt = new Date().toISOString();
       setItems((prev) =>
         prev.map((item) =>
-          item.slug === slug ? { ...item, status: "generating", started_at: new Date().toISOString() } : item
+          item.slug === slug ? {
+            ...item,
+            status: "generating",
+            is_queued: true,
+            queue_position: 1,
+            queued_at: queuedAt,
+            expected_duration_seconds: 12 * 60,
+            estimated_remaining_seconds: 12 * 60,
+            eta_updated_at: queuedAt,
+          } : item
         )
       );
-      setSelectedReel((current) => current?.slug === slug ? { ...current, status: "generating" } : current);
+      setSelectedReel((current) => current?.slug === slug ? {
+        ...current,
+        status: "generating",
+        is_queued: true,
+        queue_position: 1,
+        queued_at: queuedAt,
+        expected_duration_seconds: 12 * 60,
+        estimated_remaining_seconds: 12 * 60,
+        eta_updated_at: queuedAt,
+      } : current);
     } catch (err: unknown) {
       const message = err instanceof Error && err.name === "TimeoutError"
         ? "O servidor demorou para confirmar a geração. Atualize a lista antes de tentar novamente."
@@ -373,11 +434,11 @@ function AdminReelsContent() {
         </div>
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4.5">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Em Processamento</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Fila de Reels</p>
           <p className="mt-1 font-heading text-3xl font-black text-amber-300">{stats.generating}</p>
           <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-400/80">
             <span className={`h-2 w-2 rounded-full bg-amber-400 ${stats.generating > 0 ? "animate-ping" : ""}`} />
-            Fila de renderização ativa
+            Aguardando ou renderizando
           </div>
         </div>
 
@@ -497,6 +558,11 @@ function AdminReelsContent() {
             const cat = CATEGORY_CONFIG[item.category as PostCategory] || { label: "Plantão", color: "#FF5E00" };
             const isGenerating = item.status === "generating" || triggeringSlug === item.slug;
             const isReady = item.status === "ready";
+            const isQueued = isGenerating && !!item.is_queued;
+            const remainingSeconds = getEstimatedRemainingSeconds(item, clock);
+            const isStalled = isGenerating && isReelStalled(item, clock);
+            const isRetrying = isGenerating && (item.attempts || 0) > 1;
+            const isEstimateOverdue = isGenerating && !isQueued && remainingSeconds === 0 && !isStalled;
 
             return (
               <div
@@ -537,7 +603,7 @@ function AdminReelsContent() {
                       ) : isGenerating ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-black backdrop-blur-sm animate-pulse">
                           <span className="h-1.5 w-1.5 rounded-full bg-black" />
-                          GERANDO
+                          {isQueued ? "NA FILA" : "GERANDO"}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-black/60 border border-white/20 px-2 py-0.5 text-[10px] font-bold uppercase text-gray-300 backdrop-blur-sm">
@@ -590,15 +656,23 @@ function AdminReelsContent() {
                     )}
 
                     {isGenerating && (
-                      <div className="mt-3 flex items-center gap-2 border-t border-amber-500/20 pt-2 text-[11px] text-amber-300 font-semibold">
-                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
-                        Sintetizando voz e renderizando quadros...
+                      <div className={`mt-3 border-t pt-3 text-xs font-semibold ${isStalled || isRetrying ? "border-red-500/30 text-red-300" : "border-amber-500/20 text-amber-300"}`}>
+                        <div className="flex items-center gap-2">
+                          {isStalled || isRetrying ? <span aria-hidden="true">⚠</span> : <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />}
+                          <span>{isQueued ? `Na fila${item.queue_position ? ` · posição ${item.queue_position}` : ""}` : "Sintetizando voz e renderizando quadros"}</span>
+                        </div>
+                        <p className="mt-1 pl-5 text-[11px] font-medium text-gray-300">
+                          Tempo estimado restante: {formatCountdown(remainingSeconds)}
+                        </p>
+                        {isEstimateOverdue && <p className="mt-1 pl-5 text-[11px] text-amber-200">A estimativa foi ultrapassada; o worker ainda informa que está processando.</p>}
+                        {isRetrying && <p className="mt-1 pl-5 text-[11px]">A geração foi retomada automaticamente. Tentativa {item.attempts}.</p>}
+                        {isStalled && <p role="alert" className="mt-1 pl-5 text-[11px]">Possível travamento detectado. Atualize a lista; se o status não mudar, cancele e tente gerar novamente.</p>}
                       </div>
                     )}
 
                     {item.status === "failed" && !isGenerating && (
                       <p className="mt-2 text-[11px] text-red-400">
-                        {item.error || "Houve uma falha na renderização anterior."}
+                        {item.error || "Houve uma falha na renderização anterior."}{item.attempts ? ` Tentativas: ${item.attempts}.` : ""}
                       </p>
                     )}
                   </div>
@@ -633,7 +707,7 @@ function AdminReelsContent() {
                         disabled
                         className="flex-1 rounded-lg border border-amber-500/30 bg-amber-500/20 px-3 py-2 text-center text-xs font-black uppercase text-amber-300 cursor-not-allowed"
                       >
-                        {cancellingSlug === item.slug ? "Cancelando..." : "Processando..."}
+                        {cancellingSlug === item.slug ? "Cancelando..." : isQueued ? "Aguardando fila..." : "Processando..."}
                       </button>
                       <button
                         type="button"
@@ -819,6 +893,7 @@ function AdminReelsContent() {
                     reelJobId={selectedReel.reel_job_id}
                     initialTitle={selectedReel.copys.youtube.title}
                     initialDescription={selectedReel.copys.youtube.description}
+                    initialTags={selectedReel.copys.youtube.tags}
                     ready={selectedReel.status === "ready"}
                     onPublicationUpdate={refreshReelsSilently}
                   />

@@ -69,6 +69,9 @@ export async function POST(request: Request) {
       || !["private", "unlisted", "public"].includes(body.visibility)) {
       return reply({ error: "Revise o título (até 100 caracteres), a descrição (até 5.000) e confirme o envio. Não use os caracteres < e >." }, 400);
     }
+    const tags = Array.isArray(body.tags)
+      ? body.tags.filter((tag: unknown): tag is string => typeof tag === "string").map((tag: string) => tag.trim()).filter(Boolean).slice(0, 15)
+      : [];
     publicUpload = body.visibility === "public";
     const connection = await getYouTubeConnection(true);
     if (body.channelId !== connection.channel.id) return reply({ error: "O canal de destino mudou. Atualize a conexão antes de enviar." }, 409);
@@ -98,7 +101,7 @@ export async function POST(request: Request) {
     const { error: markError } = await db.from("reel_youtube_publications").update({ status: "uploading", updated_at: new Date().toISOString() }).eq("id", publicationId);
     if (markError) throw new Error("Não foi possível registrar o início do envio.");
     uploadStarted = true;
-    videoId = await uploadYouTubeVideo(connection, file, record.title, record.description, record.visibility);
+    videoId = await uploadYouTubeVideo(connection, file, record.title, record.description, record.visibility, tags);
     const { data: saved, error: saveError } = await db.from("reel_youtube_publications").update({ status: "uploaded", video_id: videoId, updated_at: new Date().toISOString() }).eq("id", publicationId).select("*").single();
     if (saveError) throw new Error("O vídeo foi recebido pelo YouTube, mas o histórico não pôde ser atualizado.");
     await finishSocialDelivery(deliveryClaim, record.visibility === "public" ? "published" : "submitted", videoId);

@@ -6,8 +6,8 @@ import type { ReelYouTubePublication } from "@/lib/types/database";
 
 type Channel = { id: string; title: string; url: string };
 
-export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescription, ready, onPublicationUpdate }: {
-  postId: string; reelJobId?: string; initialTitle: string; initialDescription: string; ready: boolean;
+export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescription, initialTags = [], ready, onPublicationUpdate }: {
+  postId: string; reelJobId?: string; initialTitle: string; initialDescription: string; initialTags?: string[]; ready: boolean;
   onPublicationUpdate?: () => void;
 }) {
   const inFlight = useRef(false);
@@ -80,7 +80,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
       const response = await fetch("/api/admin/reels/youtube", {
         method: "POST",
         headers: { Authorization: `Bearer ${await token()}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, reelJobId, channelId: channel.id, title, description, visibility, confirmed, repost: isReposting }),
+        body: JSON.stringify({ postId, reelJobId, channelId: channel.id, title, description, tags: initialTags, visibility, confirmed, repost: isReposting }),
         signal: AbortSignal.timeout(295_000),
       });
       const data = await response.json().catch(() => null);

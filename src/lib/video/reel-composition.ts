@@ -485,10 +485,21 @@ export function generateCompositionHtml(options: CompositionOptions): string {
       window.__timelines["main"] = tl;
 
       const subtitles = ${subtitlesJson};
+      const captionBox = document.getElementById("captionBox");
+      const captionContainer = document.querySelector(".caption-container");
+
+      function setCaption(text) {
+        if (!captionBox || !captionContainer) return;
+        captionBox.textContent = text;
+        for (let fontSize = 40; fontSize >= 24; fontSize -= 2) {
+          captionBox.style.fontSize = fontSize + "px";
+          if (captionBox.scrollHeight <= captionContainer.clientHeight - 20) return;
+        }
+      }
+
       subtitles.forEach((s) => {
         tl.call(() => {
-          const el = document.getElementById("captionBox");
-          if (el) el.textContent = s.text;
+          setCaption(s.text);
         }, null, s.start);
       });
 

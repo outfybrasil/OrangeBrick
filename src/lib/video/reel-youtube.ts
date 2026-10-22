@@ -141,10 +141,10 @@ export async function stageYouTubeVideo(session: string, signedUrl: string, jobI
   return { name: `${jobId}.mp4`, mimetype: "video/mp4", s3key: file.s3key };
 }
 
-export async function uploadYouTubeVideo(connection: Awaited<ReturnType<typeof getYouTubeConnection>>, file: Awaited<ReturnType<typeof stageYouTubeVideo>>, title: string, description: string, visibility: string) {
+export async function uploadYouTubeVideo(connection: Awaited<ReturnType<typeof getYouTubeConnection>>, file: Awaited<ReturnType<typeof stageYouTubeVideo>>, title: string, description: string, visibility: string, tags: string[] = []) {
   const data = toolData(await callComposio("COMPOSIO_MULTI_EXECUTE_TOOL", {
     session_id: connection.session,
-    tools: [{ tool_slug: "YOUTUBE_MULTIPART_UPLOAD_VIDEO", arguments: { title, description, categoryId: "20", privacyStatus: visibility, videoFile: file } }],
+    tools: [{ tool_slug: "YOUTUBE_MULTIPART_UPLOAD_VIDEO", arguments: { title, description, tags: tags.filter(Boolean).slice(0, 15), categoryId: "20", privacyStatus: visibility, videoFile: file } }],
     sync_response_to_workbench: false,
     current_step: "UPLOADING_VIDEO",
   }, 100_000));
