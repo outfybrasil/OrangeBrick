@@ -3,13 +3,11 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AdminAttention } from "@/components/admin/AdminAttention";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { PublishConfirmModal } from "@/components/admin/PublishConfirmModal";
 import { isAdminUser } from "@/lib/auth";
 import { createDataClient } from "@/lib/supabase/client";
 import type { Post, PostCategory } from "@/lib/types/database";
-import type { EditorialReviewJob } from "@/lib/server/editorial-review-jobs";
 
 type StatusFilter = "all" | "production" | "scheduled" | "published";
 
@@ -109,11 +107,6 @@ export default function AdminDashboard() {
   const [batchCategory, setBatchCategory] = useState<PostCategory | "">("");
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
   const [isBatchDeleting, setIsBatchDeleting] = useState(false);
-  const [startingReview, setStartingReview] = useState(false);
-  const [reviewJobs, setReviewJobs] = useState<EditorialReviewJob[]>([]);
-  const [reviewNotice, setReviewNotice] = useState<string | null>(null);
-  const [reviewReload, setReviewReload] = useState(0);
-  const previousReviewStatuses = useRef(new Map<string, string>());
   const [showBatchDeleteModal, setShowBatchDeleteModal] = useState(false);
   const [batchDeleteError, setBatchDeleteError] = useState<string | null>(null);
   const [stats, setStats] = useState<StatsData | null>(null);
@@ -121,24 +114,6 @@ export default function AdminDashboard() {
   const [recentDrafts, setRecentDrafts] = useState<PaginatedPost[]>([]);
   const [weeklyPublished, setWeeklyPublished] = useState<{ published_at: string | null }[]>([]);
   const [categoryDistributionRaw, setCategoryDistribution] = useState<{ category: string; count: number }[]>([]);
-
-  const startEditorialReview = async () => {
-    if (startingReview || !selectedIds.length) return;
-    setStartingReview(true);
-    setReviewNotice(null);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Sua sessão expirou. Entre novamente para revisar as matérias.");
-      const response = await fetch("/api/admin/posts/review", { method: "POST", headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ ids: selectedIds }) });
-      const result = await response.json() as { jobs?: EditorialReviewJob[]; skipped?: number; error?: string };
-      if (!response.ok || !result.jobs) throw new Error(result.error || "Não foi possível iniciar a revisão.");
-      for (const job of result.jobs) previousReviewStatuses.current.set(job.id, job.status);
-      setReviewJobs(result.jobs);
-      setReviewReload((value) => value + 1);
-      setReviewNotice(result.jobs.length ? `Revisão iniciada para ${result.jobs.length} matéria(s). Elas continuam como rascunhos. ${result.skipped ? `${result.skipped} publicada(s) ou arquivada(s) foram ignoradas.` : ""}` : "Não há rascunhos ativos nessa seleção.");
-    } catch (error) { setReviewNotice(errorMessage(error, "Não foi possível iniciar a revisão.")); }
-    finally { setStartingReview(false); }
-  };
 
   const updateSelectedCategory = async () => {
     if (!batchCategory || selectedIds.length === 0) return;
@@ -419,32 +394,6 @@ export default function AdminDashboard() {
     }
   }, [currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder, isLoading, fetchPosts]);
 
-  useEffect(() => {
-    if (isLoading) return;
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const poll = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session || cancelled) return;
-        const response = await fetch("/api/admin/posts/review", { headers: { Authorization: `Bearer ${session.access_token}` }, cache: "no-store" });
-        const result = await response.json() as { jobs?: EditorialReviewJob[] };
-        if (!response.ok || !result.jobs || cancelled) return;
-        const finished = result.jobs.some((job) => ["queued", "running"].includes(previousReviewStatuses.current.get(job.id) || "") && !["queued", "running"].includes(job.status));
-        previousReviewStatuses.current = new Map(result.jobs.map((job) => [job.id, job.status]));
-        setReviewJobs(result.jobs);
-        if (finished) {
-          publicationReviewVersion.current++;
-          setPublishCandidates(null);
-          setPublicationReview([]);
-          await Promise.all([fetchPosts(currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder), fetchStats()]);
-        }
-        if (result.jobs.some((job) => ["queued", "running"].includes(job.status))) timer = setTimeout(() => void poll(), 8000);
-      } catch { if (!cancelled) timer = setTimeout(() => void poll(), 15000); }
-    };
-    void poll();
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [isLoading, reviewReload, supabase, currentPage, filterCategory, filterStatus, selectedEditor, searchQuery, sortOrder, fetchPosts, fetchStats]);
 
   const publishedCount = stats?.publishedCount ?? 0;
   const inProductionCount = stats?.draftsCount ?? 0;
@@ -565,26 +514,6 @@ export default function AdminDashboard() {
       </section>
 
       {/* CORPO DA PÁGINA (TABELA + SIDEBAR DE WIDGETS) */}
-      <AdminAttention />
-      {(reviewNotice || reviewJobs.length > 0) && (
-        <section aria-label="Revisão automática" className="mb-6 rounded-xl border border-white/10 bg-[#0e0f14] p-4">
-          <h2 className="font-heading text-base font-bold text-white">Revisão automática</h2>
-          <p className="mt-2 text-xs text-gray-400">A IA confere fontes, texto e imagens. As matérias permanecem como rascunhos e precisam da sua confirmação para publicar.</p>
-          {reviewNotice && <p role="status" className="mt-3 text-sm text-brand-orange">{reviewNotice}</p>}
-          <ul className="mt-3 space-y-3">
-            {reviewJobs.slice(0, 15).map((job) => (
-              <li key={job.id} className="rounded-lg bg-white/[0.03] p-3 text-xs">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Link href={`/admin/edit?id=${job.post_id}`} className="font-bold text-white hover:text-brand-orange">{job.report.title || posts.find((post) => post.id === job.post_id)?.title || "Matéria na fila de revisão"}</Link>
-                  <span className={job.status === "completed" ? "text-emerald-400" : "text-brand-orange"}>{{ queued: "Na fila", running: "Conferindo fontes e imagens…", completed: "Pronta para confirmar", needs_review: "Revisão necessária", failed: "Tente novamente", skipped: "Matéria alterada" }[job.status]}</span>
-                </div>
-                {job.report.changes?.length ? <p className="mt-2 text-gray-400">{job.report.changes.join(" · ")}</p> : null}
-                {job.report.remaining?.map((reason, index) => <p key={index} className="mt-2 text-amber-300">{reason}</p>)}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
       <div className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_20rem]">
 
         {/* FILA EDITORIAL */}
@@ -663,8 +592,7 @@ export default function AdminDashboard() {
             <div className="flex flex-col gap-3 border-b border-brand-orange/25 bg-brand-orange/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between">
               <strong className="text-xs text-brand-orange">{selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}</strong>
               <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => void startEditorialReview()} disabled={startingReview || isBatchDeleting || isBatchUpdating || Boolean(publishingId)} className="min-h-11 rounded-lg bg-brand-orange px-3.5 text-xs font-bold text-white disabled:opacity-50">{startingReview ? "Iniciando revisão…" : "Revisar e corrigir selecionadas"}</button>
-                <button type="button" onClick={() => void preparePublication(selectedIds)} disabled={Boolean(publishingId) || reviewingPublication || isBatchDeleting || isBatchUpdating || startingReview || reviewJobs.some((job) => selectedIds.includes(job.post_id) && ["queued", "running"].includes(job.status))} className="inline-flex min-h-11 items-center rounded-lg bg-emerald-500 px-3.5 text-xs font-bold text-black disabled:opacity-50">Publicar selecionadas</button>
+                <button type="button" onClick={() => void preparePublication(selectedIds)} disabled={Boolean(publishingId) || reviewingPublication || isBatchDeleting || isBatchUpdating} className="inline-flex min-h-11 items-center rounded-lg bg-emerald-500 px-3.5 text-xs font-bold text-black disabled:opacity-50">Publicar selecionadas</button>
                 <button
                   type="button"
                   onClick={() => {
