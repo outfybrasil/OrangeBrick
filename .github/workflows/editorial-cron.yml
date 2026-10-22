@@ -1,0 +1,29 @@
+name: editorial-cron
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    timeout-minutes: 6
+    steps:
+      - name: Publicar matérias agendadas
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail --show-error --silent --max-time 120 --get \
+            "https://orangebrick.blog/api/cron/editorial-scheduler" \
+            -H "Authorization: Bearer $CRON_SECRET"
+      - name: Processar fila de revisões editoriais
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail --show-error --silent --max-time 240 --get \
+            "https://orangebrick.blog/api/cron/editorial-review" \
+            -H "Authorization: Bearer $CRON_SECRET"
