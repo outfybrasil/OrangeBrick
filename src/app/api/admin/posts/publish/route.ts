@@ -93,8 +93,16 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === "40001" ? 409 : 500 });
   refreshPublicationPages();
   after(async () => {
-    const results = await Promise.allSettled((current as Post[]).filter((post) => post.slug).map((post) => triggerReelGeneration(post.slug)));
-    for (const result of results) if (result.status === "rejected") console.error("[Reels] Falha ao solicitar vídeo após publicação:", result.reason);
+    const orderedPosts = [...(current as Post[])]
+      .filter((post) => post.slug)
+      .sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    for (const post of orderedPosts) {
+      try {
+        await triggerReelGeneration(post.slug);
+      } catch (error) {
+        console.error(`[Reels] Falha ao solicitar geração após publicação de ${post.slug}:`, error);
+      }
+    }
   });
   return NextResponse.json({ posts: data }, { headers: { "Cache-Control": "private, no-store" } });
 }

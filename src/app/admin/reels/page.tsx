@@ -127,6 +127,7 @@ function AdminReelsContent() {
   const [triggeringSlug, setTriggeringSlug] = useState<string | null>(null);
   const [cancellingSlug, setCancellingSlug] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const hasGeneratingReel = items.some((item) => item.status === "generating") || triggeringSlug !== null;
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
@@ -647,7 +648,7 @@ function AdminReelsContent() {
                   ) : (
                     <button
                       type="button"
-                      disabled={triggeringSlug === item.slug}
+                      disabled={triggeringSlug === item.slug || hasGeneratingReel}
                       onClick={() => handleGenerate(item.slug)}
                       className="w-full rounded-lg px-3 py-2 text-center text-xs font-black uppercase transition-all bg-white/[0.08] text-white hover:bg-brand-orange hover:text-black border border-white/10"
                     >
