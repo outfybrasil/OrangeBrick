@@ -124,10 +124,11 @@ export default function AdminLogin() {
                 />
               </label>
 
-              <label className="block">
-                <span className="mb-2 block text-xs font-bold text-gray-300">Senha</span>
+              <div className="block">
+                <label htmlFor="admin-password" className="mb-2 block text-xs font-bold text-gray-300">Senha</label>
                 <span className="relative block">
                   <input
+                    id="admin-password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     value={password}
@@ -141,11 +142,12 @@ export default function AdminLogin() {
                     onClick={() => setShowPassword((current) => !current)}
                     className="absolute right-1 top-1/2 min-h-11 -translate-y-1/2 rounded-lg px-3 text-xs font-bold text-gray-500 transition-colors hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? "Ocultar" : "Mostrar"}
                   </button>
                 </span>
-              </label>
+              </div>
 
               <button
                 type="submit"

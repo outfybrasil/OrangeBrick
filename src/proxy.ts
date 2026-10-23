@@ -10,14 +10,19 @@ function contentSecurityPolicy(nonce: string) {
   const mediaOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
     ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
     : "";
+  const publisherId = process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ?? "";
+  const adSlots = [process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID, process.env.NEXT_PUBLIC_ADSENSE_ARTICLE_SLOT_ID];
+  const adsenseEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === "true" && /^pub-\d{16}$/.test(publisherId);
+  const adsenseHasSlots = adsenseEnabled && adSlots.some((slotId) => /^\d+$/.test(slotId ?? ""));
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
-    "style-src 'self' 'unsafe-inline'",
+    `script-src 'self' 'nonce-${nonce}'${adsenseHasSlots ? " 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:" : ""} https://www.googletagmanager.com https://plausible.io${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
+    `style-src 'self' 'nonce-${nonce}'`,
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://plausible.io https://*.plausible.io",
-    "frame-src 'self' https://www.youtube-nocookie.com",
+    `connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://plausible.io https://*.plausible.io${adsenseHasSlots ? " https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.googleadservices.com" : ""}`,
+    `frame-src 'self' https://www.youtube-nocookie.com${adsenseHasSlots ? " https://*.google.com https://*.doubleclick.net https://*.googlesyndication.com" : ""}`,
     `media-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
     "object-src 'none'",
     "frame-ancestors 'none'",

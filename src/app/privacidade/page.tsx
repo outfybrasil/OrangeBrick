@@ -14,7 +14,7 @@ export default function PrivacidadePage() {
         <header className="border-b border-white/10 pb-8">
           <p className="text-sm font-bold text-brand-orange">Privacidade no Orange Brick</p>
           <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">Política de Privacidade</h1>
-          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 15 de outubro de 2026</p>
+          <p className="mt-3 text-xs text-[#8f919a]">Última atualização: 23 de outubro de 2026</p>
         </header>
 
         <PrivacyControls />
@@ -72,7 +72,9 @@ export default function PrivacidadePage() {
             A sessão de login utiliza cookies necessários de autenticação e segurança. O navegador também
             guarda sua escolha de privacidade. O identificador persistente usado para métricas e reações só
             é criado após “Permitir métricas” e é apagado quando você escolhe “Só essenciais” ou revoga a
-            preferência nesta página.
+            preferência nesta página. Quando o AdSense estiver ativado, a escolha de publicidade será
+            armazenada separadamente; ao revogá-la, os anúncios deixam de ser carregados após a atualização
+            da página.
           </p>
           <p className="mt-4">
             Ao alternar entre contas, este navegador pode guardar os perfis e as sessões das contas
@@ -88,7 +90,7 @@ export default function PrivacidadePage() {
 
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li><strong className="text-white">Supabase:</strong> autenticação, banco, armazenamento e funções de backend.</li>
-            <li><strong className="text-white">Google:</strong> autenticação social escolhida pelo usuário.</li>
+            <li><strong className="text-white">Google:</strong> autenticação social escolhida pelo usuário e, quando ativado, veiculação de publicidade pelo AdSense.</li>
             <li><strong className="text-white">Vercel:</strong> hospedagem e entrega do site.</li>
             <li><strong className="text-white">Telegram:</strong> aviso operacional enviado à equipe quando chega um contato; o aviso não inclui nome, e-mail, assunto ou mensagem.</li>
             <li><strong className="text-white">Serviços de push do navegador:</strong> entrega de notificações quando ativadas.</li>
@@ -97,6 +99,19 @@ export default function PrivacidadePage() {
             O Orange Brick não vende dados pessoais. Imagens carregadas de domínios externos podem informar
             o IP do visitante ao respectivo provedor; por isso, novas publicações da comunidade não aceitam
             mais URLs arbitrárias de imagem.
+          </p>
+          <p className="mt-4">
+            Quando a publicidade do Google AdSense estiver ativada, o Google e seus parceiros poderão usar
+            cookies e identificadores semelhantes para exibir anúncios, limitar repetições, medir resultados
+            e, conforme a escolha de privacidade, personalizar anúncios com base nas visitas a este e a outros
+            sites. Você pode desativar anúncios personalizados nas{" "}
+            <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" className="text-brand-orange underline underline-offset-4">
+              Configurações de anúncios do Google
+            </a>{" "}
+            ou consultar opções de recusa em{" "}
+            <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-brand-orange underline underline-offset-4">
+              aboutads.info
+            </a>.
           </p>
         </section>
 

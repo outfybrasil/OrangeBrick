@@ -29,6 +29,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useToast } from "@/lib/contexts/ToastContext";
+import { AdSenseUnit } from "@/components/ui/AdSenseUnit";
 
 
 type ContentBlock = EditorialBlock;
@@ -484,6 +485,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
 
           <div className="mt-8" style={{ fontSize: `${readerScale}em` }}>
             <PostContent post={post} />
+            {post.is_published && <AdSenseUnit slotId={process.env.NEXT_PUBLIC_ADSENSE_ARTICLE_SLOT_ID ?? ""} />}
           </div>
 
           {editorialSignals.quote && <blockquote className="border-y border-brand-orange/40 py-7 sm:py-9">

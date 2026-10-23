@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, useCallback, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
 import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
@@ -16,6 +16,7 @@ import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
 import { saoPauloNewsDate, selectFeaturedNews } from "@/lib/news-query";
 import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { AdSenseUnit } from "@/components/ui/AdSenseUnit";
 
 interface NewsFeedProps {
   featuredDay?: string;
@@ -354,14 +355,18 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             )}
 
             <div className="space-y-0">
-              {topPosts.map((post) => (
-                <NewsCardCompact
-                  key={post.id}
-                  post={post}
-                  stats={stats[post.id] || EMPTY_STATS}
-                  headingLevel={headingLevel === "h1" ? "h2" : "h3"}
-                  onReactionChange={handleReactionChange}
-                />
+              {topPosts.map((post, index) => (
+                <Fragment key={post.id}>
+                  <NewsCardCompact
+                    post={post}
+                    stats={stats[post.id] || EMPTY_STATS}
+                    headingLevel={headingLevel === "h1" ? "h2" : "h3"}
+                    onReactionChange={handleReactionChange}
+                  />
+                  {!isFiltering && headingLevel === "h1" && featuredDay && index === 3 && (
+                    <AdSenseUnit slotId={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID ?? ""} />
+                  )}
+                </Fragment>
               ))}
             </div>
 

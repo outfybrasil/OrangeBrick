@@ -24,6 +24,8 @@ function createValidDraft(overrides?: Partial<GeneratedDraftResult>): GeneratedD
   };
   const bodyText = `${"contexto jornalístico apurado e confirmado sobre o anúncio ".repeat(200)}\n\n**Fonte:** [Rockstar Games](${source.url})`;
   const coverUrl = "https://assets.rockstargames.com/news/gta-vi-key-art-lucia-jason.jpg";
+  const firstBodyImageUrl = "https://assets.rockstargames.com/news/gta-vi-story-1.jpg";
+  const secondBodyImageUrl = "https://assets.rockstargames.com/news/gta-vi-story-2.jpg";
 
   return {
     post: {
@@ -33,7 +35,9 @@ function createValidDraft(overrides?: Partial<GeneratedDraftResult>): GeneratedD
       summary: "A Rockstar Games divulgou novos detalhes confirmados sobre a produção e a narrativa de GTA VI para a geração atual.",
       body: JSON.stringify([
         { id: "intro", type: "text", content: "A Rockstar Games confirmou hoje novos detalhes oficiais sobre Grand Theft Auto VI." },
+        { id: "image-1", type: "image", url: firstBodyImageUrl, alt: "Captura oficial de Grand Theft Auto VI com Lucia e Jason.", caption: "Imagem oficial do primeiro material da matéria." },
         { id: "dev", type: "text", content: bodyText },
+        { id: "image-2", type: "image", url: secondBodyImageUrl, alt: "Outro momento oficial de Grand Theft Auto VI durante a narrativa.", caption: "Segundo ângulo oficial complementar à capa." },
       ]),
       category: "breaking",
       image_url: coverUrl,
@@ -61,6 +65,20 @@ function createValidDraft(overrides?: Partial<GeneratedDraftResult>): GeneratedD
         sha256: "b".repeat(64),
         alt: "Arte promocional oficial de Grand Theft Auto VI com Lucia e Jason.",
         caption: "Material visual divulgado oficialmente pela Rockstar Games.",
+      },
+      {
+        url: firstBodyImageUrl,
+        sourceUrl: source.url,
+        sha256: "c".repeat(64),
+        alt: "Captura oficial de Grand Theft Auto VI com Lucia e Jason.",
+        caption: "Imagem oficial do primeiro material da matéria.",
+      },
+      {
+        url: secondBodyImageUrl,
+        sourceUrl: source.url,
+        sha256: "d".repeat(64),
+        alt: "Outro momento oficial de Grand Theft Auto VI durante a narrativa.",
+        caption: "Segundo ângulo oficial complementar à capa.",
       },
     ],
     ...overrides,
@@ -262,15 +280,17 @@ test("should_validate_image_url_before_publishing", async () => {
 });
 
 // 10. should_not_require_two_internal_images_to_publish
-test("should_not_require_two_internal_images_to_publish", () => {
-  const draftSingleCover = createValidDraft();
-  // Valid draft with only cover and 0 body images
-  const parsedBody = JSON.parse(draftSingleCover.post.body) as Array<{ type: string }>;
-  const bodyWithoutImages = parsedBody.filter((b) => b.type !== "image");
-  draftSingleCover.post.body = JSON.stringify(bodyWithoutImages);
+test("should_require_two_internal_images_to_publish", () => {
+  for (const count of [0, 1]) {
+    const draft = createValidDraft();
+    const parsedBody = JSON.parse(draft.post.body) as Array<{ type: string }>;
+    const textBlocks = parsedBody.filter((block) => block.type !== "image");
+    const imageBlocks = parsedBody.filter((block) => block.type === "image").slice(0, count);
+    draft.post.body = JSON.stringify([...textBlocks.slice(0, 1), ...imageBlocks, ...textBlocks.slice(1)]);
 
-  const blockers = editorialPublicationBlockers(draftSingleCover);
-  assert.deepEqual(blockers, [], "Matéria com apenas 1 capa excelente e 0 imagens internas deve publicar normalmente.");
+    const blockers = editorialPublicationBlockers(draft);
+    assert.ok(blockers.some((blocker) => blocker.includes("duas imagens internas distintas")), `${count} imagens internas devem bloquear a publicação.`);
+  }
 });
 
 // End-to-End Simulation: Candidate Fallback & Publication
@@ -318,17 +338,18 @@ test("e2e_simulation_candidate_fallback_and_publish", async () => {
   assert.equal(cascade.attempts[1].reason, "http_status_404");
 
   // Step 3: Build draft with selected cover and auto-fixed alt
-  const draft = createValidDraft({
-    verifiedImages: [
-      {
-        url: cascade.selected.url,
-        sourceUrl: "https://www.rockstargames.com/news/article/gta-vi-official-update",
-        sha256: "c".repeat(64),
-        alt: "Arte promocional de Grand Theft Auto VI com Lucia e Jason.",
-        caption: "Material visual oficial divulgado pela Rockstar Games.",
-      },
-    ],
-  });
+  const draft = createValidDraft();
+  const bodyImageEvidence = draft.verifiedImages?.filter((image) => image.url !== draft.post.image_url) || [];
+  draft.verifiedImages = [
+    {
+      url: cascade.selected.url,
+      sourceUrl: "https://www.rockstargames.com/news/article/gta-vi-official-update",
+      sha256: "e".repeat(64),
+      alt: "Arte promocional de Grand Theft Auto VI com Lucia e Jason.",
+      caption: "Material visual oficial divulgado pela Rockstar Games.",
+    },
+    ...bodyImageEvidence,
+  ];
   draft.post.image_url = cascade.selected.url;
   draft.post.image_alt = cascade.selected.alt || "";
 

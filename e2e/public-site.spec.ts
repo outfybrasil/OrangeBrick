@@ -84,3 +84,36 @@ test("internal page links resolve without client or server errors", async ({ pag
 
   expect(failures).toEqual([]);
 });
+
+test("admin API rejects anonymous requests", async ({ request, baseURL }) => {
+  const response = await request.get(new URL("/api/admin/posts", baseURL!).toString());
+  expect(response.status()).toBe(401);
+});
+
+test("admin login exposes required labeled credentials", async ({ page }) => {
+  await page.goto("/admin/login", { waitUntil: "load" });
+  await expect(page.getByLabel("E-mail")).toHaveAttribute("type", "email");
+  await expect(page.getByLabel("E-mail")).toHaveAttribute("required", "");
+  const password = page.getByLabel("Senha", { exact: true });
+  await expect(password).toHaveAttribute("type", "password");
+  await expect(password).toHaveAttribute("required", "");
+  await expect(page.getByRole("button", { name: "Mostrar senha" })).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: "Mostrar senha" }).click();
+  await expect(password).toHaveAttribute("type", "text");
+  await expect(page.getByRole("button", { name: "Ocultar senha" })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("HTML responses use nonce-based script and style policies", async ({ page }) => {
+  const response = await page.goto("/", { waitUntil: "load" });
+  const policy = response?.headers()["content-security-policy"] ?? "";
+  const nonce = policy.match(/style-src 'self' 'nonce-([^']+)'/)?.[1];
+  const styleDirective = policy.split(";").map((directive) => directive.trim()).find((directive) => directive.startsWith("style-src ")) ?? "";
+  expect(nonce).toMatch(/^[a-f0-9]{32}$/);
+  expect(policy).toContain(`script-src 'self' 'nonce-${nonce}'`);
+  expect(policy).toContain("style-src-attr 'unsafe-inline'");
+  expect(styleDirective).not.toContain("'unsafe-inline'");
+  const inlineElements = await page.locator("script:not([src]):not([type='application/ld+json']), style").evaluateAll((elements) =>
+    elements.map((element) => (element as HTMLElement).nonce),
+  );
+  expect(inlineElements.every((elementNonce) => elementNonce === nonce)).toBe(true);
+});

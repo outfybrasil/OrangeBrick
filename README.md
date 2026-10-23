@@ -34,6 +34,12 @@ A validação completa é:
 npm run check
 ```
 
+## Google AdSense
+
+O carregamento dos anúncios fica desligado por padrão. Ao conectar o domínio ao AdSense, defina `NEXT_PUBLIC_ADSENSE_PUBLISHER_ID=pub-...` em Production na Vercel; isso publica o registro `ads.txt` em `/ads.txt` para verificação. Mantenha `NEXT_PUBLIC_ADSENSE_ENABLED=false` durante a análise. Crie unidades de display responsivas para a home e para matérias e informe os IDs em `NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID` e `NEXT_PUBLIC_ADSENSE_ARTICLE_SLOT_ID`. Depois que o domínio estiver aprovado e as mensagens de consentimento estiverem configuradas na conta, defina `NEXT_PUBLIC_ADSENSE_ENABLED=true` e faça um novo deploy. O código converte o ID para `ca-pub-...` e carrega a unidade somente após a autorização de publicidade.
+
+Use apenas as unidades manuais da home e das matérias; não ative Auto Ads globalmente, pois o site também tem páginas de comunidade, conta e administração. Para tráfego do Espaço Econômico Europeu, Reino Unido ou Suíça, configure uma CMP certificada pelo Google integrada ao TCF antes de habilitar anúncios personalizados. A página de privacidade e as preferências do site devem refletir as opções realmente ativadas na conta.
+
 ## Supabase
 
 Instale ou use a CLI via `npx`, conecte o projeto e aplique a migração:

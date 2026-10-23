@@ -103,9 +103,9 @@ test("distinct recognized publishers satisfy the source cross-check with verifie
   assert.deepEqual(blockers, []);
 });
 
-test("blocks malformed word count, repeated body images and missing source evidence", () => {
+test("blocks short articles, repeated body images and missing source evidence", () => {
   const draft = validDraft();
-  draft.wordCount = 749;
+  draft.wordCount = 4;
   draft.sources = [];
   draft.post.editorial_sources = [];
   draft.post.body = JSON.stringify([
@@ -117,7 +117,7 @@ test("blocks malformed word count, repeated body images and missing source evide
 
   const blockers = editorialPublicationBlockers(draft);
 
-  assert.ok(blockers.some((blocker) => blocker.includes("750 a 1.000 palavras")));
+  assert.ok(blockers.some((blocker) => blocker.includes("menos de 700 palavras")));
   assert.ok(blockers.some((blocker) => blocker.includes("imagens internas distintas")));
   assert.ok(blockers.some((blocker) => blocker.includes("editoras independentes")));
 });
