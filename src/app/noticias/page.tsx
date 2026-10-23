@@ -155,7 +155,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   let secondaryPosts: Post[] = [];
   let remainingPosts: Post[] = [];
 
-  heroPost = selectFeaturedNews(allPosts, saoPauloNewsDate(new Date()));
+  heroPost = selectFeaturedNews(allPosts, saoPauloNewsDate(new Date())) ?? allPosts[0] ?? null;
   if (heroPost) {
     const withoutHero = allPosts.filter((post) => post.id !== heroPost?.id);
     secondaryPosts = withoutHero.slice(0, 3);
