@@ -13,7 +13,7 @@ import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats, type Rea
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { PLATFORMS_CONFIG, PlatformSlug } from "@/lib/types/platform";
-import { selectFeaturedNews } from "@/lib/news-query";
+import { saoPauloNewsDate, selectFeaturedNews } from "@/lib/news-query";
 import { normalizeAuthorTag } from "@/lib/content-validation";
 import { BackToTop } from "@/components/ui/BackToTop";
 
@@ -144,7 +144,10 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   };
 
   const isFiltering = hasRequestedFilters;
-  const heroPost = !isFiltering && featuredDay && posts.length >= 3 ? selectFeaturedNews(posts, featuredDay) : null;
+  const heroPost = !isFiltering && posts.length >= 3 ? selectFeaturedNews(posts, featuredDay) ?? posts[0] : null;
+  const heroIsToday = Boolean(
+    heroPost?.published_at && featuredDay && saoPauloNewsDate(heroPost.published_at) === featuredDay
+  );
 
   const sidePosts = useMemo(() => heroPost ? posts.filter((post) => post.id !== heroPost.id).slice(0, 2) : [], [heroPost, posts]);
 
@@ -189,7 +192,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   const renderHeroSection = () => {
     if (isFiltering || !heroPost || sidePosts.length < 2) return null;
 
-    const heroBadge = "Matéria do dia";
+    const heroBadge = heroIsToday ? "Matéria do dia" : "Em destaque";
 
     return (
       <div className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
