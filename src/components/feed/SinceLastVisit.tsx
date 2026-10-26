@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 
 const LAST_VISIT_KEY = "orange-brick-last-visit";
@@ -52,19 +53,22 @@ export function SinceLastVisit() {
     void loadSummary();
   }, [supabase]);
 
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en");
+
   if (!summary) return null;
 
   return (
     <aside
-      aria-label="Novidades desde sua última visita"
+      aria-label={isEn ? "Updates since your last visit" : "Novidades desde sua última visita"}
       className="flex flex-col gap-3 border-y border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="min-w-0">
-        <p className="text-xs font-bold text-white">Desde sua última visita</p>
+        <p className="text-xs font-bold text-white">{isEn ? "Since your last visit" : "Desde sua última visita"}</p>
         <p className="mt-1 text-sm text-gray-300">
-          {summary.articles} {summary.articles === 1 ? "matéria nova" : "matérias novas"}
+          {summary.articles} {isEn ? (summary.articles === 1 ? "new article" : "new articles") : (summary.articles === 1 ? "matéria nova" : "matérias novas")}
           <span aria-hidden="true"> · </span>
-          {summary.conversations} {summary.conversations === 1 ? "nova conversa" : "novas conversas"}
+          {summary.conversations} {isEn ? (summary.conversations === 1 ? "new conversation" : "new conversations") : (summary.conversations === 1 ? "nova conversa" : "novas conversas")}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-4 text-xs font-bold">
@@ -75,17 +79,17 @@ export function SinceLastVisit() {
             data-home-target="articles"
             className="min-h-11 content-center text-brand-orange transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
-            Ver matérias
+            {isEn ? "View articles" : "Ver matérias"}
           </Link>
         )}
         {summary.conversations > 0 && (
           <Link
-            href="/brickboard"
+            href={isEn ? "/en/brickboard" : "/brickboard"}
             data-home-event="return_summary"
             data-home-target="conversations"
             className="min-h-11 content-center text-brand-orange transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
-            Ver conversas
+            {isEn ? "View conversations" : "Ver conversas"}
           </Link>
         )}
       </div>

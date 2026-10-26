@@ -6,13 +6,8 @@ import { SearchBox } from "@/components/ui/SearchBox";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { UserNav } from "@/components/auth/UserNav";
 import { useAuth } from "@/lib/contexts/AuthContext";
-
-const NAV_LINKS = [
-  { href: "/", label: "Início" },
-  { href: "/noticias", label: "Notícias" },
-  { href: "/lancamentos", label: "Lançamentos" },
-  { href: "/brickboard", label: "BrickBoard" },
-];
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { getDictionary, type Locale } from "@/lib/i18n";
 
 interface SiteHeaderProps {
   variant?: "full" | "strip";
@@ -22,11 +17,25 @@ interface SiteHeaderProps {
 export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderProps) {
   const pathname = usePathname();
   const { profile } = useAuth();
+  const currentLocale: Locale = pathname.startsWith("/en") ? "en" : "pt";
+  const dict = getDictionary(currentLocale);
+
+  const homeHref = currentLocale === "en" ? "/en" : "/";
+  const newsHref = currentLocale === "en" ? "/en/noticias" : "/noticias";
+  const releasesHref = currentLocale === "en" ? "/en/lancamentos" : "/lancamentos";
+  const communityHref = currentLocale === "en" ? "/en/brickboard" : "/brickboard";
   const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
-  const navLinks = [...NAV_LINKS, { href: myProfileHref, label: "Meu Brick" }];
+
+  const navLinks = [
+    { href: homeHref, label: currentLocale === "en" ? "Home" : "Início" },
+    { href: newsHref, label: dict.nav.news },
+    { href: releasesHref, label: dict.nav.releases },
+    { href: communityHref, label: dict.nav.community },
+    { href: myProfileHref, label: profile?.username ? (currentLocale === "en" ? "Profile" : "Meu Perfil") : dict.nav.myAccount },
+  ];
 
   const isLinkActive = (href: string) => {
-    if (href === "/") return pathname === "/";
+    if (href === "/" || href === "/en") return pathname === href;
     return pathname.startsWith(href);
   };
 
@@ -34,21 +43,23 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0d0e12]/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
         <Link
-          href="/"
+          href={homeHref}
           className="group flex min-h-11 shrink-0 items-center gap-2.5"
-          aria-label="Ir para a página inicial do Orange Brick"
+          aria-label={currentLocale === "en" ? "Go to Orange Brick home page" : "Ir para a página inicial do Orange Brick"}
         >
           <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-300 group-hover:scale-105 sm:h-5 sm:w-auto" />
         </Link>
 
         {variant === "full" && (
-          <div className="relative mx-4 hidden w-full max-w-xs flex-1 lg:block"><SearchBox key={`site-header-${searchQuery}`} initialQuery={searchQuery} compact /></div>
+          <div className="relative mx-4 hidden w-full max-w-xs flex-1 lg:block">
+            <SearchBox key={`site-header-${searchQuery}`} initialQuery={searchQuery} compact />
+          </div>
         )}
 
-        <nav className="ml-auto flex shrink-0 items-center gap-1" aria-label="Navegação principal">
+        <nav className="ml-auto flex shrink-0 items-center gap-1.5" aria-label={currentLocale === "en" ? "Main navigation" : "Navegação principal"}>
           <Link
             href="/busca"
-            aria-label="Buscar no Orange Brick"
+            aria-label={dict.common.search}
             className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-300 transition-colors hover:text-white lg:hidden"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -73,7 +84,8 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
             );
           })}
 
-          <div className="ml-1 pl-1 border-l border-white/10 flex items-center">
+          <div className="flex items-center gap-2 border-l border-white/10 pl-2">
+            <LanguageSwitcher currentLocale={currentLocale} />
             <UserNav />
           </div>
         </nav>

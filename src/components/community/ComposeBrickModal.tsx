@@ -18,6 +18,7 @@ export interface ComposeBrickModalProps {
   initialMediaUrl?: string | null;
   onRemoveInitialMedia?: () => void;
   initialMode?: "default" | "attachment";
+  isEn?: boolean;
 }
 
 const PLATFORM_LIST = ["PS5", "XSX", "SWITCH 2", "PC", "MOBILE"] as const;
@@ -30,6 +31,7 @@ export function ComposeBrickModal({
   initialMediaUrl = null,
   onRemoveInitialMedia,
   initialMode = "default",
+  isEn = false,
 }: ComposeBrickModalProps) {
   const [content, setContent] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -207,13 +209,13 @@ export function ComposeBrickModal({
             </svg>
           </span>
           <h1 id="compose-brick-title" className="text-[17px] font-[720] tracking-[-0.2px] text-[#f1f1f3] m-0">
-            Criar novo Brick
+            {isEn ? "Create new Brick" : "Criar novo Brick"}
           </h1>
           <button
             type="button"
             onClick={handleClose}
             disabled={isPublishing}
-            aria-label="Fechar"
+            aria-label={isEn ? "Close" : "Fechar"}
             className="ml-auto w-8 h-8 rounded grid place-items-center text-[#a1a2a9] hover:bg-white/[0.04] hover:text-white transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-[17px] h-[17px]">
@@ -225,7 +227,7 @@ export function ComposeBrickModal({
         <form onSubmit={handlePublish} className="flex flex-col flex-1">
           <div className="p-4 sm:p-6 pb-0 flex-1">
             <label className="sr-only" htmlFor="brick-text">
-              Texto da publicação
+              {isEn ? "Post content" : "Texto da publicação"}
             </label>
             <textarea
               id="brick-text"
@@ -235,13 +237,13 @@ export function ComposeBrickModal({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               disabled={isPublishing}
-              placeholder="Qual é a sua leitura sobre esse anúncio ou jogo?"
+              placeholder={isEn ? "What's your take on this announcement or game?" : "Qual é a sua leitura sobre esse anúncio ou jogo?"}
               aria-describedby="brick-guidance brick-count"
               className="block w-full h-[110px] resize-y min-h-[84px] max-h-[230px] p-3.5 bg-[#0e0f12] border border-[#303137] rounded-[14px] text-[#f1f1f3] text-sm leading-[1.5] placeholder:text-[#81828a] outline-none focus-visible:outline-2 focus-visible:outline-[#ff6500]"
             />
             <div className="flex justify-between gap-3.5 pt-2 pb-4 text-xs text-[#96979e]">
               <span id="brick-guidance" className="max-w-[360px] leading-relaxed">
-                Debate firme, ataque pessoal não. Marque spoilers antes de publicar.
+                {isEn ? "Strong debate, no personal attacks. Mark spoilers before publishing." : "Debate firme, ataque pessoal não. Marque spoilers antes de publicar."}
               </span>
               <span
                 id="brick-count"
@@ -271,7 +273,7 @@ export function ComposeBrickModal({
                   <path d="m8 12 6-6a4 4 0 0 1 6 6l-8 8a6 6 0 0 1-9-8l7-7" />
                   <path d="m8 16 8-8" />
                 </svg>
-                {mediaUrl ? "Trocar imagem" : "Anexar imagem"}
+                {mediaUrl ? (isEn ? "Change image" : "Trocar imagem") : (isEn ? "Attach image" : "Anexar imagem")}
               </button>
               <input
                 ref={fileInputRef}
@@ -312,14 +314,14 @@ export function ComposeBrickModal({
                   disabled={isPublishing}
                   className="bg-transparent border-0 text-[#aaa] text-xs hover:text-white transition-colors cursor-pointer px-1"
                 >
-                  Remover
+                  {isEn ? "Remove" : "Remover"}
                 </button>
               </div>
             )}
 
             {mediaUrl && (
               <div className="mb-4 space-y-1.5">
-                <label htmlFor="brick-image-alt" className="text-xs font-semibold text-gray-200">Descrição da imagem</label>
+                <label htmlFor="brick-image-alt" className="text-xs font-semibold text-gray-200">{isEn ? "Image description" : "Descrição da imagem"}</label>
                 <textarea
                   id="brick-image-alt"
                   value={mediaAlt}
@@ -330,9 +332,9 @@ export function ComposeBrickModal({
                   disabled={isPublishing}
                   aria-describedby="brick-image-alt-help"
                   className="w-full resize-y border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none"
-                  placeholder="Descreva o que aparece na imagem"
+                  placeholder={isEn ? "Describe what is shown in the image" : "Descreva o que aparece na imagem"}
                 />
-                <p id="brick-image-alt-help" className="text-xs leading-5 text-gray-400">Necessária para que pessoas que não veem a imagem entendam o anexo. Até 300 caracteres.</p>
+                <p id="brick-image-alt-help" className="text-xs leading-5 text-gray-400">{isEn ? "Required for accessibility. Up to 300 characters." : "Necessária para que pessoas que não veem a imagem entendam o anexo. Até 300 caracteres."}</p>
               </div>
             )}
 
@@ -342,7 +344,7 @@ export function ComposeBrickModal({
                   <img loading="lazy" decoding="async" src={attachedArticle.image_url} alt="" className="w-14 h-12 object-cover shrink-0" referrerPolicy="no-referrer" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6500]">Matéria anexada</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6500]">{isEn ? "Attached article" : "Matéria anexada"}</span>
                   <p className="truncate text-xs font-bold text-[#f1f1f3]">{attachedArticle.title}</p>
                 </div>
                 <button
@@ -351,15 +353,15 @@ export function ComposeBrickModal({
                   disabled={isPublishing}
                   className="bg-transparent border-0 text-[#aaa] text-xs hover:text-white transition-colors cursor-pointer px-1"
                 >
-                  Remover
+                  {isEn ? "Remove" : "Remover"}
                 </button>
               </div>
             )}
 
             <p className="mb-2 text-[11px] font-bold text-[#b1b1b7] tracking-[0.045em]">
-              PLATAFORMA <span className="ml-1 text-[#85868d] font-normal tracking-normal">OPCIONAL · escolha uma ou mais</span>
+              {isEn ? "PLATFORM" : "PLATAFORMA"} <span className="ml-1 text-[#85868d] font-normal tracking-normal">{isEn ? "OPTIONAL · choose one or more" : "OPCIONAL · escolha uma ou mais"}</span>
             </p>
-            <div className="flex gap-2 flex-wrap pb-4" aria-label="Selecionar plataformas">
+            <div className="flex gap-2 flex-wrap pb-4" aria-label={isEn ? "Select platforms" : "Selecionar plataformas"}>
               {PLATFORM_LIST.map((platform) => {
                 const isSelected = selectedPlatforms.includes(platform);
                 return (
@@ -389,7 +391,7 @@ export function ComposeBrickModal({
                 disabled={isPublishing}
                 className="w-4 h-4 accent-[#ff6500] rounded-sm cursor-pointer"
               />
-              <span className="text-xs text-[#a6a7ad]">Esta publicação contém spoilers</span>
+              <span className="text-xs text-[#a6a7ad]">{isEn ? "This post contains spoilers" : "Esta publicação contém spoilers"}</span>
             </label>
           </div>
 
@@ -400,7 +402,7 @@ export function ComposeBrickModal({
               disabled={isPublishing}
               className="h-[42px] px-4 text-[13px] font-bold text-[#b6b6bd] hover:text-white hover:bg-white/[0.04] transition-colors rounded-[2px]"
             >
-              Cancelar
+              {isEn ? "Cancel" : "Cancelar"}
             </button>
             <button
               type="submit"
@@ -411,7 +413,7 @@ export function ComposeBrickModal({
                   : "border border-[#ff6500] bg-[#ff6500] text-[#19120e] hover:bg-[#ff7921]"
               }`}
             >
-              {isPublishing ? "Publicando…" : "Publicar Brick"}
+              {isPublishing ? (isEn ? "Publishing…" : "Publicando…") : (isEn ? "Publish Brick" : "Publicar Brick")}
             </button>
           </footer>
         </form>

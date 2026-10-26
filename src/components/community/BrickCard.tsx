@@ -30,9 +30,10 @@ interface BrickCardProps {
   getComments: (postId: string) => Promise<CommunityComment[]>;
   isFollowingAuthor?: boolean;
   onToggleFollowAuthor?: () => void;
+  isEn?: boolean;
 }
 
-const reportReasons = [
+const reportReasonsPt = [
   "Spam ou publicidade",
   "Assédio ou ataque pessoal",
   "Discurso de ódio",
@@ -41,7 +42,16 @@ const reportReasons = [
   "Outro conteúdo inadequado",
 ];
 
-export function BrickCard({ post, compactArticle = false, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor }: BrickCardProps) {
+const reportReasonsEn = [
+  "Spam or advertising",
+  "Harassment or personal attack",
+  "Hate speech",
+  "Spoiler without warning",
+  "Misleading information",
+  "Other inappropriate content",
+];
+
+export function BrickCard({ post, compactArticle = false, onReaction, onDeletePost, onEditPost, onSharePost, onAddComment, onDeleteComment, onToggleCommentLike, getComments, isFollowingAuthor = false, onToggleFollowAuthor, isEn = false }: BrickCardProps) {
   const { user } = useAuth();
   const { toggleSaveBrick, isBrickSaved } = useSavedBricks();
   const isSaved = isBrickSaved(post.id);
@@ -68,6 +78,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
   const [reactionError, setReactionError] = useState<string | null>(null);
   const [isReacting, setIsReacting] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: "post" | "comment"; id: string } | null>(null);
+  const reportReasons = isEn ? reportReasonsEn : reportReasonsPt;
   const [reportReason, setReportReason] = useState(reportReasons[0]);
   const [isReporting, setIsReporting] = useState(false);
   const reportDialogRef = useModalDialog<HTMLDivElement>(
@@ -195,13 +206,13 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
   };
 
   const handleQuickShare = async () => {
-    const url = `${window.location.origin}/brickboard?post=${encodeURIComponent(post.id)}`;
+    const url = `${window.location.origin}${isEn ? "/en" : ""}/brickboard?post=${encodeURIComponent(post.id)}`;
     if (navigator.share) {
       await navigator.share({ title: "Orange Brick", text: post.content.slice(0, 160), url }).catch(() => undefined);
       return;
     }
     await navigator.clipboard.writeText(url);
-    setShareNotice("Link copiado para a área de transferência!");
+    setShareNotice(isEn ? "Link copied to clipboard!" : "Link copiado para a área de transferência!");
     window.setTimeout(() => setShareNotice(""), 3000);
   };
 
@@ -372,7 +383,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               )}
               {post.is_pinned && (
                 <span className="border-b border-yellow-400/60 px-1 py-0.5 font-subtitle text-xs font-bold text-yellow-300">
-                  Fixo
+                  {isEn ? "Pinned" : "Fixo"}
                 </span>
               )}
             </div>
@@ -388,7 +399,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               type="button"
               onClick={onToggleFollowAuthor}
               aria-pressed={isFollowingAuthor}
-              title={isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}
+              title={isFollowingAuthor ? (isEn ? "Unfollow author" : "Deixar de seguir autor") : (isEn ? "Follow author" : "Seguir autor")}
               className={`grid size-8 place-items-center border transition-colors ${
                 isFollowingAuthor
                   ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
@@ -404,7 +415,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
                 </svg>
               )}
-              <span className="sr-only">{isFollowingAuthor ? "Deixar de seguir autor" : "Seguir autor"}</span>
+              <span className="sr-only">{isFollowingAuthor ? (isEn ? "Unfollow author" : "Deixar de seguir autor") : (isEn ? "Follow author" : "Seguir autor")}</span>
             </button>
           )}
 
@@ -412,7 +423,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              aria-label="Mais opções"
+              aria-label={isEn ? "More options" : "Mais opções"}
               aria-expanded={isMenuOpen}
               className="flex size-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
             >
@@ -438,7 +449,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                   className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <BookmarkIcon filled={isSaved} className={`size-4 ${isSaved ? "text-brand-orange" : "text-gray-400"}`} />
-                  {isSaved ? "Remover dos salvos" : "Salvar Brick"}
+                  {isSaved ? (isEn ? "Remove from saved" : "Remover dos salvos") : (isEn ? "Save Brick" : "Salvar Brick")}
                 </button>
                 {isPostOwner ? (
                   <>
@@ -457,7 +468,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                         <svg className="size-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Editar publicação
+                        {isEn ? "Edit post" : "Editar publicação"}
                       </button>
                     )}
                     {onDeletePost && (
@@ -474,7 +485,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                         <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Excluir publicação
+                        {isEn ? "Delete post" : "Excluir publicação"}
                       </button>
                     )}
                   </>
@@ -493,7 +504,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                       <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                       </svg>
-                      {reportedContent.includes(`post:${post.id}`) ? "Denúncia enviada" : "Denunciar publicação"}
+                      {reportedContent.includes(`post:${post.id}`) ? (isEn ? "Report submitted" : "Denúncia enviada") : (isEn ? "Report post" : "Denunciar publicação")}
                     </button>
                     <button
                       type="button"
@@ -507,7 +518,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                       <svg className="size-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
-                      Copiar link do post
+                      {isEn ? "Copy post link" : "Copiar link do post"}
                     </button>
                   </>
                 )}
@@ -531,7 +542,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
 
       {post.attached_article && (
         <Link
-          href={`/posts/${post.attached_article.slug}`}
+          href={`${isEn ? "/en" : ""}/posts/${post.attached_article.slug}`}
           className={`group/article mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C] ${compactArticle ? "flex items-center" : "block"}`}
         >
           {post.attached_article.image_url && (
@@ -547,7 +558,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
           )}
           <div className="min-w-0 space-y-1 p-3 sm:p-3.5">
             <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
-              {compactArticle ? "Matéria compartilhada" : post.attached_article.category || "Orange Brick"}
+              {compactArticle ? (isEn ? "Shared article" : "Matéria compartilhada") : post.attached_article.category || "Orange Brick"}
             </span>
             <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
               {post.attached_article.title}
@@ -568,12 +579,12 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             <span className="break-words text-xs font-subtitle font-bold text-gray-400">
-              Republicado de {post.shared_post.original_author_name}
+              {isEn ? "Reposted from " : "Republicado de "}{post.shared_post.original_author_name}
             </span>
           </div>
           <Link
-            href={`/brickboard?post=${encodeURIComponent(post.shared_post.original_post_id)}`}
-            aria-label={`Abrir publicação original de ${post.shared_post.original_author_name}`}
+            href={`${isEn ? "/en" : ""}/brickboard?post=${encodeURIComponent(post.shared_post.original_post_id)}`}
+            aria-label={isEn ? `Open original post by ${post.shared_post.original_author_name}` : `Abrir publicação original de ${post.shared_post.original_author_name}`}
             className="group flex min-w-0 items-start gap-3 border border-white/10 bg-white/[0.02] p-3 transition-colors hover:border-brand-orange/40 hover:bg-white/[0.04]"
           >
             <img loading="lazy" decoding="async"
@@ -607,11 +618,11 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               </div>
               {post.shared_post.original_attached_article && (
                 <span className="mt-1 block truncate text-xs font-semibold text-brand-orange">
-                  Matéria: {post.shared_post.original_attached_article.title}
+                  {isEn ? "Article: " : "Matéria: "}{post.shared_post.original_attached_article.title}
                 </span>
               )}
               <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-gray-400 transition-colors group-hover:text-white">
-                Abrir publicação original <span aria-hidden="true">→</span>
+                {isEn ? "Open original post" : "Abrir publicação original"} <span aria-hidden="true">→</span>
               </span>
             </div>
           </Link>
@@ -641,14 +652,14 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
       {isShareOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-2.5">
           <p className="text-xs font-subtitle leading-relaxed text-gray-400">
-            Seu comentário fica em destaque; a publicação original aparece compacta, sem repetir a imagem.
+            {isEn ? "Your comment is featured; the original post appears compact, without repeating the image." : "Seu comentário fica em destaque; a publicação original aparece compacta, sem repetir a imagem."}
           </p>
           <form onSubmit={handleSubmitShare} className="flex flex-col gap-2 xs:flex-row">
             <input
               type="text"
               value={shareText}
               onChange={(e) => setShareText(e.target.value)}
-              placeholder="Seu comentário sobre isso..."
+              placeholder={isEn ? "Your thoughts on this..." : "Seu comentário sobre isso..."}
               maxLength={280}
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-emerald-500"
               autoFocus
@@ -658,7 +669,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               disabled={!shareText.trim() || isSharing}
               className="min-h-11 shrink-0 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-emerald-500 disabled:opacity-40"
             >
-              {isSharing ? "..." : "Republicar"}
+              {isSharing ? "..." : (isEn ? "Repost" : "Republicar")}
             </button>
           </form>
           {shareError && <p role="alert" className="text-xs text-red-300">{shareError}</p>}
@@ -668,7 +679,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
       {isCommentOpen && (
         <div className="pt-3 border-t border-brand-orange-muted/15 space-y-3">
           <div className="flex items-center justify-between text-xs font-subtitle text-gray-400">
-            <span className="font-bold text-white">Respostas ({totalCommentCount})</span>
+            <span className="font-bold text-white">{isEn ? `Replies (${totalCommentCount})` : `Respostas (${totalCommentCount})`}</span>
           </div>
 
           <div>
@@ -678,7 +689,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               </div>
             ) : comments.length === 0 ? (
               <p className="text-xs text-gray-500 font-subtitle py-2 italic text-center">
-                Seja o primeiro a responder a esse Brick!
+                {isEn ? "Be the first to reply to this Brick!" : "Seja o primeiro a responder a esse Brick!"}
               </p>
             ) : (
               threadedComments.map((c) => {
@@ -715,10 +726,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                                   setCommentError(null);
                                   window.setTimeout(() => commentInputRef.current?.focus(), 0);
                                 }}
-                                aria-label={`Responder a ${c.author_name}`}
+                                aria-label={isEn ? `Reply to ${c.author_name}` : `Responder a ${c.author_name}`}
                                 className="min-h-9 px-2 text-xs font-semibold text-gray-500 transition-colors hover:text-white"
                               >
-                                Responder
+                                {isEn ? "Reply" : "Responder"}
                               </button>
                             )}
                             {!canDeleteComment && user && (
@@ -728,15 +739,15 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                                 disabled={reportedContent.includes(`comment:${c.id}`)}
                                 className="min-h-9 px-2 text-xs font-semibold text-gray-500 hover:text-white disabled:text-emerald-300"
                               >
-                                {reportedContent.includes(`comment:${c.id}`) ? "Enviado" : "Denunciar"}
+                                {reportedContent.includes(`comment:${c.id}`) ? (isEn ? "Sent" : "Enviado") : (isEn ? "Report" : "Denunciar")}
                               </button>
                             )}
                             {canDeleteComment && (
                               <button
                                 onClick={() => setCommentPendingDelete(c.id)}
-                                aria-label="Apagar resposta"
+                                aria-label={isEn ? "Delete reply" : "Apagar resposta"}
                                 className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-red-300/60 transition-colors hover:bg-red-500/10 hover:text-red-200"
-                                title="Apagar resposta"
+                                title={isEn ? "Delete reply" : "Apagar resposta"}
                               >
                                 <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
@@ -752,7 +763,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                                 ? "bg-brand-orange/10 text-brand-orange"
                                 : "text-gray-500 hover:bg-white/5 hover:text-white"
                             }`}
-                            aria-label="Curtir resposta"
+                            aria-label={isEn ? "Like reply" : "Curtir resposta"}
                           >
                             <svg aria-hidden="true" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={c.user_has_liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1.8}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />
@@ -774,8 +785,8 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
 
           {replyTarget && (
             <div role="status" className="flex items-center justify-between gap-3 border border-brand-orange/20 bg-brand-orange/[0.06] px-3 py-2 text-xs text-gray-300">
-              <span>Respondendo a <strong className="text-white">{replyTarget.author_name}</strong></span>
-              <button type="button" onClick={() => setReplyToCommentId(null)} className="min-h-9 px-2 font-bold text-brand-orange hover:text-white">Cancelar</button>
+              <span>{isEn ? "Replying to " : "Respondendo a "}<strong className="text-white">{replyTarget.author_name}</strong></span>
+              <button type="button" onClick={() => setReplyToCommentId(null)} className="min-h-9 px-2 font-bold text-brand-orange hover:text-white">{isEn ? "Cancel" : "Cancelar"}</button>
             </div>
           )}
           {commentError && <p role="alert" className="border border-red-400/25 bg-red-500/10 px-3 py-2 text-xs text-red-200">{commentError}</p>}
@@ -788,9 +799,9 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 setCommentText(e.target.value);
                 setCommentError(null);
               }}
-              placeholder={replyTarget ? `Resposta para ${replyTarget.author_name}...` : "Escreva sua resposta..."}
+              placeholder={replyTarget ? (isEn ? `Reply to ${replyTarget.author_name}...` : `Resposta para ${replyTarget.author_name}...`) : (isEn ? "Write your reply..." : "Escreva sua resposta...")}
               maxLength={280}
-              aria-label={replyTarget ? `Resposta para ${replyTarget.author_name}` : "Sua resposta ao Brick"}
+              aria-label={replyTarget ? (isEn ? `Reply to ${replyTarget.author_name}` : `Resposta para ${replyTarget.author_name}`) : (isEn ? "Your reply to the Brick" : "Sua resposta ao Brick")}
               disabled={isSubmittingComment}
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange"
             />
@@ -799,7 +810,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               disabled={!commentText.trim() || isSubmittingComment}
               className="min-h-11 shrink-0 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange/90 disabled:opacity-40"
             >
-              {isSubmittingComment ? "Enviando…" : "Responder"}
+              {isSubmittingComment ? (isEn ? "Sending…" : "Enviando…") : (isEn ? "Reply" : "Responder")}
             </button>
           </form>
         </div>
@@ -825,10 +836,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             tabIndex={-1}
             className="w-full max-w-md rounded-2xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
-            <h3 id={`report-title-${reportTarget.id}`} className="text-lg font-bold text-white">Por que você está denunciando?</h3>
-            <p className="mt-2 text-sm leading-6 text-[#b8bac2]">A denúncia vai para a moderação. O autor não verá quem enviou.</p>
+            <h3 id={`report-title-${reportTarget.id}`} className="text-lg font-bold text-white">{isEn ? "Why are you reporting?" : "Por que você está denunciando?"}</h3>
+            <p className="mt-2 text-sm leading-6 text-[#b8bac2]">{isEn ? "The report goes to moderation. The author won't see who sent it." : "A denúncia vai para a moderação. O autor não verá quem enviou."}</p>
             <fieldset className="mt-5 space-y-2">
-              <legend className="sr-only">Motivo da denúncia</legend>
+              <legend className="sr-only">{isEn ? "Report reason" : "Motivo da denúncia"}</legend>
               {reportReasons.map((reason) => (
                 <label key={reason} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-white/10 px-3 text-sm text-gray-200 transition-colors hover:border-brand-orange/40">
                   <input
@@ -845,10 +856,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             </fieldset>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setReportTarget(null)} disabled={isReporting} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] hover:bg-white/5 hover:text-white disabled:opacity-50">
-                Cancelar
+                {isEn ? "Cancel" : "Cancelar"}
               </button>
               <button type="button" onClick={() => void handleReport()} disabled={isReporting} className="min-h-11 rounded-xl bg-brand-orange px-4 text-sm font-bold text-white hover:bg-brand-orange/90 disabled:opacity-50">
-                {isReporting ? "Enviando…" : "Enviar denúncia"}
+                {isReporting ? (isEn ? "Sending…" : "Enviando…") : (isEn ? "Submit report" : "Enviar denúncia")}
               </button>
             </div>
           </div>
@@ -872,10 +883,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-comment-title-${commentPendingDelete}`} className="text-lg font-bold text-white">
-              Apagar comentário?
+              {isEn ? "Delete comment?" : "Apagar comentário?"}
             </h3>
             <p id={`delete-brick-comment-description-${commentPendingDelete}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
-              Esta ação não pode ser desfeita.
+              {isEn ? "This action cannot be undone." : "Esta ação não pode ser desfeita."}
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button
@@ -884,7 +895,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 disabled={isDeletingComment}
                 className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
               >
-                Cancelar
+                {isEn ? "Cancel" : "Cancelar"}
               </button>
               <button
                 type="button"
@@ -892,7 +903,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 disabled={isDeletingComment}
                 className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isDeletingComment ? "Apagando…" : "Apagar"}
+                {isDeletingComment ? (isEn ? "Deleting…" : "Apagando…") : (isEn ? "Delete" : "Apagar")}
               </button>
             </div>
           </div>
@@ -915,10 +926,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-post-title-${post.id}`} className="text-lg font-bold text-white">
-              Apagar publicação?
+              {isEn ? "Delete post?" : "Apagar publicação?"}
             </h3>
             <p id={`delete-brick-post-description-${post.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
-              Esta ação não pode ser desfeita e removerá a publicação permanentemente.
+              {isEn ? "This action cannot be undone and will permanently remove the post." : "Esta ação não pode ser desfeita e removerá a publicação permanentemente."}
             </p>
             {deletePostError && <p role="alert" className="mt-3 text-sm text-red-300">{deletePostError}</p>}
             <div className="mt-5 grid grid-cols-2 gap-2">
@@ -928,7 +939,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 disabled={isDeletingPost}
                 className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
               >
-                Cancelar
+                {isEn ? "Cancel" : "Cancelar"}
               </button>
               <button
                 type="button"
@@ -936,7 +947,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 disabled={isDeletingPost}
                 className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isDeletingPost ? "Apagando…" : "Apagar"}
+                {isDeletingPost ? (isEn ? "Deleting…" : "Apagando…") : (isEn ? "Delete" : "Apagar")}
               </button>
             </div>
           </div>
@@ -960,13 +971,13 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id={`edit-brick-post-title-${post.id}`} className="font-subtitle text-base font-bold text-white">
-                Editar Brick
+                {isEn ? "Edit Brick" : "Editar Brick"}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsEditOpen(false)}
                 disabled={isSavingEdit}
-                aria-label="Fechar modal de edição"
+                aria-label={isEn ? "Close edit modal" : "Fechar modal de edição"}
                 className="grid size-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -985,12 +996,12 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                   }}
                   maxLength={280}
                   rows={4}
-                  placeholder="O que está acontecendo no mundo dos games?"
+                  placeholder={isEn ? "What's happening in gaming?" : "O que está acontecendo no mundo dos games?"}
                   className="w-full resize-none rounded-xl border border-white/10 bg-[#0B0C10] p-3.5 font-body text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange"
                   autoFocus
                 />
                 <div className="mt-2 flex items-center justify-between text-xs">
-                  <span className="text-gray-400 font-body">Texto limitado a 280 caracteres</span>
+                  <span className="text-gray-400 font-body">{isEn ? "Limited to 280 characters" : "Texto limitado a 280 caracteres"}</span>
                   <span
                     className={`font-subtitle font-bold ${
                       editContent.length > 260
@@ -1014,14 +1025,14 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                   disabled={isSavingEdit}
                   className="min-h-10 rounded-xl px-4 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
                 >
-                  Cancelar
+                  {isEn ? "Cancel" : "Cancelar"}
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingEdit || editContent.trim().length === 0 || editContent.length > 280 || editContent.trim() === post.content.trim()}
                   className="min-h-10 rounded-xl bg-brand-orange px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {isSavingEdit ? "Salvando…" : "Salvar"}
+                  {isSavingEdit ? (isEn ? "Saving…" : "Salvando…") : (isEn ? "Save" : "Salvar")}
                 </button>
               </div>
             </form>

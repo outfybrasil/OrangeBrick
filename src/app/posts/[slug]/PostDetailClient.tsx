@@ -2,7 +2,8 @@
 
 import { safeLinkUrl } from "@/lib/safe-url";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { getDictionary } from "@/lib/i18n";
 import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { parseMarkdownToReact } from "@/lib/markdown";
 import { ReactionBar } from "@/components/reactions/ReactionBar";
@@ -34,8 +35,11 @@ import { AdSenseUnit } from "@/components/ui/AdSenseUnit";
 
 type ContentBlock = EditorialBlock;
 
-function PostContent({ post }: { post: Post }) {
-  const blocks = useMemo<ContentBlock[]>(() => parseEditorialBlocks(post.body), [post.body]);
+function PostContent({ post, isEn }: { post: Post; isEn?: boolean }) {
+  const contentBody = (isEn && post.body_en)
+    ? (typeof post.body_en === "string" ? post.body_en : JSON.stringify(post.body_en))
+    : post.body;
+  const blocks = useMemo<ContentBlock[]>(() => parseEditorialBlocks(contentBody), [contentBody]);
 
   if (blocks.length > 0 && !(blocks.length === 1 && blocks[0].id === "legacy-body")) {
     const renderedUrls = new Set<string>();
@@ -105,7 +109,7 @@ return (
     );
   }
 
-  return <div>{parseMarkdownToReact(post.body)}</div>;
+  return <div>{parseMarkdownToReact(contentBody)}</div>;
 }
 
 function getEditorialSignals(post: Post) {
@@ -117,14 +121,6 @@ function getEditorialSignals(post: Post) {
   const uniqueSources = sourcePool.filter((source, index) => sourcePool.findIndex((item) => item.url === source.url) === index).slice(0, 6);
   return { quote: structuredQuote?.text || null, quoteAuthor: structuredQuote?.author, quoteRole: structuredQuote?.role, quoteSourceUrl: structuredQuote?.source_url, sources: uniqueSources };
 }
-
-const INFORMATION_STATUS_LABELS: Record<Post["information_status"], string> = {
-  confirmed: "Informação confirmada",
-  developing: "Notícia em desenvolvimento",
-  rumor: "Rumor não confirmado",
-  updated: "Matéria atualizada",
-  corrected: "Matéria corrigida",
-};
 
 function DraftQualityBanner({ post }: { post: Post }) {
   const blocks = useMemo<EditorialBlock[]>(() => parseEditorialBlocks(post.body), [post.body]);
@@ -178,25 +174,32 @@ function DraftQualityBanner({ post }: { post: Post }) {
   );
 }
 
-type RelatedPost = { id: string; slug: string; title: string; summary: string; image_url: string | null; category: string; published_at: string | null };
+type RelatedPost = { id: string; slug: string; slug_en?: string | null; title: string; title_en?: string | null; summary: string; summary_en?: string | null; image_url: string | null; category: string; published_at: string | null };
 
 interface PostArticleProps {
   post: Post;
   stats: PostStats;
   relatedPosts?: RelatedPost[];
+  isEn?: boolean;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
   breaking: "Plantão",
-  hardware: "Hardware",
-  industry: "Indústria",
-  modding: "Modding",
+  hardware: "Hard News",
+  industry: "Radar",
+  modding: "Gambiarra",
   review: "Review",
   opinion: "Opinião",
 };
 
-export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps) {
+export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: PostArticleProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isEn = isEnProp ?? (pathname?.startsWith("/en") || false);
+  const dict = getDictionary(isEn ? "en" : "pt");
+  const postTitle = (isEn && post.title_en) || post.title;
+  const postSummary = (isEn && post.summary_en) || post.summary;
+  const postSlug = (isEn && post.slug_en) || post.slug;
   const hasBodyMedia = useMemo(() => parseEditorialBlocks(post.body).some((block) => block.type === "image" || block.type === "video"), [post.body]);
   const supabase = useMemo(() => createDataClient(), []);
   const { user } = useAuth();
@@ -271,8 +274,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
     setIsBrickModalOpen(true);
   };
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : `/posts/${post.slug}`;
-  const shareText = `Confira no Orange Brick: "${post.title}"`;
+  const shareUrl = typeof window !== "undefined" ? window.location.href : (isEn ? `/en/posts/${postSlug}` : `/posts/${post.slug}`);
+  const shareText = isEn ? `Check out on Orange Brick: "${postTitle}"` : `Confira no Orange Brick: "${postTitle}"`;
   const articleWordCount = useMemo(() => post.body.replace(/<[^>]+>/g, " ").replace(/https?:\/\/\S+/g, " ").trim().split(/\s+/).filter(Boolean).length, [post.body]);
   const readingMinutes = Math.max(1, Math.ceil(articleWordCount / 200));
 
@@ -287,11 +290,11 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
   const handleQuickShare = async () => {
     const url = window.location.href;
     if (navigator.share) {
-      await navigator.share({ title: post.title, text: post.summary, url }).catch(() => undefined);
+      await navigator.share({ title: postTitle, text: postSummary, url }).catch(() => undefined);
       return;
     }
     await navigator.clipboard.writeText(url);
-    toast.success("Link copiado para a área de transferência!");
+    toast.success(dict.post.linkCopied);
   };
 
   const handleShareSocial = (platform: "whatsapp" | "twitter" | "telegram") => {
@@ -312,13 +315,13 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
     () => ({
       id: post.id,
       slug: post.slug,
-      title: post.title,
-      summary: post.summary,
+      title: postTitle,
+      summary: postSummary,
       image_url: post.image_url || undefined,
       category: post.category,
       topic_id: post.topic_id,
     }),
-    [post]
+    [post, postSummary, postTitle]
   );
 
   const conversationUrl = useMemo(() => {
@@ -328,13 +331,13 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
 
     const params = new URLSearchParams({
       attach: post.slug,
-      title: post.title,
-      summary: post.summary,
+      title: postTitle,
+      summary: postSummary,
       cat: post.category,
     });
     if (post.image_url) params.set("img", post.image_url);
     return `/brickboard?${params.toString()}`;
-  }, [conversationCount, post]);
+  }, [conversationCount, post, postSummary, postTitle]);
 
   return (
     <div className="min-h-dvh min-w-0 bg-background-void pb-16 text-white sm:pb-24">
@@ -345,18 +348,18 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               if (typeof window !== "undefined" && window.history.length > 1) {
                 router.back();
               } else {
-                router.push("/");
+                router.push(isEn ? "/en" : "/");
               }
             }}
             className="flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:gap-2 sm:text-xs"
           >
-            ← <span className="hidden xs:inline">Voltar</span>
+            ← <span className="hidden xs:inline">{dict.post.back}</span>
           </button>
           <button
             type="button"
             aria-label="Ir para a página inicial"
             className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
-            onClick={() => router.push("/")}
+            onClick={() => router.push(isEn ? "/en" : "/")}
           >
             <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-200 group-hover:scale-105 sm:h-5 sm:w-auto" />
           </button>
@@ -366,11 +369,11 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
       <main id="conteudo-principal" tabIndex={-1} className="mx-auto w-full min-w-0 max-w-3xl px-4 py-4 sm:py-10 watch-container">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-gray-500">
           <ol className="flex items-center gap-1.5">
-            <li><Link href="/" className="hover:text-brand-orange transition-colors">Início</Link></li>
+            <li><Link href={isEn ? "/en" : "/"} className="hover:text-brand-orange transition-colors">{dict.post.home}</Link></li>
             <li aria-hidden="true">/</li>
-            <li><Link href="/noticias" className="hover:text-brand-orange transition-colors">Notícias</Link></li>
+            <li><Link href={isEn ? "/en/noticias" : "/noticias"} className="hover:text-brand-orange transition-colors">{dict.post.news}</Link></li>
             <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-gray-300 font-semibold line-clamp-1">{post.title}</li>
+            <li aria-current="page" className="text-gray-300 font-semibold line-clamp-1">{postTitle}</li>
           </ol>
         </nav>
         {!post.is_published && <DraftQualityBanner post={post} />}
@@ -383,7 +386,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
                   href={`/games/${post.topic_id}`}
                   className="inline-flex min-h-6 items-center gap-1 border border-brand-orange/40 bg-brand-orange/10 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-orange hover:bg-brand-orange hover:text-white transition-colors"
                 >
-                  Ver jogo
+                  {dict.post.viewGame}
                 </Link>
               )}
               <Timer date={post.published_at ?? ""} />
@@ -399,14 +402,14 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               }`}
             >
               <BookmarkIcon filled={bookmarked} />
-              <span>{bookmarked ? "Salva" : "Salvar"}</span>
+              <span>{bookmarked ? dict.post.saved : dict.post.save}</span>
             </button>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 text-xs text-gray-400">
-            <span aria-label={`Tempo estimado de leitura: ${readingMinutes} minutos`}>◷ Leitura: <strong className="text-white">{readingMinutes} min</strong></span>
+            <span aria-label={`${dict.post.readingTime}: ${readingMinutes} ${dict.post.minutes}`}>◷ {dict.post.readingTime}: <strong className="text-white">{readingMinutes} {dict.post.minutes}</strong></span>
             <div className="flex items-center gap-1" aria-label="Ajustar tamanho do texto">
-              <span className="mr-1 text-xs">Texto</span>
+              <span className="mr-1 text-xs">{dict.post.textSize}</span>
               <button type="button" onClick={() => adjustReaderScale(readerScale - 0.1)} disabled={readerScale <= 0.9} className="min-h-11 min-w-11 border border-white/15 text-sm font-bold text-white disabled:opacity-40" aria-label="Diminuir tamanho do texto">A−</button>
               <button type="button" onClick={() => adjustReaderScale(1)} className="min-h-11 min-w-11 border border-white/15 text-xs text-gray-300" aria-label="Restaurar tamanho do texto">A</button>
               <button type="button" onClick={() => adjustReaderScale(readerScale + 0.1)} disabled={readerScale >= 1.2} className="min-h-11 min-w-11 border border-white/15 text-base font-bold text-white disabled:opacity-40" aria-label="Aumentar tamanho do texto">A+</button>
@@ -414,23 +417,23 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
           </div>
 
           <h1 className="break-words font-heading text-[clamp(1.2rem,6vw,2.75rem)] font-black uppercase leading-tight tracking-tight text-white watch-title">
-            {post.title}
+            {postTitle}
           </h1>
           <p className="text-sm xs:text-base text-gray-200 font-body border-l-2 border-brand-orange pl-2.5 sm:pl-4 py-1 leading-relaxed">
-            {post.summary}
+            {postSummary}
           </p>
 
           <section className="flex items-center gap-2.5 border border-white/10 bg-[#111217] px-4 py-3">
             <span aria-hidden="true" className={`h-2 w-2 shrink-0 ${post.information_status === "rumor" ? "bg-amber-400" : post.information_status === "corrected" ? "bg-sky-400" : "bg-emerald-400"}`} />
             <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              Estado da informação: <span className="text-white">{INFORMATION_STATUS_LABELS[post.information_status || "confirmed"]}</span>
+              Estado da informação: <span className="text-white">{dict.post.infoStatus[post.information_status || "confirmed"]}</span>
             </p>
           </section>
 
           <div className="flex flex-col gap-3 border-y border-brand-orange-muted/10 py-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <span>
-                Por <span className="text-white font-bold">{post.author_name}</span>
+                {dict.post.by} <span className="text-white font-bold">{post.author_name}</span>
               </span>
               {post.author_tag && (
                 <>
@@ -441,8 +444,8 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-500 mr-1">Compartilhar</span>
-              <button type="button" onClick={() => void handleQuickShare()} aria-label="Compartilhar matéria" className="min-h-11 border border-brand-orange/30 px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10">Compartilhar</button>
+              <span className="text-xs font-semibold text-gray-500 mr-1">{dict.post.share}</span>
+              <button type="button" onClick={() => void handleQuickShare()} aria-label="Compartilhar matéria" className="min-h-11 border border-brand-orange/30 px-3 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10">{dict.post.share}</button>
               <button
                 onClick={() => handleShareSocial("whatsapp")}
                 aria-label="Compartilhar no WhatsApp"
@@ -474,7 +477,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-brand-orange-muted/20 shadow-2xl bg-[#08090C] my-6">
               <Image
                 src={post.image_url}
-                alt={post.image_alt || post.title}
+                alt={post.image_alt || postTitle}
                 fill
                 sizes="(max-width: 1280px) 100vw, 1000px"
                 priority
@@ -484,17 +487,17 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
           )}
 
           <div className="mt-8" style={{ fontSize: `${readerScale}em` }}>
-            <PostContent post={post} />
+            <PostContent post={post} isEn={isEn} />
             {post.is_published && <AdSenseUnit slotId={process.env.NEXT_PUBLIC_ADSENSE_ARTICLE_SLOT_ID ?? ""} />}
           </div>
 
           {editorialSignals.quote && <blockquote className="border-y border-brand-orange/40 py-7 sm:py-9">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">Fala em destaque</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-orange">{dict.post.featuredQuote}</p>
             <p className="mt-3 font-heading text-[1.25em] sm:text-[1.5em] font-bold leading-snug text-white">“{editorialSignals.quote}”</p>
-            {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{safeLinkUrl(editorialSignals.quoteSourceUrl || "", false) && <a href={safeLinkUrl(editorialSignals.quoteSourceUrl || "", false)!} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">Ver fonte ↗</a>}</footer>}
+            {editorialSignals.quoteAuthor && <footer className="mt-4 text-xs text-gray-400"><strong className="text-white">{editorialSignals.quoteAuthor}</strong>{editorialSignals.quoteRole ? ` — ${editorialSignals.quoteRole}` : ""}{safeLinkUrl(editorialSignals.quoteSourceUrl || "", false) && <a href={safeLinkUrl(editorialSignals.quoteSourceUrl || "", false)!} target="_blank" rel="noreferrer" className="ml-2 font-bold text-brand-orange hover:text-white">{dict.post.viewSource}</a>}</footer>}
           </blockquote>}
 
-          {post.information_status === "corrected" && post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-sky-300">Nota de correção</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}
+          {post.information_status === "corrected" && post.correction_note && <aside className="border-y border-sky-400/40 bg-sky-400/[0.07] p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-sky-300">{dict.post.correctionNote}</p><p className="mt-2 text-sm leading-relaxed text-white">{post.correction_note}</p></aside>}
 
         </article>
 
@@ -519,22 +522,27 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
 
         {relatedPosts.length > 0 && (
           <section className="mt-10">
-            <h2 className="font-heading text-lg font-black uppercase text-white">Matérias relacionadas</h2>
-            <p className="mb-4 mt-2 text-sm text-gray-400">Continue acompanhando este assunto.</p>
+            <h2 className="font-heading text-lg font-black uppercase text-white">{dict.post.relatedArticles}</h2>
+            <p className="mb-4 mt-2 text-sm text-gray-400">{dict.post.relatedArticlesDesc}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {relatedPosts.map((rp) => (
-                <a key={rp.id} href={`/posts/${rp.slug}`} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">
-                  {rp.image_url ? (
-                    <Image src={rp.image_url} alt={rp.title} width={96} height={64} className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
-                  ) : (
-                    <div className="h-16 w-24 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-xs text-gray-600">Sem capa</div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs font-bold text-brand-orange">{CATEGORY_LABELS[rp.category] || rp.category}</span>
-                    <h3 className="mt-0.5 font-heading text-xs font-bold uppercase leading-snug text-white line-clamp-2 group-hover:text-brand-orange transition-colors">{rp.title}</h3>
-                  </div>
-                </a>
-              ))}
+              {relatedPosts.map((rp) => {
+                const rTitle = (isEn && rp.title_en) || rp.title;
+                const rCategory = isEn ? ((dict.categories as Record<string, string>)[rp.category] || rp.category) : (CATEGORY_LABELS[rp.category] || rp.category);
+                const rHref = isEn ? `/en/posts/${rp.slug_en || rp.slug}` : `/posts/${rp.slug}`;
+                return (
+                  <Link key={rp.id} href={rHref} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">
+                    {rp.image_url ? (
+                      <Image src={rp.image_url} alt={rTitle} width={96} height={64} className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
+                    ) : (
+                      <div className="h-16 w-24 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-xs text-gray-600">{dict.post.noCover}</div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-bold text-brand-orange">{rCategory}</span>
+                      <h3 className="mt-0.5 font-heading text-xs font-bold uppercase leading-snug text-white line-clamp-2 group-hover:text-brand-orange transition-colors">{rTitle}</h3>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}
@@ -543,12 +551,12 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="font-heading text-lg font-black uppercase text-white">
-                Continue no Brickboard
+                {dict.post.joinBrickboard}
               </h2>
               <p className="mt-1 text-sm text-gray-300">
                 {conversationCount > 0
-                  ? `${conversationCount} ${conversationCount === 1 ? "leitor publicou" : "leitores publicaram"} sobre esta matéria.`
-                  : "Abra a conversa e diga o que esta notícia muda para você."}
+                  ? `${conversationCount} ${conversationCount === 1 ? dict.post.brickboardPromptSingle : dict.post.brickboardPromptMultiple}`
+                  : dict.post.brickboardPromptEmpty}
               </p>
             </div>
             <button
@@ -556,7 +564,7 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
               onClick={() => router.push(conversationUrl)}
               className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90"
             >
-              {conversationCount > 0 ? "Ver conversa" : "Abrir conversa"}
+              {conversationCount > 0 ? dict.post.viewConversation : dict.post.openConversation}
             </button>
           </div>
         </section>
@@ -566,10 +574,9 @@ export function PostArticle({ post, stats, relatedPosts = [] }: PostArticleProps
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-6 bg-brand-orange rounded-full shadow-[0_0_12px_#FF5E00]" />
               <h3 className="font-heading text-lg sm:text-xl font-black text-white uppercase tracking-wider">
-                Comentários da Comunidade ({comments.length})
+                {isEn ? `Community Comments (${comments.length})` : `Comentários da Comunidade (${comments.length})`}
               </h3>
             </div>
-
           </div>
 
           {replyTarget && (

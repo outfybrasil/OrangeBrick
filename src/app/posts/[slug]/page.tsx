@@ -62,8 +62,8 @@ function getStats(postId: string): Promise<PostStats> {
 
 async function getRelatedPosts(post: Post) {
   const client = createPublicServerClient();
-  type RelatedPost = Pick<Post, "id" | "slug" | "title" | "summary" | "image_url" | "category" | "published_at" | "topic_id">;
-  const columns = "id,slug,title,summary,image_url,category,published_at,topic_id";
+  type RelatedPost = Pick<Post, "id" | "slug" | "slug_en" | "title" | "title_en" | "summary" | "summary_en" | "image_url" | "category" | "published_at" | "topic_id">;
+  const columns = "id,slug,slug_en,title,title_en,summary,summary_en,image_url,category,published_at,topic_id";
   const recentQuery = client.from("posts").select(columns).eq("is_published", true).neq("id", post.id).order("published_at", { ascending: false }).limit(80).abortSignal(AbortSignal.timeout(5000)).returns<RelatedPost[]>();
   const topicQuery = post.topic_id
     ? client.from("posts").select(columns).eq("is_published", true).eq("topic_id", post.topic_id).neq("id", post.id).order("published_at", { ascending: false }).limit(20).abortSignal(AbortSignal.timeout(5000)).returns<RelatedPost[]>()
@@ -82,7 +82,13 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
   return {
     title: post.title,
     description: post.summary,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        "pt-BR": `/posts/${post.slug}`,
+        "en-US": `/en/posts/${post.slug_en || post.slug}`,
+      },
+    },
     robots: isPreview ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "article",

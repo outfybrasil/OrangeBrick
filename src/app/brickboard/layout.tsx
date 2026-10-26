@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "Debates em tempo real, Hype, Flop e discussões da comunidade gamer OrangeBrick.",
   alternates: {
     canonical: "/brickboard",
+    languages: {
+      "pt-BR": "/brickboard",
+      "en-US": "/en/brickboard",
+    },
   },
   openGraph: {
     title: "BrickBoard — Comunidade Gamer | Orange Brick",

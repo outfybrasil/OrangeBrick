@@ -37,8 +37,9 @@ export type PublicationEffectsResult = {
 };
 
 export function refreshPublishedPages(): void {
-  for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml"]) revalidatePath(path);
+  for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml", "/en", "/brickboard", "/en/brickboard"]) revalidatePath(path);
   revalidatePath("/posts/[slug]", "page");
+  revalidatePath("/en/posts/[slug]", "page");
 }
 
 export async function runPostPublicationEffects(
@@ -134,6 +135,59 @@ export async function runPostPublicationEffects(
     } catch (error) {
       failures.push(`a thread do Brickboard não foi criada: ${error instanceof Error ? error.message : "falha desconhecida"}`);
     }
+  }
+
+  try {
+    const { data: currentPost } = await supabase
+      .from("posts")
+      .select("id, title, summary, slug, title_en, summary_en, slug_en")
+      .eq("id", post.id)
+      .maybeSingle();
+
+    if (currentPost && (!currentPost.title_en || !currentPost.summary_en || !currentPost.slug_en)) {
+      const groqKey = process.env.GROQ_API_KEY;
+      if (groqKey) {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${groqKey}`,
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+              {
+                role: "system",
+                content: "Translate this Portuguese gaming news headline and summary into natural English. Also generate an English URL slug (lowercase alphanumeric and hyphens). Respond with valid JSON only: { \"title_en\": string, \"summary_en\": string, \"slug_en\": string }.",
+              },
+              {
+                role: "user",
+                content: `Title: ${currentPost.title}\nSummary: ${currentPost.summary}`,
+              },
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.2,
+          }),
+          signal: AbortSignal.timeout(15000),
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const parsed = JSON.parse(json.choices[0].message.content);
+          if (parsed.title_en && parsed.summary_en) {
+            await supabase
+              .from("posts")
+              .update({
+                title_en: parsed.title_en,
+                summary_en: parsed.summary_en,
+                slug_en: parsed.slug_en || post.slug,
+              })
+              .eq("id", post.id);
+          }
+        }
+      }
+    }
+  } catch {
   }
 
   return {

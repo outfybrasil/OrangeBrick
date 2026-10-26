@@ -17,27 +17,37 @@ import { saoPauloNewsDate, selectFeaturedNews } from "@/lib/news-query";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Notícias de Games — Central Editorial | Orange Brick",
-  description: "Acompanhe as principais notícias do mundo dos games, análises, furos de reportagem, cobertura da indústria e debates da comunidade no Orange Brick.",
-  alternates: {
-    canonical: "/noticias",
-  },
-  openGraph: {
-    title: "Notícias de Games — Central Editorial | Orange Brick",
-    description: "Tudo o que está acontecendo no mundo dos games com jornalismo ágil e comunidade ativa.",
-    url: "/noticias",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Notícias de Games — Central Editorial | Orange Brick",
-    description: "Tudo o que está acontecendo no mundo dos games no Orange Brick.",
-  },
-};
-
 interface NewsPageProps {
   searchParams: Promise<{ periodo?: string; q?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: NewsPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const isFiltered = Boolean(params.q || (params.periodo && params.periodo === "mes"));
+
+  return {
+    title: params.q
+      ? `Busca: "${params.q}" — Notícias | Orange Brick`
+      : "Notícias de Games — Central Editorial | Orange Brick",
+    description: "Acompanhe as principais notícias do mundo dos games, análises, furos de reportagem, cobertura da indústria e debates da comunidade no Orange Brick.",
+    alternates: {
+      canonical: "/noticias",
+    },
+    robots: isFiltered
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+    openGraph: {
+      title: "Notícias de Games — Central Editorial | Orange Brick",
+      description: "Tudo o que está acontecendo no mundo dos games com jornalismo ágil e comunidade ativa.",
+      url: "/noticias",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Notícias de Games — Central Editorial | Orange Brick",
+      description: "Tudo o que está acontecendo no mundo dos games no Orange Brick.",
+    },
+  };
 }
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {

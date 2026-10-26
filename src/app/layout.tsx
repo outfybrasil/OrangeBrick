@@ -66,17 +66,17 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico?v=2", sizes: "any" },
-      { url: "/favicon-16x16.png?v=2", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png?v=2", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-48x48.png?v=2", sizes: "48x48", type: "image/png" },
-      { url: "/favicon-64x64.png?v=2", sizes: "64x64", type: "image/png" },
-      { url: "/icons/icon-192.png?v=2", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png?v=2", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico?v=3", sizes: "any" },
+      { url: "/favicon-16x16.png?v=3", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-48x48.png?v=3", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-64x64.png?v=3", sizes: "64x64", type: "image/png" },
+      { url: "/icons/icon-192.png?v=3", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png?v=3", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/favicon.ico?v=2",
+    shortcut: "/favicon.ico?v=3",
     apple: [
-      { url: "/icons/apple-touch-icon.png?v=2", sizes: "180x180", type: "image/png" },
+      { url: "/icons/apple-touch-icon.png?v=3", sizes: "180x180", type: "image/png" },
     ],
   },
   appleWebApp: {
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     siteName: "Orange Brick",
     type: "website",
     locale: "pt_BR",
-    images: [{ url: "/icons/icon-512.png", width: 512, height: 512, alt: "Orange Brick Logo" }],
+    images: [{ url: "/icons/icon-512.png?v=3", width: 512, height: 512, alt: "Orange Brick Logo" }],
   },
   twitter: { card: "summary_large_image", title: "Orange Brick — notícias de games, hardware e indústria", description: "Notícias de games, hardware, indústria e modding." },
   verification: {
@@ -137,15 +137,34 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "Orange Brick",
-              alternateName: ["Orange Brick Portal", "Portal Orange Brick"],
-              url: getSiteUrl(),
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${getSiteUrl()}/busca?q={search_term_string}`,
-                "query-input": "required name=search_term_string",
-              },
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  name: "Orange Brick",
+                  alternateName: ["Orange Brick Portal", "Portal Orange Brick"],
+                  url: getSiteUrl(),
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: `${getSiteUrl()}/busca?q={search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+                {
+                  "@type": "NewsMediaOrganization",
+                  name: "Orange Brick",
+                  url: getSiteUrl(),
+                  logo: {
+                    "@type": "ImageObject",
+                    url: `${getSiteUrl()}/icons/icon-512.png?v=3`,
+                    width: 512,
+                    height: 512,
+                  },
+                  image: `${getSiteUrl()}/icons/icon-512.png?v=3`,
+                  sameAs: [
+                    "https://www.tiktok.com/@orangebrick.blog",
+                  ],
+                },
+              ],
             }).replace(/</g, "\\u003c"),
           }}
         />

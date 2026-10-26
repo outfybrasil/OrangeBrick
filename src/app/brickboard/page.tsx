@@ -2,7 +2,8 @@
 
 import { useEffect, useState, Suspense, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { getDictionary } from "@/lib/i18n";
 import { useCommunityFeed } from "@/lib/hooks/useCommunityFeed";
 import { BrickCard } from "@/components/community/BrickCard";
 import { GamerPollWidget } from "@/components/community/GamerPollWidget";
@@ -23,7 +24,7 @@ import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
 
-const PLATFORM_TABS = [
+const PLATFORM_TABS_PT = [
   { id: "TODOS", label: "Todos" },
   { id: "[PS5]", label: "PS5" },
   { id: "[XSX]", label: "Xbox Series" },
@@ -32,10 +33,24 @@ const PLATFORM_TABS = [
   { id: "[MOBILE]", label: "Mobile" },
 ];
 
-function BrickboardContent() {
+const PLATFORM_TABS_EN = [
+  { id: "TODOS", label: "All" },
+  { id: "[PS5]", label: "PS5" },
+  { id: "[XSX]", label: "Xbox Series" },
+  { id: "[SWITCH 2]", label: "Switch 2" },
+  { id: "[PC]", label: "PC" },
+  { id: "[MOBILE]", label: "Mobile" },
+];
+
+export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
   const searchParams = useSearchParams();
   const targetPostId = searchParams.get("post");
   const router = useRouter();
+  const pathname = usePathname();
+  const isEn = isEnProp ?? (pathname?.startsWith("/en") || false);
+  const dict = getDictionary(isEn ? "en" : "pt");
+  const brickboardBase = isEn ? "/en/brickboard" : "/brickboard";
+  const PLATFORM_TABS = isEn ? PLATFORM_TABS_EN : PLATFORM_TABS_PT;
   const { user, profile } = useAuth();
   const { follows, toggleFollow } = useFollowPreferences();
   const supabase = useMemo(() => createDataClient(), []);
@@ -350,8 +365,8 @@ function BrickboardContent() {
             )}
             <span className="min-w-0 flex-1">
               <span className="flex items-center justify-between gap-3">
-                <strong className="truncate font-heading text-sm font-bold text-white">Meu progresso</strong>
-                <span className="shrink-0 text-xs font-bold text-brand-orange">Nível {userProgress.progress.level}</span>
+                <strong className="truncate font-heading text-sm font-bold text-white">{dict.community.myProgress}</strong>
+                <span className="shrink-0 text-xs font-bold text-brand-orange">{dict.community.level} {userProgress.progress.level}</span>
               </span>
               <span className="mt-2 block h-1.5 overflow-hidden bg-white/10">
                 <span className="block h-full bg-brand-orange transition-[width] duration-700" style={{ width: `${xpProgress}%` }} />
@@ -365,14 +380,14 @@ function BrickboardContent() {
         {operationError && (
           <div role="alert" className="mb-5 flex items-start justify-between gap-4 border border-red-400/25 bg-red-500/10 p-4 text-sm text-red-100">
             <p>{operationError}</p>
-            <button type="button" onClick={clearOperationError} className="min-h-8 shrink-0 px-2 font-bold text-red-200 hover:text-white" aria-label="Fechar aviso">Fechar</button>
+            <button type="button" onClick={clearOperationError} className="min-h-8 shrink-0 px-2 font-bold text-red-200 hover:text-white" aria-label={isEn ? "Close alert" : "Fechar aviso"}>{isEn ? "Close" : "Fechar"}</button>
           </div>
         )}
         {user && userProgressError && (
           <div role="alert" className="mb-5 flex items-start justify-between gap-4 border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-100">
-            <p>{userProgress ? "Não foi possível atualizar seu progresso; os dados anteriores foram mantidos." : "Não foi possível carregar seu progresso."}</p>
+            <p>{userProgress ? (isEn ? "Could not update your progress; previous data was preserved." : "Não foi possível atualizar seu progresso; os dados anteriores foram mantidos.") : (isEn ? "Could not load your progress." : "Não foi possível carregar seu progresso.")}</p>
             <button type="button" onClick={() => void loadUserProgress()} disabled={loadingUserProgress} className="min-h-8 shrink-0 px-2 font-bold text-amber-200 hover:text-white disabled:opacity-60">
-              {loadingUserProgress ? "Tentando…" : "Tentar novamente"}
+              {loadingUserProgress ? (isEn ? "Trying…" : "Tentando…") : (isEn ? "Try again" : "Tentar novamente")}
             </button>
           </div>
         )}
@@ -381,13 +396,13 @@ function BrickboardContent() {
           <div>
             <div className="mb-1 flex items-center gap-2">
               <BrickboardLogo variant="mark" alt="" className="size-4 shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">BrickBoard · Rede Gamer</span>
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">{dict.community.title}</span>
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-black leading-tight tracking-tight text-white">
-              O jogo continua <span className="text-brand-orange">aqui.</span>
+              {isEn ? <>The game continues <span className="text-brand-orange">here.</span></> : <>O jogo continua <span className="text-brand-orange">aqui.</span></>}
             </h1>
             <p className="mt-1 text-xs text-gray-400 line-clamp-1 sm:line-clamp-none">
-              Opiniões, perguntas e debates da comunidade sobre jogos e indústria.
+              {dict.community.subtitle}
             </p>
           </div>
           <button
@@ -397,18 +412,18 @@ function BrickboardContent() {
             <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Abrir uma conversa
+            {dict.community.openConversation}
           </button>
         </section>
 
         {targetPostId && (
           <div className="mb-4 flex items-center justify-between rounded-xl border border-brand-orange/30 bg-brand-orange/10 px-4 py-2.5 text-xs">
-            <span className="font-semibold text-white">Exibindo conversa selecionada</span>
+            <span className="font-semibold text-white">{dict.community.showingTargetConversation}</span>
             <Link
-              href="/brickboard"
+              href={brickboardBase}
               className="font-bold text-brand-orange hover:text-white transition-colors"
             >
-              ← Ver todas as conversas
+              {dict.community.viewAllConversations}
             </Link>
           </div>
         )}
@@ -416,11 +431,11 @@ function BrickboardContent() {
         {/* TABS + PLATFORM FILTERS */}
         <div className="mb-5">
           <div className="flex items-center justify-between border-b border-white/10">
-            <nav className="flex min-w-0 items-center overflow-x-auto" aria-label="Seções do Brickboard">
+            <nav className="flex min-w-0 items-center overflow-x-auto" aria-label={isEn ? "Brickboard sections" : "Seções do Brickboard"}>
               {([
-                { id: "latest", label: "Recentes" },
-                { id: "following", label: "Seguindo" },
-                { id: "trending", label: "Top debates" },
+                { id: "latest", label: dict.community.tabs.latest },
+                { id: "following", label: dict.community.tabs.following },
+                { id: "trending", label: dict.community.tabs.trending },
               ] as const).map((tab) => (
                 <button
                   key={tab.id}
@@ -441,16 +456,16 @@ function BrickboardContent() {
           <div className="mt-3 flex min-w-0 items-center gap-3">
             <button id="brickboard-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="brickboard-filters" onClick={() => setFiltersOpen(value => !value)} className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg border px-3 text-xs font-bold ${selectedPlatform !== "TODOS" || searchQuery.trim() ? "border-brand-orange/40 text-brand-orange" : "border-white/15 text-gray-300"}`}>
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
-              Filtros{(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0) > 0 ? ` (${(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0)})` : ""}
+              {dict.community.filters}{(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0) > 0 ? ` (${(selectedPlatform !== "TODOS" ? 1 : 0) + (searchQuery.trim() ? 1 : 0)})` : ""}
             </button>
-            <div className="min-w-0 flex-1"><p className="truncate text-xs text-gray-400">{selectedPlatform === "TODOS" ? "Todas as plataformas" : PLATFORM_TABS.find(platform => platform.id === selectedPlatform)?.label || selectedPlatform}{searchQuery.trim() ? ` · Busca: ${searchQuery.trim()}` : ""}</p><p role="status" className="mt-1 text-xs text-gray-500">{displayPosts.length} {displayPosts.length === 1 ? "conversa encontrada" : "conversas encontradas"}</p></div>
+            <div className="min-w-0 flex-1"><p className="truncate text-xs text-gray-400">{selectedPlatform === "TODOS" ? dict.community.platforms.allLabel : PLATFORM_TABS.find(platform => platform.id === selectedPlatform)?.label || selectedPlatform}{searchQuery.trim() ? ` · ${dict.common.search}: ${searchQuery.trim()}` : ""}</p><p role="status" className="mt-1 text-xs text-gray-500">{displayPosts.length} {displayPosts.length === 1 ? dict.community.foundSingle : dict.community.foundMultiple}</p></div>
           </div>
           <div id="brickboard-filters" hidden={!filtersOpen} className="mt-3 rounded-xl border border-white/10 bg-[#111217] p-4">
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(10rem,15rem)]">
-              <div className="min-w-0"><label htmlFor="brickboard-search" className="mb-2 block text-xs font-semibold text-gray-300">Buscar conversas e leitores</label><input id="brickboard-search" type="search" value={searchQuery} maxLength={120} onChange={event => { setSearchQuery(event.target.value); setVisiblePostCount(8); }} placeholder="Digite um assunto ou nome" className="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange" /></div>
-              <div className="min-w-0"><label htmlFor="brickboard-platform" className="mb-2 block text-xs font-semibold text-gray-300">Plataforma</label><select id="brickboard-platform" value={selectedPlatform} onChange={event => { setSelectedPlatform(event.target.value); setVisiblePostCount(8); }} className="min-h-11 w-full rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange">{PLATFORM_TABS.map(platform => <option key={platform.id} value={platform.id}>{platform.label} ({platformCounts[platform.id] || 0})</option>)}</select></div>
+              <div className="min-w-0"><label htmlFor="brickboard-search" className="mb-2 block text-xs font-semibold text-gray-300">{dict.community.searchLabel}</label><input id="brickboard-search" type="search" value={searchQuery} maxLength={120} onChange={event => { setSearchQuery(event.target.value); setVisiblePostCount(8); }} placeholder={dict.community.searchPlaceholder} className="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange" /></div>
+              <div className="min-w-0"><label htmlFor="brickboard-platform" className="mb-2 block text-xs font-semibold text-gray-300">{isEn ? "Platform" : "Plataforma"}</label><select id="brickboard-platform" value={selectedPlatform} onChange={event => { setSelectedPlatform(event.target.value); setVisiblePostCount(8); }} className="min-h-11 w-full rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange">{PLATFORM_TABS.map(platform => <option key={platform.id} value={platform.id}>{platform.label} ({platformCounts[platform.id] || 0})</option>)}</select></div>
             </div>
-            <div className="mt-3 flex flex-wrap justify-end gap-2">{(selectedPlatform !== "TODOS" || searchQuery.trim()) && <button type="button" onClick={() => { setSelectedPlatform("TODOS"); setSearchQuery(""); setVisiblePostCount(8); }} className="min-h-11 rounded-lg px-3 text-xs font-semibold text-gray-400 hover:text-white">Limpar busca e plataforma</button>}<button type="button" onClick={() => { setFiltersOpen(false); document.getElementById("brickboard-filter-toggle")?.focus(); }} className="min-h-11 rounded-lg border border-white/15 px-3 text-xs font-semibold text-white">Ver conversas</button></div>
+            <div className="mt-3 flex flex-wrap justify-end gap-2">{(selectedPlatform !== "TODOS" || searchQuery.trim()) && <button type="button" onClick={() => { setSelectedPlatform("TODOS"); setSearchQuery(""); setVisiblePostCount(8); }} className="min-h-11 rounded-lg px-3 text-xs font-semibold text-gray-400 hover:text-white">{dict.community.clearFilters}</button>}<button type="button" onClick={() => { setFiltersOpen(false); document.getElementById("brickboard-filter-toggle")?.focus(); }} className="min-h-11 rounded-lg border border-white/15 px-3 text-xs font-semibold text-white">{isEn ? "View discussions" : "Ver conversas"}</button></div>
           </div>
 
         </div>
@@ -458,13 +473,13 @@ function BrickboardContent() {
         {articleSlug && (
           <section className="mb-5 flex flex-col gap-3 border border-brand-orange/30 bg-brand-orange/[0.06] px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Conversa da matéria</p>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">{isEn ? "Article Discussion" : "Conversa da matéria"}</p>
               <h2 className="mt-1 text-balance break-words font-heading text-base font-black leading-snug text-white sm:text-lg">
-                {conversationTitle || "Discussão no Brickboard"}
+                {conversationTitle || (isEn ? "Discussion on BrickBoard" : "Discussão no Brickboard")}
               </h2>
             </div>
-            <Link href="/brickboard" className="inline-flex min-h-10 shrink-0 items-center justify-center border border-white/15 px-4 text-xs font-bold text-gray-200 transition-colors hover:border-white/30 hover:text-white">
-              Ver toda a timeline
+            <Link href={brickboardBase} className="inline-flex min-h-10 shrink-0 items-center justify-center border border-white/15 px-4 text-xs font-bold text-gray-200 transition-colors hover:border-white/30 hover:text-white">
+              {isEn ? "View all discussions" : "Ver toda a timeline"}
             </Link>
           </section>
         )}
@@ -472,11 +487,11 @@ function BrickboardContent() {
         {targetPostId && (
           <section className="mb-5 flex items-center justify-between gap-4 border border-brand-orange/30 bg-brand-orange/[0.06] px-4 py-3">
             <div className="min-w-0">
-              <p className="text-xs font-bold text-brand-orange">Conversa selecionada</p>
-              <p className="mt-0.5 text-sm leading-6 text-gray-300">Você chegou por um destaque da página inicial.</p>
+              <p className="text-xs font-bold text-brand-orange">{dict.community.showingTargetConversation}</p>
+              <p className="mt-0.5 text-sm leading-6 text-gray-300">{isEn ? "You arrived from a homepage feature." : "Você chegou por um destaque da página inicial."}</p>
             </div>
-            <Link href="/brickboard" className="min-h-10 shrink-0 content-center text-xs font-bold text-white transition-colors hover:text-brand-orange">
-              Ver timeline
+            <Link href={brickboardBase} className="min-h-10 shrink-0 content-center text-xs font-bold text-white transition-colors hover:text-brand-orange">
+              {isEn ? "View timeline" : "Ver timeline"}
             </Link>
           </section>
         )}
@@ -489,9 +504,9 @@ function BrickboardContent() {
 
         {isLoaded && (
           <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[160px_minmax(0,1fr)_280px] lg:grid-cols-[minmax(0,1fr)_280px]">
-            <aside className="sticky top-20 hidden flex-col gap-1.5 xl:flex" aria-label="Atalhos sociais">
+            <aside className="sticky top-20 hidden flex-col gap-1.5 xl:flex" aria-label={isEn ? "Social shortcuts" : "Atalhos sociais"}>
               <Link
-                href="/brickboard"
+                href={brickboardBase}
                 className="flex items-center gap-3 rounded-lg bg-brand-orange/10 px-3 py-2.5 text-xs font-bold text-brand-orange transition-colors"
               >
                 <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -510,7 +525,7 @@ function BrickboardContent() {
                   <circle cx="11" cy="11" r="8" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35" />
                 </svg>
-                <span>Explorar</span>
+                <span>{isEn ? "Explore" : "Explorar"}</span>
               </button>
               <Link
                 href={`${myProfileHref}#saved`}
@@ -519,7 +534,7 @@ function BrickboardContent() {
                 <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                 </svg>
-                <span>Salvos</span>
+                <span>{isEn ? "Saved" : "Salvos"}</span>
               </Link>
               <Link
                 href={myProfileHref}
@@ -529,14 +544,14 @@ function BrickboardContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                 </svg>
-                <span>Meu Brick</span>
+                <span>{isEn ? "My Brick" : "Meu Brick"}</span>
               </Link>
               <button
                 type="button"
                 onClick={() => requireUser(() => setIsComposeOpen(true))}
                 className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white shadow-md shadow-brand-orange/20 transition-colors hover:bg-[#ff7526]"
               >
-                Publicar
+                {dict.community.postBrick}
               </button>
             </aside>
 
@@ -560,7 +575,7 @@ function BrickboardContent() {
                     onClick={() => requireUser(() => setIsComposeOpen(true))}
                     className="flex-1 border border-white/10 bg-transparent px-4 py-2.5 text-left text-sm text-gray-500 transition-colors hover:border-white/20 hover:text-gray-300"
                   >
-                    Compartilhe uma opinião, pergunta ou descoberta...
+                    {dict.community.composePlaceholder}
                   </button>
                 </div>
                 {inlineMediaUrl && (
@@ -570,7 +585,7 @@ function BrickboardContent() {
                       type="button"
                       onClick={() => setInlineMediaUrl(null)}
                       className="absolute right-2 top-2 rounded-full bg-black/80 p-1 text-white hover:bg-brand-orange"
-                      title="Remover imagem"
+                      title={isEn ? "Remove image" : "Remover imagem"}
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -586,7 +601,7 @@ function BrickboardContent() {
                       const file = e.target.files?.[0];
                       if (file) {
                         if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 4 * 1024 * 1024) {
-                          toast.error("Escolha uma imagem PNG, JPG ou WebP de até 4 MB.", "Imagem não aceita");
+                          toast.error(isEn ? "Choose a PNG, JPG or WebP image under 4 MB." : "Escolha uma imagem PNG, JPG ou WebP de até 4 MB.", isEn ? "Invalid image" : "Imagem não aceita");
                           e.target.value = "";
                           return;
                         }
@@ -604,7 +619,7 @@ function BrickboardContent() {
                     <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                     </svg>
-                    <span>{inlineMediaUrl ? "Alterar Imagem" : "Anexo"}</span>
+                    <span>{inlineMediaUrl ? (isEn ? "Change Image" : "Alterar Imagem") : (isEn ? "Attachment" : "Anexo")}</span>
                   </button>
                   <button
                     type="button"
@@ -614,28 +629,28 @@ function BrickboardContent() {
                     <svg className="h-3.5 w-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    <span>Enquete</span>
+                    <span>{isEn ? "Poll" : "Enquete"}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => requireUser(() => setIsComposeOpen(true))}
                     className="ml-auto bg-brand-orange px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
                   >
-                    Publicar
+                    {dict.community.postBrick}
                   </button>
                 </div>
               </div>
 
               {displayPosts.length === 0 && activeTab === "following" && !user ? (
                 <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
-                  <p className="text-sm font-semibold text-white">Entre para acompanhar quem você segue</p>
-                  <p className="text-xs text-gray-400">Siga autores com o botão + nos Bricks e veja as conversas deles aqui.</p>
-                  <button type="button" onClick={() => setIsAuthModalOpen(true)} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">Entrar</button>
+                  <p className="text-sm font-semibold text-white">{isEn ? "Sign in to follow discussions" : "Entre para acompanhar quem você segue"}</p>
+                  <p className="text-xs text-gray-400">{isEn ? "Follow authors with the + button on Bricks to see their discussions here." : "Siga autores com o botão + nos Bricks e veja as conversas deles aqui."}</p>
+                  <button type="button" onClick={() => setIsAuthModalOpen(true)} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">{dict.nav.login}</button>
                 </div>
               ) : displayPosts.length === 0 && activeTab === "following" && followCount === 0 ? (
                 <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
-                  <p className="text-sm font-semibold text-white">Você ainda não segue ninguém</p>
-                  <p className="text-xs text-gray-400">Toque no botão + de um Brick para seguir o autor e personalizar seu feed.</p>
+                  <p className="text-sm font-semibold text-white">{isEn ? "You aren't following anyone yet" : "Você ainda não segue ninguém"}</p>
+                  <p className="text-xs text-gray-400">{dict.community.noPostsFollowing}</p>
                 </div>
               ) : displayPosts.length === 0 ? (
                 <div className="border-y border-white/10 py-16 text-center text-gray-400 space-y-2">
@@ -643,13 +658,13 @@ function BrickboardContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5h-6l-4.5 4v-4h-.5A2.5 2.5 0 0 1 4 13.5v-8Z" />
                   </svg>
                   <p className="text-sm font-semibold text-white">
-                    {targetPostId ? "Esta conversa não está mais disponível." : "Nenhum Brick encontrado para estes filtros."}
+                    {targetPostId ? (isEn ? "This discussion is no longer available." : "Esta conversa não está mais disponível.") : dict.community.noPosts}
                   </p>
-                  {!targetPostId && <p className="text-xs text-gray-400">Seja a primeira lenda a abrir o debate.</p>}
-                  {!targetPostId && <button type="button" onClick={() => requireUser(() => setIsComposeOpen(true))} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">Criar novo Brick</button>}
+                  {!targetPostId && <p className="text-xs text-gray-400">{isEn ? "Be the first legend to open the discussion." : "Seja a primeira lenda a abrir o debate."}</p>}
+                  {!targetPostId && <button type="button" onClick={() => requireUser(() => setIsComposeOpen(true))} className="mt-4 inline-flex min-h-11 items-center justify-center bg-brand-orange px-5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-orange/90">{isEn ? "Create new Brick" : "Criar novo Brick"}</button>}
                   {targetPostId && (
-                    <Link href="/brickboard" className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange transition-colors hover:text-white">
-                      Voltar para a timeline
+                    <Link href={brickboardBase} className="inline-flex min-h-11 items-center text-xs font-bold text-brand-orange transition-colors hover:text-white">
+                      {isEn ? "Back to timeline" : "Voltar para a timeline"}
                     </Link>
                   )}
                 </div>
@@ -659,6 +674,7 @@ function BrickboardContent() {
                     <div id={`brick-${post.id}`} key={post.id} className="scroll-mt-28 content-visibility-auto">
                       <BrickCard
                         post={post}
+                        isEn={isEn}
                         compactArticle={Boolean(post.attached_article && articlePreviewOwners.get(post.attached_article.slug)?.postId !== post.id)}
                         onReaction={async (postId, type) => {
                           const res = await toggleReaction(postId, type);
@@ -702,13 +718,13 @@ function BrickboardContent() {
                   <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
                     <div className="flex items-center gap-2">
 <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="question" size={14} /></span>
-                      <span className="text-xs font-black uppercase text-brand-orange">Pergunta do dia</span>
+                      <span className="text-xs font-black uppercase text-brand-orange">{isEn ? "Question of the day" : "Pergunta do dia"}</span>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">{poll.total_votes} voto{poll.total_votes !== 1 ? "s" : ""}</span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">{poll.total_votes} {isEn ? (poll.total_votes !== 1 ? "votes" : "vote") : (poll.total_votes !== 1 ? "votos" : "voto")}</span>
                   </div>
                   <div className="p-4">
                     <p className="font-heading text-base font-black uppercase leading-snug text-white">{poll.question}</p>
-                    <p className="mb-3 mt-1 text-xs text-gray-400">Resultado da comunidade:</p>
+                    <p className="mb-3 mt-1 text-xs text-gray-400">{isEn ? "Community results:" : "Resultado da comunidade:"}</p>
                     <div className="space-y-2">
                       {poll.options.map((option) => {
                         const pct = poll.total_votes > 0 ? Math.round((option.votes / poll.total_votes) * 100) : 0;
@@ -735,7 +751,7 @@ function BrickboardContent() {
                     </div>
                     {poll.ends_at && (
                       <p className="mt-3 text-xs text-gray-500">
-                        Termina em {Math.max(0, Math.ceil((new Date(poll.ends_at).getTime() - now) / 3600000))}h
+                        {isEn ? `Ends in ${Math.max(0, Math.ceil((new Date(poll.ends_at).getTime() - now) / 3600000))}h` : `Termina em ${Math.max(0, Math.ceil((new Date(poll.ends_at).getTime() - now) / 3600000))}h`}
                       </p>
                     )}
                   </div>
@@ -746,7 +762,7 @@ function BrickboardContent() {
                 <div className="overflow-hidden border border-white/10 bg-[#101116] rounded-lg">
                   <div className="border-b border-white/10 px-4 py-3">
                     <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">
-                      Pessoas para seguir
+                      {isEn ? "Who to follow" : "Pessoas para seguir"}
                     </h3>
                   </div>
                   <div className="divide-y divide-white/[0.06] p-2">
@@ -771,7 +787,7 @@ function BrickboardContent() {
                             type="button"
                             onClick={() => requireUser(() => toggleFollow("profile", p.username))}
                             aria-pressed={isFollowing}
-                            aria-label={isFollowing ? `Deixar de seguir ${p.name}` : `Seguir ${p.name}`}
+                            aria-label={isFollowing ? (isEn ? `Unfollow ${p.name}` : `Deixar de seguir ${p.name}`) : (isEn ? `Follow ${p.name}` : `Seguir ${p.name}`)}
                             className={`grid size-7 place-items-center rounded border text-xs font-bold transition-colors ${
                               isFollowing
                                 ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
@@ -790,7 +806,7 @@ function BrickboardContent() {
               {trendingTopics.length > 0 && (
                 <div className="overflow-hidden border border-white/10 bg-[#101116]">
                   <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
-                    <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="trending-up" size={14} /></span>Em alta agora</span>
+                    <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="trending-up" size={14} /></span>{isEn ? "Trending now" : "Em alta agora"}</span>
                     <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">Brickboard</span>
                   </div>
 <div className="space-y-2 p-3">
@@ -799,13 +815,13 @@ function BrickboardContent() {
                         key={topic.name}
                         type="button"
                         onClick={() => { setSelectedPlatform(topic.name); setVisiblePostCount(8); }}
-                        aria-label={`Filtrar conversas da plataforma ${topic.name}`}
+                        aria-label={isEn ? `Filter discussions for platform ${topic.name}` : `Filtrar conversas da plataforma ${topic.name}`}
                         className="group flex min-h-14 w-full items-center gap-3 rounded-xl border border-white/10 bg-[#0c0d11] p-2.5 text-left transition-colors hover:border-brand-orange/40"
                       >
                         <span className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-slate-600 font-heading text-xs font-black text-gray-300 group-hover:border-brand-orange group-hover:text-brand-orange">{String(i + 1).padStart(2, "0")}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-heading text-sm font-bold text-white group-hover:text-brand-orange">{topic.name}</span>
-                          <span className="mt-1 block text-xs text-gray-500">{topic.count} resposta{topic.count !== 1 ? "s" : ""}</span>
+                          <span className="mt-1 block text-xs text-gray-500">{topic.count} {isEn ? (topic.count !== 1 ? "replies" : "reply") : (topic.count !== 1 ? "respostas" : "resposta")}</span>
                         </span>
                         <span className="text-gray-600 group-hover:text-brand-orange">→</span>
                       </button>
@@ -822,8 +838,8 @@ function BrickboardContent() {
       <button
         onClick={() => requireUser(() => setIsComposeOpen(true))}
         className="mobile-overlay-sensitive fixed right-3 bottom-[calc(10.25rem+env(safe-area-inset-bottom))] z-40 flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 bg-brand-orange text-xl text-white shadow-[0_12px_32px_rgba(0,0,0,0.45)] transition-[opacity,transform,bottom] active:scale-95 sm:hidden"
-        title="Criar novo Brick"
-        aria-label="Criar novo Brick"
+        title={isEn ? "Create new Brick" : "Criar novo Brick"}
+        aria-label={isEn ? "Create new Brick" : "Criar novo Brick"}
       >
         <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -831,12 +847,13 @@ function BrickboardContent() {
       </button>
 
       <ComposeBrickModal
+        isEn={isEn}
         isOpen={isComposeOpen}
         onClose={() => {
           setIsComposeOpen(false);
           setPreAttachedArticle(null);
           if (searchParams.get("attach")) {
-            router.replace("/brickboard");
+            router.replace(brickboardBase);
           }
         }}
         onPublish={async (content, tag, article, media, mediaAlt) => {
@@ -850,6 +867,7 @@ function BrickboardContent() {
       />
 
       <CreatePollModal
+        isEn={isEn}
         isOpen={isPollModalOpen}
         onClose={() => setIsPollModalOpen(false)}
         onPublishPoll={(question, options) => {

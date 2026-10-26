@@ -11,7 +11,13 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "OrangeBrick — Notícias de Games, Lançamentos e BrickBoard",
   description: "Portal gamer definitivo: últimas notícias, radar de lançamentos oficiais, termômetro da comunidade e o feed BrickBoard.",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    languages: {
+      "pt-BR": "/",
+      "en-US": "/en",
+    },
+  },
   openGraph: {
     title: "OrangeBrick — Notícias de Games, Lançamentos e BrickBoard",
     description: "Portal gamer definitivo: notícias de games, radar de lançamentos oficiais, termômetro da comunidade e debates no BrickBoard.",

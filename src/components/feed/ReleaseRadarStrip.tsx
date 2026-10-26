@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import CoverflowGallery from "@/components/originkit/ui/coverflowgallery-custom-style";
 import { createDataClient } from "@/lib/supabase/client";
 import { isAllowedReleaseImageUrl } from "@/lib/release-images";
@@ -46,6 +47,8 @@ function releaseDateIso(item: ReleaseItem) {
 }
 
 export function ReleaseRadarStrip() {
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en");
   const supabase = useMemo(() => createDataClient(), []);
   const [releases, setReleases] = useState<ReleaseItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,37 +137,37 @@ export function ReleaseRadarStrip() {
       <div className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
           <div className="flex items-center justify-between gap-4">
-            <p className="mb-1 text-xs font-bold text-brand-orange">Agenda de jogos</p>
+            <p className="mb-1 text-xs font-bold text-brand-orange">{isEn ? "Gaming Schedule" : "Agenda de jogos"}</p>
             <Link
-              href="/lancamentos"
+              href={isEn ? "/en/lancamentos" : "/lancamentos"}
               className="inline-flex min-h-11 items-center px-2 text-xs font-bold text-brand-orange hover:underline sm:hidden"
             >
-              Ver todos →
+              {isEn ? "See all →" : "Ver todos →"}
             </Link>
           </div>
           <h2 id="release-radar-title" className="font-heading text-2xl font-black tracking-[-0.025em] text-white sm:text-3xl">
-            Radar de lançamentos
+            {isEn ? "Release Radar" : "Radar de lançamentos"}
           </h2>
           <p className="mt-1 text-xs leading-5 text-gray-400 sm:text-sm">
             {selectedMonth === "all"
-              ? "Jogos organizados por mês de lançamento."
-              : `Lançamentos confirmados para ${monthOptions.find((m) => m.key === selectedMonth)?.label || ""}.`}
+              ? (isEn ? "Games organized by release month." : "Jogos organizados por mês de lançamento.")
+              : (isEn ? `Confirmed releases for ${monthOptions.find((m) => m.key === selectedMonth)?.label || ""}.` : `Lançamentos confirmados para ${monthOptions.find((m) => m.key === selectedMonth)?.label || ""}.`)}
           </p>
         </div>
 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
           <Link
-            href="/lancamentos"
+            href={isEn ? "/en/lancamentos" : "/lancamentos"}
             className="inline-flex min-h-11 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-3.5 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange hover:text-white"
           >
-            Ver calendário completo <span aria-hidden="true">→</span>
+            {isEn ? "View full calendar" : "Ver calendário completo"} <span aria-hidden="true">→</span>
           </Link>
         </div>
       </div>
 
       {!isLoading && monthOptions.length > 1 && (
         <div className="mt-3 flex max-w-full items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
-          <span className="shrink-0 font-bold uppercase tracking-wider text-gray-400">Filtrar mês:</span>
+          <span className="shrink-0 font-bold uppercase tracking-wider text-gray-400">{isEn ? "Filter month:" : "Filtrar mês:"}</span>
           {monthOptions.map((option) => (
             <button
               key={option.key}

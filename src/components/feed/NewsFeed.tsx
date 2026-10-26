@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useState, useCallback, type ReactNode, type MouseEvent as ReactMouseEvent } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { EditorialImage as Image } from "@/components/ui/EditorialImage";
 import { NewsCardCompact } from "@/components/card/NewsCardCompact";
 import { NewsFeedSkeleton } from "./NewsFeedSkeleton";
@@ -9,6 +10,7 @@ import { NewsFeedEmpty } from "./NewsFeedEmpty";
 import { NewsSidebar } from "./NewsSidebar";
 import { useInfiniteFeed } from "@/lib/hooks/useInfiniteFeed";
 import { usePostStats } from "@/lib/hooks/usePostStats";
+import { getDictionary } from "@/lib/i18n";
 import { CATEGORY_CONFIG, type Post, type PostCategory, type PostStats, type ReactionType } from "@/lib/types/database";
 import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
@@ -31,14 +33,6 @@ interface NewsFeedProps {
   initialPosts?: Post[];
 }
 
-const CATEGORIES: { label: string; value: PostCategory | null }[] = [
-  { label: "Tudo", value: null },
-  ...(["breaking", "review", "hardware", "opinion", "industry", "modding"] as PostCategory[]).map((value) => ({
-    label: CATEGORY_CONFIG[value].label,
-    value,
-  })),
-];
-
 const EMPTY_STATS: PostStats = {
   reactions: { hype: 0, flop: 0, salty: 0 },
   views: 0,
@@ -47,6 +41,18 @@ const EMPTY_STATS: PostStats = {
 };
 
 export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, searchQuery = "", activeTag = null, onSelectCategory, onClearFilters, homeHighlights, initialPosts, featuredDay }: NewsFeedProps) {
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en");
+  const dict = getDictionary(isEn ? "en" : "pt");
+
+  const categoriesList = [
+    { label: isEn ? "All" : "Tudo", value: null },
+    ...(["breaking", "review", "hardware", "opinion", "industry", "modding"] as PostCategory[]).map((value) => ({
+      label: isEn ? dict.categories[value] : CATEGORY_CONFIG[value].label,
+      value,
+    })),
+  ];
+
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
@@ -193,25 +199,27 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   const renderHeroSection = () => {
     if (isFiltering || !heroPost || sidePosts.length < 2) return null;
 
-    const heroBadge = heroIsToday ? "Matéria do dia" : "Em destaque";
+    const heroTitle = (isEn && heroPost.title_en) || heroPost.title;
+    const heroSummary = (isEn && heroPost.summary_en) || heroPost.summary;
+    const heroHref = isEn ? `/en/posts/${heroPost.slug_en || heroPost.slug}` : `/posts/${heroPost.slug}`;
+    const heroBadge = isEn ? (heroIsToday ? "Story of the day" : "Featured") : (heroIsToday ? "Matéria do dia" : "Em destaque");
 
     return (
       <div className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Link
-          href={`/posts/${heroPost.slug}`}
+          href={heroHref}
           data-home-event="article"
           data-home-target={heroPost.slug}
           className="group relative flex w-full flex-col overflow-hidden bg-background-void ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange lg:col-span-2"
         >
           <div className="relative aspect-video w-full overflow-hidden bg-black">
             {heroPost.image_url ? (
-              <Image priority src={heroPost.image_url} alt={heroPost.image_alt || heroPost.title} fill sizes="(max-width: 1024px) 100vw, 66vw" className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]" />
+              <Image priority src={heroPost.image_url} alt={heroPost.image_alt || heroTitle} fill sizes="(max-width: 1024px) 100vw, 66vw" className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]" />
             ) : (
               <div className="absolute inset-0 bg-card-slate flex items-center justify-center">
-                <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">Sem mídia</span>
+                <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">{isEn ? "No media" : "Sem mídia"}</span>
               </div>
             )}
-
           </div>
           <div className="absolute left-0 top-0 z-30 rounded-br-[18px] bg-brand-orange px-4 py-2.5">
             <span className="text-xs font-black uppercase tracking-[0.18em] text-black">{heroBadge}</span>
@@ -226,68 +234,75 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             </div>
 
             <h2 className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight uppercase tracking-wider group-hover:text-brand-orange transition-colors duration-300 lg:line-clamp-2">
-              {heroPost.title}
+              {heroTitle}
             </h2>
 
             <p className="mt-1 line-clamp-2 text-sm leading-6 text-gray-200">
-              {heroPost.summary}
+              {heroSummary}
             </p>
 
             <div className="mt-2 flex flex-wrap items-center gap-x-2 text-xs">
-              <span className="text-gray-300">Por</span>
+              <span className="text-gray-300">{isEn ? "By" : "Por"}</span>
               <strong className="font-bold text-white">{heroPost.author_name}</strong>
               {normalizeAuthorTag(heroPost.author_tag) && (
                 <span className="text-brand-orange">{normalizeAuthorTag(heroPost.author_tag)}</span>
               )}
-              <span className="ml-auto text-xs font-bold text-brand-orange">Ler matéria →</span>
+              <span className="ml-auto text-xs font-bold text-brand-orange">{isEn ? "Read article →" : "Ler matéria →"}</span>
             </div>
           </div>
         </Link>
 
         <div className="flex flex-col gap-3 lg:grid lg:grid-rows-2 lg:gap-4">
-          {sidePosts.map((post) => (
-            <Link
-              key={post.id}
-              href={`/posts/${post.slug}`}
-              data-home-event="article"
-              data-home-target={post.slug}
-              className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
-            >
-              {post.image_url && (
-                <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[48%] lg:w-full lg:rounded-none lg:aspect-auto">
-                  <Image loading="lazy" decoding="async"
-                    src={post.image_url}
-                    alt={post.image_alt || post.title}
-                    fill
-                    sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw"
-                    className="h-full w-full object-cover object-center transition-transform duration-500 lg:group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 to-transparent lg:block" />
-                  <span className="absolute bottom-0 left-0 z-20 hidden rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black lg:block">
-                    {CATEGORY_CONFIG[post.category]?.label || post.category}
-                    <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
-                    <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
-                  </span>
-                </div>
-              )}
-              <div className={`relative z-20 flex min-w-0 flex-1 flex-col justify-between py-3 pr-3 lg:min-h-0 lg:overflow-hidden lg:p-3 ${post.image_url ? "" : "pl-3"}`}>
-                <div>
-                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-                    <span className={post.image_url ? "lg:hidden" : ""}><Tag category={post.category} /></span>
-                    <span className="hidden sm:block"><Timer date={post.published_at ?? ""} /></span>
+          {sidePosts.map((post) => {
+            const sideTitle = (isEn && post.title_en) || post.title;
+            const sideSummary = (isEn && post.summary_en) || post.summary;
+            const sideHref = isEn ? `/en/posts/${post.slug_en || post.slug}` : `/posts/${post.slug}`;
+            const sideCategory = isEn ? dict.categories[post.category] : (CATEGORY_CONFIG[post.category]?.label || post.category);
+
+            return (
+              <Link
+                key={post.id}
+                href={sideHref}
+                data-home-event="article"
+                data-home-target={post.slug}
+                className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
+              >
+                {post.image_url && (
+                  <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[48%] lg:w-full lg:rounded-none lg:aspect-auto">
+                    <Image loading="lazy" decoding="async"
+                      src={post.image_url}
+                      alt={post.image_alt || sideTitle}
+                      fill
+                      sizes="(max-width: 639px) 112px, (max-width: 1023px) 144px, 33vw"
+                      className="h-full w-full object-cover object-center transition-transform duration-500 lg:group-hover:scale-[1.02]"
+                    />
+                    <div className="absolute inset-0 z-10 hidden bg-gradient-to-t from-black/80 to-transparent lg:block" />
+                    <span className="absolute bottom-0 left-0 z-20 hidden rounded-tr-[18px] bg-brand-orange px-3 py-1.5 font-subtitle text-xs font-black uppercase tracking-[0.06em] text-black lg:block">
+                      {sideCategory}
+                      <span aria-hidden="true" className="absolute -right-4 bottom-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+                      <span aria-hidden="true" className="absolute -top-4 left-0 size-4 rounded-bl-[16px] shadow-[-5px_5px_0_4px_#FF5E00]" />
+                    </span>
                   </div>
-                  <h3 className="line-clamp-3 font-heading text-sm font-bold leading-snug text-white transition-colors lg:line-clamp-2 duration-200 group-hover:text-brand-orange">
-                    {post.title}
-                  </h3>
-                  {post.summary && (
-                    <p className="mt-1 hidden text-xs leading-relaxed text-gray-400 lg:line-clamp-1">
-                      {post.summary}
-                    </p>
-                  )}
+                )}
+                <div className={`relative z-20 flex min-w-0 flex-1 flex-col justify-between py-3 pr-3 lg:min-h-0 lg:overflow-hidden lg:p-3 ${post.image_url ? "" : "pl-3"}`}>
+                  <div>
+                    <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                      <span className={post.image_url ? "lg:hidden" : ""}><Tag category={post.category} /></span>
+                      <span className="hidden sm:block"><Timer date={post.published_at ?? ""} /></span>
+                    </div>
+                    <h3 className="line-clamp-3 font-heading text-sm font-bold leading-snug text-white transition-colors lg:line-clamp-2 duration-200 group-hover:text-brand-orange">
+                      {sideTitle}
+                    </h3>
+                    {sideSummary && (
+                      <p className="mt-1 hidden text-xs leading-relaxed text-gray-400 lg:line-clamp-1">
+                        {sideSummary}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     );
@@ -303,16 +318,24 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                 <span className="h-6 w-1 bg-brand-orange" />
                 <Heading className="font-heading text-xl font-black text-white">
                   {category ? (
-                    <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
+                    isEn ? (
+                      <>News in <span className="text-brand-orange">{dict.categories[category]}</span></>
+                    ) : (
+                      <>Notícias em <span className="text-brand-orange">{CATEGORY_CONFIG[category].label}</span></>
+                    )
                   ) : (
-                    <>Últimas <span className="text-brand-orange">notícias</span></>
+                    isEn ? (
+                      <>Latest <span className="text-brand-orange">news</span></>
+                    ) : (
+                      <>Últimas <span className="text-brand-orange">notícias</span></>
+                    )
                   )}
                 </Heading>
               </div>
 
               {onSelectCategory && (
-                <div role="group" aria-label="Filtrar por categoria" className="-mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1 py-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
-                  {CATEGORIES.map((cat) => {
+                <div role="group" aria-label={isEn ? "Filter by category" : "Filtrar por categoria"} className="-mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1 py-1 text-xs font-semibold scrollbar-none sm:mx-0 sm:px-0">
+                  {categoriesList.map((cat) => {
                     const isActive = category === cat.value;
                     return (
                       <button

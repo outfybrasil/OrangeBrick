@@ -1,0 +1,146 @@
+export type Locale = "pt" | "en";
+
+export interface Dictionary {
+  common: {
+    siteName: string;
+    tagline: string;
+    loading: string;
+    error: string;
+    tryAgain: string;
+    backToHome: string;
+    readTime: string;
+    search: string;
+    searchPlaceholder: string;
+    language: string;
+  };
+  nav: {
+    news: string;
+    releases: string;
+    community: string;
+    ranking: string;
+    about: string;
+    contact: string;
+    login: string;
+    profile: string;
+    myAccount: string;
+    admin: string;
+    logout: string;
+  };
+  categories: {
+    breaking: string;
+    hardware: string;
+    industry: string;
+    modding: string;
+    review: string;
+    opinion: string;
+    all: string;
+  };
+  feed: {
+    featured: string;
+    latestNews: string;
+    trending: string;
+    agenda: string;
+    noPosts: string;
+    loadMore: string;
+    byAuthor: string;
+    publishedAt: string;
+    shares: string;
+    comments: string;
+  };
+  footer: {
+    description: string;
+    categories: string;
+    institutional: string;
+    about: string;
+    terms: string;
+    privacy: string;
+    advertise: string;
+    contact: string;
+    rights: string;
+  };
+  post: {
+    back: string;
+    home: string;
+    news: string;
+    save: string;
+    saved: string;
+    readingTime: string;
+    minutes: string;
+    textSize: string;
+    by: string;
+    share: string;
+    linkCopied: string;
+    featuredQuote: string;
+    viewSource: string;
+    viewGame: string;
+    correctionNote: string;
+    relatedArticles: string;
+    relatedArticlesDesc: string;
+    joinBrickboard: string;
+    brickboardPromptSingle: string;
+    brickboardPromptMultiple: string;
+    brickboardPromptEmpty: string;
+    openConversation: string;
+    viewConversation: string;
+    previewBanner: string;
+    noCover: string;
+    infoStatus: {
+      confirmed: string;
+      developing: string;
+      rumor: string;
+      updated: string;
+      corrected: string;
+    };
+  };
+  community: {
+    title: string;
+    tagline: string;
+    subtitle: string;
+    openConversation: string;
+    showingTargetConversation: string;
+    viewAllConversations: string;
+    tabs: {
+      latest: string;
+      following: string;
+      trending: string;
+    };
+    platforms: {
+      all: string;
+      allLabel: string;
+    };
+    filters: string;
+    searchLabel: string;
+    searchPlaceholder: string;
+    foundSingle: string;
+    foundMultiple: string;
+    clearFilters: string;
+    noPosts: string;
+    noPostsFollowing: string;
+    loadMore: string;
+    noMorePosts: string;
+    myProgress: string;
+    level: string;
+    rankings: string;
+    achievements: string;
+    howItWorks: string;
+    trendingTopics: string;
+    suggestedProfiles: string;
+    follow: string;
+    followingBtn: string;
+    pollTitle: string;
+    vote: string;
+    votes: string;
+    ended: string;
+    createPoll: string;
+    postBrick: string;
+    reply: string;
+    save: string;
+    saved: string;
+    share: string;
+    delete: string;
+    edit: string;
+    report: string;
+    cancel: string;
+    composePlaceholder: string;
+  };
+}

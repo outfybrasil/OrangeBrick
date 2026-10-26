@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { profile } = useAuth();
+  const currentLocale = pathname.startsWith("/en") ? "en" : "pt";
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
 
@@ -24,37 +25,37 @@ export function MobileBottomNav() {
 
   const items = [
     {
-      href: "/",
-      label: "Início",
-      active: pathname === "/",
+      href: currentLocale === "en" ? "/en" : "/",
+      label: currentLocale === "en" ? "Home" : "Início",
+      active: pathname === "/" || pathname === "/en",
       iconInactive: `${basePath}/icons/nav/home-inactive.png`,
       iconActive: `${basePath}/icons/nav/home-active.png`,
     },
     {
-      href: "/noticias",
-      label: "Notícias",
-      active: pathname.startsWith("/noticias") || pathname.startsWith("/posts/"),
+      href: currentLocale === "en" ? "/en/noticias" : "/noticias",
+      label: currentLocale === "en" ? "News" : "Notícias",
+      active: pathname.startsWith("/noticias") || pathname.startsWith("/posts/") || pathname.startsWith("/en/noticias") || pathname.startsWith("/en/posts/"),
       iconInactive: `${basePath}/icons/nav/news-inactive.png`,
       iconActive: `${basePath}/icons/nav/news-active.png`,
     },
     {
-      href: "/brickboard",
+      href: currentLocale === "en" ? "/en/brickboard" : "/brickboard",
       label: "BrickBoard",
       featured: true,
-      active: pathname.startsWith("/brickboard"),
+      active: pathname.startsWith("/brickboard") || pathname.startsWith("/en/brickboard"),
       iconInactive: `${basePath}/icons/nav/brickboard-inactive.png`,
       iconActive: `${basePath}/icons/nav/brickboard-active.png`,
     },
     {
-      href: "/lancamentos",
-      label: "Lançamentos",
-      active: pathname.startsWith("/lancamentos") || pathname.startsWith("/games/"),
+      href: currentLocale === "en" ? "/en/lancamentos" : "/lancamentos",
+      label: currentLocale === "en" ? "Releases" : "Lançamentos",
+      active: pathname.startsWith("/lancamentos") || pathname.startsWith("/games/") || pathname.startsWith("/en/lancamentos"),
       iconInactive: `${basePath}/icons/nav/releases-inactive.png`,
       iconActive: `${basePath}/icons/nav/releases-active.png`,
     },
     {
       href: myProfileHref,
-      label: "Meu Brick",
+      label: currentLocale === "en" ? "My Brick" : "Meu Brick",
       active: pathname.startsWith("/meu-brick") || pathname.startsWith("/profile/") || pathname.startsWith("/u/"),
       iconInactive: `${basePath}/icons/nav/profile-inactive.png`,
       iconActive: `${basePath}/icons/nav/profile-active.png`,

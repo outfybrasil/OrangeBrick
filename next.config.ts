@@ -19,6 +19,8 @@ function imageRemotePatterns() {
     "orange-brick.vercel.app",
     "lh3.googleusercontent.com",
     "live.staticflickr.com",
+    "i.ytimg.com",
+    "img.youtube.com",
     ...configuredHostnames,
   ];
   const patterns: Array<{ protocol: "https"; hostname: string; pathname?: string }> = [...new Set(hostnames)].map((hostname) => ({

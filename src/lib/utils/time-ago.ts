@@ -1,14 +1,23 @@
-export function timeAgo(date: string | Date): string {
+export function timeAgo(date: string | Date, locale: "pt" | "en" = "pt"): string {
   if (!date) return "";
   const now = new Date();
   const then = new Date(date);
   if (isNaN(then.getTime())) return "";
   const diffMs = now.getTime() - then.getTime();
-  if (diffMs < 0) return then.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  if (diffMs < 0) return then.toLocaleString(locale === "en" ? "en-US" : "pt-BR", { dateStyle: "short", timeStyle: "short" });
   const diffSeconds = Math.floor(diffMs / 1000);
   const diffMinutes = Math.floor(diffSeconds / 60);
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
+
+  if (locale === "en") {
+    if (diffSeconds < 60) return "just now";
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    return then.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
 
   if (diffSeconds < 60) return "agora";
   if (diffMinutes < 60) return `há ${diffMinutes} min`;

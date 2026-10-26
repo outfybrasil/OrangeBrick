@@ -24,6 +24,10 @@ async function request(path: string, aal = "aal1", isAdmin = true) {
     require: (name: string) => {
       if (name === "next/server") return { NextResponse };
       if (name === "@/lib/auth") return { isVerifiedAdminSession };
+      if (name === "@/lib/i18n" || name === "@/lib/i18n/index.ts") return {
+        detectLocale: () => "pt",
+        LOCALE_COOKIE_NAME: "ob_locale",
+      };
       if (name === "@supabase/ssr") return { createServerClient: () => ({ auth: {
         getUser: async () => ({ data: { user } }),
         getSession: async () => ({ data: { session: { access_token: accessToken } } }),

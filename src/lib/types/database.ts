@@ -413,10 +413,10 @@ export interface Database {
 }
 
 export const POST_LIST_COLUMNS =
-  "id, slug, title, summary, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, is_featured, featured_priority";
+  "id, slug, slug_en, title, title_en, summary, summary_en, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, is_featured, featured_priority";
 
 export const POST_DETAIL_PUBLIC_COLUMNS =
-  "id, slug, title, summary, body, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, updated_at, topic_id, information_status, featured_quote, editorial_sources, correction_note, is_featured, featured_priority";
+  "id, slug, slug_en, title, title_en, summary, summary_en, body, body_en, category, image_url, image_alt, author_name, author_tag, is_published, published_at, created_at, updated_at, topic_id, information_status, featured_quote, editorial_sources, correction_note, is_featured, featured_priority";
 
 export interface Post {
   id: string;
@@ -446,6 +446,10 @@ export interface Post {
   archived_at?: string | null;
   is_featured?: boolean | null;
   featured_priority?: number | null;
+  title_en?: string | null;
+  summary_en?: string | null;
+  body_en?: Json | null;
+  slug_en?: string | null;
 }
 
 export interface PostInsert {
@@ -476,6 +480,10 @@ export interface PostInsert {
   archived_at?: string | null;
   is_featured?: boolean | null;
   featured_priority?: number | null;
+  title_en?: string | null;
+  summary_en?: string | null;
+  body_en?: Json | null;
+  slug_en?: string | null;
 }
 
 export interface EditorialImage {

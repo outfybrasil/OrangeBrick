@@ -9,6 +9,8 @@ import { getRateLimitWindowStart } from "@/lib/server/rate-limit";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 const reply = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
+const PAGE_SIZE = 10;
+const SITE_FILTERS = ["all", "published", "scheduled", "draft"] as const;
 
 async function administrator(request: Request) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
@@ -19,13 +21,21 @@ async function administrator(request: Request) {
 
 export async function GET(request: Request) {
   if (!await administrator(request)) return reply({ error: "Acesso administrativo com dois fatores obrigatório." }, 403);
-  const page = Number(new URL(request.url).searchParams.get("page") || 1);
+  const searchParams = new URL(request.url).searchParams;
+  const page = Number(searchParams.get("page") || 1);
+  const requestedFilter = searchParams.get("site") || "all";
   if (!Number.isSafeInteger(page) || page < 1 || page > 500) return reply({ error: "Página inválida." }, 400);
+  if (!SITE_FILTERS.includes(requestedFilter as typeof SITE_FILTERS[number])) return reply({ error: "Filtro inválido." }, 400);
+  const siteFilter = requestedFilter as typeof SITE_FILTERS[number];
   const db = createServiceDataClient();
-  const { data: posts, count, error } = await db.from("posts").select("id,title,slug,is_published,scheduled_at,published_at,updated_at", { count: "exact" }).is("archived_at", null).order("updated_at", { ascending: false }).order("id", { ascending: false }).range((page - 1) * 20, page * 20 - 1).abortSignal(AbortSignal.timeout(8000));
+  let postsQuery = db.from("posts").select("id,title,slug,is_published,scheduled_at,published_at,updated_at", { count: "exact" }).is("archived_at", null);
+  if (siteFilter === "published") postsQuery = postsQuery.eq("is_published", true);
+  if (siteFilter === "scheduled") postsQuery = postsQuery.eq("is_published", false).not("scheduled_at", "is", null);
+  if (siteFilter === "draft") postsQuery = postsQuery.eq("is_published", false).is("scheduled_at", null);
+  const { data: posts, count, error } = await postsQuery.order("updated_at", { ascending: false }).order("id", { ascending: false }).range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1).abortSignal(AbortSignal.timeout(8000));
   if (error) return reply({ error: "Não foi possível carregar o acompanhamento." }, 503);
   const ids = (posts || []).map(post => post.id as string);
-  if (!ids.length) return reply({ items: [], page, pages: Math.max(1, Math.ceil((count || 0) / 20)), warnings: [], checkedAt: new Date().toISOString() });
+  if (!ids.length) return reply({ items: [], page, pages: Math.max(1, Math.ceil((count || 0) / PAGE_SIZE)), pageSize: PAGE_SIZE, total: count || 0, warnings: [], checkedAt: new Date().toISOString() });
   const [telegram, youtube, social] = await Promise.all([
     db.from("bot_state").select("key,value,updated_at").in("key", ids.map(id => `telegram:publication:${id}`)).abortSignal(AbortSignal.timeout(8000)),
     db.from("reel_youtube_publications").select("post_id,status,updated_at,video_id,visibility").in("post_id", ids).order("updated_at", { ascending: false }).abortSignal(AbortSignal.timeout(8000)),
@@ -38,7 +48,7 @@ export async function GET(request: Request) {
   for (const row of social.data || []) socialPublications.set(`${row.post_id}:${row.platform}`, row as SocialDelivery);
   return reply({
     items: (posts || []).map(post => ({ id: post.id, title: post.title, slug: post.slug, site: post.is_published ? "published" : post.scheduled_at ? "scheduled" : "draft", publishedAt: post.published_at, telegram: telegram.error ? unavailableDelivery() : telegramDelivery(notices.get(String(post.id)) || null), youtube: youtube.error ? unavailableDelivery() : youtubeDelivery(publications.get(String(post.id)) || null), instagram: social.error ? unavailableDelivery() : socialDelivery(socialPublications.get(`${post.id}:instagram`) || null, "instagram"), tiktok: social.error ? unavailableDelivery() : socialDelivery(socialPublications.get(`${post.id}:tiktok`) || null, "tiktok") })),
-    page, pages: Math.max(1, Math.ceil((count || 0) / 20)), checkedAt: new Date().toISOString(),
+    page, pages: Math.max(1, Math.ceil((count || 0) / PAGE_SIZE)), pageSize: PAGE_SIZE, total: count || 0, checkedAt: new Date().toISOString(),
     warnings: [telegram.error && "A consulta do Telegram está indisponível.", youtube.error && "A consulta do YouTube está indisponível.", social.error && "A consulta do Instagram e TikTok está indisponível."].filter(Boolean),
   });
 }

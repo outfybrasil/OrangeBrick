@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { NewsFeed } from "@/components/feed/NewsFeed";
 import { ReleaseRadarStrip } from "@/components/feed/ReleaseRadarStrip";
@@ -20,6 +20,9 @@ interface HomePageClientProps {
 
 export function HomePageClient({ initialPosts, featuredDay }: HomePageClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en");
+  const basePath = isEn ? "/en" : "";
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category") as PostCategory | null;
   const qParam = searchParams.get("q") || "";
@@ -46,7 +49,7 @@ export function HomePageClient({ initialPosts, featuredDay }: HomePageClientProp
     if (qParam) params.set("q", qParam);
     if (activeTag) params.set("tag", activeTag);
     const queryString = params.toString();
-    router.push(queryString ? `/?${queryString}` : "/");
+    router.push(queryString ? `${basePath}/?${queryString}` : (isEn ? "/en" : "/"));
   };
 
   return (
@@ -63,7 +66,7 @@ export function HomePageClient({ initialPosts, featuredDay }: HomePageClientProp
           activeTag={activeTag}
           searchQuery={qParam}
           onSelectCategory={handleCategoryClick}
-          onClearFilters={() => router.push("/")}
+          onClearFilters={() => router.push(isEn ? "/en" : "/")}
           initialPosts={hasQueryFilters ? undefined : initialPosts}
         />
 

@@ -9,7 +9,6 @@ interface TopicRouteProps {
 
 export async function GET(request: Request, { params }: TopicRouteProps) {
   const { slug } = await params;
-  let destination = "/noticias";
 
   try {
     const supabase = createPublicServerClient();
@@ -19,13 +18,24 @@ export async function GET(request: Request, { params }: TopicRouteProps) {
       .eq("id", decodeURIComponent(slug))
       .eq("is_active", true)
       .maybeSingle()) as { data: { name: string } | null };
+
     const name = data?.name;
     if (typeof name === "string" && name.trim()) {
-      destination = `/noticias?q=${encodeURIComponent(name.trim().slice(0, 80))}`;
+      const destination = `/noticias?q=${encodeURIComponent(name.trim().slice(0, 80))}`;
+      return NextResponse.redirect(new URL(destination, request.url), {
+        status: 308,
+        headers: { "X-Robots-Tag": "noindex" },
+      });
     }
   } catch {
-    destination = "/noticias";
+    return new NextResponse(null, {
+      status: 404,
+      headers: { "X-Robots-Tag": "noindex" },
+    });
   }
 
-  return NextResponse.redirect(new URL(destination, request.url), 308);
+  return new NextResponse(null, {
+    status: 404,
+    headers: { "X-Robots-Tag": "noindex" },
+  });
 }

@@ -2,6 +2,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { detectLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 
 const PROTECTED_PREFIXES = ["/admin"];
 const EMAIL_AUTH_PATHS = new Set(["/cadastro", "/entrar", "/recuperar-senha", "/nova-senha"]);
@@ -64,6 +65,37 @@ export async function proxy(request: NextRequest) {
 
   if (EMAIL_AUTH_PATHS.has(pathname) && process.env.EMAIL_AUTH_ENABLED === "false") {
     return secureRedirect(new URL("/", request.url), policy);
+  }
+
+  const isEnRoute = pathname === "/en" || pathname.startsWith("/en/");
+  const isApiRoute = pathname.startsWith("/api/");
+  const isAdminRoute = isProtected(pathname);
+
+  if (!isApiRoute && !isAdminRoute) {
+    const cookieLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value;
+    const userAgent = request.headers.get("user-agent") || "";
+    const isBot = /bot|googlebot|crawler|spider|bingbot|yandex|duckduckbot/i.test(userAgent);
+
+    if (cookieLocale === "en" && !isEnRoute && pathname === "/") {
+      return secureRedirect(new URL("/en", request.url), policy);
+    }
+
+    if (cookieLocale === "pt" && isEnRoute) {
+      const targetPath = pathname.replace(/^\/en(?:\/|$)/, "/") || "/";
+      return secureRedirect(new URL(targetPath, request.url), policy);
+    }
+
+    if (!cookieLocale && !isBot && !isEnRoute && pathname === "/") {
+      const country = request.headers.get("x-vercel-ip-country");
+      const acceptLanguage = request.headers.get("accept-language");
+      const detected = detectLocale(country, acceptLanguage);
+      if (detected === "en") {
+        const redirectUrl = new URL("/en", request.url);
+        const redirectRes = secureRedirect(redirectUrl, policy);
+        redirectRes.cookies.set(LOCALE_COOKIE_NAME, "en", { path: "/", maxAge: 31536000, sameSite: "lax" });
+        return redirectRes;
+      }
+    }
   }
 
   if (!isProtected(pathname)) {

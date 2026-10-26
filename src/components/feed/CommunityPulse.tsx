@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { createDataClient } from "@/lib/supabase/client";
 import { timeAgo } from "@/lib/utils/time-ago";
 import { resolveAvatarUrl } from "@/lib/avatar";
@@ -17,6 +18,8 @@ interface PulsePost {
 }
 
 export function CommunityPulse() {
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en");
   const supabase = useMemo(() => createDataClient(), []);
   const [posts, setPosts] = useState<PulsePost[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -83,24 +86,24 @@ export function CommunityPulse() {
         <div>
           <div className="mb-0.5 flex items-center gap-1.5">
             <BrickboardLogo variant="mark" alt="" className="size-3.5 shrink-0" />
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">Comunidade Gamer</p>
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-brand-orange">{isEn ? "Gamer Community" : "Comunidade Gamer"}</p>
           </div>
           <h2 id="community-pulse-title" className="font-heading text-xl font-black text-white sm:text-2xl">
-            A conversa continua no BrickBoard
+            {isEn ? "The conversation continues on BrickBoard" : "A conversa continua no BrickBoard"}
           </h2>
         </div>
         <Link
-          href="/brickboard"
+          href={isEn ? "/en/brickboard" : "/brickboard"}
           className="shrink-0 text-xs font-bold text-brand-orange transition-colors hover:text-white flex items-center gap-1"
         >
-          <span>Ir para o BrickBoard</span>
+          <span>{isEn ? "Go to BrickBoard" : "Ir para o BrickBoard"}</span>
           <span aria-hidden="true">→</span>
         </Link>
       </div>
 
       {hasError ? (
         <div className="flex min-h-24 flex-col items-start justify-center gap-2 border border-white/10 px-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-300">Não foi possível carregar as conversas recentes.</p>
+          <p className="text-sm text-gray-300">{isEn ? "Could not load recent conversations." : "Não foi possível carregar as conversas recentes."}</p>
           <button
             type="button"
             onClick={() => {
@@ -109,13 +112,13 @@ export function CommunityPulse() {
             }}
             className="min-h-11 text-xs font-bold text-brand-orange transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
-            Tentar novamente
+            {isEn ? "Try again" : "Tentar novamente"}
           </button>
         </div>
       ) : isLoaded && posts.length > 0 ? (
         <div className="space-y-3">
           <Link
-            href={`/brickboard?post=${posts[0].id}`}
+            href={isEn ? `/en/brickboard?post=${posts[0].id}` : `/brickboard?post=${posts[0].id}`}
             data-home-event="brickboard"
             data-home-target={posts[0].id}
             className="group block rounded-sm border border-white/10 bg-[#111217] p-5 sm:p-6 transition-colors hover:border-brand-orange/40"
@@ -149,12 +152,12 @@ export function CommunityPulse() {
                     {posts[0].content}
                   </h3>
                   <p className="mt-0.5 text-xs text-gray-400 line-clamp-1">
-                    Iniciado por <strong className="text-gray-300 font-semibold">{posts[0].author_name}</strong> · {posts[0].comments_count === null ? "respostas indisponíveis" : `${posts[0].comments_count} ${posts[0].comments_count === 1 ? "resposta" : "respostas"}`}
+                    {isEn ? "Started by" : "Iniciado por"} <strong className="text-gray-300 font-semibold">{posts[0].author_name}</strong> · {posts[0].comments_count === null ? (isEn ? "replies unavailable" : "respostas indisponíveis") : `${posts[0].comments_count} ${posts[0].comments_count === 1 ? (isEn ? "reply" : "resposta") : (isEn ? "replies" : "respostas")}`}
                   </p>
                 </div>
               </div>
               <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-orange shrink-0 self-end sm:self-center transition-transform group-hover:translate-x-1">
-                <span>Entrar na conversa</span>
+                <span>{isEn ? "Join the conversation" : "Entrar na conversa"}</span>
                 <span aria-hidden="true">→</span>
               </div>
             </div>

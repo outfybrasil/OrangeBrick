@@ -8,9 +8,10 @@ interface CreatePollModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPublishPoll: (question: string, options: string[]) => void;
+  isEn?: boolean;
 }
 
-export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollModalProps) {
+export function CreatePollModal({ isOpen, onClose, onPublishPoll, isEn = false }: CreatePollModalProps) {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const dialogRef = useModalDialog<HTMLDivElement>(isOpen, onClose);
@@ -64,13 +65,13 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <h2 id="create-poll-title" className="font-heading text-lg font-bold text-white">
-              Criar Enquete
+              {isEn ? "Create Poll" : "Criar Enquete"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fechar criação de enquete"
+            aria-label={isEn ? "Close poll creator" : "Fechar criação de enquete"}
             className="flex min-h-11 min-w-11 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
           >
             <Icon name="close" size={18} />
@@ -80,28 +81,28 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-gray-300">
-              Pergunta da Enquete
+              {isEn ? "Poll Question" : "Pergunta da Enquete"}
             </label>
             <input
               type="text"
               required
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ex: Qual é o seu jogo mais aguardado de 2026?"
+              placeholder={isEn ? "e.g. What is your most anticipated game of 2026?" : "Ex: Qual é o seu jogo mais aguardado de 2026?"}
               className="w-full rounded-xl border border-white/10 bg-background-void p-3 text-sm text-white outline-none focus:border-brand-orange"
             />
           </div>
 
           <div className="space-y-2.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
-              Opções de Voto (mínimo 2, máximo 4)
+              {isEn ? "Voting Options (min 2, max 4)" : "Opções de Voto (mínimo 2, máximo 4)"}
             </label>
             {options.map((opt, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <input
                   type="text"
                   required={idx < 2}
-                  placeholder={`Opção ${idx + 1}`}
+                  placeholder={isEn ? `Option ${idx + 1}` : `Opção ${idx + 1}`}
                   value={opt}
                   onChange={(e) => updateOption(idx, e.target.value)}
                   className="flex-1 rounded-xl border border-white/10 bg-background-void px-3.5 py-2.5 text-xs text-white outline-none focus:border-brand-orange"
@@ -111,8 +112,8 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
                     type="button"
                     onClick={() => removeOption(idx)}
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-red-400"
-                    title="Remover opção"
-                    aria-label={`Remover opção ${idx + 1}`}
+                    title={isEn ? "Remove option" : "Remover opção"}
+                    aria-label={isEn ? `Remove option ${idx + 1}` : `Remover opção ${idx + 1}`}
                   >
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" className="h-4 w-4" strokeWidth="2" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
                   </button>
@@ -125,7 +126,7 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
                 onClick={addOption}
                 className="text-xs font-bold text-brand-orange hover:underline pt-1 block"
               >
-                + Adicionar mais uma opção
+                {isEn ? "+ Add another option" : "+ Adicionar mais uma opção"}
               </button>
             )}
           </div>
@@ -136,14 +137,14 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll }: CreatePollMo
               onClick={onClose}
               className="min-h-11 rounded-xl px-4 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/5 hover:text-white"
             >
-              Cancelar
+              {isEn ? "Cancel" : "Cancelar"}
             </button>
             <button
               type="submit"
               disabled={!isValid}
               className="min-h-11 rounded-xl bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-[#e95500] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Publicar Enquete
+              {isEn ? "Publish Poll" : "Publicar Enquete"}
             </button>
           </div>
         </form>
