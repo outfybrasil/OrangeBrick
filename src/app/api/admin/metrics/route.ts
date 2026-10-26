@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPublicServerClient, createServiceDataClient } from "@/lib/supabase/server";
 import { isVerifiedAdminSession } from "@/lib/auth";
+import { loadTodayAudienceMetrics } from "@/lib/server/today-audience-metrics";
 
 type SocialMetricSnapshot = {
   post_id: string;
@@ -29,19 +30,30 @@ export async function GET(request: Request) {
   const { data: { user }, error } = await createPublicServerClient().auth.getUser(token);
   if (error || !isVerifiedAdminSession(user, token)) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   const days = Number(new URL(request.url).searchParams.get("days") || 7);
-  if (![7, 30, 90].includes(days)) return NextResponse.json({ error: "Período inválido" }, { status: 400 });
+  if (![1, 7, 30, 90].includes(days)) return NextResponse.json({ error: "Período inválido" }, { status: 400 });
   const client = createServiceDataClient();
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60_000).toISOString();
-  const [result, site, snapshotResult, clickResult, accountResult] = await Promise.all([
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60_000).toISOString();
+  const todayParts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(now).map(part => [part.type, part.value]));
+  const today = `${todayParts.year}-${todayParts.month}-${todayParts.day}`;
+  const snapshotQuery = client.from("reel_social_metrics").select("post_id,platform,captured_on,captured_at,views,reach,average_watch_milliseconds,watch_time_milliseconds,likes,comments,shares,saves,follows,interactions,error");
+  const periodSnapshots = days === 1 ? snapshotQuery.gte("captured_on", today).lte("captured_on", today) : snapshotQuery.gte("captured_at", cutoff);
+  const metricsPromise = days === 1 ? loadTodayAudienceMetrics(client, now) : Promise.all([
     client.rpc("admin_audience_metrics", { p_days: days }),
     client.rpc("admin_site_metrics", { p_days: days }),
-    client.from("reel_social_metrics").select("post_id,platform,captured_on,captured_at,views,reach,average_watch_milliseconds,watch_time_milliseconds,likes,comments,shares,saves,follows,interactions,error").gte("captured_at", cutoff).order("captured_at", { ascending: false }).limit(1000),
     client.rpc("admin_reel_social_click_counts", { p_days: days }),
+  ]).then(([result, site, clickResult]) => {
+    if (result.error || site.error || clickResult.error) throw new Error("Metrics unavailable");
+    return { audience: result.data as object, site: site.data, clicks: (clickResult.data || []) as unknown as SocialClickCount[] };
+  });
+  const [metrics, snapshotResult, accountResult] = await Promise.all([
+    metricsPromise.catch(() => null),
+    periodSnapshots.order("captured_at", { ascending: false }).limit(1000),
     client.from("reel_account_metrics").select("platform,captured_on,captured_at,followers,following,total_posts,total_views,total_likes,error").order("captured_on", { ascending: false }).limit(90),
   ]);
-  if (result.error || site.error || snapshotResult.error || clickResult.error) return NextResponse.json({ error: "Não foi possível carregar as métricas. Tente novamente." }, { status: 503 });
+  if (!metrics || snapshotResult.error) return NextResponse.json({ error: "Não foi possível carregar as métricas. Tente novamente." }, { status: 503 });
   const snapshots = (snapshotResult.data || []) as unknown as SocialMetricSnapshot[];
-  const clicks = (clickResult.data || []) as unknown as SocialClickCount[];
+  const clicks = metrics.clicks;
   const latest = new Map<string, SocialMetricSnapshot>();
   for (const row of snapshots) {
     const key = `${row.post_id}:${row.platform}`;
@@ -70,5 +82,5 @@ export async function GET(request: Request) {
     if (!post || !["instagram", "tiktok", "youtube"].includes(platform)) return [];
     return [{ post_id: postId, platform, slug: post.slug, title: post.title, cta_variant: ctaVariantByPost.get(postId) || "comment", ...(latest.get(key) || {}), clicks: clickCounts.get(key) || 0 }];
   }).sort((left, right) => (right.views || 0) - (left.views || 0));
-  return NextResponse.json({ ...result.data as object, site: site.data, social, accounts: accountResult.data || [] }, { headers: { "Cache-Control": "private, no-store" } });
+  return NextResponse.json({ ...metrics.audience, site: metrics.site, social, accounts: accountResult.data || [] }, { headers: { "Cache-Control": "private, no-store" } });
 }

@@ -66,7 +66,7 @@ export default function MetricsPage() {
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <label htmlFor="metrics-period" className="text-sm text-gray-300">Período</label>
         <select id="metrics-period" value={days} onChange={event => setDays(Number(event.target.value))} className="min-h-11 rounded-lg border border-white/20 bg-[#16171d] px-3 text-sm text-white">
-          {[7, 30, 90].map(value => <option key={value} value={value}>Últimos {value} dias</option>)}
+          {[1, 7, 30, 90].map(value => <option key={value} value={value}>{value === 1 ? "Hoje" : "Últimos " + value + " dias"}</option>)}
         </select>
         <button onClick={() => setRefresh(value => value + 1)} disabled={loading} className="min-h-11 rounded-lg border border-white/20 px-4 text-sm disabled:opacity-50">Atualizar</button>
       </div>
