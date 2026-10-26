@@ -67,7 +67,7 @@ const OFFICIAL_EDITORIAL_DOMAINS = [
   "capcom.com", "capcom-games.com", "sega.com", "bandainamcoent.com", "square-enix.com", "square-enix-games.com",
   "rockstargames.com", "bethesda.net", "activision.com", "blizzard.com", "epicgames.com", "cdprojektred.com", "konami.com",
   "take2games.com", "2k.com", "valvesoftware.com", "warnerbrosgames.com", "wbgames.com", "riotgames.com", "bungie.net",
-  "remedygames.com", "krafton.com", "hoyoverse.com", "mihoyo.com", "battle.net", "atari.com", "annapurnainteractive.com", "housemarque.com",
+  "remedygames.com", "krafton.com", "hoyoverse.com", "mihoyo.com", "battle.net", "atari.com", "annapurnainteractive.com", "housemarque.com", "knightmaregame.co.uk",
 ];
 
 const EDITORIAL_PUBLISHERS: Array<{ publisher: string; domains: string[] }> = [

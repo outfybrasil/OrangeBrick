@@ -32,11 +32,12 @@ export async function GET(request: Request) {
   if (![7, 30, 90].includes(days)) return NextResponse.json({ error: "Período inválido" }, { status: 400 });
   const client = createServiceDataClient();
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60_000).toISOString();
-  const [result, site, snapshotResult, clickResult] = await Promise.all([
+  const [result, site, snapshotResult, clickResult, accountResult] = await Promise.all([
     client.rpc("admin_audience_metrics", { p_days: days }),
     client.rpc("admin_site_metrics", { p_days: days }),
     client.from("reel_social_metrics").select("post_id,platform,captured_on,captured_at,views,reach,average_watch_milliseconds,watch_time_milliseconds,likes,comments,shares,saves,follows,interactions,error").gte("captured_at", cutoff).order("captured_at", { ascending: false }).limit(1000),
     client.rpc("admin_reel_social_click_counts", { p_days: days }),
+    client.from("reel_account_metrics").select("platform,captured_on,captured_at,followers,following,total_posts,total_views,total_likes,error").order("captured_on", { ascending: false }).limit(90),
   ]);
   if (result.error || site.error || snapshotResult.error || clickResult.error) return NextResponse.json({ error: "Não foi possível carregar as métricas. Tente novamente." }, { status: 503 });
   const snapshots = (snapshotResult.data || []) as unknown as SocialMetricSnapshot[];
@@ -48,18 +49,26 @@ export async function GET(request: Request) {
   }
   const clickCounts = new Map(clicks.map(row => [`${row.post_id}:${row.platform}`, row.clicks]));
   const postIds = [...new Set([...latest.values()].map(row => row.post_id).concat(clicks.map(row => row.post_id)))];
-  const { data: postsData, error: postsError } = postIds.length
-    ? await client.from("posts").select("id,slug,title").in("id", postIds)
-    : { data: [], error: null };
+  const [{ data: postsData, error: postsError }, { data: jobsData }] = await Promise.all([
+    postIds.length ? client.from("posts").select("id,slug,title").in("id", postIds) : { data: [], error: null },
+    postIds.length ? client.from("reel_jobs").select("post_id,script").in("post_id", postIds).eq("status", "ready") : { data: [], error: null },
+  ]);
   if (postsError) return NextResponse.json({ error: "Não foi possível relacionar as métricas às matérias." }, { status: 503 });
   const posts = (postsData || []) as unknown as SocialPost[];
   const postsById = new Map<string, SocialPost>(posts.map(post => [post.id, post]));
+  const ctaVariantByPost = new Map<string, string>();
+  for (const job of (jobsData || []) as Array<{ post_id: string; script: unknown }>) {
+    const script = job.script as { ctaVariant?: string } | null;
+    if (script?.ctaVariant && !ctaVariantByPost.has(job.post_id)) {
+      ctaVariantByPost.set(job.post_id, script.ctaVariant);
+    }
+  }
   const socialKeys = new Set([...latest.keys(), ...clickCounts.keys()]);
   const social = [...socialKeys].flatMap(key => {
     const [postId, platform] = key.split(":");
     const post = postsById.get(postId);
     if (!post || !["instagram", "tiktok", "youtube"].includes(platform)) return [];
-    return [{ post_id: postId, platform, slug: post.slug, title: post.title, ...(latest.get(key) || {}), clicks: clickCounts.get(key) || 0 }];
+    return [{ post_id: postId, platform, slug: post.slug, title: post.title, cta_variant: ctaVariantByPost.get(postId) || "comment", ...(latest.get(key) || {}), clicks: clickCounts.get(key) || 0 }];
   }).sort((left, right) => (right.views || 0) - (left.views || 0));
-  return NextResponse.json({ ...result.data as object, site: site.data, social }, { headers: { "Cache-Control": "private, no-store" } });
+  return NextResponse.json({ ...result.data as object, site: site.data, social, accounts: accountResult.data || [] }, { headers: { "Cache-Control": "private, no-store" } });
 }

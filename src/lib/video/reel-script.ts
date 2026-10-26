@@ -10,6 +10,8 @@ export interface ReelScene {
   imageIndex: number;
 }
 
+export type ReelCtaVariant = "comment" | "follow";
+
 export interface ReelScriptData {
   hook: string;
   headline: string;
@@ -20,11 +22,13 @@ export interface ReelScriptData {
   ctaQuestion: string;
   ctaAction: string;
   ctaButton: string;
+  ctaVariant?: ReelCtaVariant;
   ttsProvider?: "elevenlabs" | "edge-tts";
 }
 
 export interface ReelScriptOptions {
   provider?: "auto" | "gemini" | "groq";
+  ctaVariant?: ReelCtaVariant;
 }
 
 const CANDIDATE_MODELS = [
@@ -151,7 +155,27 @@ function contextualCommentQuestion(post: Post): string {
   return "Qual detalhe dessa notícia mais impacta você?";
 }
 
-function buildScriptPrompt(post: Post, sourceBody: string): string {
+function buildScriptPrompt(post: Post, sourceBody: string, ctaVariant: ReelCtaVariant = "comment"): string {
+  const isFollow = ctaVariant === "follow";
+  const rule4 = isFollow
+    ? `4. Termine com uma chamada direta convidando a seguir o OB Labs para entender o impacto nos games (exemplo: "Quer entender o que muda para quem joga? Siga o OB Labs."). A chamada final conta no limite de 75 a 95 palavras da narração. Não peça para comentar, curtir, salvar e compartilhar ao mesmo tempo; use um único CTA de seguir.`
+    : `4. Termine com uma pergunta específica sobre o assunto que convide a comentar. A pergunta final deve ser a mesma do campo ctaQuestion e conta no limite de 75 a 95 palavras da narração. Não peça para seguir, curtir, salvar e compartilhar ao mesmo tempo; a fala deve ter um único CTA de conversa. As chamadas para seguir e acessar a matéria ficam nas descrições específicas de cada plataforma.`;
+
+  const rule8 = isFollow
+    ? `8. A chamada final e o CTA devem focar no benefício de seguir o perfil para acompanhar o que muda nos games. O campo ctaQuestion deve trazer a chamada de benefício ("Quer entender o que muda para quem joga?"), ctaAction deve ser "Siga o OB Labs para entender o que muda nos games" e ctaButton deve ser "SIGA O OB LABS".`
+    : `8. A pergunta final e o CTA devem ser específicos ao assunto. Convide a pessoa a responder nos comentários, sem prometer frequência ou resultado e sem direcionar para outra plataforma.`;
+
+  const ctaQuestionExample = isFollow
+    ? `"Quer entender o que muda para quem joga?"`
+    : `"Pergunta específica sobre o impacto para quem joga?"`;
+  const ctaActionExample = isFollow
+    ? `"Siga o OB Labs para entender o que muda nos games"`
+    : `"Comente sua resposta para continuar a conversa"`;
+  const ctaButtonExample = isFollow ? `"SIGA O OB LABS"` : `"COMENTE ABAIXO"`;
+  const narrationExample = isFollow
+    ? `"Narração factual completa, com chamada de benefício e convite para seguir o OB Labs no final"`
+    : `"Narração factual completa, com pergunta específica e convite para comentar no final"`;
+
   return `Você é editor de vídeos curtos de games para o Orange Brick. Crie um roteiro vertical de 35 a 45 segundos que capture atenção, mantenha retenção e incentive participação e audiência recorrente, sem prometer viralização nem usar clickbait.
 
 TÍTULO: ${post.title}
@@ -164,11 +188,11 @@ REGRAS:
 1. A primeira fala deve ser o gancho, com um fato concreto, consequência ou dúvida real que o próprio vídeo responde. Repita a mesma ideia na primeira tela. Comece direto, sem vinheta, saudação ou apresentação do canal.
 2. Conte uma única história nesta ordem: gancho, fato principal, contexto que muda a leitura, impacto para quem joga e conclusão. Use surpresa, curiosidade ou debate apenas quando os fatos sustentarem esse ângulo. Entregue a resposta antes do fim; não esconda informação para forçar retenção.
 3. Escreva de 75 a 95 palavras faladas em português brasileiro natural para preservar o fato, o contexto e o impacto. Use frases curtas, com no máximo 22 palavras cada, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
-4. Termine com uma pergunta específica sobre o assunto que convide a comentar. A pergunta final deve ser a mesma do campo ctaQuestion e conta no limite de 75 a 95 palavras da narração. Não peça para seguir, curtir, salvar e compartilhar ao mesmo tempo; a fala deve ter um único CTA de conversa. As chamadas para seguir e acessar a matéria ficam nas descrições específicas de cada plataforma.
+${rule4}
 5. Preserve rigorosamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não misture números de processos diferentes nem transforme “propõe” ou “pode afetar” em “fechou” ou “demitiu”.
 6. Crie exatamente 5 cenas alinhadas à narração: revelação, detalhe principal, contexto, impacto e conclusão/próximo passo. Só mostre plataformas, datas, números, decisões e declarações que apareçam na matéria. Se um dado não existir, use contexto ou impacto; nunca invente nem preencha com informação genérica.
 7. Escreva textos de tela curtos e legíveis no celular: gancho com até 55 caracteres; títulos de cena com até 36; destaques com até 48; tags com até 18; no máximo 3 pílulas curtas por cena. Use pílulas apenas para fatos confirmados. Evite repetir a mesma frase em todas as telas.
-8. A pergunta final e o CTA devem ser específicos ao assunto. Convide a pessoa a responder nos comentários, sem prometer frequência ou resultado e sem direcionar para outra plataforma.
+${rule8}
 9. Nunca use reticências nem corte uma frase ou informação para caber. Reescreva de forma concisa, preservando a ideia completa. Nenhum texto pode terminar com preposição, artigo ou conjunção que dependa de continuação.
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
@@ -177,7 +201,7 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
   "headline": "TÍTULO DE IMPACTO EM MAIÚSCULAS",
   "subHeadline": "SUBTÍTULO EM DESTAQUE",
   "badge": "CATEGORIA",
-  "narrationText": "Narração factual completa, com pergunta específica e convite para comentar no final",
+  "narrationText": ${narrationExample},
   "scenes": [
     {
       "id": "scene1",
@@ -218,21 +242,27 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
       "imageIndex": 1
     }
   ],
-  "ctaQuestion": "Pergunta específica sobre o impacto para quem joga?",
-  "ctaAction": "Comente sua resposta para continuar a conversa",
-  "ctaButton": "COMENTE ABAIXO"
+  "ctaQuestion": ${ctaQuestionExample},
+  "ctaAction": ${ctaActionExample},
+  "ctaButton": ${ctaButtonExample}
 }`;
 }
 
-function buildReviewPrompt(post: Post, sourceBody: string, draft: ReelScriptData): string {
-  return `Revise editorialmente o roteiro antes da renderização. Compare cada informação com a matéria. Preserve o fato principal, o contexto e o impacto; corrija qualquer frase, cena ou dado incompleto. Não invente, não altere números, datas, autoria, status de anúncio ou grau de certeza. Nunca use reticências nem corte texto para caber: reescreva sem perder a ideia. A narração final deve ter de 75 a 95 palavras, no máximo 22 palavras por frase, e terminar com uma pergunta completa que seja a mesma do campo ctaQuestion; a pergunta conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Retorne somente o JSON revisado.\n\nMATÉRIA\nTítulo: ${post.title}\nResumo: ${post.summary}\nConteúdo: ${sourceBody}\n\nROTEIRO PARA REVISÃO\n${JSON.stringify(draft)}`;
+function buildReviewPrompt(post: Post, sourceBody: string, draft: ReelScriptData, ctaVariant: ReelCtaVariant = "comment"): string {
+  const endingRule = ctaVariant === "follow"
+    ? "terminar com uma chamada clara para seguir o OB Labs (ex: 'Quer entender o que muda para quem joga? Siga o OB Labs.')"
+    : "terminar com uma pergunta completa que seja a mesma do campo ctaQuestion";
+  return `Revise editorialmente o roteiro antes da renderização. Compare cada informação com a matéria. Preserve o fato principal, o contexto e o impacto; corrija qualquer frase, cena ou dado incompleto. Não invente, não altere números, datas, autoria, status de anúncio ou grau de certeza. Nunca use reticências nem corte texto para caber: reescreva sem perder a ideia. A narração final deve ter de 75 a 95 palavras, no máximo 22 palavras por frase, e ${endingRule}; o encerramento conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Retorne somente o JSON revisado.\n\nMATÉRIA\nTítulo: ${post.title}\nResumo: ${post.summary}\nConteúdo: ${sourceBody}\n\nROTEIRO PARA REVISÃO\n${JSON.stringify(draft)}`;
 }
 
-function buildRepairPrompt(post: Post, invalid: string, error: string): string {
+function buildRepairPrompt(post: Post, invalid: string, error: string, ctaVariant: ReelCtaVariant = "comment"): string {
+  const endingRule = ctaVariant === "follow"
+    ? "terminar com uma chamada direta convidando a seguir o OB Labs"
+    : "terminar com uma pergunta completa que seja a mesma do campo ctaQuestion e um convite para comentar";
   return `O roteiro JSON abaixo foi reprovado na validação automática antes da renderização.
 ERRO: ${error}
 
-Corrija apenas o que viola as regras e preserve integralmente o fato principal, o contexto, o impacto, os números, as datas, a autoria, o status do anúncio e o grau de certeza. Não invente informação. A narração final deve ter de 75 a 95 palavras, com no máximo 22 palavras por frase, terminar com uma pergunta completa que seja a mesma do campo ctaQuestion e um convite para comentar; a pergunta conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Nunca use reticências nem termine uma frase com preposição, artigo ou conjunção. Retorne somente o JSON completo corrigido.
+Corrija apenas o que viola as regras e preserve integralmente o fato principal, o contexto, o impacto, os números, as datas, a autoria, o status do anúncio e o grau de certeza. Não invente informação. A narração final deve ter de 75 a 95 palavras, com no máximo 22 palavras por frase, ${endingRule}; o encerramento conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Nunca use reticências nem termine uma frase com preposição, artigo ou conjunção. Retorne somente o JSON completo corrigido.
 
 MATÉRIA
 Título: ${post.title}
@@ -262,6 +292,33 @@ function normalizeNarrationQuestion(narration: string, question: string) {
   if (questionIndex !== sentences.length - 1) {
     const normalizedQuestion = sentences.splice(questionIndex, 1)[0];
     sentences.push(normalizedQuestion);
+  }
+  return sentences.join(" ");
+}
+
+function normalizeNarrationFollow(narration: string, benefitCall: string) {
+  const followCall = "Siga o OB Labs.";
+  const sentences = narration.trim().split(/(?<=[.!?])\s+/u).filter(Boolean);
+  const lastSentence = sentences[sentences.length - 1] || "";
+  if (/siga\s+(?:o\s+)?(?:@)?ob\.labs/i.test(lastSentence)) {
+    return sentences.join(" ");
+  }
+  let questionIndex = -1;
+  for (let index = sentences.length - 1; index >= 0; index--) {
+    if (sentences[index].trim().endsWith("?")) {
+      questionIndex = index;
+      break;
+    }
+  }
+  const cleanCall = benefitCall.endsWith("?") ? benefitCall : `${benefitCall}?`;
+  if (questionIndex >= 0) {
+    sentences[questionIndex] = `${cleanCall} ${followCall}`;
+    if (questionIndex !== sentences.length - 1) {
+      const moved = sentences.splice(questionIndex, 1)[0];
+      sentences.push(moved);
+    }
+  } else {
+    sentences.push(`${cleanCall} ${followCall}`);
   }
   return sentences.join(" ");
 }
@@ -378,12 +435,13 @@ function normalizeNarration(value: string) {
   return narration;
 }
 
-function parseScript(raw: string, post: Post): ReelScriptData {
+function parseScript(raw: string, post: Post, ctaVariant: ReelCtaVariant = "comment"): ReelScriptData {
   const cleaned = raw.replace(/```json\n?|```/g, "").trim();
   const data = JSON.parse(cleaned) as ReelScriptData;
   if (!data.narrationText?.trim() || !Array.isArray(data.scenes) || data.scenes.length !== 5) {
     throw new Error("Roteiro retornado pelo Gemini está incompleto.");
   }
+  data.ctaVariant = ctaVariant;
   data.hook = fitDisplayText(data.hook || data.scenes[0]?.headline || data.headline || "", 55, "gancho");
   if (!data.hook || /frase de gancho/i.test(data.hook)) throw new Error("Roteiro retornado pelo Gemini não tem um gancho válido.");
   data.headline = fitDisplayText(data.headline || data.hook, 48, "título principal");
@@ -415,6 +473,30 @@ function parseScript(raw: string, post: Post): ReelScriptData {
     .replace(/\s*(?:O que você acha dessa mudança|Qual é a sua opinião sobre essa notícia|O que essa notícia muda para quem joga)\?\s*$/i, "")
     .trim();
   data.narrationText = data.narrationText.replace(/@OrangeBrick/gi, "@ob.labs");
+  if (ctaVariant === "follow") {
+    const candidateQuestion = typeof data.ctaQuestion === "string" ? data.ctaQuestion.replace(/\s+/g, " ").trim() : "";
+    if (
+      !candidateQuestion.endsWith("?") ||
+      Array.from(candidateQuestion).length > 56 ||
+      /…|\.{3}/u.test(candidateQuestion) ||
+      /\b(?:de|do|da|dos|das|em|no|na|nos|nas|para|por|com|que|e|ou|mas|a|o|as|os|um|uma|seu|sua|seus|suas|entre|sobre|até|após|antes|durante)\s*\?$/iu.test(candidateQuestion)
+    ) {
+      data.ctaQuestion = "Quer entender o que muda para quem joga?";
+    } else {
+      data.ctaQuestion = fitText(candidateQuestion, 56, "pergunta final");
+    }
+    data.narrationText = normalizeNarrationFollow(data.narrationText, data.ctaQuestion);
+    data.narrationText = normalizeNarration(data.narrationText);
+    data.narrationText = fitText(data.narrationText, 1200, "narração");
+    const narrationWordCount = narrationWords(data.narrationText);
+    const longestSentence = Math.max(0, ...splitNarrationSentences(data.narrationText).map((sentence) => narrationWords(sentence)));
+    if (narrationWordCount < 75 || narrationWordCount > 95 || longestSentence > 22 || !/[.!?]$/u.test(data.narrationText)) {
+      throw new Error(`A narração está incompleta ou tem frases longas (${narrationWordCount} palavras; maior frase com ${longestSentence}).`);
+    }
+    data.ctaAction = "Siga o OB Labs para entender o que muda nos games";
+    data.ctaButton = "SIGA O OB LABS";
+    return data;
+  }
   const candidateQuestion = typeof data.ctaQuestion === "string" ? data.ctaQuestion.replace(/\s+/g, " ").trim() : "";
   if (
     !candidateQuestion.endsWith("?") ||
@@ -456,11 +538,12 @@ async function generateValidatedScript(
   generate: (prompt: string, temperature?: number) => Promise<string>,
   label: string,
   draftTemperature = 0.45,
+  ctaVariant: ReelCtaVariant = "comment",
 ): Promise<ReelScriptData> {
-  const draftText = await generate(buildScriptPrompt(post, sourceBody), draftTemperature);
+  const draftText = await generate(buildScriptPrompt(post, sourceBody, ctaVariant), draftTemperature);
   let validDraft: ReelScriptData | null = null;
   try {
-    validDraft = parseScript(draftText, post);
+    validDraft = parseScript(draftText, post, ctaVariant);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Roteiro inválido.";
     console.warn(`[ReelScript] ${label}: rascunho reprovado (${message.slice(0, 160)}). Solicitando revisão...`);
@@ -469,7 +552,7 @@ async function generateValidatedScript(
   let reviewText: string;
   try {
     const draft = parseScriptDraft(draftText);
-    reviewText = await generate(buildReviewPrompt(post, sourceBody, draft), 0.2);
+    reviewText = await generate(buildReviewPrompt(post, sourceBody, draft, ctaVariant), 0.2);
   } catch (error) {
     if (validDraft) {
       const message = error instanceof Error ? error.message : "revisão indisponível";
@@ -480,13 +563,13 @@ async function generateValidatedScript(
   }
 
   try {
-    return parseScript(reviewText, post);
+    return parseScript(reviewText, post, ctaVariant);
   } catch (validationError) {
     const message = validationError instanceof Error ? validationError.message : "Roteiro inválido.";
     console.warn(`[ReelScript] ${label} reprovado (${message}). Tentando reparo...`);
     try {
-      const repaired = await generate(buildRepairPrompt(post, reviewText, message), 0.2);
-      return parseScript(repaired, post);
+      const repaired = await generate(buildRepairPrompt(post, reviewText, message, ctaVariant), 0.2);
+      return parseScript(repaired, post, ctaVariant);
     } catch (repairError) {
       const repairMessage = repairError instanceof Error ? repairError.message : "Roteiro inválido.";
       if (validDraft) {
@@ -503,7 +586,7 @@ function isDailyQuotaError(error: Error & { status?: number }) {
   return error.status === 429 && /(?:free_tier_requests|retry in \d+[hm])/i.test(error.message);
 }
 
-async function generateGeminiScript(post: Post, sourceBody: string, apiKey: string): Promise<ReelScriptData> {
+async function generateGeminiScript(post: Post, sourceBody: string, apiKey: string, ctaVariant: ReelCtaVariant = "comment"): Promise<ReelScriptData> {
   const gemini = new GoogleGenAI({ apiKey, httpOptions: { timeout: 45_000, retryOptions: { attempts: 1 } } });
   const cooldowns = new Map<string, number>();
   let lastError: Error | null = null;
@@ -529,7 +612,7 @@ async function generateGeminiScript(post: Post, sourceBody: string, apiKey: stri
           },
         }).then((response) => response.text || "");
       try {
-        return await generateValidatedScript(post, sourceBody, generate, model);
+        return await generateValidatedScript(post, sourceBody, generate, model, 0.45, ctaVariant);
       } catch (err) {
         lastError = err as Error;
         const status = (err as { status?: number })?.status;
@@ -608,19 +691,20 @@ async function callGroq(apiKey: string, prompt: string, temperature: number): Pr
   throw new Error(`Groq não conseguiu gerar o roteiro. ${failures.join(" | ")}`);
 }
 
-async function generateGroqScript(post: Post, sourceBody: string, apiKey: string): Promise<ReelScriptData> {
+async function generateGroqScript(post: Post, sourceBody: string, apiKey: string, ctaVariant: ReelCtaVariant = "comment"): Promise<ReelScriptData> {
   const generate = (contents: string, temperature = 0.3) => callGroq(apiKey, contents, temperature);
-  return generateValidatedScript(post, sourceBody, generate, "Groq", 0.35);
+  return generateValidatedScript(post, sourceBody, generate, "Groq", 0.35, ctaVariant);
 }
 
 export async function generateReelScript(post: Post, apiKey: string, options: ReelScriptOptions = {}): Promise<ReelScriptData> {
   const sourceBody = articleBodyText(post.body);
   const provider = options.provider || "auto";
+  const ctaVariant: ReelCtaVariant = options.ctaVariant || "comment";
   let geminiError: Error | null = null;
 
   if (provider !== "groq") {
     try {
-      return await generateGeminiScript(post, sourceBody, apiKey);
+      return await generateGeminiScript(post, sourceBody, apiKey, ctaVariant);
     } catch (error) {
       geminiError = error as Error;
       if (provider === "gemini") throw geminiError;
@@ -630,7 +714,7 @@ export async function generateReelScript(post: Post, apiKey: string, options: Re
   const groqKey = typeof process !== "undefined" ? process.env.GROQ_API_KEY : undefined;
   if (groqKey) {
     try {
-      return await generateGroqScript(post, sourceBody, groqKey);
+      return await generateGroqScript(post, sourceBody, groqKey, ctaVariant);
     } catch (error) {
       const groqError = error instanceof Error ? error.message : String(error);
       const geminiMessage = geminiError ? ` Gemini: ${geminiError.message.slice(0, 180)}.` : "";

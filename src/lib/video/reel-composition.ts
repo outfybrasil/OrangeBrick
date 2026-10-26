@@ -298,6 +298,11 @@ export function generateCompositionHtml(options: CompositionOptions): string {
   ];
 
   const subtitlesJson = JSON.stringify(sentences);
+  const isFollowCta = script.ctaVariant === "follow" || /siga/i.test(script.ctaButton || "");
+  const defaultCtaQuestion = isFollowCta ? "Quer entender o que muda?" : "O que você acha?";
+  const defaultCtaAction = isFollowCta ? "Siga o OB Labs para entender o que muda nos games" : "Comente sua resposta para continuar a conversa";
+  const defaultCtaButton = isFollowCta ? "SIGA O OB LABS" : "COMENTE ABAIXO";
+  const ctaIcon = isFollowCta ? "➕" : "💬";
 
   return `<!doctype html>
 <html lang="pt-BR" data-resolution="portrait">
@@ -462,13 +467,13 @@ export function generateCompositionHtml(options: CompositionOptions): string {
         <div id="scene6" class="scene clip" data-start="${sceneDurations[5].start}" data-duration="${sceneDurations[5].dur}">
           <div class="cta-box">
             <h2 class="big-headline" style="font-size: 78px;">
-              ${escapeHtml(script.ctaQuestion || "O que você acha?")}
+              ${escapeHtml(script.ctaQuestion || defaultCtaQuestion)}
             </h2>
             <p style="font-size: 34px; color: #a1a1aa; margin-top: 20px;">
-              💬 ${escapeHtml(script.ctaAction || "Comente sua resposta para continuar a conversa")}
+              ${ctaIcon} ${escapeHtml(script.ctaAction || defaultCtaAction)}
             </p>
             <div class="cta-btn">
-              <span>🟠 ${escapeHtml(script.ctaButton || "COMENTE ABAIXO")}</span>
+              <span>🟠 ${escapeHtml(script.ctaButton || defaultCtaButton)}</span>
             </div>
           </div>
         </div>

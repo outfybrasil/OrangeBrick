@@ -46,11 +46,14 @@ async function composioProxy(accountId: string, userId: string, endpoint: string
   let data: unknown = envelope.data;
   for (let depth = 0; depth < 3; depth++) {
     const current = object(data);
-    if (current.error) throw new Error(String(object(current.error).message || "A plataforma recusou a consulta de métricas."));
+    const errObj = object(current.error);
+    const isError = Boolean(current.error && errObj.code !== "ok" && (errObj.message || errObj.code || typeof current.error === "string"));
+    if (isError) throw new Error(String(errObj.message || current.error || "A plataforma recusou a consulta de métricas."));
     if (current.data === undefined) break;
     data = current.data;
   }
-  if (!response.ok) throw new Error(String(object(object(data).error).message || "A plataforma recusou a consulta de métricas."));
+  const errObj = object(object(data).error);
+  if (!response.ok) throw new Error(String(errObj.message || "A plataforma recusou a consulta de métricas."));
   return data;
 }
 
@@ -80,7 +83,8 @@ async function instagramMetrics(publication: SocialPublication, userId: string):
 async function tiktokMetrics(mediaId: string, accountId: string, userId: string): Promise<MetricValues> {
   const fields = "id,view_count,like_count,comment_count,share_count";
   const data = await composioProxy(accountId, userId, `https://open.tiktokapis.com/v2/video/query/?fields=${fields}`, "POST", { filters: { video_ids: [mediaId] } });
-  const video = (Array.isArray(object(data).videos) ? object(data).videos as unknown[] : []).map(object)[0];
+  const videos = Array.isArray(object(data).videos) ? object(data).videos as unknown[] : Array.isArray(object(object(data).data).videos) ? object(object(data).data).videos as unknown[] : [];
+  const video = videos.map(object)[0];
   if (!video) throw new Error("O TikTok não retornou métricas para este vídeo.");
   return { views: numberOrNull(video.view_count), reach: null, average_watch_milliseconds: null, watch_time_milliseconds: null, likes: numberOrNull(video.like_count), comments: numberOrNull(video.comment_count), shares: numberOrNull(video.share_count), saves: null, follows: null, interactions: null, error: null };
 }
@@ -95,8 +99,39 @@ function emptyMetrics(error: string): MetricValues {
   return { views: null, reach: null, average_watch_milliseconds: null, watch_time_milliseconds: null, likes: null, comments: null, shares: null, saves: null, follows: null, interactions: null, error };
 }
 
+function extractKeywords(text: string): string[] {
+  const stopWords = new Set(["de", "a", "o", "as", "os", "em", "para", "com", "que", "do", "da", "dos", "das", "no", "na", "nos", "nas", "um", "uma", "e", "ou", "se", "por", "mais", "nao", "sobre", "apos", "novo", "nova"]);
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.has(word));
+}
+
 async function saveMetrics(db: ReturnType<typeof getReelAdmin>, postId: string, platform: Platform, metrics: MetricValues, date: string) {
   const { error } = await db.from("reel_social_metrics").upsert({ post_id: postId, platform, captured_on: date, captured_at: new Date().toISOString(), ...metrics }, { onConflict: "post_id,platform,captured_on" });
+  return !error;
+}
+
+async function saveAccountMetrics(
+  db: ReturnType<typeof getReelAdmin>,
+  platform: Platform,
+  data: { followers: number | null; following?: number | null; total_posts?: number | null; total_views?: number | null; total_likes?: number | null; error?: string | null },
+  date: string,
+) {
+  const { error } = await db.from("reel_account_metrics").upsert({
+    platform,
+    captured_on: date,
+    captured_at: new Date().toISOString(),
+    followers: data.followers ?? null,
+    following: data.following ?? null,
+    total_posts: data.total_posts ?? null,
+    total_views: data.total_views ?? null,
+    total_likes: data.total_likes ?? null,
+    error: data.error ?? null,
+  }, { onConflict: "platform,captured_on" });
   return !error;
 }
 
@@ -124,7 +159,7 @@ export async function GET(request: Request) {
   const db = getReelAdmin();
   const since = new Date(Date.now() - 90 * 24 * 60 * 60_000).toISOString();
   const userId = process.env.COMPOSIO_USER_ID || "pg-test-107e6949-7abc-4a6e-a8c9-dbe29178282d";
-  const { data: publications, error: publicationError } = await db.from("reel_social_publications").select("post_id,platform,status,external_id,platform_media_id").eq("status", "published").gte("updated_at", since).order("updated_at", { ascending: false }).limit(180);
+  const { data: publications, error: publicationError } = await db.from("reel_social_publications").select("post_id,platform,status,external_id,platform_media_id").in("status", ["published", "submitted"]).gte("updated_at", since).order("updated_at", { ascending: false }).limit(180);
   const { data: youtubeRows, error: youtubeError } = await db.from("reel_youtube_publications").select("post_id,video_id,tags").eq("status", "uploaded").eq("visibility", "public").not("video_id", "is", null).gte("updated_at", since).order("updated_at", { ascending: false }).limit(60);
   if (publicationError || youtubeError) return NextResponse.json({ error: "Não foi possível consultar os Reels publicados." }, { status: 503 });
 
@@ -135,7 +170,7 @@ export async function GET(request: Request) {
     : null;
   const tiktokAccountData = tiktokAccountResponse?.ok ? object(await tiktokAccountResponse.json().catch(() => null)) : {};
   const tiktokAccount = (Array.isArray(tiktokAccountData.items) ? tiktokAccountData.items as RecordData[] : []).find(item => (object(item.toolkit).slug === "tiktok" || item.appName === "tiktok") && item.status === "ACTIVE");
-  const tiktokAccountId = typeof tiktokAccount?.id === "string" ? tiktokAccount.id : "";
+  const tiktokAccountId = typeof tiktokAccount?.id === "string" ? tiktokAccount.id : (process.env.COMPOSIO_TIKTOK_ACCOUNT || "");
   const date = capturedDate();
   const rowsToSave: Array<{ postId: string; platform: Platform; metrics: MetricValues }> = [];
   const tiktokBackfills = tiktokRows.filter(row => !row.platform_media_id);
@@ -153,17 +188,90 @@ export async function GET(request: Request) {
         const raw = await statusResponse.text();
         const parsed = (() => { try { return JSON.parse(raw); } catch { return null; } })();
         const result = parsed?.data?.data || parsed?.data;
-        const ids = raw.match(/"publicaly_available_post_id"\s*:\s*\[([^\]]*)\]/)?.[1] || "";
+        const ids = raw.match(/"publica[a-z]*_available_post_id"\s*:\s*\[([^\]]*)\]/i)?.[1] || "";
         const mediaId = [...ids.matchAll(/"?(\d{15,25})"?/g)].map(match => match[1])[0];
         if (statusResponse.ok && result?.status === "PUBLISH_COMPLETE" && mediaId) {
-          const { error } = await db.from("reel_social_publications").update({ platform_media_id: mediaId, status: "published", updated_at: new Date().toISOString() }).eq("post_id", publication.post_id).eq("platform", "tiktok").eq("status", "published");
-          if (!error) publication.platform_media_id = mediaId;
+          const { error } = await db.from("reel_social_publications").update({ platform_media_id: mediaId, status: "published", updated_at: new Date().toISOString() }).eq("post_id", publication.post_id).eq("platform", "tiktok");
+          if (!error) {
+            publication.platform_media_id = mediaId;
+            publication.status = "published";
+          }
         }
       } catch {}
     });
+
+    const stillMissing = tiktokRows.filter(row => !row.platform_media_id);
+    if (stillMissing.length) {
+      try {
+        const listData1 = await composioProxy(tiktokAccountId, userId, "https://open.tiktokapis.com/v2/video/list/?fields=id,title,create_time", "POST", { max_count: 20 });
+        const dataObj1 = object(listData1);
+        const videos1 = (Array.isArray(dataObj1.videos) ? dataObj1.videos as unknown[] : []).map(object);
+        let allVideos = [...videos1];
+        if (dataObj1.has_more && dataObj1.cursor) {
+          const listData2 = await composioProxy(tiktokAccountId, userId, "https://open.tiktokapis.com/v2/video/list/?fields=id,title,create_time", "POST", { max_count: 20, cursor: dataObj1.cursor });
+          const videos2 = (Array.isArray(object(listData2).videos) ? object(listData2).videos as unknown[] : []).map(object);
+          allVideos = [...allVideos, ...videos2];
+        }
+        if (allVideos.length) {
+          const { data: posts } = await db.from("posts").select("id,title,slug,summary").in("id", stillMissing.map(item => item.post_id));
+          const postList = posts || [];
+          for (const publication of stillMissing) {
+            const post = postList.find(p => p.id === publication.post_id);
+            if (!post) continue;
+            const pWords = extractKeywords(`${post.title} ${post.summary || ""} ${post.slug}`);
+            let bestVideo: RecordData | null = null;
+            let bestScore = 0;
+            for (const video of allVideos) {
+              const vWords = new Set(extractKeywords(String(video.title || "")));
+              let matchCount = 0;
+              for (const word of pWords) {
+                if (vWords.has(word)) matchCount++;
+              }
+              if (matchCount > bestScore) {
+                bestScore = matchCount;
+                bestVideo = video;
+              }
+            }
+            if (bestVideo && bestScore >= 10 && typeof bestVideo.id === "string") {
+              const { error } = await db.from("reel_social_publications").update({ platform_media_id: bestVideo.id, status: "published", updated_at: new Date().toISOString() }).eq("post_id", publication.post_id).eq("platform", "tiktok");
+              if (!error) {
+                publication.platform_media_id = bestVideo.id;
+                publication.status = "published";
+              }
+            }
+          }
+        }
+      } catch {}
+    }
   }
 
-  const socialTasks = publishedSocial.filter(row => row.platform === "instagram" || row.platform === "tiktok");
+  const instagramAccount = process.env.COMPOSIO_INSTAGRAM_ACCOUNT;
+  if (instagramAccount) {
+    try {
+      const profile = await composioProxy(instagramAccount, userId, "https://graph.instagram.com/v21.0/me?fields=id,username,followers_count,media_count", "GET");
+      const followers = numberOrNull(object(profile).followers_count);
+      const totalPosts = numberOrNull(object(profile).media_count);
+      await saveAccountMetrics(db, "instagram", { followers, total_posts: totalPosts }, date);
+    } catch (error) {
+      await saveAccountMetrics(db, "instagram", { followers: null, error: error instanceof Error ? error.message : "Falha ao consultar perfil do Instagram." }, date);
+    }
+  }
+
+  if (tiktokAccountId) {
+    try {
+      const userInfo = await composioProxy(tiktokAccountId, userId, "https://open.tiktokapis.com/v2/user/info/?fields=follower_count,following_count,likes_count,video_count", "GET");
+      const user = object(object(userInfo).user || object(object(userInfo).data).user);
+      const followers = numberOrNull(user.follower_count);
+      const following = numberOrNull(user.following_count);
+      const totalLikes = numberOrNull(user.likes_count);
+      const totalPosts = numberOrNull(user.video_count);
+      await saveAccountMetrics(db, "tiktok", { followers, following, total_posts: totalPosts, total_likes: totalLikes }, date);
+    } catch (error) {
+      await saveAccountMetrics(db, "tiktok", { followers: null, error: error instanceof Error ? error.message : "Falha ao consultar perfil do TikTok." }, date);
+    }
+  }
+
+  const socialTasks = publishedSocial.filter(row => row.platform === "instagram" || (row.platform === "tiktok" && row.platform_media_id));
   await mapInBatches(socialTasks, 4, async publication => {
     try {
       const metrics = publication.platform === "instagram"
@@ -186,14 +294,32 @@ export async function GET(request: Request) {
   }
   const youtube = (youtubeRows || []) as YouTubePublication[];
   if (youtube.length && youtubeConnection) {
+    try {
+      const channelStatsRes = await youtubeTool(youtubeConnection, "YOUTUBE_GET_CHANNEL_STATISTICS", { mine: true, part: "statistics" });
+      const channels = Array.isArray(channelStatsRes.channels) ? channelStatsRes.channels : Array.isArray(channelStatsRes.items) ? channelStatsRes.items : [];
+      const channelObj = channels.map(object).find(item => item.id === youtubeConnection?.channel.id) || object(channels[0]);
+      const channelStats = object(channelObj.statistics);
+      const followers = numberOrNull(channelStats.subscriberCount);
+      const totalViews = numberOrNull(channelStats.viewCount);
+      const totalPosts = numberOrNull(channelStats.videoCount);
+      await saveAccountMetrics(db, "youtube", { followers, total_views: totalViews, total_posts: totalPosts }, date);
+    } catch (error) {
+      await saveAccountMetrics(db, "youtube", { followers: null, error: error instanceof Error ? error.message : "Falha ao consultar canal do YouTube." }, date);
+    }
+
     const videoIds = youtube.map(publication => publication.video_id);
     const videosById = new Map<string, RecordData>();
     let youtubeDetailsError: string | null = null;
     try {
-      for (let index = 0; index < videoIds.length; index += 50) {
-        const details = await youtubeTool(youtubeConnection, "YOUTUBE_GET_VIDEO_DETAILS_BATCH", { id: videoIds.slice(index, index + 50), parts: ["snippet", "statistics"] });
-        const videos = (Array.isArray(details.items) ? details.items as RecordData[] : Array.isArray(details.videos) ? details.videos as RecordData[] : []).map(object);
-        for (const video of videos) if (typeof video.id === "string") videosById.set(video.id, video);
+      for (let index = 0; index < videoIds.length; index += 5) {
+        const batch = videoIds.slice(index, index + 5);
+        try {
+          const details = await youtubeTool(youtubeConnection, "YOUTUBE_GET_VIDEO_DETAILS_BATCH", { id: batch, parts: ["snippet", "statistics"] });
+          const videos = (Array.isArray(details.items) ? details.items as RecordData[] : Array.isArray(details.videos) ? details.videos as RecordData[] : []).map(object);
+          for (const video of videos) if (typeof video.id === "string") videosById.set(video.id, video);
+        } catch (error) {
+          youtubeDetailsError = error instanceof Error ? error.message : "Falha ao consultar lote do YouTube.";
+        }
       }
     } catch (error) {
       youtubeDetailsError = error instanceof Error ? error.message : "Falha ao consultar o YouTube.";
@@ -248,12 +374,7 @@ export async function GET(request: Request) {
           const averageViewDuration = numberOrNull(record.averageViewDuration);
           row.metrics = { ...row.metrics, average_watch_milliseconds: averageViewDuration === null ? null : averageViewDuration * 1000, follows: numberOrNull(record.subscribersGained), shares: numberOrNull(record.shares) };
         }
-      } catch (error) {
-        for (const publication of youtube) {
-          const row = rowsToSave.find(item => item.postId === publication.post_id && item.platform === "youtube");
-          if (row) row.metrics.error = error instanceof Error ? error.message : "Falha ao consultar as métricas do YouTube.";
-        }
-      }
+      } catch {}
     }
 
     const tagMismatches = tagChecks.filter(check => !check.match).map(check => check.postId);

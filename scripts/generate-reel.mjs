@@ -18,6 +18,9 @@ let activeSlug;
 const sendTelegram = args.includes("--telegram");
 const styleFlag = args.find((a) => a.startsWith("--style="));
 const forcedStyle = styleFlag ? styleFlag.split("=")[1] : (args.includes("--style") ? args[args.indexOf("--style") + 1] : undefined);
+const ctaFlag = args.find((a) => a.startsWith("--cta="));
+const forcedCta = ctaFlag ? ctaFlag.split("=")[1] : (args.includes("--cta") ? args[args.indexOf("--cta") + 1] : undefined);
+const ctaVariant = forcedCta === "follow" ? "follow" : "comment";
 
 console.log("\n🎬 Orange Brick — Gerador de Vídeos Curtos (Reels / Shorts)");
 console.log("=========================================================\n");
@@ -116,9 +119,10 @@ async function run() {
 
   // 1. Generate Script with Gemini
   console.log("🤖 1/5: Gerando roteiro dinâmico com Gemini 3.8 Flash...");
-  const script = await generateReelScript(post, geminiKey);
+  const script = await generateReelScript(post, geminiKey, { ctaVariant });
   console.log(`   Hook: "${script.hook}"`);
   console.log(`   Destaque: "${script.headline}"`);
+  console.log(`   CTA: ${ctaVariant} (${script.ctaButton})`);
 
   // Setup work directory
   const workDir = path.join(ROOT_DIR, "tmp", "reels", post.slug);

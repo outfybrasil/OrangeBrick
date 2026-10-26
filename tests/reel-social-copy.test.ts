@@ -46,7 +46,7 @@ function loadGenerateReelScript(response: unknown) {
   const source = ts.transpileModule(readFileSync(new URL("../src/lib/video/reel-script.ts", import.meta.url), "utf8"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
   }).outputText;
-  const exports: { generateReelScript?: (post: { title: string; summary: string; category: string; body: string }, apiKey: string) => Promise<{ narrationText: string; ctaQuestion: string; ctaAction: string; ctaButton: string }> } = {};
+  const exports: { generateReelScript?: (post: { title: string; summary: string; category: string; body: string }, apiKey: string, options?: { ctaVariant?: "comment" | "follow"; provider?: "gemini" | "groq" | "auto" }) => Promise<{ narrationText: string; ctaQuestion: string; ctaAction: string; ctaButton: string; ctaVariant?: "comment" | "follow" }> } = {};
   const require = createRequire(import.meta.url);
   class GoogleGenAI {
     models = { generateContent: async () => ({ text: JSON.stringify(response) }) };
@@ -279,3 +279,35 @@ test("new reel scripts replace generic CTAs with a contextual question and comme
   assert.equal(script.ctaAction, "Comente sua resposta para continuar a conversa");
   assert.equal(script.ctaButton, "COMENTE ABAIXO");
 });
+
+test("reel scripts support follow cta variant with OB Labs closing and action", async () => {
+  const response = {
+    hook: "Faraway chega em novembro.",
+    headline: "FARAWAY CHEGA EM NOVEMBRO",
+    subHeadline: "O ARCADE GANHA DATA",
+    badge: "GAMES",
+    narrationText: "Faraway estreia em novembro no PS5, Xbox, Switch 2 e PC. O jogo combina constelações e quebra-cabeças em dezesseis fases. A proposta é do criador Steph Thirion e transforma cada cenário em um desafio lógico. A chegada multiplataforma amplia o público do arcade e coloca o projeto no calendário de jogos independentes. O visual minimalista usa o céu como tabuleiro e cada constelação vira uma pista. A data foi confirmada para 5 de novembro, mas o preço ainda não foi revelado.",
+    scenes: Array.from({ length: 5 }, (_, index) => ({
+      id: `scene${index + 1}`,
+      headline: `Cena ${index + 1}`,
+      highlight: `Fato ${index + 1}`,
+      tag: "FARAWAY",
+      imageIndex: index % 3,
+    })),
+    ctaQuestion: "Quer entender o impacto nos consoles?",
+  };
+  const generate = loadGenerateReelScript(response);
+  const script = await generate({
+    title: "Faraway chega em 5 de novembro ao PS5, Xbox, Switch 2 e PC",
+    summary: "Faraway estreia em 5 de novembro em consoles e PC; o arcade terá 16 fases.",
+    category: "breaking",
+    body: "",
+  }, "test", { ctaVariant: "follow" });
+
+  assert.equal(script.ctaVariant, "follow");
+  assert.equal(script.ctaQuestion, "Quer entender o impacto nos consoles?");
+  assert.match(script.narrationText, /Quer entender o impacto nos consoles\? Siga o OB Labs\.$/);
+  assert.equal(script.ctaAction, "Siga o OB Labs para entender o que muda nos games");
+  assert.equal(script.ctaButton, "SIGA O OB LABS");
+});
+

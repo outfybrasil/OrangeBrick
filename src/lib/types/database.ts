@@ -37,6 +37,18 @@ export interface ReelSocialMetrics {
   error: string | null;
 }
 
+export interface ReelAccountMetrics {
+  platform: "instagram" | "tiktok" | "youtube";
+  captured_on: string;
+  captured_at: string;
+  followers: number | null;
+  following: number | null;
+  total_posts: number | null;
+  total_views: number | null;
+  total_likes: number | null;
+  error: string | null;
+}
+
 export interface ReelJob {
   id: string;
   post_id: string;
@@ -80,6 +92,12 @@ export interface Database {
         Row: ReelSocialMetrics;
         Insert: Omit<ReelSocialMetrics, "captured_at"> & Partial<Pick<ReelSocialMetrics, "captured_at">>;
         Update: Partial<ReelSocialMetrics>;
+        Relationships: [];
+      };
+      reel_account_metrics: {
+        Row: ReelAccountMetrics;
+        Insert: Omit<ReelAccountMetrics, "captured_at"> & Partial<Pick<ReelAccountMetrics, "captured_at">>;
+        Update: Partial<ReelAccountMetrics>;
         Relationships: [];
       };
       reel_social_clicks: {

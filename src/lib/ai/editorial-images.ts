@@ -46,6 +46,7 @@ const OFFICIAL_ASSET_DOMAINS = [
   "pushsquare.com",
   "purexbox.com",
   "virtastic.app",
+  "knightmaregame.co.uk",
   "nintendolife.com",
 ];
 
