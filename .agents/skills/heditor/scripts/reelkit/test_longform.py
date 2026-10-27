@@ -290,3 +290,18 @@ def test_assemble_audio_and_video_keep_the_same_length(tmp_path):
     with wave.open(str(tmp_path / "voice.wav")) as w:
         assert w.getnframes() == round(sum(b - a for a, b in keeps) * 48000)
     assert dur == pytest.approx(frames / 24)
+
+
+def test_silent_style_pack_adds_no_sound_events():
+    """`nativo` (family native) sets every SFX category to None; the timeline must skip them."""
+    import longkit as lk
+    import stylepacks as sp
+
+    pack = sp.get("nativo")
+    assert all(value is None for value in pack["sfx"].values())
+    assert pack["music"]["bed"] is False and pack["transition"]["kind"] == "cut"
+    timeline = lk.Timeline()
+    for category in pack["sfx"].values():
+        timeline.sfx(1.0, category, -12, "silent")
+    timeline.sfx(2.0, "whoosh", -12, "kept")
+    assert [s["category"] for s in timeline.sounds] == ["whoosh"]

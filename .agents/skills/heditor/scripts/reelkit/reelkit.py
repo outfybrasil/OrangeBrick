@@ -168,13 +168,49 @@ def ensure_icons(names):
                             f"https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/{n}.svg"], check=True)
 
 
+GSAP_PLUGINS = {  # file stem in ~/.heditor/assets/js/gsap -> global to register (None: registers itself)
+    "SplitText": "SplitText", "DrawSVGPlugin": "DrawSVGPlugin", "MorphSVGPlugin": "MorphSVGPlugin",
+    "MotionPathPlugin": "MotionPathPlugin", "CustomEase": "CustomEase", "CustomWiggle": "CustomWiggle",
+    "CustomBounce": "CustomBounce", "TextPlugin": "TextPlugin", "Physics2DPlugin": "Physics2DPlugin",
+    "PhysicsPropsPlugin": "PhysicsPropsPlugin", "ScrambleTextPlugin": "ScrambleTextPlugin", "EasePack": None,
+}
+GSAP_ALIASES = {"DrawSVG": "DrawSVGPlugin", "MorphSVG": "MorphSVGPlugin", "MotionPath": "MotionPathPlugin",
+                "Text": "TextPlugin", "Physics2D": "Physics2DPlugin", "PhysicsProps": "PhysicsPropsPlugin",
+                "ScrambleText": "ScrambleTextPlugin"}
+
+
+def gsap_plugin_tags(names):
+    """<script> tags + registerPlugin for GSAP plugins copied by setup_assets (offline, after gsap.min.js).
+    CustomWiggle needs CustomEase; it is added automatically. See references/gsap-craft.md for the seek-safe rules."""
+    stems = []
+    for n in names:
+        stem = GSAP_ALIASES.get(n, n)
+        if stem not in GSAP_PLUGINS:
+            raise ValueError(f"unknown GSAP plugin {n!r}; known: {', '.join(GSAP_PLUGINS)}")
+        if stem in ("CustomWiggle", "CustomBounce") and "CustomEase" not in stems:
+            stems.append("CustomEase")
+        if stem not in stems:
+            stems.append(stem)
+    if not stems:
+        return ""
+    tags = "".join(f'<script src="assets/gsap/{s}.min.js"></script>' for s in stems)
+    regs = [GSAP_PLUGINS[s] for s in stems if GSAP_PLUGINS[s]]
+    return tags + (f"<script>gsap.registerPlugin({','.join(regs)});</script>" if regs else "")
+
+
 def setup_assets(work):
-    """Copy fonts, GSAP, grain, licences and the brand logo into <work>/composition/assets."""
+    """Copy fonts, GSAP (+ plugins), grain, licences and the brand logo into <work>/composition/assets."""
     a = Path(work) / "composition/assets"
     a.mkdir(parents=True, exist_ok=True)
     for src in list(FONTS.glob("*")) + [ASSETS / "js/gsap.min.js", ASSETS / "grain.png", ASSETS / "licenses/Lucide-LICENSE.txt"]:
         if src.is_file() and not (a / src.name).exists():
             (a / src.name).write_bytes(src.read_bytes())
+    plugin_dir = ASSETS / "js/gsap"
+    if plugin_dir.exists():
+        (a / "gsap").mkdir(exist_ok=True)
+        for src in plugin_dir.glob("*.min.js"):
+            if not (a / "gsap" / src.name).exists():
+                (a / "gsap" / src.name).write_bytes(src.read_bytes())
     brand = load_brand(work)
     logo = Path(brand["logo"]).expanduser() if brand.get("logo") else ASSETS / "logo-placeholder.png"
     if logo.exists() and not (a / "logo.png").exists():
@@ -199,7 +235,7 @@ def prepare_camera(work, width=960):
     src = a / "camera-src.mp4"
     w, h = map(int, subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries",
                                     "stream=width,height", "-of", "csv=p=0", str(src)],
-                                   capture_output=True, text=True, check=True).stdout.strip().split(","))
+                                   capture_output=True, text=True, check=True).stdout.strip().split(",")[:2])
     height = round(width * h / w / 2) * 2
     out = a / "camera-hd.mp4"
     if _stale(out, src):
@@ -282,6 +318,7 @@ const S=(s,v,t)=>tl.set(s,v,t);
 const TO=(s,v,t)=>tl.to(s,v,t);
 const FT=(s,a,b,t)=>tl.fromTo(s,a,Object.assign({},E,b),t);
 let seed=K.seed||20261012;function rnd(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296;}
+function scramble(sel,text,t,dur,chars,fps){chars=chars||'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*<>/';fps=fps||15;const n=Math.max(2,Math.round(dur*fps)),fr=[];for(let i=0;i<=n;i++){const k=Math.floor(text.length*i/n);let s=text.slice(0,k);for(let j=k;j<text.length;j++)s+=/\s/.test(text[j])?text[j]:chars[Math.floor(rnd()*chars.length)];fr.push(s);}fr[n]=text;const el=document.querySelector(sel);if(el)el.textContent=fr[0];const o={p:0};tl.fromTo(o,{p:0},{p:1,duration:dur,ease:'none',immediateRender:false,onUpdate:()=>{if(el)el.textContent=fr[Math.min(n,Math.floor(o.p*n+1e-6))];}},t);}
 const RIG=K.rigStates;
 gsap.set('#rig',RIG.hero);gsap.set('#rig-aura',RIG.hero);gsap.set('#world',{x:0,y:0});gsap.set('#cam-zoom',{scale:1});gsap.set('#flash',{opacity:0});
 TO('#glow-a',{x:180,y:260,duration:D,ease:'sine.inOut'},0);
@@ -306,14 +343,16 @@ if(K.segments){K.segments.forEach((sg,i)=>{const o=sg.x+'% '+sg.y+'%';
 """
 
 
-def captions_js(caps, gold="#f5c66b", mode="text"):
+def captions_js(caps, gold="#f5c66b", mode="text", pill=("#000000", "#ffd84d")):
     """mode="text": active word in gold; mode="pill": active word as pure black text on a light-yellow pill.
 
     Dark text with a dark outline on a mid-tone pill reads poorly on phones; in pill mode the outline takes
     the pill colour so the black letters stay crisp."""
     if mode == "pill":
-        on = '{opacity:1,color:"#000000",backgroundColor:"#ffd84d",webkitTextStrokeColor:"#ffd84d",scale:1.06}'
-        off = '{color:"#ffffff",backgroundColor:"rgba(255,216,77,0)",webkitTextStrokeColor:"#050a14",scale:1}'
+        fg, bg = pill
+        r, g, b = (int(bg.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
+        on = f'{{opacity:1,color:"{fg}",backgroundColor:"{bg}",webkitTextStrokeColor:"{bg}",scale:1.06}}'
+        off = f'{{color:"#ffffff",backgroundColor:"rgba({r},{g},{b},0)",webkitTextStrokeColor:"#050a14",scale:1}}'
     else:
         on = f'{{opacity:1,color:"{gold}",scale:1.08}}'
         off = '{color:"#ffffff",scale:1}'
@@ -364,9 +403,12 @@ def rig_states(card_w, card_h, hero_y=500, top_scale=0.5, top_y=SAFE_TOP + 10):
 
 
 def page(*, title, duration, card_w, card_h, face_origin, videos, scenes_html, css, js, keys, caps,
-         world_back="", overlays="", caption_mode="text", brand_work=None, fmt=None):
+         world_back="", overlays="", caption_mode="text", brand_work=None, fmt=None, plugins=(),
+         caption_pill=("#000000", "#ffd84d")):
     """Reel page skeleton. `fmt` (formats key, default 9:16) only changes the canvas size: the Reel layout
-    (caption band, rig states) is vertical; long-form/horizontal compositions use longkit."""
+    (caption band, rig states) is vertical; long-form/horizontal compositions use longkit.
+    `plugins`: GSAP plugins to load offline and register, e.g. ("SplitText", "DrawSVG", "MorphSVG").
+    `caption_pill`: (text, pill) colours of the active word in pill mode (hex, keep >= 4.5:1)."""
     import formats
     canvas = formats.get(fmt)
     brand = load_brand(brand_work)
@@ -386,7 +428,7 @@ def page(*, title, duration, card_w, card_h, face_origin, videos, scenes_html, c
     extra_css = (root + size_css + f"#rig,#rig-aura{{width:{card_w}px;height:{card_h}px}}"
                  f"#cam-zoom,#cam-breath,#cam-jump{{transform-origin:{face_origin}}}")
     return f"""<!doctype html><html lang="{brand.get('lang', 'pt')}"><head><meta charset="utf-8"><title>{html.escape(title)}</title>
-<script src="assets/gsap.min.js"></script><style>{BASE_CSS}{extra_css}{css}</style></head><body>
+<script src="assets/gsap.min.js"></script>{gsap_plugin_tags(plugins)}<style>{BASE_CSS}{extra_css}{css}</style></head><body>
 <main id="stage" data-composition-id="main" data-start="0" data-duration="{duration:.4f}" data-width="{canvas.width}" data-height="{canvas.height}" data-fps="30">
 <div id="world">
 <div id="bg"></div>{world_back}<div class="glow" id="glow-a"></div><div class="glow" id="glow-b"></div>
@@ -402,7 +444,7 @@ def page(*, title, duration, card_w, card_h, face_origin, videos, scenes_html, c
 <audio id="master" class="clip" data-start="0" data-duration="{duration:.4f}" data-track-index="100" src="assets/master.wav" data-volume="1"></audio>
 </main>
 <script>window.K={json.dumps(keys, ensure_ascii=False)};window.captionData={json.dumps(caps, ensure_ascii=False)};</script>
-<script>{BASE_JS}{js}{captions_js(caps, mode=caption_mode)}window.__timelines=window.__timelines||{{}};window.__timelines.main=tl;</script>
+<script>{BASE_JS}{js}{captions_js(caps, mode=caption_mode, pill=caption_pill)}window.__timelines=window.__timelines||{{}};window.__timelines.main=tl;</script>
 </body></html>"""
 
 
@@ -492,9 +534,13 @@ def track_faces(work, video="camera-hd.mp4", step=0.2):
     path = Path(work) / "composition/assets" / video
     w, h = map(int, subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries",
                                     "stream=width,height", "-of", "csv=p=0", str(path)],
-                                   capture_output=True, text=True, check=True).stdout.strip().split(","))
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-vf", f"fps={1 / step}", "-f", "rawvideo",
-                          "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+                                   capture_output=True, text=True, check=True).stdout.strip().split(",")[:2])
+    # Detect on a downscaled copy: positions are fractions, and 5 fps of full-HD RGB frames
+    # (~6 MB each) exhausts the memory of a small VPS on cuts longer than ~40 s.
+    if w > 640:
+        w, h = 640, max(2, round(h * 640 / w / 2) * 2)
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-vf", f"fps={1 / step},scale={w}:{h}",
+                          "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
     frames = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3)
     det = vision.FaceDetector.create_from_options(vision.FaceDetectorOptions(
         base_options=BaseOptions(model_asset_path=str(MODELS / "blaze_face_short_range.tflite")),
@@ -524,10 +570,97 @@ def jump_segments(work, faces, voice_end, default=(0.45, 0.5)):
     return segs
 
 
+# Mix profiles (plan["mix"] = "voice" | "presence" | {"profile": ..., <overrides>}).
+#   voice    — organic Reels, class excerpts, dense explanations: music ~21.5 dB under the voice.
+#   presence — paid ads and creative mode: a rhythmic bed that is felt the whole time (~15 dB under the voice,
+#              the values of the approved trailer), filtered sections get make-up gain, asr-check is mandatory.
+# Both have a presence floor: the bed's presence band (500 Hz-6 kHz, after ducking: what the ear hears as "the
+# track" over a voice) may not stay under voice median + presence_floor_db for longer than presence_gap_s inside
+# the speech, outside sections the plan declares as "silence". Calibrated on a real case: a 16 s muffled section and
+# a quiet intro read as "no music" at -44..-58 dB; a bed that read as present sat at -28..-36 dB.
+MIX_PROFILES = {
+    "voice": {"music_median_db": -21.5, "bed_p95_db": -12.0, "within_10db_pct": 5, "music_duck": 0.80,
+              "low_duck": 0.55, "sfx_duck": 0.85, "sfx_offset_db": -7.0, "filtered_makeup_db": 0.0,
+              "presence_floor_db": -48.0, "presence_gap_s": 8.0, "asr_check_required": False},
+    "presence": {"music_median_db": -15.0, "bed_p95_db": -7.0, "within_10db_pct": 30, "music_duck": 0.62,
+                 "low_duck": 0.35, "sfx_duck": 0.60, "sfx_offset_db": -4.0, "filtered_makeup_db": 4.0,
+                 "presence_floor_db": -38.0, "presence_gap_s": 2.0, "asr_check_required": True},
+}
+FILTERED_MODES = ("muffled", "lowpass")
+
+
+def mix_targets(plan):
+    """Resolved mix targets of a plan: profile defaults + explicit overrides (legacy dicts keep working)."""
+    over = plan.get("mix") or {}
+    if isinstance(over, str):
+        over = {"profile": over}
+    name = over.get("profile") or plan.get("mix_profile") or "voice"
+    if name not in MIX_PROFILES:
+        raise ValueError(f"unknown mix profile {name!r}; use one of {sorted(MIX_PROFILES)}")
+    targets = dict(MIX_PROFILES[name])
+    targets.update({k: v for k, v in over.items() if k != "profile"})
+    targets["profile"] = name if not (set(over) - {"profile"}) else f"{name}+custom"
+    return targets
+
+
+def presence_levels(x, hop, lo=500.0, hi=6000.0):
+    """Per-window level (dB) of the presence band of a mono signal (Hann-windowed FFT power, RMS-equivalent)."""
+    f = np.fft.rfftfreq(hop, 1 / SR)
+    band = (f >= lo) & (f < hi)
+    win = np.hanning(hop)
+    out = []
+    for i in range(len(x) // hop):
+        spec = np.abs(np.fft.rfft(x[i * hop:(i + 1) * hop] * win)) ** 2
+        out.append(10 * np.log10(spec[band].sum() * 2 / (hop * np.sum(win ** 2)) + 1e-12))
+    return np.array(out)
+
+
+def music_gaps(levels_db, voice_ref_db, eligible, hop_s, floor_db, min_s=0.8, bridge_s=1.2):
+    """Runs of windows where the bed falls under voice_ref + floor (eligible windows only).
+
+    levels_db: per-window presence-band level of the bed (presence_levels); eligible: bool per window (inside the
+    speech, outside declared silence). Runs separated by less than bridge_s are merged (a bed that only peeks out
+    for a moment is still "gone"). Returns [(start_s, end_s)] of runs >= min_s and the % of eligible windows present."""
+    rel = np.asarray(levels_db) - voice_ref_db
+    low = np.asarray(eligible) & (rel < floor_db)
+    gaps, i = [], 0
+    while i < len(low):
+        if low[i]:
+            j = i
+            while j < len(low) and low[j]:
+                j += 1
+            if (j - i) * hop_s >= min(min_s, bridge_s) / 2 - 1e-9:
+                gaps.append((round(i * hop_s, 2), round(j * hop_s, 2)))
+            i = j
+        else:
+            i += 1
+    merged = []
+    for g in gaps:
+        if merged and g[0] - merged[-1][1] < bridge_s - 1e-9:
+            merged[-1] = (merged[-1][0], g[1])
+        else:
+            merged.append(g)
+    merged = [g for g in merged if g[1] - g[0] >= min_s - 1e-9]
+    n = int(np.sum(eligible))
+    present = float(np.mean(~low[np.asarray(eligible)]) * 100) if n else 100.0
+    return merged, present
+
+
 def mix(work, plan, sfx_lib, music_body_db=-21.0, music_duck=0.80, sfx_offset_db=-7.0, sfx_duck=0.85,
         multiband=True, low_duck=0.55):
-    """Voice-first mix: music ~21.5 dB under the voice (median), background >= 12 dB under at p95."""
+    """Mix with a profile (MIX_PROFILES): "voice" (default, music ~21.5 dB under the voice) or "presence" (paid
+    ads, creative mode: ~15 dB under, filtered make-up, asr-check required). plan["mix"] = "presence" or a dict
+    {"profile": "presence", <overrides>}; legacy dicts without "profile" override the voice profile. The same
+    targets are read by test_voice_first_balance and test_music_presence (rk.mix_targets)."""
     work = Path(work)
+    tg = mix_targets(plan)
+    music_duck = tg.get("music_duck", music_duck)
+    low_duck = tg.get("low_duck", low_duck)
+    sfx_duck = tg.get("sfx_duck", sfx_duck)
+    sfx_offset_db = tg.get("sfx_offset_db", sfx_offset_db)
+    target_med = float(tg["music_median_db"])
+    target_p95 = float(tg["bed_p95_db"])
+    makeup = float(tg.get("filtered_makeup_db", 0.0))
     a = work / "composition/assets"
     duration = plan["duration"]
     n = round(duration * SR)
@@ -535,6 +668,16 @@ def mix(work, plan, sfx_lib, music_body_db=-21.0, music_duck=0.80, sfx_offset_db
         voice = np.frombuffer(src.readframes(src.getnframes()), "<i2") / 32768.0
     vfull = np.pad(voice, (0, max(0, n - len(voice))))[:n]
     env = voice_envelope(voice, n)
+    # Dramatic pauses (style trailer): inside these windows the voice is digital silence, so the ducking is
+    # released at once instead of holding ~650 ms; hits, braams and the music swell land at full level.
+    for w0, w1 in plan.get("duck_open", []):
+        s0, s1 = max(0, round(w0 * SR)), min(n, round(w1 * SR))
+        r = min(round(0.03 * SR), max(1, (s1 - s0) // 4))
+        if s1 - s0 > 2 * r:
+            win = np.ones(s1 - s0)
+            win[:r] = np.linspace(0, 1, r)
+            win[-r:] = np.linspace(1, 0, r)
+            env[s0:s1] *= 1 - win
     music = np.zeros((n, 2))
     music_low = np.zeros((n, 2))
     log = []
@@ -548,6 +691,8 @@ def mix(work, plan, sfx_lib, music_body_db=-21.0, music_duck=0.80, sfx_offset_db
             chain = ",".join(x for x in (base, filt) if x) if multiband else base
             seg = decode(sec["track"], sec["src"], end - start + 0.05, chain)
             seg = ramp(seg[: round((end - start) * SR)], sec.get("fade_in", 0.012), sec.get("fade_out", 0.025))
+            if makeup and sec["mode"] in FILTERED_MODES:
+                seg = seg * db(makeup)
             target = music_low if (multiband and band == "low") else music
             target[first: first + len(seg)] += seg[: n - first]
             if not multiband:
@@ -610,13 +755,13 @@ def mix(work, plan, sfx_lib, music_body_db=-21.0, music_duck=0.80, sfx_offset_db
     vr = lv(vfull)
     # effective speech windows: within 15 dB of the loudest window (pauses and tails excluded)
     vo = vr > (vr.max() - 15)
-    # auto-calibration: music ~21.5 dB under voice (median), background >= 12 dB under at p95
+    # auto-calibration to the profile targets (voice: music ~21.5 dB under, p95 >= 12 dB under; presence: -15/-7)
     for _ in range(4):
         mr = lv(music.mean(1))
         br = lv((music + sfx).mean(1))
         med = float(np.median(mr[vo] - vr[vo]))
         p95 = float(np.percentile(br[vo] - vr[vo], 95))
-        adj = min(-21.5 - med, -12.0 - p95, 0.0) if (med > -21.5 or p95 > -12.0) else 0.0
+        adj = min(target_med - med, target_p95 - p95, 0.0) if (med > target_med or p95 > target_p95) else 0.0
         if abs(adj) < 0.2:
             break
         music *= db(adj)
@@ -626,6 +771,24 @@ def mix(work, plan, sfx_lib, music_body_db=-21.0, music_duck=0.80, sfx_offset_db
                "music_minus_voice_median_db": float(np.median(mr[vo] - vr[vo])),
                "sfx_minus_voice_p95_db": float(np.percentile(sr_[vo] - vr[vo], 95)),
                "windows_bed_within_10db_pct": float(np.mean(rel > -10) * 100), "windows": int(vo.sum())}
+    # presence floor: the bed may not vanish inside the speech (outside declared silence / no-music plans)
+    hop_s = hop / SR
+    tracked = [sec for sec in plan["music"] if sec["mode"] != "silence" and sec.get("track")]
+    elig = np.zeros(len(vr), bool)
+    for w in range(len(vr)):
+        t0, t1 = w * hop_s, (w + 1) * hop_s
+        if t1 > plan["voice_end"] + 1e-6:
+            break
+        inside = any(sec["start"] <= t0 + 1e-6 and t1 <= min(sec["end"], duration) + 1e-6 for sec in tracked)
+        elig[w] = inside
+    hi_db = presence_levels(music.mean(1), hop)
+    gaps, present = music_gaps(hi_db, float(np.median(vr[vo])), elig, hop_s, float(tg["presence_floor_db"]))
+    long_filtered = [[sec["start"], sec["end"], sec["mode"]] for sec in plan["music"]
+                     if sec["mode"] in FILTERED_MODES and sec["end"] - sec["start"] > 3.0]
+    balance.update({"mix_profile": tg["profile"], "music_presence_pct": round(present, 1),
+                    "music_gaps": [list(g) for g in gaps], "presence_floor_db": tg["presence_floor_db"],
+                    "presence_gap_s": tg["presence_gap_s"], "long_filtered_sections": long_filtered,
+                    "asr_check_required": bool(tg.get("asr_check_required"))})
     mixd = music + sfx + np.column_stack([vfull] * 2)
     peak = float(np.max(np.abs(mixd)))
     if peak > 0.89:

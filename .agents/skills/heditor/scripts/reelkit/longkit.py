@@ -200,6 +200,8 @@ class Timeline:
         self.elements.append((float(t0), float(t1), markup, cap))
 
     def sfx(self, t, category, gain_db, context, **kw):
+        if not category:  # style packs without sound design (e.g. nativo) set the category to None
+            return
         self.sounds.append(dict({"time": round(max(0.0, t), 3), "category": category, "variant": 0,
                                  "gain_db": gain_db, "context": context}, **kw))
 

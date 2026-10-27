@@ -69,8 +69,35 @@ def _voiced_span(quiet, min_run=4):
     return first, last
 
 
+def cut_on_seam(r0, r1, s, e, start, fps, seams):
+    """Shift a pause trim so its cut lands on a scene seam inside the pause, removing the same number of frames.
+
+    Sources joined from scenes (AI avatar studio videos, spliced takes) reset the pose at every seam. When the seam
+    sits in a kept edge of the pause, the trim cut and the pose reset become two jumps a few frames apart (a stutter
+    that edits tend to hide by blanking the speaker). Moving the removed window so the joint is "last frame of the old
+    scene -> first frame of the new one" leaves a single discontinuity, at the seam, and keeps the timeline intact.
+
+    r0/r1: removed frames [r0, r1) relative to the block start; s/e: the pause in seconds relative to the block start;
+    start: block start in source seconds; seams: source times of the first frame of each new scene.
+    Returns (r0, r1, seam or None).
+    """
+    tol = 1.0 / fps
+    for t in seams or ():
+        rel = t - start
+        if not (s - tol <= rel <= e + tol):
+            continue
+        ft = round(rel * fps)
+        if r0 <= ft <= r1:
+            return r0, r1, t
+        width = r1 - r0
+        if ft > r1:
+            return ft - width, ft, t
+        return ft, ft + width, t
+    return r0, r1, None
+
+
 def prepare_cut(source, work, blocks, crop, fps=24, min_pause=0.35, edge=0.12, tail_fade=0.04,
-                lead=0.08, tail=0.12, fmt=None):
+                lead=0.08, tail=0.12, fmt=None, seams=None):
     source, work = Path(source), Path(work)
     if crop and str(crop).startswith("fit:"):
         import formats
@@ -83,12 +110,27 @@ def prepare_cut(source, work, blocks, crop, fps=24, min_pause=0.35, edge=0.12, t
     assets.mkdir(parents=True, exist_ok=True)
     (work / "clips").mkdir(exist_ok=True)
     (work / "qa").mkdir(exist_ok=True)
-    blocks = [tuple(bl) + (0.2,) * (5 - len(bl)) for bl in blocks]  # (chave, início, fim, raio_fim, raio_início)
-    levels = np.concatenate([_rms10(_pcm(source, bl[1], bl[2] - bl[1])) for bl in blocks])
+    # ("PAUSE", seconds[, key]) inserts digital silence + black frames (style trailer: dramatic beats for
+    # title cards and hits). Pauses are listed in edl["pauses"]; gaps/tests count only the silence around them.
+    blocks = [tuple(bl) if str(bl[0]).upper() == "PAUSE" else tuple(bl) + (0.2,) * (5 - len(bl)) for bl in blocks]
+    speech = [bl for bl in blocks if str(bl[0]).upper() != "PAUSE"]
+    levels = np.concatenate([_rms10(_pcm(source, bl[1], bl[2] - bl[1])) for bl in speech])
     floor = float(np.percentile(levels, 10))
     thr = min(-32.0, max(-48.0, floor + 12))
-    voice, videos, chunks, trims, cursor = [], [], [], [], 0.0
-    for g, (key, a, b, rb, ra) in enumerate(blocks):
+    voice, videos, chunks, trims, pauses, cursor = [], [], [], [], [], 0.0
+    for g, block in enumerate(blocks):
+        if str(block[0]).upper() == "PAUSE":
+            frames = max(1, round(float(block[1]) * fps))
+            key = block[2] if len(block) > 2 else f"pause-{g}"
+            span = frames / fps
+            voice.append(np.zeros(frames * SR // fps))
+            pauses.append({"key": key, "out_start": cursor, "out_end": cursor + span})
+            chunks.append({"block": key, "pause": True, "source_in": None, "source_out": None,
+                           "out_start": cursor, "out_end": cursor + span, "speed": 1.0})
+            cursor += span
+            videos.append(("PAUSE", g, frames))
+            continue
+        key, a, b, rb, ra = block
         qa_, da = _quiet(source, a, ra)
         qb_, db_ = _quiet(source, b, rb)
         f0, f1 = round(qa_ * fps), math.floor(qb_ * fps + 1e-6)
@@ -106,11 +148,13 @@ def prepare_cut(source, work, blocks, crop, fps=24, min_pause=0.35, edge=0.12, t
                     j += 1
                 s, e = i / 100, j / 100
                 if e - s > min_pause and s > 0.1 and e < dur - 0.1:
-                    r0, r1 = math.ceil((s + edge) * fps), math.floor((e - edge) * fps)
+                    r0, r1 = math.ceil((s + edge) * fps - 1e-6), math.floor((e - edge) * fps + 1e-6)
                     if r1 - r0 >= 1:
+                        r0, r1, seam = cut_on_seam(r0, r1, s, e, start, fps, seams)
                         removed.append((r0, r1))
                         trims.append({"block": key, "source_start": start + s, "source_end": start + e,
-                                      "removed_s": (r1 - r0) / fps})
+                                      "removed_s": (r1 - r0) / fps,
+                                      **({"seam": seam, "cut_source": start + r1 / fps} if seam is not None else {})})
                 i = j
             else:
                 i += 1
@@ -152,6 +196,18 @@ def prepare_cut(source, work, blocks, crop, fps=24, min_pause=0.35, edge=0.12, t
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw_clip), "-filter_complex", graph, "-map", "[v]", "-an",
                         "-r", str(fps), "-c:v", "libx264", "-crf", "14", "-preset", "fast", str(clip)], check=True)
         videos.append(clip)
+    real = [v for v in videos if not isinstance(v, tuple)]
+    if len(real) < len(videos):
+        size = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width,height",
+                               "-of", "csv=p=0", str(real[0])], capture_output=True, text=True, check=True).stdout.strip()
+        vw, vh = map(int, size.split(",")[:2])
+        for i, v in enumerate(videos):
+            if isinstance(v, tuple):
+                clip = work / "clips" / f"pause-{v[1]}.mp4"
+                subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"color=c=black:s={vw}x{vh}:r={fps}",
+                                "-frames:v", str(v[2]), "-pix_fmt", "yuv420p", "-c:v", "libx264", "-crf", "14",
+                                "-preset", "fast", str(clip)], check=True)
+                videos[i] = clip
     lst = work / "clips/list.txt"
     lst.write_text("".join(f"file '{p}'\n" for p in videos))
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy",
@@ -170,6 +226,7 @@ def prepare_cut(source, work, blocks, crop, fps=24, min_pause=0.35, edge=0.12, t
     edl = {"source": str(source), "format": fmt or "9:16", "fps": fps, "crop": crop, "speed": 1.0, "voice_duration": len(v) / SR,
            "noise_floor_dbfs": round(floor, 1), "silence_threshold_dbfs": round(thr, 1), "min_pause_s": min_pause,
            "pause_edge_s": edge, "lead_s": lead, "tail_s": tail,
-           "chunks": chunks, "silence_trims": trims, "removed_seconds": sum(x["removed_s"] for x in trims)}
+           "chunks": chunks, "pauses": pauses, "silence_trims": trims,
+           "removed_seconds": sum(x["removed_s"] for x in trims)}
     (work / "edl.json").write_text(json.dumps(edl, ensure_ascii=False, indent=2))
     return edl

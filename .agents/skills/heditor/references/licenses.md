@@ -12,12 +12,18 @@
 | ONNX Runtime | depth inference | MIT | pip |
 | OpenCV (contrib) | guided filter, optical flow, drawing | Apache-2.0 | pip |
 | three.js r181 | 3D objects in layered edits | MIT | downloaded by setup from jsDelivr (with LICENSE) |
+| three.js addons r181 (EffectComposer, UnrealBloomPass, BokehPass, OutputPass, RoundedBoxGeometry and their shaders) | bloom, depth of field, rounded bodies (physkit) | MIT | downloaded by setup from jsDelivr |
+| GSAP 3.14.2 plugins (SplitText, DrawSVG, MorphSVG, MotionPath, CustomEase, CustomWiggle, CustomBounce, Text, Physics2D, PhysicsProps, ScrambleText, EasePack) | text, SVG and easing effects | GSAP standard "no charge" licence (same as the core) | downloaded by setup from jsDelivr |
+| SVGO 4.1.0 | SVG clean-up before animation (`heditor svg`) | MIT | npm, installed by setup in `~/.heditor/node` |
+| Rapier 3D (`@dimforge/rapier3d-compat` 0.21.0) | rigid-body physics baked before render (`heditor physics`) | Apache-2.0 | npm, installed by setup in `~/.heditor/node` |
 | FFmpeg | cutting, grading, audio, encoding | LGPL/GPL (system build) | system package |
 | Playwright (Python) | deterministic frame previews | Apache-2.0 | pip |
 | NumPy, Pillow, pytest | processing, images, tests | BSD/MIT-CMU/MIT | pip |
 | Fonts from github.com/google/fonts | typography | SIL Open Font License 1.1 | downloaded by setup with OFL.txt files |
 | Lucide icons | inline SVG icons | ISC | downloaded on demand |
 | Mixkit music and sound effects | soundtrack and SFX | Mixkit Stock Music Free License / Mixkit Sound Effects Free License (https://mixkit.co/license/) | downloaded by setup from Mixkit's CDN to the user's machine; never redistributed in this repository |
+| Mixkit stock video | B-roll (`heditor stock`) | Mixkit Stock Video Free License (https://mixkit.co/license/#videoFree), subject to the Mixkit User Terms (no mass download, no redistribution as stock) | one clip per `heditor stock get`, on demand, from Mixkit's CDN into the work dir after the licence is confirmed on the clip page; provenance in `<work>/stock.json` |
+| HeyGen CLI (`heygen`, optional) | AI avatar source videos (`heditor heygen`, `heditor avatar`) | HeyGen terms of service; generated videos are billed to and governed by the user's HeyGen account | never installed by setup; installed only when the user accepts it in `heditor heygen connect` (official installer from static.heygen.ai, checksum verified, `~/.local/bin`) |
 
 Optional external tools referenced by some styles (not installed by setup; check the licence before using them in your project and record it in DESIGN.md):
 

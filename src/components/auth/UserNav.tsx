@@ -2,15 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { NotificationCenter } from "@/components/ui/NotificationCenter";
 import { BookmarkDrawer } from "@/components/ui/BookmarkDrawer";
 import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import { isAdminUser } from "@/lib/auth";
+import { getDictionary } from "@/lib/i18n";
 
 export function UserNav() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const pathname = usePathname();
+  const isEn = pathname?.startsWith("/en") ?? false;
+  const dict = getDictionary(isEn ? "en" : "pt");
   const { user, profile, signOut, signOutAll, switchAccount, removeAccount, savedAccounts, isLoading } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("login");
@@ -57,31 +62,31 @@ export function UserNav() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
           onClick={() => { setAuthModalTab("login"); setIsAuthModalOpen(true); }}
-          className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-card-slate/60 px-3 text-xs font-bold text-gray-200 transition-all hover:border-white/20 hover:bg-card-slate sm:px-3.5"
+          className="flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-card-slate/60 px-2.5 text-xs font-bold text-gray-200 transition-all hover:border-white/20 hover:bg-card-slate sm:min-h-11 sm:px-3.5"
         >
-          <svg className="w-3.5 h-3.5 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="h-3.5 w-3.5 shrink-0 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          <span>Entrar</span>
+          <span>{dict.nav.login}</span>
         </button>
 
         {emailAuthEnabled ? (
           <Link
             href="/cadastro"
-            className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black shadow-sm transition-all hover:bg-[#ff7526] sm:px-4"
+            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black shadow-sm transition-all hover:bg-[#ff7526] sm:flex sm:px-4"
           >
-            <span>Criar conta</span>
+            <span>{isEn ? "Sign Up" : "Criar conta"}</span>
           </Link>
         ) : (
           <button
             type="button"
             onClick={() => { setAuthModalTab("signup"); setIsAuthModalOpen(true); }}
-            className="flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black transition-all hover:bg-[#ff7526] sm:px-4"
+            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black transition-all hover:bg-[#ff7526] sm:flex sm:px-4"
           >
-            Criar conta
+            {isEn ? "Sign Up" : "Criar conta"}
           </button>
         )}
 
@@ -94,19 +99,19 @@ export function UserNav() {
     );
   }
 
-  const displayName = profile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || "Leitor";
+  const displayName = profile?.nickname || user.user_metadata?.full_name || user.email?.split("@")[0] || (isEn ? "Reader" : "Leitor");
   const rawAvatar = profile?.avatar_url || getGoogleAvatarUrl(user);
   const avatarUrl = resolveAvatarUrl(rawAvatar, displayName);
 
   return (
     <>
-      <div ref={dropdownRef} className="flex items-center gap-2 relative">
+      <div ref={dropdownRef} className="relative flex shrink-0 items-center gap-1 sm:gap-2">
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           aria-expanded={isDropdownOpen}
           aria-haspopup="menu"
           aria-controls="user-nav-menu"
-          className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl border border-brand-orange-muted/20 bg-card-slate/80 p-1.5 transition-all hover:border-brand-orange/40 hover:bg-card-slate sm:pr-3"
+          className="flex min-h-9 min-w-9 items-center justify-center gap-1.5 rounded-xl border border-brand-orange-muted/20 bg-card-slate/80 p-1 transition-all hover:border-brand-orange/40 hover:bg-card-slate sm:min-h-11 sm:min-w-11 sm:gap-2 sm:p-1.5 sm:pr-3"
         >
           {avatarUrl ? (
             <img
@@ -151,7 +156,7 @@ export function UserNav() {
               <svg aria-hidden="true" className="h-4 w-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
               </svg>
-              <span>Meu Brick</span>
+              <span>{isEn ? "My Brick" : "Meu Brick"}</span>
             </Link>
 
             <Link
@@ -166,7 +171,7 @@ export function UserNav() {
                   className="h-8 w-8 max-w-none object-contain"
                 />
               </span>
-              <span>Conquistas</span>
+              <span>{dict.community.achievements}</span>
             </Link>
 
             <button
@@ -179,12 +184,12 @@ export function UserNav() {
               <svg className="w-4 h-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
               </svg>
-              <span>Matérias Salvas</span>
+              <span>{isEn ? "Saved Articles" : "Matérias Salvas"}</span>
             </button>
 
             <Link href="/configuracoes/notificacoes" onClick={() => setIsDropdownOpen(false)} className="flex min-h-11 items-center gap-2 rounded-lg px-3 font-bold text-gray-300 transition-colors hover:bg-brand-orange/10 hover:text-white">
               <svg className="h-4 w-4 text-brand-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0" /></svg>
-              <span>Preferências de alertas</span>
+              <span>{isEn ? "Alert Preferences" : "Preferências de alertas"}</span>
             </Link>
 
             {isAdmin && (
@@ -196,16 +201,16 @@ export function UserNav() {
                 <svg className="w-4 h-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                <span>Painel Admin</span>
+                <span>{dict.nav.admin}</span>
               </Link>
             )}
 
             <div className="pt-2 mt-2 border-t border-brand-orange-muted/15">
               <div className="px-3 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                <span>Contas</span>
+                <span>{isEn ? "Accounts" : "Contas"}</span>
                 {savedAccounts.length > 1 && (
                   <span className="text-[10px] text-brand-orange font-mono">
-                    {savedAccounts.length} salvas
+                    {savedAccounts.length} {isEn ? "saved" : "salvas"}
                   </span>
                 )}
               </div>
@@ -257,7 +262,7 @@ export function UserNav() {
 
                       {isActive ? (
                         <span
-                          title="Conta ativa"
+                          title={isEn ? "Active account" : "Conta ativa"}
                           className="shrink-0 text-brand-orange ml-1.5 flex items-center justify-center"
                         >
                           <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -277,7 +282,7 @@ export function UserNav() {
                             e.stopPropagation();
                             removeAccount(account.userId);
                           }}
-                          title="Remover conta deste dispositivo"
+                          title={isEn ? "Remove account from this device" : "Remover conta deste dispositivo"}
                           className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-1 text-gray-400 transition-opacity shrink-0 ml-1.5"
                         >
                           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -301,7 +306,7 @@ export function UserNav() {
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                <span>Adicionar outra conta</span>
+                <span>{isEn ? "Add another account" : "Adicionar outra conta"}</span>
               </button>
             </div>
 
@@ -319,8 +324,8 @@ export function UserNav() {
                 </svg>
                 <span>
                   {savedAccounts.length > 1
-                    ? `Sair de @${profile?.username || displayName}`
-                    : "Sair"}
+                    ? (isEn ? `Sign out of @${profile?.username || displayName}` : `Sair de @${profile?.username || displayName}`)
+                    : dict.nav.logout}
                 </span>
               </button>
 
@@ -336,7 +341,7 @@ export function UserNav() {
                   <svg className="w-3.5 h-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  <span>Sair de todas as contas</span>
+                  <span>{isEn ? "Sign out of all accounts" : "Sair de todas as contas"}</span>
                 </button>
               )}
             </div>

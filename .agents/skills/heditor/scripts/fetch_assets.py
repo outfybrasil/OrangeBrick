@@ -53,6 +53,18 @@ OTHER = {
     "js/three.module.min.js": "https://cdn.jsdelivr.net/npm/three@0.181.2/build/three.module.min.js",
     "js/three.core.min.js": "https://cdn.jsdelivr.net/npm/three@0.181.2/build/three.core.min.js",
     "licenses/three-LICENSE.txt": "https://raw.githubusercontent.com/mrdoob/three.js/r181/LICENSE",
+    **{f"js/three-addons/{rel}": f"https://cdn.jsdelivr.net/npm/three@0.181.2/examples/jsm/{rel}" for rel in (
+        # post-processing (bloom, depth of field, output) for physkit and other 3D layers; they import "three",
+        # resolved by the importmap that physkit writes into the page
+        "postprocessing/EffectComposer.js", "postprocessing/Pass.js", "postprocessing/RenderPass.js",
+        "postprocessing/ShaderPass.js", "postprocessing/MaskPass.js", "postprocessing/UnrealBloomPass.js",
+        "postprocessing/OutputPass.js", "postprocessing/BokehPass.js", "shaders/CopyShader.js",
+        "shaders/LuminosityHighPassShader.js", "shaders/OutputShader.js", "shaders/BokehShader.js",
+        "geometries/RoundedBoxGeometry.js")},
+    # GSAP plugins (all free since 3.13, same standard licence as the core); loaded offline by rk.page(plugins=...)
+    **{f"js/gsap/{p}.min.js": f"https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/{p}.min.js" for p in (
+        "SplitText", "DrawSVGPlugin", "MorphSVGPlugin", "MotionPathPlugin", "CustomEase", "CustomWiggle",
+        "CustomBounce", "TextPlugin", "Physics2DPlugin", "PhysicsPropsPlugin", "ScrambleTextPlugin", "EasePack")},
     # depthkit (layered edits): person matte and hand landmarks
     "models/selfie_multiclass_256x256.tflite":
         "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/"

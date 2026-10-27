@@ -65,6 +65,14 @@ const nextConfig: NextConfig = {
       { source: "/admin/images", destination: "/admin", permanent: false },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/en/:path((?!brickboard$|brickboard/|posts/).*)",
+        destination: "/:path",
+      },
+    ];
+  },
   async headers() {
     return [
       {

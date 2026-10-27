@@ -30,7 +30,7 @@ Python (inside `build.py`): `import depthkit as dk` next to `import reelkit as r
 | `dk.track_points(work, t0, points, t1)` | list + `qa/track-<t0>.json` | Lucas–Kanade tracking of chosen video pixels (labels pinned to objects, a moving plane quad). Check `ok`. |
 | `dk.track_hands(work, t0, t1, step=1/15)` | list + `qa/hands-<t0>.json` | MediaPipe Hand Landmarker; `palm` and `size` per hand for objects that float over the palm. |
 | `dk.to_stage(pt, video_size, box)` | stage px | Converts a video pixel to stage pixels for a video drawn with `object-fit: cover` in `box`. |
-| `dk.setup_three(work)` | assets | Copies three.js (module + core, MIT) into the cut for offline 3D. |
+| `dk.setup_three(work)` | assets | Copies three.js (module + core, MIT) into the cut for offline 3D. For bloom, depth of field and rigid-body physics use `physkit.setup(work)` instead (adds the post-processing addons and an importmap); see `physics-3d.md`. |
 | `dk.still_layers(src, out_dir, cut=0.52, soft=0.2, blur=6)` | `<stem>.jpg`, `<stem>-front.webp`, `<stem>-depth.png` | 2.5D parallax for a still (a generated painting, a photo): background + a soft RGBA front layer of the near planes (`dk.front_alpha`). Move the front 60–90 px more than the back and scale it ≤ 4 % more; ≈ 10 s per 1536×1024 image on CPU. Recipe in `styles/documentario-narrado.md`. |
 
 Models are Apache-2.0 and download into `~/.heditor/assets/models` (setup fetches the segmenter and the hand model; `setup.sh --depth` also pre-fetches the 99 MB depth model, otherwise it downloads on first use). CPU cost on 4 cores: matte ≈ 1× real time at 960 px, depth ≈ 2–4× real time at 10 fps, looks ≈ 0.5–1×.

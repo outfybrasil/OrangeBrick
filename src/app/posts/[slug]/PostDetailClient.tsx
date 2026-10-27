@@ -18,6 +18,7 @@ import { Tag } from "@/components/ui/Tag";
 import { Timer } from "@/components/ui/Timer";
 import { Footer } from "@/components/ui/Footer";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { BookmarkIcon, SocialLogo } from "@/components/ui/ContentActionIcons";
 import { ArticleHypeSummary } from "@/components/releases/ArticleHypeSummary";
 import { createDataClient } from "@/lib/supabase/client";
@@ -342,7 +343,7 @@ export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: 
   return (
     <div className="min-h-dvh min-w-0 bg-background-void pb-16 text-white sm:pb-24">
       <header className="border-b border-brand-orange-muted/10 bg-card-slate/20 py-2 sm:py-4 sticky top-0 z-30 backdrop-blur-md watch-compact">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-2 sm:px-4">
+        <div className="mx-auto flex max-w-3xl min-w-0 items-center justify-between gap-2 px-3 sm:px-4">
           <button
             onClick={() => {
               if (typeof window !== "undefined" && window.history.length > 1) {
@@ -351,18 +352,21 @@ export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: 
                 router.push(isEn ? "/en" : "/");
               }
             }}
-            className="flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:gap-2 sm:text-xs"
+            className="flex min-h-10 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:min-h-11 sm:gap-2"
           >
             ← <span className="hidden xs:inline">{dict.post.back}</span>
           </button>
-          <button
-            type="button"
-            aria-label="Ir para a página inicial"
-            className="group flex min-h-11 min-w-11 items-center justify-end gap-2 rounded-xl sm:gap-3"
-            onClick={() => router.push(isEn ? "/en" : "/")}
-          >
-            <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-200 group-hover:scale-105 sm:h-5 sm:w-auto" />
-          </button>
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <LanguageSwitcher currentLocale={isEn ? "en" : "pt"} />
+            <button
+              type="button"
+              aria-label={isEn ? "Go to home page" : "Ir para a página inicial"}
+              className="group flex min-h-10 min-w-0 shrink items-center justify-end gap-2 rounded-xl sm:min-h-11 sm:shrink-0 sm:gap-3"
+              onClick={() => router.push(isEn ? "/en" : "/")}
+            >
+              <BrandLogo alt="Orange Brick" className="h-auto w-[clamp(5.5rem,30vw,9.5rem)] max-w-full transition-transform duration-200 group-hover:scale-105 sm:h-5 sm:w-auto" />
+            </button>
+          </div>
         </div>
       </header>
 

@@ -23,6 +23,7 @@ import { getGoogleAvatarUrl, resolveAvatarUrl } from "@/lib/avatar";
 import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 const PLATFORM_TABS_PT = [
   { id: "TODOS", label: "Todos" },
@@ -299,8 +300,8 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d0e12]/95 py-2 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex shrink-0 items-center gap-4">
+        <div className="mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
             {user && userProgress && (
               <Link href={myProfileHref} className="group hidden min-h-11 items-center gap-2.5 border-r border-white/10 pr-4 lg:flex" aria-label={`Abrir Meu Brick, nível ${userProgress.progress.level}`}>
                 {avatarUrl ? (
@@ -310,27 +311,27 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
                 )}
                 <span className="w-24">
                   <span className="flex items-center justify-between gap-2 text-xs font-bold">
-                    <span className="text-gray-400 group-hover:text-white">Progresso</span>
+                    <span className="text-gray-400 group-hover:text-white">{dict.community.myProgress}</span>
                     <span className="text-brand-orange">Nv. {userProgress.progress.level}</span>
                   </span>
                   <span className="mt-1 block h-1 overflow-hidden bg-white/10"><span className="block h-full bg-brand-orange" style={{ width: `${xpProgress}%` }} /></span>
                 </span>
               </Link>
             )}
-            <Link href="/brickboard" className="group flex min-h-11 shrink-0 items-center gap-2.5" aria-label="BrickBoard — Página inicial da comunidade">
-              <BrickboardLogo alt="BrickBoard" className="h-5 w-auto transition-transform duration-300 group-hover:scale-105 sm:h-6" />
+            <Link href={isEn ? "/en/brickboard" : "/brickboard"} className="group flex min-h-10 min-w-0 shrink items-center gap-2 sm:min-h-11 sm:shrink-0 sm:gap-2.5" aria-label="BrickBoard — Página inicial da comunidade">
+              <BrickboardLogo alt="BrickBoard" className="h-auto w-[clamp(5.5rem,28vw,9rem)] max-w-full transition-transform duration-300 group-hover:scale-105 sm:h-6 sm:w-auto" />
             </Link>
           </div>
 
-          <button type="button" onClick={openFilters} className="hidden min-h-11 items-center rounded-lg border border-white/10 px-4 text-xs font-semibold text-gray-300 hover:text-white md:inline-flex">Buscar e filtrar</button>
+          <button type="button" onClick={openFilters} className="hidden min-h-11 items-center rounded-lg border border-white/10 px-4 text-xs font-semibold text-gray-300 hover:text-white md:inline-flex">{dict.community.filters}</button>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {user && userProgress && (
               <Link
                 href={myProfileHref}
                 aria-label={`Abrir Meu Brick. Nível ${userProgress.progress.level}`}
                 title={`Nível ${userProgress.progress.level} · ${Math.round(xpProgress)}% do caminho`}
-                className="flex min-h-9 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-2.5 text-xs font-black text-brand-orange transition-colors hover:bg-brand-orange hover:text-white lg:hidden"
+                className="hidden min-h-9 items-center gap-1.5 border border-brand-orange/30 bg-brand-orange/10 px-2.5 text-xs font-black text-brand-orange transition-colors hover:bg-brand-orange hover:text-white xs:flex lg:hidden"
               >
                 Nv. {userProgress.progress.level}
                 <span aria-hidden="true" className="h-1 w-8 overflow-hidden bg-white/15">
@@ -339,11 +340,12 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
               </Link>
             )}
             <Link
-              href="/"
+              href={isEn ? "/en" : "/"}
               className="hidden min-h-9 items-center gap-1.5 border border-white/10 px-3 text-xs font-bold text-gray-300 transition-colors hover:border-white/25 hover:text-white sm:flex"
             >
               ← Portal
             </Link>
+            <LanguageSwitcher currentLocale={isEn ? "en" : "pt"} />
             <UserNav />
           </div>
         </div>

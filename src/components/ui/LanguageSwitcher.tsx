@@ -33,32 +33,34 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
   };
 
   return (
-    <div className="flex items-center gap-1 border border-white/10 bg-black/40 px-2 py-1 text-xs">
-      <Globe className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+    <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-white/10 bg-black/40 px-1 py-0.5 text-xs sm:gap-1 sm:px-2 sm:py-1">
+      <Globe className="hidden h-3.5 w-3.5 text-gray-400 sm:inline-block" aria-hidden="true" />
       <button
         type="button"
         onClick={() => handleSwitch("pt")}
         disabled={isPending}
-        className={`px-1 py-0.5 font-mono font-bold transition-colors ${
+        className={`inline-flex min-h-7 min-w-7 items-center justify-center rounded px-1 py-0.5 font-mono font-bold transition-colors ${
           currentLocale === "pt"
             ? "text-brand-orange"
-            : "text-gray-400 hover:text-white"
+            : "text-gray-300 hover:text-white"
         }`}
         aria-label="Mudar para Português"
+        aria-pressed={currentLocale === "pt"}
       >
         PT
       </button>
-      <span className="text-gray-600">/</span>
+      <span aria-hidden="true" className="text-gray-500">/</span>
       <button
         type="button"
         onClick={() => handleSwitch("en")}
         disabled={isPending}
-        className={`px-1 py-0.5 font-mono font-bold transition-colors ${
+        className={`inline-flex min-h-7 min-w-7 items-center justify-center rounded px-1 py-0.5 font-mono font-bold transition-colors ${
           currentLocale === "en"
             ? "text-brand-orange"
-            : "text-gray-400 hover:text-white"
+            : "text-gray-300 hover:text-white"
         }`}
         aria-label="Switch to English"
+        aria-pressed={currentLocale === "en"}
       >
         EN
       </button>

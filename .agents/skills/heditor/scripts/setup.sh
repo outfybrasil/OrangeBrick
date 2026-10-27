@@ -44,11 +44,12 @@ done
 if ! have ffmpeg || ! have ffprobe; then
   say "installing ffmpeg"; install_pkgs ffmpeg || { say "please install ffmpeg (https://ffmpeg.org/download.html)"; exit 1; }
 fi
-if ! have node || [[ $(node -p 'process.versions.node.split(".")[0]') -lt 18 ]]; then
-  say "installing Node.js >= 18"
+# HyperFrames (hyperframes@0.8.x) declares engines.node >= 22; an older Node passes npx but can fail at render.
+if ! have node || [[ $(node -p 'process.versions.node.split(".")[0]') -lt 22 ]]; then
+  say "installing Node.js >= 22"
   if have brew; then brew install node
   elif have apt-get; then curl -fsSL https://deb.nodesource.com/setup_22.x | $SUDO bash - && $SUDO apt-get install -y nodejs
-  else install_pkgs nodejs npm || { say "please install Node.js >= 18 (https://nodejs.org)"; exit 1; }; fi
+  else install_pkgs nodejs npm || { say "please install Node.js >= 22 (https://nodejs.org)"; exit 1; }; fi
 fi
 PY=""
 for cand in python3.13 python3.12 python3.11 python3.10 python3; do
@@ -72,6 +73,13 @@ say "installing python packages"
 say "warming up hyperframes@$HYPERFRAMES_VERSION and its Chrome"
 npx --yes "hyperframes@$HYPERFRAMES_VERSION" browser ensure >/dev/null
 CHROME_PATH="$(npx --yes "hyperframes@$HYPERFRAMES_VERSION" browser path 2>/dev/null | tail -1)"
+
+# 3b) node tools: SVGO (SVG clean-up before animation) and Rapier (physics baking for 3D scenes) ---------------
+say "installing node tools (svgo, rapier) in $HEDITOR_HOME/node"
+mkdir -p "$HEDITOR_HOME/node"
+[[ -f "$HEDITOR_HOME/node/package.json" ]] || echo '{"name":"heditor-node-tools","private":true}' > "$HEDITOR_HOME/node/package.json"
+npm install --prefix "$HEDITOR_HOME/node" --no-audit --no-fund --silent svgo@4.1.0 @dimforge/rapier3d-compat@0.21.0 || \
+  say "node tools failed; 'heditor svg' and 'heditor physics' will not work until setup is re-run"
 
 # 4) assets -------------------------------------------------------------------
 say "downloading fonts, GSAP, face/person/hand models, music and SFX (first run takes a few minutes)"

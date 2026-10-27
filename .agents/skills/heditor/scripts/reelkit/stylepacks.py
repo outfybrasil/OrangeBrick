@@ -70,6 +70,11 @@ FAMILY = {
                "long_notes": "Layered moments (text behind the speaker, depth scans) need a full-frame camera with a "
                              "good matte: use them only in speaker-layout set pieces, never over a screen share."},
     "creator": {"transition": {"kind": "cut", "dur": 0.25}, "chapter_card": "editorial", "lower_third": "tag"},
+    # Clean native edit: cuts and animated captions only (no SFX, no music bed, no set pieces).
+    "native": {"transition": {"kind": "cut", "dur": 0.0}, "chapter_card": "editorial", "lower_third": "tag",
+               "overlay": {"grain": 0.0, "vignette": 0.0},
+               "sfx": {"chapter": None, "callout": None, "lower_third": None, "set_piece": None, "transition": None,
+                       "cta_tap": None, "cta_done": None, "intro": None}},
 }
 
 # One entry per named style. Only what differs from BASE + FAMILY is written.
@@ -346,6 +351,23 @@ STYLES = {
         "font_note": "Tilt Neon (OFL) for the signs",
         "music": {"ids": [293, 31, 597, 623], "mood": "urgent, nocturnal"},
     },
+    "lapidacao": {
+        "name": "Lapidação (luxury jewellery commercial)", "family": "ad",
+        "palette": {"bg": "#050506", "bg2": "#0b0c10", "surface": "#111217", "text": "#eef3f7", "muted": "#9aa3b2",
+                    "accent": "#edc580", "accent2": "#dce8ff", "alert": "#ff5f57", "ok": "#edc580"},
+        "fonts": {"display": "Geist", "caption": "Geist", "mono": "JetBrains Mono"},
+        "captions": {"weight": 800, "case": "upper", "box": None, "active_fg": "#000000", "active_bg": "#f3d79b"},
+        "frame": {"border": "1px solid rgba(237,197,128,.45)", "camera_radius": 20,
+                  "world": "radial-gradient(ellipse 120% 70% at 50% 30%,#0b0c10 0%,#050506 55%,#020203 100%)"},
+        "transition": {"kind": "flash", "dur": 0.3, "ease": "power2.out"},
+        "chapter_card": "slate", "lower_third": "plate",
+        "sfx": {"chapter": "lock_click", "callout": "magic_sparkle", "set_piece": "trailer_hit", "transition": "whoosh"},
+        "music": {"ids": [568, 167, 623], "mood": "driving electronic that builds to a drop on the reveal; louder bed"},
+        "long_notes": "Chapters as objects under a spotlight on black velvet: the raw material of the chapter drops as "
+                      "a rough stone, the explanation is the cut (laser, facets, flash) and the result is the gem with "
+                      "its parts named; a jeweller's loupe reviews screen recordings; keep the case/tag/rope set "
+                      "pieces for the offer chapter only.",
+    },
     "manual-de-montagem": {
         "name": "Manual de montagem (assembly blueprint)", "family": "ad",
         "palette": {"bg": "#0a2c6e", "bg2": "#0f3f95", "accent": "#ffd84d", "accent2": "#ffffff", "ok": "#4ade80"},
@@ -470,6 +492,83 @@ STYLES = {
                       "oak like a projected slide); chapters are syllabus items whose '?' turns into ✓; concept-map "
                       "set pieces are drawn live on the trigger words (±0.15 s); a SUMMARY board closes each chapter.",
     },
+    "trailer": {
+        "name": "Trailer (movie trailer)", "family": "organic",
+        "palette": {"bg": "#000000", "bg2": "#03090e", "surface": "#03090e", "text": "#eceaf2", "muted": "#cfc6ff",
+                    "accent": "#9a7cff", "accent2": "#edc580", "alert": "#ff5a4f"},
+        "fonts": {"display": "Geist", "caption": "Geist", "body": "Geist"},
+        "captions": {"weight": 700, "case": "upper", "box": "rgba(3,9,14,.46)", "stroke": "5px #03090e", "fg": "#ffffff",
+                     "active_fg": "#03090e", "active_bg": "#ffffff"},
+        "frame": {"border": "1.5px solid rgba(236,234,242,.7)", "camera_radius": 0, "screen_radius": 18,
+                  "letterbox": True},
+        "overlay": {"grain": 0.11, "vignette": 0.4},
+        "transition": {"kind": "flash", "dur": 0.3},
+        "chapter_card": "serif", "lower_third": "plate",
+        "camera_grade": "selectivecolor=magentas='-0.25 0.32 0.12 0':yellows='0 0 -0.10 0',huesaturation=hue=-10:"
+                        "saturation=-0.6:colors=m,colortemperature=temperature=7000:mix=0.5,eq=contrast=1.30:"
+                        "brightness=-0.05:saturation=0.76:gamma=1.07,vignette=PI/3.9",
+        "sfx": {"chapter": "trailer_hit", "callout": "bass_impact", "set_piece": "riser", "transition": "whoosh"},
+        "font_note": "Geist caps, tracking 0.3-0.42 em; Mixkit cinematic stems by id in references/styles/trailer.md",
+        "music": {"ids": [871, 677, 686], "mood": "suspense → escalation → reveal (v2 used Mixkit 614/1011/678/686)"},
+        "long_notes": "Chapters open as black title cards (gold serif, hit + braam in a short inserted pause, voice at "
+                      "1x); the speaker stays full frame with the trailer grade and letterbox, screen shares sit in a "
+                      "gold-bordered window. Keep the big beats (black cards, silence, climax) for the 3-5 key "
+                      "moments of the video: a long video cannot carry trailer density end to end.",
+    },
+    "nativo": {
+        "name": "Nativo (clean native edit)", "family": "native",
+        "palette": {"bg": "#000000", "bg2": "#0a0a0a", "surface": "#000000", "text": "#ffffff", "muted": "#c9c9c9",
+                    "accent": "#ffd84d", "accent2": "#ffffff"},
+        "fonts": {"display": "Inter", "body": "Inter", "caption": "Inter"},
+        "captions": {"weight": 900, "case": "none", "fg": "#ffffff", "active_fg": "#000000", "active_bg": "#ffd84d",
+                     "box": None, "stroke": "10px #000000", "scale": 1.1},
+        "frame": {"border": "none", "camera_radius": 0, "screen_radius": 0, "shadow": "none", "world": "#000000"},
+        "music": {"ids": [], "mood": "none (voice only unless the user asks for a soft bed)", "bed": False},
+        "long_notes": "Cuts and animated captions only: pauses, false starts and repetitions removed (long edl), "
+                      "camera or screen full frame with a hard cut between layouts, word-by-word captions. No set "
+                      "pieces, callouts, lower thirds, SFX or music unless the user asks; chapters go to the "
+                      "description (YouTube timestamps), not on screen.",
+    },
+    "gravidade": {
+        "name": "Gravidade (the speech has weight)", "family": "organic",
+        "palette": {"bg": "#020308", "bg2": "#0a0e18", "surface": "#161c2c", "text": "#f4f8fb", "muted": "#9fb3c4",
+                    "accent": "#f5c66b", "accent2": "#7dffb0", "alert": "#ff6b6b", "ok": "#7dffb0"},
+        "fonts": {"display": "Anton", "caption": "Anton"},
+        "captions": {"weight": 400, "case": "upper", "box": None, "stroke": "6px #020308", "active_fg": "#000000",
+                     "active_bg": "#ffd84d", "scale": 1.05},
+        "frame": {"border": "3px solid #2a3654", "camera_radius": 24,
+                  "world": "radial-gradient(ellipse 80% 60% at 50% 70%,#0a0e18 0%,#020308 75%)"},
+        "transition": {"kind": "flash", "dur": 0.35, "ease": "power3.out"},
+        "chapter_card": "slate", "lower_third": "plate",
+        "sfx": {"chapter": "stamp", "callout": "lock_click", "set_piece": "trailer_hit", "transition": "whoosh"},
+        "music": {"ids": [680, 677, 369], "mood": "restless percussion, silence before the impact"},
+        "long_notes": "Physics set pieces (physkit, baked): problems fall into a heap on their words, the turn lands "
+                      "as a heavy block that throws the heap, the answer stacks as a straight tower. Keep the room "
+                      "to the key beats of each chapter (render cost ~1 s/frame) and a clean pip/side layout in "
+                      "between; chapter cards as a block landing with the chapter name.",
+    },
+    "circuito": {
+        "name": "Circuito (circuit board)", "family": "didactic",
+        "palette": {"bg": "#020a07", "bg2": "#08261c", "surface": "#0a110e", "text": "#e6f1ea", "muted": "#8fb7a5",
+                    "accent": "#d9a441", "accent2": "#7dffb0", "alert": "#ff5c6c", "ok": "#7dffb0"},
+        "fonts": {"display": "JetBrains Mono", "body": "JetBrains Mono", "mono": "JetBrains Mono",
+                  "caption": "JetBrains Mono"},
+        "captions": {"weight": 800, "case": "upper", "box": None, "stroke": "6px #03100b", "fg": "#ffffff",
+                     "active_fg": "#03100b", "active_bg": "#7dffb0", "scale": 0.9},
+        "frame": {"border": "3px solid #3b6a57", "camera_radius": 10, "screen_radius": 8,
+                  "shadow": "0 0 24px rgba(125,255,176,.18)",
+                  "world": "radial-gradient(ellipse 85% 60% at 50% 48%,#08261c 0%,#051710 55%,#020a07 100%)"},
+        "overlay": {"grain": 0.03, "vignette": 0.3},
+        "transition": {"kind": "wipe", "dur": 0.5, "ease": "power2.inOut"},
+        "chapter_card": "terminal", "lower_third": "terminal",
+        "sfx": {"chapter": "power_up", "callout": "data_beep", "lower_third": "scan", "set_piece": "magic_transition",
+                "transition": "swipe", "cta_tap": "click", "cta_done": "success_chime", "intro": "power_up"},
+        "music": {"ids": [167, 568, 623], "mood": "mechanical electronic, drop on the thesis title"},
+        "long_notes": "The screen share becomes the main chip (green-outlined, pins around it); chapter cards are "
+                      "new boards with the chapter name in silkscreen; concept-map set pieces are components drawn "
+                      "on their words (DrawSVG), copper traces on the verbs and pulses (MotionPath) for data that "
+                      "travels; LEDs and flags give the verdict per part.",
+    },
     "camadas": {
         "name": "Camadas (concept layers)", "family": "layers",
         "palette": {"bg": "#07060c", "bg2": "#14101f", "accent": "#ff7a59", "accent2": "#b9a6ff", "ok": "#6ef0ff"},
@@ -517,6 +616,23 @@ STYLES = {
         "chapter_card": "broadcast",
         "music": {"ids": [293, 597, 82], "mood": "hot take"},
         "long_notes": "Reaction videos: the subject (screen) on top, the speaker below; headline banner per chapter.",
+    },
+    "reacao": {
+        "name": "Reação (the speaker in front of the post)", "family": "layers",
+        "palette": {"bg": "#0b0b0f", "bg2": "#16161c", "text": "#ffffff", "accent": "#2f6bff", "accent2": "#d8ff3e",
+                    "alert": "#ff3b30"},
+        "fonts": {"display": "Geist", "body": "Inter", "caption": "Geist"},
+        "captions": {"weight": 900, "case": "none", "box": None, "stroke": "6px #000000", "fg": "#ffffff",
+                     "active_fg": "#ffd84d", "active_bg": None},
+        "frame": {"camera_shape": "cutout", "border": "0 solid transparent", "screen_radius": 18,
+                  "shadow": "0 30px 90px rgba(0,0,0,.55)"},
+        "transition": {"kind": "slide", "dur": 0.34, "ease": "power3.out"},
+        "chapter_card": "app", "lower_third": "tag",
+        "sfx": {"chapter": "swipe", "callout": "pen_write", "lower_third": "pop", "transition": "swipe"},
+        "music": {"ids": [187, 82, 293, 597], "mood": "reaction, launch"},
+        "long_notes": "Reactions and reviews of a page, post or demo: the subject full-bleed (screen share or "
+                      "capture) with the speaker cut out in front at the bottom corner; callouts drawn on the "
+                      "subject on their words; each chapter swipes to its source with a credit chip.",
     },
     "revista": {
         "name": "Revista (editorial spreads)", "family": "creator",

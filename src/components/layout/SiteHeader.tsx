@@ -41,13 +41,13 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0d0e12]/95 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl min-w-0 items-center justify-between gap-1.5 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <Link
           href={homeHref}
-          className="group flex min-h-11 shrink-0 items-center gap-2.5"
+          className="group flex min-h-10 min-w-0 shrink items-center gap-2 sm:min-h-11 sm:shrink-0 sm:gap-2.5"
           aria-label={currentLocale === "en" ? "Go to Orange Brick home page" : "Ir para a página inicial do Orange Brick"}
         >
-          <BrandLogo alt="Orange Brick" className="h-auto w-[min(44vw,10rem)] transition-transform duration-300 group-hover:scale-105 sm:h-5 sm:w-auto" />
+          <BrandLogo alt="Orange Brick" className="h-auto w-[clamp(5.5rem,28vw,9.5rem)] max-w-full transition-transform duration-300 group-hover:scale-105 sm:h-5 sm:w-auto" />
         </Link>
 
         {variant === "full" && (
@@ -56,13 +56,13 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
           </div>
         )}
 
-        <nav className="ml-auto flex shrink-0 items-center gap-1.5" aria-label={currentLocale === "en" ? "Main navigation" : "Navegação principal"}>
+        <nav className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5" aria-label={currentLocale === "en" ? "Main navigation" : "Navegação principal"}>
           <Link
-            href="/busca"
+            href={currentLocale === "en" ? "/en/busca" : "/busca"}
             aria-label={dict.common.search}
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-300 transition-colors hover:text-white lg:hidden"
+            className="flex min-h-9 min-w-9 items-center justify-center rounded-lg text-gray-300 transition-colors hover:text-white sm:min-h-11 sm:min-w-11 lg:hidden"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 sm:size-5" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="10.5" cy="10.5" r="6.5" />
               <path strokeLinecap="round" d="m16 16 5 5" />
             </svg>
@@ -84,7 +84,7 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
             );
           })}
 
-          <div className="flex items-center gap-2 border-l border-white/10 pl-2">
+          <div className="flex shrink-0 items-center gap-1.5 border-l border-white/10 pl-1.5 sm:gap-2 sm:pl-2">
             <LanguageSwitcher currentLocale={currentLocale} />
             <UserNav />
           </div>

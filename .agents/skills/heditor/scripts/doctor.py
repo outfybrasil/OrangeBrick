@@ -23,6 +23,14 @@ def check(name, ok, hint="", required=True):
 
 for tool in ["ffmpeg", "ffprobe", "node", "npx", "git", "curl"]:
     check(tool, shutil.which(tool) is not None, "install it and re-run setup.sh")
+node_major = 0
+if shutil.which("node"):
+    try:
+        node_major = int(subprocess.run(["node", "-p", "process.versions.node.split('.')[0]"], capture_output=True,
+                                        text=True, timeout=20).stdout.strip() or 0)
+    except (ValueError, OSError, subprocess.SubprocessError):
+        node_major = 0
+check("node >= 22 (HyperFrames)", node_major >= 22, f"current major {node_major}; install Node.js 22+ and re-run setup.sh")
 check("python 3.10-3.13", (3, 10) <= sys.version_info[:2] <= (3, 13), f"current {sys.version.split()[0]}")
 for mod in ["numpy", "PIL", "faster_whisper", "mediapipe", "playwright", "pytest"]:
     try:
@@ -35,6 +43,14 @@ check("chrome for previews/render", bool(chrome) and Path(chrome).exists(), "run
 fonts = list((ASSETS / "fonts").glob("*.ttf"))
 check(f"fonts ({len(fonts)})", len(fonts) >= 15, "run setup.sh")
 check("gsap", (ASSETS / "js/gsap.min.js").exists(), "run setup.sh")
+n_plugins = len(list((ASSETS / "js/gsap").glob("*.min.js"))) if (ASSETS / "js/gsap").exists() else 0
+check(f"gsap plugins ({n_plugins}/12)", n_plugins >= 12, "run setup.sh (SplitText, DrawSVG, MorphSVG…)", required=False)
+check("three.js post-processing addons", (ASSETS / "js/three-addons/postprocessing/UnrealBloomPass.js").exists(),
+      "run setup.sh (bloom/depth of field for 3D layers)", required=False)
+NODE = HOME / "node/node_modules"
+check("node: svgo", (NODE / "svgo").exists(), "run setup.sh (heditor svg)", required=False)
+check("node: rapier3d-compat", (NODE / "@dimforge/rapier3d-compat").exists(), "run setup.sh (heditor physics)",
+      required=False)
 check("face model", (ASSETS / "models/blaze_face_short_range.tflite").exists(), "run setup.sh")
 for mod, attr in [("onnxruntime", None), ("cv2", "ximgproc")]:
     try:
@@ -56,6 +72,12 @@ brand = HOME / "brand.json"
 handle = json.loads(brand.read_text()).get("handle", "") if brand.exists() else ""
 check("brand.json", brand.exists() and handle not in ("", "@yourhandle"),
       f"edit {brand} (name, handle, colors, logo)", required=False)
+# Optional AI avatar (heditor heygen connect). Offline check only: CLI present and a credential stored or in env.
+heygen_cli = os.environ.get("HEYGEN_BIN") or shutil.which("heygen") or (
+    str(Path("~/.local/bin/heygen").expanduser()) if Path("~/.local/bin/heygen").expanduser().exists() else "")
+heygen_cred = bool(os.environ.get("HEYGEN_API_KEY")) or Path("~/.heygen/credentials").expanduser().exists()
+check("HeyGen avatar (optional)", bool(heygen_cli) and heygen_cred,
+      "not connected; only for AI avatar videos: heditor heygen connect", required=False)
 try:
     v = subprocess.run(["npx", "--yes", "hyperframes@0.8.147", "--version"], capture_output=True, text=True, timeout=180)
     check("hyperframes@0.8.147", v.returncode == 0, v.stderr[-200:])
