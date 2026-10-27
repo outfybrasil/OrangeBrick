@@ -75,9 +75,8 @@ export function SiteHeader({ variant = "full", searchQuery = "" }: SiteHeaderPro
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                className={`hidden min-h-11 items-center px-3 text-xs font-semibold transition-colors lg:flex ${
-                  active ? "text-brand-orange font-bold" : "text-gray-400 hover:text-white"
-                }`}
+                className={`hidden min-h-11 items-center px-3 text-xs font-semibold transition-colors lg:flex ${active ? "text-brand-orange font-bold" : "text-gray-400 hover:text-white"
+                  }`}
               >
                 {link.label}
               </Link>
