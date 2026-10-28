@@ -3,7 +3,6 @@ import { HomePageClient } from "@/components/feed/HomePageClient";
 import { createPublicServerClient } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
-import { getSiteUrl } from "@/lib/site-url";
 import { saoPauloNewsDate } from "@/lib/news-query";
 import type { Metadata } from "next";
 
@@ -49,31 +48,9 @@ async function fetchLatestPosts() {
 
 export default async function EnglishHomePage() {
   const initialPosts = await fetchLatestPosts();
-  const siteUrl = getSiteUrl();
-
-  const websiteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Orange Brick",
-    alternateName: "OrangeBrick",
-    url: `${siteUrl}/en`,
-    description: "Gaming news portal, official release radar, and BrickBoard gamer community.",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${siteUrl}/busca?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
 
   return (
     <div className="min-h-dvh bg-background-void text-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
-      />
       <h1 className="sr-only">
         Orange Brick — Gaming News, Latest Headlines, Release Radar and Community
       </h1>

@@ -131,43 +131,6 @@ export default async function RootLayout({
         >
           Pular para o conteúdo
         </a>
-        <script
-          suppressHydrationWarning
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@graph": [
-                {
-                  "@type": "WebSite",
-                  name: "Orange Brick",
-                  alternateName: ["Orange Brick Portal", "Portal Orange Brick"],
-                  url: getSiteUrl(),
-                  potentialAction: {
-                    "@type": "SearchAction",
-                    target: `${getSiteUrl()}/busca?q={search_term_string}`,
-                    "query-input": "required name=search_term_string",
-                  },
-                },
-                {
-                  "@type": "NewsMediaOrganization",
-                  name: "Orange Brick",
-                  url: getSiteUrl(),
-                  logo: {
-                    "@type": "ImageObject",
-                    url: `${getSiteUrl()}/icons/icon-512.png?v=3`,
-                    width: 512,
-                    height: 512,
-                  },
-                  image: `${getSiteUrl()}/icons/icon-512.png?v=3`,
-                  sameAs: [
-                    "https://www.tiktok.com/@orangebrick.blog",
-                  ],
-                },
-              ],
-            }).replace(/</g, "\\u003c"),
-          }}
-        />
         <AuthProvider>
           <ToastProvider>
             {children}
