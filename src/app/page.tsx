@@ -24,11 +24,13 @@ export const metadata: Metadata = {
     url: "/",
     siteName: "Orange Brick",
     type: "website",
+    images: [{ url: "/icons/icon-512.png?v=3", width: 512, height: 512, alt: "Logo atual do Orange Brick" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Orange Brick — Notícias de Games, Lançamentos e BrickBoard",
     description: "Portal gamer definitivo: últimas notícias, lançamentos e o BrickBoard.",
+    images: ["/icons/icon-512.png?v=3"],
   },
 };
 
@@ -55,7 +57,7 @@ export default async function HomePage() {
       {
         "@type": "WebSite",
         name: "Orange Brick",
-        alternateName: ["OrangeBrick", "orangebrick.blog"],
+        alternateName: ["OrangeBrick"],
         url: siteUrl,
         description: "Portal de notícias de games, radar de lançamentos e comunidade gamer BrickBoard.",
         potentialAction: {

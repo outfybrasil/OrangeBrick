@@ -11,8 +11,24 @@ jobs:
   run:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
-    timeout-minutes: 6
+    timeout-minutes: 12
     steps:
+      - name: Recuperar uma geração editorial que falhou
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          hour="$(TZ=America/Sao_Paulo date +%H)"
+          case "$hour" in
+            11|12) slot=11 ;;
+            17|18) slot=17 ;;
+            20|21) slot=20 ;;
+            *) exit 0 ;;
+          esac
+          curl --fail --show-error --silent --max-time 300 --get \
+            --data-urlencode "slot=$slot" \
+            --data-urlencode "retry_failed=1" \
+            "https://orangebrick.blog/api/cron/generate-daily" \
+            -H "Authorization: Bearer $CRON_SECRET"
       - name: Publicar matérias agendadas
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}

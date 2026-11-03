@@ -84,6 +84,45 @@ function editorialSlotStore(supabase: ReturnType<typeof serviceClient>): Editori
   };
 }
 
+async function claimFailedRetry(supabase: ReturnType<typeof serviceClient>, slotKey: string): Promise<boolean> {
+  const store = editorialSlotStore(supabase);
+  const existing = await store.readSlot(slotKey);
+  if (existing?.value !== "failed") return false;
+
+  const retryKey = slotKey.replace("scheduled-publication:", "scheduled-publication-retry:");
+  const { error } = await supabase.from("bot_state").insert({ key: retryKey, value: "claimed", updated_at: new Date().toISOString() });
+  if (error?.code === "23505") return false;
+  if (error) throw error;
+  return true;
+}
+
+function safeDiagnosticMessage(message: string): string {
+  return message
+    .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(/((?:api[_-]?key|key|secret|token)=)[^&\s]+/gi, "$1[redacted]")
+    .replace(/\bAIza[0-9A-Za-z_-]{20,}\b/g, "[redacted]")
+    .replace(/\bsb_secret_[A-Za-z0-9_-]+\b/gi, "[redacted]")
+    .replace(/\b\d{8,12}:[A-Za-z0-9_-]{30,}\b/g, "[redacted]")
+    .slice(0, 500);
+}
+
+async function recordEditorialDiagnostic(
+  supabase: ReturnType<typeof serviceClient>,
+  source: string,
+  message: string,
+  slot: string,
+  reference: string,
+) {
+  const { error } = await supabase.rpc("record_app_error", {
+    target_source: source,
+    target_message: safeDiagnosticMessage(message),
+    target_route: `/api/cron/generate-daily?slot=${slot}`,
+    target_reference: reference,
+    target_metadata: { slot },
+  }).abortSignal(AbortSignal.timeout(3_000));
+  if (error) console.error("Falha ao registrar diagnóstico editorial:", error.code);
+}
+
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -99,10 +138,16 @@ export async function GET(request: Request) {
   }
 
   const supabase = serviceClient();
-  const slotKey = `scheduled-publication:${saoPauloDate(new Date())}:${slot}`;
-  let slotStateTransitioned = false;
+  const date = saoPauloDate(new Date());
+  const slotKey = `scheduled-publication:${date}:${slot}`;
+  const retryFailedOnly = new URL(request.url).searchParams.get("retry_failed") === "1";
+  let generatedPostId: string | null = null;
 
   try {
+    if (retryFailedOnly && !(await claimFailedRetry(supabase, slotKey))) {
+      return NextResponse.json({ ok: true, skipped: true, reason: "Não há falha elegível para nova tentativa." });
+    }
+
     await retryPendingPublicationNotices().catch((error) => {
       console.error("Falha ao reenviar avisos pendentes:", error);
     });
@@ -112,11 +157,12 @@ export async function GET(request: Request) {
     }
 
     const result = await generateNewsDraft();
+    generatedPostId = result.post.id;
+    await setSlotState(supabase, slotKey, `draft:${generatedPostId}`);
     const imageChecks = await inspectPublicationImagesInDatabase([result.post], supabase);
     const blockers = [...new Set([...editorialPublicationBlockers(result), ...(imageChecks.get(result.post.id) || [])])];
     if (blockers.length > 0) {
-      await setSlotState(supabase, slotKey, `draft:${result.post.id}`);
-      slotStateTransitioned = true;
+      await recordEditorialDiagnostic(supabase, "scheduled-publication-draft", blockers.join(" | "), slot, result.post.id);
       const isCoverBlocker =
         !result.post.image_url?.trim() ||
         blockers.some((b) => b.toLowerCase().includes("capa"));
@@ -138,7 +184,6 @@ export async function GET(request: Request) {
       .update({ is_published: true, published_at: now, updated_at: now })
       .eq("id", result.post.id).eq("is_published", false).select("id").maybeSingle();
     if (publicationError || !publishedPost) throw publicationError || new Error("Publicação não confirmada pelo banco.");
-    slotStateTransitioned = true;
     await setSlotState(supabase, slotKey, `published:${result.post.id}`).catch((error) => {
       console.error("Falha ao registrar publicação do horário editorial:", error);
     });
@@ -156,18 +201,27 @@ export async function GET(request: Request) {
       wordCount: result.wordCount,
     });
   } catch (error: unknown) {
-    if (!slotStateTransitioned) {
+    if (generatedPostId) {
+      const published = await editorialSlotStore(supabase).isPostPublished(generatedPostId).catch(() => false);
+      await setSlotState(supabase, slotKey, `${published ? "published" : "draft"}:${generatedPostId}`).catch((stateError) => {
+        console.error("Falha ao preservar estado da matéria gerada:", stateError);
+      });
+    } else {
       await setSlotState(supabase, slotKey, "failed").catch((stateError) => {
         console.error("Falha ao registrar estado do horário editorial:", stateError);
       });
     }
     if (error instanceof NoFreshTopicError) {
-      await notifyAdmin(`📭 <b>Nenhum rascunho inédito foi gerado no horário das ${slot}h.</b>\n${escapeHtml(error.message)}`);
-      return NextResponse.json({ ok: false, reason: error.message });
+      const safeMessage = safeDiagnosticMessage(error.message);
+      await recordEditorialDiagnostic(supabase, "scheduled-publication-failed", safeMessage, slot, slotKey);
+      await notifyAdmin(`📭 <b>Nenhum rascunho inédito foi gerado no horário das ${slot}h.</b>\n${escapeHtml(safeMessage)}`);
+      return NextResponse.json({ ok: false, reason: safeMessage });
     }
     const message = error instanceof Error ? error.message : "Falha na geração editorial";
-    console.error("Erro na geração editorial programada:", error);
-    await notifyAdmin(`❌ <b>Falha na geração da matéria das ${slot}h.</b>\n<code>${escapeHtml(message.slice(0, 300))}</code>`);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const safeMessage = safeDiagnosticMessage(message);
+    console.error("Erro na geração editorial programada:", safeMessage);
+    await recordEditorialDiagnostic(supabase, "scheduled-publication-failed", safeMessage, slot, generatedPostId || slotKey);
+    await notifyAdmin(`❌ <b>Falha na geração da matéria das ${slot}h.</b>\n<code>${escapeHtml(safeMessage.slice(0, 300))}</code>`);
+    return NextResponse.json({ error: safeMessage }, { status: 500 });
   }
 }

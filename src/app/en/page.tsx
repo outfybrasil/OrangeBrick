@@ -24,9 +24,11 @@ export const metadata: Metadata = {
     siteName: "Orange Brick",
     type: "website",
     locale: "en_US",
+    images: [{ url: "/icons/icon-512.png?v=3", width: 512, height: 512, alt: "Orange Brick logo" }],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/icons/icon-512.png?v=3"],
     title: "Orange Brick — Gaming News, Release Radar and Community",
     description: "Gaming news portal: fast, direct reporting, release radar, and the gamer community.",
   },

@@ -187,7 +187,7 @@ export async function sendWelcomeEmail({
     };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://orangebrick.com.br";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://orangebrick.blog";
   const html = baseEmailWrapper(`
     <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1.3; letter-spacing: -0.02em;">
       Acesso liberado, ${userName}.
