@@ -21,8 +21,7 @@ for (const route of routes) {
     const response = await page.goto(route, { waitUntil: "load" });
     expect(response?.status()).toBeLessThan(400);
     const main = page.locator("main");
-    await expect(main).toHaveCount(1);
-    await expect(main).toBeVisible();
+    await expect(main.first()).toBeVisible();
     const skipLink = page.getByRole("link", { name: "Pular para o conteúdo" });
     await expect(skipLink).toHaveAttribute("href", "#conteudo-principal");
     const firstFocusable = await page.evaluate(() => {
@@ -41,7 +40,8 @@ for (const route of routes) {
     expect(skipLinkHeight).toBeGreaterThan(10);
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/#conteudo-principal$/);
-    await expect(main).toBeFocused();
+    await expect(main.first()).toBeFocused();
+    await expect(main).toHaveCount(1);
     const dimensions = await page.evaluate(() => ({
       viewport: document.documentElement.clientWidth,
       document: document.documentElement.scrollWidth,
