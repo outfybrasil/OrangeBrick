@@ -91,20 +91,28 @@ test("social copy uses a platform-specific CTA, article link, and focused hashta
   assert.equal((copy.instagram.caption.match(/Saros: Zenith chega grátis ao PS5/g) || []).length, 1);
   assert.ok(copy.instagram.hashtags.includes("#Saros"));
   assert.ok(copy.tiktok.hashtags.includes("#saros"));
+  assert.ok(copy.instagram.hashtags.includes("#Gaming"));
+  assert.ok(copy.instagram.hashtags.includes("#Reels"));
+  assert.ok(copy.instagram.hashtags.includes("#Viral"));
+  assert.ok(copy.tiktok.hashtags.includes("#gaming"));
+  assert.ok(copy.tiktok.hashtags.includes("#fyp"));
+  assert.ok(copy.tiktok.hashtags.includes("#viral"));
   assert.ok(copy.youtube.description.includes("#Saros"));
   assert.ok(copy.youtube.description.includes("#Shorts"));
+  assert.ok(copy.youtube.description.includes("#Gaming"));
+  assert.ok(copy.youtube.description.includes("#Viral"));
   assert.ok(copy.youtube.tags.includes("Saros"));
   assert.ok(copy.youtube.tags.includes("Shorts"));
+  assert.ok(copy.youtube.tags.includes("Gaming"));
+  assert.ok(copy.youtube.tags.includes("Video Games"));
   assert.equal(copy.instagram.hashtags.length, 5);
   assert.equal(copy.tiktok.hashtags.length, 5);
   assert.equal((copy.youtube.description.match(/#[\p{L}\p{N}_]+/gu) || []).length, 5);
   assert.ok(copy.instagram.hashtags.includes("#PlayStation"));
-  assert.ok(copy.instagram.hashtags.includes("#PlantaoOB"));
-  assert.ok(copy.instagram.hashtags.includes("#OrangeBrick"));
-  assert.ok(copy.tiktok.hashtags.includes("#plantaoob"));
-  assert.ok(copy.tiktok.hashtags.includes("#orangebrick"));
-  assert.doesNotMatch(`${copy.instagram.caption} ${copy.tiktok.caption} ${copy.youtube.description}`, /#(?:fyp|viral)\b/i);
-  assert.doesNotMatch(`${copy.instagram.caption} ${copy.tiktok.caption} ${copy.youtube.description}`, /#(?:games|news)\b/i);
+  assert.ok(!copy.instagram.hashtags.some(tag => /orangebrick|plantaoob/i.test(tag)));
+  assert.ok(!copy.tiktok.hashtags.some(tag => /orangebrick|plantaoob/i.test(tag)));
+  assert.match(`${copy.instagram.caption} ${copy.tiktok.caption} ${copy.youtube.description}`, /#(?:fyp|viral)\b/i);
+  assert.doesNotMatch(`${copy.instagram.caption} ${copy.tiktok.caption} ${copy.youtube.description}`, /#(?:orangebrick|plantaoob)\b/i);
 
   const faraway = generate({
     title: "Faraway chega em 5 de novembro ao PS5, Xbox, Switch 2 e PC",
@@ -119,42 +127,37 @@ test("social copy uses a platform-specific CTA, article link, and focused hashta
   assert.match(faraway.youtube.description, /Inscreva-se no canal/);
   assert.ok(faraway.instagram.hashtags.includes("#Faraway"));
   assert.ok(faraway.instagram.hashtags.includes("#PlayStation"));
-  assert.ok(faraway.instagram.hashtags.includes("#PlantaoOB"));
+  assert.ok(faraway.instagram.hashtags.includes("#Gaming"));
+  assert.ok(faraway.instagram.hashtags.includes("#Viral"));
   assert.match(faraway.youtube.description, /#Shorts\b/);
   assert.ok(faraway.youtube.tags.includes("NintendoSwitch2"));
   assert.ok(faraway.youtube.tags.includes("Xbox"));
 });
 
-test("hashtags preserve subject, series and brand for every category and match each video's platforms", () => {
+test("hashtags balance each subject with broad platform discovery tags", () => {
   const generate = loadGenerateSocialCopys();
-  const seriesTags: Record<string, string> = {
-    breaking: "#plantaoob",
-    hardware: "#hardnewsob",
-    industry: "#radarob",
-    modding: "#gambiarraob",
-    review: "#reviewob",
-    opinion: "#opiniaoob",
-  };
   for (const category of ["breaking", "hardware", "industry", "modding", "review", "opinion"]) {
     const copy = generate({ title: "Cyberpunk 2077 recebe novidades no PC", summary: "Cyberpunk 2077 recebe novidades no PC e na Steam.", slug: "cyberpunk-2077-novidades-pc", category });
-    for (const hashtags of [copy.instagram.hashtags, copy.tiktok.hashtags]) {
+    for (const hashtags of [copy.instagram.hashtags, copy.tiktok.hashtags, (copy.youtube.description.match(/#[\p{L}\p{N}_]+/gu) || [])]) {
       assert.equal(hashtags.length, 5);
       assert.equal(new Set(hashtags.map(tag => tag.toLowerCase())).size, hashtags.length);
       assert.ok(hashtags.some(tag => tag.toLowerCase() === "#cyberpunk2077"));
-      assert.ok(hashtags.some(tag => tag.toLowerCase() === "#pcgaming"));
-      assert.ok(hashtags.some(tag => tag.toLowerCase() === "#orangebrick"));
-      assert.ok(hashtags.some(tag => tag.toLowerCase() === seriesTags[category]));
+      assert.ok(hashtags.some(tag => tag.toLowerCase() === "#gaming"));
+      assert.ok(hashtags.some(tag => tag.toLowerCase() === "#viral"));
+      assert.ok(!hashtags.some(tag => /orangebrick|plantaoob|hardnewsob|radarob|gambiarraob|reviewob|opiniaoob/i.test(tag)));
       assert.ok(!hashtags.some(tag => /^#(?:games|news)$/i.test(tag)));
       assert.ok(!hashtags.some(tag => /playstation|xbox|nintendo/i.test(tag)));
     }
     assert.match(copy.youtube.description, /#Shorts\b/);
-    assert.match(copy.youtube.description, /#OrangeBrick\b/);
+    assert.match(copy.tiktok.caption, /#FYP\b/i);
+    assert.match(copy.instagram.caption, /#Reels\b/);
     assert.ok(copy.youtube.tags.includes("Shorts"));
     assert.ok(copy.youtube.tags.includes("Orange Brick"));
+    assert.ok(copy.youtube.tags.includes("Gaming News"));
   }
   const series = generate({ title: "Cyberpunk Edgerunners ganha nova temporada", summary: "A série de animação terá novos episódios.", slug: "cyberpunk-edgerunners-nova-temporada", category: "breaking" });
   assert.ok(!series.instagram.hashtags.includes("#Cyberpunk2077"));
-  assert.ok(series.instagram.hashtags.includes("#NoticiasDeGames"));
+  assert.ok(series.instagram.hashtags.includes("#Gaming"));
 });
 
 test("YouTube title prioritizes the hook without TTS attribution", () => {

@@ -141,15 +141,15 @@ export function generateSocialCopys(post: {
   const articleUrl = `https://orangebrick.blog/reels/${encodeURIComponent(post.slug)}`;
   const trackedArticleUrl = (source: string, medium: string) => `${articleUrl}?utm_source=${source}&utm_medium=${medium}&utm_campaign=reel&utm_content=${encodeURIComponent(post.slug)}`;
   const attribution = post.script?.ttsProvider === "elevenlabs" ? "Narração: elevenlabs.io" : "";
-  const seriesByCategory: Record<string, { label: string; hashtag: string }> = {
-    breaking: { label: "Plantão OB", hashtag: "PlantaoOB" },
-    hardware: { label: "Hard News OB", hashtag: "HardNewsOB" },
-    industry: { label: "Radar OB", hashtag: "RadarOB" },
-    modding: { label: "Gambiarra OB", hashtag: "GambiarraOB" },
-    review: { label: "Review OB", hashtag: "ReviewOB" },
-    opinion: { label: "Opinião OB", hashtag: "OpiniaoOB" },
+  const seriesByCategory: Record<string, { label: string }> = {
+    breaking: { label: "Plantão OB" },
+    hardware: { label: "Hard News OB" },
+    industry: { label: "Radar OB" },
+    modding: { label: "Gambiarra OB" },
+    review: { label: "Review OB" },
+    opinion: { label: "Opinião OB" },
   };
-  const series = seriesByCategory[post.category] || { label: "Orange Brick", hashtag: "OrangeBrick" };
+  const series = seriesByCategory[post.category] || { label: "Orange Brick" };
   const seriesLine = `${series.label} — Orange Brick`;
   const youtubeTitleSource = Array.from(hook).length <= 70 ? hook : completeTitle;
   const youtubeTitleCharacters = Array.from(youtubeTitleSource);
@@ -203,14 +203,6 @@ export function generateSocialCopys(post: {
     [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
     [/\bsteam\b/i, "Steam"],
   ];
-  const categoryHashtags: Record<string, string> = {
-    breaking: "NoticiasDeGames",
-    hardware: "HardwareGamer",
-    industry: "IndustriaDeGames",
-    modding: "ModdingGamer",
-    review: "ReviewDeGames",
-    opinion: "OpiniaoDeGames",
-  };
   const searchableCopy = `${title} ${summary} ${hook}`;
   const platformTags = [
     ...(/\b(?:playstation|ps[45])\b/i.test(searchableCopy) ? ["PlayStation"] : []),
@@ -240,14 +232,11 @@ export function generateSocialCopys(post: {
     ...selectedSubjectTags,
     ...(selectedSubjectTags.length === 0 && fallbackTopic ? [`${fallbackTopic[0].toLocaleUpperCase("pt-BR")}${fallbackTopic.slice(1)}`] : []),
   ])].slice(0, 2);
-  const categoryHashtag = categoryHashtags[post.category] || "NoticiasDeGames";
-  const newsTags = ["breaking", "hardware", "industry"].includes(post.category) ? ["NoticiasDeGames"] : [];
   const uniqueHashtags = (names: string[]) => [...new Map(names.map(name => [name.toLocaleLowerCase("pt-BR"), name])).values()];
   const contextTags = uniqueHashtags([...subjects, ...platformTags]).slice(0, 2);
-  const baseHashtags = uniqueHashtags([...contextTags, series.hashtag, "OrangeBrick", categoryHashtag, ...newsTags, "GamesBrasil"]);
-  const instagramHashtagNames = baseHashtags.slice(0, 5);
-  const tiktokHashtagNames = baseHashtags.slice(0, 5);
-  const youtubeHashtagNames = uniqueHashtags(["Shorts", ...baseHashtags]).slice(0, 5);
+  const instagramHashtagNames = uniqueHashtags([...contextTags, "Gaming", "Reels", "Viral"]).slice(0, 5);
+  const tiktokHashtagNames = uniqueHashtags([...contextTags, "Gaming", "FYP", "Viral"]).slice(0, 5);
+  const youtubeHashtagNames = uniqueHashtags(["Shorts", ...contextTags, "Gaming", "Viral"]).slice(0, 5);
   const instagramHashtags = instagramHashtagNames.map((hashtag) => `#${hashtag}`);
   const tiktokHashtags = tiktokHashtagNames.map((hashtag) => `#${hashtag.toLocaleLowerCase("pt-BR")}`);
   const coreCopy = narrationIsComplete ? [narration] : [hook, supportingSummary];
@@ -293,7 +282,17 @@ export function generateSocialCopys(post: {
     youtube: {
       title: youtubeTitle,
       description: youtubeDescription,
-      tags: [...new Set(["Orange Brick", "Shorts", series.label, ...(categoryTags[post.category] || []), ...subjects, ...platformTags])].slice(0, 15),
+      tags: uniqueHashtags([
+        ...subjects,
+        ...platformTags,
+        ...(categoryTags[post.category] || []),
+        "Gaming",
+        "Video Games",
+        "Gaming News",
+        "Shorts",
+        series.label,
+        "Orange Brick",
+      ]).slice(0, 15),
     },
   };
 }

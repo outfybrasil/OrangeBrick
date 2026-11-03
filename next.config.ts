@@ -41,6 +41,7 @@ function imageRemotePatterns() {
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  allowedDevOrigins: ["*.trycloudflare.com"],
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   serverExternalPackages: ["sharp"],
   images: {

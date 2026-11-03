@@ -161,6 +161,7 @@ function AdminReelsContent() {
   // Status de geração individual
   const [triggeringSlug, setTriggeringSlug] = useState<string | null>(null);
   const [cancellingSlug, setCancellingSlug] = useState<string | null>(null);
+  const [downloadingSlug, setDownloadingSlug] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [clock, setClock] = useState(() => Date.now());
   const hasGeneratingReel = items.some((item) => item.status === "generating") || triggeringSlug !== null;
@@ -169,6 +170,42 @@ function AdminReelsContent() {
     setToastMessage(msg);
     window.setTimeout(() => setToastMessage((c) => (c === msg ? null : c)), 3500);
   }, []);
+
+  const downloadReel = useCallback(async (item: AdminReelItem) => {
+    setDownloadingSlug(item.slug);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const response = await fetch(`/api/admin/reels/download?id=${encodeURIComponent(item.id)}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null) as { error?: unknown } | null;
+        throw new Error(typeof result?.error === "string" ? result.error : "Não foi possível baixar o Reel.");
+      }
+
+      const video = await response.blob();
+      if (!video.size) throw new Error("O arquivo do Reel está vazio.");
+
+      const objectUrl = URL.createObjectURL(video);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${item.slug}.mp4`;
+      link.style.display = "none";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      showToast("Download do Reel iniciado.");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Não foi possível baixar o Reel.");
+    } finally {
+      setDownloadingSlug(null);
+    }
+  }, [showToast, supabase]);
 
   const loadReels = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
@@ -689,16 +726,23 @@ function AdminReelsContent() {
                       >
                         Assistente Social
                       </button>
-                      <a
-                        href={item.video_url}
-                        download={`${item.slug}.mp4`}
-                        className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-                        title="Baixar arquivo MP4"
+                      <button
+                        type="button"
+                        onClick={() => void downloadReel(item)}
+                        disabled={downloadingSlug !== null}
+                        aria-label={downloadingSlug === item.slug ? "Preparando download do Reel" : `Baixar Reel de ${item.title}`}
+                        aria-busy={downloadingSlug === item.slug}
+                        className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-wait disabled:opacity-60"
+                        title={downloadingSlug === item.slug ? "Preparando download" : "Baixar arquivo MP4"}
                       >
-                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </a>
+                        {downloadingSlug === item.slug ? (
+                          <span className="block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-transparent" aria-hidden="true" />
+                        ) : (
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   ) : isGenerating ? (
                     <div className="flex items-center gap-2">
@@ -772,16 +816,18 @@ function AdminReelsContent() {
 
               {/* AÇÕES E DETALHES TÉCNICOS */}
               <div className="mt-3 flex w-full max-w-[260px] flex-col gap-2">
-                <a
-                  href={selectedReel.video_url}
-                  download={`${selectedReel.slug}.mp4`}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-brand-orange py-2 text-xs font-black uppercase text-white shadow-lg transition-colors hover:bg-brand-orange/90"
+                <button
+                  type="button"
+                  onClick={() => void downloadReel(selectedReel)}
+                  disabled={downloadingSlug !== null}
+                  aria-busy={downloadingSlug === selectedReel.slug}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-brand-orange py-2 text-xs font-black uppercase text-white shadow-lg transition-colors hover:bg-brand-orange/90 disabled:cursor-wait disabled:opacity-60"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Baixar Vídeo (MP4)
-                </a>
+                  {downloadingSlug === selectedReel.slug ? "Preparando download…" : "Baixar Vídeo (MP4)"}
+                </button>
 
                 {selectedReel.status === "generating" ? (
                   <button
