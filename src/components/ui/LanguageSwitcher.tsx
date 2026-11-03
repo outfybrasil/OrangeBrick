@@ -44,7 +44,7 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
             ? "text-brand-orange"
             : "text-gray-300 hover:text-white"
         }`}
-        aria-label="Mudar para Português"
+        aria-label="PT — Mudar para Português"
         aria-pressed={currentLocale === "pt"}
       >
         PT
@@ -59,7 +59,7 @@ export function LanguageSwitcher({ currentLocale }: { currentLocale: Locale }) {
             ? "text-brand-orange"
             : "text-gray-300 hover:text-white"
         }`}
-        aria-label="Switch to English"
+        aria-label="EN — Switch to English"
         aria-pressed={currentLocale === "en"}
       >
         EN

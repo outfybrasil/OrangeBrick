@@ -29,7 +29,7 @@ export function GradientButtonGroup({ items, ariaLabel }: GradientButtonGroupPro
             <div key={item.href} className="relative flex items-center">
               <Link
                 href={item.href}
-                aria-label={item.label === "Lançamentos" ? "Agenda de lançamentos" : item.label}
+                aria-label={item.label === "Lançamentos" ? "Agenda de lançamentos" : item.label === "BrickBoard" ? "Brick Board" : item.label}
                 aria-current={item.active ? "page" : undefined}
                 className="group relative flex min-h-16 w-full flex-col items-center justify-start gap-1 px-0.5 pb-1 pt-2 text-center transition-colors select-none"
               >

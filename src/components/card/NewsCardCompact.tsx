@@ -49,7 +49,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionCh
         data-home-target={post.slug}
         className="group relative mb-3 grid grid-cols-1 overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 sm:min-h-[148px] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
       >
-        <Link href={postHref} aria-label={`${isEn ? "Read" : "Ler"} ${postTitle}`} className="relative block aspect-video overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange sm:aspect-auto sm:h-full">
+        <Link href={postHref} className="relative block aspect-video overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange sm:aspect-auto sm:h-full">
           {post.image_url ? (
             <Image
               src={post.image_url}
@@ -93,10 +93,10 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionCh
               disabled={isPending}
               aria-pressed={userReaction === "hype"}
               className={`group/hype group flex min-h-11 items-center gap-1.5 px-2 font-bold transition-colors ${userReaction === "hype" ? "text-brand-orange" : "text-gray-400 hover:text-brand-orange"}`}
-              aria-label={`Hype: ${counts.hype}`}
             >
               <HypeIcon count={counts.hype} active={userReaction === "hype"} size={14} />
               <span>Hype</span>
+              {" "}
               <span className="tabular-nums">{counts.hype}</span>
             </button>
             <button

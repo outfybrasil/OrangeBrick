@@ -78,7 +78,6 @@ function ReleaseHypeMeter({
               onClick={() => onVote(releaseId, option.type)}
               disabled={isVoting || !canVote}
               aria-pressed={isSelected}
-              aria-label={countsStatus === "loaded" ? `${option.label}: ${counts[option.type]} votos` : `${option.label}: votos indisponíveis`}
               className={`min-h-11 border px-1.5 text-xs font-extrabold uppercase tracking-[0.04em] transition-colors disabled:cursor-wait disabled:opacity-60 ${
                 isSelected
                   ? "border-brand-orange bg-brand-orange text-white"
@@ -87,6 +86,7 @@ function ReleaseHypeMeter({
             >
               <span className="block sm:hidden">{option.shortLabel}</span>
               <span className="hidden sm:block">{option.label}</span>
+              {" "}
               <span className={`ml-1 tabular-nums ${isSelected ? "text-white/75" : "text-gray-600"}`}>
                 {countsStatus === "loaded" ? counts[option.type] : "—"}
               </span>

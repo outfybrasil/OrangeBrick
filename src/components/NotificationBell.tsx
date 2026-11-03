@@ -414,7 +414,7 @@ export default function NotificationBell() {
       <button
         onClick={subscribed ? unsubscribe : subscribe}
         disabled={loading}
-        aria-label={subscribed ? "Desativar alertas" : blocked ? "Ver como liberar os alertas" : "Receber alertas"}
+        aria-label={blocked ? "Alertas bloqueados. Ver como liberar os alertas." : label}
         aria-describedby={error ? "push-notification-error" : undefined}
         className={`flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-bold transition-colors ${
           subscribed
