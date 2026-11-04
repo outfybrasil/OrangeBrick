@@ -293,7 +293,12 @@ export async function GET(request: Request) {
   );
   if (longVideos.length > 0 && editorial.storage && typeof editorial.storage.from === "function") {
     try {
-      const storagePaths = longVideos.map((v) => `long-videos/${v.slug}/${v.slug}.mp4`);
+      const storagePaths: string[] = [];
+      for (const v of longVideos) {
+        storagePaths.push(`long-videos/${v.slug}/${v.slug}.mp4`);
+        storagePaths.push(`long-videos/${v.slug}/${v.slug}-sem-narracao.mp4`);
+        storagePaths.push(`long-videos/${v.slug}/${v.slug}-sem-narracao-sem-legenda.mp4`);
+      }
       const { data: signedLong } = await editorial.storage.from("editorial-reels").createSignedUrls(storagePaths, 3600);
       const signedByPath = new Map<string, string>();
       for (const entry of signedLong || []) {
@@ -303,6 +308,14 @@ export async function GET(request: Request) {
         const signedUrl = signedByPath.get(`long-videos/${video.slug}/${video.slug}.mp4`);
         if (signedUrl) {
           video.video_url = signedUrl;
+        }
+        const signedNoNarr = signedByPath.get(`long-videos/${video.slug}/${video.slug}-sem-narracao.mp4`);
+        if (signedNoNarr) {
+          video.video_no_narration_url = signedNoNarr;
+        }
+        const signedClean = signedByPath.get(`long-videos/${video.slug}/${video.slug}-sem-narracao-sem-legenda.mp4`);
+        if (signedClean) {
+          video.video_no_narration_clean_url = signedClean;
         }
       }
     } catch {}
@@ -391,7 +404,11 @@ export async function POST(request: Request) {
       let deletedList: string[] = [];
       try {
         if (editorial.storage && typeof editorial.storage.from === "function") {
-          await editorial.storage.from("editorial-reels").remove([`long-videos/${slug}/${slug}.mp4`]);
+          await editorial.storage.from("editorial-reels").remove([
+            `long-videos/${slug}/${slug}.mp4`,
+            `long-videos/${slug}/${slug}-sem-narracao.mp4`,
+            `long-videos/${slug}/${slug}-sem-narracao-sem-legenda.mp4`
+          ]);
           const { data: delBlob } = await editorial.storage.from("editorial-reels").download("long-videos/deleted-slugs.mp4");
           if (delBlob && typeof delBlob.text === "function") {
             const parsed = JSON.parse(await delBlob.text());
@@ -421,9 +438,19 @@ export async function POST(request: Request) {
         if (editorial.storage && typeof editorial.storage.from === "function") {
           const { data: signed } = await editorial.storage
             .from("editorial-reels")
-            .createSignedUrl(`long-videos/${item.slug}/${item.slug}.mp4`, 3600);
-          if (signed?.signedUrl) {
-            item.video_url = signed.signedUrl;
+            .createSignedUrls([
+              `long-videos/${item.slug}/${item.slug}.mp4`,
+              `long-videos/${item.slug}/${item.slug}-sem-narracao.mp4`,
+              `long-videos/${item.slug}/${item.slug}-sem-narracao-sem-legenda.mp4`
+            ], 3600);
+          for (const entry of signed || []) {
+            if (entry.path?.endsWith("-sem-narracao-sem-legenda.mp4") && entry.signedUrl) {
+              item.video_no_narration_clean_url = entry.signedUrl;
+            } else if (entry.path?.endsWith("-sem-narracao.mp4") && entry.signedUrl) {
+              item.video_no_narration_url = entry.signedUrl;
+            } else if (entry.signedUrl) {
+              item.video_url = entry.signedUrl;
+            }
           }
         }
       } catch {}

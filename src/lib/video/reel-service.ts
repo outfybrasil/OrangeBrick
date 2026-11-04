@@ -589,6 +589,8 @@ export interface LongVideoManifestItem {
   resolution: string;
   fps: number;
   video_url?: string;
+  video_no_narration_url?: string;
+  video_no_narration_clean_url?: string;
   srt_url?: string;
   preview_sheet_url?: string;
   thumbnails: LongVideoThumbnailOption[];

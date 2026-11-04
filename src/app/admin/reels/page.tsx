@@ -963,14 +963,35 @@ function DarkPipelineStudio({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   {activeLongVideo.video_url && (
                     <a
                       href={activeLongVideo.video_url}
-                      download
-                      className="col-span-2 sm:col-span-1 flex min-h-[38px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-xs font-black uppercase text-black hover:bg-brand-orange/90"
+                      download={`${activeLongVideo.slug}.mp4`}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-xs font-black uppercase text-black hover:bg-brand-orange/90"
+                      title="Vídeo completo: narração neural, legendas e trilha sonora"
                     >
-                      ⬇ Baixar .MP4 (1080p)
+                      ⬇ Completo (1080p)
+                    </a>
+                  )}
+                  {activeLongVideo.video_no_narration_url && (
+                    <a
+                      href={activeLongVideo.video_no_narration_url}
+                      download={`${activeLongVideo.slug}-sem-narracao.mp4`}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-500/20"
+                      title="Vídeo com legendas e trilha instrumental, sem a voz neural"
+                    >
+                      ⬇ Sem Narração
+                    </a>
+                  )}
+                  {activeLongVideo.video_no_narration_clean_url && (
+                    <a
+                      href={activeLongVideo.video_no_narration_clean_url}
+                      download={`${activeLongVideo.slug}-sem-narracao-sem-legenda.mp4`}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-center text-xs font-bold text-cyan-300 hover:bg-cyan-500/20"
+                      title="Vídeo limpo: sem narração e sem legendas (apenas visual e trilha)"
+                    >
+                      ⬇ Sem Narração & Legenda (Clean)
                     </a>
                   )}
                   {activeLongVideo.srt_url && (
@@ -1476,7 +1497,12 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
         return incoming.map((item) => {
           const existing = prev.find((p) => p.slug === item.slug);
           if (existing?.video_url && existing.video_url.startsWith("http") && (!item.video_url || item.video_url.startsWith("http"))) {
-            return { ...item, video_url: existing.video_url };
+            return {
+              ...item,
+              video_url: existing.video_url,
+              video_no_narration_url: existing.video_no_narration_url || item.video_no_narration_url,
+              video_no_narration_clean_url: existing.video_no_narration_clean_url || item.video_no_narration_clean_url,
+            };
           }
           return item;
         });

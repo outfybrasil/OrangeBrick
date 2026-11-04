@@ -2012,6 +2012,39 @@ async function run() {
     ], { stdio: "pipe" });
 
     generatePreviewContactSheet(finalMp4Path, totalDuration, previewSheetPath);
+
+    const audioInstPath = path.join(workDir, "master_instrumental.m4a");
+    const bgmFile = path.join(audioAssetsDir, "bgm_shadow_dark.mp3");
+    if (!fs.existsSync(audioInstPath) && fs.existsSync(bgmFile)) {
+      execFileSync(FFMPEG_BIN, [
+        "-y",
+        "-stream_loop", "-1", "-i", bgmFile,
+        "-af", `atrim=start=0:duration=${totalDuration},asetpts=PTS-STARTPTS,volume=0.35,afade=t=in:st=0:d=1.8,afade=t=out:st=${Math.max(0, totalDuration - 4)}:d=4`,
+        "-c:a", "aac", "-b:a", "192k",
+        audioInstPath
+      ], { stdio: "pipe" });
+    }
+
+    const noNarrPath = path.join(outDir, `${episode.slug}-sem-narracao.mp4`);
+    const noNarrCleanPath = path.join(outDir, `${episode.slug}-sem-narracao-sem-legenda.mp4`);
+
+    if (fs.existsSync(audioInstPath)) {
+      execFileSync(FFMPEG_BIN, [
+        "-y", "-i", finalMp4Path, "-i", audioInstPath,
+        "-map", "0:v:0", "-map", "1:a:0",
+        "-c:v", "copy", "-c:a", "copy",
+        "-movflags", "+faststart", "-shortest",
+        noNarrPath
+      ], { stdio: "pipe" });
+
+      execFileSync(FFMPEG_BIN, [
+        "-y", "-i", concatVideoPath, "-i", audioInstPath,
+        "-map", "0:v:0", "-map", "1:a:0",
+        "-c:v", "copy", "-c:a", "copy",
+        "-movflags", "+faststart", "-shortest",
+        noNarrCleanPath
+      ], { stdio: "pipe" });
+    }
   }
 
   const thumbnails = [];
@@ -2147,6 +2180,8 @@ async function run() {
     resolution: "1920x1080",
     fps: 30,
     video_url: `/long-videos/${episode.slug}/${episode.slug}.mp4`,
+    video_no_narration_url: `/long-videos/${episode.slug}/${episode.slug}-sem-narracao.mp4`,
+    video_no_narration_clean_url: `/long-videos/${episode.slug}/${episode.slug}-sem-narracao-sem-legenda.mp4`,
     srt_url: `/long-videos/${episode.slug}/${episode.slug}.srt`,
     preview_sheet_url: `/long-videos/${episode.slug}/preview-sheet.jpg`,
     thumbnails: [],
