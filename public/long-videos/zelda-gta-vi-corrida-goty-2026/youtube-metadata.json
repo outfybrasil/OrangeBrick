@@ -1,0 +1,214 @@
+{
+  "slug": "zelda-gta-vi-corrida-goty-2026",
+  "series_badge": "DOSSIÊ ORANGE BRICK // EPISÓDIO #02",
+  "title": "Zelda recebeu nota 96: GTA VI consegue entrar na disputa pelo GOTY no TGA 2026?",
+  "subtitle": "A estreia de The Legend of Zelda: Ocarina of Time com média 96 no Switch 2, a regra do The Game Awards para remakes e a janela limite de 24 horas para GTA VI.",
+  "status": "pending_review",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+  "source_mode": "ai_dossier",
+  "source_post_slugs": [
+    "zelda-gta-vi-disputa-jogo-do-ano-tga-2026",
+    "zelda-ocarina-of-time-remake-notas-reviews-critica",
+    "equipe-do-remake-de-zelda-ocarina-of-time-nunca-jogou-o-original",
+    "gta-vi-trailer-lancamento-elegivel-tga-2026",
+    "gta-vi-pre-download-10-novembro-ate-212-gb"
+  ],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-AntonioNeural",
+  "duration_seconds": 744.252,
+  "duration_formatted": "12:24",
+  "monetization_midroll_eligible": true,
+  "file_size": 47165461,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026.mp4",
+  "srt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026.srt",
+  "preview_sheet_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/preview-sheet.jpg",
+  "thumbnails": [
+    {
+      "id": "thumb_1",
+      "label": "Opção 1 · Choque de Gigantes",
+      "angle": "Foco na nota 96 de Zelda contra a chegada de GTA VI",
+      "headline": "ZELDA NOTA 96",
+      "subline": "E O GTA VI NO TGA?",
+      "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_1.png"
+    },
+    {
+      "id": "thumb_2",
+      "label": "Opção 2 · Limite de 24 Horas",
+      "angle": "Foco na regra de corte de 20 de novembro do TGA",
+      "headline": "24H ANTES DO CORTE",
+      "subline": "GTA VI PODE VENCER?",
+      "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_2.png"
+    },
+    {
+      "id": "thumb_3",
+      "label": "Opção 3 · Remake vs. Inédito",
+      "angle": "Foco no debate sobre remakes no prêmio principal",
+      "headline": "REMAKE PODE SER",
+      "subline": "JOGO DO ANO EM 2026?",
+      "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_3.png"
+    }
+  ],
+  "selected_thumbnail_id": "thumb_1",
+  "chapters": [
+    {
+      "number": "01",
+      "title": "NOTA 96 CONTRA O MAIOR COLOSSO DA DÉCADA",
+      "kicker": "ABERTURA DO DOSSIÊ",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "GamesRadar+, Metacritic & The Game Awards (04/11/2026)"
+    },
+    {
+      "number": "02",
+      "title": "O QUE EXPLICAM OS 96 PONTOS DE ZELDA",
+      "kicker": "RAIO-X DAS ANÁLISES",
+      "start_seconds": 94.424,
+      "timestamp": "01:34",
+      "source": "GamesRadar+, Shacknews, IGN, GameSpot & Nintendo Life"
+    },
+    {
+      "number": "03",
+      "title": "A REVELAÇÃO DE AONUMA SOBRE A NOVA GERAÇÃO",
+      "kicker": "BASTIDORES DA NINTENDO",
+      "start_seconds": 189.16,
+      "timestamp": "03:09",
+      "source": "Eiji Aonuma — Ask the Developer Vol. 24 & Entrevista AFP"
+    },
+    {
+      "number": "04",
+      "title": "O QUE DIZ A REGRA DO TGA SOBRE REMAKES",
+      "kicker": "REGULAMENTO OFICIAL",
+      "start_seconds": 277.896,
+      "timestamp": "04:37",
+      "source": "The Game Awards — FAQ Oficial & Regras de Elegibilidade"
+    },
+    {
+      "number": "05",
+      "title": "GTA VI E A JANELA DE 24 HORAS EM NOVEMBRO",
+      "kicker": "NO LIMITE DO PRAZO",
+      "start_seconds": 368.408,
+      "timestamp": "06:08",
+      "source": "Rockstar Games Support & Calendário The Game Awards 2026"
+    },
+    {
+      "number": "06",
+      "title": "A MATEMÁTICA DO VOTO: 90% JÚRI E 10% PÚBLICO",
+      "kicker": "BASTIDORES DA VOTAÇÃO",
+      "start_seconds": 471.904,
+      "timestamp": "07:51",
+      "source": "The Game Awards — Voting Jury & Rules (2026)"
+    },
+    {
+      "number": "07",
+      "title": "TRADIÇÃO RECONSTRUÍDA CONTRA REVOLUÇÃO EM MUNDO ABERTO",
+      "kicker": "CHOQUE DE FILOSOFIAS",
+      "start_seconds": 557.352,
+      "timestamp": "09:17",
+      "source": "Análise Editorial Orange Brick — Nintendo vs. Rockstar"
+    },
+    {
+      "number": "08",
+      "title": "O VEREDITO: QUEM LEVA O TROFÉU EM 10 DE DEZEMBRO?",
+      "kicker": "CONCLUSÃO ORANGE BRICK",
+      "start_seconds": 645.56,
+      "timestamp": "10:45",
+      "source": "Editorial Orange Brick — orangebrick.blog (04/11/2026)"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "midroll_duration",
+      "label": "Janela de Monetização Mid-Roll (≥ 08:00)",
+      "passed": true,
+      "detail": "12:24 (744.252s) — Anúncios intermediários liberados no YouTube"
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Volume no Padrão do YouTube e Sidechain",
+      "passed": true,
+      "detail": "Master AAC 48 kHz / 192 kbps com trilha dark duckada sob a voz e zero silêncio morto"
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Checagem de Pronúncia e Legenda Sincronizada",
+      "passed": true,
+      "detail": "69 frases conferidas • Legendas .ASS queimada e .SRT alinhadas ao milissegundo"
+    },
+    {
+      "id": "verified_sources",
+      "label": "Fatos Conferidos e Fontes Originais",
+      "passed": true,
+      "detail": "8 capítulos com fontes primárias verificadas"
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Cenas 16:9 sem Repetição de Imagem",
+      "passed": true,
+      "detail": "16 artes e capturas oficiais distintas validadas (HTTP 200 • 1920×1080)"
+    },
+    {
+      "id": "script_originality",
+      "label": "Comparação Anti-Repetição no Canal",
+      "passed": true,
+      "detail": "Roteiro 100% original comparado ao histórico de vídeos longos do canal"
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "Zelda tirou 96 no Switch 2: por que não bateu os 99 do N64?",
+      "hook": "O remake de Ocarina of Time estreou com média 96 no Metacritic, a maior nota de 2026. Entenda o que os críticos elogiaram e o que faltou.",
+      "chapter_number": "02",
+      "start_timestamp": "01:37",
+      "end_timestamp": "02:31",
+      "duration_seconds": 54,
+      "related_slug": "zelda-ocarina-of-time-remake-notas-reviews-critica"
+    },
+    {
+      "id": "short_2",
+      "title": "Por que GTA VI entra no TGA 2026 por apenas 24 horas?",
+      "hook": "A linha de corte do The Game Awards fecha em 20 de novembro às 21h. E GTA 6 estreia no dia 19. Veja como funciona a regra de cópias para o júri.",
+      "chapter_number": "05",
+      "start_timestamp": "06:11",
+      "end_timestamp": "07:03",
+      "duration_seconds": 52,
+      "related_slug": "gta-vi-trailer-lancamento-elegivel-tga-2026"
+    },
+    {
+      "id": "short_3",
+      "title": "90% Júri vs 10% Público: por que hype não garante o GOTY",
+      "hook": "Muita gente acha que o jogo mais vendido vence o The Game Awards automaticamente, mas a matemática oficial do prêmio é bem diferente.",
+      "chapter_number": "06",
+      "start_timestamp": "07:55",
+      "end_timestamp": "08:45",
+      "duration_seconds": 50,
+      "related_slug": "zelda-gta-vi-disputa-jogo-do-ano-tga-2026"
+    }
+  ],
+  "youtube": {
+    "title": "Zelda recebeu nota 96: GTA VI consegue entrar na disputa pelo GOTY no TGA 2026?",
+    "description": "A estreia de The Legend of Zelda: Ocarina of Time com média 96 no Switch 2, a regra do The Game Awards para remakes e a janela limite de 24 horas para GTA VI.\n\nNeste dossiê investigativo do Orange Brick, destrinchamos a corrida pelo Jogo do Ano no The Game Awards 2026: a média 96 de The Legend of Zelda: Ocarina of Time no Nintendo Switch 2, as declarações de Eiji Aonuma sobre a nova geração de desenvolvedores, o regulamento oficial do TGA sobre remakes, a estreia de Grand Theft Auto VI em 19 de novembro — exatamente 24 horas antes da linha de corte de 20 de novembro — e o peso real do júri (90%) contra o voto popular (10%).\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 NOTA 96 CONTRA O MAIOR COLOSSO DA DÉCADA\n01:34 O QUE EXPLICAM OS 96 PONTOS DE ZELDA\n03:09 A REVELAÇÃO DE AONUMA SOBRE A NOVA GERAÇÃO\n04:37 O QUE DIZ A REGRA DO TGA SOBRE REMAKES\n06:08 GTA VI E A JANELA DE 24 HORAS EM NOVEMBRO\n07:51 A MATEMÁTICA DO VOTO: 90% JÚRI E 10% PÚBLICO\n09:17 TRADIÇÃO RECONSTRUÍDA CONTRA REVOLUÇÃO EM MUNDO ABERTO\n10:45 O VEREDITO: QUEM LEVA O TROFÉU EM 10 DE DEZEMBRO?\n\nFONTES VERIFICADAS NESTE DOSSIÊ:\n• Cap. 01: GamesRadar+, Metacritic & The Game Awards (04/11/2026)\n• Cap. 02: GamesRadar+, Shacknews, IGN, GameSpot & Nintendo Life\n• Cap. 03: Eiji Aonuma — Ask the Developer Vol. 24 & Entrevista AFP\n• Cap. 04: The Game Awards — FAQ Oficial & Regras de Elegibilidade\n• Cap. 05: Rockstar Games Support & Calendário The Game Awards 2026\n• Cap. 06: The Game Awards — Voting Jury & Rules (2026)\n• Cap. 07: Análise Editorial Orange Brick — Nintendo vs. Rockstar\n• Cap. 08: Editorial Orange Brick — orangebrick.blog (04/11/2026)\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nPara você: um remake com média 96 como Zelda: Ocarina of Time merece vencer o prêmio principal de Jogo do Ano, ou GTA VI chegando 24 horas antes do prazo limite do TGA deve levar o troféu? Deixe seu voto nos comentários!",
+    "tags": [
+      "The Game Awards 2026",
+      "GOTY 2026",
+      "Zelda Ocarina of Time Remake",
+      "Zelda Switch 2 nota 96",
+      "GTA 6 GOTY",
+      "Grand Theft Auto VI",
+      "Eiji Aonuma",
+      "Metacritic 2026",
+      "Nintendo Switch 2",
+      "Orange Brick"
+    ],
+    "pinned_comment": "Para você: um remake com média 96 como Zelda: Ocarina of Time merece vencer o prêmio principal de Jogo do Ano, ou GTA VI chegando 24 horas antes do prazo limite do TGA deve levar o troféu? Deixe seu voto nos comentários!",
+    "visibility": "private",
+    "scheduled_at": null
+  },
+  "review_notes": null,
+  "approved_at": null,
+  "created_at": "2026-11-04T21:17:21.981Z",
+  "updated_at": "2026-11-04T21:17:21.982Z"
+}
