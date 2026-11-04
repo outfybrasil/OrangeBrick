@@ -1,0 +1,707 @@
+1
+00:00:03,300 --> 00:00:07,179
+O próximo God of War mudou oficialmente de
+data.
+
+2
+00:00:07,129 --> 00:00:11,968
+Mas o que aconteceu nos bastidores desde que
+conhecemos Laufey até a decisão da
+
+3
+00:00:11,968 --> 00:00:14,540
+Santa Monica Studio de adiar o lançamento?
+
+4
+00:00:14,539 --> 00:00:17,621
+No dia quatro de novembro de dois mil e vinte
+e seis,
+
+5
+00:00:17,621 --> 00:00:22,447
+o estúdio da Sony publicou um comunicado
+direto nas suas redes oficiais alterando o
+
+6
+00:00:22,447 --> 00:00:24,947
+calendário de estreia no PlayStation cinco.
+
+7
+00:00:24,947 --> 00:00:26,832
+A jornada protagonizada por Faye,
+
+8
+00:00:26,832 --> 00:00:31,630
+que estava marcada para dezesseis de fevereiro
+de dois mil e vinte e sete e já tinha
+
+9
+00:00:31,630 --> 00:00:34,543
+pré-venda aberta nas lojas desde o fim de
+setembro,
+
+10
+00:00:34,543 --> 00:00:38,085
+foi transferida para vinte de maio de dois mil
+e vinte e sete.
+
+11
+00:00:38,085 --> 00:00:43,584
+São noventa e três dias adicionais de espera —
+pouco mais de três meses de diferença —
+
+12
+00:00:43,584 --> 00:00:48,187
+para um dos exclusivos de peso mais aguardados
+da atual geração da Sony.
+
+13
+00:00:48,187 --> 00:00:52,839
+Sempre que um grande estúdio adia um
+lançamento com pré-venda em andamento,
+
+14
+00:00:52,839 --> 00:00:57,925
+a internet se divide entre teorias alarmistas
+sobre crises internas e especulações
+
+15
+00:00:57,925 --> 00:00:59,475
+sobre janelas comerciais.
+
+16
+00:00:59,476 --> 00:01:01,829
+Por isso, neste dossiê do Orange Brick,
+
+17
+00:01:01,829 --> 00:01:06,294
+nós vamos reconstruir passo a passo a linha do
+tempo de God of War Laufey:
+
+18
+00:01:06,294 --> 00:01:11,181
+da revelação em junho de dois mil e vinte e
+seis aos detalhes do mundo Everywhen,
+
+19
+00:01:11,181 --> 00:01:15,284
+do novo sistema de combate à leitura integral
+da carta de adiamento,
+
+20
+00:01:15,284 --> 00:01:19,629
+separando rigorosamente o que o estúdio
+confirmou do que é apenas rumor.
+
+21
+00:01:24,188 --> 00:01:26,559
+Para entender a dimensão desse projeto,
+
+22
+00:01:26,559 --> 00:01:30,571
+precisamos voltar ao dia dois de junho de dois
+mil e vinte e seis,
+
+23
+00:01:30,571 --> 00:01:35,860
+quando a Sony e a Santa Monica Studio
+apresentaram God of War Laufey pela primeira vez.
+
+24
+00:01:35,810 --> 00:01:40,117
+Depois do encerramento da guerra de Odin em
+God of War Ragnarök,
+
+25
+00:01:40,117 --> 00:01:43,616
+a grande dúvida era qual direção a franquia
+tomaria.
+
+26
+00:01:43,616 --> 00:01:49,636
+A resposta veio com uma mudança corajosa de
+ponto de vista: colocar Laufey, a Justa —
+
+27
+00:01:49,636 --> 00:01:54,522
+conhecida por Kratos e Atreus como Faye — no
+centro absoluto da ação.
+
+28
+00:01:54,522 --> 00:01:57,947
+No artigo oficial de apresentação no
+PlayStation Blog,
+
+29
+00:01:57,947 --> 00:02:03,529
+assinado pela diretora sênior de comunicação e
+comunidade da Santa Monica, Grace Orlady,
+
+30
+00:02:03,529 --> 00:02:07,145
+o estúdio deixou claro que Laufey não é um
+projeto menor,
+
+31
+00:02:07,145 --> 00:02:11,014
+mas um novo capítulo principal dentro do
+universo God of War.
+
+32
+00:02:11,014 --> 00:02:16,266
+Orlady explicou que a equipe manteve o DNA
+inegociável da série — combate visceral,
+
+33
+00:02:16,266 --> 00:02:18,861
+exploração densa e narrativa emocional —,
+
+34
+00:02:18,861 --> 00:02:24,050
+mas desenhou um ritmo próprio para refletir a
+identidade de uma guerreira gigante.
+
+35
+00:02:24,050 --> 00:02:26,675
+Pela primeira vez desde a criação da franquia,
+
+36
+00:02:26,675 --> 00:02:30,156
+o jogador assume uma campanha inteira fora da
+pele de Kratos,
+
+37
+00:02:30,156 --> 00:02:34,893
+enxergando os segredos da saga nórdica pelos
+olhos da personagem que colocou toda a
+
+38
+00:02:34,893 --> 00:02:37,405
+história de dois mil e dezoito em movimento.
+
+39
+00:02:41,980 --> 00:02:47,542
+Nos dois jogos anteriores da fase nórdica,
+Faye era uma presença quase mística.
+
+40
+00:02:47,492 --> 00:02:52,665
+O jogo de dois mil e dezoito começava
+literalmente com Kratos e Atreus diante da sua
+
+41
+00:02:52,665 --> 00:02:53,589
+pira funerária,
+
+42
+00:02:53,589 --> 00:02:58,270
+cumprindo o último pedido de levar suas cinzas
+ao pico mais alto dos reinos.
+
+43
+00:02:58,270 --> 00:02:58,979
+Em Ragnarök,
+
+44
+00:02:58,979 --> 00:03:04,119
+pequenos fragmentos de memória mostraram Faye
+interpretada pela atriz Deborah Ann Woll,
+
+45
+00:03:04,119 --> 00:03:08,845
+revelando sua força e o peso das escolhas que
+ela fez para proteger o marido e o
+
+46
+00:03:08,845 --> 00:03:10,617
+filho das profecias de Asgard.
+
+47
+00:03:10,617 --> 00:03:15,736
+Agora, em God of War Laufey, Deborah Ann Woll
+retorna oficialmente ao papel,
+
+48
+00:03:15,736 --> 00:03:19,239
+mas sem a aura distante de uma lembrança
+idealizada.
+
+49
+00:03:19,240 --> 00:03:25,007
+A proposta declarada pela Santa Monica Studio
+é mergulhar na humanidade real da personagem:
+
+50
+00:03:25,007 --> 00:03:28,873
+suas forças como guardiã do seu povo, mas
+também suas falhas,
+
+51
+00:03:28,873 --> 00:03:33,245
+seus impulsos e o preço emocional de tentar
+dobrar o próprio destino.
+
+52
+00:03:33,245 --> 00:03:38,648
+E o ponto de partida da trama faz uma ponte
+direta com a cena que todo fã conhece de cor:
+
+53
+00:03:38,648 --> 00:03:43,686
+a jornada de Faye começa exatamente no
+instante seguinte ao seu funeral em Midgard,
+
+54
+00:03:43,686 --> 00:03:46,600
+quando ela abre os olhos do outro lado da
+morte.
+
+55
+00:03:51,156 --> 00:03:56,399
+Quando Faye desperta após o seu funeral, ela
+não está em Helheim nem em Valhala.
+
+56
+00:03:56,349 --> 00:03:59,204
+Ela acorda em um domínio inédito na franquia,
+
+57
+00:03:59,204 --> 00:04:02,250
+batizado pela Santa Monica Studio de Everywhen
+—
+
+58
+00:04:02,250 --> 00:04:06,438
+traduzido no comunicado em português do
+estúdio como o Todo-Tempo.
+
+59
+00:04:06,439 --> 00:04:09,302
+Segundo a descrição oficial da PlayStation,
+
+60
+00:04:09,302 --> 00:04:12,565
+o Everywhen é um além dos deuses onde
+divindades,
+
+61
+00:04:12,565 --> 00:04:17,026
+guerreiros e criaturas de diferentes
+mitologias e épocas se cruzam.
+
+62
+00:04:17,025 --> 00:04:17,948
+Logo ao chegar,
+
+63
+00:04:17,948 --> 00:04:23,058
+Faye descobre que uma ruptura na magia desse
+plano espiritual ameaça destruir todas
+
+64
+00:04:23,058 --> 00:04:28,045
+as proteções que ela havia preparado em vida
+para manter Kratos e Atreus a salvo.
+
+65
+00:04:28,046 --> 00:04:33,223
+As imagens oficiais divulgadas pelo estúdio já
+mostram o impacto visual dessa premissa:
+
+66
+00:04:33,223 --> 00:04:37,924
+vemos figuras com adornos que remetem a
+panteões antigos fora da Escandinávia e
+
+67
+00:04:37,924 --> 00:04:42,268
+templos de arquitetura oriental e ancestral
+colidindo no mesmo horizonte.
+
+68
+00:04:42,268 --> 00:04:47,089
+Para atravessar esse labirinto mitológico,
+Faye não estará sozinha.
+
+69
+00:04:47,089 --> 00:04:50,961
+O estúdio apresentou dois companheiros
+centrais: Phranque,
+
+70
+00:04:50,961 --> 00:04:54,633
+uma entidade em forma de cubo cósmico
+senciente, e Rue,
+
+71
+00:04:54,633 --> 00:04:59,908
+uma guardiã espiritual ligada diretamente à
+espada empunhada pela protagonista.
+
+72
+00:05:04,484 --> 00:05:09,715
+Mas como toda essa mitologia funciona com o
+controle DualSense na mão?
+
+73
+00:05:09,665 --> 00:05:11,371
+Na revelação de gameplay,
+
+74
+00:05:11,371 --> 00:05:16,693
+a Santa Monica Studio detalhou uma mudança
+importante na filosofia de combate.
+
+75
+00:05:16,693 --> 00:05:20,628
+Enquanto Kratos nos jogos nórdicos tinha uma
+movimentação pesada,
+
+76
+00:05:20,628 --> 00:05:24,442
+plantada no chão e focada em golpes brutais de
+curta distância,
+
+77
+00:05:24,442 --> 00:05:28,983
+Faye foi projetada para unir a câmera próxima
+e tática da era nórdica com a
+
+78
+00:05:28,983 --> 00:05:33,645
+agilidade vertical e acrobática que marcou a
+fase grega clássica da franquia.
+
+79
+00:05:33,644 --> 00:05:35,280
+Em vez do Machado Leviatã —
+
+80
+00:05:35,280 --> 00:05:40,977
+que naquele momento da cronologia já havia
+sido deixado como herança para Kratos em Midgard —,
+
+81
+00:05:40,977 --> 00:05:46,795
+Faye utiliza uma espada mística combinada com
+um arco espiritual e feitiços de alquimia e almas.
+
+82
+00:05:46,795 --> 00:05:52,753
+Os vídeos e capturas oficiais mostram a
+guerreira alternando combos rápidos no solo com saltos,
+
+83
+00:05:52,753 --> 00:05:57,331
+esquivas aéreas e disparos em pleno ar contra
+criaturas aladas em chamas.
+
+84
+00:05:57,330 --> 00:05:58,102
+Além disso,
+
+85
+00:05:58,102 --> 00:06:03,577
+o sistema de magia de almas permite absorver e
+canalizar energias do Everywhen
+
+86
+00:06:03,577 --> 00:06:05,612
+através do artefato Phalange,
+
+87
+00:06:05,612 --> 00:06:09,613
+criando sinergias elementais que exigem
+reflexos rápidos.
+
+88
+00:06:09,614 --> 00:06:11,745
+Claro que a sensação real de peso,
+
+89
+00:06:11,745 --> 00:06:16,821
+resposta de quadros e equilíbrio de
+dificuldade só poderá ser comprovada quando o
+
+90
+00:06:16,821 --> 00:06:19,640
+jogo final for testado de forma independente.
+
+91
+00:06:24,220 --> 00:06:25,830
+Depois da revelação em junho,
+
+92
+00:06:25,830 --> 00:06:30,439
+a Sony deu o passo seguinte em vinte e oito de
+setembro de dois mil e vinte e seis,
+
+93
+00:06:30,439 --> 00:06:34,992
+quando abriu as pré-vendas mundiais e cravou a
+estreia para dezesseis de fevereiro
+
+94
+00:06:34,992 --> 00:06:36,491
+de dois mil e vinte e sete.
+
+95
+00:06:36,441 --> 00:06:40,903
+Tudo parecia caminhar para um lançamento no
+primeiro trimestre, até que,
+
+96
+00:06:40,903 --> 00:06:43,072
+na quarta-feira quatro de novembro,
+
+97
+00:06:43,072 --> 00:06:47,844
+a Santa Monica Studio divulgou a carta oficial
+que você vê traduzida na tela.
+
+98
+00:06:47,844 --> 00:06:52,933
+No texto, o estúdio declara: desde a revelação
+de God of War Laufey em junho,
+
+99
+00:06:52,933 --> 00:06:58,750
+ficamos profundamente gratos ao ver tanto
+entusiasmo pela jornada de Faye no Todo-Tempo.
+
+100
+00:06:58,750 --> 00:07:03,533
+Não tomamos como garantida a confiança
+depositada em nosso estúdio para criar uma
+
+101
+00:07:03,533 --> 00:07:07,844
+experiência extraordinária à altura da paixão
+e dedicação dos nossos fãs.
+
+102
+00:07:07,844 --> 00:07:10,779
+E conclui de forma direta: com isso em mente,
+
+103
+00:07:10,779 --> 00:07:17,040
+decidimos adiar o lançamento de God of War
+Laufey para vinte de maio de dois mil e vinte e sete.
+
+104
+00:07:17,041 --> 00:07:22,388
+Aproveitaremos cada momento até lá para dar os
+retoques finais e levar o jogo ao seu
+
+105
+00:07:22,388 --> 00:07:23,406
+pleno potencial.
+
+106
+00:07:23,406 --> 00:07:26,432
+Repare no rigor jornalístico necessário aqui:
+
+107
+00:07:26,432 --> 00:07:31,340
+o estúdio atribui os três meses extras
+exclusivamente ao polimento final.
+
+108
+00:07:31,339 --> 00:07:34,888
+A carta não menciona falhas graves de motor
+gráfico,
+
+109
+00:07:34,888 --> 00:07:37,959
+refação de história nem fuga de concorrentes.
+
+110
+00:07:37,959 --> 00:07:44,413
+Qualquer teoria além do comunicado oficial,
+neste momento, é pura especulação sem fonte.
+
+111
+00:07:48,996 --> 00:07:53,992
+E o que muda na prática para quem já havia
+reservado o jogo na pré-venda aberta em
+
+112
+00:07:53,992 --> 00:07:55,515
+vinte e nove de setembro?
+
+113
+00:07:55,465 --> 00:07:59,918
+No PlayStation Blog, a Sony havia detalhado
+três formatos principais:
+
+114
+00:07:59,918 --> 00:08:04,952
+a edição padrão física ou digital com o bônus
+da armadura Last Wish e o visual
+
+115
+00:08:04,952 --> 00:08:06,372
+dourado para Phranque;
+
+116
+00:08:06,372 --> 00:08:12,180
+a edição Digital Deluxe, que acrescenta a
+armadura Dark Alchemy, visuais de espada e arco,
+
+117
+00:08:12,180 --> 00:08:16,052
+minilivro de arte e trilha sonora; e a
+Collector Box física,
+
+118
+00:08:16,052 --> 00:08:21,086
+vendida separadamente com estátua iluminada de
+Faye e um baralho de oráculo de
+
+119
+00:08:21,086 --> 00:08:22,570
+cinquenta e uma cartas.
+
+120
+00:08:22,569 --> 00:08:26,125
+Com a mudança para vinte de maio de dois mil e
+vinte e sete,
+
+121
+00:08:26,125 --> 00:08:30,748
+as reservas digitais na PlayStation Store têm
+sua data de liberação atualizada
+
+122
+00:08:30,748 --> 00:08:32,645
+automaticamente pela plataforma,
+
+123
+00:08:32,645 --> 00:08:37,327
+cabendo ao comprador conferir as regras de
+cobrança e cancelamento da sua loja.
+
+124
+00:08:37,327 --> 00:08:42,776
+Mas há um segundo motivo pelo qual God of War
+Laufey é tão estratégico para o futuro
+
+125
+00:08:42,776 --> 00:08:44,138
+do PlayStation cinco.
+
+126
+00:08:44,138 --> 00:08:48,435
+Como o próprio diretor criativo Cory Barlog já
+adiantou ao falar sobre a
+
+127
+00:08:48,435 --> 00:08:49,927
+continuidade da franquia,
+
+128
+00:08:49,927 --> 00:08:54,582
+os acontecimentos vividos por Faye no
+Todo-Tempo não são uma história isolada:
+
+129
+00:08:54,582 --> 00:08:59,416
+eles servem de alicerce direto para os
+mistérios e consequências que Kratos ainda
+
+130
+00:08:59,416 --> 00:09:01,982
+enfrentará nos próximos capítulos da série.
+
+131
+00:09:06,548 --> 00:09:11,077
+Chegamos ao veredito deste dossiê sobre God of
+War Laufey.
+
+132
+00:09:11,027 --> 00:09:15,871
+Quando olhamos a trajetória completa desde o
+anúncio em junho de dois mil e vinte e
+
+133
+00:09:15,871 --> 00:09:18,439
+seis até o comunicado de quatro de novembro,
+
+134
+00:09:18,439 --> 00:09:19,956
+o cenário fica cristalino.
+
+135
+00:09:19,956 --> 00:09:25,097
+A Santa Monica Studio assumiu o desafio mais
+ousado da franquia em quase uma década:
+
+136
+00:09:25,097 --> 00:09:26,933
+dar protagonismo total a Faye,
+
+137
+00:09:26,933 --> 00:09:31,768
+criar uma dimensão inédita onde diferentes
+mitologias se encontram e acelerar o
+
+138
+00:09:31,768 --> 00:09:35,747
+ritmo do combate misturando a herança grega
+com a câmera nórdica.
+
+139
+00:09:35,746 --> 00:09:40,479
+Em uma indústria marcada por lançamentos
+apressados que exigem meses de correções
+
+140
+00:09:40,479 --> 00:09:41,531
+depois da estreia,
+
+141
+00:09:41,531 --> 00:09:43,518
+adiar o calendário em três meses —
+
+142
+00:09:43,518 --> 00:09:47,784
+de dezesseis de fevereiro para vinte de maio
+de dois mil e vinte e sete —
+
+143
+00:09:47,784 --> 00:09:51,524
+é uma decisão que prioriza a entrega final no
+PlayStation cinco.
+
+144
+00:09:51,525 --> 00:09:51,965
+Até lá,
+
+145
+00:09:51,965 --> 00:09:57,371
+nossa cobertura no Orange Brick continuará
+acompanhando cada novo trailer de gameplay,
+
+146
+00:09:57,371 --> 00:10:02,022
+as análises técnicas independentes e qualquer
+atualização oficial da Sony.
+
+147
+00:10:02,022 --> 00:10:07,435
+E para você: o adiamento para vinte de maio
+foi a escolha certa para polir o jogo,
+
+148
+00:10:07,435 --> 00:10:11,461
+e qual é a sua expectativa para jogar com Faye
+no Todo-Tempo?
+
+149
+00:10:11,461 --> 00:10:13,819
+Deixe seu comentário aqui embaixo,
+
+150
+00:10:13,819 --> 00:10:18,604
+inscreva-se no canal do Orange Brick e acesse
+orangebrick ponto blog.

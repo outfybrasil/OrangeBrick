@@ -348,6 +348,7 @@
     "created_at": "2026-11-04T18:43:17.299Z"
   },
   "zelda-gta-vi-corrida-goty-2026": {
+    "slug": "zelda-gta-vi-corrida-goty-2026",
     "series_badge": "DOSSIÊ ORANGE BRICK // EPISÓDIO #02",
     "title": "Zelda recebeu nota 96: GTA VI consegue entrar na disputa pelo GOTY no TGA 2026?",
     "subtitle": "A estreia de The Legend of Zelda: Ocarina of Time com média 96 no Switch 2, a regra do The Game Awards para remakes e a janela limite de 24 horas para GTA VI.",
@@ -364,8 +365,6 @@
     ],
     "visual_style": "documentario",
     "voice_id": "pt-BR-AntonioNeural",
-    "slug": "zelda-gta-vi-corrida-goty-2026",
-    "updated_at": "2026-11-04T21:17:21.988Z",
     "duration_seconds": 744.252,
     "duration_formatted": "12:24",
     "monetization_midroll_eligible": true,
@@ -559,15 +558,21 @@
     },
     "review_notes": null,
     "approved_at": null,
-    "created_at": "2026-11-04T21:17:21.981Z"
+    "created_at": "2026-11-04T21:17:21.981Z",
+    "updated_at": "2026-11-04T21:17:21.982Z",
+    "video_no_narration_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026-sem-narracao-sem-legenda.mp4",
+    "narration_script_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/roteiro-narracao.md",
+    "narration_script_txt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/roteiro-narracao.txt"
   },
   "god-of-war-laufey-do-anuncio-ao-adiamento": {
+    "slug": "god-of-war-laufey-do-anuncio-ao-adiamento",
     "series_badge": "DOSSIÊ ORANGE BRICK // EPISÓDIO #03",
     "title": "God of War Laufey: Do Anúncio de Faye no Everywhen ao Adiamento Oficial para Maio de 2027",
     "subtitle": "A trajetória completa do novo capítulo da Santa Monica Studio no PS5: quem é Faye, o além dos deuses Everywhen, o sistema de combate ágil e o comunicado oficial de adiamento.",
-    "status": "generating",
-    "pipeline_stage_index": 4,
-    "pipeline_stage_label": "4/8 · Renderizando 16 cenas documentais em 1920×1080",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
     "source_mode": "ai_dossier",
     "source_post_slugs": [
       "god-of-war-laufey-adiado-20-maio-2027",
@@ -576,7 +581,204 @@
     ],
     "visual_style": "documentario",
     "voice_id": "pt-BR-AntonioNeural",
-    "slug": "god-of-war-laufey-do-anuncio-ao-adiamento",
-    "updated_at": "2026-11-04T21:17:34.358Z"
+    "duration_seconds": 626.364,
+    "duration_formatted": "10:26",
+    "monetization_midroll_eligible": true,
+    "file_size": 43658933,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.mp4",
+    "srt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.srt",
+    "preview_sheet_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Opção 1 · Alerta de Adiamento",
+        "angle": "Foco na mudança oficial de data para 20 de maio de 2027",
+        "headline": "GOD OF WAR ADIADO",
+        "subline": "20 DE MAIO DE 2027",
+        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_1.png"
+      },
+      {
+        "id": "thumb_2",
+        "label": "Opção 2 · Jornada de Faye",
+        "angle": "Foco na história de Laufey no além dos deuses Everywhen",
+        "headline": "DO ANÚNCIO AO CORTE",
+        "subline": "A SAGA DE FAYE NO PS5",
+        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_2.png"
+      },
+      {
+        "id": "thumb_3",
+        "label": "Opção 3 · Bastidores & Kratos",
+        "angle": "Foco na conexão entre Laufey, Kratos e o futuro da série",
+        "headline": "POR QUE LAUFEY MUDOU",
+        "subline": "DE FEVEREIRO PARA MAIO?",
+        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_3.png"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O CHOQUE DE CALENDÁRIO: DE FEVEREIRO PARA MAIO",
+        "kicker": "PLANTÃO SANTA MONICA",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "Santa Monica Studio (04/11/2026) & PlayStation.Blog"
+      },
+      {
+        "number": "02",
+        "title": "JUNHO DE 2026: A APOSTA EM UM NOVO PROTAGONISMO",
+        "kicker": "ATO 01 // REVELAÇÃO",
+        "start_seconds": 80.888,
+        "timestamp": "01:20",
+        "source": "Grace Orlady (Santa Monica Studio) — PlayStation.Blog (02/06/2026)"
+      },
+      {
+        "number": "03",
+        "title": "QUEM É FAYE: DA PIRA FUNERÁRIA AO PROTAGONISMO",
+        "kicker": "ATO 02 // A GUERREIRA",
+        "start_seconds": 158.68,
+        "timestamp": "02:38",
+        "source": "PlayStation.Blog — Perfil de Personagem & Elenco Oficial"
+      },
+      {
+        "number": "04",
+        "title": "EVERYWHEN: O ALÉM DOS DEUSES E NOVAS MITOLOGIAS",
+        "kicker": "ATO 03 // O MUNDO",
+        "start_seconds": 227.856,
+        "timestamp": "03:47",
+        "source": "PlayStation.Blog — Lore Oficial de Everywhen, Phranque & Rue"
+      },
+      {
+        "number": "05",
+        "title": "COMBATE: A FUSÃO DA ERA NÓRDICA COM A AGILIDADE GREGA",
+        "kicker": "ATO 04 // JOGABILIDADE",
+        "start_seconds": 301.184,
+        "timestamp": "05:01",
+        "source": "PlayStation.Blog — Análise Oficial de Combate e Armas"
+      },
+      {
+        "number": "06",
+        "title": "O COMUNICADO DE 4 DE NOVEMBRO: POR QUE ADIOU?",
+        "kicker": "ATO 05 // A CARTA OFICIAL",
+        "start_seconds": 380.92,
+        "timestamp": "06:20",
+        "source": "Santa Monica Studio — Comunicado Oficial (04/11/2026)"
+      },
+      {
+        "number": "07",
+        "title": "EDIÇÕES, PRÉ-VENDA E A CONEXÃO COM O FUTURO DE KRATOS",
+        "kicker": "ATO 06 // EDIÇÕES & FUTURO",
+        "start_seconds": 465.696,
+        "timestamp": "07:45",
+        "source": "PlayStation.Blog (28/09/2026) & Cory Barlog (SDCC 2026)"
+      },
+      {
+        "number": "08",
+        "title": "O VEREDITO: VALE ESPERAR ATÉ 20 DE MAIO DE 2027?",
+        "kicker": "CONCLUSÃO ORANGE BRICK",
+        "start_seconds": 543.248,
+        "timestamp": "09:03",
+        "source": "Editorial Orange Brick — orangebrick.blog (04/11/2026)"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "midroll_duration",
+        "label": "Janela de Monetização Mid-Roll (≥ 08:00)",
+        "passed": true,
+        "detail": "10:26 (626.364s) — Anúncios intermediários liberados no YouTube"
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Volume no Padrão do YouTube e Sidechain",
+        "passed": true,
+        "detail": "Master AAC 48 kHz / 192 kbps com trilha dark duckada sob a voz e zero silêncio morto"
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Checagem de Pronúncia e Legenda Sincronizada",
+        "passed": true,
+        "detail": "54 frases conferidas • Legendas .ASS queimada e .SRT alinhadas ao milissegundo"
+      },
+      {
+        "id": "verified_sources",
+        "label": "Fatos Conferidos e Fontes Originais",
+        "passed": true,
+        "detail": "8 capítulos com fontes primárias verificadas"
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Cenas 16:9 sem Repetição de Imagem",
+        "passed": true,
+        "detail": "16 artes e capturas oficiais distintas validadas (HTTP 200 • 1920×1080)"
+      },
+      {
+        "id": "script_originality",
+        "label": "Comparação Anti-Repetição no Canal",
+        "passed": true,
+        "detail": "Roteiro 100% original comparado ao histórico de vídeos longos do canal"
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "O que a Santa Monica disse na carta de adiamento de God of War Laufey",
+        "hook": "God of War Laufey saiu de 16 de fevereiro para 20 de maio de 2027. Veja exatamente o que diz o comunicado oficial do estúdio.",
+        "chapter_number": "06",
+        "start_timestamp": "06:24",
+        "end_timestamp": "07:16",
+        "duration_seconds": 52,
+        "related_slug": "god-of-war-laufey-adiado-20-maio-2027"
+      },
+      {
+        "id": "short_2",
+        "title": "O que é o Everywhen: o além dos deuses em God of War Laufey",
+        "hook": "A história de God of War Laufey começa logo após o funeral de Faye, quando ela desperta em uma dimensão onde várias mitologias colidem.",
+        "chapter_number": "04",
+        "start_timestamp": "03:51",
+        "end_timestamp": "04:45",
+        "duration_seconds": 54,
+        "related_slug": "god-of-war-laufey-data-lancamento-fevereiro-2027-ps5"
+      },
+      {
+        "id": "short_3",
+        "title": "Como funciona o combate de Faye comparado ao de Kratos",
+        "hook": "Esqueça apenas o peso lento da fase nórdica: a Santa Monica misturou a narrativa atual com a agilidade aérea da era grega para Faye.",
+        "chapter_number": "05",
+        "start_timestamp": "05:04",
+        "end_timestamp": "05:54",
+        "duration_seconds": 50,
+        "related_slug": "god-of-war-laufey-adiado-20-maio-2027"
+      }
+    ],
+    "youtube": {
+      "title": "God of War Laufey: Do Anúncio de Faye no Everywhen ao Adiamento Oficial para Maio de 2027",
+      "description": "A trajetória completa do novo capítulo da Santa Monica Studio no PS5: quem é Faye, o além dos deuses Everywhen, o sistema de combate ágil e o comunicado oficial de adiamento.\n\nNeste dossiê investigativo do Orange Brick, reconstruímos toda a trajetória oficial de God of War Laufey até o comunicado de adiamento em 4 de novembro de 2026: a mudança de 16 de fevereiro para 20 de maio de 2027 no PlayStation 5, a revelação de junho de 2026 com Faye (Laufey) como protagonista interpretada por Deborah Ann Woll, o mundo pós-morte Everywhen, os companheiros Phranque e Rue, o combate ágil com espada, arco e magia de almas, as edições de pré-venda e a conexão futura com Kratos.\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 O CHOQUE DE CALENDÁRIO: DE FEVEREIRO PARA MAIO\n01:20 JUNHO DE 2026: A APOSTA EM UM NOVO PROTAGONISMO\n02:38 QUEM É FAYE: DA PIRA FUNERÁRIA AO PROTAGONISMO\n03:47 EVERYWHEN: O ALÉM DOS DEUSES E NOVAS MITOLOGIAS\n05:01 COMBATE: A FUSÃO DA ERA NÓRDICA COM A AGILIDADE GREGA\n06:20 O COMUNICADO DE 4 DE NOVEMBRO: POR QUE ADIOU?\n07:45 EDIÇÕES, PRÉ-VENDA E A CONEXÃO COM O FUTURO DE KRATOS\n09:03 O VEREDITO: VALE ESPERAR ATÉ 20 DE MAIO DE 2027?\n\nFONTES VERIFICADAS NESTE DOSSIÊ:\n• Cap. 01: Santa Monica Studio (04/11/2026) & PlayStation.Blog\n• Cap. 02: Grace Orlady (Santa Monica Studio) — PlayStation.Blog (02/06/2026)\n• Cap. 03: PlayStation.Blog — Perfil de Personagem & Elenco Oficial\n• Cap. 04: PlayStation.Blog — Lore Oficial de Everywhen, Phranque & Rue\n• Cap. 05: PlayStation.Blog — Análise Oficial de Combate e Armas\n• Cap. 06: Santa Monica Studio — Comunicado Oficial (04/11/2026)\n• Cap. 07: PlayStation.Blog (28/09/2026) & Cory Barlog (SDCC 2026)\n• Cap. 08: Editorial Orange Brick — orangebrick.blog (04/11/2026)\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nO adiamento de God of War Laufey de 16 de fevereiro para 20 de maio de 2027 preocupa você ou 3 meses extras para polimento na Santa Monica Studio são a decisão certa? E o que você espera de jogar com Faye no Everywhen? Comente abaixo!",
+      "tags": [
+        "God of War Laufey",
+        "God of War Laufey adiado",
+        "Faye God of War",
+        "Santa Monica Studio",
+        "God of War 20 de maio de 2027",
+        "Everywhen God of War",
+        "PlayStation 5",
+        "Kratos e Faye",
+        "Deborah Ann Woll",
+        "Orange Brick"
+      ],
+      "pinned_comment": "O adiamento de God of War Laufey de 16 de fevereiro para 20 de maio de 2027 preocupa você ou 3 meses extras para polimento na Santa Monica Studio são a decisão certa? E o que você espera de jogar com Faye no Everywhen? Comente abaixo!",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "review_notes": null,
+    "approved_at": null,
+    "created_at": "2026-11-04T21:29:37.799Z",
+    "updated_at": "2026-11-04T21:29:37.799Z",
+    "video_no_narration_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao-sem-legenda.mp4",
+    "narration_script_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.md",
+    "narration_script_txt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.txt"
   }
 }

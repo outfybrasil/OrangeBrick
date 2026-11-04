@@ -561,7 +561,7 @@ function DarkPipelineStudio({
         <button
           type="button"
           onClick={() => setShowCreatorDrawer(!showCreatorDrawer)}
-          className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all shadow-lg ${
+          className={`flex min-h-[42px] w-full sm:w-auto items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all shadow-lg ${
             showCreatorDrawer
               ? "border border-white/20 bg-white/10 text-white"
               : "bg-brand-orange text-black hover:bg-brand-orange/90"
@@ -572,13 +572,13 @@ function DarkPipelineStudio({
       </div>
 
       {showCreatorDrawer && (
-        <div className="rounded-3xl border border-brand-orange/40 bg-[#0e111a] p-5 sm:p-6 shadow-2xl">
+        <div className="rounded-3xl border border-brand-orange/40 bg-[#0e111a] p-3.5 sm:p-6 shadow-2xl">
           <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
                 Etapa 1 da Esteira · Entrada da Produção
               </span>
-              <h3 className="mt-1 font-heading text-xl font-black text-white">
+              <h3 className="mt-1 font-heading text-lg sm:text-xl font-black text-white">
                 Iniciar Novo Episódio Documental (16:9 · 8 a 15 minutos)
               </h3>
               <p className="text-xs text-gray-400">
@@ -586,11 +586,11 @@ function DarkPipelineStudio({
               </p>
             </div>
 
-            <div className="flex rounded-xl border border-white/10 bg-[#090b10] p-1">
+            <div className="grid w-full grid-cols-1 gap-1 rounded-xl border border-white/10 bg-[#090b10] p-1 xs:grid-cols-2 sm:w-auto sm:flex">
               <button
                 type="button"
                 onClick={() => setCreatorScriptSource("ai_dossier")}
-                className={`rounded-lg px-3.5 py-2 text-xs font-black uppercase transition-all ${
+                className={`flex min-h-[38px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-black uppercase transition-all ${
                   creatorScriptSource === "ai_dossier"
                     ? "bg-brand-orange text-black"
                     : "text-gray-400 hover:text-white"
@@ -601,7 +601,7 @@ function DarkPipelineStudio({
               <button
                 type="button"
                 onClick={() => setCreatorScriptSource("custom_script")}
-                className={`rounded-lg px-3.5 py-2 text-xs font-black uppercase transition-all ${
+                className={`flex min-h-[38px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-black uppercase transition-all ${
                   creatorScriptSource === "custom_script"
                     ? "bg-brand-orange text-black"
                     : "text-gray-400 hover:text-white"
@@ -616,7 +616,7 @@ function DarkPipelineStudio({
             <div className="space-y-4 lg:col-span-7">
               {creatorScriptSource === "ai_dossier" && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1">
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
                       Ideias Rápidas de Pauta (Opcional)
                     </label>
@@ -670,7 +670,7 @@ function DarkPipelineStudio({
 
               {creatorScriptSource === "ai_dossier" ? (
                 <div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-gray-300">
                       Matérias-Fonte do Portal ({creatorSelectedSlugs.length} selecionadas)
                     </label>
@@ -679,7 +679,7 @@ function DarkPipelineStudio({
                       value={creatorPostFilter}
                       onChange={(e) => setCreatorPostFilter(e.target.value)}
                       placeholder="Filtrar matérias..."
-                      className="rounded-lg border border-white/10 bg-[#141824] px-2.5 py-1 text-xs text-white placeholder-gray-500 focus:border-brand-orange focus:outline-none"
+                      className="w-full xs:w-auto rounded-lg border border-white/10 bg-[#141824] px-2.5 py-1 text-xs text-white placeholder-gray-500 focus:border-brand-orange focus:outline-none"
                     />
                   </div>
                   <div className="mt-2 max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-white/10 bg-[#090b10] p-2.5">
@@ -688,7 +688,7 @@ function DarkPipelineStudio({
                       return (
                         <label
                           key={post.id}
-                          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3 py-2 text-xs transition-colors ${
+                          className={`flex cursor-pointer items-start xs:items-center justify-between gap-2.5 rounded-lg border p-2 sm:px-3 sm:py-2 text-xs transition-colors ${
                             checked
                               ? "border-brand-orange/50 bg-brand-orange/10 text-white"
                               : "border-white/5 bg-white/[0.02] text-gray-300 hover:bg-white/[0.05]"
@@ -703,7 +703,7 @@ function DarkPipelineStudio({
                                   checked ? prev.filter((s) => s !== post.slug) : [...prev, post.slug]
                                 )
                               }
-                              className="h-4 w-4 rounded accent-brand-orange"
+                              className="h-4 w-4 shrink-0 rounded accent-brand-orange"
                             />
                             <span className="truncate font-semibold">{post.title}</span>
                           </div>
@@ -715,11 +715,11 @@ function DarkPipelineStudio({
                 </div>
               ) : (
                 <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-gray-300">
                       Roteiro Completo em Texto Livre (separe blocos com linha em branco)
                     </label>
-                    <label className="cursor-pointer rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1 text-xs font-bold text-white hover:bg-white/10">
+                    <label className="inline-flex min-h-[36px] cursor-pointer items-center justify-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1 text-xs font-bold text-white hover:bg-white/10">
                       📂 Importar arquivo .TXT
                       <input type="file" accept=".txt,.md" onChange={handleUploadScriptFile} className="hidden" />
                     </label>
@@ -731,7 +731,7 @@ function DarkPipelineStudio({
                     placeholder={"Capítulo 1: O Choque dos US$ 80\nEscreva ou cole aqui os parágrafos da narração...\n\nCapítulo 2: O Mito dos 210 GB\nContinue os capítulos..."}
                     className="mt-2 w-full rounded-xl border border-white/15 bg-[#090b10] p-3.5 font-mono text-xs leading-relaxed text-gray-200 placeholder-gray-600 focus:border-brand-orange focus:outline-none"
                   />
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#141824] px-3.5 py-2 text-xs">
+                  <div className="mt-2 flex flex-col xs:flex-row xs:items-center justify-between gap-2 rounded-xl border border-white/10 bg-[#141824] p-3 text-xs">
                     <span className="text-gray-300">
                       Palavras: <strong className="text-white">{manualScriptStats.words}</strong> · Duração estimada de locução:{" "}
                       <strong className="text-white">{manualScriptStats.formattedDuration}</strong>
@@ -752,7 +752,7 @@ function DarkPipelineStudio({
               )}
             </div>
 
-            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#121622] p-5 lg:col-span-5">
+            <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#121622] p-4 sm:p-5 lg:col-span-5">
               <div className="space-y-4">
                 <h4 className="font-heading text-base font-black uppercase text-white">
                   Parâmetros da Fábrica Audiovisual
@@ -834,11 +834,11 @@ function DarkPipelineStudio({
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-3 border-t border-white/10 pt-4">
+              <div className="mt-6 flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 border-t border-white/10 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowCreatorDrawer(false)}
-                  className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/5"
+                  className="flex min-h-[42px] items-center justify-center rounded-xl border border-white/15 px-4 py-2 text-xs font-bold text-gray-300 hover:bg-white/5"
                 >
                   Cancelar
                 </button>
@@ -846,7 +846,7 @@ function DarkPipelineStudio({
                   type="button"
                   disabled={isSubmittingDarkAction}
                   onClick={handleCreateLongEpisode}
-                  className="rounded-xl bg-brand-orange px-5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
+                  className="flex min-h-[42px] items-center justify-center rounded-xl bg-brand-orange px-5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
                 >
                   {isSubmittingDarkAction ? "Gerando Vídeo..." : "🚀 Iniciar Produção do Vídeo"}
                 </button>
@@ -872,7 +872,7 @@ function DarkPipelineStudio({
           return (
             <div
               key={video.slug}
-              className={`flex min-w-[280px] flex-1 items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-all ${
+              className={`flex flex-col xs:flex-row xs:items-center w-full sm:min-w-[280px] sm:flex-1 justify-between gap-3 rounded-2xl border p-3 sm:p-3.5 text-left transition-all ${
                 isSelected
                   ? "border-brand-orange bg-[#141824] shadow-xl"
                   : "border-white/10 bg-[#0e1017] hover:border-white/25"
@@ -904,7 +904,7 @@ function DarkPipelineStudio({
                 </p>
               </button>
 
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center justify-between xs:justify-end gap-2 border-t border-white/5 pt-2 xs:border-t-0 xs:pt-0">
                 {isConfirmingCardDelete ? (
                   <>
                     <button
@@ -992,8 +992,8 @@ function DarkPipelineStudio({
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-[#10131d] px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="flex flex-col gap-3 border-t border-white/10 bg-[#10131d] p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
                   {activeLongVideo.video_url && (
                     <button
                       type="button"
@@ -1014,21 +1014,21 @@ function DarkPipelineStudio({
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-1.5 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
                   {activeLongVideo.video_url && (
                     <a
                       href={activeLongVideo.video_url}
                       download
-                      className="rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-black uppercase text-black hover:bg-brand-orange/90"
+                      className="flex min-h-[36px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-[11px] sm:text-xs font-black uppercase text-black hover:bg-brand-orange/90"
                     >
-                      ⬇ Baixar .MP4 (1080p)
+                      ⬇ Baixar .MP4
                     </a>
                   )}
                   {activeLongVideo.srt_url && (
                     <a
                       href={activeLongVideo.srt_url}
                       download
-                      className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-[11px] sm:text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
                       ⬇ Legendas .SRT
                     </a>
@@ -1038,54 +1038,54 @@ function DarkPipelineStudio({
                       href={activeLongVideo.preview_sheet_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-[11px] sm:text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
-                      🖼️ Folha de Revisão (8 Cenas)
+                      🖼️ Folha Cenas
                     </a>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
                     Etapa 5 · Teste de Clique (CTR) e Legibilidade
                   </span>
-                  <h3 className="font-heading text-lg font-black text-white">
+                  <h3 className="font-heading text-base sm:text-lg font-black text-white">
                     3 Opções de Thumbnail + Simulador Desktop vs. Celular
                   </h3>
                 </div>
 
-                <div className="flex rounded-xl border border-white/10 bg-[#090b10] p-1">
+                <div className="grid w-full grid-cols-1 gap-1 rounded-xl border border-white/10 bg-[#090b10] p-1 xs:grid-cols-2 sm:w-auto sm:flex">
                   <button
                     type="button"
                     onClick={() => setThumbPreviewMode("desktop")}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                    className={`flex min-h-[36px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all ${
                       thumbPreviewMode === "desktop" ? "bg-white text-black" : "text-gray-400 hover:text-white"
                     }`}
                   >
-                    🖥️ Vista Desktop (1280×720)
+                    🖥️ Vista Desktop
                   </button>
                   <button
                     type="button"
                     onClick={() => setThumbPreviewMode("mobile")}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                    className={`flex min-h-[36px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all ${
                       thumbPreviewMode === "mobile" ? "bg-brand-orange text-black font-black" : "text-gray-400 hover:text-white"
                     }`}
                   >
-                    📱 Simular Feed Celular (168×94)
+                    📱 Feed Celular (168×94)
                   </button>
                 </div>
               </div>
 
               {thumbPreviewMode === "mobile" && activeThumbnailOption && (
-                <div className="mt-4 rounded-2xl border border-brand-orange/30 bg-[#090b10] p-4">
+                <div className="mt-4 rounded-2xl border border-brand-orange/30 bg-[#090b10] p-3.5 sm:p-4">
                   <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-orange">
                     Simulação Realista: Feed do YouTube no Celular (Teste dos 3 Segundos)
                   </p>
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col xs:flex-row items-start gap-3">
                     <div className="relative h-[94px] w-[168px] shrink-0 overflow-hidden rounded-lg border border-white/15 bg-black">
                       <img
                         src={activeThumbnailOption.url}
@@ -1149,17 +1149,17 @@ function DarkPipelineStudio({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-5">
-              <div className="flex items-center justify-between">
+            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
                     Etapas 2, 3 e 4 · Navegação Interativa por Capítulos
                   </span>
-                  <h3 className="font-heading text-lg font-black text-white">
+                  <h3 className="font-heading text-base sm:text-lg font-black text-white">
                     Roteiro Sincronizado & Fontes Primárias ({activeLongVideo.chapters?.length || 0} Capítulos)
                   </h3>
                 </div>
-                <span className="text-xs text-gray-400">Clique para pular no vídeo</span>
+                <span className="text-[11px] sm:text-xs text-gray-400">Clique para pular no vídeo</span>
               </div>
 
               <div className="mt-4 space-y-2">
@@ -1170,26 +1170,26 @@ function DarkPipelineStudio({
                       key={chapter.number}
                       type="button"
                       onClick={() => handleSeekChapter(chapter.start_seconds, idx)}
-                      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-all ${
+                      className={`flex w-full items-center justify-between gap-2.5 rounded-xl border p-2.5 sm:px-3.5 sm:py-2.5 text-left transition-all ${
                         isCurrent
                           ? "border-brand-orange bg-brand-orange/15 text-white"
                           : "border-white/10 bg-[#131622] text-gray-300 hover:border-white/25"
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="rounded-lg bg-black/60 px-2.5 py-1 font-mono text-xs font-extrabold text-brand-orange">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span className="shrink-0 rounded-lg bg-black/60 px-2 py-0.5 font-mono text-[11px] sm:text-xs font-extrabold text-brand-orange">
                           {chapter.timestamp}
                         </span>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="truncate text-xs font-black text-white">
                             Cap. {chapter.number} — {chapter.title}
                           </p>
-                          <p className="truncate text-[11px] text-gray-400">
-                            Fonte verificada: <strong className="text-gray-200">{chapter.source || "Apuração Orange Brick"}</strong>
+                          <p className="truncate text-[10px] sm:text-[11px] text-gray-400">
+                            Fonte: <strong className="text-gray-200">{chapter.source || "Apuração Orange Brick"}</strong>
                           </p>
                         </div>
                       </div>
-                      <span className="shrink-0 text-[11px] font-semibold text-brand-orange">
+                      <span className="shrink-0 text-[10px] sm:text-[11px] font-semibold text-brand-orange">
                         Pular ▶
                       </span>
                     </button>
@@ -1200,8 +1200,8 @@ function DarkPipelineStudio({
           </div>
 
           <div className="space-y-6 xl:col-span-5">
-            <div className="rounded-3xl border border-brand-orange/40 bg-[#10131e] p-5 shadow-xl">
-              <div className="flex items-center justify-between">
+            <div className="rounded-3xl border border-brand-orange/40 bg-[#10131e] p-3.5 sm:p-5 shadow-xl">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
                   Etapa 7 · Portão de Revisão Humana
                 </span>
@@ -1210,7 +1210,7 @@ function DarkPipelineStudio({
                 </span>
               </div>
 
-              <h3 className="mt-2 font-heading text-xl font-black text-white">
+              <h3 className="mt-2 font-heading text-lg sm:text-xl font-black text-white">
                 Nada vai ao ar sem você aprovar
               </h3>
               <p className="mt-1 text-xs text-gray-300">
@@ -1237,45 +1237,47 @@ function DarkPipelineStudio({
                 />
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2.5">
+              <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-2.5">
                 <button
                   type="button"
                   disabled={isSubmittingDarkAction}
                   onClick={() => void handleReviewDecision("approve")}
-                  className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-all hover:bg-emerald-400 disabled:opacity-60"
+                  className="flex min-h-[44px] items-center justify-center flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-all hover:bg-emerald-400 disabled:opacity-60"
                 >
                   ✓ Aprovar Episódio para o Canal
                 </button>
-                <button
-                  type="button"
-                  disabled={isSubmittingDarkAction}
-                  onClick={() => setShowRejectPrompt((prev) => !prev)}
-                  className="rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-300 transition-all hover:bg-red-500/25"
-                >
-                  ✕ Reprovar
-                </button>
-                <button
-                  type="button"
-                  disabled={isSubmittingDarkAction}
-                  onClick={() =>
-                    setConfirmDeleteSlug((prev) => (prev === activeLongVideo.slug ? null : activeLongVideo.slug))
-                  }
-                  className="rounded-xl border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-200 transition-all hover:bg-red-900/40"
-                >
-                  🗑️ Apagar Vídeo
-                </button>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2.5">
+                  <button
+                    type="button"
+                    disabled={isSubmittingDarkAction}
+                    onClick={() => setShowRejectPrompt((prev) => !prev)}
+                    className="flex min-h-[44px] items-center justify-center rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-300 transition-all hover:bg-red-500/25"
+                  >
+                    ✕ Reprovar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmittingDarkAction}
+                    onClick={() =>
+                      setConfirmDeleteSlug((prev) => (prev === activeLongVideo.slug ? null : activeLongVideo.slug))
+                    }
+                    className="flex min-h-[44px] items-center justify-center rounded-xl border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-200 transition-all hover:bg-red-900/40"
+                  >
+                    🗑️ Apagar
+                  </button>
+                </div>
               </div>
 
               {confirmDeleteSlug === activeLongVideo.slug && (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-500/40 bg-[#090b10] p-3.5">
+                <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-red-500/40 bg-[#090b10] p-3 sm:p-3.5">
                   <p className="text-xs font-bold text-red-300">
                     Tem certeza que deseja apagar permanentemente &ldquo;{activeLongVideo.title}&rdquo;?
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
                     <button
                       type="button"
                       onClick={() => setConfirmDeleteSlug(null)}
-                      className="rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                      className="min-h-[36px] rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:text-white"
                     >
                       Cancelar
                     </button>
@@ -1283,7 +1285,7 @@ function DarkPipelineStudio({
                       type="button"
                       disabled={isSubmittingDarkAction}
                       onClick={() => void handleDeleteLongEpisode(activeLongVideo.slug)}
-                      className="rounded-lg bg-red-500 px-3.5 py-1.5 text-xs font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
+                      className="min-h-[36px] rounded-lg bg-red-500 px-3.5 py-1.5 text-xs font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
                     >
                       Confirmar Exclusão
                     </button>
@@ -1292,7 +1294,7 @@ function DarkPipelineStudio({
               )}
 
               {showRejectPrompt && (
-                <div className="mt-3 space-y-2 rounded-2xl border border-red-500/30 bg-[#090b10] p-3.5">
+                <div className="mt-3 space-y-2 rounded-2xl border border-red-500/30 bg-[#090b10] p-3 sm:p-3.5">
                   <label className="block text-xs font-bold text-red-300">
                     Qual ajuste precisa ser refeito na esteira?
                   </label>
@@ -1323,7 +1325,7 @@ function DarkPipelineStudio({
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-5">
+            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
               <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
                 Etapa 6 · Checagens Automáticas de Qualidade (QA Gate)
               </span>
@@ -1355,7 +1357,7 @@ function DarkPipelineStudio({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-5 space-y-4">
+            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5 space-y-4">
               <div>
                 <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
                   Etapa 8 · Agendamento YouTube & Kit de Publicação
@@ -1442,27 +1444,27 @@ function DarkPipelineStudio({
                     </pre>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => void copyText("Tags SEO", activeLongVideo.youtube.tags.join(", "))}
-                      className="flex-1 rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[38px] items-center justify-center rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
                       🏷️ Copiar {activeLongVideo.youtube.tags.length} Tags SEO
                     </button>
                     <button
                       type="button"
                       onClick={() => void copyText("Comentário Fixado", activeLongVideo.youtube.pinned_comment)}
-                      className="flex-1 rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[38px] items-center justify-center rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
-                      💬 Copiar Comentário Fixado
+                      💬 Copiar Comentário
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-5">
+            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
               <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
                 Distribuição Cruzada · Funil de Tráfego Orgânico
               </span>
@@ -1856,18 +1858,18 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
         </div>
       )}
 
-      <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b0d14] p-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-4 sm:mb-6 flex flex-col gap-2.5 rounded-2xl border border-white/10 bg-[#0b0d14] p-1.5 sm:p-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid grid-cols-1 xs:grid-cols-2 gap-1.5 w-full sm:flex sm:w-auto">
           <button
             type="button"
             onClick={() => switchMode("long")}
-            className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[42px] items-center justify-center gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "long"
                 ? "bg-brand-orange text-black shadow-lg shadow-brand-orange/20"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span>🎬 Vídeos Longos (16:9 · 8–15 min)</span>
+            <span>🎬 Vídeos Longos (16:9)</span>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
               {longVideos.length}
             </span>
@@ -1876,23 +1878,23 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <button
             type="button"
             onClick={() => switchMode("short")}
-            className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[42px] items-center justify-center gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "short"
                 ? "bg-white text-black shadow-lg"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span>📱 Reels & Shorts (9:16 · 30–60s)</span>
+            <span>📱 Reels & Shorts (9:16)</span>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
               {stats.ready}/{stats.total}
             </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-3 px-2 text-xs text-gray-400">
+        <div className="flex items-center gap-2 px-1 text-[11px] sm:text-xs text-gray-400">
           <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-400">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Trava Humana Ativa: Nada vai ao ar sem sua aprovação
+            <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+            Trava Humana Ativa: Nada vai ao ar sem aprovação
           </span>
         </div>
       </div>
