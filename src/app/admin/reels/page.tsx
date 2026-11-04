@@ -237,6 +237,8 @@ function DarkPipelineStudio({
 
   const [selectedLongSlug, setSelectedLongSlug] = useState<string>("");
   const [activeChapterIdx, setActiveChapterIdx] = useState<number>(0);
+  const [isPlayingLongVideo, setIsPlayingLongVideo] = useState<boolean>(false);
+  const [videoFallbackUrl, setVideoFallbackUrl] = useState<string | null>(null);
   const [thumbPreviewMode, setThumbPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [creatorScriptSource, setCreatorScriptSource] = useState<"ai_dossier" | "custom_script">("ai_dossier");
   const [creatorTitle, setCreatorTitle] = useState<string>(DARK_PRESET_THEMES[0].title);
@@ -327,6 +329,16 @@ function DarkPipelineStudio({
     void player.play().catch(() => undefined);
   };
 
+  const handleTogglePlayLongVideo = () => {
+    const player = longVideoRef.current;
+    if (!player) return;
+    if (player.paused) {
+      void player.play().catch(() => undefined);
+    } else {
+      player.pause();
+    }
+  };
+
   const handleCreateLongEpisode = async () => {
     if (!creatorTitle.trim()) {
       showToast("Informe o título do episódio documental.");
@@ -371,13 +383,13 @@ function DarkPipelineStudio({
 
       const result = await res.json().catch(() => null);
       if (!res.ok || !result?.item) {
-        throw new Error(result?.error || "Não foi possível iniciar a esteira do Canal Dark.");
+        throw new Error(result?.error || "Não foi possível iniciar a esteira de Vídeos Longos.");
       }
 
       onPrependLongVideo(result.item);
       setSelectedLongSlug(result.item.slug);
       setShowCreatorDrawer(false);
-      showToast(result.message || "Episódio enviado para a esteira do Canal Dark!");
+      showToast(result.message || "Episódio enviado para a esteira de Vídeos Longos!");
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : "Erro ao criar produção.");
     } finally {
@@ -502,7 +514,7 @@ function DarkPipelineStudio({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-widest text-brand-orange">
-              Esteira Industrial · Pipeline Canal Dark ({darkConfig?.channel_name || "Orange Brick Docs"})
+              Esteira Industrial · Vídeos Longos ({darkConfig?.channel_name || "Orange Brick Docs"})
             </p>
             <h2 className="mt-0.5 font-heading text-lg font-black text-white">
               Da Pauta ao Vídeo Pronto, com 3 Capas, Legendas SRT e Trava de Revisão Humana
@@ -819,6 +831,8 @@ function DarkPipelineStudio({
               onClick={() => {
                 setSelectedLongSlug(video.slug);
                 setActiveChapterIdx(0);
+                setVideoFallbackUrl(null);
+                setIsPlayingLongVideo(false);
               }}
               className={`flex min-w-[280px] flex-1 items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-all ${
                 isSelected
@@ -858,23 +872,23 @@ function DarkPipelineStudio({
                 {activeLongVideo.video_url ? (
                   <video
                     ref={longVideoRef}
-                    key={activeLongVideo.video_url}
-                    src={activeLongVideo.video_url}
+                    key={videoFallbackUrl || activeLongVideo.video_url}
+                    src={videoFallbackUrl || activeLongVideo.video_url}
                     poster={activeThumbnailOption?.url || activeLongVideo.preview_sheet_url}
                     controls
                     playsInline
+                    preload="metadata"
+                    onPlay={() => setIsPlayingLongVideo(true)}
+                    onPause={() => setIsPlayingLongVideo(false)}
+                    onEnded={() => setIsPlayingLongVideo(false)}
+                    onError={() => {
+                      const localPath = `/long-videos/${activeLongVideo.slug}/${activeLongVideo.slug}.mp4`;
+                      if (!videoFallbackUrl && activeLongVideo.video_url !== localPath) {
+                        setVideoFallbackUrl(localPath);
+                      }
+                    }}
                     className="h-full w-full object-contain"
-                  >
-                    {activeLongVideo.srt_url && (
-                      <track
-                        kind="subtitles"
-                        src={activeLongVideo.srt_url}
-                        srcLang="pt-BR"
-                        label="Português (Brasil)"
-                        default
-                      />
-                    )}
-                  </video>
+                  />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
                     <div className="h-9 w-9 animate-spin rounded-full border-2 border-brand-orange border-t-transparent" />
@@ -890,6 +904,15 @@ function DarkPipelineStudio({
 
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-[#10131d] px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
+                  {activeLongVideo.video_url && (
+                    <button
+                      type="button"
+                      onClick={handleTogglePlayLongVideo}
+                      className="rounded-lg bg-emerald-500 px-3.5 py-1.5 text-xs font-black uppercase text-black transition-colors hover:bg-emerald-400"
+                    >
+                      {isPlayingLongVideo ? "⏸ Pausar Vídeo" : "▶ Reproduzir Vídeo"}
+                    </button>
+                  )}
                   <span className="rounded-md bg-emerald-500/20 px-2.5 py-1 font-black text-emerald-300">
                     {activeLongVideo.duration_formatted} ({Math.round(activeLongVideo.duration_seconds)}s)
                   </span>
@@ -1371,7 +1394,7 @@ function DarkPipelineStudio({
         <div className="rounded-2xl border border-dashed border-white/15 p-12 text-center">
           <p className="font-heading text-lg font-black text-white">Nenhum episódio longo carregado</p>
           <p className="mt-1 text-xs text-gray-400">
-            Clique em &ldquo;+ Nova Produção Dark&rdquo; acima para disparar a esteira de 8 etapas.
+            Clique em &ldquo;+ Novo Vídeo Longo&rdquo; acima para disparar a esteira de 8 etapas.
           </p>
         </div>
       )}
@@ -1408,7 +1431,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
   const pipelineMode: "short" | "long" = modeParam === "long" ? "long" : modeParam === "short" ? "short" : defaultMode;
 
   const switchMode = useCallback((nextMode: "short" | "long") => {
-    const url = nextMode === "long" ? "/admin/canal-dark" : "/admin/reels";
+    const url = nextMode === "long" ? "/admin/videos-longos" : "/admin/reels";
     router.replace(url, { scroll: false });
   }, [router]);
 
@@ -1671,7 +1694,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
   return (
     <AdminShell
       active="reels"
-      title={pipelineMode === "long" ? "Pipeline Canal Dark · Documentários 16:9" : "Central de Reels & Vídeos"}
+      title={pipelineMode === "long" ? "Vídeos Longos · Documentários 16:9" : "Central de Reels & Vídeos"}
       description={
         pipelineMode === "long"
           ? "Esteira automatizada em 8 etapas: pauta ou roteiro próprio, narração neural PT-BR, cenas 16:9 em 1080p, 3 thumbnails, trava QA e revisão humana antes de agendar no YouTube."
@@ -1686,7 +1709,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
               onClick={() => setShowCreatorDrawer((prev) => !prev)}
               className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-brand-orange px-3.5 text-xs font-black uppercase tracking-wider text-black transition-colors hover:bg-brand-orange/90"
             >
-              <span>{showCreatorDrawer ? "Fechar Fábrica" : "+ Nova Produção Dark"}</span>
+              <span>{showCreatorDrawer ? "Fechar Fábrica" : "+ Novo Vídeo Longo"}</span>
             </button>
           )}
           <button
@@ -1719,7 +1742,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span>🎬 Pipeline Canal Dark (16:9 · 8–15 min)</span>
+            <span>🎬 Vídeos Longos (16:9 · 8–15 min)</span>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
               {longVideos.length}
             </span>
@@ -1764,7 +1787,19 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           showCreatorDrawer={showCreatorDrawer}
           setShowCreatorDrawer={setShowCreatorDrawer}
           onUpdateLongVideo={(updated) =>
-            setLongVideos((prev) => prev.map((entry) => (entry.slug === updated.slug ? updated : entry)))
+            setLongVideos((prev) =>
+              prev.map((entry) =>
+                entry.slug === updated.slug
+                  ? {
+                      ...updated,
+                      video_url:
+                        updated.video_url?.startsWith("http") || !entry.video_url?.startsWith("http")
+                          ? updated.video_url
+                          : entry.video_url,
+                    }
+                  : entry
+              )
+            )
           }
           onPrependLongVideo={(created) =>
             setLongVideos((prev) => [created, ...prev.filter((entry) => entry.slug !== created.slug)])

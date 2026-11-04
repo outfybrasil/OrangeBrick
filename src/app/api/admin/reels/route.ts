@@ -265,7 +265,7 @@ export async function GET(request: Request) {
   const longVideos: LongVideoManifestItem[] = Object.values(rawLongManifest).sort(
     (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
   );
-  if (remote && longVideos.length > 0 && editorial.storage && typeof editorial.storage.from === "function") {
+  if (longVideos.length > 0 && editorial.storage && typeof editorial.storage.from === "function") {
     try {
       const storagePaths = longVideos.map((v) => `long-videos/${v.slug}/${v.slug}.mp4`);
       const { data: signedLong } = await editorial.storage.from("editorial-reels").createSignedUrls(storagePaths, 3600);
@@ -322,17 +322,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, darkConfig: updated });
     }
 
+    const attachSignedLongVideoUrl = async (item: LongVideoManifestItem | null) => {
+      if (!item) return null;
+      try {
+        const editorial = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
+          { auth: { persistSession: false, autoRefreshToken: false } }
+        );
+        if (editorial.storage && typeof editorial.storage.from === "function") {
+          const { data: signed } = await editorial.storage
+            .from("editorial-reels")
+            .createSignedUrl(`long-videos/${item.slug}/${item.slug}.mp4`, 3600);
+          if (signed?.signedUrl) {
+            item.video_url = signed.signedUrl;
+          }
+        }
+      } catch {}
+      return item;
+    };
+
     if (action === "review") {
       const slug = typeof body.slug === "string" ? body.slug : "";
       const decision = body.decision === "approve" ? "approved" : "rejected";
       const notes = typeof body.review_notes === "string" ? body.review_notes.trim() : null;
       const thumbId = typeof body.selected_thumbnail_id === "string" ? body.selected_thumbnail_id : undefined;
-      const updated = updateLongVideoItem(slug, {
-        status: decision,
-        review_notes: notes,
-        approved_at: decision === "approved" ? new Date().toISOString() : null,
-        ...(thumbId ? { selected_thumbnail_id: thumbId } : {}),
-      });
+      const updated = await attachSignedLongVideoUrl(
+        updateLongVideoItem(slug, {
+          status: decision,
+          review_notes: notes,
+          approved_at: decision === "approved" ? new Date().toISOString() : null,
+          ...(thumbId ? { selected_thumbnail_id: thumbId } : {}),
+        })
+      );
       if (!updated) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
       return NextResponse.json({ success: true, item: updated });
     }
@@ -346,14 +368,16 @@ export async function POST(request: Request) {
       if (current.status !== "approved" && current.status !== "scheduled") {
         return NextResponse.json({ error: "Aprove o episódio no painel de revisão antes de agendar no YouTube." }, { status: 400 });
       }
-      const updated = updateLongVideoItem(slug, {
-        status: "scheduled",
-        youtube: {
-          ...current.youtube,
-          scheduled_at: scheduledAt,
-          visibility,
-        },
-      });
+      const updated = await attachSignedLongVideoUrl(
+        updateLongVideoItem(slug, {
+          status: "scheduled",
+          youtube: {
+            ...current.youtube,
+            scheduled_at: scheduledAt,
+            visibility,
+          },
+        })
+      );
       return NextResponse.json({ success: true, item: updated });
     }
 

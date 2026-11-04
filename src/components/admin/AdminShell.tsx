@@ -162,9 +162,9 @@ export function AdminShell({
                 <ReelsIcon />
                 Reels & Vídeos
               </Link>
-              <Link href="/admin/canal-dark" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange">
+              <Link href="/admin/videos-longos" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange">
                 <DarkPipelineIcon />
-                <span>Pipeline Canal Dark</span>
+                <span>Vídeos Longos</span>
               </Link>
               <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
                 <ReleasesIcon />
@@ -398,7 +398,7 @@ export function AdminShell({
                   <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
                   <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
-                  <Link href="/admin/canal-dark" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange"><DarkPipelineIcon />Pipeline Canal Dark</Link>
+                  <Link href="/admin/videos-longos" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange"><DarkPipelineIcon />Vídeos Longos</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
                   <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>
                   <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}><ProgressionIcon />Progressão</Link>

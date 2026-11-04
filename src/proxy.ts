@@ -24,7 +24,7 @@ function contentSecurityPolicy(nonce: string) {
     "font-src 'self' https://fonts.gstatic.com",
     `connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://plausible.io https://*.plausible.io${adsenseHasSlots ? " https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.googleadservices.com" : ""}`,
     `frame-src 'self' https://www.youtube-nocookie.com${adsenseHasSlots ? " https://*.google.com https://*.doubleclick.net https://*.googlesyndication.com" : ""}`,
-    `media-src 'self'${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
+    `media-src 'self' blob:${mediaOrigin ? ` ${mediaOrigin}` : ""}`,
     "object-src 'none'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
@@ -149,5 +149,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|mp4|webm|srt|vtt)$).*)"],
 };
