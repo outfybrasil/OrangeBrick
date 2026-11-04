@@ -667,32 +667,55 @@ export function saveDarkPipelineConfig(update: Partial<DarkPipelineConfig>): Dar
 }
 
 export function getLongVideoManifest(): Record<string, LongVideoManifestItem> {
-  let base: Record<string, LongVideoManifestItem> = {};
-  try {
-    if (fs.existsSync(LONG_MANIFEST_PATH)) {
-      base = JSON.parse(fs.readFileSync(LONG_MANIFEST_PATH, "utf-8"));
-    }
-  } catch {}
   try {
     if (fs.existsSync(TMP_LONG_MANIFEST_PATH)) {
       const runtime = JSON.parse(fs.readFileSync(TMP_LONG_MANIFEST_PATH, "utf-8"));
-      return { ...base, ...runtime };
+      if (runtime && typeof runtime === "object") {
+        return runtime;
+      }
     }
   } catch {}
-  return base;
+  try {
+    if (fs.existsSync(LONG_MANIFEST_PATH)) {
+      return JSON.parse(fs.readFileSync(LONG_MANIFEST_PATH, "utf-8"));
+    }
+  } catch {}
+  return {};
 }
 
 export function saveLongVideoManifest(manifest: Record<string, LongVideoManifestItem>) {
   const payload = JSON.stringify(manifest, null, 2);
   try {
+    fs.writeFileSync(TMP_LONG_MANIFEST_PATH, payload, "utf-8");
+  } catch {}
+  try {
     const dir = path.dirname(LONG_MANIFEST_PATH);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(LONG_MANIFEST_PATH, payload, "utf-8");
-  } catch {
-    try {
-      fs.writeFileSync(TMP_LONG_MANIFEST_PATH, payload, "utf-8");
-    } catch {}
-  }
+  } catch {}
+}
+
+export function deleteLongVideoItem(slug: string): boolean {
+  const manifest = getLongVideoManifest();
+  const existed = Boolean(manifest[slug]);
+  delete manifest[slug];
+  saveLongVideoManifest(manifest);
+
+  try {
+    const publicDir = path.resolve(process.cwd(), "public", "long-videos", slug);
+    if (fs.existsSync(publicDir)) {
+      fs.rmSync(publicDir, { recursive: true, force: true });
+    }
+  } catch {}
+
+  try {
+    const tmpDir = path.resolve(process.cwd(), "tmp", "long-videos", slug);
+    if (fs.existsSync(tmpDir)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  } catch {}
+
+  return existed;
 }
 
 export function updateLongVideoItem(slug: string, update: Partial<LongVideoManifestItem>): LongVideoManifestItem | null {

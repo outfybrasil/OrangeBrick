@@ -11,10 +11,12 @@ import {
   cancelReel,
   getLocalReelQueueStatus,
   getLongVideoManifest,
+  saveLongVideoManifest,
   getDarkPipelineConfig,
   saveDarkPipelineConfig,
   triggerLongVideoGeneration,
   updateLongVideoItem,
+  deleteLongVideoItem,
   VALID_LONG_VIDEO_STYLES,
   type ReelManifestItem,
   type SocialCopys,
@@ -263,7 +265,21 @@ export async function GET(request: Request) {
     };
   });
 
-  const rawLongManifest = typeof getLongVideoManifest === "function" ? getLongVideoManifest() : {};
+  let rawLongManifest = typeof getLongVideoManifest === "function" ? getLongVideoManifest() : {};
+  if (editorial.storage && typeof editorial.storage.from === "function") {
+    try {
+      const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.json");
+      if (stateBlob && typeof stateBlob.text === "function") {
+        const parsedState = JSON.parse(await stateBlob.text());
+        if (parsedState && typeof parsedState === "object") {
+          rawLongManifest = parsedState;
+          if (typeof saveLongVideoManifest === "function") {
+            saveLongVideoManifest(rawLongManifest);
+          }
+        }
+      }
+    } catch {}
+  }
   const longVideos: LongVideoManifestItem[] = Object.values(rawLongManifest).sort(
     (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
   );
@@ -318,20 +334,68 @@ export async function POST(request: Request) {
 
   if (body?.pipeline === "long") {
     const action = typeof body.action === "string" ? body.action : "";
+    const editorial = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+
+    const syncManifestToStorage = async (manifestOverride?: Record<string, LongVideoManifestItem>) => {
+      try {
+        if (editorial.storage && typeof editorial.storage.from === "function") {
+          const currentManifest = manifestOverride || getLongVideoManifest();
+          const payload = Buffer.from(JSON.stringify(currentManifest, null, 2), "utf-8");
+          await editorial.storage.from("editorial-reels").upload("long-videos/manifest-state.json", payload, {
+            contentType: "application/json",
+            upsert: true,
+          });
+        }
+      } catch {}
+    };
+
+    const loadManifestFromStorageIfNeeded = async () => {
+      try {
+        if (editorial.storage && typeof editorial.storage.from === "function") {
+          const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.json");
+          if (stateBlob && typeof stateBlob.text === "function") {
+            const parsedState = JSON.parse(await stateBlob.text());
+            if (parsedState && typeof parsedState === "object" && typeof saveLongVideoManifest === "function") {
+              saveLongVideoManifest(parsedState);
+            }
+          }
+        }
+      } catch {}
+    };
+
+    await loadManifestFromStorageIfNeeded();
 
     if (action === "config") {
       const updated = saveDarkPipelineConfig((body.config as Partial<DarkPipelineConfig>) || {});
       return NextResponse.json({ success: true, darkConfig: updated });
     }
 
+    if (action === "delete") {
+      const slug = typeof body.slug === "string" ? body.slug.trim() : "";
+      if (!slug) {
+        return NextResponse.json({ error: "Informe o slug do episódio para excluir." }, { status: 400 });
+      }
+      deleteLongVideoItem(slug);
+      try {
+        if (editorial.storage && typeof editorial.storage.from === "function") {
+          await editorial.storage.from("editorial-reels").remove([`long-videos/${slug}/${slug}.mp4`]);
+        }
+      } catch {}
+      await syncManifestToStorage();
+      return NextResponse.json({
+        success: true,
+        deletedSlug: slug,
+        message: "Episódio removido com sucesso.",
+      });
+    }
+
     const attachSignedLongVideoUrl = async (item: LongVideoManifestItem | null) => {
       if (!item) return null;
       try {
-        const editorial = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
-          { auth: { persistSession: false, autoRefreshToken: false } }
-        );
         if (editorial.storage && typeof editorial.storage.from === "function") {
           const { data: signed } = await editorial.storage
             .from("editorial-reels")
@@ -349,15 +413,15 @@ export async function POST(request: Request) {
       const decision = body.decision === "approve" ? "approved" : "rejected";
       const notes = typeof body.review_notes === "string" ? body.review_notes.trim() : null;
       const thumbId = typeof body.selected_thumbnail_id === "string" ? body.selected_thumbnail_id : undefined;
-      const updated = await attachSignedLongVideoUrl(
-        updateLongVideoItem(slug, {
-          status: decision,
-          review_notes: notes,
-          approved_at: decision === "approved" ? new Date().toISOString() : null,
-          ...(thumbId ? { selected_thumbnail_id: thumbId } : {}),
-        })
-      );
-      if (!updated) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
+      const rawUpdated = updateLongVideoItem(slug, {
+        status: decision,
+        review_notes: notes,
+        approved_at: decision === "approved" ? new Date().toISOString() : null,
+        ...(thumbId ? { selected_thumbnail_id: thumbId } : {}),
+      });
+      if (!rawUpdated) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
+      await syncManifestToStorage();
+      const updated = await attachSignedLongVideoUrl(rawUpdated);
       return NextResponse.json({ success: true, item: updated });
     }
 
@@ -370,16 +434,16 @@ export async function POST(request: Request) {
       if (current.status !== "approved" && current.status !== "scheduled") {
         return NextResponse.json({ error: "Aprove o episódio no painel de revisão antes de agendar no YouTube." }, { status: 400 });
       }
-      const updated = await attachSignedLongVideoUrl(
-        updateLongVideoItem(slug, {
-          status: "scheduled",
-          youtube: {
-            ...current.youtube,
-            scheduled_at: scheduledAt,
-            visibility,
-          },
-        })
-      );
+      const rawUpdated = updateLongVideoItem(slug, {
+        status: "scheduled",
+        youtube: {
+          ...current.youtube,
+          scheduled_at: scheduledAt,
+          visibility,
+        },
+      });
+      await syncManifestToStorage();
+      const updated = await attachSignedLongVideoUrl(rawUpdated);
       return NextResponse.json({ success: true, item: updated });
     }
 
@@ -430,6 +494,7 @@ export async function POST(request: Request) {
         voiceId,
         targetMinMinutes,
       });
+      await syncManifestToStorage();
 
       return NextResponse.json({
         queued: true,

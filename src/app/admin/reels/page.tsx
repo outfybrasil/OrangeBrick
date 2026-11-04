@@ -217,6 +217,7 @@ interface DarkPipelineStudioProps {
   setShowCreatorDrawer: (next: boolean) => void;
   onUpdateLongVideo: (updated: LongVideoManifestItem) => void;
   onPrependLongVideo: (created: LongVideoManifestItem) => void;
+  onDeleteLongVideo: (slug: string) => void;
   onOpenRelatedReel: (slug?: string) => void;
   showToast: (msg: string) => void;
 }
@@ -229,6 +230,7 @@ function DarkPipelineStudio({
   setShowCreatorDrawer,
   onUpdateLongVideo,
   onPrependLongVideo,
+  onDeleteLongVideo,
   onOpenRelatedReel,
   showToast,
 }: DarkPipelineStudioProps) {
@@ -252,6 +254,7 @@ function DarkPipelineStudio({
   const [isSubmittingDarkAction, setIsSubmittingDarkAction] = useState<boolean>(false);
   const [rejectionReasonInput, setRejectionReasonInput] = useState<string>("");
   const [showRejectPrompt, setShowRejectPrompt] = useState<boolean>(false);
+  const [confirmDeleteSlug, setConfirmDeleteSlug] = useState<string | null>(null);
   const [reviewerNotesInput, setReviewerNotesInput] = useState<string>("");
   const [scheduleDateTime, setScheduleDateTime] = useState<string>(() => {
     const tomorrow = new Date(Date.now() + 24 * 3600 * 1000);
@@ -503,6 +506,44 @@ function DarkPipelineStudio({
       showToast("Episódio agendado no calendário do YouTube!");
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : "Falha ao agendar episódio.");
+    } finally {
+      setIsSubmittingDarkAction(false);
+    }
+  };
+
+  const handleDeleteLongEpisode = async (slugToDelete: string) => {
+    if (!slugToDelete) return;
+    setIsSubmittingDarkAction(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const res = await fetch("/api/admin/reels", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pipeline: "long",
+          action: "delete",
+          slug: slugToDelete,
+        }),
+      });
+
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.error || "Não foi possível excluir o episódio.");
+      }
+
+      onDeleteLongVideo(slugToDelete);
+      setConfirmDeleteSlug(null);
+      if (selectedLongSlug === slugToDelete) {
+        setSelectedLongSlug("");
+      }
+      showToast("Episódio excluído com sucesso.");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Erro ao excluir episódio.");
     } finally {
       setIsSubmittingDarkAction(false);
     }
@@ -852,23 +893,26 @@ function DarkPipelineStudio({
         {longVideos.map((video) => {
           const badge = longStatusBadge(video.status);
           const isSelected = activeLongVideo?.slug === video.slug;
+          const isConfirmingCardDelete = confirmDeleteSlug === video.slug;
           return (
-            <button
+            <div
               key={video.slug}
-              type="button"
-              onClick={() => {
-                setSelectedLongSlug(video.slug);
-                setActiveChapterIdx(0);
-                setVideoFallbackUrl(null);
-                setIsPlayingLongVideo(false);
-              }}
               className={`flex min-w-[280px] flex-1 items-center justify-between gap-3 rounded-2xl border p-3.5 text-left transition-all ${
                 isSelected
                   ? "border-brand-orange bg-[#141824] shadow-xl"
                   : "border-white/10 bg-[#0e1017] hover:border-white/25"
               }`}
             >
-              <div className="min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedLongSlug(video.slug);
+                  setActiveChapterIdx(0);
+                  setVideoFallbackUrl(null);
+                  setIsPlayingLongVideo(false);
+                }}
+                className="min-w-0 flex-1 text-left"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase ${badge.className}`}>
                     {badge.label}
@@ -883,11 +927,53 @@ function DarkPipelineStudio({
                 <p className="mt-0.5 text-[11px] text-gray-400">
                   {video.chapters?.length || 8} capítulos · {formatBytes(video.file_size)} · {video.resolution}
                 </p>
+              </button>
+
+              <div className="flex shrink-0 items-center gap-2">
+                {isConfirmingCardDelete ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled={isSubmittingDarkAction}
+                      onClick={() => void handleDeleteLongEpisode(video.slug)}
+                      className="rounded-lg bg-red-500 px-2.5 py-1.5 text-[11px] font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
+                    >
+                      Confirmar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteSlug(null)}
+                      className="rounded-lg border border-white/15 px-2 py-1.5 text-[11px] font-bold text-gray-300 hover:text-white"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedLongSlug(video.slug);
+                        setActiveChapterIdx(0);
+                        setVideoFallbackUrl(null);
+                        setIsPlayingLongVideo(false);
+                      }}
+                      className="text-xs font-bold text-brand-orange"
+                    >
+                      {isSelected ? "Em tela ●" : "Abrir →"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteSlug(video.slug)}
+                      title="Apagar este vídeo longo"
+                      className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[11px] font-bold text-red-300 transition-colors hover:bg-red-500/25 hover:text-red-200"
+                    >
+                      🗑️ Apagar
+                    </button>
+                  </>
+                )}
               </div>
-              <span className="shrink-0 text-xs font-bold text-brand-orange">
-                {isSelected ? "Em tela ●" : "Abrir →"}
-              </span>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -1192,7 +1278,42 @@ function DarkPipelineStudio({
                 >
                   ✕ Reprovar
                 </button>
+                <button
+                  type="button"
+                  disabled={isSubmittingDarkAction}
+                  onClick={() =>
+                    setConfirmDeleteSlug((prev) => (prev === activeLongVideo.slug ? null : activeLongVideo.slug))
+                  }
+                  className="rounded-xl border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-200 transition-all hover:bg-red-900/40"
+                >
+                  🗑️ Apagar Vídeo
+                </button>
               </div>
+
+              {confirmDeleteSlug === activeLongVideo.slug && (
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-500/40 bg-[#090b10] p-3.5">
+                  <p className="text-xs font-bold text-red-300">
+                    Tem certeza que deseja apagar permanentemente &ldquo;{activeLongVideo.title}&rdquo;?
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteSlug(null)}
+                      className="rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:text-white"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isSubmittingDarkAction}
+                      onClick={() => void handleDeleteLongEpisode(activeLongVideo.slug)}
+                      className="rounded-lg bg-red-500 px-3.5 py-1.5 text-xs font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
+                    >
+                      Confirmar Exclusão
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {showRejectPrompt && (
                 <div className="mt-3 space-y-2 rounded-2xl border border-red-500/30 bg-[#090b10] p-3.5">
@@ -1831,6 +1952,9 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           }
           onPrependLongVideo={(created) =>
             setLongVideos((prev) => [created, ...prev.filter((entry) => entry.slug !== created.slug)])
+          }
+          onDeleteLongVideo={(deletedSlug) =>
+            setLongVideos((prev) => prev.filter((entry) => entry.slug !== deletedSlug))
           }
           onOpenRelatedReel={(slug) => {
             const targetReel = items.find((i) => i.slug === slug);
