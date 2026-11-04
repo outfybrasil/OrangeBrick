@@ -83,17 +83,6 @@ function isReelStalled(item: AdminReelItem, now: number) {
   return elapsedSeconds !== undefined && elapsedSeconds > Math.max(expected * 2, 30 * 60);
 }
 
-const DARK_PIPELINE_STEPS = [
-  { step: 1, title: "1. Pauta ou Roteiro", detail: "Dossiê IA ou Texto Livre" },
-  { step: 2, title: "2. Fatos & Fontes", detail: "Apuração verificada" },
-  { step: 3, title: "3. Narração Neural", detail: "Voz PT-BR + Capítulos" },
-  { step: 4, title: "4. Cenas 16:9", detail: "1920×1080 30fps" },
-  { step: 5, title: "5. Mix, SRT & 3 Thumbs", detail: "-14 LUFS + 3 Capas" },
-  { step: 6, title: "6. Checagens QA", detail: "6 travas automáticas" },
-  { step: 7, title: "7. Revisão Humana", detail: "Aprovar ou Reprovar" },
-  { step: 8, title: "8. Agenda YouTube", detail: "Publicação + 3 Shorts" },
-];
-
 const DARK_PRESET_THEMES = [
   {
     id: "gta6-market",
@@ -243,13 +232,13 @@ function DarkPipelineStudio({
   const [videoFallbackUrl, setVideoFallbackUrl] = useState<string | null>(null);
   const [thumbPreviewMode, setThumbPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [creatorScriptSource, setCreatorScriptSource] = useState<"ai_dossier" | "custom_script">("ai_dossier");
-  const [creatorTitle, setCreatorTitle] = useState<string>(DARK_PRESET_THEMES[0].title);
-  const [creatorSubtitle, setCreatorSubtitle] = useState<string>(DARK_PRESET_THEMES[0].subtitle);
+  const [creatorTitle, setCreatorTitle] = useState<string>("");
+  const [creatorSubtitle, setCreatorSubtitle] = useState<string>("");
   const [creatorSelectedSlugs, setCreatorSelectedSlugs] = useState<string[]>([]);
   const [creatorPostFilter, setCreatorPostFilter] = useState<string>("");
   const [creatorManualScript, setCreatorManualScript] = useState<string>("");
   const [creatorStyle, setCreatorStyle] = useState<LongVideoVisualStyle>("documentario");
-  const [creatorVoice, setCreatorVoice] = useState<string>("pt-BR-AntonioNeural");
+  const [creatorVoice, setCreatorVoice] = useState<string>("none");
   const [creatorTargetMinutes, setCreatorTargetMinutes] = useState<number>(10);
   const [isSubmittingDarkAction, setIsSubmittingDarkAction] = useState<boolean>(false);
   const [rejectionReasonInput, setRejectionReasonInput] = useState<string>("");
@@ -551,60 +540,35 @@ function DarkPipelineStudio({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-[#0b0d14] p-4 sm:p-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-[11px] font-black uppercase tracking-widest text-brand-orange">
-              Esteira Industrial · Vídeos Longos ({darkConfig?.channel_name || "Orange Brick Docs"})
-            </p>
-            <h2 className="mt-0.5 font-heading text-lg font-black text-white">
-              Da Pauta ao Vídeo Pronto, com 3 Capas, Legendas SRT e Trava de Revisão Humana
-            </h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-bold text-emerald-300">
-              Janela Mid-Roll YouTube (&ge; 08:00)
+      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b0d14] p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-brand-orange/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
+              {darkConfig?.channel_name || "Orange Brick Docs"}
             </span>
-            <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 font-semibold text-gray-300">
-              {creatorVoice === "none" || activeLongVideo?.voice_id === "none"
-                ? "Locução: Sem Narrador (Gravar Voz por Cima)"
-                : `Voz Neural: ${
-                    creatorVoice === "pt-BR-FranciscaNeural"
-                      ? "Francisca (PT-BR)"
-                      : creatorVoice === "pt-BR-ThalitaNeural"
-                        ? "Thalita (PT-BR)"
-                        : "Antonio (PT-BR)"
-                  }`}
+            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+              Mid-Roll (&ge; 08:00)
             </span>
           </div>
+          <h2 className="mt-1 font-heading text-lg font-black text-white">
+            Produção & Revisão de Vídeos Longos (16:9 1080p)
+          </h2>
+          <p className="text-xs text-gray-400">
+            Crie episódios com narração própria ou voz neural, revise as cenas e aprove antes de publicar.
+          </p>
         </div>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          {DARK_PIPELINE_STEPS.map((item) => {
-            const currentStep = activeLongVideo?.pipeline_stage_index || 7;
-            const isCompleted = item.step < currentStep || (item.step === 7 && (activeLongVideo?.status === "approved" || activeLongVideo?.status === "scheduled")) || (item.step === 8 && activeLongVideo?.status === "scheduled");
-            const isCurrent = item.step === currentStep && activeLongVideo?.status !== "scheduled";
-            return (
-              <div
-                key={item.step}
-                className={`rounded-xl border p-3 transition-all ${
-                  isCurrent
-                    ? "border-brand-orange bg-brand-orange/15 text-white shadow-lg shadow-brand-orange/10"
-                    : isCompleted
-                      ? "border-emerald-500/25 bg-emerald-950/15 text-emerald-200"
-                      : "border-white/10 bg-[#11141f] text-gray-400"
-                }`}
-              >
-                <div className="flex items-center justify-between text-[11px] font-black uppercase">
-                  <span>Etapa {item.step}</span>
-                  <span>{isCompleted ? "✓" : isCurrent ? "●" : "○"}</span>
-                </div>
-                <p className="mt-1 text-xs font-extrabold text-white">{item.title.replace(/^\d+\.\s*/, "")}</p>
-                <p className="mt-0.5 text-[11px] text-gray-400">{item.detail}</p>
-              </div>
-            );
-          })}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowCreatorDrawer(!showCreatorDrawer)}
+          className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all shadow-lg ${
+            showCreatorDrawer
+              ? "border border-white/20 bg-white/10 text-white"
+              : "bg-brand-orange text-black hover:bg-brand-orange/90"
+          }`}
+        >
+          <span>{showCreatorDrawer ? "✕ Fechar Formulário" : "+ Criar Novo Vídeo Longo"}</span>
+        </button>
       </div>
 
       {showCreatorDrawer && (
@@ -651,24 +615,27 @@ function DarkPipelineStudio({
           <div className="mt-5 grid gap-6 lg:grid-cols-12">
             <div className="space-y-4 lg:col-span-7">
               {creatorScriptSource === "ai_dossier" && (
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
-                    Pautas Investigativas Sugeridas (1 clique para preencher)
-                  </label>
-                  <div className="mt-2 grid gap-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                      Ideias Rápidas de Pauta (Opcional)
+                    </label>
+                    <span className="text-[11px] text-gray-500">Ou digite o tema que desejar abaixo</span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     {DARK_PRESET_THEMES.map((preset) => (
                       <button
                         key={preset.id}
                         type="button"
                         onClick={() => handleSelectPresetTheme(preset.id)}
-                        className={`rounded-xl border p-3 text-left transition-all ${
+                        className={`rounded-xl border p-2.5 text-left transition-all ${
                           creatorTitle === preset.title
-                            ? "border-brand-orange bg-brand-orange/10 text-white"
+                            ? "border-brand-orange bg-brand-orange/15 text-white ring-1 ring-brand-orange"
                             : "border-white/10 bg-[#141824] text-gray-300 hover:border-white/25"
                         }`}
                       >
-                        <p className="text-xs font-black text-brand-orange">{preset.label}</p>
-                        <p className="mt-0.5 text-xs text-gray-400 line-clamp-1">{preset.subtitle}</p>
+                        <p className="line-clamp-1 text-xs font-black text-brand-orange">{preset.label.split("·")[1]?.trim() || preset.label}</p>
+                        <p className="mt-0.5 line-clamp-1 text-[11px] text-gray-400">{preset.subtitle}</p>
                       </button>
                     ))}
                   </div>
@@ -881,7 +848,7 @@ function DarkPipelineStudio({
                   onClick={handleCreateLongEpisode}
                   className="rounded-xl bg-brand-orange px-5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
                 >
-                  {isSubmittingDarkAction ? "Enfileirando Produção..." : "🚀 Disparar Esteira de 8 Etapas"}
+                  {isSubmittingDarkAction ? "Gerando Vídeo..." : "🚀 Iniciar Produção do Vídeo"}
                 </button>
               </div>
             </div>
@@ -889,7 +856,15 @@ function DarkPipelineStudio({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            Episódios em Produção / Revisão ({longVideos.length})
+          </p>
+          <span className="text-[11px] text-gray-500">Selecione para assistir e aprovar</span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
         {longVideos.map((video) => {
           const badge = longStatusBadge(video.status);
           const isSelected = activeLongVideo?.slug === video.slug;
@@ -976,6 +951,7 @@ function DarkPipelineStudio({
             </div>
           );
         })}
+        </div>
       </div>
 
       {activeLongVideo ? (
@@ -1562,7 +1538,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
   const [items, setItems] = useState<AdminReelItem[]>([]);
   const [longVideos, setLongVideos] = useState<LongVideoManifestItem[]>([]);
   const [darkConfig, setDarkConfig] = useState<DarkPipelineConfig | null>(null);
-  const [showCreatorDrawer, setShowCreatorDrawer] = useState<boolean>(true);
+  const [showCreatorDrawer, setShowCreatorDrawer] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");

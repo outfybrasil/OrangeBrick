@@ -266,19 +266,27 @@ export async function GET(request: Request) {
   });
 
   let rawLongManifest = typeof getLongVideoManifest === "function" ? getLongVideoManifest() : {};
+  let deletedSlugs: string[] = [];
   if (editorial.storage && typeof editorial.storage.from === "function") {
     try {
-      const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.json");
+      const { data: delBlob } = await editorial.storage.from("editorial-reels").download("long-videos/deleted-slugs.mp4");
+      if (delBlob && typeof delBlob.text === "function") {
+        const parsed = JSON.parse(await delBlob.text());
+        if (Array.isArray(parsed)) deletedSlugs = parsed;
+      }
+    } catch {}
+    try {
+      const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.mp4");
       if (stateBlob && typeof stateBlob.text === "function") {
         const parsedState = JSON.parse(await stateBlob.text());
         if (parsedState && typeof parsedState === "object") {
-          rawLongManifest = parsedState;
-          if (typeof saveLongVideoManifest === "function") {
-            saveLongVideoManifest(rawLongManifest);
-          }
+          rawLongManifest = { ...rawLongManifest, ...parsedState };
         }
       }
     } catch {}
+  }
+  for (const slug of deletedSlugs) {
+    delete rawLongManifest[slug];
   }
   const longVideos: LongVideoManifestItem[] = Object.values(rawLongManifest).sort(
     (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
@@ -345,8 +353,8 @@ export async function POST(request: Request) {
         if (editorial.storage && typeof editorial.storage.from === "function") {
           const currentManifest = manifestOverride || getLongVideoManifest();
           const payload = Buffer.from(JSON.stringify(currentManifest, null, 2), "utf-8");
-          await editorial.storage.from("editorial-reels").upload("long-videos/manifest-state.json", payload, {
-            contentType: "application/json",
+          await editorial.storage.from("editorial-reels").upload("long-videos/manifest-state.mp4", payload, {
+            contentType: "video/mp4",
             upsert: true,
           });
         }
@@ -356,7 +364,7 @@ export async function POST(request: Request) {
     const loadManifestFromStorageIfNeeded = async () => {
       try {
         if (editorial.storage && typeof editorial.storage.from === "function") {
-          const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.json");
+          const { data: stateBlob } = await editorial.storage.from("editorial-reels").download("long-videos/manifest-state.mp4");
           if (stateBlob && typeof stateBlob.text === "function") {
             const parsedState = JSON.parse(await stateBlob.text());
             if (parsedState && typeof parsedState === "object" && typeof saveLongVideoManifest === "function") {
@@ -380,9 +388,23 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Informe o slug do episódio para excluir." }, { status: 400 });
       }
       deleteLongVideoItem(slug);
+      let deletedList: string[] = [];
       try {
         if (editorial.storage && typeof editorial.storage.from === "function") {
           await editorial.storage.from("editorial-reels").remove([`long-videos/${slug}/${slug}.mp4`]);
+          const { data: delBlob } = await editorial.storage.from("editorial-reels").download("long-videos/deleted-slugs.mp4");
+          if (delBlob && typeof delBlob.text === "function") {
+            const parsed = JSON.parse(await delBlob.text());
+            if (Array.isArray(parsed)) deletedList = parsed;
+          }
+          if (!deletedList.includes(slug)) {
+            deletedList.push(slug);
+          }
+          await editorial.storage.from("editorial-reels").upload(
+            "long-videos/deleted-slugs.mp4",
+            Buffer.from(JSON.stringify(deletedList)),
+            { contentType: "video/mp4", upsert: true }
+          );
         }
       } catch {}
       await syncManifestToStorage();
