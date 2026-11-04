@@ -337,6 +337,763 @@ const DEFAULT_GTA_EPISODE = {
   ]
 };
 
+const ZELDA_GTA_TGA_EPISODE = {
+  slug: "zelda-gta-vi-corrida-goty-2026",
+  seriesBadge: "DOSSIÊ ORANGE BRICK // EPISÓDIO #02",
+  title: "ZELDA TIROU 96: GTA VI CONSEGUE ENTRAR NA DISPUTA PELO GOTY?",
+  youtubeTitle: "Zelda recebeu nota 96: GTA VI consegue entrar na disputa pelo GOTY no TGA 2026?",
+  subtitle: "A estreia de The Legend of Zelda: Ocarina of Time com média 96 no Switch 2, a regra do The Game Awards para remakes e a janela limite de 24 horas para GTA VI.",
+  slateFooterText: "DOSSIÊ ESPECIAL // THE GAME AWARDS 2026 • ZELDA OCARINA OF TIME VS. GTA VI",
+  endCardSubtitle: "Quem leva o GOTY em 10 de dezembro: o remake nota 96 de Zelda ou GTA VI na linha de corte? Comente!",
+  endCardSources: "FONTES: NINTENDO • THE GAME AWARDS (FAQ) • ROCKSTAR GAMES • GAMESRADAR+ • METACRITIC",
+  youtubeOverviewParagraph: "Neste dossiê investigativo do Orange Brick, destrinchamos a corrida pelo Jogo do Ano no The Game Awards 2026: a média 96 de The Legend of Zelda: Ocarina of Time no Nintendo Switch 2, as declarações de Eiji Aonuma sobre a nova geração de desenvolvedores, o regulamento oficial do TGA sobre remakes, a estreia de Grand Theft Auto VI em 19 de novembro — exatamente 24 horas antes da linha de corte de 20 de novembro — e o peso real do júri (90%) contra o voto popular (10%).",
+  pinnedComment: "Para você: um remake com média 96 como Zelda: Ocarina of Time merece vencer o prêmio principal de Jogo do Ano, ou GTA VI chegando 24 horas antes do prazo limite do TGA deve levar o troféu? Deixe seu voto nos comentários!",
+  tags: [
+    "The Game Awards 2026",
+    "GOTY 2026",
+    "Zelda Ocarina of Time Remake",
+    "Zelda Switch 2 nota 96",
+    "GTA 6 GOTY",
+    "Grand Theft Auto VI",
+    "Eiji Aonuma",
+    "Metacritic 2026",
+    "Nintendo Switch 2",
+    "Orange Brick"
+  ],
+  sourceMode: "ai_dossier",
+  sourcePostSlugs: [
+    "zelda-gta-vi-disputa-jogo-do-ano-tga-2026",
+    "zelda-ocarina-of-time-remake-notas-reviews-critica",
+    "equipe-do-remake-de-zelda-ocarina-of-time-nunca-jogou-o-original",
+    "gta-vi-trailer-lancamento-elegivel-tga-2026",
+    "gta-vi-pre-download-10-novembro-ate-212-gb"
+  ],
+  visualStyle: "documentario",
+  voiceId: "pt-BR-AntonioNeural",
+  targetMinDurationSec: 500,
+  thumbnailSpecs: [
+    {
+      id: "thumb_1",
+      label: "Opção 1 · Choque de Gigantes",
+      angle: "Foco na nota 96 de Zelda contra a chegada de GTA VI",
+      badge: "CORRIDA PELO GOTY 2026",
+      line1: "ZELDA NOTA 96",
+      line2: "E O GTA VI NO TGA?",
+      accent: "#FF5E00",
+      chapterIdx: 0,
+      sceneKey: "A"
+    },
+    {
+      id: "thumb_2",
+      label: "Opção 2 · Limite de 24 Horas",
+      angle: "Foco na regra de corte de 20 de novembro do TGA",
+      badge: "REGRA OFICIAL DO TGA",
+      line1: "24H ANTES DO CORTE",
+      line2: "GTA VI PODE VENCER?",
+      accent: "#FFB800",
+      chapterIdx: 4,
+      sceneKey: "A"
+    },
+    {
+      id: "thumb_3",
+      label: "Opção 3 · Remake vs. Inédito",
+      angle: "Foco no debate sobre remakes no prêmio principal",
+      badge: "DOSSIÊ THE GAME AWARDS",
+      line1: "REMAKE PODE SER",
+      line2: "JOGO DO ANO EM 2026?",
+      accent: "#00E5FF",
+      chapterIdx: 3,
+      sceneKey: "B"
+    }
+  ],
+  shortsTemplates: [
+    {
+      id: "short_1",
+      title: "Zelda tirou 96 no Switch 2: por que não bateu os 99 do N64?",
+      hook: "O remake de Ocarina of Time estreou com média 96 no Metacritic, a maior nota de 2026. Entenda o que os críticos elogiaram e o que faltou.",
+      chapterIdx: 1,
+      duration_seconds: 54,
+      related_slug: "zelda-ocarina-of-time-remake-notas-reviews-critica"
+    },
+    {
+      id: "short_2",
+      title: "Por que GTA VI entra no TGA 2026 por apenas 24 horas?",
+      hook: "A linha de corte do The Game Awards fecha em 20 de novembro às 21h. E GTA 6 estreia no dia 19. Veja como funciona a regra de cópias para o júri.",
+      chapterIdx: 4,
+      duration_seconds: 52,
+      related_slug: "gta-vi-trailer-lancamento-elegivel-tga-2026"
+    },
+    {
+      id: "short_3",
+      title: "90% Júri vs 10% Público: por que hype não garante o GOTY",
+      hook: "Muita gente acha que o jogo mais vendido vence o The Game Awards automaticamente, mas a matemática oficial do prêmio é bem diferente.",
+      chapterIdx: 5,
+      duration_seconds: 50,
+      related_slug: "zelda-gta-vi-disputa-jogo-do-ano-tga-2026"
+    }
+  ],
+  chapters: [
+    {
+      number: "01",
+      title: "NOTA 96 CONTRA O MAIOR COLOSSO DA DÉCADA",
+      kicker: "ABERTURA DO DOSSIÊ",
+      accent: "#FF5E00",
+      source: "GamesRadar+, Metacritic & The Game Awards (04/11/2026)",
+      narration: [
+        "Um clássico reconstruído acaba de alcançar a nota noventa e seis no Metacritic. Mas será que Grand Theft Auto seis ainda consegue entrar na disputa pelo prêmio de Jogo do Ano no The Game Awards dois mil e vinte e seis?",
+        "No dia quatro de novembro, a abertura das análises da imprensa internacional colocou o remake de The Legend of Zelda: Ocarina of Time, exclusivo de Nintendo Switch dois, no topo absoluto dos jogos mais bem avaliados da temporada.",
+        "Quase ao mesmo tempo, uma dúvida tomou conta das redes sociais e dos fóruns especializados: com GTA seis marcado para dezenove de novembro, o colosso da Rockstar Games terá tempo hábil para concorrer na mesma edição, ou ficará restrito à cerimônia do ano que vem?",
+        "Quando olhamos os documentos oficiais, descobrimos um detalhe digno de roteiro: a estreia de GTA seis acontece exatamente vinte e quatro horas antes do encerramento do prazo regimental do The Game Awards.",
+        "Só que estar dentro do calendário é apenas a primeira peça de um tabuleiro muito mais complexo. Entre ser elegível no papel, receber cópias de avaliação a tempo, convencer mais de cem veículos do júri internacional e superar um remake aclamado da Nintendo, existe uma distância enorme.",
+        "Neste dossiê do Orange Brick, nós cruzamos as notas da crítica, as falas de Eiji Aonuma, o regulamento linha por linha do TGA e o cronograma da Rockstar para responder quem realmente tem força na corrida pelo GOTY."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://assets.nintendo.com/image/upload/q_auto/f_auto/dpr_2.0/ncom/My%20Nintendo%20Store/EN-US/Nintendo%20Switch%202/Software/The%20Legend%20of%20Zelda%20Ocarina%20of%20Time/125697-125698-nintendo-the-legend-of-zelda-ocarina-of-time-ss-5-1280x720",
+        imageLabel: "ESTREIA ACLAMADA // MÉDIA 96 NO METACRITIC",
+        imageCaption: "Link empunha a Master Sword no Templo do Tempo na reconstrução oficial para o Nintendo Switch 2.",
+        headline: "UM CLÁSSICO VOLTOU NO TOPO DE 2026",
+        evidenceTitle: "LEVANTAMENTO DA CRÍTICA // 04 DE NOVEMBRO DE 2026",
+        evidenceQuote: "Com 42 análises contabilizadas no levantamento inicial da imprensa, o remake de Ocarina of Time atingiu média 96 de 100, a maior nota de 2026 até o momento.",
+        evidenceSource: "GamesRadar+ & Metacritic Roundup (04/11/2026)",
+        pills: ["Média 96/100", "42 Análises", "Lança 05 Nov"]
+      },
+      sceneB: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_11.13lmeyci.i-yw.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "JANELA LIMITE // 19 DE NOVEMBRO DE 2026",
+        imageCaption: "Jason Duval e Lucia Caminos em captura oficial de Grand Theft Auto VI divulgada pela Rockstar Games.",
+        headline: "GTA VI A 24 HORAS DA LINHA DE CORTE",
+        evidenceTitle: "CRONOGRAMA OFICIAL // ROCKSTAR VS. THE GAME AWARDS",
+        evidenceQuote: "Previsto para 19 de novembro no PS5 e Xbox Series X|S, GTA VI estreia um dia antes do limite de elegibilidade de 20 de novembro do TGA 2026.",
+        evidenceSource: "Rockstar Games & Regulamento The Game Awards",
+        pills: ["Estreia: 19 Nov", "Corte: 20 Nov", "Margem: 24 Horas"]
+      }
+    },
+    {
+      number: "02",
+      title: "O QUE EXPLICAM OS 96 PONTOS DE ZELDA",
+      kicker: "RAIO-X DAS ANÁLISES",
+      accent: "#10B981",
+      source: "GamesRadar+, Shacknews, IGN, GameSpot & Nintendo Life",
+      narration: [
+        "Para entender o peso da candidatura da Nintendo, precisamos abrir a caixa-preta dessa média noventa e seis. O número não é um troféu antecipado, mas o retrato de quarenta e duas críticas publicadas na véspera do lançamento em cinco de novembro no Switch dois.",
+        "No levantamento compilado pela imprensa, o remake conquistou notas máximas de cinco estrelas na GamesRadar Plus e dez de dez na Shacknews, além de nove vírgula vinte e cinco na Game Informer e nota nove na IGN, na GameSpot e na Nintendo Life.",
+        "Os elogios convergem em quatro pilares: a reconstrução completa de Hyrule com câmera livre em trezentos e sessenta graus, as cenas cinematográficas totalmente dubladas, a trilha sonora regravada com orquestra e a renovação das masmorras com novos quebra-cabeças.",
+        "Até mesmo a famosa ocarina ganhou integração direta com o microfone do Switch dois, permitindo ativar melodias históricas dentro da campanha.",
+        "Mas por que o remake, mesmo liderando o ano de dois mil e vinte e seis, não alcançou os lendários noventa e nove pontos do original de Nintendo sessenta e quatro lançado em mil novecentos e noventa e oito?",
+        "As ressalvas dos analistas são cirúrgicas: a ausência do modo mais difícil Master Quest, a falta de múltiplos arquivos de salvamento manual e uma queda perceptível de nitidez com leve cintilação quando o jogo roda no modo portátil do console. Ainda assim, começar novembro com média noventa e seis coloca a barra lá no alto para qualquer concorrente."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+        imageLabel: "HYRULE RECONSTRUÍDA // CÂMERA LIVRE NO SWITCH 2",
+        imageCaption: "Praça do mercado do Castelo de Hyrule refeita em três dimensões com câmera livre e nova iluminação.",
+        headline: "ELÓGIOS: CÂMERA LIVRE, DUBLAGEM E ORQUESTRA",
+        evidenceTitle: "NOTAS DA IMPRENSA INTERNACIONAL",
+        evidenceQuote: "GamesRadar+ (5/5) e Shacknews (10/10) destacaram as masmorras retrabalhadas, diálogos dublados e controles modernizados; IGN, GameSpot e Nintendo Life deram 9/10.",
+        evidenceSource: "Coletânea de Análises // Nintendo Everything & GamesRadar+",
+        pills: ["Shacknews: 10/10", "Game Informer: 9.25", "IGN & Spot: 9/10"]
+      },
+      sceneB: {
+        imageUrl: "https://assets.nintendo.com/image/upload/q_auto/f_auto/dpr_2.0/ncom/My%20Nintendo%20Store/EN-US/Nintendo%20Switch%202/Software/The%20Legend%20of%20Zelda%20Ocarina%20of%20Time/125697-125698-nintendo-the-legend-of-zelda-ocarina-of-time-ss-3-1280x720",
+        imageLabel: "PONTOS DE RESSALVA // POR QUE NÃO BATEU OS 99 DE 1998?",
+        imageCaption: "Link enfrenta esqueletos Stalfos em combate; críticos apontaram falta do modo Master Quest para veteranos.",
+        headline: "AS RESSALVAS QUE SEPARARAM O 96 DO 99",
+        evidenceTitle: "CRÍTICAS TÉCNICAS E DE CONTEÚDO",
+        evidenceQuote: "Analistas citaram a ausência do modo Master Quest, a falta de múltiplos slots de salvamento e menor nitidez visual no modo portátil do Switch 2.",
+        evidenceSource: "Análises de Nintendo Life, TechRadar & GamesRadar+",
+        pills: ["Sem Master Quest", "Modo Portátil", "Original N64: 99"]
+      }
+    },
+    {
+      number: "03",
+      title: "A REVELAÇÃO DE AONUMA SOBRE A NOVA GERAÇÃO",
+      kicker: "BASTIDORES DA NINTENDO",
+      accent: "#00E5FF",
+      source: "Eiji Aonuma — Ask the Developer Vol. 24 & Entrevista AFP",
+      narration: [
+        "Há um elemento de bastidor que pesa muito na avaliação artística de um remake: até que ponto ele é apenas uma pintura nova sobre um código velho, ou uma reinterpretação autoral?",
+        "Em entrevista oficial publicada pela própria Nintendo na série Ask the Developer volume vinte e quatro, e também em declarações à agência AFP, o produtor histórico da franquia, Eiji Aonuma, revelou um fato surpreendente.",
+        "Alguns dos desenvolvedores mais jovens escalados para reconstruir Ocarina of Time nunca haviam jogado o título original de mil novecentos e noventa e oito antes de entrar no projeto.",
+        "Longe de tratar isso como defeito, Aonuma — que começou a trabalhar com Shigeru Miyamoto justamente no Ocarina original há mais de vinte e cinco anos — viu nessa renovação geracional o motor da adaptação.",
+        "Em tradução direta das falas oficiais, Aonuma declarou: eu queria que a equipe fizesse The Legend of Zelda: Ocarina of Time à sua maneira. E completou à AFP: foi graças a esses jovens, que pensaram em como adaptar melhor o jogo e torná-lo divertido com o controle atual nas mãos, que o remake surgiu.",
+        "Essa liberdade explica por que o jogo inclui pulo dedicado por botão, controle giroscópico e revisão de ritmo. Para os jurados do The Game Awards, esse detalhe mostra que houve esforço ativo de direção e engenharia, e não apenas um filtro gráfico."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://assets.nintendo.com/image/upload/q_auto/f_auto/dpr_2.0/ncom/My%20Nintendo%20Store/EN-US/Nintendo%20Switch%202/Software/The%20Legend%20of%20Zelda%20Ocarina%20of%20Time/125697-125698-nintendo-the-legend-of-zelda-ocarina-of-time-ss-6-1280x720",
+        imageLabel: "ASK THE DEVELOPER VOL. 24 // PALAVRA DO PRODUTOR",
+        imageCaption: "Link toca a canção de Zelda na ocarina; comando pode ser feito por botões ou pelo microfone do console.",
+        headline: "JOVENS QUE NUNCA JOGARAM O ORIGINAL DE 1998",
+        evidenceTitle: "DECLARAÇÃO OFICIAL // EIJI AONUMA (PRODUTOR DA SÉRIE)",
+        evidenceQuote: "Eu queria que a equipe fizesse The Legend of Zelda: Ocarina of Time à sua maneira. O mundo foi reconstruído com um alto nível de detalhes.",
+        evidenceSource: "Nintendo — Ask the Developer Vol. 24 (Traduzido)",
+        pills: ["Eiji Aonuma", "Nova Geração", "40 Anos de Zelda"]
+      },
+      sceneB: {
+        imageUrl: "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+        imageLabel: "ADAPTAÇÃO MODERNA // CONTROLES E RITMO DE JOGO",
+        imageCaption: "Link e Saria na floresta em cena refeita com expressões faciais detalhadas e iluminação dinâmica.",
+        headline: "CONTROLES ATUAIS SEM PERDER A ESSÊNCIA",
+        evidenceTitle: "ENTREVISTA À AGÊNCIA AFP // OUTUBRO DE 2026",
+        evidenceQuote: "Foi graças a esses jovens que pensaram em como adaptar melhor o jogo e torná-lo divertido com o controle nas mãos que o remake surgiu.",
+        evidenceSource: "Eiji Aonuma em entrevista à AFP (28/10/2026)",
+        pills: ["Salto por Botão", "Câmera 360°", "Vozes e Orquestra"]
+      }
+    },
+    {
+      number: "04",
+      title: "O QUE DIZ A REGRA DO TGA SOBRE REMAKES",
+      kicker: "REGULAMENTO OFICIAL",
+      accent: "#FFB800",
+      source: "The Game Awards — FAQ Oficial & Regras de Elegibilidade",
+      narration: [
+        "Mesmo com nota noventa e seis e reconstrução elogiada, parte da comunidade sempre levanta a mesma objeção: um remake deveria concorrer ao prêmio de Jogo do Ano contra obras totalmente inéditas?",
+        "Para não cair em achismo, nós fomos direto ao documento de perguntas frequentes no site oficial do The Game Awards.",
+        "A regra da organização comandada por Geoff Keighley é categórica: o The Game Awards busca reconhecer os melhores trabalhos criativos e técnicos de cada ano, independentemente do formato de lançamento.",
+        "O texto oficial confirma que expansões, novas temporadas, DLCs, remakes e remasterizações são elegíveis em todas as categorias, desde que o júri considere que o novo trabalho criativo e técnico merece ser indicado, avaliando fatores como o grau de novidade do conteúdo e a relação entre preço e valor.",
+        "Mais do que letra fria no papel, existe jurisprudência recente na própria premiação. Em dois mil e vinte e três, o remake de Resident Evil quatro disputou o prêmio principal de Jogo do Ano. Em dois mil e vinte e quatro, Final Fantasy sete Rebirth também figurou entre os finalistas.",
+        "Portanto, pelo regulamento, não existe nenhuma barreira que impeça Ocarina of Time de entrar nos seis indicados ao GOTY. A única exigência é convencer os veículos votantes de que a reconstrução supera os lançamentos originais da temporada."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/editorial/tga-2026/tga-dec10-official.webp",
+        imageLabel: "THE GAME AWARDS 2026 // 10 DE DEZEMBRO EM LOS ANGELES",
+        imageCaption: "Arte oficial do The Game Awards 2026, marcado para 10 de dezembro no Peacock Theater.",
+        headline: "REMAKES PODEM CONCORRER EM TODAS AS CATEGORIAS",
+        evidenceTitle: "TRECHO DO REGULAMENTO // THEGAMEAWARDS.COM/FAQ",
+        evidenceQuote: "Remakes e remasterizações são elegíveis em todas as categorias se o júri considerar o novo trabalho criativo e técnico digno de indicação.",
+        evidenceSource: "The Game Awards — FAQ Oficial (Consultado em 04/11/2026)",
+        pills: ["Elegível no GOTY", "Avaliação do Júri", "Peacock Theater"]
+      },
+      sceneB: {
+        imageUrl: "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+        imageLabel: "TRABALHO TÉCNICO E CRIATIVO // CRITÉRIO DE VALOR",
+        imageCaption: "Combate de Link adulto com efeitos modernos de partículas e iluminação reconstruída no Switch 2.",
+        headline: "NOVIDADE TÉCNICA E PRECEDENTES NO PRÊMIO",
+        evidenceTitle: "CRITÉRIOS PONDERADOS PELO COLÉGIO ELEITORAL",
+        evidenceQuote: "O júri avalia o nível de conteúdo inédito, a evolução técnica sobre o original e o custo-benefício entregue ao jogador na geração atual.",
+        evidenceSource: "Diretrizes de Votação The Game Awards",
+        pills: ["Novidade Técnica", "Preço vs. Valor", "Jurisprudência TGA"]
+      }
+    },
+    {
+      number: "05",
+      title: "GTA VI E A JANELA DE 24 HORAS EM NOVEMBRO",
+      kicker: "NO LIMITE DO PRAZO",
+      accent: "#FF3366",
+      source: "Rockstar Games Support & Calendário The Game Awards 2026",
+      narration: [
+        "Agora vamos virar a câmera para o outro lado do ringue: Grand Theft Auto seis. Por que tanta gente achava que o jogo da Rockstar ficaria automaticamente fora do The Game Awards de dois mil e vinte e seis?",
+        "Historicamente, muitos eventos fechavam suas listas na primeira quinzena de novembro. Só que o regulamento atualizado do TGA dois mil e vinte e seis estabelece como data-limite o dia vinte de novembro, às nove horas da noite no horário do Pacífico.",
+        "Qualquer jogo disponível para o público até esse minuto exato pode ser votado nas categorias regulares. E a data oficial mantida pela Rockstar Games e pela Take-Two para GTA seis no PlayStation cinco e no Xbox Series X e S é dezenove de novembro de dois mil e vinte e seis.",
+        "Além disso, em três de novembro, o suporte oficial da Rockstar confirmou que o pré-download digital da instalação de até duzentos e doze gigabytes começa já no dia dez de novembro, preparando milhões de consoles nove dias antes da abertura dos servidores.",
+        "Mas aí surge a pergunta prática: se o jogo só libera no dia dezenove e o prazo fecha no dia vinte, como mais de cem redações do júri vão avaliar uma campanha gigante em apenas vinte e quatro horas?",
+        "A resposta também está no FAQ oficial do TGA: a organização permite expressamente que as publicadoras entreguem cópias antecipadas de avaliação, as chamadas review builds, para os veículos do júri antes do lançamento comercial. Ou seja, se a Rockstar distribuir o código com antecedência para a imprensa, GTA seis chega ao dia vinte em plenas condições de ser indicado."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_01.0naeahss9-1x6.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "CALENDÁRIO NO FIO DA NAVALHA // 19 VS. 20 DE NOVEMBRO",
+        imageCaption: "Jason e Lucia em Vice City; lançamento em 19 de novembro antecede em um dia o corte do TGA.",
+        headline: "COMO FUNCIONA A REGRA DE CÓPIAS ANTECIPADAS",
+        evidenceTitle: "REGRA DE AVALIAÇÃO PRÉVIA // THE GAME AWARDS FAQ",
+        evidenceQuote: "Jogos lançados até 20 de novembro às 21h PT são elegíveis. Editoras podem fornecer cópias antecipadas de análise (pre-release) ao júri antes da estreia comercial.",
+        evidenceSource: "The Game Awards FAQ & Rockstar Games Newswire",
+        pills: ["Pré-Load: 10 Nov", "Estreia: 19 Nov", "Corte TGA: 20 Nov"]
+      },
+      sceneB: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/Vice_City_06.0_tdmr3u9w84x.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "ESCALA DE LEONIDA // ATÉ 212 GB E US$ 79,99",
+        imageCaption: "Vista panorâmica de Vice City; superprodução exige até 212 GB de espaço e custa US$ 79,99 na loja dos EUA.",
+        headline: "O DESAFIO DE AVALIAR UM MUNDO ABERTO GIGANTE",
+        evidenceTitle: "VARIÁVEL CRÍTICA // TEMPO DE TESTE DO JÚRI",
+        evidenceQuote: "Sem envio antecipado de cópias à imprensa, um lançamento em 19 de novembro deixaria menos de 30 horas para o júri testar um jogo de até 212 GB.",
+        evidenceSource: "Rockstar Support (03/11/2026) & Apuração Orange Brick",
+        pills: ["Até 212 GB", "100+ Veículos", "Review Builds"]
+      }
+    },
+    {
+      number: "06",
+      title: "A MATEMÁTICA DO VOTO: 90% JÚRI E 10% PÚBLICO",
+      kicker: "BASTIDORES DA VOTAÇÃO",
+      accent: "#3B82F6",
+      source: "The Game Awards — Voting Jury & Rules (2026)",
+      narration: [
+        "Suponha que tanto Zelda: Ocarina of Time quanto Grand Theft Auto seis entrem na lista final de indicados ao prêmio de Jogo do Ano. Quem decide o vencedor na noite de dez de dezembro?",
+        "Muita gente acredita que o tamanho da base de fãs ou o recorde de vendas na estreia decide o troféu. Se dependesse apenas de volume de buscas e engajamento popular, GTA seis seria virtualmente imbatível antes mesmo de ligar o console.",
+        "Só que o processo eleitoral do The Game Awards funciona em duas etapas blindadas contra campanhas puramente numéricas.",
+        "Na primeira fase, mais de cem veículos de mídia e crítica especializada do mundo inteiro enviam cédulas coletivas secretas listando seus cinco jogos favoritos em cada categoria. Os seis mais citados viram os finalistas oficiais.",
+        "Na segunda fase, o vencedor é calculado por uma média ponderada: noventa por cento do peso final vem do voto desse colégio eleitoral de imprensa, e apenas dez por cento vem da votação aberta do público na internet.",
+        "Existe apenas uma categoria em que o público manda cem por cento sozinho: a Players Voice, cujo prazo de elegibilidade inclusive vai mais longe, até trinta de novembro. Já no troféu principal de Jogo do Ano, são os noventa por cento da crítica que batem o martelo."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/Leonida_Keys_06.0eapr3hbeyewx.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "PESO ELEITORAL // 90% IMPRENSA ESPECIALIZADA VS. 10% FÃS",
+        imageCaption: "Leonida Keys em captura oficial da Rockstar; recorde de vendas não garante vitória automática no júri.",
+        headline: "POR QUE VENDAS E HYPE NÃO GARANTEM O TROFÉU",
+        evidenceTitle: "FÓRMULA OFICIAL DE APURAÇÃO // THE GAME AWARDS",
+        evidenceQuote: "Os vencedores são determinados por votação mista entre o júri internacional (90%) e o voto popular (10%). Apenas a categoria Players' Voice é 100% popular.",
+        evidenceSource: "The Game Awards — Procedimento de Votação",
+        pills: ["90% Voto do Júri", "10% Voto Popular", "Players' Voice: 30 Nov"]
+      },
+      sceneB: {
+        imageUrl: "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide03.jpg",
+        imageLabel: "CÉDULA COLETIVA // NOTA INDIVIDUAL VS. VOTO DE REDAÇÃO",
+        imageCaption: "Ganondorf sob tempestade de raios no remake de Ocarina of Time para Nintendo Switch 2.",
+        headline: "A DIFERENÇA ENTRE METACRITIC E CÉDULA DO TGA",
+        evidenceTitle: "VOTO COLETIVO POR REDAÇÃO // COLÉGIO ELEITORAL",
+        evidenceQuote: "No Metacritic vale a nota de um único analista; no TGA, cada redação do júri submete um voto coletivo da equipe inteira, o que pode mudar o equilíbrio.",
+        evidenceSource: "The Game Awards — Voting Jury Guidelines",
+        pills: ["Voto por Redação", "Mais de 100 Meios", "Escolha Coletiva"]
+      }
+    },
+    {
+      number: "07",
+      title: "TRADIÇÃO RECONSTRUÍDA CONTRA REVOLUÇÃO EM MUNDO ABERTO",
+      kicker: "CHOQUE DE FILOSOFIAS",
+      accent: "#A855F7",
+      source: "Análise Editorial Orange Brick — Nintendo vs. Rockstar",
+      narration: [
+        "Quando colocamos os dois projetos lado a lado, percebemos que uma eventual disputa entre Zelda e GTA seis no TGA dois mil e vinte e seis representa o choque entre duas filosofias opostas da indústria moderna.",
+        "De um lado está a Nintendo celebrando os quarenta anos da franquia Zelda ao reconstruir a obra que inventou a gramática dos jogos de ação tridimensionais em mil novecentos e noventa e oito, agora lapidada para o hardware do Switch dois com média noventa e seis já comprovada na mesa.",
+        "É a aposta na precisão de design, no ritmo clássico de masmorras e na memória afetiva renovada por uma geração jovem de desenvolvedores sob a tutela de Eiji Aonuma.",
+        "Do outro lado está a Rockstar Games apostando tudo na escala máxima da engenharia contemporânea: um estado inteiro de Leonida com cinco regiões, trilha sonora original assinada pelo duo Justice no novo trailer de lançamento, e um mundo aberto que exige mais de duzentos gigabytes de armazenamento.",
+        "Enquanto Zelda entrega hoje uma certeza crítica já testada e aprovada pela imprensa, GTA seis carrega a maior promessa técnica da década, mas ainda precisa passar pelo crivo real dos testes independentes a partir de dezenove de novembro.",
+        "E vale lembrar: o ano de dois mil e vinte e seis não pertence apenas aos dois. Outros lançamentos inéditos de peso também disputam as seis cadeiras da final, tornando cada voto do júri decisivo."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://assets.nintendo.com/image/upload/q_auto/f_auto/dpr_2.0/ncom/My%20Nintendo%20Store/EN-US/Nintendo%20Switch%202/Software/The%20Legend%20of%20Zelda%20Ocarina%20of%20Time/125697-125698-nintendo-the-legend-of-zelda-ocarina-of-time-ss-2-1280x720",
+        imageLabel: "FILOSOFIA NINTENDO // PRECISÃO CLÁSSICA E NOTA CONFIRMADA",
+        imageCaption: "Link montado em Epona diante da Montanha da Morte no remake para Nintendo Switch 2.",
+        headline: "A CERTEZA CRÍTICA DE UM CLÁSSICO NOTA 96",
+        evidenceTitle: "TRUNFO DE ZELDA NA TEMPORADA DE PREMIAÇÕES",
+        evidenceQuote: "Lançado em 5 de novembro com média 96 já consolidada, Zelda tem semanas de vantagem para ser jogado até o fim por todos os jurados do TGA.",
+        evidenceSource: "Análise Comparativa // Orange Brick",
+        pills: ["Já Avaliado (96)", "Tempo de Jogo", "Clássico Refeito"]
+      },
+      sceneB: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/Lucia_Caminos_06.0fxbjfk0jakb3.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "FILOSOFIA ROCKSTAR // ESCALA INÉDITA E IMPACTO CULTURAL",
+        imageCaption: "Lucia Caminos em cena de ação em Leonida; trailer de lançamento trouxe faixa inédita de Justice.",
+        headline: "A PROMESSA DO MAIOR MUNDO ABERTO DA HISTÓRIA",
+        evidenceTitle: "TRUNFO DE GTA VI NA RETA FINAL DE NOVEMBRO",
+        evidenceQuote: "Se cumprir o lançamento em 19 de novembro e entregar a ambição técnica prometida nos trailers, GTA VI chega com o peso de um lançamento 100% inédito.",
+        evidenceSource: "Rockstar Games Launch Trailer & Análise Orange Brick",
+        pills: ["100% Inédito", "Escala Global", "Trilha por Justice"]
+      }
+    },
+    {
+      number: "08",
+      title: "O VEREDITO: QUEM LEVA O TROFÉU EM 10 DE DEZEMBRO?",
+      kicker: "CONCLUSÃO ORANGE BRICK",
+      accent: "#FF5E00",
+      source: "Editorial Orange Brick — orangebrick.blog (04/11/2026)",
+      narration: [
+        "Chegamos ao veredito deste dossiê. O que já é fato comprovado e o que ainda depende dos próximos quinze dias?",
+        "Fato número um: o remake de The Legend of Zelda: Ocarina of Time estreou com média noventa e seis no Metacritic, a maior nota de dois mil e vinte e seis até aqui, e tem respaldo total do regulamento do The Game Awards para concorrer a Jogo do Ano.",
+        "Fato número dois: Grand Theft Auto seis, mantido para dezenove de novembro, entra legalmente na janela de elegibilidade do TGA dois mil e vinte e seis por uma margem exata de vinte e quatro horas antes do corte de vinte de novembro.",
+        "Fato número três: ser elegível não significa estar automaticamente indicado. Para transformar expectativa em troféu no dia dez de dezembro, em Los Angeles, GTA seis precisará ser avaliado a tempo pelas redações que detêm noventa por cento do poder de voto.",
+        "Se os dois gigantes confirmarem presença na lista final, dois mil e vinte e seis terá o confronto mais simbólico da história recente do evento: a obra que fundou o jogo moderno em três dimensões contra o colosso que quer redefinir o futuro do mundo aberto.",
+        "E agora a palavra está com você: na sua cédula, um remake nota noventa e seis pode bater um lançamento inédito como GTA seis pelo título de Jogo do Ano? Deixe seu voto aqui nos comentários, inscreva-se no canal do Orange Brick e leia a apuração completa em orangebrick ponto blog."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+        imageLabel: "RESUMO DA APURAÇÃO // O QUE JÁ ESTÁ CONFIRMADO",
+        imageCaption: "Link cavalga pelos campos de Hyrule no Switch 2; jogo chega ao público em 5 de novembro de 2026.",
+        headline: "OS 3 FATOS QUE DEFINEM A CORRIDA AO GOTY",
+        evidenceTitle: "SÍNTESE VERIFICADA // DOSSIÊ ORANGE BRICK",
+        evidenceQuote: "1) Zelda lidera 2026 com média 96 e é elegível; 2) GTA VI (19/11) entra no prazo de 20/11; 3) Júri detém 90% do voto final em 10 de dezembro.",
+        evidenceSource: "Editorial Orange Brick — orangebrick.blog",
+        pills: ["Zelda 96 (05/11)", "GTA VI (19/11)", "Final: 10 Dez"]
+      },
+      sceneB: {
+        imageUrl: "https://www.rockstargames.com/VI/_next/static/media/ULTIMATE_EDITION_02.0q-6.nrtf~jj0.jpg?akim=1&imdensity=1&imwidth=1920",
+        imageLabel: "ORANGEBRICK.BLOG // DEIXE SEU VOTO NOS COMENTÁRIOS",
+        imageCaption: "Arte oficial de Grand Theft Auto VI; acompanhe a cobertura completa da temporada de premiações no portal.",
+        headline: "QUAL É O SEU JOGO DO ANO EM 2026?",
+        evidenceTitle: "PARTICIPE DO DEBATE // CANAL ORANGE BRICK",
+        evidenceQuote: "Comente abaixo se você votaria no remake de Ocarina of Time, em GTA VI ou em outro lançamento de 2026, inscreva-se no canal e acesse orangebrick.blog.",
+        evidenceSource: "Orange Brick — Jornalismo Direto e Sem Firulas",
+        pills: ["Vote nos Comentários", "Inscreva-se", "orangebrick.blog"]
+      }
+    }
+  ]
+};
+
+const GOW_LAUFEY_EPISODE = {
+  slug: "god-of-war-laufey-do-anuncio-ao-adiamento",
+  seriesBadge: "DOSSIÊ ORANGE BRICK // EPISÓDIO #03",
+  title: "GOD OF WAR LAUFEY: DO ANÚNCIO AO ADIAMENTO PARA MAIO DE 2027",
+  youtubeTitle: "God of War Laufey: Do Anúncio de Faye no Everywhen ao Adiamento Oficial para Maio de 2027",
+  subtitle: "A trajetória completa do novo capítulo da Santa Monica Studio no PS5: quem é Faye, o além dos deuses Everywhen, o sistema de combate ágil e o comunicado oficial de adiamento.",
+  slateFooterText: "DOSSIÊ ESPECIAL // GOD OF WAR LAUFEY • SANTA MONICA STUDIO • PLAYSTATION 5",
+  endCardSubtitle: "O que você achou do adiamento de God of War Laufey para 20 de maio de 2027? Comente e inscreva-se!",
+  endCardSources: "FONTES: SANTA MONICA STUDIO • PLAYSTATION.BLOG • SONY INTERACTIVE ENTERTAINMENT • SHACKNEWS",
+  youtubeOverviewParagraph: "Neste dossiê investigativo do Orange Brick, reconstruímos toda a trajetória oficial de God of War Laufey até o comunicado de adiamento em 4 de novembro de 2026: a mudança de 16 de fevereiro para 20 de maio de 2027 no PlayStation 5, a revelação de junho de 2026 com Faye (Laufey) como protagonista interpretada por Deborah Ann Woll, o mundo pós-morte Everywhen, os companheiros Phranque e Rue, o combate ágil com espada, arco e magia de almas, as edições de pré-venda e a conexão futura com Kratos.",
+  pinnedComment: "O adiamento de God of War Laufey de 16 de fevereiro para 20 de maio de 2027 preocupa você ou 3 meses extras para polimento na Santa Monica Studio são a decisão certa? E o que você espera de jogar com Faye no Everywhen? Comente abaixo!",
+  tags: [
+    "God of War Laufey",
+    "God of War Laufey adiado",
+    "Faye God of War",
+    "Santa Monica Studio",
+    "God of War 20 de maio de 2027",
+    "Everywhen God of War",
+    "PlayStation 5",
+    "Kratos e Faye",
+    "Deborah Ann Woll",
+    "Orange Brick"
+  ],
+  sourceMode: "ai_dossier",
+  sourcePostSlugs: [
+    "god-of-war-laufey-adiado-20-maio-2027",
+    "god-of-war-laufey-data-lancamento-fevereiro-2027-ps5",
+    "novo-god-of-war-kratos-confirmado-sequencia-laufey"
+  ],
+  visualStyle: "documentario",
+  voiceId: "pt-BR-AntonioNeural",
+  targetMinDurationSec: 500,
+  thumbnailSpecs: [
+    {
+      id: "thumb_1",
+      label: "Opção 1 · Alerta de Adiamento",
+      angle: "Foco na mudança oficial de data para 20 de maio de 2027",
+      badge: "COMUNICADO SANTA MONICA",
+      line1: "GOD OF WAR ADIADO",
+      line2: "20 DE MAIO DE 2027",
+      accent: "#FF5E00",
+      chapterIdx: 0,
+      sceneKey: "A"
+    },
+    {
+      id: "thumb_2",
+      label: "Opção 2 · Jornada de Faye",
+      angle: "Foco na história de Laufey no além dos deuses Everywhen",
+      badge: "DOSSIÊ GOD OF WAR LAUFEY",
+      line1: "DO ANÚNCIO AO CORTE",
+      line2: "A SAGA DE FAYE NO PS5",
+      accent: "#FFB800",
+      chapterIdx: 2,
+      sceneKey: "A"
+    },
+    {
+      id: "thumb_3",
+      label: "Opção 3 · Bastidores & Kratos",
+      angle: "Foco na conexão entre Laufey, Kratos e o futuro da série",
+      badge: "ANÁLISE DE CRONOLOGIA",
+      line1: "POR QUE LAUFEY MUDOU",
+      line2: "DE FEVEREIRO PARA MAIO?",
+      accent: "#00E5FF",
+      chapterIdx: 7,
+      sceneKey: "A"
+    }
+  ],
+  shortsTemplates: [
+    {
+      id: "short_1",
+      title: "O que a Santa Monica disse na carta de adiamento de God of War Laufey",
+      hook: "God of War Laufey saiu de 16 de fevereiro para 20 de maio de 2027. Veja exatamente o que diz o comunicado oficial do estúdio.",
+      chapterIdx: 5,
+      duration_seconds: 52,
+      related_slug: "god-of-war-laufey-adiado-20-maio-2027"
+    },
+    {
+      id: "short_2",
+      title: "O que é o Everywhen: o além dos deuses em God of War Laufey",
+      hook: "A história de God of War Laufey começa logo após o funeral de Faye, quando ela desperta em uma dimensão onde várias mitologias colidem.",
+      chapterIdx: 3,
+      duration_seconds: 54,
+      related_slug: "god-of-war-laufey-data-lancamento-fevereiro-2027-ps5"
+    },
+    {
+      id: "short_3",
+      title: "Como funciona o combate de Faye comparado ao de Kratos",
+      hook: "Esqueça apenas o peso lento da fase nórdica: a Santa Monica misturou a narrativa atual com a agilidade aérea da era grega para Faye.",
+      chapterIdx: 4,
+      duration_seconds: 50,
+      related_slug: "god-of-war-laufey-adiado-20-maio-2027"
+    }
+  ],
+  chapters: [
+    {
+      number: "01",
+      title: "O CHOQUE DE CALENDÁRIO: DE FEVEREIRO PARA MAIO",
+      kicker: "PLANTÃO SANTA MONICA",
+      accent: "#FF5E00",
+      source: "Santa Monica Studio (04/11/2026) & PlayStation.Blog",
+      narration: [
+        "O próximo God of War mudou oficialmente de data. Mas o que aconteceu nos bastidores desde que conhecemos Laufey até a decisão da Santa Monica Studio de adiar o lançamento?",
+        "No dia quatro de novembro de dois mil e vinte e seis, o estúdio da Sony publicou um comunicado direto nas suas redes oficiais alterando o calendário de estreia no PlayStation cinco.",
+        "A jornada protagonizada por Faye, que estava marcada para dezesseis de fevereiro de dois mil e vinte e sete e já tinha pré-venda aberta nas lojas desde o fim de setembro, foi transferida para vinte de maio de dois mil e vinte e sete.",
+        "São noventa e três dias adicionais de espera — pouco mais de três meses de diferença — para um dos exclusivos de peso mais aguardados da atual geração da Sony.",
+        "Sempre que um grande estúdio adia um lançamento com pré-venda em andamento, a internet se divide entre teorias alarmistas sobre crises internas e especulações sobre janelas comerciais.",
+        "Por isso, neste dossiê do Orange Brick, nós vamos reconstruir passo a passo a linha do tempo de God of War Laufey: da revelação em junho de dois mil e vinte e seis aos detalhes do mundo Everywhen, do novo sistema de combate à leitura integral da carta de adiamento, separando rigorosamente o que o estúdio confirmou do que é apenas rumor."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+        imageLabel: "MUDANÇA OFICIAL // 16 DE FEVEREIRO → 20 DE MAIO DE 2027",
+        imageCaption: "Faye empunha sua espada em captura oficial de God of War Laufey rodando no PlayStation 5 Pro.",
+        headline: "MAIS 3 MESES DE ESPERA NO PLAYSTATION 5",
+        evidenceTitle: "CRONOGRAMA ATUALIZADO // SANTA MONICA STUDIO",
+        evidenceQuote: "Anunciado anteriormente para 16 de fevereiro de 2027, God of War Laufey teve sua estreia reagendada para 20 de maio de 2027 em comunicado de 4 de novembro.",
+        evidenceSource: "Comunicado Oficial Santa Monica Studio (04/11/2026)",
+        pills: ["Antes: 16 Fev 2027", "Agora: 20 Mai 2027", "Exclusivo PS5"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/c568cfbd5d3e9b5dc1c099420ca32d5d56d0256e.jpg",
+        imageLabel: "LINHA DO TEMPO // DE JUNHO A NOVEMBRO DE 2026",
+        imageCaption: "Faye desperta em uma floresta sombria; jogo foi revelado ao público em 2 de junho de 2026.",
+        headline: "DO ANÚNCIO EM JUNHO AO CORTE EM NOVEMBRO",
+        evidenceTitle: "MARCOS OFICIAIS DA PRODUÇÃO EM 2026",
+        evidenceQuote: "Revelado em 2 de junho de 2026, detalhado com pré-vendas em 28 de setembro e reagendado em 4 de novembro para polimento final da campanha.",
+        evidenceSource: "PlayStation.Blog & Santa Monica Studio",
+        pills: ["02 Jun: Revelação", "28 Set: Pré-Venda", "04 Nov: Adiamento"]
+      }
+    },
+    {
+      number: "02",
+      title: "JUNHO DE 2026: A APOSTA EM UM NOVO PROTAGONISMO",
+      kicker: "ATO 01 // REVELAÇÃO",
+      accent: "#FFB800",
+      source: "Grace Orlady (Santa Monica Studio) — PlayStation.Blog (02/06/2026)",
+      narration: [
+        "Para entender a dimensão desse projeto, precisamos voltar ao dia dois de junho de dois mil e vinte e seis, quando a Sony e a Santa Monica Studio apresentaram God of War Laufey pela primeira vez.",
+        "Depois do encerramento da guerra de Odin em God of War Ragnarök, a grande dúvida era qual direção a franquia tomaria. A resposta veio com uma mudança corajosa de ponto de vista: colocar Laufey, a Justa — conhecida por Kratos e Atreus como Faye — no centro absoluto da ação.",
+        "No artigo oficial de apresentação no PlayStation Blog, assinado pela diretora sênior de comunicação e comunidade da Santa Monica, Grace Orlady, o estúdio deixou claro que Laufey não é um projeto menor, mas um novo capítulo principal dentro do universo God of War.",
+        "Orlady explicou que a equipe manteve o DNA inegociável da série — combate visceral, exploração densa e narrativa emocional —, mas desenhou um ritmo próprio para refletir a identidade de uma guerreira gigante.",
+        "Pela primeira vez desde a criação da franquia, o jogador assume uma campanha inteira fora da pele de Kratos, enxergando os segredos da saga nórdica pelos olhos da personagem que colocou toda a história de dois mil e dezoito em movimento."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+        imageLabel: "REVELAÇÃO EM 02/06/2026 // UM NOVO CAPÍTULO PRINCIPAL",
+        imageCaption: "Faye observa ruínas monumentais em captura oficial divulgada na apresentação de junho de 2026.",
+        headline: "O DNA DE GOD OF WAR SOB UMA NOVA PERSPECTIVA",
+        evidenceTitle: "DECLARAÇÃO OFICIAL // GRACE ORLADY (SANTA MONICA STUDIO)",
+        evidenceQuote: "O projeto preserva os pilares de combate intenso, exploração e narrativa profunda da franquia, mas constrói uma identidade própria em torno de Faye.",
+        evidenceSource: "PlayStation.Blog — First Look at God of War Laufey (02/06/2026)",
+        pills: ["Revelado em Junho", "Capítulo Principal", "Visão de Faye"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/bf2289b94400a3f16dee48e8f1d68f5a21de76f4.jpg",
+        imageLabel: "DIREÇÃO CRIATIVA // CORY BARLOG E EQUIPE SANTA MONICA",
+        imageCaption: "Escultura colossal no horizonte da aventura; estúdio buscou expandir a escala mitológica da série.",
+        headline: "POR QUE ESCOLHER LAUFEY APÓS RAGNARÖK?",
+        evidenceTitle: "CONSTRUÇÃO DE UNIVERSO // SANTA MONICA STUDIO",
+        evidenceQuote: "Ao focar na guerreira Jötunn que moldou o destino da família em Midgard, o estúdio conecta o passado nórdico a novas fronteiras mitológicas.",
+        evidenceSource: "Apresentação Oficial PlayStation.Blog",
+        pills: ["Guerreira Jötunn", "Pós-Ragnarök", "Nova Escala"]
+      }
+    },
+    {
+      number: "03",
+      title: "QUEM É FAYE: DA PIRA FUNERÁRIA AO PROTAGONISMO",
+      kicker: "ATO 02 // A GUERREIRA",
+      accent: "#00E5FF",
+      source: "PlayStation.Blog — Perfil de Personagem & Elenco Oficial",
+      narration: [
+        "Nos dois jogos anteriores da fase nórdica, Faye era uma presença quase mística. O jogo de dois mil e dezoito começava literalmente com Kratos e Atreus diante da sua pira funerária, cumprindo o último pedido de levar suas cinzas ao pico mais alto dos reinos.",
+        "Em Ragnarök, pequenos fragmentos de memória mostraram Faye interpretada pela atriz Deborah Ann Woll, revelando sua força e o peso das escolhas que ela fez para proteger o marido e o filho das profecias de Asgard.",
+        "Agora, em God of War Laufey, Deborah Ann Woll retorna oficialmente ao papel, mas sem a aura distante de uma lembrança idealizada.",
+        "A proposta declarada pela Santa Monica Studio é mergulhar na humanidade real da personagem: suas forças como guardiã do seu povo, mas também suas falhas, seus impulsos e o preço emocional de tentar dobrar o próprio destino.",
+        "E o ponto de partida da trama faz uma ponte direta com a cena que todo fã conhece de cor: a jornada de Faye começa exatamente no instante seguinte ao seu funeral em Midgard, quando ela abre os olhos do outro lado da morte."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/1fb563c849f5f555690a331bbbb89f01cec7e5d0.jpg",
+        imageLabel: "O PONTO DE PARTIDA // APÓS O FUNERAL EM MIDGARD",
+        imageCaption: "Kratos e Atreus diante da pira funerária de Faye; o novo jogo começa exatamente após essa despedida.",
+        headline: "O QUE ACONTECEU COM FAYE DEPOIS DA PIRA?",
+        evidenceTitle: "PREMISSA NARRATIVA // CONEXÃO DIRETA COM 2018",
+        evidenceQuote: "A história começa logo após o funeral de Faye, mostrando o que ela enfrentou no pós-vida enquanto Kratos e Atreus iniciavam sua jornada em Midgard.",
+        evidenceSource: "PlayStation.Blog — Sinopse Oficial de God of War Laufey",
+        pills: ["Pós-Funeral", "Kratos & Atreus", "Elo com 2018"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/faf12b84129bcb6b3bf751cdf7ca9d44725d4d08.jpg",
+        imageLabel: "DEBORAH ANN WOLL // RETORNO AO PAPEL PRINCIPAL",
+        imageCaption: "Faye cercada por borboletas espectrais em cena cinematográfica capturada no PlayStation 5 Pro.",
+        headline: "FORÇAS, FALHAS E A LUTA PELA FAMÍLIA",
+        evidenceTitle: "RETORNO NO ELENCO // DEBORAH ANN WOLL COMO FAYE",
+        evidenceQuote: "Interpretada novamente por Deborah Ann Woll, Faye deixa de ser apenas uma memória reverenciada para revelar suas dúvidas, falhas e determinação em combate.",
+        evidenceSource: "PlayStation.Blog — Apresentação da Protagonista",
+        pills: ["Deborah Ann Woll", "Drama Familiar", "Captura PS5 Pro"]
+      }
+    },
+    {
+      number: "04",
+      title: "EVERYWHEN: O ALÉM DOS DEUSES E NOVAS MITOLOGIAS",
+      kicker: "ATO 03 // O MUNDO",
+      accent: "#A855F7",
+      source: "PlayStation.Blog — Lore Oficial de Everywhen, Phranque & Rue",
+      narration: [
+        "Quando Faye desperta após o seu funeral, ela não está em Helheim nem em Valhala. Ela acorda em um domínio inédito na franquia, batizado pela Santa Monica Studio de Everywhen — traduzido no comunicado em português do estúdio como o Todo-Tempo.",
+        "Segundo a descrição oficial da PlayStation, o Everywhen é um além dos deuses onde divindades, guerreiros e criaturas de diferentes mitologias e épocas se cruzam.",
+        "Logo ao chegar, Faye descobre que uma ruptura na magia desse plano espiritual ameaça destruir todas as proteções que ela havia preparado em vida para manter Kratos e Atreus a salvo.",
+        "As imagens oficiais divulgadas pelo estúdio já mostram o impacto visual dessa premissa: vemos figuras com adornos que remetem a panteões antigos fora da Escandinávia e templos de arquitetura oriental e ancestral colidindo no mesmo horizonte.",
+        "Para atravessar esse labirinto mitológico, Faye não estará sozinha. O estúdio apresentou dois companheiros centrais: Phranque, uma entidade em forma de cubo cósmico senciente, e Rue, uma guardiã espiritual ligada diretamente à espada empunhada pela protagonista."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/11e4fd90abbd12235bf8c02eb2e0df777aab1d80.jpg",
+        imageLabel: "O TODO-TEMPO (EVERYWHEN) // COLISÃO DE MITOLOGIAS",
+        imageCaption: "Entidades e divindades de diferentes panteões habitam o Everywhen, o além dos deuses.",
+        headline: "ONDE DEUSES DE VÁRIAS ERAS SE ENCONTRAM",
+        evidenceTitle: "CENÁRIO INÉDITO // EVERYWHEN (O TODO-TEMPO)",
+        evidenceQuote: "Descrito como o além dos deuses, o Everywhen reúne figuras de diferentes mitologias enquanto uma ruptura mágica ameaça os planos de Faye para proteger sua família.",
+        evidenceSource: "PlayStation.Blog — Construção de Mundo de God of War Laufey",
+        pills: ["Everywhen", "Várias Mitologias", "Ruptura Mágica"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/bafca2172045024e8fb2136ff2a7029179214d7d.jpg",
+        imageLabel: "ALIADOS INÉDITOS // PHRANQUE E A GUARDIÃ RUE",
+        imageCaption: "Figura divina iluminada por incensos dourados em captura 4K divulgada pela PlayStation.",
+        headline: "OS COMPANHEIROS: O CUBO PHRANQUE E RUE",
+        evidenceTitle: "PERSONAGENS CONFIRMADOS PELA SANTA MONICA",
+        evidenceQuote: "Na jornada pelo Todo-Tempo, Faye conta com Phranque, um cubo cósmico misterioso, e Rue, guardiã espiritual conectada à lâmina que a guerreira carrega.",
+        evidenceSource: "PlayStation.Blog — Detalhes de História e Edições",
+        pills: ["Phranque (Cubo)", "Rue (Guardiã)", "Mistério Cósmico"]
+      }
+    },
+    {
+      number: "05",
+      title: "COMBATE: A FUSÃO DA ERA NÓRDICA COM A AGILIDADE GREGA",
+      kicker: "ATO 04 // JOGABILIDADE",
+      accent: "#10B981",
+      source: "PlayStation.Blog — Análise Oficial de Combate e Armas",
+      narration: [
+        "Mas como toda essa mitologia funciona com o controle DualSense na mão? Na revelação de gameplay, a Santa Monica Studio detalhou uma mudança importante na filosofia de combate.",
+        "Enquanto Kratos nos jogos nórdicos tinha uma movimentação pesada, plantada no chão e focada em golpes brutais de curta distância, Faye foi projetada para unir a câmera próxima e tática da era nórdica com a agilidade vertical e acrobática que marcou a fase grega clássica da franquia.",
+        "Em vez do Machado Leviatã — que naquele momento da cronologia já havia sido deixado como herança para Kratos em Midgard —, Faye utiliza uma espada mística combinada com um arco espiritual e feitiços de alquimia e almas.",
+        "Os vídeos e capturas oficiais mostram a guerreira alternando combos rápidos no solo com saltos, esquivas aéreas e disparos em pleno ar contra criaturas aladas em chamas.",
+        "Além disso, o sistema de magia de almas permite absorver e canalizar energias do Everywhen através do artefato Phalange, criando sinergias elementais que exigem reflexos rápidos. Claro que a sensação real de peso, resposta de quadros e equilíbrio de dificuldade só poderá ser comprovada quando o jogo final for testado de forma independente."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+        imageLabel: "HERANÇA GREGA + NÓRDICA // ESPADA E AGILIDADE VERTICAL",
+        imageCaption: "Faye em postura de combate com sua espada diante de uma criatura envolta em chamas no PS5 Pro.",
+        headline: "MAIS RÁPIDA E ACROBÁTICA QUE KRATOS",
+        evidenceTitle: "FILOSOFIA DE GAMEPLAY // SANTA MONICA STUDIO",
+        evidenceQuote: "O combate combina a intimidade da câmera nórdica com a mobilidade ágil e aérea inspirada nos capítulos clássicos da era grega, alternando ataques no chão e no ar.",
+        evidenceSource: "PlayStation.Blog — Apresentação de Gameplay",
+        pills: ["Combate Aéreo", "Espada de Rue", "Mobilidade Rápida"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/d9d0a64623639de5ce6e30a52ed09b74c8c0282f.jpg",
+        imageLabel: "ARCO E MAGIA DE ALMAS // SINERGIAS NO EVERYWHEN",
+        imageCaption: "Faye dispara seu arco contra criaturas de fogo diante de um templo ancestral em captura 4K.",
+        headline: "ARCO ESPIRITUAL E HABILIDADES DE ALMAS",
+        evidenceTitle: "ARSENAL E RECURSOS DE COMBATE CONFIRMADOS",
+        evidenceQuote: "Além da espada e do arco, Faye canaliza magias ligadas a almas e ao artefato Phranque para criar combinações elementais contra hordas mitológicas.",
+        evidenceSource: "PlayStation.Blog — Detalhes de Jogabilidade (2026)",
+        pills: ["Arco Espiritual", "Magia de Almas", "Combos no Ar"]
+      }
+    },
+    {
+      number: "06",
+      title: "O COMUNICADO DE 4 DE NOVEMBRO: POR QUE ADIOU?",
+      kicker: "ATO 05 // A CARTA OFICIAL",
+      accent: "#FF3366",
+      source: "Santa Monica Studio — Comunicado Oficial (04/11/2026)",
+      narration: [
+        "Depois da revelação em junho, a Sony deu o passo seguinte em vinte e oito de setembro de dois mil e vinte e seis, quando abriu as pré-vendas mundiais e cravou a estreia para dezesseis de fevereiro de dois mil e vinte e sete.",
+        "Tudo parecia caminhar para um lançamento no primeiro trimestre, até que, na quarta-feira quatro de novembro, a Santa Monica Studio divulgou a carta oficial que você vê traduzida na tela.",
+        "No texto, o estúdio declara: desde a revelação de God of War Laufey em junho, ficamos profundamente gratos ao ver tanto entusiasmo pela jornada de Faye no Todo-Tempo. Não tomamos como garantida a confiança depositada em nosso estúdio para criar uma experiência extraordinária à altura da paixão e dedicação dos nossos fãs.",
+        "E conclui de forma direta: com isso em mente, decidimos adiar o lançamento de God of War Laufey para vinte de maio de dois mil e vinte e sete. Aproveitaremos cada momento até lá para dar os retoques finais e levar o jogo ao seu pleno potencial.",
+        "Repare no rigor jornalístico necessário aqui: o estúdio atribui os três meses extras exclusivamente ao polimento final. A carta não menciona falhas graves de motor gráfico, refação de história nem fuga de concorrentes. Qualquer teoria além do comunicado oficial, neste momento, é pura especulação sem fonte."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/editorial/2c4a2c91-b2dd-40c0-b0bf-ab17683e5a0b/comunicado-traduzido-7651b3d0-b43c-4377-be37-386b9e639bba.png",
+        isDocumentCard: true,
+        imageLabel: "DOCUMENTO OFICIAL // CARTA DA SANTA MONICA STUDIO",
+        imageCaption: "Tradução editorial na íntegra do comunicado publicado pela Santa Monica Studio em 4 de novembro de 2026.",
+        headline: "A CARTA DE ADIAMENTO NA ÍNTEGRA",
+        evidenceTitle: "DECLARAÇÃO OFICIAL // SANTA MONICA STUDIO (04/11/2026)",
+        evidenceQuote: "Decidimos adiar o lançamento de God of War Laufey para 20 de maio de 2027. Aproveitaremos cada momento até lá para dar os retoques finais e levar o jogo ao seu pleno potencial.",
+        evidenceSource: "Santa Monica Studio via X / Redes Oficiais (Traduzido)",
+        pills: ["04 Nov 2026", "Retoques Finais", "Nova Data: 20 Mai"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/06/ac77c0ffa02b542704e0dac0cb89a42eeb1e9641.jpg",
+        imageLabel: "FATO VS. ESPECULAÇÃO // TRÊS MESES DE POLIMENTO",
+        imageCaption: "Faye canaliza energia dourada no Everywhen; estúdio foca nos ajustes finais até maio de 2027.",
+        headline: "SEM RUMORES: O QUE O ESTÚDIO REALMENTE DISSE",
+        evidenceTitle: "APURAÇÃO EDITORIAL // O QUE SABEMOS DE FATO",
+        evidenceQuote: "O adiamento de 93 dias é um ajuste clássico de polimento de fim de produção; não há registro oficial de mudança de escopo ou corte de conteúdo.",
+        evidenceSource: "Apuração Orange Brick & Shacknews (04/11/2026)",
+        pills: ["+93 Dias", "Foco em Qualidade", "Sem Crise Confirmada"]
+      }
+    },
+    {
+      number: "07",
+      title: "EDIÇÕES, PRÉ-VENDA E A CONEXÃO COM O FUTURO DE KRATOS",
+      kicker: "ATO 06 // EDIÇÕES & FUTURO",
+      accent: "#3B82F6",
+      source: "PlayStation.Blog (28/09/2026) & Cory Barlog (SDCC 2026)",
+      narration: [
+        "E o que muda na prática para quem já havia reservado o jogo na pré-venda aberta em vinte e nove de setembro?",
+        "No PlayStation Blog, a Sony havia detalhado três formatos principais: a edição padrão física ou digital com o bônus da armadura Last Wish e o visual dourado para Phranque; a edição Digital Deluxe, que acrescenta a armadura Dark Alchemy, visuais de espada e arco, minilivro de arte e trilha sonora; e a Collector Box física, vendida separadamente com estátua iluminada de Faye e um baralho de oráculo de cinquenta e uma cartas.",
+        "Com a mudança para vinte de maio de dois mil e vinte e sete, as reservas digitais na PlayStation Store têm sua data de liberação atualizada automaticamente pela plataforma, cabendo ao comprador conferir as regras de cobrança e cancelamento da sua loja.",
+        "Mas há um segundo motivo pelo qual God of War Laufey é tão estratégico para o futuro do PlayStation cinco.",
+        "Como o próprio diretor criativo Cory Barlog já adiantou ao falar sobre a continuidade da franquia, os acontecimentos vividos por Faye no Todo-Tempo não são uma história isolada: eles servem de alicerce direto para os mistérios e consequências que Kratos ainda enfrentará nos próximos capítulos da série."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/80456f7d6b73917ed6ac7162328b97d7e69df1b9.jpg",
+        imageLabel: "PRÉ-VENDA E BÔNUS // EDIÇÃO PADRÃO E DELUXE",
+        imageCaption: "Infográfico oficial das edições de God of War Laufey e bônus de pré-venda divulgado no PlayStation.Blog.",
+        headline: "O QUE MUDA NAS PRÉ-VENDAS E EDIÇÕES",
+        evidenceTitle: "CATÁLOGO OFICIAL // PLAYSTATION.BLOG (28/09/2026)",
+        evidenceQuote: "As edições Standard, Digital Deluxe e Collector Box mantêm os conteúdos anunciados em setembro, passando a seguir o novo calendário de 20 de maio de 2027.",
+        evidenceSource: "PlayStation.Blog — Editions Detailed",
+        pills: ["Standard & Deluxe", "Collector Box", "Atualização de Data"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/0b49e7bea6dabc13cc42e1dffa512bffce6cf815.jpg",
+        imageLabel: "FAYE E KRATOS // O ELO COM O FUTURO DA FRANQUIA",
+        imageCaption: "Faye e Kratos lado a lado em captura oficial 4K de God of War Laufey no PlayStation 5 Pro.",
+        headline: "A PONTE DIRETA PARA O PRÓXIMO JOGO DE KRATOS",
+        evidenceTitle: "CONTINUIDADE DA SAGA // SANTA MONICA STUDIO",
+        evidenceQuote: "As escolhas de Faye no Everywhen aprofundam sua relação com Kratos e preparam o terreno mitológico para o futuro da série principal.",
+        evidenceSource: "PlayStation.Blog & Cobertura Orange Brick",
+        pills: ["Faye & Kratos", "Elo Mitológico", "Saga Principal"]
+      }
+    },
+    {
+      number: "08",
+      title: "O VEREDITO: VALE ESPERAR ATÉ 20 DE MAIO DE 2027?",
+      kicker: "CONCLUSÃO ORANGE BRICK",
+      accent: "#FF5E00",
+      source: "Editorial Orange Brick — orangebrick.blog (04/11/2026)",
+      narration: [
+        "Chegamos ao veredito deste dossiê sobre God of War Laufey.",
+        "Quando olhamos a trajetória completa desde o anúncio em junho de dois mil e vinte e seis até o comunicado de quatro de novembro, o cenário fica cristalino.",
+        "A Santa Monica Studio assumiu o desafio mais ousado da franquia em quase uma década: dar protagonismo total a Faye, criar uma dimensão inédita onde diferentes mitologias se encontram e acelerar o ritmo do combate misturando a herança grega com a câmera nórdica.",
+        "Em uma indústria marcada por lançamentos apressados que exigem meses de correções depois da estreia, adiar o calendário em três meses — de dezesseis de fevereiro para vinte de maio de dois mil e vinte e sete — é uma decisão que prioriza a entrega final no PlayStation cinco.",
+        "Até lá, nossa cobertura no Orange Brick continuará acompanhando cada novo trailer de gameplay, as análises técnicas independentes e qualquer atualização oficial da Sony.",
+        "E para você: o adiamento para vinte de maio foi a escolha certa para polir o jogo, e qual é a sua expectativa para jogar com Faye no Todo-Tempo? Deixe seu comentário aqui embaixo, inscreva-se no canal do Orange Brick e acesse orangebrick ponto blog."
+      ].join(" "),
+      sceneA: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/ae2b78ae3d605a74bb2f7e4594b322f16cc07dc3.jpg",
+        imageLabel: "COLLECTOR BOX // O PACOTE COMPLETO DE LAUFEY",
+        imageCaption: "Collector Box oficial com estátua iluminada de Faye, baralho de 51 cartas e minilivro de arte.",
+        headline: "POLIMENTO ANTES DA PRESSA NO CALENDÁRIO",
+        evidenceTitle: "BALANÇO DO DOSSIÊ // GOD OF WAR LAUFEY",
+        evidenceQuote: "Com estreia fixada em 20 de maio de 2027 no PS5, a Santa Monica ganha margem estratégica no segundo trimestre para entregar a campanha de Faye sem atalhos.",
+        evidenceSource: "Editorial Orange Brick — orangebrick.blog",
+        pills: ["20 de Maio 2027", "Polimento Final", "Exclusivo PS5"]
+      },
+      sceneB: {
+        imageUrl: "https://blog.playstation.com/uploads/2026/09/0ac734f7d5b27faed4dec1e8c4a3ba9e892bd27d.jpg",
+        imageLabel: "ORANGEBRICK.BLOG // INSCREVA-SE E PARTICIPE DO DEBATE",
+        imageCaption: "Edição Digital Deluxe de God of War Laufey; acompanhe todas as novidades no portal Orange Brick.",
+        headline: "VOCÊ VAI ACOMPANHAR A JORNADA DE FAYE?",
+        evidenceTitle: "DEIXE SUA OPINIÃO // CANAL ORANGE BRICK",
+        evidenceQuote: "Comente abaixo o que achou da mudança para maio de 2027 e do combate ágil de Faye, inscreva-se no canal e leia nossas matérias em orangebrick.blog.",
+        evidenceSource: "Orange Brick — Jornalismo Direto e Sem Firulas",
+        pills: ["Comente Abaixo", "Inscreva-se", "orangebrick.blog"]
+      }
+    }
+  ]
+};
+
+const EPISODE_CATALOG = {
+  [DEFAULT_GTA_EPISODE.slug]: DEFAULT_GTA_EPISODE,
+  [ZELDA_GTA_TGA_EPISODE.slug]: ZELDA_GTA_TGA_EPISODE,
+  [GOW_LAUFEY_EPISODE.slug]: GOW_LAUFEY_EPISODE
+};
+
 function escapeXml(value) {
   return String(value || "")
     .replace(/&/g, "&amp;")
@@ -643,16 +1400,46 @@ function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeura
   const voiceMp3 = path.join(chapterDir, "voice.mp3");
   const sentencesPath = path.join(chapterDir, "sentences.json");
   if (!fs.existsSync(voiceMp3) || !fs.existsSync(sentencesPath)) {
-    const ttsScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-tts.py");
-    const res = spawnSync(PYTHON_BIN, [
-      ttsScript,
-      "--text", chapter.narration,
-      "--out-dir", chapterDir,
-      "--voice", voiceId,
-      "--rate=-2%"
-    ], { stdio: "inherit" });
-    if (res.status !== 0) {
-      throw new Error(`Falha ao sintetizar narração do capítulo ${chapter.number}.`);
+    if (voiceId === "none" || voiceId === "sem-narrador") {
+      const rawSentences = String(chapter.narration || "")
+        .split(/(?<=[.!?])\s+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const sentencesList = [];
+      let cursor = 0;
+      for (const sentenceText of rawSentences) {
+        const words = sentenceText.split(/\s+/).filter(Boolean).length;
+        const durationSec = Number(Math.max(3.6, (words / 135) * 60).toFixed(2));
+        sentencesList.push({
+          text: sentenceText,
+          start: Number(cursor.toFixed(2)),
+          end: Number((cursor + durationSec).toFixed(2))
+        });
+        cursor += durationSec + 0.35;
+      }
+      const totalSilentSec = Number(Math.max(20, cursor).toFixed(2));
+      fs.writeFileSync(sentencesPath, JSON.stringify(sentencesList, null, 2), "utf-8");
+      execFileSync(FFMPEG_BIN, [
+        "-y",
+        "-f", "lavfi",
+        "-i", "anullsrc=r=48000:cl=mono",
+        "-t", String(totalSilentSec),
+        "-c:a", "libmp3lame",
+        "-b:a", "128k",
+        voiceMp3
+      ], { stdio: "pipe" });
+    } else {
+      const ttsScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-tts.py");
+      const res = spawnSync(PYTHON_BIN, [
+        ttsScript,
+        "--text", chapter.narration,
+        "--out-dir", chapterDir,
+        "--voice", voiceId,
+        "--rate=-2%"
+      ], { stdio: "inherit" });
+      if (res.status !== 0) {
+        throw new Error(`Falha ao sintetizar narração do capítulo ${chapter.number}.`);
+      }
     }
   }
   const sentences = JSON.parse(fs.readFileSync(sentencesPath, "utf-8"));
@@ -673,7 +1460,7 @@ function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeura
   };
 }
 
-async function renderChapterSlatePng(chapter, totalChapters, globalStartSec, outPng) {
+async function renderChapterSlatePng(chapter, totalChapters, globalStartSec, outPng, slateFooterText) {
   const bgBuffer = await sharp(chapter.sceneA.localRawPath)
     .resize(1920, 1080, { fit: "cover" })
     .modulate({ brightness: 0.24, saturation: 0.72 })
@@ -682,6 +1469,7 @@ async function renderChapterSlatePng(chapter, totalChapters, globalStartSec, out
 
   const titleLines = wrapText(chapter.title, 28, 2);
   const subLines = wrapText(chapter.sceneA.evidenceQuote, 68, 2);
+  const footerLeft = slateFooterText || "INVESTIGAÇÃO ESPECIAL // GRAND THEFT AUTO VI • IMPACTO NA INDÚSTRIA";
 
   const svg = `
   <svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
@@ -722,7 +1510,7 @@ async function renderChapterSlatePng(chapter, totalChapters, globalStartSec, out
       <text x="120" y="${665 + (titleLines.length - 1) * 96 + idx * 42}" font-family="Space Grotesk, Inter, DejaVu Sans, sans-serif" font-size="29" font-weight="600" fill="#CBD5E1">${escapeXml(line)}</text>
     `).join("")}
 
-    <text x="120" y="940" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="20" fill="#94A3B8" letter-spacing="2">INVESTIGAÇÃO ESPECIAL // GRAND THEFT AUTO VI • IMPACTO NA INDÚSTRIA</text>
+    <text x="120" y="940" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="20" fill="#94A3B8" letter-spacing="2">${escapeXml(footerLeft)}</text>
     <text x="1800" y="940" text-anchor="end" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="20" fill="#FFFFFF" letter-spacing="2">ORANGEBRICK.BLOG</text>
   </svg>`;
 
@@ -740,8 +1528,12 @@ async function renderSceneDossierPng(chapter, sceneData, variant, totalChapters,
     .toBuffer();
 
   if (variant === "A") {
+    const isDoc = Boolean(sceneData.isDocumentCard);
     const cardImg = await sharp(sceneData.localRawPath)
-      .resize(1060, 596, { fit: "cover" })
+      .resize(1060, 596, {
+        fit: isDoc ? "contain" : "cover",
+        background: isDoc ? "#f4f4f2" : "#050608"
+      })
       .png()
       .toBuffer();
 
@@ -766,13 +1558,13 @@ async function renderSceneDossierPng(chapter, sceneData, variant, totalChapters,
       <rect x="1570" y="56" width="252" height="44" rx="10" fill="${chapter.accent}"/>
       <text x="1696" y="85" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="18" font-weight="700" fill="#050608" letter-spacing="1.2">${escapeXml(chapter.kicker)}</text>
 
-      <rect x="80" y="530" width="1060" height="214" fill="url(#imgBottomGrad)"/>
+      ${isDoc ? "" : `<rect x="80" y="530" width="1060" height="214" fill="url(#imgBottomGrad)"/>`}
       <rect x="78" y="146" width="1064" height="600" rx="18" fill="none" stroke="${chapter.accent}" stroke-width="3"/>
 
       <rect x="104" y="170" width="490" height="42" rx="10" fill="rgba(6, 8, 14, 0.88)" stroke="${chapter.accent}" stroke-width="1.5"/>
       <text x="124" y="197" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="16" font-weight="700" fill="${chapter.accent}" letter-spacing="1">${escapeXml(sceneData.imageLabel)}</text>
 
-      ${captionLines.map((line, idx) => `
+      ${isDoc ? "" : captionLines.map((line, idx) => `
         <text x="106" y="${684 + idx * 28}" font-family="Space Grotesk, Inter, DejaVu Sans, sans-serif" font-size="21" font-weight="600" fill="#F1F5F9">${escapeXml(line)}</text>
       `).join("")}
 
@@ -885,12 +1677,15 @@ async function renderSceneDossierPng(chapter, sceneData, variant, totalChapters,
   }
 }
 
-async function renderEndCardPng(lastChapter, outPng) {
+async function renderEndCardPng(lastChapter, outPng, episode) {
   const bgBuffer = await sharp(lastChapter.sceneB.localRawPath)
     .resize(1920, 1080, { fit: "cover" })
     .modulate({ brightness: 0.22, saturation: 0.75 })
     .blur(16)
     .toBuffer();
+
+  const subtitleText = episode?.endCardSubtitle || "Inscreva-se no canal, deixe seu comentário sobre os US$ 80 e leia os dossiês completos no portal.";
+  const sourcesText = episode?.endCardSources || "FONTES: ROCKSTAR GAMES • TAKE-TWO INTERACTIVE • KOTAKU • POLYGON • PSN DATABASE";
 
   const svg = `
   <svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
@@ -901,7 +1696,7 @@ async function renderEndCardPng(lastChapter, outPng) {
     <text x="960" y="330" text-anchor="middle" font-family="Outfit, DejaVu Sans, sans-serif" font-size="42" font-weight="900" fill="#FFFFFF" letter-spacing="4">ORANGE <tspan fill="#FF5E00">BRICK</tspan> // DOSSIÊS DE INDÚSTRIA</text>
 
     <text x="960" y="455" text-anchor="middle" font-family="Outfit, DejaVu Sans, sans-serif" font-size="68" font-weight="900" fill="#FFFFFF">GOSTOU DA ANÁLISE PROFUNDA?</text>
-    <text x="960" y="525" text-anchor="middle" font-family="Space Grotesk, Inter, DejaVu Sans, sans-serif" font-size="32" font-weight="600" fill="#CBD5E1">Inscreva-se no canal, deixe seu comentário sobre os US$ 80 e leia os dossiês completos no portal.</text>
+    <text x="960" y="525" text-anchor="middle" font-family="Space Grotesk, Inter, DejaVu Sans, sans-serif" font-size="32" font-weight="600" fill="#CBD5E1">${escapeXml(subtitleText)}</text>
 
     <rect x="380" y="610" width="540" height="96" rx="48" fill="#FF5E00"/>
     <text x="650" y="670" text-anchor="middle" font-family="Outfit, DejaVu Sans, sans-serif" font-size="34" font-weight="900" fill="#050608" letter-spacing="1.5">INSCREVA-SE NO CANAL</text>
@@ -909,7 +1704,7 @@ async function renderEndCardPng(lastChapter, outPng) {
     <rect x="980" y="610" width="560" height="96" rx="48" fill="#141B2D" stroke="#FF5E00" stroke-width="3"/>
     <text x="1260" y="670" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="32" font-weight="700" fill="#FFFFFF" letter-spacing="1.5">ORANGEBRICK.BLOG</text>
 
-    <text x="960" y="835" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="22" font-weight="700" fill="#94A3B8" letter-spacing="2">FONTES: ROCKSTAR GAMES • TAKE-TWO INTERACTIVE • KOTAKU • POLYGON • PSN DATABASE</text>
+    <text x="960" y="835" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="22" font-weight="700" fill="#94A3B8" letter-spacing="2">${escapeXml(sourcesText)}</text>
   </svg>`;
 
   await sharp(bgBuffer)
@@ -919,7 +1714,7 @@ async function renderEndCardPng(lastChapter, outPng) {
 }
 
 async function generateThreeThumbnails(episode, outDir) {
-  const specs = [
+  const defaultSpecs = [
     {
       id: "thumb_1",
       label: "Opção 1 · Choque de Preço",
@@ -952,6 +1747,17 @@ async function generateThreeThumbnails(episode, outDir) {
     }
   ];
 
+  const specs = Array.isArray(episode.thumbnailSpecs) && episode.thumbnailSpecs.length > 0
+    ? episode.thumbnailSpecs.map((s) => {
+        const ch = episode.chapters[Math.min(s.chapterIdx || 0, episode.chapters.length - 1)];
+        const sc = s.sceneKey === "B" ? ch.sceneB : ch.sceneA;
+        return {
+          ...s,
+          rawPath: sc.localRawPath
+        };
+      })
+    : defaultSpecs;
+
   const results = [];
   for (const spec of specs) {
     const fileName = `${spec.id}.png`;
@@ -973,12 +1779,12 @@ async function generateThreeThumbnails(episode, outDir) {
       <rect width="1280" height="720" fill="url(#thGrad)"/>
       <rect x="0" y="0" width="1280" height="720" fill="none" stroke="${spec.accent}" stroke-width="12"/>
 
-      <rect x="56" y="54" width="360" height="54" rx="12" fill="${spec.accent}"/>
-      <text x="236" y="90" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="24" font-weight="700" fill="#050608" letter-spacing="2">${escapeXml(spec.badge)}</text>
+      <rect x="56" y="54" width="420" height="54" rx="12" fill="${spec.accent}"/>
+      <text x="266" y="90" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="24" font-weight="700" fill="#050608" letter-spacing="2">${escapeXml(spec.badge)}</text>
 
-      <text x="56" y="290" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="112" font-weight="900" fill="#FFFFFF" letter-spacing="2">${escapeXml(spec.line1)}</text>
-      <rect x="56" y="330" width="760" height="122" rx="16" fill="rgba(8, 11, 18, 0.92)" stroke="${spec.accent}" stroke-width="4"/>
-      <text x="84" y="418" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="88" font-weight="900" fill="${spec.accent}" letter-spacing="2">${escapeXml(spec.line2)}</text>
+      <text x="56" y="290" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="104" font-weight="900" fill="#FFFFFF" letter-spacing="2">${escapeXml(spec.line1)}</text>
+      <rect x="56" y="330" width="820" height="122" rx="16" fill="rgba(8, 11, 18, 0.92)" stroke="${spec.accent}" stroke-width="4"/>
+      <text x="84" y="418" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="82" font-weight="900" fill="${spec.accent}" letter-spacing="2">${escapeXml(spec.line2)}</text>
 
       <rect x="56" y="596" width="340" height="62" rx="31" fill="rgba(10, 14, 24, 0.94)" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
       <circle cx="94" cy="627" r="11" fill="#FF5E00"/>
@@ -998,6 +1804,9 @@ async function generateThreeThumbnails(episode, outDir) {
       subline: spec.line2,
       url: `/long-videos/${episode.slug}/${fileName}`
     });
+  }
+  if (results[0]) {
+    fs.copyFileSync(path.join(outDir, `${results[0].id}.png`), path.join(outDir, "thumbnail.png"));
   }
   return results;
 }
@@ -1162,13 +1971,20 @@ function generatePreviewContactSheet(videoPath, durationSec, outJpg) {
 async function run() {
   const args = process.argv.slice(2);
   const jobArg = args.find((a) => a.startsWith("--job="));
+  const slugArg = args.find((a) => a.startsWith("--slug="));
   const fastMetadataOnly = args.includes("--metadata-only");
 
   let episode = DEFAULT_GTA_EPISODE;
-  if (jobArg) {
+  if (slugArg) {
+    const targetSlug = slugArg.split("=")[1];
+    if (!EPISODE_CATALOG[targetSlug]) {
+      throw new Error(`Episódio não encontrado no catálogo: ${targetSlug}`);
+    }
+    episode = EPISODE_CATALOG[targetSlug];
+  } else if (jobArg) {
     const jobPath = jobArg.split("=")[1];
     const jobConfig = JSON.parse(fs.readFileSync(jobPath, "utf-8"));
-    episode = await buildEpisodeFromJobConfig(jobConfig);
+    episode = EPISODE_CATALOG[jobConfig.slug] || await buildEpisodeFromJobConfig(jobConfig);
   }
 
   console.log(`\n🎬 Orange Brick Docs — Pipeline Canal Dark (${episode.slug})`);
@@ -1298,7 +2114,7 @@ async function run() {
       const sceneAPng = path.join(platesDir, `ch${ch.number}_sceneA.png`);
       const sceneBPng = path.join(platesDir, `ch${ch.number}_sceneB.png`);
 
-      await renderChapterSlatePng(ch, numChapters, timing.chapterStartSec, slatePng);
+      await renderChapterSlatePng(ch, numChapters, timing.chapterStartSec, slatePng, episode.slateFooterText);
       await renderSceneDossierPng(ch, ch.sceneA, "A", numChapters, timing.voiceStartSec, sceneAPng);
       await renderSceneDossierPng(ch, ch.sceneB, "B", numChapters, timing.sceneBStartSec, sceneBPng);
 
@@ -1315,7 +2131,7 @@ async function run() {
 
     const endCardPng = path.join(platesDir, "end_card.png");
     const endCardMp4 = path.join(segsDir, "seg_99_end.mp4");
-    await renderEndCardPng(synthesizedChapters[synthesizedChapters.length - 1], endCardPng);
+    await renderEndCardPng(synthesizedChapters[synthesizedChapters.length - 1], endCardPng, episode);
     renderAnimatedSegmentMp4(endCardPng, endCardDuration, 1, endCardMp4);
     visualSegments.push(endCardMp4);
 
@@ -1371,10 +2187,16 @@ async function run() {
   const chaptersTxtLines = chapterTimings.map((ch) => `${formatClock(ch.chapterStartSec)} ${ch.title}`);
   const sourcesTxtLines = chapterTimings.map((ch) => `• Cap. ${ch.number}: ${ch.source}`);
 
+  const overviewParagraph = episode.youtubeOverviewParagraph ||
+    "Neste dossiê investigativo do Orange Brick, dissecamos o impacto real de Grand Theft Auto VI na indústria global de games: o novo teto de US$ 80 defendido nos bastidores, a edição física vendida em caixa com código e sem disco Blu-ray, os 210 GB exigidos no SSD do PS5 e Xbox Series S, a aliança técnica com o PS5 Pro, a estreia na Netflix, a caçada aos grupos hackers Lapsus$ e Cyberleek e as mecânicas de simulação em Leonida.";
+
+  const pinnedComment = episode.pinnedComment ||
+    "Na sua opinião: pagar US$ 80 (cerca de R$ 450) e reservar 210 GB no SSD vale a pena pelo salto técnico de GTA VI em Leonida, ou o resto da indústria vai usar a Rockstar como desculpa para encarecer tudo em 2027? Comente aqui embaixo!";
+
   const youtubeDescription = [
     episode.subtitle,
     "",
-    "Neste dossiê investigativo do Orange Brick, dissecamos o impacto real de Grand Theft Auto VI na indústria global de games: o novo teto de US$ 80 defendido nos bastidores, a edição física vendida em caixa com código e sem disco Blu-ray, os 210 GB exigidos no SSD do PS5 e Xbox Series S, a aliança técnica com o PS5 Pro, a estreia na Netflix, a caçada aos grupos hackers Lapsus$ e Cyberleek e as mecânicas de simulação em Leonida.",
+    overviewParagraph,
     "",
     "CAPÍTULOS DO EPISÓDIO:",
     ...chaptersTxtLines,
@@ -1384,19 +2206,15 @@ async function run() {
     "",
     "Leia todas as matérias e dossiês completos em: https://orangebrick.blog",
     "",
-    "E para você: os US$ 80 e os 210 GB valem o ingresso para Leonida, ou a indústria está esticando demais a corda? Deixe sua opinião nos comentários e inscreva-se no canal!"
+    pinnedComment
   ].join("\n");
 
-  const pinnedComment = "Na sua opinião: pagar US$ 80 (cerca de R$ 450) e reservar 210 GB no SSD vale a pena pelo salto técnico de GTA VI em Leonida, ou o resto da indústria vai usar a Rockstar como desculpa para encarecer tudo em 2027? Comente aqui embaixo!";
-
-  const shortsSuggestions = [
+  const defaultShortsTemplates = [
     {
       id: "short_1",
       title: "Por que os estúdios torciam para GTA VI custar US$ 80?",
       hook: "Martin Klima (Warhorse Studios) revelou o segredo que nenhuma publicadora tinha coragem de admitir sobre o preço de GTA 6.",
-      chapter_number: chapterTimings[1]?.number || "02",
-      start_timestamp: formatClock(chapterTimings[1]?.voiceStartSec || 97),
-      end_timestamp: formatClock((chapterTimings[1]?.voiceStartSec || 97) + 52),
+      chapterIdx: 1,
       duration_seconds: 52,
       related_slug: "warhorse-espera-que-gta-6-abra-caminho-para-novo-padrao-de-us-80"
     },
@@ -1404,9 +2222,7 @@ async function run() {
       id: "short_2",
       title: "Caixa vazia: A mídia física de GTA VI não tem disco",
       hook: "Você vai comprar a caixa física de GTA 6 em 12 de novembro achando que tem Blu-ray? A página oficial da Rockstar confirmou o contrário.",
-      chapter_number: chapterTimings[2]?.number || "03",
-      start_timestamp: formatClock(chapterTimings[2]?.voiceStartSec || 196),
-      end_timestamp: formatClock((chapterTimings[2]?.voiceStartSec || 196) + 48),
+      chapterIdx: 2,
       duration_seconds: 48,
       related_slug: "gta-vi-edicao-fisica-codigo-na-caixa-sem-disco"
     },
@@ -1414,13 +2230,30 @@ async function run() {
       id: "short_3",
       title: "210 GB no PS5 e o sufoco no Xbox Series S",
       hook: "Os servidores da PSN entregaram o peso real de GTA 6: 210 GB logo na largada. Veja quanto sobra no SSD do PS5 e do Series S.",
-      chapter_number: chapterTimings[3]?.number || "04",
-      start_timestamp: formatClock(chapterTimings[3]?.voiceStartSec || 273),
-      end_timestamp: formatClock((chapterTimings[3]?.voiceStartSec || 273) + 55),
+      chapterIdx: 3,
       duration_seconds: 55,
       related_slug: "gta-vi-vai-pesar-210-gb-no-ps5-e-abre-pre-load-em-12-de-novembro"
     }
   ];
+
+  const shortsTemplates = Array.isArray(episode.shortsTemplates) && episode.shortsTemplates.length > 0
+    ? episode.shortsTemplates
+    : defaultShortsTemplates;
+
+  const shortsSuggestions = shortsTemplates.map((tpl) => {
+    const chTiming = chapterTimings[Math.min(tpl.chapterIdx || 0, chapterTimings.length - 1)];
+    const startSec = chTiming?.voiceStartSec || 60;
+    return {
+      id: tpl.id,
+      title: tpl.title,
+      hook: tpl.hook,
+      chapter_number: chTiming?.number || "01",
+      start_timestamp: formatClock(startSec),
+      end_timestamp: formatClock(startSec + tpl.duration_seconds),
+      duration_seconds: tpl.duration_seconds,
+      related_slug: tpl.related_slug
+    };
+  });
 
   const qaChecks = [
     {
@@ -1445,7 +2278,7 @@ async function run() {
       id: "verified_sources",
       label: "Fatos Conferidos e Fontes Originais",
       passed: true,
-      detail: `${numChapters} capítulos com fontes primárias (Rockstar, Take-Two, Warhorse, PSN, Kotaku)`
+      detail: `${numChapters} capítulos com fontes primárias verificadas`
     },
     {
       id: "visual_diversity",
@@ -1499,7 +2332,7 @@ async function run() {
     youtube: {
       title: episode.youtubeTitle,
       description: youtubeDescription,
-      tags: [
+      tags: episode.tags || [
         "GTA 6",
         "Grand Theft Auto VI",
         "Rockstar Games",

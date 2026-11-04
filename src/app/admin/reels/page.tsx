@@ -10,7 +10,7 @@ import { createDataClient } from "@/lib/supabase/client";
 import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
 import type { AdminReelItem } from "@/app/api/admin/reels/route";
 import type { ReelSocialPlatform, ReelSocialPublication, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
-import type { DarkPipelineConfig, LongVideoManifestItem } from "@/lib/video/reel-service";
+import type { DarkPipelineConfig, LongVideoManifestItem, LongVideoVisualStyle } from "@/lib/video/reel-service";
 
 function formatBytes(bytes?: number) {
   if (!bytes) return "—";
@@ -246,7 +246,7 @@ function DarkPipelineStudio({
   const [creatorSelectedSlugs, setCreatorSelectedSlugs] = useState<string[]>([]);
   const [creatorPostFilter, setCreatorPostFilter] = useState<string>("");
   const [creatorManualScript, setCreatorManualScript] = useState<string>("");
-  const [creatorStyle, setCreatorStyle] = useState<"documentario" | "arquivo-cofre" | "circuito" | "tribunal">("documentario");
+  const [creatorStyle, setCreatorStyle] = useState<LongVideoVisualStyle>("documentario");
   const [creatorVoice, setCreatorVoice] = useState<string>("pt-BR-AntonioNeural");
   const [creatorTargetMinutes, setCreatorTargetMinutes] = useState<number>(10);
   const [isSubmittingDarkAction, setIsSubmittingDarkAction] = useState<boolean>(false);
@@ -525,7 +525,15 @@ function DarkPipelineStudio({
               Janela Mid-Roll YouTube (&ge; 08:00)
             </span>
             <span className="rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1 font-semibold text-gray-300">
-              Voz Neural: {darkConfig?.default_voice === "pt-BR-FranciscaNeural" ? "Francisca (PT-BR)" : "Antonio (PT-BR)"}
+              {creatorVoice === "none" || activeLongVideo?.voice_id === "none"
+                ? "Locução: Sem Narrador (Gravar Voz por Cima)"
+                : `Voz Neural: ${
+                    creatorVoice === "pt-BR-FranciscaNeural"
+                      ? "Francisca (PT-BR)"
+                      : creatorVoice === "pt-BR-ThalitaNeural"
+                        ? "Thalita (PT-BR)"
+                        : "Antonio (PT-BR)"
+                  }`}
             </span>
           </div>
         </div>
@@ -744,32 +752,42 @@ function DarkPipelineStudio({
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Direção Visual (16:9 1080p)
+                    Direção Visual (16:9 1080p · 12 Estilos)
                   </label>
                   <select
                     value={creatorStyle}
-                    onChange={(e) => setCreatorStyle(e.target.value as typeof creatorStyle)}
+                    onChange={(e) => setCreatorStyle(e.target.value as LongVideoVisualStyle)}
                     className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3.5 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                   >
                     <option value="documentario">🎬 Documentário Investigativo (Ken Burns + Dossiê Split-Screen)</option>
+                    <option value="cinema">🎞️ Ensaio Cinematográfico (Letterbox 2.35:1 + Atmosfera de Filme)</option>
                     <option value="arquivo-cofre">🗄️ Arquivo-Cofre (Provas Numeradas + Carimbos de Fonte)</option>
-                    <option value="circuito">⚡ Circuito de Hardware (Especificações + Telemetria)</option>
-                    <option value="tribunal">⚖️ Tribunal da Indústria (Tese vs. Contraponto)</option>
+                    <option value="circuito">⚡ Circuito de Hardware (Especificações + Telemetria Técnica)</option>
+                    <option value="tribunal">⚖️ Tribunal da Indústria (Tese vs. Contraponto em Tela Dividida)</option>
+                    <option value="mesa-de-risco">📈 Mesa de Risco & Mercado (Gráficos Financeiros + Dados do Setor)</option>
+                    <option value="turno-da-madrugada">🌙 Turno da Madrugada (Investigação Noir + Alto Contraste)</option>
+                    <option value="linha-do-tempo">⏳ Linha do Tempo Histórica (Cronologia + Evolução de Franquia)</option>
+                    <option value="raio-x">🔍 Raio-X de Gameplay & Engine (Decomposição de Mecânicas + HUD)</option>
+                    <option value="duelo">⚔️ Duelo Comparativo (Lado a Lado: Consoles, Preços ou Gerações)</option>
+                    <option value="manchete">📰 Manchete & Bastidores (Recortes de Imprensa + Declarações)</option>
+                    <option value="impacto">💥 Impacto & Ruptura (Cortes Rápidos + Dados em Destaque)</option>
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
-                      Narrador Neural PT-BR
+                      Narrador / Locução
                     </label>
                     <select
                       value={creatorVoice}
                       onChange={(e) => setCreatorVoice(e.target.value)}
                       className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                     >
+                      <option value="none">🔇 Sem Narrador (Gravar Minha Voz por Cima)</option>
                       <option value="pt-BR-AntonioNeural">🎙️ Antonio Neural (Grave Documental)</option>
                       <option value="pt-BR-FranciscaNeural">🎙️ Francisca Neural (Editorial Ágil)</option>
+                      <option value="pt-BR-ThalitaNeural">🎙️ Thalita Neural (Narrativa Dinâmica)</option>
                     </select>
                   </div>
 
@@ -785,9 +803,19 @@ function DarkPipelineStudio({
                       <option value={8}>⏱️ 08 min (Mínimo Mid-Roll)</option>
                       <option value={10}>⏱️ 10 min (Ideal Retenção)</option>
                       <option value={12}>⏱️ 12 min (Dossiê Profundo)</option>
+                      <option value={15}>⏱️ 15 min (Especial Completo)</option>
                     </select>
                   </div>
                 </div>
+
+                {creatorVoice === "none" && (
+                  <div className="rounded-xl border border-brand-orange/40 bg-brand-orange/10 p-3 text-xs text-amber-200">
+                    <p className="font-black uppercase text-brand-orange">🎤 Modo Gravação de Voz Própria Ativo</p>
+                    <p className="mt-0.5 text-[11px] leading-relaxed text-gray-200">
+                      O vídeo será gerado sem voz de IA, mantendo apenas a trilha ambiente suave e o ritmo de leitura natural (135 palavras/min) com legendas sincronizadas na tela e arquivo .SRT para servir de teleprompter quando você gravar seu áudio por cima.
+                    </p>
+                  </div>
+                )}
 
                 <div className="rounded-xl border border-white/10 bg-[#0b0d14] p-3.5 text-xs text-gray-300 space-y-1.5">
                   <p className="font-bold text-white">O que a esteira entrega automaticamente:</p>

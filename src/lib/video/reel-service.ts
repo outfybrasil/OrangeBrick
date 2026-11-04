@@ -541,6 +541,35 @@ export interface LongVideoQaCheck {
   detail: string;
 }
 
+export type LongVideoVisualStyle =
+  | "documentario"
+  | "cinema"
+  | "arquivo-cofre"
+  | "circuito"
+  | "tribunal"
+  | "mesa-de-risco"
+  | "turno-da-madrugada"
+  | "linha-do-tempo"
+  | "raio-x"
+  | "duelo"
+  | "manchete"
+  | "impacto";
+
+export const VALID_LONG_VIDEO_STYLES: LongVideoVisualStyle[] = [
+  "documentario",
+  "cinema",
+  "arquivo-cofre",
+  "circuito",
+  "tribunal",
+  "mesa-de-risco",
+  "turno-da-madrugada",
+  "linha-do-tempo",
+  "raio-x",
+  "duelo",
+  "manchete",
+  "impacto",
+];
+
 export interface LongVideoManifestItem {
   slug: string;
   series_badge: string;
@@ -551,7 +580,7 @@ export interface LongVideoManifestItem {
   pipeline_stage_label: string;
   source_mode: "ai_dossier" | "custom_script";
   source_post_slugs: string[];
-  visual_style: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  visual_style: LongVideoVisualStyle;
   voice_id: string;
   duration_seconds: number;
   duration_formatted: string;
@@ -585,7 +614,7 @@ export interface LongVideoManifestItem {
 export interface DarkPipelineConfig {
   channel_name: string;
   niche: string;
-  default_style: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  default_style: LongVideoVisualStyle;
   default_voice: string;
   target_min_minutes: number;
   daily_schedule_time: string;
@@ -688,7 +717,7 @@ export function triggerLongVideoGeneration(options: {
   sourceMode: "ai_dossier" | "custom_script";
   sourcePostSlugs: string[];
   customScriptText?: string;
-  visualStyle: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  visualStyle: LongVideoVisualStyle;
   voiceId: string;
   targetMinMinutes: number;
 }): LongVideoManifestItem {

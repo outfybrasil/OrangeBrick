@@ -15,9 +15,11 @@ import {
   saveDarkPipelineConfig,
   triggerLongVideoGeneration,
   updateLongVideoItem,
+  VALID_LONG_VIDEO_STYLES,
   type ReelManifestItem,
   type SocialCopys,
   type LongVideoManifestItem,
+  type LongVideoVisualStyle,
   type DarkPipelineConfig,
 } from "@/lib/video/reel-service";
 import type { ReelSocialPublication, ReelSocialPlatform, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
@@ -408,9 +410,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Selecione pelo menos 1 matéria do catálogo para compilar o dossiê." }, { status: 400 });
       }
       const styleRaw = typeof body.visual_style === "string" ? body.visual_style : "documentario";
-      const visualStyle = (["documentario", "arquivo-cofre", "circuito", "tribunal"].includes(styleRaw)
+      const allowedStyles = Array.isArray(VALID_LONG_VIDEO_STYLES)
+        ? VALID_LONG_VIDEO_STYLES
+        : ["documentario", "cinema", "arquivo-cofre", "circuito", "tribunal", "mesa-de-risco", "turno-da-madrugada", "linha-do-tempo", "raio-x", "duelo", "manchete", "impacto"];
+      const visualStyle = (allowedStyles.includes(styleRaw as LongVideoVisualStyle)
         ? styleRaw
-        : "documentario") as "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+        : "documentario") as LongVideoVisualStyle;
       const voiceId = typeof body.voice_id === "string" && body.voice_id ? body.voice_id : "pt-BR-AntonioNeural";
       const targetMinMinutes = typeof body.target_min_minutes === "number" && body.target_min_minutes >= 8 ? body.target_min_minutes : 8;
 
