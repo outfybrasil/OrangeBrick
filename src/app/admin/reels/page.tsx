@@ -229,7 +229,6 @@ function DarkPipelineStudio({
   const [selectedLongSlug, setSelectedLongSlug] = useState<string>("");
   const [activeChapterIdx, setActiveChapterIdx] = useState<number>(0);
   const [isPlayingLongVideo, setIsPlayingLongVideo] = useState<boolean>(false);
-  const [videoFallbackUrl, setVideoFallbackUrl] = useState<string | null>(null);
   const [thumbPreviewMode, setThumbPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [creatorScriptSource, setCreatorScriptSource] = useState<"ai_dossier" | "custom_script">("ai_dossier");
   const [creatorTitle, setCreatorTitle] = useState<string>("");
@@ -883,7 +882,6 @@ function DarkPipelineStudio({
                 onClick={() => {
                   setSelectedLongSlug(video.slug);
                   setActiveChapterIdx(0);
-                  setVideoFallbackUrl(null);
                   setIsPlayingLongVideo(false);
                 }}
                 className="w-full min-w-0 text-left"
@@ -930,7 +928,6 @@ function DarkPipelineStudio({
                       onClick={() => {
                         setSelectedLongSlug(video.slug);
                         setActiveChapterIdx(0);
-                        setVideoFallbackUrl(null);
                         setIsPlayingLongVideo(false);
                       }}
                       className="text-xs font-bold text-brand-orange"
@@ -962,8 +959,8 @@ function DarkPipelineStudio({
                 {activeLongVideo.video_url ? (
                   <video
                     ref={longVideoRef}
-                    key={videoFallbackUrl || activeLongVideo.video_url}
-                    src={videoFallbackUrl || activeLongVideo.video_url}
+                    key={activeLongVideo.slug}
+                    src={activeLongVideo.video_url}
                     poster={activeThumbnailOption?.url || activeLongVideo.preview_sheet_url}
                     controls
                     playsInline
@@ -971,12 +968,6 @@ function DarkPipelineStudio({
                     onPlay={() => setIsPlayingLongVideo(true)}
                     onPause={() => setIsPlayingLongVideo(false)}
                     onEnded={() => setIsPlayingLongVideo(false)}
-                    onError={() => {
-                      const localPath = `/long-videos/${activeLongVideo.slug}/${activeLongVideo.slug}.mp4`;
-                      if (!videoFallbackUrl && activeLongVideo.video_url !== localPath) {
-                        setVideoFallbackUrl(localPath);
-                      }
-                    }}
                     className="h-full w-full object-contain"
                   />
                 ) : (
@@ -1624,7 +1615,16 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
 
       const data = await res.json();
       setItems(data.items || []);
-      setLongVideos(data.longVideos || []);
+      setLongVideos((prev) => {
+        const incoming: LongVideoManifestItem[] = data.longVideos || [];
+        return incoming.map((item) => {
+          const existing = prev.find((p) => p.slug === item.slug);
+          if (existing?.video_url && existing.video_url.startsWith("http") && (!item.video_url || item.video_url.startsWith("http"))) {
+            return { ...item, video_url: existing.video_url };
+          }
+          return item;
+        });
+      });
       setDarkConfig(data.darkConfig || null);
       setSelectedReel((current) => current ? data.items?.find((item: AdminReelItem) => item.slug === current.slug) || current : null);
       setError(null);
