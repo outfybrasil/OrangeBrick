@@ -371,41 +371,6 @@ const ZELDA_GTA_TGA_EPISODE = {
   visualStyle: "documentario",
   voiceId: "pt-BR-AntonioNeural",
   targetMinDurationSec: 500,
-  thumbnailSpecs: [
-    {
-      id: "thumb_1",
-      label: "Opção 1 · Choque de Gigantes",
-      angle: "Foco na nota 96 de Zelda contra a chegada de GTA VI",
-      badge: "CORRIDA PELO GOTY 2026",
-      line1: "ZELDA NOTA 96",
-      line2: "E O GTA VI NO TGA?",
-      accent: "#FF5E00",
-      chapterIdx: 0,
-      sceneKey: "A"
-    },
-    {
-      id: "thumb_2",
-      label: "Opção 2 · Limite de 24 Horas",
-      angle: "Foco na regra de corte de 20 de novembro do TGA",
-      badge: "REGRA OFICIAL DO TGA",
-      line1: "24H ANTES DO CORTE",
-      line2: "GTA VI PODE VENCER?",
-      accent: "#FFB800",
-      chapterIdx: 4,
-      sceneKey: "A"
-    },
-    {
-      id: "thumb_3",
-      label: "Opção 3 · Remake vs. Inédito",
-      angle: "Foco no debate sobre remakes no prêmio principal",
-      badge: "DOSSIÊ THE GAME AWARDS",
-      line1: "REMAKE PODE SER",
-      line2: "JOGO DO ANO EM 2026?",
-      accent: "#00E5FF",
-      chapterIdx: 3,
-      sceneKey: "B"
-    }
-  ],
   shortsTemplates: [
     {
       id: "short_1",
@@ -748,41 +713,6 @@ const GOW_LAUFEY_EPISODE = {
   visualStyle: "documentario",
   voiceId: "pt-BR-AntonioNeural",
   targetMinDurationSec: 500,
-  thumbnailSpecs: [
-    {
-      id: "thumb_1",
-      label: "Opção 1 · Alerta de Adiamento",
-      angle: "Foco na mudança oficial de data para 20 de maio de 2027",
-      badge: "COMUNICADO SANTA MONICA",
-      line1: "GOD OF WAR ADIADO",
-      line2: "20 DE MAIO DE 2027",
-      accent: "#FF5E00",
-      chapterIdx: 0,
-      sceneKey: "A"
-    },
-    {
-      id: "thumb_2",
-      label: "Opção 2 · Jornada de Faye",
-      angle: "Foco na história de Laufey no além dos deuses Everywhen",
-      badge: "DOSSIÊ GOD OF WAR LAUFEY",
-      line1: "DO ANÚNCIO AO CORTE",
-      line2: "A SAGA DE FAYE NO PS5",
-      accent: "#FFB800",
-      chapterIdx: 2,
-      sceneKey: "A"
-    },
-    {
-      id: "thumb_3",
-      label: "Opção 3 · Bastidores & Kratos",
-      angle: "Foco na conexão entre Laufey, Kratos e o futuro da série",
-      badge: "ANÁLISE DE CRONOLOGIA",
-      line1: "POR QUE LAUFEY MUDOU",
-      line2: "DE FEVEREIRO PARA MAIO?",
-      accent: "#00E5FF",
-      chapterIdx: 7,
-      sceneKey: "A"
-    }
-  ],
   shortsTemplates: [
     {
       id: "short_1",
@@ -1713,104 +1643,6 @@ async function renderEndCardPng(lastChapter, outPng, episode) {
     .toFile(outPng);
 }
 
-async function generateThreeThumbnails(episode, outDir) {
-  const defaultSpecs = [
-    {
-      id: "thumb_1",
-      label: "Opção 1 · Choque de Preço",
-      angle: "Foco econômico (US$ 80 + R$ 450)",
-      badge: "DOSSIÊ DE INDÚSTRIA",
-      line1: "US$ 80 E SEM DISCO",
-      line2: "O EFEITO GTA VI",
-      accent: "#FF5E00",
-      rawPath: episode.chapters[0].sceneA.localRawPath
-    },
-    {
-      id: "thumb_2",
-      label: "Opção 2 · Gargalo Técnico",
-      angle: "Foco em hardware (210 GB no SSD + Caixa Vazia)",
-      badge: "ALERTA NOS CONSOLES",
-      line1: "210 GB NO PS5",
-      line2: "CAIXA SÓ COM CÓDIGO",
-      accent: "#FFB800",
-      rawPath: episode.chapters[Math.min(3, episode.chapters.length - 1)].sceneA.localRawPath
-    },
-    {
-      id: "thumb_3",
-      label: "Opção 3 · Bastidores & Vazamentos",
-      angle: "Foco investigativo (Lapsus$ + Leonida)",
-      badge: "INVESTIGAÇÃO COMPLETA",
-      line1: "A GUERRA POR TRÁS",
-      line2: "DE GTA VI EM NOVEMBRO",
-      accent: "#00E5FF",
-      rawPath: episode.chapters[Math.min(5, episode.chapters.length - 1)].sceneA.localRawPath
-    }
-  ];
-
-  const specs = Array.isArray(episode.thumbnailSpecs) && episode.thumbnailSpecs.length > 0
-    ? episode.thumbnailSpecs.map((s) => {
-        const ch = episode.chapters[Math.min(s.chapterIdx || 0, episode.chapters.length - 1)];
-        const sc = s.sceneKey === "B" ? ch.sceneB : ch.sceneA;
-        return {
-          ...s,
-          rawPath: sc.localRawPath
-        };
-      })
-    : defaultSpecs;
-
-  const results = [];
-  for (const spec of specs) {
-    const fileName = `${spec.id}.png`;
-    const filePath = path.join(outDir, fileName);
-    const bg = await sharp(spec.rawPath)
-      .resize(1280, 720, { fit: "cover" })
-      .modulate({ brightness: 0.85, saturation: 1.15 })
-      .toBuffer();
-
-    const svg = `
-    <svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="thGrad" x1="0%" y1="0%" x2="88%" y2="0%">
-          <stop offset="0%" stop-color="#04050a" stop-opacity="0.96"/>
-          <stop offset="56%" stop-color="#04050a" stop-opacity="0.72"/>
-          <stop offset="100%" stop-color="#04050a" stop-opacity="0.08"/>
-        </linearGradient>
-      </defs>
-      <rect width="1280" height="720" fill="url(#thGrad)"/>
-      <rect x="0" y="0" width="1280" height="720" fill="none" stroke="${spec.accent}" stroke-width="12"/>
-
-      <rect x="56" y="54" width="420" height="54" rx="12" fill="${spec.accent}"/>
-      <text x="266" y="90" text-anchor="middle" font-family="IBM Plex Mono, DejaVu Sans Mono, monospace" font-size="24" font-weight="700" fill="#050608" letter-spacing="2">${escapeXml(spec.badge)}</text>
-
-      <text x="56" y="290" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="104" font-weight="900" fill="#FFFFFF" letter-spacing="2">${escapeXml(spec.line1)}</text>
-      <rect x="56" y="330" width="820" height="122" rx="16" fill="rgba(8, 11, 18, 0.92)" stroke="${spec.accent}" stroke-width="4"/>
-      <text x="84" y="418" font-family="Anton, Bebas Neue, Outfit, DejaVu Sans, sans-serif" font-size="82" font-weight="900" fill="${spec.accent}" letter-spacing="2">${escapeXml(spec.line2)}</text>
-
-      <rect x="56" y="596" width="340" height="62" rx="31" fill="rgba(10, 14, 24, 0.94)" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
-      <circle cx="94" cy="627" r="11" fill="#FF5E00"/>
-      <text x="122" y="636" font-family="Outfit, DejaVu Sans, sans-serif" font-size="26" font-weight="900" fill="#FFFFFF" letter-spacing="2">ORANGE <tspan fill="#FF5E00">BRICK</tspan></text>
-    </svg>`;
-
-    await sharp(bg)
-      .composite([{ input: Buffer.from(svg), left: 0, top: 0 }])
-      .png()
-      .toFile(filePath);
-
-    results.push({
-      id: spec.id,
-      label: spec.label,
-      angle: spec.angle,
-      headline: spec.line1,
-      subline: spec.line2,
-      url: `/long-videos/${episode.slug}/${fileName}`
-    });
-  }
-  if (results[0]) {
-    fs.copyFileSync(path.join(outDir, `${results[0].id}.png`), path.join(outDir, "thumbnail.png"));
-  }
-  return results;
-}
-
 function renderAnimatedSegmentMp4(imagePng, durationSec, motionDirection, outMp4) {
   const d = Number(durationSec.toFixed(3));
   const fadeOutStart = Math.max(0.1, Number((d - 0.35).toFixed(3)));
@@ -2137,7 +1969,7 @@ async function run() {
 
     updateManifestProgress(episode.slug, {
       pipeline_stage_index: 5,
-      pipeline_stage_label: "5/8 · Mixando áudio no padrão YouTube, legendas e thumbnails"
+      pipeline_stage_label: "5/8 · Mixando áudio no padrão YouTube e legendas"
     });
 
     const masterAudioPath = path.join(workDir, "master_audio.m4a");
@@ -2182,7 +2014,7 @@ async function run() {
     generatePreviewContactSheet(finalMp4Path, totalDuration, previewSheetPath);
   }
 
-  const thumbnails = await generateThreeThumbnails(episode, outDir);
+  const thumbnails = [];
 
   const chaptersTxtLines = chapterTimings.map((ch) => `${formatClock(ch.chapterStartSec)} ${ch.title}`);
   const sourcesTxtLines = chapterTimings.map((ch) => `• Cap. ${ch.number}: ${ch.source}`);
@@ -2317,8 +2149,8 @@ async function run() {
     video_url: `/long-videos/${episode.slug}/${episode.slug}.mp4`,
     srt_url: `/long-videos/${episode.slug}/${episode.slug}.srt`,
     preview_sheet_url: `/long-videos/${episode.slug}/preview-sheet.jpg`,
-    thumbnails,
-    selected_thumbnail_id: thumbnails[0]?.id || "thumb_1",
+    thumbnails: [],
+    selected_thumbnail_id: null,
     chapters: chapterTimings.map((ch) => ({
       number: ch.number,
       title: ch.title,
@@ -2360,7 +2192,6 @@ async function run() {
 
   console.log(`\n🎉 SUCESSO! Episódio e Kit Pipeline Canal Dark salvos no manifesto!`);
   console.log(`   📂 Vídeo MP4: ${finalMp4Path} (${(stats.size / (1024 * 1024)).toFixed(1)} MB)`);
-  console.log(`   🖼️ 3 Thumbnails geradas: ${thumbnails.map((t) => t.id).join(", ")}`);
   console.log(`   ⏱️ Duração: ${formatClock(totalDuration)} (${totalDuration}s)\n`);
 }
 

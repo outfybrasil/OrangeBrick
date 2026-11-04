@@ -229,7 +229,6 @@ function DarkPipelineStudio({
   const [selectedLongSlug, setSelectedLongSlug] = useState<string>("");
   const [activeChapterIdx, setActiveChapterIdx] = useState<number>(0);
   const [isPlayingLongVideo, setIsPlayingLongVideo] = useState<boolean>(false);
-  const [thumbPreviewMode, setThumbPreviewMode] = useState<"desktop" | "mobile">("desktop");
   const [creatorScriptSource, setCreatorScriptSource] = useState<"ai_dossier" | "custom_script">("ai_dossier");
   const [creatorTitle, setCreatorTitle] = useState<string>("");
   const [creatorSubtitle, setCreatorSubtitle] = useState<string>("");
@@ -254,15 +253,6 @@ function DarkPipelineStudio({
   const activeLongVideo = useMemo(() => {
     return longVideos.find((v) => v.slug === selectedLongSlug) || longVideos[0] || null;
   }, [longVideos, selectedLongSlug]);
-
-  const activeThumbnailOption = useMemo(() => {
-    if (!activeLongVideo) return null;
-    return (
-      activeLongVideo.thumbnails?.find((t) => t.id === activeLongVideo.selected_thumbnail_id) ||
-      activeLongVideo.thumbnails?.[0] ||
-      null
-    );
-  }, [activeLongVideo]);
 
   const manualScriptStats = useMemo(() => {
     const words = creatorManualScript.trim() ? creatorManualScript.trim().split(/\s+/).length : 0;
@@ -388,7 +378,7 @@ function DarkPipelineStudio({
     }
   };
 
-  const handleReviewDecision = async (decision: "approve" | "reject", customThumbId?: string) => {
+  const handleReviewDecision = async (decision: "approve" | "reject") => {
     if (!activeLongVideo) return;
     const notesToSave = decision === "reject" ? rejectionReasonInput.trim() : reviewerNotesInput.trim();
     if (decision === "reject" && !notesToSave) {
@@ -412,7 +402,6 @@ function DarkPipelineStudio({
           slug: activeLongVideo.slug,
           decision,
           review_notes: notesToSave || undefined,
-          selected_thumbnail_id: customThumbId || activeLongVideo.selected_thumbnail_id,
         }),
       });
 
@@ -428,37 +417,6 @@ function DarkPipelineStudio({
       showToast(err instanceof Error ? err.message : "Erro ao salvar decisão.");
     } finally {
       setIsSubmittingDarkAction(false);
-    }
-  };
-
-  const handleSelectThumbnail = async (thumbId: string) => {
-    if (!activeLongVideo) return;
-    onUpdateLongVideo({ ...activeLongVideo, selected_thumbnail_id: thumbId });
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const decision = activeLongVideo.status === "rejected" ? "reject" : "approve";
-      const res = await fetch("/api/admin/reels", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          pipeline: "long",
-          action: "review",
-          slug: activeLongVideo.slug,
-          decision,
-          selected_thumbnail_id: thumbId,
-        }),
-      });
-      const result = await res.json().catch(() => null);
-      if (result?.item) {
-        onUpdateLongVideo(result.item);
-      }
-      showToast("Thumbnail principal selecionada.");
-    } catch {
-      showToast("Não foi possível salvar a thumbnail escolhida.");
     }
   };
 
@@ -961,7 +919,7 @@ function DarkPipelineStudio({
                     ref={longVideoRef}
                     key={activeLongVideo.slug}
                     src={activeLongVideo.video_url}
-                    poster={activeThumbnailOption?.url || activeLongVideo.preview_sheet_url}
+                    poster={activeLongVideo.preview_sheet_url}
                     controls
                     playsInline
                     preload="metadata"
@@ -1035,108 +993,6 @@ function DarkPipelineStudio({
                     </a>
                   )}
                 </div>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
-              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
-                    Etapa 5 · Teste de Clique (CTR) e Legibilidade
-                  </span>
-                  <h3 className="font-heading text-base sm:text-lg font-black text-white">
-                    3 Opções de Thumbnail + Simulador Desktop vs. Celular
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1 w-full sm:w-auto sm:flex rounded-xl border border-white/10 bg-[#090b10] p-1">
-                  <button
-                    type="button"
-                    onClick={() => setThumbPreviewMode("desktop")}
-                    className={`flex min-h-[36px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all ${
-                      thumbPreviewMode === "desktop" ? "bg-white text-black" : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    🖥️ Vista Desktop
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setThumbPreviewMode("mobile")}
-                    className={`flex min-h-[36px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all ${
-                      thumbPreviewMode === "mobile" ? "bg-brand-orange text-black font-black" : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    📱 Feed Celular (168×94)
-                  </button>
-                </div>
-              </div>
-
-              {thumbPreviewMode === "mobile" && activeThumbnailOption && (
-                <div className="mt-4 rounded-2xl border border-brand-orange/30 bg-[#090b10] p-3.5 sm:p-4">
-                  <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-orange">
-                    Simulação Realista: Feed do YouTube no Celular (Teste dos 3 Segundos)
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-start gap-3">
-                    <div className="relative w-full aspect-video sm:w-[178px] sm:h-[100px] shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black">
-                      <img
-                        src={activeThumbnailOption.url}
-                        alt={activeThumbnailOption.label}
-                        className="h-full w-full object-cover"
-                      />
-                      <span className="absolute bottom-1.5 right-1.5 rounded bg-black/90 px-1.5 py-0.5 font-mono text-[10px] font-bold text-white">
-                        {activeLongVideo.duration_formatted}
-                      </span>
-                    </div>
-                    <div className="w-full min-w-0 flex-1">
-                      <p className="text-sm font-bold leading-snug text-white break-words">
-                        {activeLongVideo.youtube?.title || activeLongVideo.title}
-                      </p>
-                      <p className="mt-1 text-xs text-gray-400">
-                        Orange Brick Docs · 42 mil visualizações · há 2 horas
-                      </p>
-                      <span className="mt-2 inline-block rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
-                        ✓ Manchete curta ({activeThumbnailOption.headline}) legível em tela pequena
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {(activeLongVideo.thumbnails || []).map((thumb) => {
-                  const isSelected = (activeLongVideo.selected_thumbnail_id || "thumb_1") === thumb.id;
-                  return (
-                    <button
-                      key={thumb.id}
-                      type="button"
-                      onClick={() => void handleSelectThumbnail(thumb.id)}
-                      className={`group flex flex-col overflow-hidden rounded-2xl border text-left transition-all ${
-                        isSelected
-                          ? "border-brand-orange bg-brand-orange/10 ring-2 ring-brand-orange/40"
-                          : "border-white/10 bg-[#131622] hover:border-white/25"
-                      }`}
-                    >
-                      <div className="relative aspect-video w-full overflow-hidden bg-black">
-                        <img
-                          src={thumb.url}
-                          alt={thumb.label}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <span
-                          className={`absolute right-2 top-2 rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
-                            isSelected ? "bg-brand-orange text-black" : "bg-black/75 text-white"
-                          }`}
-                        >
-                          {isSelected ? "✓ Capa Ativa" : "Selecionar"}
-                        </span>
-                      </div>
-                      <div className="p-3">
-                        <p className="text-xs font-black text-white">{thumb.label}</p>
-                        <p className="mt-0.5 text-[11px] text-gray-400">{thumb.angle}</p>
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             </div>
 
@@ -1824,7 +1680,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       title={pipelineMode === "long" ? "Vídeos Longos · Documentários 16:9" : "Central de Reels & Vídeos"}
       description={
         pipelineMode === "long"
-          ? "Esteira automatizada em 8 etapas: pauta ou roteiro próprio, narração neural PT-BR, cenas 16:9 em 1080p, 3 thumbnails, trava QA e revisão humana antes de agendar no YouTube."
+          ? "Esteira automatizada: pauta ou roteiro próprio, narração neural PT-BR, cenas 16:9 em 1080p, trava QA e revisão humana antes de agendar no YouTube."
           : "Gerencie vídeos verticais (1080×1920) em motion graphics com narração neural. Cada notícia publicada gera seu vídeo automaticamente."
       }
       wide
