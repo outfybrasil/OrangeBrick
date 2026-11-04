@@ -1,0 +1,851 @@
+1
+00:00:03,300 --> 00:00:06,783
+Dezenove de novembro de dois mil e vinte e
+seis.
+
+2
+00:00:06,733 --> 00:00:11,826
+Nunca na história recente do entretenimento
+eletrônico uma única data no calendário
+
+3
+00:00:11,826 --> 00:00:16,797
+provocou tanto pânico silencioso nas salas de
+diretoria das grandes publicadoras.
+
+4
+00:00:16,797 --> 00:00:21,873
+Quando a Take-Two Interactive e a Rockstar
+Games cravaram que Grand Theft Auto seis
+
+5
+00:00:21,873 --> 00:00:24,319
+chegaria às lojas na metade de novembro,
+
+6
+00:00:24,319 --> 00:00:27,805
+o efeito imediato nos bastidores foi uma
+debandada geral.
+
+7
+00:00:27,805 --> 00:00:33,004
+Executivos de estúdios rivais passaram meses
+redesenhando janelas de distribuição do
+
+8
+00:00:33,004 --> 00:00:37,461
+segundo semestre para evitar o choque frontal
+com o retorno a Vice City.
+
+9
+00:00:37,460 --> 00:00:43,041
+Para você ter ideia do tamanho do bloqueio, na
+semana inteira de estreia da Rockstar,
+
+10
+00:00:43,041 --> 00:00:45,470
+praticamente toda a indústria recuou.
+
+11
+00:00:45,470 --> 00:00:50,466
+A única exceção curiosa que aceitou dividir os
+holofotes naquele mesmo dezenove de
+
+12
+00:00:50,466 --> 00:00:53,451
+novembro foi uma expansão de Goat Simulator
+três,
+
+13
+00:00:53,451 --> 00:00:58,569
+apostando justamente no contraste absurdo do
+humor contra o maior colosso da década.
+
+14
+00:00:58,570 --> 00:01:03,264
+Mas o impacto de GTA seis vai muito além do
+medo da concorrência.
+
+15
+00:01:03,264 --> 00:01:08,617
+Ele está servindo como laboratório vivo para
+quatro mudanças estruturais que afetam
+
+16
+00:01:08,617 --> 00:01:11,197
+diretamente o seu bolso e o seu console:
+
+17
+00:01:11,197 --> 00:01:16,228
+a quebra do teto de setenta dólares, a morte
+prática do disco físico na caixa,
+
+18
+00:01:16,228 --> 00:01:21,646
+o gargalo de duzentos e dez gigabytes nos SSDs
+atuais e um novo patamar de simulação
+
+19
+00:01:21,646 --> 00:01:22,677
+em mundo aberto.
+
+20
+00:01:22,677 --> 00:01:27,805
+Neste dossiê do Orange Brick, nós cruzamos os
+documentos, os registros de rede,
+
+21
+00:01:27,805 --> 00:01:33,258
+os vazamentos e as falas de executivos para
+mostrar como GTA seis já mudou as regras
+
+22
+00:01:33,258 --> 00:01:35,789
+da indústria antes mesmo de ser jogado.
+
+23
+00:01:40,364 --> 00:01:44,715
+O primeiro grande abalo atende por um número:
+oitenta dólares.
+
+24
+00:01:44,665 --> 00:01:45,488
+Durante anos,
+
+25
+00:01:45,488 --> 00:01:50,487
+estúdios europeus e norte-americanos
+reclamaram a portas fechadas que o teto de
+
+26
+00:01:50,487 --> 00:01:54,537
+setenta dólares já não fechava a conta de
+produções gigantescas.
+
+27
+00:01:54,537 --> 00:01:58,449
+Quem colocou o dedo na ferida publicamente foi
+Martin Klima,
+
+28
+00:01:58,449 --> 00:02:04,448
+cofundador e diretor de operações da Warhorse
+Studios, criadora de Kingdom Come Deliverance.
+
+29
+00:02:04,448 --> 00:02:07,321
+Klima expôs a matemática brutal da indústria:
+
+30
+00:02:07,321 --> 00:02:11,279
+na geração do PlayStation três e do Xbox
+trezentos e sessenta,
+
+31
+00:02:11,279 --> 00:02:15,940
+um grande lançamento custava entre quarenta e
+oitenta milhões de dólares.
+
+32
+00:02:15,940 --> 00:02:16,256
+Hoje,
+
+33
+00:02:16,256 --> 00:02:21,559
+projetos de ponta ultrapassam facilmente a
+barreira dos duzentos e cinquenta milhões
+
+34
+00:02:21,559 --> 00:02:24,021
+apenas em engenharia e desenvolvimento,
+
+35
+00:02:24,021 --> 00:02:25,914
+sem contar o marketing global.
+
+36
+00:02:25,915 --> 00:02:30,469
+O problema é que nenhum estúdio comum tinha
+coragem de ser o primeiro a cobrar
+
+37
+00:02:30,469 --> 00:02:35,022
+oitenta dólares pela edição básica e sofrer um
+boicote imediato dos jogadores.
+
+38
+00:02:35,022 --> 00:02:38,734
+Todos esperavam que a Rockstar abrisse essa
+porta.
+
+39
+00:02:38,733 --> 00:02:39,951
+Do lado da Take-Two,
+
+40
+00:02:39,951 --> 00:02:45,613
+o diretor executivo Strauss Zelnick já
+preparava o terreno nas conferências com investidores,
+
+41
+00:02:45,613 --> 00:02:50,666
+defendendo que os jogos entregam um valor por
+hora de entretenimento muito superior
+
+42
+00:02:50,666 --> 00:02:52,432
+ao preço cobrado na etiqueta.
+
+43
+00:02:52,432 --> 00:02:56,193
+E a confirmação veio na listagem oficial dos
+Estados Unidos:
+
+44
+00:02:56,193 --> 00:03:01,145
+edição padrão de GTA seis por setenta e nove
+dólares e noventa e nove centavos,
+
+45
+00:03:01,145 --> 00:03:05,595
+e edição Ultimate por noventa e nove dólares e
+noventa e nove centavos.
+
+46
+00:03:05,596 --> 00:03:10,895
+No Brasil, a edição padrão já orbita a faixa
+dos quatrocentos e cinquenta reais,
+
+47
+00:03:10,895 --> 00:03:15,201
+inaugurando um novo piso psicológico para toda
+a próxima geração.
+
+48
+00:03:19,756 --> 00:03:22,536
+Se o preço de oitenta dólares já gerou debate,
+
+49
+00:03:22,536 --> 00:03:27,431
+o formato da edição de colecionador de
+prateleira acendeu o alerta vermelho entre
+
+50
+00:03:27,431 --> 00:03:30,089
+quem ainda defende a posse física dos jogos.
+
+51
+00:03:30,039 --> 00:03:35,518
+A página oficial de suporte e versões da
+Rockstar Games confirmou um detalhe decisivo:
+
+52
+00:03:35,518 --> 00:03:40,678
+a edição física de Grand Theft Auto seis
+vendida nas lojas não traz disco Blu-ray
+
+53
+00:03:40,678 --> 00:03:41,952
+dentro da embalagem.
+
+54
+00:03:41,952 --> 00:03:47,334
+Ao abrir a caixa plástica, que começa a ser
+distribuída no varejo em doze de novembro,
+
+55
+00:03:47,334 --> 00:03:49,587
+uma semana antes da estreia oficial,
+
+56
+00:03:49,587 --> 00:03:55,281
+o comprador encontra apenas um código de
+resgate para baixar o jogo completo pela internet.
+
+57
+00:03:55,281 --> 00:03:55,983
+Na prática,
+
+58
+00:03:55,983 --> 00:04:01,149
+comprar a versão de prateleira não elimina um
+único megabyte de download e impede
+
+59
+00:04:01,149 --> 00:04:02,233
+qualquer revenda,
+
+60
+00:04:02,233 --> 00:04:07,016
+empréstimo ou preservação offline depois que o
+código é ativado na conta da
+
+61
+00:04:07,016 --> 00:04:09,312
+PlayStation Network ou da rede Xbox.
+
+62
+00:04:09,312 --> 00:04:12,992
+Além disso, a própria edição Ultimate, de cem
+dólares,
+
+63
+00:04:12,992 --> 00:04:19,261
+sequer terá versão em caixa nas lojas, ficando
+restrita exclusivamente às vitrines digitais.
+
+64
+00:04:19,261 --> 00:04:24,759
+Quando o maior lançamento da década abandona a
+prensagem em disco na sua tiragem de varejo,
+
+65
+00:04:24,759 --> 00:04:27,961
+a mensagem para o restante da indústria é
+cristalina:
+
+66
+00:04:27,961 --> 00:04:32,131
+a caixa física virou apenas um cartão-presente
+de luxo para estantes.
+
+67
+00:04:36,708 --> 00:04:41,811
+Mas por que a Rockstar desistiu de prensar
+discos Blu-ray tradicionais?
+
+68
+00:04:41,761 --> 00:04:47,010
+A resposta técnica apareceu nos servidores da
+PlayStation Network em vinte e sete de
+
+69
+00:04:47,010 --> 00:04:49,197
+outubro de dois mil e vinte e seis.
+
+70
+00:04:49,197 --> 00:04:54,117
+Os registros de pré-carregamento revelaram que
+a edição padrão de Grand Theft Auto
+
+71
+00:04:54,117 --> 00:04:59,037
+seis exige impressionantes duzentos e dez
+gigabytes de espaço livre no PlayStation
+
+72
+00:04:59,037 --> 00:04:59,397
+cinco,
+
+73
+00:04:59,397 --> 00:05:04,618
+podendo chegar a duzentos e doze gigabytes
+dependendo da região e do pacote de idiomas.
+
+74
+00:05:04,618 --> 00:05:09,697
+Isso é mais do que o dobro do tamanho de Red
+Dead Redemption dois no seu lançamento
+
+75
+00:05:09,697 --> 00:05:14,287
+e ultrapassa o limite físico de dois discos
+Blu-ray de camada tripla de cem
+
+76
+00:05:14,287 --> 00:05:15,205
+gigabytes cada.
+
+77
+00:05:15,205 --> 00:05:19,848
+Para quem tem o modelo original do PlayStation
+cinco, a conta é sufocante:
+
+78
+00:05:19,848 --> 00:05:24,366
+dos oitocentos e vinte e cinco gigabytes
+anunciados na caixa do console,
+
+79
+00:05:24,366 --> 00:05:29,950
+apenas seiscentos e sessenta e sete gigabytes
+ficam realmente disponíveis para o usuário.
+
+80
+00:05:29,950 --> 00:05:30,484
+Sozinho,
+
+81
+00:05:30,484 --> 00:05:35,960
+GTA seis devora quase um terço de todo o
+armazenamento útil da máquina antes mesmo
+
+82
+00:05:35,960 --> 00:05:39,032
+de qualquer atualização do futuro modo online.
+
+83
+00:05:39,031 --> 00:05:42,968
+No Xbox Series S de entrada, o cenário é ainda
+mais dramático:
+
+84
+00:05:42,968 --> 00:05:47,349
+com apenas trezentos e sessenta e quatro
+gigabytes livres de fábrica,
+
+85
+00:05:47,349 --> 00:05:52,555
+instalar o jogo da Rockstar deixa o console
+praticamente sem espaço para manter um
+
+86
+00:05:52,555 --> 00:05:56,301
+segundo grande título competitivo instalado ao
+mesmo tempo.
+
+87
+00:05:56,302 --> 00:05:59,569
+O pré-download começa entre dez e doze de
+novembro,
+
+88
+00:05:59,569 --> 00:06:02,900
+uma semana inteira antes da abertura dos
+servidores,
+
+89
+00:06:02,900 --> 00:06:07,705
+justamente para evitar um colapso global nas
+redes de distribuição digital.
+
+90
+00:06:12,284 --> 00:06:17,745
+Com um mundo aberto tão pesado, a pergunta
+inevitável nos fóruns técnicos foi uma só:
+
+91
+00:06:17,745 --> 00:06:21,022
+qual console vai rodar Leonida no seu ápice
+visual?
+
+92
+00:06:20,972 --> 00:06:25,919
+A Sony se antecipou e firmou uma parceria
+estratégica direta com a Rockstar Games
+
+93
+00:06:25,919 --> 00:06:30,744
+para transformar o PlayStation cinco Pro na
+vitrine oficial de Grand Theft Auto
+
+94
+00:06:30,744 --> 00:06:31,049
+seis.
+
+95
+00:06:31,049 --> 00:06:35,797
+Engenheiros da fabricante japonesa trabalharam
+ao lado do estúdio para integrar
+
+96
+00:06:35,797 --> 00:06:40,786
+reconstrução de imagem avançada por
+inteligência artificial e ray tracing acelerado
+
+97
+00:06:40,786 --> 00:06:41,567
+por hardware,
+
+98
+00:06:41,567 --> 00:06:46,375
+mirando estabilidade superior de quadros sem
+sacrificar a densidade de tráfego e
+
+99
+00:06:46,375 --> 00:06:47,758
+vegetação de Vice City.
+
+100
+00:06:47,758 --> 00:06:48,507
+Para a Sony,
+
+101
+00:06:48,507 --> 00:06:53,188
+o acordo é a peça que faltava para justificar
+o investimento no seu console
+
+102
+00:06:53,188 --> 00:06:54,686
+intermediário mais caro,
+
+103
+00:06:54,686 --> 00:06:59,804
+vendendo o PS cinco Pro como a máquina
+definitiva para jogar GTA seis antes de uma
+
+104
+00:06:59,804 --> 00:07:01,801
+futura versão para computadores.
+
+105
+00:07:01,801 --> 00:07:02,783
+Já no marketing,
+
+106
+00:07:02,783 --> 00:07:07,875
+a Rockstar quebrou outro protocolo histórico
+da indústria em vinte e sete de agosto
+
+107
+00:07:07,875 --> 00:07:09,531
+de dois mil e vinte e seis.
+
+108
+00:07:09,531 --> 00:07:12,529
+Em vez de estrear sua apresentação
+aprofundada,
+
+109
+00:07:12,529 --> 00:07:15,527
+chamada Grand Theft Auto seis An Extended
+Look,
+
+110
+00:07:15,527 --> 00:07:19,800
+diretamente no YouTube ou em uma feira
+tradicional como a Gamescom,
+
+111
+00:07:19,800 --> 00:07:23,817
+a empresa fechou uma janela exclusiva de seis
+horas na Netflix.
+
+112
+00:07:23,817 --> 00:07:24,923
+Pela primeira vez,
+
+113
+00:07:24,923 --> 00:07:30,024
+o trailer de gameplay mais esperado da década
+estreou como evento televisivo dentro
+
+114
+00:07:30,024 --> 00:07:32,728
+da maior plataforma de streaming do planeta,
+
+115
+00:07:32,728 --> 00:07:37,398
+provando que a Rockstar já não disputa atenção
+apenas com outros videogames,
+
+116
+00:07:37,398 --> 00:07:38,996
+mas com Hollywood inteira.
+
+117
+00:07:43,564 --> 00:07:46,702
+Mas por trás do controle milimétrico da
+Rockstar,
+
+118
+00:07:46,702 --> 00:07:51,953
+GTA seis também protagonizou a história de
+espionagem e vazamentos mais surreal da
+
+119
+00:07:51,953 --> 00:07:53,106
+indústria moderna.
+
+120
+00:07:53,056 --> 00:07:57,093
+Tudo começou no dia dezoito de setembro de
+dois mil e vinte e dois,
+
+121
+00:07:57,093 --> 00:08:02,154
+quando o usuário teapotuberhacker despejou
+noventa vídeos de desenvolvimento inicial
+
+122
+00:08:02,154 --> 00:08:03,298
+no fórum GTAForums.
+
+123
+00:08:03,298 --> 00:08:05,783
+O autor da invasão era Arion Kurtaj,
+
+124
+00:08:05,783 --> 00:08:09,994
+um jovem de dezessete anos integrante do grupo
+hacker Lapsus,
+
+125
+00:08:09,994 --> 00:08:15,173
+o mesmo coletivo que havia invadido gigantes
+como Nvidia, Uber e Microsoft.
+
+126
+00:08:15,173 --> 00:08:19,268
+O detalhe que parece roteiro de cinema é como
+o ataque aconteceu:
+
+127
+00:08:19,268 --> 00:08:24,686
+Kurtaj já estava sob custódia policial em um
+quarto de hotel em Oxford, na Inglaterra,
+
+128
+00:08:24,686 --> 00:08:30,293
+mas conseguiu invadir os canais internos da
+Rockstar usando apenas a televisão do quarto,
+
+129
+00:08:30,293 --> 00:08:34,892
+um Amazon Fire Stick, um teclado e engenharia
+social contra funcionários.
+
+130
+00:08:34,893 --> 00:08:37,310
+Em dezembro de dois mil e vinte e três,
+
+131
+00:08:37,310 --> 00:08:42,329
+a Justiça britânica determinou sua internação
+hospitalar por tempo indeterminado.
+
+132
+00:08:42,329 --> 00:08:48,069
+Mesmo assim, o fantasma dos arquivos roubados
+nunca desapareceu por completo.
+
+133
+00:08:48,069 --> 00:08:53,516
+Em dezoito de agosto de dois mil e vinte e
+seis, a apenas nove dias da vitrine da Netflix,
+
+134
+00:08:53,516 --> 00:08:58,600
+um novo grupo chamado Cyberleek publicou
+gravações inéditas de uma build de dois mil
+
+135
+00:08:58,600 --> 00:09:01,263
+e vinte e três e o mapa completo de Leonida,
+
+136
+00:09:01,263 --> 00:09:06,832
+exigindo o fim das pré-vendas digitais antes
+de ter todo o conteúdo derrubado pela Take-Two.
+
+137
+00:09:11,412 --> 00:09:16,153
+Quando juntamos o que os vazamentos mostraram
+com o que a própria Rockstar já
+
+138
+00:09:16,153 --> 00:09:17,569
+confirmou oficialmente,
+
+139
+00:09:17,569 --> 00:09:22,002
+fica claro por que GTA seis custou tão caro e
+exige tanto armazenamento:
+
+140
+00:09:22,002 --> 00:09:27,112
+o jogo abandona a ação arcade rasa do passado
+e abraça a profundidade tática de Red
+
+141
+00:09:27,112 --> 00:09:28,404
+Dead Redemption dois.
+
+142
+00:09:28,404 --> 00:09:30,043
+No combate corpo a corpo,
+
+143
+00:09:30,043 --> 00:09:35,548
+Jason e Lucia contam com uma barra física de
+estamina que escurece as bordas da tela
+
+144
+00:09:35,548 --> 00:09:36,859
+em caso de exaustão,
+
+145
+00:09:36,859 --> 00:09:42,627
+além de desarmes, armas improvisadas
+recolhidas do chão, posição deitada de furtividade,
+
+146
+00:09:42,627 --> 00:09:44,986
+algemas plásticas e escudos humanos.
+
+147
+00:09:44,985 --> 00:09:48,435
+O arsenal também deixou de ser um bolso mágico
+infinito:
+
+148
+00:09:48,435 --> 00:09:51,947
+você carrega apenas duas pistolas e dois
+rifles no corpo,
+
+149
+00:09:51,947 --> 00:09:56,568
+enquanto o restante do equipamento fica
+guardado no porta-malas do veículo,
+
+150
+00:09:56,568 --> 00:10:00,942
+dividido entre os menus de depósito e
+carregamento com limite de slots.
+
+151
+00:10:00,942 --> 00:10:06,368
+Os próprios carros ganharam indicadores
+dedicados de combustível e estado do motor,
+
+152
+00:10:06,368 --> 00:10:11,860
+em uma frota de mais de duzentos veículos com
+painéis, volantes e bancos ajustáveis.
+
+153
+00:10:11,860 --> 00:10:16,375
+Mas a revolução mais impressionante está na
+inteligência policial.
+
+154
+00:10:16,376 --> 00:10:19,743
+As lendárias seis estrelas de procurado estão
+de volta,
+
+155
+00:10:19,743 --> 00:10:25,008
+acompanhadas de ícones que mostram se a
+polícia já identificou a roupa que você veste,
+
+156
+00:10:25,008 --> 00:10:28,621
+o veículo que você dirige e o último bairro
+onde foi visto.
+
+157
+00:10:28,621 --> 00:10:33,553
+Some a isso dois contadores separados de
+dinheiro na carteira e no esconderijo,
+
+158
+00:10:33,553 --> 00:10:39,172
+um indicador de moralidade após agressões
+gratuitas e cinco condados inteiros em Leonida —
+
+159
+00:10:39,172 --> 00:10:41,794
+de Vice City aos pântanos de Grassrivers —
+
+160
+00:10:41,794 --> 00:10:45,789
+e temos a simulação urbana mais densa já
+tentada nos videogames.
+
+161
+00:10:50,348 --> 00:10:53,334
+Chegamos ao veredito deste dossiê.
+
+162
+00:10:53,284 --> 00:10:57,531
+Grand Theft Auto seis não é apenas mais um
+lançamento de fim de ano;
+
+163
+00:10:57,531 --> 00:11:01,715
+ele é a linha divisória entre duas eras da
+indústria de videogames.
+
+164
+00:11:01,715 --> 00:11:02,395
+De um lado,
+
+165
+00:11:02,395 --> 00:11:07,837
+a Rockstar promete entregar em dezenove de
+novembro uma obra de engenharia sem paralelo,
+
+166
+00:11:07,837 --> 00:11:11,609
+capaz de fazer um mundo aberto moderno reagir
+a cada detalhe,
+
+167
+00:11:11,609 --> 00:11:16,001
+da gasolina no tanque ao modelo da camisa
+usada numa fuga em Vice City.
+
+168
+00:11:16,001 --> 00:11:21,972
+Do outro lado, o colosso da Take-Two deixa
+como herança um mercado mais caro e mais fechado:
+
+169
+00:11:21,972 --> 00:11:25,217
+jogos de oitenta dólares como novo teto
+comercial,
+
+170
+00:11:25,217 --> 00:11:30,214
+caixas físicas sem disco nas prateleiras e
+instalações que passam de duzentos
+
+171
+00:11:30,214 --> 00:11:34,368
+gigabytes e obrigam o jogador a gerenciar cada
+bloco do seu SSD.
+
+172
+00:11:34,368 --> 00:11:39,289
+Quando o resto da indústria tentar copiar o
+preço de oitenta dólares e a caixa sem
+
+173
+00:11:39,289 --> 00:11:41,269
+mídia em dois mil e vinte e sete,
+
+174
+00:11:41,269 --> 00:11:44,689
+a pergunta que todo consumidor precisará fazer
+é simples:
+
+175
+00:11:44,689 --> 00:11:49,190
+esses outros jogos também entregam o nível de
+obsessão técnica da Rockstar,
+
+176
+00:11:49,190 --> 00:11:51,830
+ou querem apenas cobrar o preço de GTA seis?
+
+177
+00:11:51,830 --> 00:11:57,937
+E para você: os oitenta dólares e os duzentos
+e dez gigabytes valem o ingresso para Leonida,
+
+178
+00:11:57,937 --> 00:12:00,924
+ou a indústria está esticando demais a corda?
+
+179
+00:12:00,924 --> 00:12:03,341
+Deixe sua análise aqui nos comentários,
+
+180
+00:12:03,341 --> 00:12:08,484
+inscreva-se no canal do Orange Brick e acesse
+orangebrick ponto blog para ler todas
+
+181
+00:12:08,484 --> 00:12:10,529
+as matérias completas na íntegra.

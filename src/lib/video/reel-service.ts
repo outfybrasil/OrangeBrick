@@ -77,7 +77,7 @@ export function checkReelFile(slug: string): { exists: boolean; size?: number; u
     const filePath = path.resolve(process.cwd(), "public", "reels", `${slug}.mp4`);
     if (fs.existsSync(filePath)) {
       const stats = fs.statSync(filePath);
-      if (stats.size > 100000) { // pelo menos 100kb
+      if (stats.size > 100000) {
         return {
           exists: true,
           size: stats.size,
@@ -504,3 +504,251 @@ function processReelQueue() {
 
   child.unref();
 }
+
+export interface LongVideoChapter {
+  number: string;
+  title: string;
+  kicker?: string;
+  start_seconds: number;
+  timestamp: string;
+  source?: string;
+}
+
+export interface LongVideoThumbnailOption {
+  id: string;
+  label: string;
+  angle: string;
+  headline: string;
+  subline: string;
+  url: string;
+}
+
+export interface LongVideoShortSuggestion {
+  id: string;
+  title: string;
+  hook: string;
+  chapter_number: string;
+  start_timestamp: string;
+  end_timestamp: string;
+  duration_seconds: number;
+  related_slug?: string;
+}
+
+export interface LongVideoQaCheck {
+  id: string;
+  label: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface LongVideoManifestItem {
+  slug: string;
+  series_badge: string;
+  title: string;
+  subtitle: string;
+  status: "generating" | "pending_review" | "approved" | "rejected" | "scheduled" | "failed";
+  pipeline_stage_index: number;
+  pipeline_stage_label: string;
+  source_mode: "ai_dossier" | "custom_script";
+  source_post_slugs: string[];
+  visual_style: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  voice_id: string;
+  duration_seconds: number;
+  duration_formatted: string;
+  monetization_midroll_eligible: boolean;
+  file_size?: number;
+  resolution: string;
+  fps: number;
+  video_url?: string;
+  srt_url?: string;
+  preview_sheet_url?: string;
+  thumbnails: LongVideoThumbnailOption[];
+  selected_thumbnail_id?: string;
+  chapters: LongVideoChapter[];
+  qa_checks: LongVideoQaCheck[];
+  shorts_suggestions: LongVideoShortSuggestion[];
+  youtube: {
+    title: string;
+    description: string;
+    tags: string[];
+    pinned_comment: string;
+    visibility?: "private" | "unlisted" | "public";
+    scheduled_at?: string | null;
+  };
+  review_notes?: string | null;
+  approved_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  error?: string;
+}
+
+export interface DarkPipelineConfig {
+  channel_name: string;
+  niche: string;
+  default_style: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  default_voice: string;
+  target_min_minutes: number;
+  daily_schedule_time: string;
+  daily_conveyor_enabled: boolean;
+  require_human_approval: boolean;
+}
+
+const LONG_MANIFEST_PATH = path.resolve(process.cwd(), "public", "long-videos", "manifest.json");
+const TMP_LONG_MANIFEST_PATH = path.join("/tmp", "orangebrick-long-videos-manifest.json");
+const DARK_CONFIG_PATH = path.resolve(process.cwd(), "public", "long-videos", "pipeline-config.json");
+const TMP_DARK_CONFIG_PATH = path.join("/tmp", "orangebrick-dark-pipeline-config.json");
+
+export function getDarkPipelineConfig(): DarkPipelineConfig {
+  const fallback: DarkPipelineConfig = {
+    channel_name: "Orange Brick Docs",
+    niche: "Dossiês de Indústria, Hardware & Bastidores dos Games",
+    default_style: "documentario",
+    default_voice: "pt-BR-AntonioNeural",
+    target_min_minutes: 8,
+    daily_schedule_time: "19:00",
+    daily_conveyor_enabled: true,
+    require_human_approval: true,
+  };
+  try {
+    if (fs.existsSync(TMP_DARK_CONFIG_PATH)) {
+      const parsed = JSON.parse(fs.readFileSync(TMP_DARK_CONFIG_PATH, "utf-8"));
+      return { ...fallback, ...parsed };
+    }
+    if (fs.existsSync(DARK_CONFIG_PATH)) {
+      const parsed = JSON.parse(fs.readFileSync(DARK_CONFIG_PATH, "utf-8"));
+      return { ...fallback, ...parsed };
+    }
+  } catch {}
+  return fallback;
+}
+
+export function saveDarkPipelineConfig(update: Partial<DarkPipelineConfig>): DarkPipelineConfig {
+  const next = { ...getDarkPipelineConfig(), ...update };
+  const payload = JSON.stringify(next, null, 2);
+  try {
+    const dir = path.dirname(DARK_CONFIG_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DARK_CONFIG_PATH, payload, "utf-8");
+  } catch {
+    try {
+      fs.writeFileSync(TMP_DARK_CONFIG_PATH, payload, "utf-8");
+    } catch {}
+  }
+  return next;
+}
+
+export function getLongVideoManifest(): Record<string, LongVideoManifestItem> {
+  let base: Record<string, LongVideoManifestItem> = {};
+  try {
+    if (fs.existsSync(LONG_MANIFEST_PATH)) {
+      base = JSON.parse(fs.readFileSync(LONG_MANIFEST_PATH, "utf-8"));
+    }
+  } catch {}
+  try {
+    if (fs.existsSync(TMP_LONG_MANIFEST_PATH)) {
+      const runtime = JSON.parse(fs.readFileSync(TMP_LONG_MANIFEST_PATH, "utf-8"));
+      return { ...base, ...runtime };
+    }
+  } catch {}
+  return base;
+}
+
+export function saveLongVideoManifest(manifest: Record<string, LongVideoManifestItem>) {
+  const payload = JSON.stringify(manifest, null, 2);
+  try {
+    const dir = path.dirname(LONG_MANIFEST_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(LONG_MANIFEST_PATH, payload, "utf-8");
+  } catch {
+    try {
+      fs.writeFileSync(TMP_LONG_MANIFEST_PATH, payload, "utf-8");
+    } catch {}
+  }
+}
+
+export function updateLongVideoItem(slug: string, update: Partial<LongVideoManifestItem>): LongVideoManifestItem | null {
+  const manifest = getLongVideoManifest();
+  const existing = manifest[slug];
+  if (!existing) return null;
+  const next: LongVideoManifestItem = {
+    ...existing,
+    ...update,
+    youtube: update.youtube ? { ...existing.youtube, ...update.youtube } : existing.youtube,
+    updated_at: new Date().toISOString(),
+  };
+  manifest[slug] = next;
+  saveLongVideoManifest(manifest);
+  return next;
+}
+
+export function triggerLongVideoGeneration(options: {
+  slug: string;
+  title: string;
+  subtitle: string;
+  sourceMode: "ai_dossier" | "custom_script";
+  sourcePostSlugs: string[];
+  customScriptText?: string;
+  visualStyle: "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+  voiceId: string;
+  targetMinMinutes: number;
+}): LongVideoManifestItem {
+  const manifest = getLongVideoManifest();
+  const now = new Date().toISOString();
+  const initialItem: LongVideoManifestItem = {
+    slug: options.slug,
+    series_badge: `DOSSIÊ ORANGE BRICK // ESTILO ${options.visualStyle.toUpperCase()}`,
+    title: options.title,
+    subtitle: options.subtitle,
+    status: "generating",
+    pipeline_stage_index: 1,
+    pipeline_stage_label: "1/8 · Estruturando roteiro, capítulos e fontes verificadas",
+    source_mode: options.sourceMode,
+    source_post_slugs: options.sourcePostSlugs,
+    visual_style: options.visualStyle,
+    voice_id: options.voiceId,
+    duration_seconds: options.targetMinMinutes * 60,
+    duration_formatted: `${String(options.targetMinMinutes).padStart(2, "0")}:00`,
+    monetization_midroll_eligible: options.targetMinMinutes >= 8,
+    resolution: "1920x1080",
+    fps: 30,
+    thumbnails: [],
+    chapters: [],
+    qa_checks: [],
+    shorts_suggestions: [],
+    youtube: {
+      title: options.title,
+      description: options.subtitle,
+      tags: ["Orange Brick", "Dossiê Games", "Indústria de Games"],
+      pinned_comment: "Deixe sua opinião nos comentários e inscreva-se no canal!",
+      visibility: "private",
+      scheduled_at: null,
+    },
+    created_at: manifest[options.slug]?.created_at || now,
+    updated_at: now,
+  };
+
+  manifest[options.slug] = initialItem;
+  saveLongVideoManifest(manifest);
+
+  try {
+    const jobDir = path.resolve(process.cwd(), "tmp", "long-videos", options.slug);
+    fs.mkdirSync(jobDir, { recursive: true });
+    const jobConfigPath = path.join(jobDir, "job-request.json");
+    fs.writeFileSync(jobConfigPath, JSON.stringify(options, null, 2), "utf-8");
+
+    const scriptPath = path.resolve(process.cwd(), "scripts", "generate-long-video.mjs");
+    const child = spawn(process.execPath, [
+      ...(fs.existsSync(path.resolve(process.cwd(), ".env.local")) ? ["--env-file=.env.local"] : []),
+      scriptPath,
+      `--job=${jobConfigPath}`,
+    ], {
+      detached: true,
+      stdio: "ignore",
+      cwd: process.cwd(),
+    });
+    child.unref();
+  } catch {}
+
+  return initialItem;
+}
+

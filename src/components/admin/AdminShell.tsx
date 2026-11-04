@@ -37,6 +37,16 @@ function ReelsIcon() {
   );
 }
 
+function DarkPipelineIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
+      <rect x="2" y="5" width="20" height="14" rx="2.5" />
+      <polygon points="10 9.5 15.5 12 10 14.5 10 9.5" fill="currentColor" stroke="none" />
+      <path d="M6 19v2M18 19v2" />
+    </svg>
+  );
+}
+
 function ComposeIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -44,7 +54,6 @@ function ComposeIcon() {
     </svg>
   );
 }
-
 
 function ReleasesIcon() {
   return (
@@ -113,7 +122,7 @@ export function AdminShell({
   const navClass = (section: AdminSection) =>
     `flex min-h-10 items-center gap-3 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-brand-orange ${
       active === section
-        ? "bg-white/[0.08] text-brand-orange font-bold border-l-2 border-brand-orange pl-2.5"
+        ? "bg-white/[0.08] text-brand-orange font-bold"
         : "text-gray-400 hover:bg-white/[0.04] hover:text-white"
     }`;
 
@@ -127,15 +136,12 @@ export function AdminShell({
 
   return (
     <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white selection:bg-brand-orange selection:text-white">
-      {/* SIDEBAR DESKTOP */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] xl:flex">
-        {/* LOGO */}
         <div className="flex min-h-16 flex-col items-start justify-center gap-1 border-b border-white/10 px-5">
           <BrandLogo alt="Orange Brick" className="h-5 w-auto" />
           <p className="text-xs font-semibold text-gray-500">Redação</p>
         </div>
 
-        {/* NAV ITEMS */}
         <nav aria-label="Navegação administrativa" className="flex-1 space-y-5 p-3.5 overflow-y-auto">
           <div>
             <p className="px-3 pb-2 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
@@ -155,6 +161,10 @@ export function AdminShell({
               <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}>
                 <ReelsIcon />
                 Reels & Vídeos
+              </Link>
+              <Link href="/admin/canal-dark" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange">
+                <DarkPipelineIcon />
+                <span>Pipeline Canal Dark</span>
               </Link>
               <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
                 <ReleasesIcon />
@@ -196,7 +206,6 @@ export function AdminShell({
           </div>
         </nav>
 
-        {/* RODAPÉ DA SIDEBAR */}
         <div className="border-t border-white/10 p-3 space-y-2">
           <Link
             href="/"
@@ -226,12 +235,9 @@ export function AdminShell({
         </div>
       </aside>
 
-      {/* ÁREA DE CONTEÚDO PRINCIPAL */}
       <div className="xl:pl-60">
-        {/* HEADER TOP STATUS BAR (DESKTOP & MOBILE) */}
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0b0e]/95 backdrop-blur-xl">
           <div className="flex min-h-14 items-center justify-between gap-3 px-3.5 sm:px-6 lg:px-8">
-            {/* MOBILE LOGO & TOGGLE */}
             <div className="flex items-center gap-2.5 xl:hidden">
               <button
                 type="button"
@@ -254,7 +260,6 @@ export function AdminShell({
               </Link>
             </div>
 
-            {/* DESKTOP STATUS & DATE */}
             <div className="hidden xl:flex items-center gap-3 text-xs">
               <span className="inline-flex items-center gap-1.5 text-gray-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -264,7 +269,6 @@ export function AdminShell({
               <span className="text-gray-400">{formattedDate}</span>
             </div>
 
-            {/* BOTÃO DE AÇÃO NO TOPO */}
             <div className="flex items-center gap-2">
               {actions}
               <Link
@@ -280,17 +284,10 @@ export function AdminShell({
           </div>
         </header>
 
-        {/* CONTEÚDO PRINCIPAL COM SAFE-AREA E PADDING PARA BOTTOM DOCK */}
         <main id="conteudo-principal" tabIndex={-1} className={`${wide ? "max-w-[1600px]" : "max-w-7xl"} mx-auto w-full min-w-0 px-3.5 py-4 pb-28 xs:px-4 sm:px-6 sm:py-6 sm:pb-12 lg:px-8`}>
-          {/* HEADER DA PÁGINA */}
           <div className="mb-4 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-orange">
-                  PAINEL ADMINISTRATIVO
-                </p>
-                {status}
-              </div>
+              {status ? <div className="mb-1 flex flex-wrap items-center gap-2">{status}</div> : null}
               <h1 className="break-words font-heading text-xl font-black leading-tight text-white xs:text-2xl sm:text-3xl">
                 {title}
               </h1>
@@ -302,7 +299,6 @@ export function AdminShell({
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAVIGATION DOCK */}
       <nav
         aria-label="Navegação rápida mobile"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0b0e]/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-2xl xl:hidden"
@@ -332,7 +328,6 @@ export function AdminShell({
             <span>Escrever</span>
           </Link>
 
-
           <Link
             href="/admin/reels"
             className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
@@ -342,7 +337,7 @@ export function AdminShell({
             }`}
           >
             <ReelsIcon />
-            <span>Reels</span>
+            <span>Vídeos</span>
           </Link>
 
           <button
@@ -361,7 +356,6 @@ export function AdminShell({
         </div>
       </nav>
 
-      {/* MOBILE FULL DRAWER MODAL */}
       {mobileMenuOpen && (
         <div
           id="admin-mobile-drawer"
@@ -376,7 +370,6 @@ export function AdminShell({
             className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4 shadow-2xl animate-in slide-in-from-left duration-200 focus:outline-none"
             tabIndex={-1}
           >
-            {/* DRAWER HEADER */}
             <div className="flex min-h-14 items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="flex flex-col gap-1">
@@ -394,7 +387,6 @@ export function AdminShell({
               </button>
             </div>
 
-            {/* DRAWER NAV LINKS */}
             <nav className="flex-1 space-y-4 overflow-y-auto py-4" onClick={() => setMobileMenuOpen(false)}>
               <div>
                 <p className="px-3 pb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-gray-500">
@@ -403,9 +395,10 @@ export function AdminShell({
                 <div className="space-y-1">
                   <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}><OverviewIcon />Visão geral</Link>
                   <Link href="/admin/publicacoes" className={navClass("publications")} aria-current={active === "publications" ? "page" : undefined}><ComposeIcon />Publicações</Link>
-              <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
-              <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
+                  <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
+                  <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
+                  <Link href="/admin/canal-dark" className="flex min-h-9 items-center gap-2.5 rounded-lg pl-8 pr-3 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.04] hover:text-brand-orange"><DarkPipelineIcon />Pipeline Canal Dark</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
                   <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>
                   <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}><ProgressionIcon />Progressão</Link>
@@ -425,7 +418,6 @@ export function AdminShell({
               </div>
             </nav>
 
-            {/* DRAWER FOOTER */}
             <div className="space-y-2 border-t border-white/10 pt-3 pb-[env(safe-area-inset-bottom)]">
               <Link
                 href="/"

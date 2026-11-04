@@ -10,8 +10,15 @@ import {
   triggerReelGeneration,
   cancelReel,
   getLocalReelQueueStatus,
+  getLongVideoManifest,
+  getDarkPipelineConfig,
+  saveDarkPipelineConfig,
+  triggerLongVideoGeneration,
+  updateLongVideoItem,
   type ReelManifestItem,
   type SocialCopys,
+  type LongVideoManifestItem,
+  type DarkPipelineConfig,
 } from "@/lib/video/reel-service";
 import type { ReelSocialPublication, ReelSocialPlatform, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 
@@ -254,8 +261,30 @@ export async function GET(request: Request) {
     };
   });
 
+  const rawLongManifest = typeof getLongVideoManifest === "function" ? getLongVideoManifest() : {};
+  const longVideos: LongVideoManifestItem[] = Object.values(rawLongManifest).sort(
+    (a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime()
+  );
+  if (remote && longVideos.length > 0 && editorial.storage && typeof editorial.storage.from === "function") {
+    try {
+      const storagePaths = longVideos.map((v) => `long-videos/${v.slug}/${v.slug}.mp4`);
+      const { data: signedLong } = await editorial.storage.from("editorial-reels").createSignedUrls(storagePaths, 3600);
+      const signedByPath = new Map<string, string>();
+      for (const entry of signedLong || []) {
+        if (entry.path && entry.signedUrl) signedByPath.set(entry.path, entry.signedUrl);
+      }
+      for (const video of longVideos) {
+        const signedUrl = signedByPath.get(`long-videos/${video.slug}/${video.slug}.mp4`);
+        if (signedUrl) {
+          video.video_url = signedUrl;
+        }
+      }
+    } catch {}
+  }
+  const darkConfig: DarkPipelineConfig | null = typeof getDarkPipelineConfig === "function" ? getDarkPipelineConfig() : null;
+
   return NextResponse.json(
-    { items },
+    { items, longVideos, darkConfig },
     { headers: { "Cache-Control": "private, no-store" } }
   );
 }
@@ -278,11 +307,109 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  let body: { slug?: string };
+  let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Corpo da requisição inválido" }, { status: 400 });
+  }
+
+  if (body?.pipeline === "long") {
+    const action = typeof body.action === "string" ? body.action : "";
+
+    if (action === "config") {
+      const updated = saveDarkPipelineConfig((body.config as Partial<DarkPipelineConfig>) || {});
+      return NextResponse.json({ success: true, darkConfig: updated });
+    }
+
+    if (action === "review") {
+      const slug = typeof body.slug === "string" ? body.slug : "";
+      const decision = body.decision === "approve" ? "approved" : "rejected";
+      const notes = typeof body.review_notes === "string" ? body.review_notes.trim() : null;
+      const thumbId = typeof body.selected_thumbnail_id === "string" ? body.selected_thumbnail_id : undefined;
+      const updated = updateLongVideoItem(slug, {
+        status: decision,
+        review_notes: notes,
+        approved_at: decision === "approved" ? new Date().toISOString() : null,
+        ...(thumbId ? { selected_thumbnail_id: thumbId } : {}),
+      });
+      if (!updated) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
+      return NextResponse.json({ success: true, item: updated });
+    }
+
+    if (action === "schedule") {
+      const slug = typeof body.slug === "string" ? body.slug : "";
+      const scheduledAt = typeof body.scheduled_at === "string" ? body.scheduled_at : new Date(Date.now() + 3600_000).toISOString();
+      const visibility = body.visibility === "public" || body.visibility === "unlisted" ? body.visibility : "private";
+      const current = getLongVideoManifest()[slug];
+      if (!current) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
+      if (current.status !== "approved" && current.status !== "scheduled") {
+        return NextResponse.json({ error: "Aprove o episódio no painel de revisão antes de agendar no YouTube." }, { status: 400 });
+      }
+      const updated = updateLongVideoItem(slug, {
+        status: "scheduled",
+        youtube: {
+          ...current.youtube,
+          scheduled_at: scheduledAt,
+          visibility,
+        },
+      });
+      return NextResponse.json({ success: true, item: updated });
+    }
+
+    if (action === "create") {
+      const rawTitle = typeof body.title === "string" ? body.title.trim() : "";
+      if (!rawTitle || rawTitle.length < 6) {
+        return NextResponse.json({ error: "Informe um título para o episódio longo (mínimo de 6 caracteres)." }, { status: 400 });
+      }
+      const slug = (typeof body.slug === "string" && body.slug.trim() ? body.slug.trim() : rawTitle)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 110);
+      const subtitle = typeof body.subtitle === "string" && body.subtitle.trim()
+        ? body.subtitle.trim()
+        : `Dossiê investigativo Orange Brick sobre ${rawTitle}.`;
+      const sourceMode = body.source_mode === "custom_script" ? "custom_script" : "ai_dossier";
+      const sourcePostSlugs = Array.isArray(body.source_post_slugs)
+        ? body.source_post_slugs.filter((s): s is string => typeof s === "string")
+        : [];
+      const customScriptText = typeof body.custom_script_text === "string" ? body.custom_script_text.trim() : undefined;
+      if (sourceMode === "custom_script" && (!customScriptText || customScriptText.split(/\s+/).length < 60)) {
+        return NextResponse.json({ error: "Cole um roteiro com pelo menos 60 palavras para dividir em cenas." }, { status: 400 });
+      }
+      if (sourceMode === "ai_dossier" && sourcePostSlugs.length === 0) {
+        return NextResponse.json({ error: "Selecione pelo menos 1 matéria do catálogo para compilar o dossiê." }, { status: 400 });
+      }
+      const styleRaw = typeof body.visual_style === "string" ? body.visual_style : "documentario";
+      const visualStyle = (["documentario", "arquivo-cofre", "circuito", "tribunal"].includes(styleRaw)
+        ? styleRaw
+        : "documentario") as "documentario" | "arquivo-cofre" | "circuito" | "tribunal";
+      const voiceId = typeof body.voice_id === "string" && body.voice_id ? body.voice_id : "pt-BR-AntonioNeural";
+      const targetMinMinutes = typeof body.target_min_minutes === "number" && body.target_min_minutes >= 8 ? body.target_min_minutes : 8;
+
+      const created = triggerLongVideoGeneration({
+        slug,
+        title: rawTitle,
+        subtitle,
+        sourceMode,
+        sourcePostSlugs,
+        customScriptText,
+        visualStyle,
+        voiceId,
+        targetMinMinutes,
+      });
+
+      return NextResponse.json({
+        queued: true,
+        message: "Produção do episódio longo iniciada na esteira.",
+        item: created,
+      }, { status: 202 });
+    }
+
+    return NextResponse.json({ error: "Ação inválida no pipeline de vídeo longo." }, { status: 400 });
   }
 
   const slug = body?.slug;

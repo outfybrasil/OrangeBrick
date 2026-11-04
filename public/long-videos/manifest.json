@@ -1,0 +1,482 @@
+{
+  "o-efeito-gta-6-na-industria": {
+    "series_badge": "DOSSIÊ ORANGE BRICK // EPISÓDIO #01",
+    "title": "O EFEITO GTA VI: Jogada de US$ 80, Caixa Sem Disco, 210 GB e o Terremoto na Indústria",
+    "subtitle": "Como um único lançamento marcado para 19 de novembro de 2026 redesenhou preços, calendários, hardware e mídia física no mercado global.",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+    "source_mode": "ai_dossier",
+    "source_post_slugs": [
+      "warhorse-espera-que-gta-6-abra-caminho-para-novo-padrao-de-us-80",
+      "gta-vi-edicao-fisica-codigo-na-caixa-sem-disco",
+      "gta-vi-vai-pesar-210-gb-no-ps5-e-abre-pre-load-em-12-de-novembro",
+      "gta-6-no-ps5-pro-sony-confirma-parceria-e-recursos-avancados",
+      "gta-6-vazamentos-mecanicas-e-a-saga-do-grupo-hacker",
+      "gta-6-mecanicas-novas-reveladas-pelo-gameplay-vazado"
+    ],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-AntonioNeural",
+    "slug": "o-efeito-gta-6-na-industria",
+    "updated_at": "2026-11-04T18:20:10.832Z",
+    "duration_seconds": 738.3,
+    "duration_formatted": "12:18",
+    "monetization_midroll_eligible": true,
+    "file_size": 45824227,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.mp4",
+    "srt_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.srt",
+    "preview_sheet_url": "/long-videos/o-efeito-gta-6-na-industria/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Opção 1 · Choque de Preço",
+        "angle": "Foco econômico (US$ 80 + R$ 450)",
+        "headline": "US$ 80 E SEM DISCO",
+        "subline": "O EFEITO GTA VI",
+        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_1.png"
+      },
+      {
+        "id": "thumb_2",
+        "label": "Opção 2 · Gargalo Técnico",
+        "angle": "Foco em hardware (210 GB no SSD + Caixa Vazia)",
+        "headline": "210 GB NO PS5",
+        "subline": "CAIXA SÓ COM CÓDIGO",
+        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_2.png"
+      },
+      {
+        "id": "thumb_3",
+        "label": "Opção 3 · Bastidores & Vazamentos",
+        "angle": "Foco investigativo (Lapsus$ + Leonida)",
+        "headline": "A GUERRA POR TRÁS",
+        "subline": "DE GTA VI EM NOVEMBRO",
+        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_3.png"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O TERREMOTO DE 19 DE NOVEMBRO",
+        "kicker": "CALENDÁRIO EM FUGA",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "Take-Two Interactive & Calendário 2026"
+      },
+      {
+        "number": "02",
+        "title": "A BOMBA DOS US$ 80 E O MEDO DOS ESTÚDIOS",
+        "kicker": "ECONOMIA & PREÇOS",
+        "start_seconds": 97.064,
+        "timestamp": "01:37",
+        "source": "Martin Klima (Warhorse Studios) & Strauss Zelnick (Take-Two)"
+      },
+      {
+        "number": "03",
+        "title": "CAIXA VAZIA: A MÍDIA FÍSICA SEM DISCO",
+        "kicker": "FIM DO BLU-RAY?",
+        "start_seconds": 196.456,
+        "timestamp": "03:16",
+        "source": "Rockstar Games Support — Plataformas e Versões"
+      },
+      {
+        "number": "04",
+        "title": "210 GB E O GARGALO NOS CONSOLES ATUAIS",
+        "kicker": "HARDWARE NO LIMITE",
+        "start_seconds": 273.408,
+        "timestamp": "04:33",
+        "source": "PlayStation Network Database (27/10/2026)"
+      },
+      {
+        "number": "05",
+        "title": "ALIANÇA COM O PS5 PRO E A JOGADA NA NETFLIX",
+        "kicker": "HARDWARE & MARKETING",
+        "start_seconds": 368.984,
+        "timestamp": "06:08",
+        "source": "Sony Interactive Entertainment & Rockstar Games"
+      },
+      {
+        "number": "06",
+        "title": "A CAÇADA HACKER: DE ARION KURTAJ À CYBERLEEK",
+        "kicker": "SEGURANÇA & VAZAMENTOS",
+        "start_seconds": 460.264,
+        "timestamp": "07:40",
+        "source": "Comunicado Rockstar (2022), Corte de Oxford & Kotaku (2026)"
+      },
+      {
+        "number": "07",
+        "title": "AUTÓPSIA DO GAMEPLAY: LEONIDA COMO SIMULADOR",
+        "kicker": "MECÂNICAS & MUNDO VIVO",
+        "start_seconds": 548.112,
+        "timestamp": "09:08",
+        "source": "Análise de Gameplay & Site Oficial Rockstar Games"
+      },
+      {
+        "number": "08",
+        "title": "O VEREDITO: O MUNDO PÓS-19 DE NOVEMBRO",
+        "kicker": "CONCLUSÃO ORANGE BRICK",
+        "start_seconds": 647.048,
+        "timestamp": "10:47",
+        "source": "Editorial Orange Brick — orangebrick.blog"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "midroll_duration",
+        "label": "Janela de Monetização Mid-Roll (≥ 08:00)",
+        "passed": true,
+        "detail": "12:18 (738.3s) — Anúncios intermediários liberados no YouTube"
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Volume no Padrão do YouTube e Sidechain",
+        "passed": true,
+        "detail": "Master AAC 48 kHz / 192 kbps com trilha dark duckada sob a voz e zero silêncio morto"
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Checagem de Pronúncia e Legenda Sincronizada",
+        "passed": true,
+        "detail": "61 frases conferidas • Legendas .ASS queimada e .SRT alinhadas ao milissegundo"
+      },
+      {
+        "id": "verified_sources",
+        "label": "Fatos Conferidos e Fontes Originais",
+        "passed": true,
+        "detail": "8 capítulos com fontes primárias (Rockstar, Take-Two, Warhorse, PSN, Kotaku)"
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Cenas 16:9 sem Repetição de Imagem",
+        "passed": true,
+        "detail": "16 artes e capturas oficiais distintas validadas (HTTP 200 • 1920×1080)"
+      },
+      {
+        "id": "script_originality",
+        "label": "Comparação Anti-Repetição no Canal",
+        "passed": true,
+        "detail": "Roteiro 100% original comparado ao histórico de vídeos longos do canal"
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "Por que os estúdios torciam para GTA VI custar US$ 80?",
+        "hook": "Martin Klima (Warhorse Studios) revelou o segredo que nenhuma publicadora tinha coragem de admitir sobre o preço de GTA 6.",
+        "chapter_number": "02",
+        "start_timestamp": "01:40",
+        "end_timestamp": "02:32",
+        "duration_seconds": 52,
+        "related_slug": "warhorse-espera-que-gta-6-abra-caminho-para-novo-padrao-de-us-80"
+      },
+      {
+        "id": "short_2",
+        "title": "Caixa vazia: A mídia física de GTA VI não tem disco",
+        "hook": "Você vai comprar a caixa física de GTA 6 em 12 de novembro achando que tem Blu-ray? A página oficial da Rockstar confirmou o contrário.",
+        "chapter_number": "03",
+        "start_timestamp": "03:19",
+        "end_timestamp": "04:07",
+        "duration_seconds": 48,
+        "related_slug": "gta-vi-edicao-fisica-codigo-na-caixa-sem-disco"
+      },
+      {
+        "id": "short_3",
+        "title": "210 GB no PS5 e o sufoco no Xbox Series S",
+        "hook": "Os servidores da PSN entregaram o peso real de GTA 6: 210 GB logo na largada. Veja quanto sobra no SSD do PS5 e do Series S.",
+        "chapter_number": "04",
+        "start_timestamp": "04:36",
+        "end_timestamp": "05:31",
+        "duration_seconds": 55,
+        "related_slug": "gta-vi-vai-pesar-210-gb-no-ps5-e-abre-pre-load-em-12-de-novembro"
+      }
+    ],
+    "youtube": {
+      "title": "O EFEITO GTA VI: Jogada de US$ 80, Caixa Sem Disco, 210 GB e o Terremoto na Indústria",
+      "description": "Como um único lançamento marcado para 19 de novembro de 2026 redesenhou preços, calendários, hardware e mídia física no mercado global.\n\nNeste dossiê investigativo do Orange Brick, dissecamos o impacto real de Grand Theft Auto VI na indústria global de games: o novo teto de US$ 80 defendido nos bastidores, a edição física vendida em caixa com código e sem disco Blu-ray, os 210 GB exigidos no SSD do PS5 e Xbox Series S, a aliança técnica com o PS5 Pro, a estreia na Netflix, a caçada aos grupos hackers Lapsus$ e Cyberleek e as mecânicas de simulação em Leonida.\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 O TERREMOTO DE 19 DE NOVEMBRO\n01:37 A BOMBA DOS US$ 80 E O MEDO DOS ESTÚDIOS\n03:16 CAIXA VAZIA: A MÍDIA FÍSICA SEM DISCO\n04:33 210 GB E O GARGALO NOS CONSOLES ATUAIS\n06:08 ALIANÇA COM O PS5 PRO E A JOGADA NA NETFLIX\n07:40 A CAÇADA HACKER: DE ARION KURTAJ À CYBERLEEK\n09:08 AUTÓPSIA DO GAMEPLAY: LEONIDA COMO SIMULADOR\n10:47 O VEREDITO: O MUNDO PÓS-19 DE NOVEMBRO\n\nFONTES VERIFICADAS NESTE DOSSIÊ:\n• Cap. 01: Take-Two Interactive & Calendário 2026\n• Cap. 02: Martin Klima (Warhorse Studios) & Strauss Zelnick (Take-Two)\n• Cap. 03: Rockstar Games Support — Plataformas e Versões\n• Cap. 04: PlayStation Network Database (27/10/2026)\n• Cap. 05: Sony Interactive Entertainment & Rockstar Games\n• Cap. 06: Comunicado Rockstar (2022), Corte de Oxford & Kotaku (2026)\n• Cap. 07: Análise de Gameplay & Site Oficial Rockstar Games\n• Cap. 08: Editorial Orange Brick — orangebrick.blog\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nE para você: os US$ 80 e os 210 GB valem o ingresso para Leonida, ou a indústria está esticando demais a corda? Deixe sua opinião nos comentários e inscreva-se no canal!",
+      "tags": [
+        "GTA 6",
+        "Grand Theft Auto VI",
+        "Rockstar Games",
+        "GTA 6 preco 80 dolares",
+        "GTA 6 210 GB",
+        "GTA 6 midia fisica sem disco",
+        "GTA 6 gameplay mecanicas",
+        "GTA 6 Leonida Vice City",
+        "Take Two Interactive",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Na sua opinião: pagar US$ 80 (cerca de R$ 450) e reservar 210 GB no SSD vale a pena pelo salto técnico de GTA VI em Leonida, ou o resto da indústria vai usar a Rockstar como desculpa para encarecer tudo em 2027? Comente aqui embaixo!",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "review_notes": null,
+    "approved_at": null,
+    "created_at": "2026-11-04T18:20:10.830Z"
+  },
+  "o-efeito-gta-6-na-industria-oficial": {
+    "series_badge": "DOSSIÊ ORANGE BRICK",
+    "title": "O efeito GTA VI: preço, caixa sem disco e até 212 GB",
+    "subtitle": "Preço, caixa sem disco, armazenamento e pré-download: o que foi confirmado sobre GTA VI.",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aguardando revisão",
+    "source_mode": "ai_dossier",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-AntonioNeural",
+    "slug": "o-efeito-gta-6-na-industria-oficial",
+    "updated_at": "2026-11-04T18:43:17.299Z",
+    "duration_seconds": 495.02400000000006,
+    "duration_formatted": "08:15",
+    "monetization_midroll_eligible": true,
+    "file_size": 162140188,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/o-efeito-gta-6-oficial.mp4",
+    "srt_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/legendas.srt",
+    "preview_sheet_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Capa oficial",
+        "angle": "Preço, acesso e armazenamento",
+        "headline": "GTA VI: O QUE MUDA PARA VOCÊ",
+        "subline": "US$ 80 · SEM DISCO · ATÉ 212 GB",
+        "url": "/long-videos/o-efeito-gta-6-na-industria-oficial/thumbnail.png"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "GTA VI: O QUE MUDA PARA VOCÊ",
+        "kicker": "DOSSIÊ ORANGE BRICK",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "Rockstar Games · informações oficiais"
+      },
+      {
+        "number": "02",
+        "title": "A DATA E A EXPECTATIVA",
+        "kicker": "01 / LANÇAMENTO",
+        "start_seconds": 36,
+        "timestamp": "00:36",
+        "source": "Rockstar Games · site oficial de GTA VI"
+      },
+      {
+        "number": "03",
+        "title": "O PREÇO DE UMA SUPERPRODUÇÃO",
+        "kicker": "02 / PREÇO",
+        "start_seconds": 83.424,
+        "timestamp": "01:23",
+        "source": "Rockstar Store · preço nos Estados Unidos"
+      },
+      {
+        "number": "04",
+        "title": "A CAIXA NÃO VEM COM DISCO",
+        "kicker": "03 / MÍDIA FÍSICA",
+        "start_seconds": 137.616,
+        "timestamp": "02:17",
+        "source": "Rockstar Support · detalhes da pré-venda"
+      },
+      {
+        "number": "05",
+        "title": "O TAMANHO QUE PEDE PLANEJAMENTO",
+        "kicker": "04 / ARMAZENAMENTO",
+        "start_seconds": 194.06400000000002,
+        "timestamp": "03:14",
+        "source": "Rockstar Support · requisitos de instalação"
+      },
+      {
+        "number": "06",
+        "title": "QUANDO COMEÇA O PRÉ-DOWNLOAD",
+        "kicker": "05 / PREPARAÇÃO",
+        "start_seconds": 248.92800000000003,
+        "timestamp": "04:08",
+        "source": "Rockstar Support · FAQ atualizado em 03/11/2026"
+      },
+      {
+        "number": "07",
+        "title": "O QUE JÁ FOI MOSTRADO",
+        "kicker": "06 / O JOGO",
+        "start_seconds": 301.00800000000004,
+        "timestamp": "05:01",
+        "source": "Rockstar Games · comunicado de 2022 e materiais oficiais"
+      },
+      {
+        "number": "08",
+        "title": "A ESCOLHA É SUA",
+        "kicker": "07 / CONCLUSÃO",
+        "start_seconds": 449.44800000000004,
+        "timestamp": "07:29",
+        "source": "Orange Brick · informações consultadas em 04/11/2026"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "fontes",
+        "label": "Fontes oficiais consultadas",
+        "passed": true,
+        "detail": "Rockstar Games, Rockstar Store e Rockstar Support; links na descrição."
+      },
+      {
+        "id": "visual",
+        "label": "Capturas e cenas",
+        "passed": true,
+        "detail": "Capturas da galeria oficial da Rockstar, com 65 cenas."
+      }
+    ],
+    "shorts_suggestions": [],
+    "youtube": {
+      "title": "O efeito GTA VI: preço, caixa sem disco e até 212 GB",
+      "description": "GTA VI chega em 19 de novembro de 2026. Entenda o preço nos Estados Unidos, a caixa com código digital, o espaço de instalação e o pré-download.\n\n00:00:00 GTA VI: O QUE MUDA PARA VOCÊ\n00:00:36 A DATA E A EXPECTATIVA\n00:01:23 O PREÇO DE UMA SUPERPRODUÇÃO\n00:02:17 A CAIXA NÃO VEM COM DISCO\n00:03:14 O TAMANHO QUE PEDE PLANEJAMENTO\n00:04:08 QUANDO COMEÇA O PRÉ-DOWNLOAD\n00:05:01 O QUE JÁ FOI MOSTRADO\n00:07:29 A ESCOLHA É SUA\n\nFontes consultadas:\nhttps://www.rockstargames.com/VI\nhttps://store.rockstargames.com/game/buy-gta-vi\nhttps://support.rockstargames.com/articles/46YkMi4rHxYXMeIHtZiKaE/grand-theft-auto-vi-pre-order-details\nhttps://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\nhttps://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\nhttps://www.videogameschronicle.com/news/rockstar-comments-on-gta-6-leak-and-claims-project-wont-be-delayed/\nhttps://apnews.com/article/e5ee22c1d8932f43b912dd6455f2f3c4\n\nUma caixa com código faz sentido para você? Conte nos comentários.\n",
+      "tags": [
+        "GTA 6",
+        "Grand Theft Auto VI",
+        "Rockstar Games",
+        "mídia física",
+        "pré-download GTA VI",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Você compraria uma caixa com código, sem disco? Conte nos comentários.",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "review_notes": null,
+    "approved_at": null,
+    "created_at": "2026-11-04T18:43:17.299Z"
+  },
+  "zelda-gta-vi-corrida-goty-2026": {
+    "series_badge": "DOSSIÊ ORANGE BRICK",
+    "title": "Zelda tirou 96: GTA VI pode mudar a disputa pelo GOTY?",
+    "subtitle": "As notas de Zelda, as regras do prêmio e a possibilidade de GTA VI disputar o GOTY.",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aguardando revisão",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-AntonioNeural",
+    "slug": "zelda-gta-vi-corrida-goty-2026",
+    "updated_at": "2026-11-04T19:17:56.215Z",
+    "duration_seconds": 336.833333,
+    "duration_formatted": "05:36",
+    "monetization_midroll_eligible": false,
+    "file_size": 96194844,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026.mp4",
+    "srt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/legendas.srt",
+    "preview_sheet_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Capa do vídeo",
+        "angle": "Abertura do dossiê",
+        "headline": "O GOTY TEM UM NOVO DESAFIO",
+        "subline": "ZELDA 96 · GTA VI NO PRAZO",
+        "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumbnail.png"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O GOTY TEM UM NOVO DESAFIO",
+        "kicker": "ABERTURA",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "Nintendo · The Game Awards"
+      },
+      {
+        "number": "02",
+        "title": "A VOLTA DE OCARINA OF TIME",
+        "kicker": "01 / ZELDA",
+        "start_seconds": 30.6,
+        "timestamp": "00:30",
+        "source": "Nintendo · página oficial"
+      },
+      {
+        "number": "03",
+        "title": "O QUE SIGNIFICA A NOTA 96",
+        "kicker": "02 / CRÍTICA",
+        "start_seconds": 74.88,
+        "timestamp": "01:14",
+        "source": "GamesRadar · análises em 04/11/2026"
+      },
+      {
+        "number": "04",
+        "title": "UM CLÁSSICO PODE CONCORRER?",
+        "kicker": "03 / REGULAMENTO",
+        "start_seconds": 117.45599999999999,
+        "timestamp": "01:57",
+        "source": "The Game Awards · regulamento"
+      },
+      {
+        "number": "05",
+        "title": "GTA VI CHEGA NO LIMITE",
+        "kicker": "04 / GTA VI",
+        "start_seconds": 164.54399999999998,
+        "timestamp": "02:44",
+        "source": "Rockstar Games · The Game Awards"
+      },
+      {
+        "number": "06",
+        "title": "COMO O VENCEDOR É ESCOLHIDO",
+        "kicker": "05 / VOTAÇÃO",
+        "start_seconds": 208.65599999999998,
+        "timestamp": "03:28",
+        "source": "The Game Awards · regras de votação"
+      },
+      {
+        "number": "07",
+        "title": "O QUE AINDA FALTA SABER",
+        "kicker": "06 / EXPECTATIVA",
+        "start_seconds": 253.03199999999998,
+        "timestamp": "04:13",
+        "source": "Nintendo · Rockstar · The Game Awards"
+      },
+      {
+        "number": "08",
+        "title": "QUAL SERIA O SEU GOTY?",
+        "kicker": "07 / SUA VEZ",
+        "start_seconds": 299.376,
+        "timestamp": "04:59",
+        "source": "Orange Brick · apuração em 04/11/2026"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "fontes",
+        "label": "Fontes consultadas",
+        "passed": true,
+        "detail": "Fontes e data de consulta na descrição."
+      },
+      {
+        "id": "cenas",
+        "label": "Imagens e cenas",
+        "passed": true,
+        "detail": "Materiais de divulgação e 45 cenas."
+      }
+    ],
+    "shorts_suggestions": [],
+    "youtube": {
+      "title": "Zelda tirou 96: GTA VI pode mudar a disputa pelo GOTY?",
+      "description": "As notas de Zelda, as regras do prêmio e a possibilidade de GTA VI disputar o GOTY.\n\n00:00:00 O GOTY TEM UM NOVO DESAFIO\n00:00:30 A VOLTA DE OCARINA OF TIME\n00:01:14 O QUE SIGNIFICA A NOTA 96\n00:01:57 UM CLÁSSICO PODE CONCORRER?\n00:02:44 GTA VI CHEGA NO LIMITE\n00:03:28 COMO O VENCEDOR É ESCOLHIDO\n00:04:13 O QUE AINDA FALTA SABER\n00:04:59 QUAL SERIA O SEU GOTY?\n\nFontes consultadas:\nhttps://thegameawards.com/faq\nhttps://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-125697/\nhttps://www.rockstargames.com/VI\nhttps://www.gamesradar.com/games/the-legend-of-zelda/the-legend-of-zelda-ocarina-of-time-remakes-metacritic-score-makes-it-the-highest-rated-game-of-2026-but-even-it-cant-reach-the-originals-near-perfect-score/\n\nConte sua opinião nos comentários e acompanhe o Orange Brick.\n",
+      "tags": [
+        "The Game Awards",
+        "GOTY 2026",
+        "Zelda Ocarina of Time",
+        "GTA 6",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Qual seria seu jogo do ano: Zelda, GTA VI ou outro?",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "review_notes": null,
+    "approved_at": null,
+    "created_at": "2026-11-04T19:17:56.215Z"
+  }
+}

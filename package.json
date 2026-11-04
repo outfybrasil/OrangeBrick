@@ -28,7 +28,8 @@
     "telegram:setup": "node --env-file=.env.local scripts/setup-telegram-webhook.mjs",
     "reel:generate": "node --experimental-strip-types --env-file=.env.local scripts/generate-reel.mjs",
     "reel:latest": "node --experimental-strip-types --env-file=.env.local scripts/generate-reel.mjs --latest",
-    "reel:verify-youtube-tags": "node --experimental-strip-types --env-file=.env.local scripts/verify-youtube-reel-tags.mjs"
+    "reel:verify-youtube-tags": "node --experimental-strip-types --env-file=.env.local scripts/verify-youtube-reel-tags.mjs",
+    "video:long": "node --experimental-strip-types --env-file=.env.local scripts/generate-long-video.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.17.1",
