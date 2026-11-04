@@ -586,7 +586,7 @@ function DarkPipelineStudio({
               </p>
             </div>
 
-            <div className="grid w-full grid-cols-1 gap-1 rounded-xl border border-white/10 bg-[#090b10] p-1 xs:grid-cols-2 sm:w-auto sm:flex">
+            <div className="grid grid-cols-2 gap-1 w-full sm:w-auto sm:flex rounded-xl border border-white/10 bg-[#090b10] p-1">
               <button
                 type="button"
                 onClick={() => setCreatorScriptSource("ai_dossier")}
@@ -872,7 +872,7 @@ function DarkPipelineStudio({
           return (
             <div
               key={video.slug}
-              className={`flex flex-col xs:flex-row xs:items-center w-full sm:min-w-[280px] sm:flex-1 justify-between gap-3 rounded-2xl border p-3 sm:p-3.5 text-left transition-all ${
+              className={`flex flex-col w-full sm:min-w-[280px] sm:flex-1 justify-between gap-2.5 rounded-2xl border p-3 sm:p-3.5 text-left transition-all ${
                 isSelected
                   ? "border-brand-orange bg-[#141824] shadow-xl"
                   : "border-white/10 bg-[#0e1017] hover:border-white/25"
@@ -886,9 +886,9 @@ function DarkPipelineStudio({
                   setVideoFallbackUrl(null);
                   setIsPlayingLongVideo(false);
                 }}
-                className="min-w-0 flex-1 text-left"
+                className="w-full min-w-0 text-left"
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase ${badge.className}`}>
                     {badge.label}
                   </span>
@@ -896,15 +896,15 @@ function DarkPipelineStudio({
                     ⏱️ {video.duration_formatted} {video.monetization_midroll_eligible ? "· Mid-Roll Ativo" : ""}
                   </span>
                 </div>
-                <p className="mt-1.5 truncate font-heading text-sm font-black text-white">
+                <p className="mt-1.5 font-heading text-sm font-black text-white leading-snug break-words">
                   {video.title}
                 </p>
-                <p className="mt-0.5 text-[11px] text-gray-400">
+                <p className="mt-1 text-[11px] text-gray-400 break-words">
                   {video.chapters?.length || 8} capítulos · {formatBytes(video.file_size)} · {video.resolution}
                 </p>
               </button>
 
-              <div className="flex shrink-0 items-center justify-between xs:justify-end gap-2 border-t border-white/5 pt-2 xs:border-t-0 xs:pt-0">
+              <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">
                 {isConfirmingCardDelete ? (
                   <>
                     <button
@@ -935,7 +935,7 @@ function DarkPipelineStudio({
                       }}
                       className="text-xs font-bold text-brand-orange"
                     >
-                      {isSelected ? "Em tela ●" : "Abrir →"}
+                      {isSelected ? "● Episódio no Player" : "Abrir Episódio →"}
                     </button>
                     <button
                       type="button"
@@ -955,8 +955,8 @@ function DarkPipelineStudio({
       </div>
 
       {activeLongVideo ? (
-        <div className="grid gap-6 xl:grid-cols-12">
-          <div className="space-y-6 xl:col-span-7">
+        <div className="grid gap-6 xl:grid-cols-12 w-full min-w-0">
+          <div className="space-y-6 xl:col-span-7 w-full min-w-0">
             <div className="overflow-hidden rounded-3xl border border-white/15 bg-[#0b0d14] shadow-2xl">
               <div className="relative aspect-video w-full bg-black">
                 {activeLongVideo.video_url ? (
@@ -1014,21 +1014,21 @@ function DarkPipelineStudio({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 xs:grid-cols-3 gap-1.5 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
+                <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-2">
                   {activeLongVideo.video_url && (
                     <a
                       href={activeLongVideo.video_url}
                       download
-                      className="flex min-h-[36px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-[11px] sm:text-xs font-black uppercase text-black hover:bg-brand-orange/90"
+                      className="col-span-2 sm:col-span-1 flex min-h-[38px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-xs font-black uppercase text-black hover:bg-brand-orange/90"
                     >
-                      ⬇ Baixar .MP4
+                      ⬇ Baixar .MP4 (1080p)
                     </a>
                   )}
                   {activeLongVideo.srt_url && (
                     <a
                       href={activeLongVideo.srt_url}
                       download
-                      className="flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-[11px] sm:text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
                       ⬇ Legendas .SRT
                     </a>
@@ -1038,7 +1038,7 @@ function DarkPipelineStudio({
                       href={activeLongVideo.preview_sheet_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex min-h-[36px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-[11px] sm:text-xs font-bold text-gray-200 hover:bg-white/10"
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
                       🖼️ Folha Cenas
                     </a>
@@ -1058,7 +1058,7 @@ function DarkPipelineStudio({
                   </h3>
                 </div>
 
-                <div className="grid w-full grid-cols-1 gap-1 rounded-xl border border-white/10 bg-[#090b10] p-1 xs:grid-cols-2 sm:w-auto sm:flex">
+                <div className="grid grid-cols-2 gap-1 w-full sm:w-auto sm:flex rounded-xl border border-white/10 bg-[#090b10] p-1">
                   <button
                     type="button"
                     onClick={() => setThumbPreviewMode("desktop")}
@@ -1085,19 +1085,19 @@ function DarkPipelineStudio({
                   <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-brand-orange">
                     Simulação Realista: Feed do YouTube no Celular (Teste dos 3 Segundos)
                   </p>
-                  <div className="flex flex-col xs:flex-row items-start gap-3">
-                    <div className="relative h-[94px] w-[168px] shrink-0 overflow-hidden rounded-lg border border-white/15 bg-black">
+                  <div className="flex flex-col sm:flex-row items-start gap-3">
+                    <div className="relative w-full aspect-video sm:w-[178px] sm:h-[100px] shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black">
                       <img
                         src={activeThumbnailOption.url}
                         alt={activeThumbnailOption.label}
                         className="h-full w-full object-cover"
                       />
-                      <span className="absolute bottom-1 right-1 rounded bg-black/90 px-1 py-0.5 font-mono text-[10px] font-bold text-white">
+                      <span className="absolute bottom-1.5 right-1.5 rounded bg-black/90 px-1.5 py-0.5 font-mono text-[10px] font-bold text-white">
                         {activeLongVideo.duration_formatted}
                       </span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-sm font-bold leading-snug text-white">
+                    <div className="w-full min-w-0 flex-1">
+                      <p className="text-sm font-bold leading-snug text-white break-words">
                         {activeLongVideo.youtube?.title || activeLongVideo.title}
                       </p>
                       <p className="mt-1 text-xs text-gray-400">
@@ -1181,10 +1181,10 @@ function DarkPipelineStudio({
                           {chapter.timestamp}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-black text-white">
+                          <p className="text-xs font-black text-white leading-snug break-words">
                             Cap. {chapter.number} — {chapter.title}
                           </p>
-                          <p className="truncate text-[10px] sm:text-[11px] text-gray-400">
+                          <p className="mt-0.5 text-[10px] sm:text-[11px] text-gray-400 leading-snug line-clamp-1">
                             Fonte: <strong className="text-gray-200">{chapter.source || "Apuração Orange Brick"}</strong>
                           </p>
                         </div>
@@ -1199,7 +1199,7 @@ function DarkPipelineStudio({
             </div>
           </div>
 
-          <div className="space-y-6 xl:col-span-5">
+          <div className="space-y-6 xl:col-span-5 w-full min-w-0">
             <div className="rounded-3xl border border-brand-orange/40 bg-[#10131e] p-3.5 sm:p-5 shadow-xl">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
@@ -1337,11 +1337,11 @@ function DarkPipelineStudio({
                 {(activeLongVideo.qa_checks || []).map((check) => (
                   <div
                     key={check.id}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-[#131622] p-3"
+                    className="flex items-start justify-between gap-2.5 rounded-xl border border-white/10 bg-[#131622] p-2.5 sm:p-3"
                   >
-                    <div>
-                      <p className="text-xs font-extrabold text-white">{check.label}</p>
-                      <p className="mt-0.5 text-[11px] text-gray-400">{check.detail}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-extrabold text-white leading-snug break-words">{check.label}</p>
+                      <p className="mt-0.5 text-[11px] text-gray-400 leading-snug break-words">{check.detail}</p>
                     </div>
                     <span
                       className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
@@ -1439,7 +1439,7 @@ function DarkPipelineStudio({
                         Copiar
                       </button>
                     </div>
-                    <pre className="mt-1 max-h-32 overflow-y-auto whitespace-pre-wrap font-mono text-[11px] text-gray-300">
+                    <pre className="mt-1 max-h-32 overflow-y-auto whitespace-pre-wrap break-all font-mono text-[11px] text-gray-300">
                       {activeLongVideo.youtube.description}
                     </pre>
                   </div>
@@ -1479,18 +1479,18 @@ function DarkPipelineStudio({
                 {(activeLongVideo.shorts_suggestions || []).map((cut) => (
                   <div
                     key={cut.id}
-                    className="rounded-xl border border-white/10 bg-[#131622] p-3"
+                    className="rounded-xl border border-white/10 bg-[#131622] p-3 space-y-2"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-black text-white">{cut.title}</span>
-                      <span className="rounded bg-brand-orange/20 px-2 py-0.5 font-mono text-[10px] font-bold text-brand-orange">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                      <span className="text-xs font-black text-white leading-snug break-words">{cut.title}</span>
+                      <span className="self-start sm:self-auto shrink-0 rounded bg-brand-orange/20 px-2 py-0.5 font-mono text-[10px] font-bold text-brand-orange">
                         {cut.start_timestamp} → {cut.end_timestamp} ({cut.duration_seconds}s)
                       </span>
                     </div>
-                    <p className="mt-1 text-[11px] text-gray-300">
+                    <p className="text-[11px] text-gray-300 break-words">
                       Gancho: &ldquo;{cut.hook}&rdquo;
                     </p>
-                    <div className="mt-2 flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5">
                       <button
                         type="button"
                         onClick={() =>
@@ -1499,14 +1499,14 @@ function DarkPipelineStudio({
                             Math.max(0, Number.parseInt(cut.chapter_number, 10) - 1)
                           )
                         }
-                        className="text-[11px] font-bold text-gray-400 hover:text-white"
+                        className="text-left text-[11px] font-bold text-gray-400 hover:text-white"
                       >
                         ▶ Ouvir trecho no player
                       </button>
                       <button
                         type="button"
                         onClick={() => onOpenRelatedReel(cut.related_slug)}
-                        className="text-[11px] font-extrabold text-brand-orange hover:underline"
+                        className="text-left sm:text-right text-[11px] font-extrabold text-brand-orange hover:underline"
                       >
                         Abrir nos Reels 9:16 →
                       </button>
@@ -1829,12 +1829,12 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       }
       wide
       actions={
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {pipelineMode === "long" && (
             <button
               type="button"
               onClick={() => setShowCreatorDrawer((prev) => !prev)}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-brand-orange px-3.5 text-xs font-black uppercase tracking-wider text-black transition-colors hover:bg-brand-orange/90"
+              className="hidden sm:inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-brand-orange px-3.5 text-xs font-black uppercase tracking-wider text-black transition-colors hover:bg-brand-orange/90"
             >
               <span>{showCreatorDrawer ? "Fechar Fábrica" : "+ Novo Vídeo Longo"}</span>
             </button>
@@ -1842,7 +1842,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <button
             type="button"
             onClick={() => loadReels()}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3.5 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 sm:px-3.5 text-xs font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             <svg className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1859,18 +1859,18 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       )}
 
       <div className="mb-4 sm:mb-6 flex flex-col gap-2.5 rounded-2xl border border-white/10 bg-[#0b0d14] p-1.5 sm:p-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="grid grid-cols-1 xs:grid-cols-2 gap-1.5 w-full sm:flex sm:w-auto">
+        <div className="grid grid-cols-2 gap-1.5 w-full sm:w-auto sm:flex">
           <button
             type="button"
             onClick={() => switchMode("long")}
-            className={`flex min-h-[42px] items-center justify-center gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "long"
                 ? "bg-brand-orange text-black shadow-lg shadow-brand-orange/20"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span>🎬 Vídeos Longos (16:9)</span>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
+            <span className="truncate">🎬 Vídeos Longos</span>
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
               {longVideos.length}
             </span>
           </button>
@@ -1878,14 +1878,14 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <button
             type="button"
             onClick={() => switchMode("short")}
-            className={`flex min-h-[42px] items-center justify-center gap-2 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "short"
                 ? "bg-white text-black shadow-lg"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span>📱 Reels & Shorts (9:16)</span>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
+            <span className="truncate">📱 Reels (9:16)</span>
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
               {stats.ready}/{stats.total}
             </span>
           </button>

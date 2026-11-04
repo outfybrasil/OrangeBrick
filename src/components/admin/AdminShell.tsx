@@ -235,9 +235,9 @@ export function AdminShell({
         </div>
       </aside>
 
-      <div className="xl:pl-60">
+      <div className="min-w-0 overflow-x-clip xl:pl-60">
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0a0b0e]/95 backdrop-blur-xl">
-          <div className="flex min-h-14 items-center justify-between gap-3 px-3.5 sm:px-6 lg:px-8">
+          <div className="flex min-h-14 items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2.5 xl:hidden">
               <button
                 type="button"
