@@ -1,11 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { execSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
+import sharp from "sharp";
+import { selectMusicTrack } from "@brasa/motion/music";
+import { prepareMotionAssets } from "@brasa/motion/runtime";
+import { selectVideoVoice, recordVideoVoice } from "../src/lib/video/video-voice.mjs";
 import { randomInt } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateReelScript } from "../src/lib/video/reel-script.ts";
-import { generateCompositionHtml, getReelSceneStarts, resolveVisualStyle } from "../src/lib/video/reel-composition.ts";
+import { generateCompositionHtml, buildReelEditPlan, resolveVisualStyle } from "../src/lib/video/reel-composition.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +24,7 @@ const styleFlag = args.find((a) => a.startsWith("--style="));
 const forcedStyle = styleFlag ? styleFlag.split("=")[1] : (args.includes("--style") ? args[args.indexOf("--style") + 1] : undefined);
 const ctaFlag = args.find((a) => a.startsWith("--cta="));
 const forcedCta = ctaFlag ? ctaFlag.split("=")[1] : (args.includes("--cta") ? args[args.indexOf("--cta") + 1] : undefined);
-const ctaVariant = forcedCta === "follow" ? "follow" : "comment";
+const ctaVariant = forcedCta === "comment" ? "comment" : "follow";
 
 console.log("\n🎬 Orange Brick — Gerador de Vídeos Curtos (Reels / Shorts)");
 console.log("=========================================================\n");
@@ -134,7 +138,11 @@ async function run() {
   // 2. Download Images
   console.log("\n🖼️ 2/5: Coletando imagens editoriais...");
   const imageUrls = [];
-  if (post.image_url) imageUrls.push(post.image_url);
+  const imageDescriptions = [];
+  if (post.image_url) {
+    imageUrls.push(post.image_url);
+    imageDescriptions.push(post.image_alt || post.title);
+  }
 
   // Extract images from post content blocks if present
   try {
@@ -142,27 +150,27 @@ async function run() {
     for (const b of blocks) {
       if (b.type === "image" && b.url && !imageUrls.includes(b.url)) {
         imageUrls.push(b.url);
+        imageDescriptions.push(b.alt || b.caption || post.title);
       }
     }
   } catch {}
 
+  if (!imageUrls.length) throw new Error("A matéria não possui material visual para o Reel.");
   const localImages = [];
-  for (let i = 0; i < Math.max(imageUrls.length, 1); i++) {
+  const visualAssets = [];
+  for (let i = 0; i < imageUrls.length; i++) {
     const url = imageUrls[i];
     const fileName = `img_${i}.webp`;
-    const dest = path.join(assetsDir, fileName);
-    if (url) {
-      try {
-        const resp = await fetch(url);
-        if (resp.ok) {
-          const buf = Buffer.from(await resp.arrayBuffer());
-          fs.writeFileSync(dest, buf);
-          localImages.push(`assets/${fileName}`);
-        }
-      } catch (err) {
-        console.warn(`   Aviso: Falha ao baixar imagem ${url}:`, err.message);
-      }
+    const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+    if (!response.ok) throw new Error(`Imagem ${i} indisponível: HTTP ${response.status}.`);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const metadata = await sharp(buffer).metadata();
+    if (!metadata.width || !metadata.height || metadata.width < 1200 || metadata.height < 675) {
+      throw new Error(`Imagem ${i} abaixo da resolução editorial mínima de 1200 × 675.`);
     }
+    await sharp(buffer).rotate().webp({ quality: 92 }).toFile(path.join(assetsDir, fileName));
+    localImages.push(`assets/${fileName}`);
+    visualAssets.push({ url, description: imageDescriptions[i], width: metadata.width, height: metadata.height });
   }
 
   // 3. Generate Audio (TTS)
@@ -170,11 +178,13 @@ async function run() {
   const ttsScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-tts.py");
   const pyCmd = process.platform === "win32" ? "py" : "python3";
 
+  const voiceId = selectVideoVoice(ROOT_DIR, process.env.VIDEO_TTS_VOICE || "auto");
   const ttsRes = spawnSync(pyCmd, [
     ttsScript,
     "--text", script.narrationText,
     "--out-dir", workDir,
-    "--voice", "pt-BR-AntonioNeural"
+    "--voice", voiceId,
+    "--provider", process.env.VIDEO_TTS_PROVIDER || "auto"
   ], { stdio: "inherit" });
 
   if (ttsRes.status !== 0) {
@@ -184,22 +194,45 @@ async function run() {
 
   const ttsMetadata = JSON.parse(fs.readFileSync(path.join(workDir, "tts-provider.json"), "utf-8"));
   script.ttsProvider = ttsMetadata.provider;
+  script.ttsVoice = ttsMetadata.voice;
+  script.editorialStandard = "youtube-editorial-v3";
+  recordVideoVoice(ROOT_DIR, voiceId, post.slug);
   const sentences = JSON.parse(fs.readFileSync(path.join(workDir, "sentences.json"), "utf-8"));
+  const wordTimings = ["provider-alignment", "provider-word-boundary"].includes(ttsMetadata.word_timing)
+    ? JSON.parse(fs.readFileSync(path.join(workDir, "words.json"), "utf-8")) : undefined;
   const voiceDuration = sentences.length ? sentences[sentences.length - 1].end : 40.0;
   const variation = randomInt(0, 1000000);
   const visualStyle = resolveVisualStyle(variation, forcedStyle);
-  const totalDuration = Math.round((voiceDuration + 2.5) * 10) / 10;
+  const totalDuration = Math.round((voiceDuration + 0.8) * 10) / 10;
   console.log(`   Duração da narração: ${voiceDuration}s (Total: ${totalDuration}s)`);
-  console.log(`   🎨 Estilo visual selecionado: ${visualStyle.toUpperCase()}${forcedStyle ? " (forçado via CLI)" : " (aleatório)"}`);
+  console.log(`   🎨 Estilo visual selecionado: ${visualStyle.toUpperCase()}${forcedStyle ? " (forçado via CLI)" : " (padrão editorial)"}`);
 
   // 4. Mix Audio (Voice + BGM + SFX)
   console.log("\n🔊 4/5: Mixando áudio, trilha sonora e efeitos...");
   const mixerScript = path.join(ROOT_DIR, "src", "lib", "video", "reel-mixer.py");
   const audioAssetsDir = path.join(ROOT_DIR, "assets", "reels", "audio");
+  const compositionOptions = {
+    script, category: post.category, duration: totalDuration, variation,
+    style: visualStyle, sentences, wordTimings, imagePaths: localImages, imageDescriptions,
+  };
+  const editPlan = buildReelEditPlan(compositionOptions);
+  const recentManifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf-8")) : {};
+  const recentMusicIds = Object.values(recentManifest).filter((item) => item.status === "ready" && item.musicId).sort((a, b) => String(b.finished_at).localeCompare(String(a.finished_at))).slice(0, 3).map((item) => item.musicId);
+  const musicMood = visualStyle === "game" ? "game" : post.category === "hardware" || post.category === "modding" ? "electronic" : post.category === "industry" ? "ambient" : "calm";
+  const selectedMusic = selectMusicTrack({ mood: musicMood, seed: variation, excludeIds: recentMusicIds, minDuration: totalDuration });
   fs.writeFileSync(path.join(workDir, "production.json"), JSON.stringify({
+    version: 2,
     variation,
     style: visualStyle,
-    sceneStarts: getReelSceneStarts(totalDuration, variation),
+    sceneStarts: editPlan.map((scene) => scene.start),
+    scenes: editPlan,
+    assets: visualAssets,
+    captionTiming: wordTimings ? "provider-alignment" : "sentence-weighted-estimate",
+    soundDesign: "restrained",
+    selectedMusic,
+    soundEffects: [],
+    voice: ttsMetadata,
+    editorialStandard: "youtube-editorial-v3",
   }, null, 2));
   const masterAudio = path.join(workDir, "master_audio.m4a");
 
@@ -237,15 +270,8 @@ async function run() {
     "type": "module"
   }, null, 2));
 
-  const html = generateCompositionHtml({
-    script,
-    category: post.category,
-    duration: totalDuration,
-    variation,
-    style: visualStyle,
-    sentences,
-    imagePaths: localImages
-  });
+  await prepareMotionAssets(compDir, path.join(ROOT_DIR, "public", "logos", "orange-brick-mark.png"));
+  const html = generateCompositionHtml(compositionOptions);
   fs.writeFileSync(path.join(compDir, "index.html"), html, "utf-8");
 
   // Render MP4
@@ -276,6 +302,8 @@ async function run() {
       variation,
       style: visualStyle,
       file_size: stats.size,
+      musicId: selectedMusic.id,
+      musicTitle: selectedMusic.title,
       script
     };
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");

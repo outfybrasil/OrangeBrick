@@ -274,7 +274,7 @@ test("new reel scripts replace generic CTAs with a contextual question and comme
     summary: "Faraway estreia em 5 de novembro em consoles e PC; o arcade terá 16 fases.",
     category: "breaking",
     body: "",
-  }, "test");
+  }, "test", { ctaVariant: "comment" });
 
   assert.equal(script.ctaQuestion, "Você pretende jogar Faraway no lançamento?");
   assert.match(script.narrationText, /Você pretende jogar Faraway no lançamento\?$/);

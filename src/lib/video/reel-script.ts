@@ -1,6 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Post } from "../types/database.ts";
 
+export type ReelSceneLayout = "image" | "detail" | "comparison" | "brief";
+
+export interface ReelSceneComparison {
+  imageIndex: number;
+  label: string;
+}
+
 export interface ReelScene {
   id: string;
   headline: string;
@@ -8,6 +15,9 @@ export interface ReelScene {
   tag: string;
   pills?: string[];
   imageIndex: number;
+  narrationAnchor?: string;
+  layout?: ReelSceneLayout;
+  comparison?: ReelSceneComparison[];
 }
 
 export type ReelCtaVariant = "comment" | "follow";
@@ -24,6 +34,8 @@ export interface ReelScriptData {
   ctaButton: string;
   ctaVariant?: ReelCtaVariant;
   ttsProvider?: "elevenlabs" | "edge-tts";
+  ttsVoice?: string;
+  editorialStandard?: string;
 }
 
 export interface ReelScriptOptions {
@@ -155,6 +167,22 @@ function contextualCommentQuestion(post: Post): string {
   return "Qual detalhe dessa notícia mais impacta você?";
 }
 
+function visualAssetDescriptions(post: Post): string {
+  const assets: Array<{ url: string; description: string }> = [];
+  if (post.image_url) assets.push({ url: post.image_url, description: post.image_alt || post.title });
+  try {
+    const blocks = JSON.parse(post.body);
+    if (Array.isArray(blocks)) {
+      for (const block of blocks) {
+        if (block.type === "image" && typeof block.url === "string" && !assets.some((asset) => asset.url === block.url)) {
+          assets.push({ url: block.url, description: [block.alt, block.caption].filter((value) => typeof value === "string").join(" — ") });
+        }
+      }
+    }
+  } catch {}
+  return assets.map((asset, index) => `${index}: ${asset.description || "Material sem descrição; não inferir o conteúdo."}`).join("\n");
+}
+
 function buildScriptPrompt(post: Post, sourceBody: string, ctaVariant: ReelCtaVariant = "comment"): string {
   const isFollow = ctaVariant === "follow";
   const rule4 = isFollow
@@ -187,13 +215,23 @@ ${sourceBody}
 REGRAS:
 1. A primeira fala deve ser o gancho, com um fato concreto, consequência ou dúvida real que o próprio vídeo responde. Repita a mesma ideia na primeira tela. Comece direto, sem vinheta, saudação ou apresentação do canal.
 2. Conte uma única história nesta ordem: gancho, fato principal, contexto que muda a leitura, impacto para quem joga e conclusão. Use surpresa, curiosidade ou debate apenas quando os fatos sustentarem esse ângulo. Entregue a resposta antes do fim; não esconda informação para forçar retenção.
-3. Escreva de 75 a 95 palavras faladas em português brasileiro natural para preservar o fato, o contexto e o impacto. Use frases curtas, com no máximo 22 palavras cada, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
+3. Escreva como conversa jornalística, variando a extensão das frases e conectando as ideias. Prepare números e siglas para uma leitura natural, sem inventar fatos ou traduzir nomes oficiais de jogos. Escreva de 75 a 95 palavras faladas em português brasileiro natural para preservar o fato, o contexto e o impacto. Use frases curtas, com no máximo 22 palavras cada, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
 ${rule4}
 5. Preserve rigorosamente o status e os limites dos fatos: proposta não é decisão concluída; “até X” não é total confirmado; cargos afetados não significam necessariamente demissões concluídas. Não misture números de processos diferentes nem transforme “propõe” ou “pode afetar” em “fechou” ou “demitiu”.
 6. Crie exatamente 5 cenas alinhadas à narração: revelação, detalhe principal, contexto, impacto e conclusão/próximo passo. Só mostre plataformas, datas, números, decisões e declarações que apareçam na matéria. Se um dado não existir, use contexto ou impacto; nunca invente nem preencha com informação genérica.
 7. Escreva textos de tela curtos e legíveis no celular: gancho com até 55 caracteres; títulos de cena com até 36; destaques com até 48; tags com até 18; no máximo 3 pílulas curtas por cena. Use pílulas apenas para fatos confirmados. Evite repetir a mesma frase em todas as telas.
 ${rule8}
 9. Nunca use reticências nem corte uma frase ou informação para caber. Reescreva de forma concisa, preservando a ideia completa. Nenhum texto pode terminar com preposição, artigo ou conjunção que dependa de continuação.
+
+DIREÇÃO EDITORIAL:
+- Para cada cena, inclua narrationAnchor: copie de 3 a 8 palavras consecutivas do início da frase da narrationText em que a cena deve começar. As âncoras devem seguir a ordem da fala. Revise-as se alterar a narração.
+- Escolha layout conforme a ideia: image para gameplay/produto, detail para um fato ou número importante, brief para dois ou três pontos confirmados, comparison somente para dois elementos comparáveis identificados. Alterne a composição quando a explicação mudar; não force variedade sem motivo.
+- Em comparison, inclua comparison: [{imageIndex: índice do primeiro material, label: identificação real de até 24 caracteres}, {imageIndex: índice do segundo material, label: identificação real de até 24 caracteres}]. Não invente antes/depois, diferenças técnicas ou relações que os materiais não demonstram.
+- Escreva highlight como uma informação que complemente o título; use pills para resumir fatos curtos, sem repetir a mesma frase.
+- Escolha imageIndex usando somente os materiais listados abaixo. Não sugira que uma imagem mostra algo que sua descrição não confirma.
+- Use títulos informativos e naturais. Evite linguagem de trailer, exageros, emojis e jargões publicitários. A imagem deve explicar o fato; títulos e legendas não precisam repetir a mesma informação.
+MATERIAIS DISPONÍVEIS:
+${visualAssetDescriptions(post)}
 
 Retorne EXCLUSIVAMENTE um objeto JSON válido no seguinte formato:
 {
@@ -452,6 +490,12 @@ function parseScript(raw: string, post: Post, ctaVariant: ReelCtaVariant = "comm
     return {
       ...scene,
       id: `scene${sceneNumber}`,
+      layout: (["image", "detail", "comparison", "brief"] as const).find((layout) => layout === scene.layout),
+      comparison: Array.isArray(scene.comparison) ? scene.comparison.slice(0, 2).flatMap((item) =>
+        Number.isInteger(item?.imageIndex) && item.imageIndex >= 0 && typeof item.label === "string"
+          ? [{ imageIndex: item.imageIndex, label: fitPill(item.label, 24) }]
+          : []) : undefined,
+      narrationAnchor: typeof scene.narrationAnchor === "string" ? scene.narrationAnchor.replace(/\s+/g, " ").trim() : undefined,
       headline: fitDisplayText(scene.headline || "", 36, `título da cena ${sceneNumber}`),
       highlight: fitDisplayText(scene.highlight || "", 48, `destaque da cena ${sceneNumber}`),
       tag: fitLabel(scene.tag || "", 18, categoryLabel(post)),
@@ -699,7 +743,7 @@ async function generateGroqScript(post: Post, sourceBody: string, apiKey: string
 export async function generateReelScript(post: Post, apiKey: string, options: ReelScriptOptions = {}): Promise<ReelScriptData> {
   const sourceBody = articleBodyText(post.body);
   const provider = options.provider || "auto";
-  const ctaVariant: ReelCtaVariant = options.ctaVariant || "comment";
+  const ctaVariant: ReelCtaVariant = options.ctaVariant || "follow";
   let geminiError: Error | null = null;
 
   if (provider !== "groq") {

@@ -3,6 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { spawn } from "node:child_process";
 import { getReelAdmin, REEL_BUCKET, dispatchReelWorker } from "../src/lib/video/reel-remote.ts";
+import { recordVideoVoice, EDITORIAL_VOICES } from "../src/lib/video/video-voice.mjs";
 
 const supabase = getReelAdmin();
 const root = process.cwd();
@@ -76,6 +77,10 @@ async function run() {
       if (postError || !post) throw new Error("Matéria não encontrada.");
       if (!post.is_published || post.archived_at || post.updated_at !== job.expected_updated_at) throw new Error("A matéria mudou. Solicite uma nova geração.");
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug) || post.slug.length > 200) throw new Error("Slug inválido.");
+      const { data: recent, error: historyError } = await supabase.from("reel_jobs").select("script").eq("status", "ready").order("finished_at", { ascending: false }).limit(1);
+      if (historyError) throw new Error("Não foi possível consultar a última voz usada. A geração foi interrompida para preservar a alternância.");
+      const previousVoice = recent?.[0]?.script?.ttsVoice;
+      if (EDITORIAL_VOICES.includes(previousVoice)) recordVideoVoice(root, previousVoice, "previous-completed-reel");
       await render(post.slug);
       const manifest = JSON.parse(fs.readFileSync(path.join(root, "public/reels/manifest.json"), "utf8"));
       const item = manifest[post.slug];
@@ -90,7 +95,7 @@ async function run() {
       });
       if (finishError) throw new Error(finishError.message);
       if (result !== "ready") await supabase.storage.from(REEL_BUCKET).remove([storagePath]);
-      process.stdout.write(`Reel ${job.id}: ${result}\n`);
+      process.stdout.write(`Reel ${job.id}: ${result} · padrão ${item.script.editorialStandard || "não informado"} · voz ${item.script.ttsVoice || "não informada"}\n`);
       if (result === "ready") await publishSocial(job.post_id, job.id);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Falha ao gerar Reel.";

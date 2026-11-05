@@ -39,11 +39,17 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
         track_groups.setdefault(group, []).append(track)
     track_groups = [track_groups[group] for group in sorted(track_groups)]
     selected_group = rng.choice(track_groups) if track_groups else []
-    bgm = rng.choice(selected_group) if selected_group else None
+    selected_music = plan.get("selectedMusic")
+    bgm = Path(selected_music["filePath"]) if selected_music else rng.choice(selected_group) if selected_group else None
+    if selected_music and not bgm.is_file():
+        raise ValueError("A música selecionada não está disponível na biblioteca.")
     effects = [name for name in ("impact", "whoosh", "coin", "powerup")
                if (assets_dir / f"{name}.wav").exists()]
     selected_starts = [starts[0], *rng.sample(starts[1:-1], min(2, len(starts[1:-1]))), starts[-1]]
     selected_starts.sort()
+    restrained = plan.get("soundDesign") == "restrained"
+    if restrained:
+        selected_starts = []
     cmd = [ffmpeg, "-y", "-i", str(voice)]
     filters = [f"[0:a]aresample=48000,volume=1.2,apad,atrim=duration={d},asplit=2[v][side]"]
     labels = ["[v]"]
@@ -51,11 +57,11 @@ def mix(work_dir: Path, assets_dir: Path, out_path: Path, total_duration: float 
     selected_effects = []
     if bgm:
         cmd.extend(["-stream_loop", "-1", "-i", str(bgm)])
-        offset = rng.choice([0, 8, 16, 24])
+        offset = 0 if selected_music else rng.choice([0, 8, 16, 24])
         filters.append(
             f"[{input_index}:a]aresample=48000,atrim=start={offset}:duration={d},"
             f"asetpts=PTS-STARTPTS,loudnorm=I=-24:TP=-4:LRA=7,aresample=48000,"
-            f"volume=1.0,afade=t=in:d=0.8,"
+            f"volume={0.3 if restrained else 1.0},afade=t=in:d=0.8,"
             f"afade=t=out:st={max(d - 2.5, 0)}:d=2.5[music]"
         )
         filters.append("[music][side]sidechaincompress=threshold=0.08:ratio=3:attack=20:release=420[m]")

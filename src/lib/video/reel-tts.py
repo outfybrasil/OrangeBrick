@@ -4,7 +4,6 @@ import base64
 import json
 import os
 import re
-import urllib.error
 import urllib.request
 from pathlib import Path
 import edge_tts
@@ -30,17 +29,35 @@ def build_words(sentences):
     return words
 
 
-def save_timing_files(out_dir: Path, sentences, provider: str):
-    words = build_words(sentences)
+def save_timing_files(out_dir: Path, sentences, provider: str, words=None, voice=None):
+    timing_method = "provider-alignment" if words else "sentence-weighted-estimate"
+    words = words or build_words(sentences)
     with open(out_dir / "sentences.json", "w", encoding="utf-8") as file:
         json.dump(sentences, file, ensure_ascii=False, indent=2)
     with open(out_dir / "words.json", "w", encoding="utf-8") as file:
         json.dump(words, file, ensure_ascii=False, indent=2)
     with open(out_dir / "tts-provider.json", "w", encoding="utf-8") as file:
-        json.dump({"provider": provider}, file)
+        json.dump({"provider": provider, "voice": voice, "word_timing": timing_method, "review_required": True}, file)
     print(f"SUCCESS: Generated {len(sentences)} sentences, {len(words)} words with {provider}.")
     if sentences:
         print(f"DURATION: {sentences[-1]['end']}s")
+
+
+def normalize_sentence_timings(sentences):
+    normalized = []
+    previous_end = 0
+    for sentence in sentences:
+        start = sentence["start"]
+        end = sentence["end"]
+        if start < previous_end:
+            if previous_end - start > 0.0021:
+                raise ValueError("As frases da narração têm sobreposição incompatível com o arredondamento.")
+            start = previous_end
+        if end <= start:
+            raise ValueError("Uma frase da narração não tem duração válida.")
+        normalized.append({**sentence, "start": start, "end": end, "duration": round(end - start, 3)})
+        previous_end = end
+    return normalized
 
 
 def validate_transcript(expected_text, sentences):
@@ -105,7 +122,10 @@ def generate_elevenlabs(text: str, out_dir: Path, api_key: str, voice_id: str):
     if not sentences:
         raise ValueError("Não foi possível preparar as legendas sincronizadas.")
     (out_dir / "voice.mp3").write_bytes(base64.b64decode(result["audio_base64"]))
-    return sentences
+    words = []
+    for match in re.finditer(r"\S+", text):
+        words.append({"word": match.group(), "start": round(starts[match.start()], 3), "end": round(ends[match.end() - 1], 3)})
+    return sentences, words
 
 
 async def generate_edge_tts(text: str, voice: str, rate: str, out_dir: Path):
@@ -127,37 +147,32 @@ async def generate_edge_tts(text: str, voice: str, rate: str, out_dir: Path):
     return sentences
 
 
-async def run_tts(text: str, voice: str, rate: str, out_dir: Path):
+async def run_tts(text: str, voice: str, rate: str, out_dir: Path, requested_provider="auto"):
     out_dir.mkdir(parents=True, exist_ok=True)
     api_key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
     voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "").strip()
-    provider = "edge-tts"
-
-    if api_key and voice_id:
-        try:
-            sentences = generate_elevenlabs(text, out_dir, api_key, voice_id)
-            validate_transcript(text, sentences)
-            provider = "elevenlabs"
-        except Exception as error:
-            reason = str(error.code) if isinstance(error, urllib.error.HTTPError) else type(error).__name__
-            print(f"ElevenLabs indisponível ({reason}); usando a voz gratuita de fallback.")
-            sentences = await generate_edge_tts(text, voice, rate, out_dir)
+    provider = requested_provider if requested_provider != "auto" else ("elevenlabs" if api_key and voice_id else "edge-tts")
+    words = None
+    if provider == "elevenlabs":
+        if not api_key or not voice_id:
+            raise ValueError("ElevenLabs selecionado sem configuração completa. Nenhuma voz alternativa foi gerada.")
+        sentences, words = generate_elevenlabs(text, out_dir, api_key, voice_id)
     else:
-        print("ElevenLabs não configurado; usando a voz gratuita de fallback.")
         sentences = await generate_edge_tts(text, voice, rate, out_dir)
-
+    sentences = normalize_sentence_timings(sentences)
     validate_transcript(text, sentences)
-    save_timing_files(out_dir, sentences, provider)
+    save_timing_files(out_dir, sentences, provider, words, voice_id if provider == "elevenlabs" else voice)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--text", required=True)
-    parser.add_argument("--voice", default="pt-BR-AntonioNeural")
+    parser.add_argument("--voice", default=os.environ.get("VIDEO_TTS_VOICE", "pt-BR-ThalitaMultilingualNeural"))
     parser.add_argument("--rate", default="+0%")
     parser.add_argument("--out-dir", required=True)
+    parser.add_argument("--provider", choices=["auto", "elevenlabs", "edge-tts"], default=os.environ.get("VIDEO_TTS_PROVIDER", "auto"))
     args = parser.parse_args()
-    asyncio.run(run_tts(args.text, args.voice, args.rate, Path(args.out_dir)))
+    asyncio.run(run_tts(args.text, args.voice, args.rate, Path(args.out_dir), args.provider))
 
 
 if __name__ == "__main__":

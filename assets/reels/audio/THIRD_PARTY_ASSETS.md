@@ -8,3 +8,7 @@ The following loops are from OpenGameArt.org and are licensed CC0:
 - `bgm_space_ranger.mp3` - "Music loop, strong, downtempo, seamless" by Nostromo: https://opengameart.org/content/music-loop-strong-downtempo-seamless
 
 Attribution is optional under CC0.
+
+## Biblioteca ampliada Brasa Motion
+
+A biblioteca portátil usada pelos novos Reels fica em `packages/brasa-motion/assets/music`, com 20 faixas e catálogo por clima/intensidade. Consulte [os créditos completos](../../../packages/brasa-motion/assets/music/CREDITS.md). Os arquivos legados acima permanecem para os fluxos existentes; o novo seletor usa apenas as faixas do catálogo.

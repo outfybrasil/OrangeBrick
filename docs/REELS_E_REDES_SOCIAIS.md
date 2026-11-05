@@ -1162,3 +1162,11 @@ O código desta continuação prepara cron, redirects, snapshots de métricas, c
 - [`REELS_AUTOMATION.md`](./REELS_AUTOMATION.md) — histórico
 - [`REELS_PRD.md`](./REELS_PRD.md) — histórico
 - [`HANDOFF_2026-10-22.md`](./HANDOFF_2026-10-22.md)
+
+## Padrão editorial do executor
+
+O workflow `reel-generator.yml` usa o motor local `@brasa/motion` com composição editorial fixa e animações internas. O padrão não é mais sorteado entre estilos antigos.
+
+A narração automática usa Edge TTS com Thalita e Francisca. O executor consulta o último trabalho concluído para alternar a voz mesmo quando o GitHub inicia uma máquina nova. A voz, o provedor e o padrão `youtube-editorial-v3` ficam registrados no JSON do roteiro salvo em `reel_jobs.script`.
+
+Antes da fila, `scripts/verify-reel-runtime.mjs` sintetiza uma amostra e renderiza um quadro em 1080 × 1920. O workflow pode ser executado com `verify_only: true` para validar a instalação sem gerar nem publicar itens da fila. O teste técnico não substitui escuta de pronúncia e naturalidade.

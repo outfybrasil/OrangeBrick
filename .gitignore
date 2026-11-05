@@ -68,3 +68,8 @@ scratch/
 public/reels/*.mp4
 !public/reels/.gitkeep
 public/long-videos/**/*.mp4
+
+/packages/*/dist/
+
+__pycache__/
+*.pyc
