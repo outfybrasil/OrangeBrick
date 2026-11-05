@@ -1,4 +1,4 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync, statSync } from "node:fs";
 import path, { sep } from "node:path";
 import { Readable } from "node:stream";
 import { createClient } from "@supabase/supabase-js";
@@ -29,16 +29,69 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  const postId = new URL(request.url).searchParams.get("id");
-  if (!postId || !/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(postId)) {
-    return NextResponse.json({ error: "Matéria inválida." }, { status: 400 });
-  }
-
   const editorial = createClient(
     supabaseUrl,
     (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
     { auth: { persistSession: false, autoRefreshToken: false } }
   );
+
+  const url = new URL(request.url);
+  const slugParam = url.searchParams.get("slug");
+  const variantParam = url.searchParams.get("variant") || "full";
+
+  if (slugParam) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugParam)) {
+      return NextResponse.json({ error: "Slug inválido." }, { status: 400 });
+    }
+
+    let filename = `${slugParam}.mp4`;
+    let contentType = "video/mp4";
+    if (variantParam === "no_narration") {
+      filename = `${slugParam}-sem-narracao.mp4`;
+    } else if (variantParam === "clean") {
+      filename = `${slugParam}-sem-narracao-sem-legenda.mp4`;
+    } else if (variantParam === "srt") {
+      filename = `${slugParam}.srt`;
+      contentType = "text/plain; charset=utf-8";
+    }
+
+    const storagePath = `long-videos/${slugParam}/${filename}`;
+    try {
+      const { data: blob } = await editorial.storage.from("editorial-reels").download(storagePath);
+      if (blob && blob.size > 0) {
+        const headers = new Headers({
+          "Content-Type": contentType,
+          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Cache-Control": "private, no-store",
+          "X-Content-Type-Options": "nosniff",
+          "Content-Length": String(blob.size),
+        });
+        return new Response(blob.stream(), { headers });
+      }
+    } catch {}
+
+    const localPath = path.resolve(process.cwd(), "public", "long-videos", slugParam, filename);
+    const longDir = path.resolve(process.cwd(), "public", "long-videos");
+    if (localPath.startsWith(`${longDir}${sep}`) && existsSync(localPath)) {
+      const stats = statSync(localPath);
+      const headers = new Headers({
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Length": String(stats.size),
+      });
+      return new Response(Readable.toWeb(createReadStream(localPath)) as ReadableStream<Uint8Array>, { headers });
+    }
+
+    return NextResponse.json({ error: "Arquivo do episódio não encontrado." }, { status: 404 });
+  }
+
+  const postId = url.searchParams.get("id");
+  if (!postId || !/^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(postId)) {
+    return NextResponse.json({ error: "Matéria inválida." }, { status: 400 });
+  }
+
   const { data: post, error: postError } = await editorial
     .from("posts")
     .select("id,slug")

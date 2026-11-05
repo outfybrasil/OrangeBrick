@@ -239,6 +239,7 @@ function DarkPipelineStudio({
   const [creatorVoice, setCreatorVoice] = useState<string>("none");
   const [creatorTargetMinutes, setCreatorTargetMinutes] = useState<number>(10);
   const [isSubmittingDarkAction, setIsSubmittingDarkAction] = useState<boolean>(false);
+  const [downloadingVariant, setDownloadingVariant] = useState<string | null>(null);
   const [rejectionReasonInput, setRejectionReasonInput] = useState<string>("");
   const [showRejectPrompt, setShowRejectPrompt] = useState<boolean>(false);
   const [confirmDeleteSlug, setConfirmDeleteSlug] = useState<string | null>(null);
@@ -317,6 +318,48 @@ function DarkPipelineStudio({
       void player.play().catch(() => undefined);
     } else {
       player.pause();
+    }
+  };
+
+  const handleDownloadLongVideo = async (variant: "full" | "no_narration" | "clean" | "srt") => {
+    if (!activeLongVideo) return;
+    setDownloadingVariant(variant);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const res = await fetch(`/api/admin/reels/download?slug=${encodeURIComponent(activeLongVideo.slug)}&variant=${variant}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null) as { error?: string } | null;
+        throw new Error(errJson?.error || "Falha ao preparar o arquivo para download.");
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size === 0) throw new Error("O arquivo retornado está vazio.");
+
+      let filename = `${activeLongVideo.slug}.mp4`;
+      if (variant === "no_narration") filename = `${activeLongVideo.slug}-sem-narracao.mp4`;
+      else if (variant === "clean") filename = `${activeLongVideo.slug}-sem-narracao-sem-legenda.mp4`;
+      else if (variant === "srt") filename = `${activeLongVideo.slug}.srt`;
+
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      link.style.display = "none";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      showToast(`Download de ${filename} concluído!`);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Erro ao baixar o vídeo.");
+    } finally {
+      setDownloadingVariant(null);
     }
   };
 
@@ -965,43 +1008,47 @@ function DarkPipelineStudio({
 
                 <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   {activeLongVideo.video_url && (
-                    <a
-                      href={activeLongVideo.video_url}
-                      download={`${activeLongVideo.slug}.mp4`}
-                      className="flex min-h-[38px] items-center justify-center rounded-lg bg-brand-orange px-3 py-1.5 text-center text-xs font-black uppercase text-black hover:bg-brand-orange/90"
-                      title="Vídeo completo: narração neural, legendas e trilha sonora"
+                    <button
+                      type="button"
+                      disabled={downloadingVariant !== null}
+                      onClick={() => void handleDownloadLongVideo("full")}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg bg-brand-orange px-3.5 py-1.5 text-center text-xs font-black uppercase text-black hover:bg-brand-orange/90 disabled:opacity-60 transition-all cursor-pointer"
+                      title="Baixar vídeo completo: narração neural, legendas e trilha sonora"
                     >
-                      ⬇ Completo (1080p)
-                    </a>
+                      {downloadingVariant === "full" ? "⏳ Baixando..." : "⬇ Completo (1080p)"}
+                    </button>
                   )}
                   {activeLongVideo.video_no_narration_url && (
-                    <a
-                      href={activeLongVideo.video_no_narration_url}
-                      download={`${activeLongVideo.slug}-sem-narracao.mp4`}
-                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-500/20"
-                      title="Vídeo com legendas e trilha instrumental, sem a voz neural"
+                    <button
+                      type="button"
+                      disabled={downloadingVariant !== null}
+                      onClick={() => void handleDownloadLongVideo("no_narration")}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3.5 py-1.5 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-60 transition-all cursor-pointer"
+                      title="Baixar vídeo com legendas e trilha instrumental, sem a voz neural"
                     >
-                      ⬇ Sem Narração
-                    </a>
+                      {downloadingVariant === "no_narration" ? "⏳ Baixando..." : "⬇ Sem Narração"}
+                    </button>
                   )}
                   {activeLongVideo.video_no_narration_clean_url && (
-                    <a
-                      href={activeLongVideo.video_no_narration_clean_url}
-                      download={`${activeLongVideo.slug}-sem-narracao-sem-legenda.mp4`}
-                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-center text-xs font-bold text-cyan-300 hover:bg-cyan-500/20"
-                      title="Vídeo limpo: sem narração e sem legendas (apenas visual e trilha)"
+                    <button
+                      type="button"
+                      disabled={downloadingVariant !== null}
+                      onClick={() => void handleDownloadLongVideo("clean")}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3.5 py-1.5 text-center text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-60 transition-all cursor-pointer"
+                      title="Baixar vídeo limpo: sem narração e sem legendas (apenas visual e trilha)"
                     >
-                      ⬇ Sem Narração & Legenda (Clean)
-                    </a>
+                      {downloadingVariant === "clean" ? "⏳ Baixando..." : "⬇ Sem Narração & Legenda (Clean)"}
+                    </button>
                   )}
                   {activeLongVideo.srt_url && (
-                    <a
-                      href={activeLongVideo.srt_url}
-                      download
-                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-xs font-bold text-gray-200 hover:bg-white/10"
+                    <button
+                      type="button"
+                      disabled={downloadingVariant !== null}
+                      onClick={() => void handleDownloadLongVideo("srt")}
+                      className="flex min-h-[38px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-center text-xs font-bold text-gray-200 hover:bg-white/10 disabled:opacity-60 transition-all cursor-pointer"
                     >
-                      ⬇ Legendas .SRT
-                    </a>
+                      {downloadingVariant === "srt" ? "⏳ Baixando..." : "⬇ Legendas .SRT"}
+                    </button>
                   )}
                   {activeLongVideo.preview_sheet_url && (
                     <a
