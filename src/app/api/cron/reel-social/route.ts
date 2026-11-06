@@ -91,22 +91,34 @@ async function pollTikTokStatus(db: ReelAdmin, postId?: string): Promise<{ postI
 
 async function publishNext(db: ReelAdmin, jobs: ReelJob[], activatedAt?: string) {
   const postIds = [...new Set(jobs.map((job) => job.post_id))];
-  const [postsResult, deliveriesResult] = await Promise.all([
+  const [postsResult, deliveriesResult, targetsResult] = await Promise.all([
     db.from("posts").select("id,slug,title,summary,category,is_published,published_at,updated_at,archived_at").in("id", postIds),
     db.from("reel_social_publications").select("post_id,platform,status,external_id").in("post_id", postIds),
+    db.from("bot_state").select("key,value").in("key", postIds.map(id => `reel:target_platforms:${id}`)),
   ]);
   if (postsResult.error || deliveriesResult.error) return NextResponse.json({ error: "Não foi possível conferir as publicações." }, { status: 503 });
   const posts = new Map(((postsResult.data || []) as Post[]).map((post) => [post.id, post]));
   const deliveries = new Map(((deliveriesResult.data || []) as Delivery[]).map((row) => [`${row.post_id}:${row.platform}`, row]));
+  const targets = new Map(((targetsResult?.data || []) as { key: string; value: string }[]).map((row) => [row.key.replace(/^reel:target_platforms:/, ""), row.value]));
 
   for (const job of jobs) {
     const storagePath = job.storage_path;
     if (!storagePath) continue;
     const post = pickPost(posts.get(job.post_id), job, activatedAt);
     if (!post) continue;
+    const rawTarget = targets.get(post.id);
+    let allowedPlatforms = platforms;
+    if (rawTarget) {
+      try {
+        const parsed = JSON.parse(rawTarget);
+        if (Array.isArray(parsed) && parsed.length > 0) allowedPlatforms = parsed;
+        else if (Array.isArray(parsed) && parsed.length === 0) allowedPlatforms = [];
+      } catch {}
+    }
     const activeDelivery = platforms.map(platform => deliveries.get(`${post.id}:${platform}`)).find(delivery => delivery?.status === "processing");
     if (activeDelivery) return NextResponse.json({ processed: false, postId: post.id, platform: activeDelivery.platform, status: "processing" });
     for (const platform of platforms) {
+      if (!allowedPlatforms.includes(platform)) continue;
       const delivery = deliveries.get(`${post.id}:${platform}`);
       if (delivery) continue;
       if (platform === "youtube") {
@@ -151,13 +163,25 @@ async function targetedPublish(db: ReelAdmin, postId: string, jobId: string | nu
   const storagePath = job.storage_path;
   if (!post || !storagePath) return NextResponse.json({ processed: false, postId });
 
-  const { data: deliveriesData, error: deliveriesError } = await db.from("reel_social_publications").select("post_id,platform,status,external_id").eq("post_id", postId);
+  const [{ data: deliveriesData, error: deliveriesError }, { data: targetData }] = await Promise.all([
+    db.from("reel_social_publications").select("post_id,platform,status,external_id").eq("post_id", postId),
+    db.from("bot_state").select("value").eq("key", `reel:target_platforms:${postId}`).maybeSingle(),
+  ]);
   if (deliveriesError) return NextResponse.json({ error: "Não foi possível conferir as publicações." }, { status: 503 });
+  let allowedPlatforms = platforms;
+  if (targetData?.value) {
+    try {
+      const parsed = JSON.parse(targetData.value);
+      if (Array.isArray(parsed) && parsed.length > 0) allowedPlatforms = parsed;
+      else if (Array.isArray(parsed) && parsed.length === 0) allowedPlatforms = [];
+    } catch {}
+  }
   const deliveries = new Map(((deliveriesData || []) as Delivery[]).map((row) => [`${row.post_id}:${row.platform}`, row]));
   const activeDelivery = platforms.map(platform => deliveries.get(`${post.id}:${platform}`)).find(delivery => delivery?.status === "processing");
   if (activeDelivery) return NextResponse.json({ processed: false, postId: post.id, platform: activeDelivery.platform, status: "processing" });
 
   for (const platform of platforms) {
+    if (!allowedPlatforms.includes(platform)) continue;
     const delivery = deliveries.get(`${post.id}:${platform}`);
     if (delivery) continue;
     if (platform === "youtube") {

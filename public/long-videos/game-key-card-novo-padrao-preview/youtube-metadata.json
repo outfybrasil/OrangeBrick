@@ -1,0 +1,189 @@
+{
+  "series_badge": "O QUE MUDA PARA QUEM JOGA",
+  "title": "Game-Key Card: o que você realmente compra?",
+  "subtitle": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+  "status": "pending_review",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+  "source_mode": "custom_script",
+  "source_post_slugs": [],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-ThalitaMultilingualNeural",
+  "slug": "game-key-card-novo-padrao-preview",
+  "updated_at": "2026-11-05T04:35:07.061Z",
+  "editorial_standard": "youtube-editorial-v2",
+  "is_preview": true,
+  "production": {
+    "scenes": [
+      {
+        "chapter": "01",
+        "voiceStartSec": 0,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 11.8,
+            "headline": "Caixa física. Download obrigatório.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Você compra a caixa"
+          },
+          {
+            "start": 11.8,
+            "duration": 13.633333333333333,
+            "headline": "O que você precisa",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Na primeira vez"
+          },
+          {
+            "start": 25.433333333333334,
+            "duration": 15.866666666666664,
+            "headline": "Baixou? Guarde o cartão.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Depois do download"
+          },
+          {
+            "start": 41.3,
+            "duration": 13.100000000000001,
+            "headline": "Outro console, novo download.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "E se você levar"
+          },
+          {
+            "start": 54.4,
+            "duration": 4.333333333333336,
+            "headline": "Entenda antes de comprar.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Para entender o que muda"
+          }
+        ]
+      }
+    ],
+    "voices": [
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      }
+    ],
+    "human_audio_review": false,
+    "audio_verification": {
+      "passed": true,
+      "full_decode": true,
+      "integrated_lufs": -14.08,
+      "true_peak_dbtp": -1.94,
+      "corrected": false,
+      "human_listening": false
+    }
+  },
+  "duration_seconds": 58.733,
+  "duration_formatted": "00:58",
+  "monetization_midroll_eligible": false,
+  "file_size": 2201592,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview.mp4",
+  "video_no_narration_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview-sem-narracao.mp4",
+  "video_no_narration_clean_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview-sem-narracao-sem-legenda.mp4",
+  "srt_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview.srt",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/game-key-card-novo-padrao-preview/preview-sheet.jpg",
+  "thumbnails": [],
+  "selected_thumbnail_id": null,
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O cartão é a chave",
+      "kicker": "ENTENDA O FORMATO",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "https://www.nintendo.com/us/gaming-systems/switch-2/faq/"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "editorial_standard",
+      "label": "Padrão editorial de retenção",
+      "passed": true,
+      "detail": "Abertura sem vinheta, duração baseada na fala, cenas nos limites de frases e CTA único."
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Revisão auditiva e legendas",
+      "passed": false,
+      "detail": "13 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+    },
+    {
+      "id": "verified_sources",
+      "label": "Revisão das fontes",
+      "passed": false,
+      "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Áudio final medido",
+      "passed": true,
+      "detail": "-14.08 LUFS; -1.94 dBTP. Escuta humana pendente."
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Materiais visuais",
+      "passed": false,
+      "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "Game-Key Card precisa de internet?",
+      "hook": "A caixa é física, mas o primeiro download é obrigatório.",
+      "chapter_number": "01",
+      "start_timestamp": "01:00",
+      "end_timestamp": "01:35",
+      "duration_seconds": 35,
+      "related_slug": "game-key-card-novo-padrao-preview"
+    }
+  ],
+  "youtube": {
+    "title": "Game-Key Card: o que você realmente compra?",
+    "description": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.\n\nPrévia editorial do novo padrão de vídeo. Explicação baseada no guia e no FAQ oficiais da Nintendo.\n\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://www.nintendo.com/us/gaming-systems/switch-2/faq/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nO download inicial muda sua decisão de comprar a edição física?",
+    "tags": [
+      "Nintendo Switch 2",
+      "Game-Key Card",
+      "Orange Brick"
+    ],
+    "pinned_comment": "O download inicial muda sua decisão de comprar a edição física?",
+    "visibility": "private",
+    "scheduled_at": null
+  },
+  "review_notes": null,
+  "approved_at": null,
+  "created_at": "2026-11-05T01:20:11.725Z",
+  "marketing": {
+    "standard": "youtube-editorial-v2",
+    "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+    "promise": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+    "primary_cta": "Inscreva-se para entender o que muda nos jogos e consoles",
+    "title_variants": [
+      "Game-Key Card: o que você realmente compra?",
+      "Game-Key Card no Switch 2: entenda o download obrigatório",
+      "O cartão é a chave: como funciona o Game-Key Card"
+    ],
+    "thumbnail_concepts": [
+      "Embalagem oficial com foco no aviso Game-Key Card; texto: PRECISA BAIXAR",
+      "Cartão oficial e seta para armazenamento; texto: O JOGO FICA ONDE?",
+      "Diagrama editorial cartão → download → console; texto: ENTENDA ANTES DE COMPRAR"
+    ],
+    "thumbnail_review_required": true,
+    "end_screen": {
+      "studio_configuration_required": true,
+      "start_seconds": 43.733,
+      "related_video": null
+    },
+    "metrics_review_hours": [
+      24,
+      72,
+      168,
+      672
+    ]
+  },
+  "review_history": []
+}

@@ -236,7 +236,7 @@ function DarkPipelineStudio({
   const [creatorPostFilter, setCreatorPostFilter] = useState<string>("");
   const [creatorManualScript, setCreatorManualScript] = useState<string>("");
   const [creatorStyle, setCreatorStyle] = useState<LongVideoVisualStyle>("documentario");
-  const [creatorVoice, setCreatorVoice] = useState<string>("none");
+  const [creatorVoice, setCreatorVoice] = useState<string>("auto");
   const [creatorTargetMinutes, setCreatorTargetMinutes] = useState<number>(10);
   const [isSubmittingDarkAction, setIsSubmittingDarkAction] = useState<boolean>(false);
   const [downloadingVariant, setDownloadingVariant] = useState<string | null>(null);
@@ -792,26 +792,26 @@ function DarkPipelineStudio({
                       onChange={(e) => setCreatorVoice(e.target.value)}
                       className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                     >
+                      <option value="auto">Voz editorial automática</option>
                       <option value="none">🔇 Sem Narrador (Gravar Minha Voz por Cima)</option>
                       <option value="pt-BR-AntonioNeural">🎙️ Antonio Neural (Grave Documental)</option>
                       <option value="pt-BR-FranciscaNeural">🎙️ Francisca Neural (Editorial Ágil)</option>
-                      <option value="pt-BR-ThalitaNeural">🎙️ Thalita Neural (Narrativa Dinâmica)</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
-                      Meta de Duração (Mid-Roll)
+                      Duração de referência
                     </label>
                     <select
                       value={creatorTargetMinutes}
                       onChange={(e) => setCreatorTargetMinutes(Number(e.target.value))}
                       className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                     >
-                      <option value={8}>⏱️ 08 min (Mínimo Mid-Roll)</option>
-                      <option value={10}>⏱️ 10 min (Ideal Retenção)</option>
-                      <option value={12}>⏱️ 12 min (Dossiê Profundo)</option>
-                      <option value={15}>⏱️ 15 min (Especial Completo)</option>
+                      <option value={8}>⏱️ Até 8 min</option>
+                      <option value={10}>⏱️ Até 10 min</option>
+                      <option value={12}>⏱️ Até 12 min</option>
+                      <option value={15}>⏱️ Até 15 min</option>
                     </select>
                   </div>
                 </div>
@@ -827,10 +827,10 @@ function DarkPipelineStudio({
 
                 <div className="rounded-xl border border-white/10 bg-[#0b0d14] p-3.5 text-xs text-gray-300 space-y-1.5">
                   <p className="font-bold text-white">O que a esteira entrega automaticamente:</p>
-                  <p>✓ Vídeo 1920×1080 H.264 30fps com lower thirds e barra de capítulos</p>
-                  <p>✓ Áudio masterizado com trilha ambiente ducked (-14 LUFS) + arquivo .SRT</p>
-                  <p>✓ 3 opções de Thumbnail 1280×720 com teste de leitura no celular</p>
-                  <p>✓ Kit YouTube completo + 3 sugestões de cortes verticais (Shorts)</p>
+                  <p>✓ Vídeo 1920×1080 com cenas ligadas à narração e abertura direta</p>
+                  <p>✓ Narração, trilha discreta e legendas para revisão</p>
+                  <p>✓ Duração baseada no conteúdo, sem pausas para preencher tempo</p>
+                  <p>✓ Descrição, fontes e sugestões de Shorts relacionados</p>
                 </div>
               </div>
 
@@ -1455,7 +1455,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
   const [items, setItems] = useState<AdminReelItem[]>([]);
   const [longVideos, setLongVideos] = useState<LongVideoManifestItem[]>([]);
   const [darkConfig, setDarkConfig] = useState<DarkPipelineConfig | null>(null);
-  const [showCreatorDrawer, setShowCreatorDrawer] = useState<boolean>(false);
+  const [showCreatorDrawer, setShowCreatorDrawer] = useState<boolean>(() => searchParams.get("create") === "1");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -1469,6 +1469,30 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [clock, setClock] = useState(() => Date.now());
   const hasGeneratingReel = items.some((item) => item.status === "generating") || triggeringSlug !== null;
+  const [targetPlatformsModal, setTargetPlatformsModal] = useState<{
+    slug: string;
+    title: string;
+    isReady: boolean;
+    platforms: {
+      youtube: boolean;
+      tiktok: boolean;
+      instagram: boolean;
+    };
+  } | null>(null);
+
+  const promptPlatformSelection = useCallback((item: { slug: string; title: string; status?: string; targetPlatforms?: ReelSocialPlatform[] }) => {
+    const defaults = item.targetPlatforms || ["youtube", "tiktok", "instagram"];
+    setTargetPlatformsModal({
+      slug: item.slug,
+      title: item.title,
+      isReady: item.status === "ready",
+      platforms: {
+        youtube: defaults.includes("youtube"),
+        tiktok: defaults.includes("tiktok"),
+        instagram: defaults.includes("instagram"),
+      },
+    });
+  }, []);
 
   const pipelineMode: "short" | "long" = modeParam === "long" ? "long" : modeParam === "short" ? "short" : defaultMode;
 
@@ -1481,6 +1505,29 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
     setToastMessage(msg);
     window.setTimeout(() => setToastMessage((c) => (c === msg ? null : c)), 3500);
   }, []);
+
+  const handleSavePlatforms = useCallback(async (slug: string, platforms: ReelSocialPlatform[]) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sessão expirada. Faça login novamente.");
+      const res = await fetch("/api/admin/reels", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "set_platforms", slug, platforms }),
+      });
+      if (!res.ok) throw new Error("Falha ao salvar redes de publicação.");
+      setItems((prev) =>
+        prev.map((item) => (item.slug === slug ? { ...item, targetPlatforms: platforms } : item))
+      );
+      setSelectedReel((curr) => (curr?.slug === slug ? { ...curr, targetPlatforms: platforms } : curr));
+      showToast("Redes de publicação atualizadas.");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Erro ao atualizar redes.");
+    }
+  }, [showToast, supabase]);
 
   const downloadReel = useCallback(async (item: AdminReelItem) => {
     setDownloadingSlug(item.slug);
@@ -1625,7 +1672,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
     return () => window.clearInterval(interval);
   }, [items, loadReels]);
 
-  const handleGenerate = async (slug: string) => {
+  const handleGenerate = async (slug: string, platforms?: ReelSocialPlatform[]) => {
     setTriggeringSlug(slug);
     setError(null);
     try {
@@ -1638,7 +1685,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           Authorization: `Bearer ${session.access_token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ slug }),
+        body: JSON.stringify({ slug, platforms }),
         signal: AbortSignal.timeout(30_000),
       });
 
@@ -1653,6 +1700,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
         prev.map((item) =>
           item.slug === slug ? {
             ...item,
+            targetPlatforms: platforms || item.targetPlatforms || ["youtube", "tiktok", "instagram"],
             status: "generating",
             is_queued: true,
             queue_position: 1,
@@ -1665,6 +1713,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       );
       setSelectedReel((current) => current?.slug === slug ? {
         ...current,
+        targetPlatforms: platforms || current.targetPlatforms || ["youtube", "tiktok", "instagram"],
         status: "generating",
         is_queued: true,
         queue_position: 1,
@@ -2081,6 +2130,25 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                           {item.title}
                         </h3>
 
+                        {item.targetPlatforms && item.targetPlatforms.length > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1">
+                            {item.targetPlatforms.map((p) => (
+                              <span
+                                key={p}
+                                className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
+                                  p === "youtube"
+                                    ? "bg-[#ff0000]/15 text-red-300 border border-[#ff0000]/30"
+                                    : p === "tiktok"
+                                      ? "bg-[#fe2c55]/15 text-pink-300 border border-[#fe2c55]/30"
+                                      : "bg-purple-500/15 text-purple-200 border border-purple-500/30"
+                                }`}
+                              >
+                                {p === "youtube" ? "🔴 YT" : p === "tiktok" ? "🎵 TikTok" : "📸 Insta"}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         {isReady && (
                           <div className="mt-3 flex items-center gap-3 border-t border-white/5 pt-2 text-[11px] text-gray-400">
                             <span>⏱️ {item.duration ? `${item.duration}s` : "35s"}</span>
@@ -2171,7 +2239,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                         <button
                           type="button"
                           disabled={triggeringSlug === item.slug || hasGeneratingReel}
-                          onClick={() => handleGenerate(item.slug)}
+                          onClick={() => promptPlatformSelection(item)}
                           className="w-full rounded-lg px-3 py-2 text-center text-xs font-black uppercase transition-all bg-white/[0.08] text-white hover:bg-brand-orange hover:text-black border border-white/10"
                         >
                           {triggeringSlug === item.slug ? "Iniciando..." : item.status === "failed" ? "Tentar Novamente" : "Gerar Reel com IA"}
@@ -2243,7 +2311,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleGenerate(selectedReel.slug)}
+                    onClick={() => promptPlatformSelection(selectedReel)}
                     disabled={triggeringSlug === selectedReel.slug}
                     className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-[11px] font-bold text-gray-400 hover:text-white hover:bg-white/10"
                   >
@@ -2264,6 +2332,37 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 <p className="mt-1 line-clamp-2 text-xs text-gray-400">
                   {selectedReel.summary}
                 </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-gray-400">Publicação automática:</span>
+                  {(selectedReel.targetPlatforms || ["youtube", "tiktok", "instagram"]).length === 0 ? (
+                    <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase text-amber-300 border border-amber-500/30">
+                      Desativada (Download Apenas)
+                    </span>
+                  ) : (
+                    (selectedReel.targetPlatforms || ["youtube", "tiktok", "instagram"]).map((p) => (
+                      <span
+                        key={p}
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
+                          p === "youtube"
+                            ? "bg-[#ff0000]/20 text-red-300 border border-[#ff0000]/30"
+                            : p === "tiktok"
+                              ? "bg-[#fe2c55]/20 text-pink-300 border border-[#fe2c55]/30"
+                              : "bg-purple-500/20 text-purple-200 border border-purple-500/30"
+                        }`}
+                      >
+                        {p === "youtube" ? "🔴 YouTube" : p === "tiktok" ? "🎵 TikTok" : "📸 Instagram"}
+                      </span>
+                    ))
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => promptPlatformSelection(selectedReel)}
+                    className="ml-2 text-[11px] font-extrabold text-brand-orange hover:underline"
+                  >
+                    Alterar redes
+                  </button>
+                </div>
               </div>
 
               <div className="mt-5 flex flex-wrap gap-2 border-b border-white/10 pb-3">
@@ -2344,6 +2443,179 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   />
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {targetPlatformsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#121214] p-6 shadow-2xl space-y-5">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="rounded-md bg-brand-orange/20 px-2.5 py-1 text-[11px] font-black uppercase text-brand-orange tracking-wide">
+                  Destinos de Publicação
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setTargetPlatformsModal(null)}
+                  className="rounded-lg p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+              <h3 className="mt-3 font-heading text-lg font-black text-white leading-snug">
+                Onde você vai postar este Reel?
+              </h3>
+              <p className="mt-1 line-clamp-2 text-xs text-gray-400">
+                {targetPlatformsModal.title}
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              <label
+                className={`flex items-start gap-3.5 rounded-xl border p-3.5 cursor-pointer transition-all ${
+                  targetPlatformsModal.platforms.youtube
+                    ? "border-[#ff0000]/60 bg-[#ff0000]/10 text-white shadow-sm"
+                    : "border-white/10 bg-white/[0.02] text-gray-400 hover:bg-white/[0.05]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={targetPlatformsModal.platforms.youtube}
+                  onChange={(e) =>
+                    setTargetPlatformsModal((prev) =>
+                      prev ? { ...prev, platforms: { ...prev.platforms, youtube: e.target.checked } } : null
+                    )
+                  }
+                  className="mt-1 h-4 w-4 rounded border-white/20 text-[#ff0000] focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm text-white">🔴 YouTube Shorts</span>
+                    {targetPlatformsModal.platforms.youtube && (
+                      <span className="rounded bg-[#ff0000]/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-red-200">Ativo</span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-300">
+                    Upload oficial com título, descrição e tags preparadas para shorts.
+                  </p>
+                </div>
+              </label>
+
+              <label
+                className={`flex items-start gap-3.5 rounded-xl border p-3.5 cursor-pointer transition-all ${
+                  targetPlatformsModal.platforms.tiktok
+                    ? "border-[#fe2c55]/60 bg-[#fe2c55]/10 text-white shadow-sm"
+                    : "border-white/10 bg-white/[0.02] text-gray-400 hover:bg-white/[0.05]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={targetPlatformsModal.platforms.tiktok}
+                  onChange={(e) =>
+                    setTargetPlatformsModal((prev) =>
+                      prev ? { ...prev, platforms: { ...prev.platforms, tiktok: e.target.checked } } : null
+                    )
+                  }
+                  className="mt-1 h-4 w-4 rounded border-white/20 text-[#fe2c55] focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm text-white">🎵 TikTok</span>
+                    {targetPlatformsModal.platforms.tiktok && (
+                      <span className="rounded bg-[#fe2c55]/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-pink-200">Ativo</span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-300">
+                    Envio para a caixa de rascunhos para você revisar ou publicar direto.
+                  </p>
+                </div>
+              </label>
+
+              <label
+                className={`flex items-start gap-3.5 rounded-xl border p-3.5 cursor-pointer transition-all ${
+                  targetPlatformsModal.platforms.instagram
+                    ? "border-pink-500/60 bg-gradient-to-r from-purple-500/10 to-pink-500/10 text-white shadow-sm"
+                    : "border-white/10 bg-white/[0.02] text-gray-400 hover:bg-white/[0.05]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={targetPlatformsModal.platforms.instagram}
+                  onChange={(e) =>
+                    setTargetPlatformsModal((prev) =>
+                      prev ? { ...prev, platforms: { ...prev.platforms, instagram: e.target.checked } } : null
+                    )
+                  }
+                  className="mt-1 h-4 w-4 rounded border-white/20 text-pink-500 focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm text-white">📸 Instagram Reels</span>
+                    {targetPlatformsModal.platforms.instagram && (
+                      <span className="rounded bg-pink-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-pink-200">Ativo</span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-300">
+                    Publicação no feed e aba Reels da página conectada.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-[11px] text-gray-400">
+              {!targetPlatformsModal.platforms.youtube && !targetPlatformsModal.platforms.tiktok && !targetPlatformsModal.platforms.instagram ? (
+                <span className="text-amber-400 font-semibold">
+                  ⚠️ Nenhuma rede selecionada: o Reel será gerado somente para download local no painel, sem envio a nenhuma rede social.
+                </span>
+              ) : (
+                <span>
+                  A esteira automática publicará apenas nas redes marcadas acima.
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setTargetPlatformsModal(null)}
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-gray-300 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+              {targetPlatformsModal.isReady && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const chosen: ReelSocialPlatform[] = [];
+                    if (targetPlatformsModal.platforms.youtube) chosen.push("youtube");
+                    if (targetPlatformsModal.platforms.tiktok) chosen.push("tiktok");
+                    if (targetPlatformsModal.platforms.instagram) chosen.push("instagram");
+                    const slug = targetPlatformsModal.slug;
+                    setTargetPlatformsModal(null);
+                    void handleSavePlatforms(slug, chosen);
+                  }}
+                  className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition-colors"
+                >
+                  Salvar Destinos
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={triggeringSlug === targetPlatformsModal.slug}
+                onClick={() => {
+                  const chosen: ReelSocialPlatform[] = [];
+                  if (targetPlatformsModal.platforms.youtube) chosen.push("youtube");
+                  if (targetPlatformsModal.platforms.tiktok) chosen.push("tiktok");
+                  if (targetPlatformsModal.platforms.instagram) chosen.push("instagram");
+                  const slug = targetPlatformsModal.slug;
+                  setTargetPlatformsModal(null);
+                  void handleGenerate(slug, chosen);
+                }}
+                className="rounded-xl bg-brand-orange px-5 py-2.5 text-xs font-black uppercase text-black hover:bg-orange-400 transition-colors shadow-lg shadow-brand-orange/20"
+              >
+                {targetPlatformsModal.isReady ? "Regerar com IA" : "Confirmar e Gerar Reel"}
+              </button>
             </div>
           </div>
         </div>

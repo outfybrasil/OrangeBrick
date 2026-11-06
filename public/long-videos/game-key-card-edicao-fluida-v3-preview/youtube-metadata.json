@@ -1,0 +1,360 @@
+{
+  "series_badge": "O QUE MUDA PARA QUEM JOGA",
+  "title": "Game-Key Card: o que você realmente compra?",
+  "subtitle": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+  "status": "approved",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "Aprovado pelo usuário",
+  "source_mode": "custom_script",
+  "source_post_slugs": [],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-FranciscaNeural",
+  "slug": "game-key-card-edicao-fluida-v3-preview",
+  "updated_at": "2026-11-05T04:35:07.061Z",
+  "error": "A produção foi interrompida. Confira roteiro, materiais e provedor de voz antes de tentar novamente.",
+  "editorial_standard": "youtube-editorial-v3",
+  "is_preview": true,
+  "production": {
+    "scenes": [
+      {
+        "chapter": "01",
+        "voiceStartSec": 0,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 3.6,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "57464be29aa1151614fb9daf33df702b34a29c01d2b01799bfe2d0c0fa470269",
+              "bytes": 75445,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 108,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Físico na caixa. Download no console.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "A caixa é física, mas o jogo"
+          },
+          {
+            "start": 3.6,
+            "duration": 3.4999999999999996,
+            "layout": "evidence",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "2ba23a9f42d934f64c267733212d333a9a6ae19885018327a8cae8da0d96eae2",
+              "bytes": 78608,
+              "layout": "evidence",
+              "fps": 30,
+              "frames": 105,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Procure esta marca.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "O aviso que muda a compra está"
+          },
+          {
+            "start": 7.1,
+            "duration": 5.066666666666666,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "72c887ab68ae75d4b1d1caa56f5db2ab7b43f1e35bb3b89ec439233e3c2e5829",
+              "bytes": 79860,
+              "layout": "process",
+              "fps": 30,
+              "frames": 152,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O jogo vai para o armazenamento.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Ele é a chave para baixar os"
+          },
+          {
+            "start": 12.166666666666666,
+            "duration": 4.9,
+            "layout": "storage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "87a8fc06a01cadc6a9d95ef5b0fe9c4c7c07fb792705bc24ee1bb665a4202d1f",
+              "bytes": 92378,
+              "layout": "storage",
+              "fps": 30,
+              "frames": 147,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O download precisa caber.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Esses dados ocupam espaço no console ou"
+          },
+          {
+            "start": 17.066666666666666,
+            "duration": 4.133333333333333,
+            "layout": "insert",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "e78f18d8c5dffbed60b0c920b568b63ef5042954a1a7daba35b23e57d4f30092",
+              "bytes": 72755,
+              "layout": "insert",
+              "fps": 30,
+              "frames": 124,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Baixou? O cartão ainda é necessário.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/keyCard-step01_img.png",
+            "narrationAnchor": "Depois de baixar, o cartão continua obrigatório"
+          },
+          {
+            "start": 21.2,
+            "duration": 6.933333333333334,
+            "layout": "offline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "f8578de71935e650589c89bd4097acd1f6c1ee1bc07b29db2ef9d4ec5b2e9ab1",
+              "bytes": 104606,
+              "layout": "offline",
+              "fps": 30,
+              "frames": 208,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Sem internet não significa sem cartão.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Sem internet, você pode iniciar os títulos"
+          },
+          {
+            "start": 28.133333333333333,
+            "duration": 2.5666666666666664,
+            "layout": "handoff",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "e46e9d7c455d5d9a4b2ee786cbec199669afe66e96d57c34e75f4d349ddbf517",
+              "bytes": 77865,
+              "layout": "handoff",
+              "fps": 30,
+              "frames": 77,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "E em outro Switch 2?",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "E se o cartão for para outro"
+          },
+          {
+            "start": 30.7,
+            "duration": 3.333333333333332,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "52d99fda93fce5b5963c2285dad373baad5c266b82c9121e3159916cf86c4a10",
+              "bytes": 82884,
+              "layout": "process",
+              "fps": 30,
+              "frames": 100,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Neste console, baixe os dados também.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Nesse console, será preciso baixar os dados"
+          },
+          {
+            "start": 34.03333333333333,
+            "duration": 6.633333333333333,
+            "layout": "quote",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "b261c6a95624162aa47c44918ed98150566fbba606e0504cf45006aefbfd14fb",
+              "bytes": 78506,
+              "layout": "quote",
+              "fps": 30,
+              "frames": 199,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Conta Nintendo não é necessária para baixar os dados.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Outro detalhe: segundo o suporte da Nintendo,"
+          },
+          {
+            "start": 40.666666666666664,
+            "duration": 4.766666666666666,
+            "layout": "takeaway",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "ad99435b2689b94d26ebf998c0a37a1ee66f4c1879b4439e96e20f06e2f9756c",
+              "bytes": 77253,
+              "layout": "takeaway",
+              "fps": 30,
+              "frames": 143,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Reconheça a chave. Confira o espaço.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Na loja, procure o símbolo da chave"
+          },
+          {
+            "start": 45.43333333333333,
+            "duration": 4.900000000000006,
+            "layout": "cta",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "d333b75589e5efba8a0426d71c8a0538c517bf646b4c93447778f915a27ce745",
+              "bytes": 69333,
+              "layout": "cta",
+              "fps": 30,
+              "frames": 147,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Entenda antes de comprar.",
+            "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+            "narrationAnchor": "Para entender o que muda"
+          }
+        ]
+      }
+    ],
+    "voices": [
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      }
+    ],
+    "human_audio_review": false,
+    "audio_verification": {
+      "passed": true,
+      "full_decode": true,
+      "integrated_lufs": -14.84,
+      "true_peak_dbtp": -1.64,
+      "corrected": false,
+      "human_listening": false
+    }
+  },
+  "duration_seconds": 50.333,
+  "duration_formatted": "00:50",
+  "monetization_midroll_eligible": false,
+  "file_size": 2299874,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview.mp4",
+  "video_no_narration_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview-sem-narracao.mp4",
+  "video_no_narration_clean_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview-sem-narracao-sem-legenda.mp4",
+  "srt_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview.srt",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/game-key-card-edicao-fluida-v3-preview/preview-sheet.jpg",
+  "thumbnails": [],
+  "selected_thumbnail_id": null,
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O cartão é a chave",
+      "kicker": "ENTENDA O FORMATO",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "https://www.nintendo.com/us/gaming-systems/switch-2/faq/"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "editorial_standard",
+      "label": "Padrão editorial de retenção",
+      "passed": true,
+      "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Revisão auditiva e legendas",
+      "passed": false,
+      "detail": "11 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+    },
+    {
+      "id": "verified_sources",
+      "label": "Revisão das fontes",
+      "passed": false,
+      "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Áudio final medido",
+      "passed": true,
+      "detail": "-14.84 LUFS; -1.64 dBTP. Escuta humana pendente."
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Materiais visuais",
+      "passed": false,
+      "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "Game-Key Card precisa de internet?",
+      "hook": "A caixa é física, mas o primeiro download é obrigatório.",
+      "chapter_number": "01",
+      "start_timestamp": "01:00",
+      "end_timestamp": "01:35",
+      "duration_seconds": 35,
+      "related_slug": "game-key-card-edicao-fluida-v3-preview"
+    }
+  ],
+  "youtube": {
+    "title": "Game-Key Card: o que você realmente compra?",
+    "description": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.\n\nPrévia revisada: produto, embalagem, demonstrações e consequências, com enquadramento fixo e animações locais.\n\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://www.nintendo.com/us/gaming-systems/switch-2/faq/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nO download inicial muda sua decisão de comprar a edição física?",
+    "tags": [
+      "Nintendo Switch 2",
+      "Game-Key Card",
+      "Orange Brick"
+    ],
+    "pinned_comment": "O download inicial muda sua decisão de comprar a edição física?",
+    "visibility": "private",
+    "scheduled_at": null
+  },
+  "marketing": {
+    "standard": "youtube-editorial-v3",
+    "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+    "promise": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+    "primary_cta": "Inscreva-se para entender o que muda nos jogos e consoles",
+    "title_variants": [
+      "Game-Key Card: o que você realmente compra?",
+      "Game-Key Card no Switch 2: entenda o download obrigatório",
+      "O cartão é a chave: como funciona o Game-Key Card"
+    ],
+    "thumbnail_concepts": [
+      "Embalagem oficial com foco no aviso Game-Key Card; texto: PRECISA BAIXAR",
+      "Cartão oficial e seta para armazenamento; texto: O JOGO FICA ONDE?",
+      "Diagrama editorial cartão → download → console; texto: ENTENDA ANTES DE COMPRAR"
+    ],
+    "thumbnail_review_required": true,
+    "end_screen": {
+      "studio_configuration_required": true,
+      "start_seconds": 35.333,
+      "related_video": null
+    },
+    "metrics_review_hours": [
+      24,
+      72,
+      168,
+      672
+    ]
+  },
+  "review_notes": null,
+  "approved_at": "2026-11-05T04:33:20.210Z",
+  "created_at": "2026-11-05T01:40:59.042Z",
+  "review_history": [
+    {
+      "id": "approved-reconciled-game-key-card-edicao-fluida-v3-preview",
+      "kind": "approved",
+      "at": "2026-11-05T04:33:20.210Z",
+      "detail": "Aprovação confirmada pelo usuário ao reconciliar o histórico. Registro criado agora, sem atribuir uma data anterior à aprovação."
+    }
+  ]
+}

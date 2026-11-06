@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest) {
   if (!isApiRoute && !isAdminRoute) {
     const cookieLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value;
     const userAgent = request.headers.get("user-agent") || "";
-    const isBot = /bot|googlebot|crawler|spider|bingbot|yandex|duckduckbot/i.test(userAgent);
+    const isBot = /bot|googlebot|crawler|spider|bingbot|yandex|duckduckbot|google-favicon|google-inspectiontool|mediapartners-google/i.test(userAgent);
 
     if (cookieLocale === "en" && !isEnRoute && pathname === "/") {
       return secureRedirect(new URL("/en", request.url), policy);

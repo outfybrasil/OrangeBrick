@@ -1,0 +1,193 @@
+{
+  "checked_at": "2026-11-04",
+  "chapters": [
+    {
+      "title": "O duelo ainda precisa acontecer",
+      "sources": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://thegameawards.com/faq"
+    },
+    {
+      "title": "O que a nota de Zelda realmente diz",
+      "sources": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/ · https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/"
+    },
+    {
+      "title": "Um remake pode concorrer?",
+      "sources": "https://thegameawards.com/faq"
+    },
+    {
+      "title": "O calendário sem contagem inventada",
+      "sources": "https://thegameawards.com/faq · https://www.rockstargames.com/VI · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/"
+    },
+    {
+      "title": "Quem transforma recepção em prêmio",
+      "sources": "https://thegameawards.com/faq · https://thegameawards.com/voting-jury"
+    },
+    {
+      "title": "Como comparar sem declarar um vencedor",
+      "sources": "https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.rockstargames.com/VI · https://thegameawards.com/faq"
+    }
+  ],
+  "images": [
+    {
+      "url": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+      "http_status": 200,
+      "width": 3840,
+      "height": 2160
+    },
+    {
+      "url": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+      "http_status": 200,
+      "width": 3840,
+      "height": 2160
+    },
+    {
+      "url": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+      "http_status": 200,
+      "width": 3840,
+      "height": 2160
+    },
+    {
+      "url": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+      "http_status": 200,
+      "width": 3840,
+      "height": 2160
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide03.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "url": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+      "http_status": 200,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "footage": [
+    {
+      "fingerprint": "258dd1d0c4778f12ad4926183b86252f2f019da505b51adb9a4d8b9a8dcedb30",
+      "bytes": 5773838,
+      "layout": "footage",
+      "fps": 30,
+      "frames": 317,
+      "camera": "fixed-viewport/native-footage",
+      "fixed_frame_verified": true,
+      "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+      "source_start": 36,
+      "source_audio": "muted"
+    },
+    {
+      "fingerprint": "00d43aadf4dcb1fb692ea348562202aa72732c3d2df5880a48b6fac6f577b007",
+      "bytes": 10429416,
+      "layout": "footage",
+      "fps": 30,
+      "frames": 366,
+      "camera": "fixed-viewport/native-footage",
+      "fixed_frame_verified": true,
+      "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+      "source_start": 47,
+      "source_audio": "muted"
+    },
+    {
+      "fingerprint": "d99b25d97ca0c8548e3ca283008e9eaac2bb370b8b64bda229b1eaacb2005dcc",
+      "bytes": 6606556,
+      "layout": "footage",
+      "fps": 30,
+      "frames": 432,
+      "camera": "fixed-viewport/native-footage",
+      "fixed_frame_verified": true,
+      "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+      "source_start": 6,
+      "source_audio": "muted"
+    },
+    {
+      "fingerprint": "c0bff7cd2b6bba3133ca8cede30eb106c1ecfbcebaf595f37c6fa91556d872e9",
+      "bytes": 6936968,
+      "layout": "footage",
+      "fps": 30,
+      "frames": 389,
+      "camera": "fixed-viewport/native-footage",
+      "fixed_frame_verified": true,
+      "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+      "source_start": 58,
+      "source_audio": "muted"
+    },
+    {
+      "fingerprint": "c5c1c04de59fab4f0ff26b67290c452c874c46435745e394b7a571d0a651106a",
+      "bytes": 8014272,
+      "layout": "footage",
+      "fps": 30,
+      "frames": 404,
+      "camera": "fixed-viewport/native-footage",
+      "fixed_frame_verified": true,
+      "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+      "source_start": 24,
+      "source_audio": "muted"
+    }
+  ],
+  "music": {
+    "title": "Shadow",
+    "author": "James Gargette",
+    "license": "CC0",
+    "source": "https://opengameart.org/content/shadow-2"
+  },
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "nb_frames": "9671"
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0",
+        "nb_frames": "15111"
+      }
+    ],
+    "format": {
+      "duration": "322.367000",
+      "size": "50007796"
+    }
+  }
+}

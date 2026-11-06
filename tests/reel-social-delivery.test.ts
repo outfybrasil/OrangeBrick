@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+import { mergeVideoManifests } from "../src/lib/video/long-video-library.ts";
 
 type Row = Record<string, unknown>;
 type Result = { data: Row | Row[] | null; error: { code: string } | null };
@@ -339,6 +340,32 @@ test("automation dispatches YouTube then Instagram then TikTok once each", async
   assert.equal(tables.reel_social_publications.length, 3);
 });
 
+test("automation respects configured target platforms and skips unselected ones", async () => {
+  const { mocks, delivery, tables } = setup();
+  tables.bot_state = [{ key: `reel:target_platforms:${postId}`, value: JSON.stringify(["youtube", "tiktok"]) }];
+  const calls: string[] = [];
+  const handler = loadModule("src/app/api/cron/reel-social/route.ts", {
+    ...mocks,
+    "@/lib/video/reel-service": { generateSocialCopys: () => ({ youtube: { title: "Example", description: "Example" }, tiktok: { caption: "Example" } }) },
+    "@/lib/video/reel-youtube": { getYouTubeConnection: async () => ({ channel: { id: "channel" } }) },
+  }, async (input) => {
+    const platform = String(input).split("/").pop() as string;
+    calls.push(platform);
+    const claim = await delivery.beginSocialDelivery(postId, platform, { automatic: true });
+    assert.ok(claim);
+    await delivery.finishSocialDelivery(claim, platform === "tiktok" ? "submitted" : "published", "published-id");
+    return Response.json(platform === "youtube" ? { publication: { status: "uploaded", video_id: "published-id", visibility: "public" } } : { publishId: "published-id", isDirect: false });
+  }, { CRON_SECRET: "cron" }).GET as (request: Request) => Promise<Response>;
+
+  for (let i = 0; i < 3; i++) {
+    const response = await handler(new Request(`https://site.example/api/cron/reel-social?postId=${postId}`, { headers: { authorization: "Bearer cron" } }));
+    assert.equal(response.status, 200);
+    if (i === 2) assert.equal((await response.json()).processed, false);
+  }
+  assert.deepEqual(calls.filter(c => !c.includes("?")), ["youtube", "tiktok"]);
+  assert.equal(calls.some(c => c.includes("instagram")), false);
+});
+
 test("Reels use shared storage by default locally and on Vercel", () => {
   for (const env of [{}, { VERCEL: "1" }, { VERCEL: "1", REELS_REMOTE: "false" }]) {
     const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": {} }, undefined, env as Record<string, string>);
@@ -358,6 +385,7 @@ test("localhost and production list the same remote Reel without reading local v
     const remote = loadModule("src/lib/video/reel-remote.ts", { "@supabase/supabase-js": supabase }, undefined, env);
     const route = loadModule("src/app/api/admin/reels/route.ts", {
       ...mocks,
+      "@/lib/video/long-video-library": { mergeVideoManifests },
       "@supabase/supabase-js": supabase,
       "@/lib/video/reel-remote": remote,
       "@/lib/video/reel-service": {

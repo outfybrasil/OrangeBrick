@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "packages/*/dist/**",
+    "Brasa-Motion-Portable/**",
     "next-env.d.ts",
     "scripts/**",
     "supabase/functions/**",

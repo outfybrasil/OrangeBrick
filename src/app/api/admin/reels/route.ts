@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { mergeVideoManifests } from "@/lib/video/long-video-library";
 import { createClient } from "@supabase/supabase-js";
 import { isVerifiedAdminSession } from "@/lib/auth";
 import type { Post, ReelYouTubePublication } from "@/lib/types/database";
@@ -55,6 +56,7 @@ export interface AdminReelItem {
   eta_updated_at?: string;
   copys: SocialCopys;
   socialPublications: Partial<Record<ReelSocialPlatform, ReelSocialPublication>>;
+  targetPlatforms?: ReelSocialPlatform[];
 }
 
 export async function GET(request: Request) {
@@ -91,12 +93,29 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Erro ao buscar matérias" }, { status: 500 });
   }
 
-  const { data: socialRows, error: socialError } = posts.length
-    ? await editorial.from("reel_social_publications").select("post_id,platform,status,external_id,error,updated_at").in("post_id", posts.map((post) => post.id))
-    : { data: [], error: null };
+  const postIds = posts.map((post) => post.id);
+  const [{ data: socialRows, error: socialError }, { data: platformRows }] = await Promise.all([
+    postIds.length
+      ? editorial.from("reel_social_publications").select("post_id,platform,status,external_id,error,updated_at").in("post_id", postIds)
+      : { data: [], error: null },
+    postIds.length
+      ? editorial.from("bot_state").select("key,value").in("key", postIds.map((id) => `reel:target_platforms:${id}`))
+      : { data: [] },
+  ]);
 
   if (socialError) {
     return NextResponse.json({ error: "Erro ao buscar o status das publicações sociais." }, { status: 500 });
+  }
+
+  const targetPlatformsByPostId = new Map<string, ReelSocialPlatform[]>();
+  for (const row of (platformRows || []) as { key: string; value: string }[]) {
+    const id = row.key.replace(/^reel:target_platforms:/, "");
+    try {
+      const parsed = JSON.parse(row.value);
+      if (Array.isArray(parsed)) {
+        targetPlatformsByPostId.set(id, parsed.filter((p: unknown): p is ReelSocialPlatform => p === "instagram" || p === "tiktok" || p === "youtube"));
+      }
+    } catch {}
   }
 
   const socialByPostId = new Map<string, Partial<Record<ReelSocialPlatform, ReelSocialPublication>>>();
@@ -262,6 +281,7 @@ export async function GET(request: Request) {
       eta_updated_at: etaSeconds === undefined ? undefined : etaUpdatedAt,
       copys,
       socialPublications: socialByPostId.get(post.id || "") || {},
+      targetPlatforms: targetPlatformsByPostId.get(post.id || "") || ["youtube", "tiktok", "instagram"],
     };
   });
 
@@ -280,7 +300,7 @@ export async function GET(request: Request) {
       if (stateBlob && typeof stateBlob.text === "function") {
         const parsedState = JSON.parse(await stateBlob.text());
         if (parsedState && typeof parsedState === "object") {
-          rawLongManifest = { ...rawLongManifest, ...parsedState };
+          rawLongManifest = mergeVideoManifests(rawLongManifest, parsedState);
         }
       }
     } catch {}
@@ -381,7 +401,7 @@ export async function POST(request: Request) {
           if (stateBlob && typeof stateBlob.text === "function") {
             const parsedState = JSON.parse(await stateBlob.text());
             if (parsedState && typeof parsedState === "object" && typeof saveLongVideoManifest === "function") {
-              saveLongVideoManifest(parsedState);
+              saveLongVideoManifest(mergeVideoManifests(getLongVideoManifest(), parsedState));
             }
           }
         }
@@ -475,25 +495,7 @@ export async function POST(request: Request) {
     }
 
     if (action === "schedule") {
-      const slug = typeof body.slug === "string" ? body.slug : "";
-      const scheduledAt = typeof body.scheduled_at === "string" ? body.scheduled_at : new Date(Date.now() + 3600_000).toISOString();
-      const visibility = body.visibility === "public" || body.visibility === "unlisted" ? body.visibility : "private";
-      const current = getLongVideoManifest()[slug];
-      if (!current) return NextResponse.json({ error: "Episódio longo não encontrado." }, { status: 404 });
-      if (current.status !== "approved" && current.status !== "scheduled") {
-        return NextResponse.json({ error: "Aprove o episódio no painel de revisão antes de agendar no YouTube." }, { status: 400 });
-      }
-      const rawUpdated = updateLongVideoItem(slug, {
-        status: "scheduled",
-        youtube: {
-          ...current.youtube,
-          scheduled_at: scheduledAt,
-          visibility,
-        },
-      });
-      await syncManifestToStorage();
-      const updated = await attachSignedLongVideoUrl(rawUpdated);
-      return NextResponse.json({ success: true, item: updated });
+      return NextResponse.json({ error: "O agendamento deve ser confirmado no YouTube Studio. Salvar uma data no painel não agenda a publicação." }, { status: 409 });
     }
 
     if (action === "create") {
@@ -529,7 +531,7 @@ export async function POST(request: Request) {
       const visualStyle = (allowedStyles.includes(styleRaw as LongVideoVisualStyle)
         ? styleRaw
         : "documentario") as LongVideoVisualStyle;
-      const voiceId = typeof body.voice_id === "string" && body.voice_id ? body.voice_id : "pt-BR-AntonioNeural";
+      const voiceId = typeof body.voice_id === "string" && body.voice_id ? body.voice_id : "auto";
       const targetMinMinutes = typeof body.target_min_minutes === "number" && body.target_min_minutes >= 8 ? body.target_min_minutes : 8;
 
       const created = triggerLongVideoGeneration({
@@ -555,9 +557,49 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ação inválida no pipeline de vídeo longo." }, { status: 400 });
   }
 
+  if (body?.action === "set_platforms") {
+    const slug = typeof body.slug === "string" ? body.slug : "";
+    const platforms = Array.isArray(body.platforms)
+      ? (body.platforms as unknown[]).filter((p): p is ReelSocialPlatform => p === "instagram" || p === "tiktok" || p === "youtube")
+      : [];
+    const editorial = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+    const { data: postRow } = await editorial.from("posts").select("id").eq("slug", slug).maybeSingle();
+    if (!postRow?.id) return NextResponse.json({ error: "Matéria não encontrada" }, { status: 404 });
+    await editorial.from("bot_state").upsert({
+      key: `reel:target_platforms:${postRow.id}`,
+      value: JSON.stringify(platforms),
+      updated_at: new Date().toISOString(),
+    });
+    return NextResponse.json({ success: true, platforms });
+  }
+
   const slug = body?.slug;
   if (typeof slug !== "string" || slug.length > 200 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return NextResponse.json({ error: "Slug da matéria é obrigatório" }, { status: 400 });
+  }
+
+  const requestedPlatforms = Array.isArray(body?.platforms)
+    ? (body.platforms as unknown[]).filter((p): p is ReelSocialPlatform => p === "instagram" || p === "tiktok" || p === "youtube")
+    : null;
+
+  if (requestedPlatforms !== null) {
+    const editorial = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+    const { data: postRow } = await editorial.from("posts").select("id").eq("slug", slug).maybeSingle();
+    if (postRow?.id) {
+      await editorial.from("bot_state").upsert({
+        key: `reel:target_platforms:${postRow.id}`,
+        value: JSON.stringify(requestedPlatforms),
+        updated_at: new Date().toISOString(),
+      });
+    }
   }
 
   try {

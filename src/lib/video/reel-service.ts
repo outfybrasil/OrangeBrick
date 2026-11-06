@@ -1,3 +1,6 @@
+import { generateSocialCopys, type SocialCopys } from "../social/social-copy";
+export { generateSocialCopys };
+export type { SocialCopys };
 import fs from "node:fs";
 import path from "node:path";
 import { spawn, type ChildProcess } from "node:child_process";
@@ -21,21 +24,6 @@ export interface ReelManifestItem {
   script?: ReelScriptData;
 }
 
-export interface SocialCopys {
-  instagram: {
-    caption: string;
-    hashtags: string[];
-  };
-  tiktok: {
-    caption: string;
-    hashtags: string[];
-  };
-  youtube: {
-    title: string;
-    description: string;
-    tags: string[];
-  };
-}
 
 const MANIFEST_PATH = path.resolve(process.cwd(), "public", "reels", "manifest.json");
 
@@ -90,212 +78,6 @@ export function checkReelFile(slug: string): { exists: boolean; size?: number; u
   return { exists: false };
 }
 
-export function generateSocialCopys(post: {
-  title: string;
-  summary: string;
-  slug: string;
-  category: string;
-  script?: ReelScriptData | null;
-}): SocialCopys {
-  const plainText = (value: string) => value
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\s+/g, " ")
-    .trim();
-  const title = plainText(post.title);
-  const danglingEnding = /\b(?:de|do|da|dos|das|em|no|na|nos|nas|para|por|com|que|e|ou|mas|a|o|as|os|um|uma|seu|sua|seus|suas|entre|sobre|até|após|antes|durante)\s*[.!?]*$/iu;
-  const hasIncompleteEnding = (value: string) => /…|\.{3}/u.test(value) || value.split(/(?<=[.!?])\s+/u).some((sentence) => danglingEnding.test(sentence.trim()));
-  const completeTitle = hasIncompleteEnding(title) ? "Veja a matéria completa." : title;
-  const rawSummary = plainText(post.summary);
-  const summary = rawSummary && !hasIncompleteEnding(rawSummary) ? rawSummary : completeTitle;
-  const rawHook = plainText(post.script?.hook || title);
-  const hook = hasIncompleteEnding(rawHook) ? completeTitle : rawHook;
-  const narration = plainText(post.script?.narrationText || "");
-  const narrationWords = narration ? narration.split(/\s+/).length : 0;
-  const narrationIsComplete = narrationWords >= 75 && narrationWords <= 95 && /[.!?]$/u.test(narration) && !hasIncompleteEnding(narration);
-  const suppliedQuestion = plainText(post.script?.ctaQuestion || "");
-  const releaseTitle = completeTitle.match(/^(.*?)\s+(?:chega|estreia|lança|recebe|ganha)\b/i)?.[1]?.trim();
-  const releaseQuestion = releaseTitle && post.category === "breaking" &&
-    /\b(?:estreia|lançamento|data de lançamento|chega em)\b/i.test(summary) &&
-    !/\b(?:playstation|ps[45]|xbox|nintendo|switch|sony|microsoft|ubisoft|steam)\b/i.test(releaseTitle)
-    ? `Você pretende jogar ${releaseTitle} no lançamento?`
-    : "";
-  const fallbackQuestions: Record<string, string> = {
-    breaking: "O que essa notícia muda para você como jogador?",
-    hardware: "Esse hardware entra na sua lista de compras?",
-    industry: "Como essa decisão pode afetar os próximos jogos?",
-    modding: "Você levaria essa modificação a sério?",
-    review: "Você daria uma chance a esse jogo?",
-    opinion: "Você concorda com essa leitura?",
-  };
-  const genericQuestion = /^(?:o que você acha dessa mudança|qual é a sua opinião sobre essa notícia|o que essa notícia muda para quem joga)\?$/i;
-  const question = suppliedQuestion && suppliedQuestion.endsWith("?") && !hasIncompleteEnding(suppliedQuestion) && !genericQuestion.test(suppliedQuestion)
-    ? suppliedQuestion
-    : releaseQuestion || fallbackQuestions[post.category] || "Que impacto essa notícia teria para você como jogador?";
-  const hookPrefix = hook.replace(/[.!?…]+$/, "").trim();
-  const escapedHookPrefix = hookPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const summaryAfterHook = summary.replace(new RegExp(`^${escapedHookPrefix}(?=$|[\\s,;:!?])[,;:!?\\s]*`, "iu"), "").trim();
-  const supportingSummary = summaryAfterHook
-    ? `${summaryAfterHook[0].toLocaleUpperCase("pt-BR")}${summaryAfterHook.slice(1)}`
-    : summary === hook ? "" : summary;
-  const articleUrl = `https://orangebrick.blog/reels/${encodeURIComponent(post.slug)}`;
-  const trackedArticleUrl = (source: string, medium: string) => `${articleUrl}?utm_source=${source}&utm_medium=${medium}&utm_campaign=reel&utm_content=${encodeURIComponent(post.slug)}`;
-  const attribution = post.script?.ttsProvider === "elevenlabs" ? "Narração: elevenlabs.io" : "";
-  const seriesByCategory: Record<string, { label: string }> = {
-    breaking: { label: "Plantão OB" },
-    hardware: { label: "Hard News OB" },
-    industry: { label: "Radar OB" },
-    modding: { label: "Gambiarra OB" },
-    review: { label: "Review OB" },
-    opinion: { label: "Opinião OB" },
-  };
-  const series = seriesByCategory[post.category] || { label: "Orange Brick" };
-  const seriesLine = `${series.label} — Orange Brick`;
-  const youtubeTitleSource = Array.from(hook).length <= 70 ? hook : completeTitle;
-  const youtubeTitleCharacters = Array.from(youtubeTitleSource);
-  const youtubeTitle = youtubeTitleCharacters.length <= 70
-    ? youtubeTitleSource
-    : `${youtubeTitleCharacters.slice(0, 69).join("").replace(/\s+\S*$/, "").trimEnd()}…`;
-  const categoryTags: Record<string, string[]> = {
-    breaking: ["Notícias de games"],
-    hardware: ["Hardware"],
-    industry: ["Indústria de games"],
-    modding: ["Modding"],
-    review: ["Análise de jogos"],
-    opinion: ["Opinião"],
-  };
-  const subjectHashtags: Array<[RegExp, string]> = [
-    [/\bfinal\s+fantasy\s*(?:vii|7)\b/i, "FinalFantasyVII"],
-    [/\bgame\s*pass\b/i, "GamePass"],
-    [/\bsaros\b/i, "Saros"],
-    [/\bfaraway\b/i, "Faraway"],
-    [/\bedgerunners?\b/i, "CyberpunkEdgerunners"],
-    [/\bcyberpunk\s*2077\b/i, "Cyberpunk2077"],
-    [/\bcyberpunk\b/i, "Cyberpunk"],
-    [/\bhideo\s+kojima\b/i, "HideoKojima"],
-    [/\b(?:call\s+of\s+duty|cod)\b/i, "CallOfDuty"],
-    [/\bmodern\s+warfare\s*4\b/i, "ModernWarfare4"],
-    [/\bocarina\s+of\s+time\b/i, "OcarinaOfTime"],
-    [/\bpalworld\b/i, "Palworld"],
-    [/\bzelda\b/i, "Zelda"],
-    [/\bpokemon\b/i, "Pokemon"],
-    [/\bubisoft\b/i, "Ubisoft"],
-    [/\bredlynx\b/i, "RedLynx"],
-    [/\btrials\b/i, "Trials"],
-    [/\b(?:singapore|singapura)\b/i, "UbisoftSingapore"],
-    [/\b(?:ps\s*plus|playstation\s*plus)\b/i, "PSPlus"],
-    [/\bxbox\s+nano\b/i, "XboxNano"],
-    [/\bcrash\s+keys\b/i, "CrashKeys"],
-    [/\bzero\s+escape\b/i, "ZeroEscape"],
-    [/\b(?:gta\s*(?:6|vi)|grand\s+theft\s+auto\s*(?:6|vi))\b/i, "GTA6"],
-    [/\bkutaragi\b/i, "KenKutaragi"],
-    [/\b(?:disco|m[ií]dia\s+f[ií]sica)\b/i, "MidiaFisica"],
-    [/\bhoyo(?:verse)?\b/i, "Hoyoverse"],
-    [/\belden\s*ring\b/i, "EldenRing"],
-    [/\bcapcom\b/i, "Capcom"],
-    [/\bkonami\b/i, "Konami"],
-    [/\bvalve\b/i, "Valve"],
-    [/\bpc\s*gamer\b/i, "PCGamer"],
-    [/\bremake\b/i, "Remake"],
-    [/\bremaster\b/i, "Remaster"],
-    [/\b(?:playstation|ps[45]|sony)\b/i, "PlayStation"],
-    [/\b(?:xbox|microsoft)\b/i, "Xbox"],
-    [/\b(?:nintendo|switch\s*2?)\b/i, "Nintendo"],
-    [/\bsteam\b/i, "Steam"],
-  ];
-  const searchableCopy = `${title} ${summary} ${hook}`;
-  const platformTags = [
-    ...(/\b(?:playstation|ps[45])\b/i.test(searchableCopy) ? ["PlayStation"] : []),
-    ...(/\bxbox\b/i.test(searchableCopy) ? ["Xbox"] : []),
-    ...(/\bswitch\s*2\b/i.test(searchableCopy) ? ["NintendoSwitch2"] : /\b(?:nintendo|switch)\b/i.test(searchableCopy) ? ["Nintendo"] : []),
-    ...(/\b(?:pc|steam)\b/i.test(searchableCopy) ? ["PCGaming"] : []),
-  ];
-  const subjectTags = subjectHashtags
-    .filter(([pattern]) => pattern.test(searchableCopy))
-    .slice(0, 2)
-    .map(([, hashtag]) => hashtag);
-  const relatedSubjectPairs = new Set([
-    "CyberpunkEdgerunners|Cyberpunk",
-    "CallOfDuty|ModernWarfare4",
-    "OcarinaOfTime|Zelda",
-    "FinalFantasyVII|GamePass",
-  ]);
-  const selectedSubjectTags = subjectTags.length === 2 && relatedSubjectPairs.has(subjectTags.join("|"))
-    ? subjectTags
-    : subjectTags.slice(0, 1);
-  const ignoredSlugWords = new Set(["para", "como", "sobre", "depois", "antes", "entre", "noticia", "noticias", "news", "games", "game", "chega", "chegam", "ganha", "ganham", "recebe", "recebem", "anuncia", "anunciam", "confirma", "confirmam", "revela", "revelam", "novo", "nova", "novos", "novas", "oficial", "data", "lancamento", "jogo", "jogos"]);
-  const fallbackTopic = post.slug
-    .toLocaleLowerCase("pt-BR")
-    .split("-")
-    .find((word) => word.length >= 4 && !ignoredSlugWords.has(word));
-  const subjects = [...new Set([
-    ...selectedSubjectTags,
-    ...(selectedSubjectTags.length === 0 && fallbackTopic ? [`${fallbackTopic[0].toLocaleUpperCase("pt-BR")}${fallbackTopic.slice(1)}`] : []),
-  ])].slice(0, 2);
-  const uniqueHashtags = (names: string[]) => [...new Map(names.map(name => [name.toLocaleLowerCase("pt-BR"), name])).values()];
-  const contextTags = uniqueHashtags([...subjects, ...platformTags]).slice(0, 2);
-  const instagramHashtagNames = uniqueHashtags([...contextTags, "Gaming", "Reels", "Viral"]).slice(0, 5);
-  const tiktokHashtagNames = uniqueHashtags([...contextTags, "Gaming", "FYP", "Viral"]).slice(0, 5);
-  const youtubeHashtagNames = uniqueHashtags(["Shorts", ...contextTags, "Gaming", "Viral"]).slice(0, 5);
-  const instagramHashtags = instagramHashtagNames.map((hashtag) => `#${hashtag}`);
-  const tiktokHashtags = tiktokHashtagNames.map((hashtag) => `#${hashtag.toLocaleLowerCase("pt-BR")}`);
-  const coreCopy = narrationIsComplete ? [narration] : [hook, supportingSummary];
-  const commentPrompt = narrationIsComplete ? "" : `Responda nos comentários: ${question}`;
-  const instagramCaption = [
-    ...coreCopy,
-    commentPrompt,
-    `Matéria completa no link da bio: ${trackedArticleUrl("instagram", "reel")}`,
-    "Siga @ob.labs para acompanhar as próximas notícias.",
-    seriesLine,
-    attribution,
-    instagramHashtags.join(" "),
-  ].filter(Boolean).join("\n\n");
-  const tiktokCaption = [
-    ...coreCopy,
-    commentPrompt,
-    "Matéria completa no link da bio.",
-    "Siga para acompanhar as próximas notícias.",
-    seriesLine,
-    attribution,
-    tiktokHashtags.join(" "),
-  ].filter(Boolean).join("\n\n");
-  const youtubeHashtags = youtubeHashtagNames.map((hashtag) => `#${hashtag}`).join(" ");
-  const youtubeDescription = [
-    ...coreCopy,
-    commentPrompt,
-    `Leia a matéria completa: ${trackedArticleUrl("youtube", "short")}`,
-    "Inscreva-se no canal para acompanhar as próximas notícias.",
-    seriesLine,
-    attribution,
-    youtubeHashtags,
-  ].filter(Boolean).join("\n\n");
-
-  return {
-    instagram: {
-      caption: instagramCaption,
-      hashtags: instagramHashtags,
-    },
-    tiktok: {
-      caption: tiktokCaption,
-      hashtags: tiktokHashtags,
-    },
-    youtube: {
-      title: youtubeTitle,
-      description: youtubeDescription,
-      tags: uniqueHashtags([
-        ...subjects,
-        ...platformTags,
-        ...(categoryTags[post.category] || []),
-        "Gaming",
-        "Video Games",
-        "Gaming News",
-        "Shorts",
-        series.label,
-        "Orange Brick",
-      ]).slice(0, 15),
-    },
-  };
-}
 
 let isProcessingQueue = false;
 let currentRunningChild: ChildProcess | null = null;
@@ -634,7 +416,7 @@ export function getDarkPipelineConfig(): DarkPipelineConfig {
     channel_name: "Orange Brick Docs",
     niche: "Dossiês de Indústria, Hardware & Bastidores dos Games",
     default_style: "documentario",
-    default_voice: "pt-BR-AntonioNeural",
+    default_voice: "auto",
     target_min_minutes: 8,
     daily_schedule_time: "19:00",
     daily_conveyor_enabled: true,
@@ -669,20 +451,24 @@ export function saveDarkPipelineConfig(update: Partial<DarkPipelineConfig>): Dar
 }
 
 export function getLongVideoManifest(): Record<string, LongVideoManifestItem> {
+  let disk: Record<string, LongVideoManifestItem> = {};
+  let runtime: Record<string, LongVideoManifestItem> = {};
   try {
-    if (fs.existsSync(TMP_LONG_MANIFEST_PATH)) {
-      const runtime = JSON.parse(fs.readFileSync(TMP_LONG_MANIFEST_PATH, "utf-8"));
-      if (runtime && typeof runtime === "object") {
-        return runtime;
-      }
-    }
+    if (fs.existsSync(LONG_MANIFEST_PATH)) disk = JSON.parse(fs.readFileSync(LONG_MANIFEST_PATH, "utf-8"));
   } catch {}
   try {
-    if (fs.existsSync(LONG_MANIFEST_PATH)) {
-      return JSON.parse(fs.readFileSync(LONG_MANIFEST_PATH, "utf-8"));
-    }
+    if (fs.existsSync(TMP_LONG_MANIFEST_PATH)) runtime = JSON.parse(fs.readFileSync(TMP_LONG_MANIFEST_PATH, "utf-8"));
   } catch {}
-  return {};
+  const merged: Record<string, LongVideoManifestItem> = {};
+  for (const items of [disk, runtime]) {
+    if (!items || typeof items !== "object" || Array.isArray(items)) continue;
+    for (const [slug, item] of Object.entries(items)) {
+      if (!item || item.slug !== slug) continue;
+      const previous = merged[slug];
+      if (!previous || Date.parse(item.updated_at || item.created_at) >= Date.parse(previous.updated_at || previous.created_at)) merged[slug] = item;
+    }
+  }
+  return merged;
 }
 
 export function saveLongVideoManifest(manifest: Record<string, LongVideoManifestItem>) {
@@ -773,7 +559,7 @@ export function triggerLongVideoGeneration(options: {
       title: options.title,
       description: options.subtitle,
       tags: ["Orange Brick", "Dossiê Games", "Indústria de Games"],
-      pinned_comment: "Deixe sua opinião nos comentários e inscreva-se no canal!",
+      pinned_comment: "Qual ponto dessa explicação mais afeta você como jogador?",
       visibility: "private",
       scheduled_at: null,
     },

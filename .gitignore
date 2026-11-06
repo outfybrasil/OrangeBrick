@@ -25,6 +25,7 @@
 # misc
 .DS_Store
 *.pem
+*.zip
 client_secret_*.json
 /scripts/.drive-sync-state.json
 
@@ -73,3 +74,4 @@ public/long-videos/**/*.mp4
 
 __pycache__/
 *.pyc
+/Brasa-Motion-Portable/

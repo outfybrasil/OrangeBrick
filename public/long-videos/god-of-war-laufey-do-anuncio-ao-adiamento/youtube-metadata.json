@@ -22,7 +22,7 @@
   "fps": 30,
   "video_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.mp4",
   "srt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.srt",
-  "preview_sheet_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/preview-sheet.jpg",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/preview-sheet.jpg",
   "thumbnails": [
     {
       "id": "thumb_1",
@@ -30,7 +30,7 @@
       "angle": "Foco na mudança oficial de data para 20 de maio de 2027",
       "headline": "GOD OF WAR ADIADO",
       "subline": "20 DE MAIO DE 2027",
-      "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_1.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_1.png"
     },
     {
       "id": "thumb_2",
@@ -38,7 +38,7 @@
       "angle": "Foco na história de Laufey no além dos deuses Everywhen",
       "headline": "DO ANÚNCIO AO CORTE",
       "subline": "A SAGA DE FAYE NO PS5",
-      "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_2.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_2.png"
     },
     {
       "id": "thumb_3",
@@ -46,7 +46,7 @@
       "angle": "Foco na conexão entre Laufey, Kratos e o futuro da série",
       "headline": "POR QUE LAUFEY MUDOU",
       "subline": "DE FEVEREIRO PARA MAIO?",
-      "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_3.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_3.png"
     }
   ],
   "selected_thumbnail_id": "thumb_1",
@@ -205,12 +205,22 @@
     "visibility": "private",
     "scheduled_at": null
   },
-  "review_notes": null,
+  "review_notes": "Original preservado; nova edição em /long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.mp4",
   "approved_at": null,
   "created_at": "2026-11-04T21:29:37.799Z",
-  "updated_at": "2026-11-04T21:29:37.799Z",
+  "updated_at": "2026-11-05T04:35:07.061Z",
   "video_no_narration_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao.mp4",
   "video_no_narration_clean_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao-sem-legenda.mp4",
   "narration_script_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.md",
-  "narration_script_txt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.txt"
+  "narration_script_txt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.txt",
+  "review_history": [
+    {
+      "id": "superseded-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+      "kind": "superseded",
+      "at": "2026-11-05T04:33:20.210Z",
+      "detail": "Versão anterior preservada; a reedição aprovada é uma produção separada.",
+      "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+    }
+  ],
+  "replaced_by_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
 }

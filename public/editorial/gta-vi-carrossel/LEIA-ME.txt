@@ -1,0 +1,7 @@
+ORANGE BRICK — CARROSSEL GTA VI
+20 slides JPG em 1080 × 1080, numerados.
+Fotos internas ocupam toda a largura, com reenquadramento vertical para acomodar duas por slide. Marca em faixa superior própria.
+Publicar os arquivos de slides/ na ordem de 01 a 20, em formato quadrado e sem zoom.
+legenda.txt: legenda. slides.json: textos alternativos. fontes.json: URLs oficiais e validação das originais.
+Música: adicionar Flower in a Hurricane, de Justice, pelo catálogo do Instagram, se disponível para a conta. Não há áudio nos JPGs.
+Material não publicado.

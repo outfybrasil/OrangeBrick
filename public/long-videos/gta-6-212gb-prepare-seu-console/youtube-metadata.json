@@ -1,0 +1,683 @@
+{
+  "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+  "title": "GTA 6: até 212 GB — prepare seu console para o download",
+  "subtitle": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+  "status": "pending_review",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+  "source_mode": "custom_script",
+  "source_post_slugs": [],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-FranciscaNeural",
+  "slug": "gta-6-212gb-prepare-seu-console",
+  "updated_at": "2026-11-06T20:30:18.205Z",
+  "error": "A produção foi interrompida. Confira roteiro, materiais e provedor de voz antes de tentar novamente.",
+  "editorial_standard": "youtube-editorial-v3",
+  "is_preview": false,
+  "production": {
+    "scenes": [
+      {
+        "chapter": "01",
+        "voiceStartSec": 0,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 14.133333333333333,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "c55c410d9cf33a68cfa014eda7db8daf268cbc745bab37c00a1f20ffb57ee301",
+              "bytes": 323828,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 424,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "GTA VI: até 212 GB.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "GTA seis pode exigir até duzentos e"
+          },
+          {
+            "start": 14.133333333333333,
+            "duration": 13.866666666666667,
+            "layout": "metrics",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "20fd594379f7787b44f7c5897ac6505bd8a61ca4bf7e057fed322306d0437acb",
+              "bytes": 187945,
+              "layout": "metrics",
+              "fps": 30,
+              "frames": 416,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Até 212 GB disponíveis.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "A palavra importante é até."
+          },
+          {
+            "start": 28,
+            "duration": 9.966666666666669,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "0a7569ecc526e7e2c0977738274ed255be4031f9490fcb302a5f3f42740e9dfb",
+              "bytes": 3424517,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 299,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 7,
+              "source_audio": "muted"
+            },
+            "headline": "O primeiro passo é verificar espaço.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+            "narrationAnchor": "Uma instalação desse tamanho começa antes do"
+          },
+          {
+            "start": 37.96666666666667,
+            "duration": 13,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "6e0995fe62ae479c8e907aa442ef98c3170474582bab5c2ca8721258856d1136",
+              "bytes": 158684,
+              "layout": "process",
+              "fps": 30,
+              "frames": 390,
+              "animated_frames": 68,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Três perguntas para se preparar.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+            "narrationAnchor": "Depois, vale separar três perguntas."
+          }
+        ]
+      },
+      {
+        "chapter": "02",
+        "voiceStartSec": 50.967,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 12.966666666666667,
+            "layout": "metrics",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "1d1bf4465b9cd380f5c8480bb1c6240309a401336a9473125a9e1faf7e1887d0",
+              "bytes": 222312,
+              "layout": "metrics",
+              "fps": 30,
+              "frames": 389,
+              "animated_frames": 43,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Capacidade e espaço livre diferem.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+            "narrationAnchor": "Antes de começar, abra a área de"
+          },
+          {
+            "start": 12.966666666666667,
+            "duration": 11.633333333333335,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "7f895c72b086784bf1b3884ff076fd0d12022bcc591656f38b8cdcd731836936",
+              "bytes": 167214,
+              "layout": "process",
+              "fps": 30,
+              "frames": 349,
+              "animated_frames": 68,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Prepare o armazenamento.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+            "narrationAnchor": "Também vale revisar o que está instalado"
+          },
+          {
+            "start": 24.6,
+            "duration": 13.100000000000001,
+            "layout": "bars",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "608836fa45a7917aeb0321d174cfe491cce1a012bbd48e2abc14a8dc7fc0d7d4",
+              "bytes": 151349,
+              "layout": "bars",
+              "fps": 30,
+              "frames": 393,
+              "animated_frames": 70,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Velocidade muda a espera.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "O tamanho do arquivo muda outra parte"
+          },
+          {
+            "start": 37.7,
+            "duration": 15.466666666666661,
+            "layout": "quote",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "e2c42969b933a9f9937fa65513a69a6116fafcf33172720ba1e755e8ab8dd9b2",
+              "bytes": 157334,
+              "layout": "quote",
+              "fps": 30,
+              "frames": 464,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A simulação não mede sua conexão.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+            "narrationAnchor": "Esse cálculo não é uma previsão do"
+          },
+          {
+            "start": 53.166666666666664,
+            "duration": 9.800000000000004,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "6ccf14a9c7f9addf7fa620036d49b39c400729902eff3dc3723fb59470d42bae",
+              "bytes": 7599828,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 294,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 40,
+              "source_audio": "muted"
+            },
+            "headline": "Espaço e conexão: prepare os dois.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+            "narrationAnchor": "Planeje as duas tarefas: reservar espaço suficiente"
+          }
+        ]
+      },
+      {
+        "chapter": "03",
+        "voiceStartSec": 113.934,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.1,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "9c9778edacf4029894a9d651b81e10a935bcf7ac596b9aeaea0e18574b09dcb0",
+              "bytes": 323079,
+              "layout": "image",
+              "fps": 30,
+              "frames": 393,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Comece pela lista de jogos instalados.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+            "narrationAnchor": "Compare o espaço livre exibido pelo console"
+          },
+          {
+            "start": 13.1,
+            "duration": 11.233333333333333,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "5710f995137dc731795e7020b05697887727769e62348499a41809904371e2a4",
+              "bytes": 6433947,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 337,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 28,
+              "source_audio": "muted"
+            },
+            "headline": "Excluir um jogo não precisa encerrar a jornada.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+            "narrationAnchor": "No PlayStation, jogos removidos podem ser baixados"
+          },
+          {
+            "start": 24.333333333333332,
+            "duration": 13.933333333333334,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "ce8f6a6b50f3cd8109ef496d6f9227221927ff62ab8d2508287c72dbfd30e2d9",
+              "bytes": 345916,
+              "layout": "image",
+              "fps": 30,
+              "frames": 418,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Jogo instalado e progresso são coisas diferentes.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+            "narrationAnchor": "O arquivo do jogo e os dados"
+          },
+          {
+            "start": 38.266666666666666,
+            "duration": 16.96666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "9dbc5ee42d34fd922b72d658292f842e4b8d3a3bd60c7f4a8808630e47b2c2e1",
+              "bytes": 389146,
+              "layout": "image",
+              "fps": 30,
+              "frames": 509,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Expansão também exige compatibilidade.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "Comprar armazenamento extra é uma opção, mas"
+          }
+        ]
+      },
+      {
+        "chapter": "04",
+        "voiceStartSec": 169.167,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 12.766666666666667,
+            "layout": "timeline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "d784f308e4ece76542c5739c7eb8413a6acdbb91e5d6d5e167f3a290d1543964",
+              "bytes": 165036,
+              "layout": "timeline",
+              "fps": 30,
+              "frames": 383,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Pré-download em 10 de novembro.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "A Rockstar anuncia o início do pré-download"
+          },
+          {
+            "start": 12.766666666666667,
+            "duration": 14.6,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "1a63eabc55b291dd5ae0aa37c633d508bc818ffc0e34545d4a5a25e90f315bcb",
+              "bytes": 297773,
+              "layout": "image",
+              "fps": 30,
+              "frames": 438,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Confira sua edição e sua loja.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+            "narrationAnchor": "Confirme as condições da sua edição e"
+          },
+          {
+            "start": 27.366666666666667,
+            "duration": 13.566666666666663,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "a429cd7fb23979f6780f3db78055e330c359781a569b7d2c79f1ec232734f039",
+              "bytes": 8582480,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 407,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 50,
+              "source_audio": "muted"
+            },
+            "headline": "Planeje uma janela de download.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "Se sua conexão é compartilhada, escolha um"
+          },
+          {
+            "start": 40.93333333333333,
+            "duration": 15.300000000000004,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "791d73247fd5ebca8ba0027f7cb6eb916d20fd6359c5a63a1a2a1657a0df3471",
+              "bytes": 329776,
+              "layout": "image",
+              "fps": 30,
+              "frames": 459,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A estimativa não é uma promessa.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+            "narrationAnchor": "Os tempos que mostramos são apenas contas"
+          }
+        ]
+      },
+      {
+        "chapter": "05",
+        "voiceStartSec": 225.4,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 14.5,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "a502fa157ae57d4a8f5f732b8de4f95077529378678f443ca3f1c324481bca8e",
+              "bytes": 172509,
+              "layout": "process",
+              "fps": 30,
+              "frames": 435,
+              "animated_frames": 68,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Prepare o console em etapas.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+            "narrationAnchor": "O plano é simples."
+          },
+          {
+            "start": 14.5,
+            "duration": 15.466666666666665,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "4a07d5fbfb15e0150b01c224d970d8d26e12668662ebc422926942cf75675544",
+              "bytes": 336810,
+              "layout": "image",
+              "fps": 30,
+              "frames": 464,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Deixe margem para a instalação.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+            "narrationAnchor": "Se puder, mantenha alguma margem livre após"
+          },
+          {
+            "start": 29.966666666666665,
+            "duration": 14.833333333333332,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "20266b78ca2a0c154268b2b89eb4f0dd97e24eb228ea4135febfa08b30b9b755",
+              "bytes": 9583442,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 445,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 60,
+              "source_audio": "muted"
+            },
+            "headline": "O número deve ajudar na decisão.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+            "narrationAnchor": "No fim, duzentos e doze gigabytes são"
+          },
+          {
+            "start": 44.8,
+            "duration": 5,
+            "layout": "cta",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "956573cbb4215688886f3bc9b92e8065c3da0377a2f983564a98f628c9050f3c",
+              "bytes": 75379,
+              "layout": "cta",
+              "fps": 30,
+              "frames": 150,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Acompanhe os próximos vídeos",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+            "narrationAnchor": "Para acompanhar jogos e tecnologia"
+          }
+        ]
+      }
+    ],
+    "voices": [
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      }
+    ],
+    "human_audio_review": false,
+    "audio_verification": {
+      "passed": true,
+      "full_decode": true,
+      "integrated_lufs": -14.22,
+      "true_peak_dbtp": -1.75,
+      "corrected": true,
+      "human_listening": false
+    }
+  },
+  "duration_seconds": 275.2,
+  "duration_formatted": "04:35",
+  "monetization_midroll_eligible": false,
+  "file_size": 46225383,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console.mp4",
+  "video_no_narration_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console-sem-narracao.mp4",
+  "video_no_narration_clean_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console-sem-narracao-sem-legenda.mp4",
+  "srt_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console.srt",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/preview-sheet.jpg",
+  "thumbnails": [
+    {
+      "id": "thumb_1",
+      "label": "Opção 1",
+      "angle": "Armazenamento e download",
+      "headline": "ATÉ 212 GB",
+      "subline": "SEU CONSOLE ESTÁ PRONTO?",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-1.jpg"
+    },
+    {
+      "id": "thumb_2",
+      "label": "Opção 2",
+      "angle": "Armazenamento e download",
+      "headline": "GTA 6 VAI CABER?",
+      "subline": "ESPAÇO E DOWNLOAD",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-2.jpg"
+    },
+    {
+      "id": "thumb_3",
+      "label": "Opção 3",
+      "angle": "Armazenamento e download",
+      "headline": "PREPARE O CONSOLE",
+      "subline": "ANTES DE BAIXAR GTA 6",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-3.jpg"
+    }
+  ],
+  "selected_thumbnail_id": "thumb_1",
+  "chapters": [
+    {
+      "number": "01",
+      "title": "Até 212 GB: o que isso significa",
+      "kicker": "O NÚMERO E O CONTEXTO",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements"
+    },
+    {
+      "number": "02",
+      "title": "Armazenamento e tempo de download",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "start_seconds": 50.967,
+      "timestamp": "00:50",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq"
+    },
+    {
+      "number": "03",
+      "title": "Libere espaço sem perder o controle",
+      "kicker": "ANTES DE APAGAR",
+      "start_seconds": 113.934,
+      "timestamp": "01:53",
+      "source": "https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/ · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements"
+    },
+    {
+      "number": "04",
+      "title": "Quando o pré-download começa?",
+      "kicker": "CALENDÁRIO OFICIAL",
+      "start_seconds": 169.167,
+      "timestamp": "02:49",
+      "source": "https://www.rockstargames.com/VI"
+    },
+    {
+      "number": "05",
+      "title": "O que fazer antes de jogar",
+      "kicker": "UM PLANO PRÁTICO",
+      "start_seconds": 225.4,
+      "timestamp": "03:45",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://www.rockstargames.com/VI · https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "editorial_standard",
+      "label": "Padrão editorial de retenção",
+      "passed": true,
+      "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Revisão auditiva e legendas",
+      "passed": false,
+      "detail": "54 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+    },
+    {
+      "id": "verified_sources",
+      "label": "Revisão das fontes",
+      "passed": false,
+      "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Áudio final medido",
+      "passed": true,
+      "detail": "-14.22 LUFS; -1.75 dBTP. Escuta humana pendente."
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Materiais visuais",
+      "passed": false,
+      "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "Até 212 GB: o que isso significa",
+      "hook": "GTA seis pode exigir até duzentos e doze gigabytes livres no seu console.",
+      "chapter_number": "01",
+      "start_timestamp": "01:00",
+      "end_timestamp": "01:45",
+      "duration_seconds": 45,
+      "related_slug": "gta-6-212gb-prepare-seu-console"
+    },
+    {
+      "id": "short_2",
+      "title": "Armazenamento e tempo de download",
+      "hook": "Antes de começar, abra a área de armazenamento do seu console e veja o espaço que está livre de verdade.",
+      "chapter_number": "02",
+      "start_timestamp": "00:50",
+      "end_timestamp": "01:35",
+      "duration_seconds": 45,
+      "related_slug": "gta-6-212gb-prepare-seu-console"
+    }
+  ],
+  "youtube": {
+    "title": "GTA 6: até 212 GB — prepare seu console para o download",
+    "description": "Espaço, pré-download e conexão: o que conferir antes de jogar.\n\nGTA VI pode exigir até 212 GB disponíveis, conforme o aparelho. Entenda o que a Rockstar confirmou, como conferir armazenamento e como interpretar estimativas de download. Informações verificadas em 6 de novembro de 2026.\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 Até 212 GB: o que isso significa\n00:50 Armazenamento e tempo de download\n01:53 Libere espaço sem perder o controle\n02:49 Quando o pré-download começa?\n03:45 O que fazer antes de jogar\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\n• Cap. 02: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\n• Cap. 03: https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/ · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\n• Cap. 04: https://www.rockstargames.com/VI\n• Cap. 05: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://www.rockstargames.com/VI · https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nVocê vai liberar espaço apagando jogos ou pretende ampliar o armazenamento?\n\n#GTA6 #PlayStation5 #XboxSeriesX",
+    "tags": [
+      "Grand Theft Auto VI",
+      "GTA VI",
+      "GTA 6",
+      "Rockstar Games",
+      "PlayStation 5",
+      "Xbox Series X",
+      "Xbox Series S",
+      "Orange Brick"
+    ],
+    "pinned_comment": "Você vai liberar espaço apagando jogos ou pretende ampliar o armazenamento?",
+    "visibility": "private",
+    "scheduled_at": null
+  },
+  "marketing": {
+    "standard": "youtube-editorial-v3",
+    "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+    "promise": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+    "primary_cta": "Para acompanhar jogos e tecnologia com contexto, inscreva-se no canal.",
+    "title_variants": [
+      "GTA 6: até 212 GB — prepare seu console para o download",
+      "GTA 6 vai lotar seu console? Entenda os 212 GB",
+      "GTA 6: espaço, pré-download e quanto tempo pode levar"
+    ],
+    "thumbnail_concepts": [
+      "ATÉ 212 GB: SEU CONSOLE ESTÁ PRONTO?",
+      "GTA 6: PREPARE O DOWNLOAD",
+      "PRECISA APAGAR JOGOS?"
+    ],
+    "thumbnail_review_required": true,
+    "end_screen": {
+      "studio_configuration_required": true,
+      "start_seconds": 260.2,
+      "related_video": null
+    },
+    "metrics_review_hours": [
+      24,
+      72,
+      168,
+      672
+    ]
+  },
+  "review_notes": "Vídeo pronto para revisão. A narração e o equilíbrio da trilha precisam de escuta humana antes da publicação.",
+  "approved_at": null,
+  "created_at": "2026-11-06T20:29:34.308Z"
+}

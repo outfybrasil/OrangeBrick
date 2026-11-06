@@ -18,7 +18,7 @@
     "visual_style": "documentario",
     "voice_id": "pt-BR-AntonioNeural",
     "slug": "o-efeito-gta-6-na-industria",
-    "updated_at": "2026-11-04T18:20:10.832Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
     "duration_seconds": 738.3,
     "duration_formatted": "12:18",
     "monetization_midroll_eligible": true,
@@ -27,7 +27,7 @@
     "fps": 30,
     "video_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.mp4",
     "srt_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.srt",
-    "preview_sheet_url": "/long-videos/o-efeito-gta-6-na-industria/preview-sheet.jpg",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/preview-sheet.jpg",
     "thumbnails": [
       {
         "id": "thumb_1",
@@ -35,7 +35,7 @@
         "angle": "Foco econômico (US$ 80 + R$ 450)",
         "headline": "US$ 80 E SEM DISCO",
         "subline": "O EFEITO GTA VI",
-        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_1.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_1.png"
       },
       {
         "id": "thumb_2",
@@ -43,7 +43,7 @@
         "angle": "Foco em hardware (210 GB no SSD + Caixa Vazia)",
         "headline": "210 GB NO PS5",
         "subline": "CAIXA SÓ COM CÓDIGO",
-        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_2.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_2.png"
       },
       {
         "id": "thumb_3",
@@ -51,7 +51,7 @@
         "angle": "Foco investigativo (Lapsus$ + Leonida)",
         "headline": "A GUERRA POR TRÁS",
         "subline": "DE GTA VI EM NOVEMBRO",
-        "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_3.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_3.png"
       }
     ],
     "selected_thumbnail_id": "thumb_1",
@@ -210,142 +210,19 @@
       "visibility": "private",
       "scheduled_at": null
     },
-    "review_notes": null,
+    "review_notes": "Versão anterior preservada. A edição corrigida está em /long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado.mp4",
     "approved_at": null,
-    "created_at": "2026-11-04T18:20:10.830Z"
-  },
-  "o-efeito-gta-6-na-industria-oficial": {
-    "series_badge": "DOSSIÊ ORANGE BRICK",
-    "title": "O efeito GTA VI: preço, caixa sem disco e até 212 GB",
-    "subtitle": "Preço, caixa sem disco, armazenamento e pré-download: o que foi confirmado sobre GTA VI.",
-    "status": "pending_review",
-    "pipeline_stage_index": 7,
-    "pipeline_stage_label": "Aguardando revisão",
-    "source_mode": "ai_dossier",
-    "source_post_slugs": [],
-    "visual_style": "documentario",
-    "voice_id": "pt-BR-AntonioNeural",
-    "slug": "o-efeito-gta-6-na-industria-oficial",
-    "updated_at": "2026-11-04T18:43:17.299Z",
-    "duration_seconds": 495.02400000000006,
-    "duration_formatted": "08:15",
-    "monetization_midroll_eligible": true,
-    "file_size": 162140188,
-    "resolution": "1920x1080",
-    "fps": 30,
-    "video_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/o-efeito-gta-6-oficial.mp4",
-    "srt_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/legendas.srt",
-    "preview_sheet_url": "/long-videos/o-efeito-gta-6-na-industria-oficial/preview-sheet.jpg",
-    "thumbnails": [
+    "created_at": "2026-11-04T18:20:10.830Z",
+    "review_history": [
       {
-        "id": "thumb_1",
-        "label": "Capa oficial",
-        "angle": "Preço, acesso e armazenamento",
-        "headline": "GTA VI: O QUE MUDA PARA VOCÊ",
-        "subline": "US$ 80 · SEM DISCO · ATÉ 212 GB",
-        "url": "/long-videos/o-efeito-gta-6-na-industria-oficial/thumbnail.png"
+        "id": "superseded-o-efeito-gta-6-na-industria-reeditado",
+        "kind": "superseded",
+        "at": "2026-11-05T04:33:20.210Z",
+        "detail": "Versão anterior preservada; a reedição aprovada é uma produção separada.",
+        "related_slug": "o-efeito-gta-6-na-industria-reeditado"
       }
     ],
-    "selected_thumbnail_id": "thumb_1",
-    "chapters": [
-      {
-        "number": "01",
-        "title": "GTA VI: O QUE MUDA PARA VOCÊ",
-        "kicker": "DOSSIÊ ORANGE BRICK",
-        "start_seconds": 0,
-        "timestamp": "00:00",
-        "source": "Rockstar Games · informações oficiais"
-      },
-      {
-        "number": "02",
-        "title": "A DATA E A EXPECTATIVA",
-        "kicker": "01 / LANÇAMENTO",
-        "start_seconds": 36,
-        "timestamp": "00:36",
-        "source": "Rockstar Games · site oficial de GTA VI"
-      },
-      {
-        "number": "03",
-        "title": "O PREÇO DE UMA SUPERPRODUÇÃO",
-        "kicker": "02 / PREÇO",
-        "start_seconds": 83.424,
-        "timestamp": "01:23",
-        "source": "Rockstar Store · preço nos Estados Unidos"
-      },
-      {
-        "number": "04",
-        "title": "A CAIXA NÃO VEM COM DISCO",
-        "kicker": "03 / MÍDIA FÍSICA",
-        "start_seconds": 137.616,
-        "timestamp": "02:17",
-        "source": "Rockstar Support · detalhes da pré-venda"
-      },
-      {
-        "number": "05",
-        "title": "O TAMANHO QUE PEDE PLANEJAMENTO",
-        "kicker": "04 / ARMAZENAMENTO",
-        "start_seconds": 194.06400000000002,
-        "timestamp": "03:14",
-        "source": "Rockstar Support · requisitos de instalação"
-      },
-      {
-        "number": "06",
-        "title": "QUANDO COMEÇA O PRÉ-DOWNLOAD",
-        "kicker": "05 / PREPARAÇÃO",
-        "start_seconds": 248.92800000000003,
-        "timestamp": "04:08",
-        "source": "Rockstar Support · FAQ atualizado em 03/11/2026"
-      },
-      {
-        "number": "07",
-        "title": "O QUE JÁ FOI MOSTRADO",
-        "kicker": "06 / O JOGO",
-        "start_seconds": 301.00800000000004,
-        "timestamp": "05:01",
-        "source": "Rockstar Games · comunicado de 2022 e materiais oficiais"
-      },
-      {
-        "number": "08",
-        "title": "A ESCOLHA É SUA",
-        "kicker": "07 / CONCLUSÃO",
-        "start_seconds": 449.44800000000004,
-        "timestamp": "07:29",
-        "source": "Orange Brick · informações consultadas em 04/11/2026"
-      }
-    ],
-    "qa_checks": [
-      {
-        "id": "fontes",
-        "label": "Fontes oficiais consultadas",
-        "passed": true,
-        "detail": "Rockstar Games, Rockstar Store e Rockstar Support; links na descrição."
-      },
-      {
-        "id": "visual",
-        "label": "Capturas e cenas",
-        "passed": true,
-        "detail": "Capturas da galeria oficial da Rockstar, com 65 cenas."
-      }
-    ],
-    "shorts_suggestions": [],
-    "youtube": {
-      "title": "O efeito GTA VI: preço, caixa sem disco e até 212 GB",
-      "description": "GTA VI chega em 19 de novembro de 2026. Entenda o preço nos Estados Unidos, a caixa com código digital, o espaço de instalação e o pré-download.\n\n00:00:00 GTA VI: O QUE MUDA PARA VOCÊ\n00:00:36 A DATA E A EXPECTATIVA\n00:01:23 O PREÇO DE UMA SUPERPRODUÇÃO\n00:02:17 A CAIXA NÃO VEM COM DISCO\n00:03:14 O TAMANHO QUE PEDE PLANEJAMENTO\n00:04:08 QUANDO COMEÇA O PRÉ-DOWNLOAD\n00:05:01 O QUE JÁ FOI MOSTRADO\n00:07:29 A ESCOLHA É SUA\n\nFontes consultadas:\nhttps://www.rockstargames.com/VI\nhttps://store.rockstargames.com/game/buy-gta-vi\nhttps://support.rockstargames.com/articles/46YkMi4rHxYXMeIHtZiKaE/grand-theft-auto-vi-pre-order-details\nhttps://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\nhttps://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\nhttps://www.videogameschronicle.com/news/rockstar-comments-on-gta-6-leak-and-claims-project-wont-be-delayed/\nhttps://apnews.com/article/e5ee22c1d8932f43b912dd6455f2f3c4\n\nUma caixa com código faz sentido para você? Conte nos comentários.\n",
-      "tags": [
-        "GTA 6",
-        "Grand Theft Auto VI",
-        "Rockstar Games",
-        "mídia física",
-        "pré-download GTA VI",
-        "Orange Brick"
-      ],
-      "pinned_comment": "Você compraria uma caixa com código, sem disco? Conte nos comentários.",
-      "visibility": "private",
-      "scheduled_at": null
-    },
-    "review_notes": null,
-    "approved_at": null,
-    "created_at": "2026-11-04T18:43:17.299Z"
+    "replaced_by_slug": "o-efeito-gta-6-na-industria-reeditado"
   },
   "zelda-gta-vi-corrida-goty-2026": {
     "slug": "zelda-gta-vi-corrida-goty-2026",
@@ -373,7 +250,7 @@
     "fps": 30,
     "video_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026.mp4",
     "srt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026.srt",
-    "preview_sheet_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/preview-sheet.jpg",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026/preview-sheet.jpg",
     "thumbnails": [
       {
         "id": "thumb_1",
@@ -381,7 +258,7 @@
         "angle": "Foco na nota 96 de Zelda contra a chegada de GTA VI",
         "headline": "ZELDA NOTA 96",
         "subline": "E O GTA VI NO TGA?",
-        "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_1.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026/thumb_1.png"
       },
       {
         "id": "thumb_2",
@@ -389,7 +266,7 @@
         "angle": "Foco na regra de corte de 20 de novembro do TGA",
         "headline": "24H ANTES DO CORTE",
         "subline": "GTA VI PODE VENCER?",
-        "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_2.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026/thumb_2.png"
       },
       {
         "id": "thumb_3",
@@ -397,7 +274,7 @@
         "angle": "Foco no debate sobre remakes no prêmio principal",
         "headline": "REMAKE PODE SER",
         "subline": "JOGO DO ANO EM 2026?",
-        "url": "/long-videos/zelda-gta-vi-corrida-goty-2026/thumb_3.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026/thumb_3.png"
       }
     ],
     "selected_thumbnail_id": "thumb_1",
@@ -556,14 +433,24 @@
       "visibility": "private",
       "scheduled_at": null
     },
-    "review_notes": null,
+    "review_notes": "Original preservado; nova edição em /long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado.mp4",
     "approved_at": null,
     "created_at": "2026-11-04T21:17:21.981Z",
-    "updated_at": "2026-11-04T21:17:21.982Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
     "video_no_narration_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026-sem-narracao.mp4",
     "video_no_narration_clean_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/zelda-gta-vi-corrida-goty-2026-sem-narracao-sem-legenda.mp4",
     "narration_script_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/roteiro-narracao.md",
-    "narration_script_txt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/roteiro-narracao.txt"
+    "narration_script_txt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026/roteiro-narracao.txt",
+    "review_history": [
+      {
+        "id": "superseded-zelda-gta-vi-corrida-goty-2026-reeditado",
+        "kind": "superseded",
+        "at": "2026-11-05T04:33:20.210Z",
+        "detail": "Versão anterior preservada; a reedição aprovada é uma produção separada.",
+        "related_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
+      }
+    ],
+    "replaced_by_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
   },
   "god-of-war-laufey-do-anuncio-ao-adiamento": {
     "slug": "god-of-war-laufey-do-anuncio-ao-adiamento",
@@ -589,7 +476,7 @@
     "fps": 30,
     "video_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.mp4",
     "srt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento.srt",
-    "preview_sheet_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/preview-sheet.jpg",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/preview-sheet.jpg",
     "thumbnails": [
       {
         "id": "thumb_1",
@@ -597,7 +484,7 @@
         "angle": "Foco na mudança oficial de data para 20 de maio de 2027",
         "headline": "GOD OF WAR ADIADO",
         "subline": "20 DE MAIO DE 2027",
-        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_1.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_1.png"
       },
       {
         "id": "thumb_2",
@@ -605,7 +492,7 @@
         "angle": "Foco na história de Laufey no além dos deuses Everywhen",
         "headline": "DO ANÚNCIO AO CORTE",
         "subline": "A SAGA DE FAYE NO PS5",
-        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_2.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_2.png"
       },
       {
         "id": "thumb_3",
@@ -613,7 +500,7 @@
         "angle": "Foco na conexão entre Laufey, Kratos e o futuro da série",
         "headline": "POR QUE LAUFEY MUDOU",
         "subline": "DE FEVEREIRO PARA MAIO?",
-        "url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_3.png"
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento/thumb_3.png"
       }
     ],
     "selected_thumbnail_id": "thumb_1",
@@ -772,13 +659,3830 @@
       "visibility": "private",
       "scheduled_at": null
     },
-    "review_notes": null,
+    "review_notes": "Original preservado; nova edição em /long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.mp4",
     "approved_at": null,
     "created_at": "2026-11-04T21:29:37.799Z",
-    "updated_at": "2026-11-04T21:29:37.799Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
     "video_no_narration_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao.mp4",
     "video_no_narration_clean_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/god-of-war-laufey-do-anuncio-ao-adiamento-sem-narracao-sem-legenda.mp4",
     "narration_script_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.md",
-    "narration_script_txt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.txt"
+    "narration_script_txt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento/roteiro-narracao.txt",
+    "review_history": [
+      {
+        "id": "superseded-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+        "kind": "superseded",
+        "at": "2026-11-05T04:33:20.210Z",
+        "detail": "Versão anterior preservada; a reedição aprovada é uma produção separada.",
+        "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+      }
+    ],
+    "replaced_by_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+  },
+  "game-key-card-novo-padrao-preview": {
+    "series_badge": "O QUE MUDA PARA QUEM JOGA",
+    "title": "Game-Key Card: o que você realmente compra?",
+    "subtitle": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-ThalitaMultilingualNeural",
+    "slug": "game-key-card-novo-padrao-preview",
+    "updated_at": "2026-11-05T04:35:07.061Z",
+    "editorial_standard": "youtube-editorial-v2",
+    "is_preview": true,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 11.8,
+              "headline": "Caixa física. Download obrigatório.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Você compra a caixa"
+            },
+            {
+              "start": 11.8,
+              "duration": 13.633333333333333,
+              "headline": "O que você precisa",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Na primeira vez"
+            },
+            {
+              "start": 25.433333333333334,
+              "duration": 15.866666666666664,
+              "headline": "Baixou? Guarde o cartão.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Depois do download"
+            },
+            {
+              "start": 41.3,
+              "duration": 13.100000000000001,
+              "headline": "Outro console, novo download.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "E se você levar"
+            },
+            {
+              "start": 54.4,
+              "duration": 4.333333333333336,
+              "headline": "Entenda antes de comprar.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Para entender o que muda"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.08,
+        "true_peak_dbtp": -1.94,
+        "corrected": false,
+        "human_listening": false
+      }
+    },
+    "duration_seconds": 58.733,
+    "duration_formatted": "00:58",
+    "monetization_midroll_eligible": false,
+    "file_size": 2201592,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview.mp4",
+    "video_no_narration_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/game-key-card-novo-padrao-preview/game-key-card-novo-padrao-preview.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/game-key-card-novo-padrao-preview/preview-sheet.jpg",
+    "thumbnails": [],
+    "selected_thumbnail_id": null,
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O cartão é a chave",
+        "kicker": "ENTENDA O FORMATO",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://www.nintendo.com/us/gaming-systems/switch-2/faq/"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Abertura sem vinheta, duração baseada na fala, cenas nos limites de frases e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "13 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.08 LUFS; -1.94 dBTP. Escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "Game-Key Card precisa de internet?",
+        "hook": "A caixa é física, mas o primeiro download é obrigatório.",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:35",
+        "duration_seconds": 35,
+        "related_slug": "game-key-card-novo-padrao-preview"
+      }
+    ],
+    "youtube": {
+      "title": "Game-Key Card: o que você realmente compra?",
+      "description": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.\n\nPrévia editorial do novo padrão de vídeo. Explicação baseada no guia e no FAQ oficiais da Nintendo.\n\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://www.nintendo.com/us/gaming-systems/switch-2/faq/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nO download inicial muda sua decisão de comprar a edição física?",
+      "tags": [
+        "Nintendo Switch 2",
+        "Game-Key Card",
+        "Orange Brick"
+      ],
+      "pinned_comment": "O download inicial muda sua decisão de comprar a edição física?",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "review_notes": null,
+    "approved_at": null,
+    "created_at": "2026-11-05T01:20:11.725Z",
+    "marketing": {
+      "standard": "youtube-editorial-v2",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+      "primary_cta": "Inscreva-se para entender o que muda nos jogos e consoles",
+      "title_variants": [
+        "Game-Key Card: o que você realmente compra?",
+        "Game-Key Card no Switch 2: entenda o download obrigatório",
+        "O cartão é a chave: como funciona o Game-Key Card"
+      ],
+      "thumbnail_concepts": [
+        "Embalagem oficial com foco no aviso Game-Key Card; texto: PRECISA BAIXAR",
+        "Cartão oficial e seta para armazenamento; texto: O JOGO FICA ONDE?",
+        "Diagrama editorial cartão → download → console; texto: ENTENDA ANTES DE COMPRAR"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 43.733,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_history": []
+  },
+  "game-key-card-edicao-fluida-v3-preview": {
+    "series_badge": "O QUE MUDA PARA QUEM JOGA",
+    "title": "Game-Key Card: o que você realmente compra?",
+    "subtitle": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+    "status": "approved",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aprovado pelo usuário",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-FranciscaNeural",
+    "slug": "game-key-card-edicao-fluida-v3-preview",
+    "updated_at": "2026-11-05T04:35:07.061Z",
+    "error": "A produção foi interrompida. Confira roteiro, materiais e provedor de voz antes de tentar novamente.",
+    "editorial_standard": "youtube-editorial-v3",
+    "is_preview": true,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 3.6,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "57464be29aa1151614fb9daf33df702b34a29c01d2b01799bfe2d0c0fa470269",
+                "bytes": 75445,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 108,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Físico na caixa. Download no console.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "A caixa é física, mas o jogo"
+            },
+            {
+              "start": 3.6,
+              "duration": 3.4999999999999996,
+              "layout": "evidence",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "2ba23a9f42d934f64c267733212d333a9a6ae19885018327a8cae8da0d96eae2",
+                "bytes": 78608,
+                "layout": "evidence",
+                "fps": 30,
+                "frames": 105,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Procure esta marca.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "O aviso que muda a compra está"
+            },
+            {
+              "start": 7.1,
+              "duration": 5.066666666666666,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "72c887ab68ae75d4b1d1caa56f5db2ab7b43f1e35bb3b89ec439233e3c2e5829",
+                "bytes": 79860,
+                "layout": "process",
+                "fps": 30,
+                "frames": 152,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O jogo vai para o armazenamento.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Ele é a chave para baixar os"
+            },
+            {
+              "start": 12.166666666666666,
+              "duration": 4.9,
+              "layout": "storage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "87a8fc06a01cadc6a9d95ef5b0fe9c4c7c07fb792705bc24ee1bb665a4202d1f",
+                "bytes": 92378,
+                "layout": "storage",
+                "fps": 30,
+                "frames": 147,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O download precisa caber.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Esses dados ocupam espaço no console ou"
+            },
+            {
+              "start": 17.066666666666666,
+              "duration": 4.133333333333333,
+              "layout": "insert",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "e78f18d8c5dffbed60b0c920b568b63ef5042954a1a7daba35b23e57d4f30092",
+                "bytes": 72755,
+                "layout": "insert",
+                "fps": 30,
+                "frames": 124,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Baixou? O cartão ainda é necessário.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/keyCard-step01_img.png",
+              "narrationAnchor": "Depois de baixar, o cartão continua obrigatório"
+            },
+            {
+              "start": 21.2,
+              "duration": 6.933333333333334,
+              "layout": "offline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "f8578de71935e650589c89bd4097acd1f6c1ee1bc07b29db2ef9d4ec5b2e9ab1",
+                "bytes": 104606,
+                "layout": "offline",
+                "fps": 30,
+                "frames": 208,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Sem internet não significa sem cartão.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Sem internet, você pode iniciar os títulos"
+            },
+            {
+              "start": 28.133333333333333,
+              "duration": 2.5666666666666664,
+              "layout": "handoff",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "e46e9d7c455d5d9a4b2ee786cbec199669afe66e96d57c34e75f4d349ddbf517",
+                "bytes": 77865,
+                "layout": "handoff",
+                "fps": 30,
+                "frames": 77,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "E em outro Switch 2?",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "E se o cartão for para outro"
+            },
+            {
+              "start": 30.7,
+              "duration": 3.333333333333332,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "52d99fda93fce5b5963c2285dad373baad5c266b82c9121e3159916cf86c4a10",
+                "bytes": 82884,
+                "layout": "process",
+                "fps": 30,
+                "frames": 100,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Neste console, baixe os dados também.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Nesse console, será preciso baixar os dados"
+            },
+            {
+              "start": 34.03333333333333,
+              "duration": 6.633333333333333,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "b261c6a95624162aa47c44918ed98150566fbba606e0504cf45006aefbfd14fb",
+                "bytes": 78506,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 199,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Conta Nintendo não é necessária para baixar os dados.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Outro detalhe: segundo o suporte da Nintendo,"
+            },
+            {
+              "start": 40.666666666666664,
+              "duration": 4.766666666666666,
+              "layout": "takeaway",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "ad99435b2689b94d26ebf998c0a37a1ee66f4c1879b4439e96e20f06e2f9756c",
+                "bytes": 77253,
+                "layout": "takeaway",
+                "fps": 30,
+                "frames": 143,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Reconheça a chave. Confira o espaço.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Na loja, procure o símbolo da chave"
+            },
+            {
+              "start": 45.43333333333333,
+              "duration": 4.900000000000006,
+              "layout": "cta",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d333b75589e5efba8a0426d71c8a0538c517bf646b4c93447778f915a27ce745",
+                "bytes": 69333,
+                "layout": "cta",
+                "fps": 30,
+                "frames": 147,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Entenda antes de comprar.",
+              "source": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+              "narrationAnchor": "Para entender o que muda"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.84,
+        "true_peak_dbtp": -1.64,
+        "corrected": false,
+        "human_listening": false
+      }
+    },
+    "duration_seconds": 50.333,
+    "duration_formatted": "00:50",
+    "monetization_midroll_eligible": false,
+    "file_size": 2299874,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview.mp4",
+    "video_no_narration_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/game-key-card-edicao-fluida-v3-preview/game-key-card-edicao-fluida-v3-preview.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/game-key-card-edicao-fluida-v3-preview/preview-sheet.jpg",
+    "thumbnails": [],
+    "selected_thumbnail_id": null,
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O cartão é a chave",
+        "kicker": "ENTENDA O FORMATO",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://www.nintendo.com/us/gaming-systems/switch-2/faq/"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "11 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.84 LUFS; -1.64 dBTP. Escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "Game-Key Card precisa de internet?",
+        "hook": "A caixa é física, mas o primeiro download é obrigatório.",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:35",
+        "duration_seconds": 35,
+        "related_slug": "game-key-card-edicao-fluida-v3-preview"
+      }
+    ],
+    "youtube": {
+      "title": "Game-Key Card: o que você realmente compra?",
+      "description": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.\n\nPrévia revisada: produto, embalagem, demonstrações e consequências, com enquadramento fixo e animações locais.\n\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://www.nintendo.com/us/gaming-systems/switch-2/faq/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nO download inicial muda sua decisão de comprar a edição física?",
+      "tags": [
+        "Nintendo Switch 2",
+        "Game-Key Card",
+        "Orange Brick"
+      ],
+      "pinned_comment": "O download inicial muda sua decisão de comprar a edição física?",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "marketing": {
+      "standard": "youtube-editorial-v3",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+      "primary_cta": "Inscreva-se para entender o que muda nos jogos e consoles",
+      "title_variants": [
+        "Game-Key Card: o que você realmente compra?",
+        "Game-Key Card no Switch 2: entenda o download obrigatório",
+        "O cartão é a chave: como funciona o Game-Key Card"
+      ],
+      "thumbnail_concepts": [
+        "Embalagem oficial com foco no aviso Game-Key Card; texto: PRECISA BAIXAR",
+        "Cartão oficial e seta para armazenamento; texto: O JOGO FICA ONDE?",
+        "Diagrama editorial cartão → download → console; texto: ENTENDA ANTES DE COMPRAR"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 35.333,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_notes": null,
+    "approved_at": "2026-11-05T04:33:20.210Z",
+    "created_at": "2026-11-05T01:40:59.042Z",
+    "review_history": [
+      {
+        "id": "approved-reconciled-game-key-card-edicao-fluida-v3-preview",
+        "kind": "approved",
+        "at": "2026-11-05T04:33:20.210Z",
+        "detail": "Aprovação confirmada pelo usuário ao reconciliar o histórico. Registro criado agora, sem atribuir uma data anterior à aprovação."
+      }
+    ]
+  },
+  "o-efeito-gta-6-na-industria-reeditado": {
+    "slug": "o-efeito-gta-6-na-industria-reeditado",
+    "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+    "title": "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+    "subtitle": "O que conferir na edição, no código da caixa, no armazenamento e no calendário antes de comprar GTA VI.",
+    "status": "approved",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aprovado pelo usuário",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-ThalitaMultilingualNeural",
+    "editorial_standard": "youtube-editorial-v3",
+    "is_preview": false,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.066666666666666,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "b7da7ca328447a9e03f159ce5e26b84a13bc7a0eaa1da65a375bec7f926b9b36",
+                "bytes": 341128,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 392,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O custo vai além da etiqueta.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "GTA seis tem preço anunciado de setenta"
+            },
+            {
+              "start": 13.066666666666666,
+              "duration": 11.633333333333333,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "7a67dc81d1756f3f931a8183fd846b353ac875635b63c68b03fbe071a789a8bd",
+                "bytes": 163458,
+                "layout": "process",
+                "fps": 30,
+                "frames": 349,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Três perguntas antes da compra.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "Esses três pontos mudam a preparação de"
+            },
+            {
+              "start": 24.7,
+              "duration": 8.400000000000002,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "fbb8af8b033a38458e2e9239c78d876e6641a6d31cd4abb5065be695b7582c95",
+                "bytes": 3359610,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 252,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 5,
+                "source_audio": "muted"
+              },
+              "headline": "Fatos antes da expectativa.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "A proposta é separar o que está"
+            }
+          ]
+        },
+        {
+          "chapter": "02",
+          "voiceStartSec": 33.1,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.6,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "ed2e43fac7035b0ef54e576eb26ae35669754d9e9973ba9862e0309c55b9bcd8",
+                "bytes": 251147,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 378,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Duas edições, preços diferentes.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "No comunicado de abertura das reservas, a"
+            },
+            {
+              "start": 12.6,
+              "duration": 15.700000000000001,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "94d7a6b17e79e24a13ee2e32be6084dde41ea88e526b180a82d5ca2fccee1a6c",
+                "bytes": 269984,
+                "layout": "image",
+                "fps": 30,
+                "frames": 471,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O adicional precisa fazer sentido.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6BWQSfnOYTcVVsRj8ay2ML/8e51ba006c8d309d0c6a1b582c44b041/UltimateEdition_07_en_us_R04_Deliv.jpg",
+              "narrationAnchor": "A diferença entre esses valores é de"
+            },
+            {
+              "start": 28.3,
+              "duration": 13.7,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "dd7d2a9d77e281f6d52429ca679c45c9ca21b636243f70243e5f88d41ce65222",
+                "bytes": 143458,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 411,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Conversão não é preço local.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Para quem compra no Brasil, há outra"
+            },
+            {
+              "start": 42,
+              "duration": 15.899999999999999,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d17148f156c4141ffb37a9ca75d70874be583b9daf1e1d8a4509839c27445cc4",
+                "bytes": 292578,
+                "layout": "image",
+                "fps": 30,
+                "frames": 477,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Compare o mesmo produto.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "A data da captura também importa."
+            },
+            {
+              "start": 57.9,
+              "duration": 7.600000000000001,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "79252c86c20aa1ac9b194d79385cadb36ab7d594c8c4585c6289b9a4c74eeef4",
+                "bytes": 4425963,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 228,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 17,
+                "source_audio": "muted"
+              },
+              "headline": "Preço não prevê todo o mercado.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "É possível discutir preço e conteúdo sem"
+            },
+            {
+              "start": 65.5,
+              "duration": 13.86666666666666,
+              "layout": "takeaway",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "0b1fef01a3105824d6b5918ba9bfa325f6212afcc0b5fe9eeb889b98619f1dab",
+                "bytes": 195916,
+                "layout": "takeaway",
+                "fps": 30,
+                "frames": 416,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Agora, olhe para dentro da caixa.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "A pergunta útil é mais concreta: qual"
+            }
+          ]
+        },
+        {
+          "chapter": "03",
+          "voiceStartSec": 112.467,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 15.666666666666666,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "2b63448756002ac1a0c03580730e6ad874f57b878e48390e89324e0a99067745",
+                "bytes": 215039,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 470,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Caixa com código. Sem disco.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+              "narrationAnchor": "O suporte da Rockstar identifica a versão"
+            },
+            {
+              "start": 15.666666666666666,
+              "duration": 11.833333333333334,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "19a97cee065b382c251f2934a0f7b7a4daf8d7a1d620b21b48bc757b446e130a",
+                "bytes": 156672,
+                "layout": "process",
+                "fps": 30,
+                "frames": 355,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Da caixa para a conta.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+              "narrationAnchor": "O caminho é diferente do de uma"
+            },
+            {
+              "start": 27.5,
+              "duration": 14.333333333333336,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "4bcacda7563aa660dfe067edb95d7840320ea1ff21e119a79056ea26c8379773",
+                "bytes": 219310,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 430,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Dois formatos, regras diferentes.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "Não confunda caixa com código e Game"
+            },
+            {
+              "start": 41.833333333333336,
+              "duration": 11.966666666666661,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d003e6855ddd210f784b63873996aa0630c157d22dae9737c5deadb35f7e5e4b",
+                "bytes": 276929,
+                "layout": "image",
+                "fps": 30,
+                "frames": 359,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Presente? Confira a região.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "Se o jogo for um presente, confirme"
+            },
+            {
+              "start": 53.8,
+              "duration": 13.100000000000009,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "8d86c4326d10fe85484d05607b2a1507ffa72f4895a520804e6356a8aec0aa8b",
+                "bytes": 229973,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 393,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A atualização é digital.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6BWQSfnOYTcVVsRj8ay2ML/8e51ba006c8d309d0c6a1b582c44b041/UltimateEdition_07_en_us_R04_Deliv.jpg",
+              "narrationAnchor": "A Ultimate física também exige atenção na"
+            },
+            {
+              "start": 66.9,
+              "duration": 10.166666666666657,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d5bf28a1edc411c892c4609617aaab6b7d8aad465f8aad7490439e659e339145",
+                "bytes": 5788066,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 305,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 29,
+                "source_audio": "muted"
+              },
+              "headline": "A preparação continua no console.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+              "narrationAnchor": "Escolher uma embalagem de prateleira não elimina"
+            }
+          ]
+        },
+        {
+          "chapter": "04",
+          "voiceStartSec": 189.534,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.833333333333334,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d7e6cc6486d73428cf980fd7ac376927d367962a50643421b14fb7ddbd675f30",
+                "bytes": 198760,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 445,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Até 212 GB, conforme o aparelho.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "A referência atual do suporte é de"
+            },
+            {
+              "start": 14.833333333333334,
+              "duration": 12.833333333333334,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "26b0f33394adda02c85ac00a3abdba9bbaea736fdda0a779857b4df8d9d16186",
+                "bytes": 221976,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 385,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Capacidade e espaço livre diferem.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Antes de começar, abra a área de"
+            },
+            {
+              "start": 27.666666666666668,
+              "duration": 11.666666666666668,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "53f27610a2762d279ee526839aa6364355693e034d6104d92d52c899cd35690e",
+                "bytes": 167354,
+                "layout": "process",
+                "fps": 30,
+                "frames": 350,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Prepare o armazenamento.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Também vale revisar o que está instalado"
+            },
+            {
+              "start": 39.333333333333336,
+              "duration": 13.733333333333334,
+              "layout": "bars",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "cac29f36a389819e171ab82e90d935ad7db97194348dd8e8d629dec04b633c03",
+                "bytes": 153252,
+                "layout": "bars",
+                "fps": 30,
+                "frames": 412,
+                "animated_frames": 70,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Velocidade muda a espera.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "O tamanho do arquivo muda outra parte"
+            },
+            {
+              "start": 53.06666666666667,
+              "duration": 15.166666666666664,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "a3cf61555f7813eacf300cf382c447d442dc9af8015c72d60d7d38e2cf49c652",
+                "bytes": 156598,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 455,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A simulação não mede sua conexão.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Esse cálculo não é uma previsão do"
+            },
+            {
+              "start": 68.23333333333333,
+              "duration": 14.666666666666671,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "557b4e225e9e018b73c7039d900c2fff19dfbf62577164234acdfa7da2e7a48b",
+                "bytes": 303368,
+                "layout": "image",
+                "fps": 30,
+                "frames": 440,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Tamanho não comprova a causa.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "Outra distinção importante: espaço instalado não explica"
+            },
+            {
+              "start": 82.9,
+              "duration": 9.233333333333334,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "4f8f65b59840ab610f4d42a9f80f8e28fc842e1a312fe98241ca63eb8c3bcacc",
+                "bytes": 7148385,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 277,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 40,
+                "source_audio": "muted"
+              },
+              "headline": "Espaço e conexão: prepare os dois.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Planeje as duas tarefas: reservar espaço suficiente"
+            }
+          ]
+        },
+        {
+          "chapter": "05",
+          "voiceStartSec": 281.667,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 15.333333333333334,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "a8f645724159e79095f928ae26f9da4519aea330d1ee53fb425104eaa386999e",
+                "bytes": 208779,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 460,
+                "animated_frames": 51,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Três datas, três etapas.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "A comunicação mais recente diferencia três momentos"
+            },
+            {
+              "start": 15.333333333333334,
+              "duration": 12.299999999999999,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "88befb75605095d28bf4a9cf3a354318792649e551e665297c05a6ad555b24ff",
+                "bytes": 189957,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 369,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Preparar não é começar a jogar.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "As datas não devem ser misturadas."
+            },
+            {
+              "start": 27.633333333333333,
+              "duration": 13.466666666666669,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "6a4e7a69a9dc32ab58ab7b3aef1f4c014cba0737969e066127e2ca22d33a969e",
+                "bytes": 217819,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 404,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Considere a entrega do seu pedido.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+              "narrationAnchor": "Para a versão em caixa, acompanhe as"
+            },
+            {
+              "start": 41.1,
+              "duration": 7.666666666666664,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "952b034b696e3962d5d3d35b19622959e5fc054f2b8cbf3f67eabddff51c6ad8",
+                "bytes": 5142032,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 230,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 51,
+                "source_audio": "muted"
+              },
+              "headline": "Organize cada etapa da compra.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Com essas etapas separadas, o calendário ajuda:"
+            }
+          ]
+        },
+        {
+          "chapter": "06",
+          "voiceStartSec": 330.434,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.533333333333333,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "6970a291c95d619a8cf3811abab2535aa8d3c915966516e87eb8b195825cc15f",
+                "bytes": 147688,
+                "layout": "image",
+                "fps": 30,
+                "frames": 436,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Recursos descritos pela Sony.",
+              "source": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-adaptive-triggers-image-block-01-en-30aug23",
+              "narrationAnchor": "Na divulgação do PlayStation, a parceria com"
+            },
+            {
+              "start": 14.533333333333333,
+              "duration": 13.833333333333334,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "78c8d9ae6b5371cb2f7e1831cb44ecdbbbe292fa71c1dbd41bba2f410c87d4bf",
+                "bytes": 154617,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 415,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A promessa precisa de contexto.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Mary Yee, vice presidente sênior de marketing"
+            },
+            {
+              "start": 28.366666666666667,
+              "duration": 8.733333333333334,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "9deab91f91e9772daf1c3965d32292c83d9dd04fc5f979215ebc70ec78dd13be",
+                "bytes": 4478832,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 262,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 60,
+                "source_audio": "muted"
+              },
+              "headline": "Divulgação não é teste comparativo.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Uma mensagem promocional não substitui uma comparação"
+            },
+            {
+              "start": 37.1,
+              "duration": 16.299999999999997,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "bfab9a4d2eb492add611d5d5d57afe7fb132d2145e44f65dabcf8250ab17185c",
+                "bytes": 351597,
+                "layout": "image",
+                "fps": 30,
+                "frames": 489,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Imagens oficiais não medem desempenho.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+              "narrationAnchor": "Os materiais oficiais apresentados aqui mostram personagens"
+            },
+            {
+              "start": 53.4,
+              "duration": 15.533333333333339,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "284d47c48bb7d5a489d2fc07a8f69ca2f8ce3f0f2cf9b4f28dcf2a18336210cf",
+                "bytes": 161073,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 466,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Versão de teste não é promessa final.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Por isso, esta versão concentra a análise"
+            }
+          ]
+        },
+        {
+          "chapter": "07",
+          "voiceStartSec": 399.367,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.166666666666666,
+              "layout": "takeaway",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "7db8cace50e979e4f0e9c35941a8fbc2e4ada167ce8cd4c90125c2d9cf9789c1",
+                "bytes": 194023,
+                "layout": "takeaway",
+                "fps": 30,
+                "frames": 425,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Confira antes de fechar a compra.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "Na hora de decidir, confira a edição"
+            },
+            {
+              "start": 14.166666666666666,
+              "duration": 14.266666666666667,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "53187566dd9b738e7fe4148c981d33f47ea930a8200b1b0c4f6f10e5a56ce2f8",
+                "bytes": 212052,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 428,
+                "animated_frames": 51,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Da escolha ao primeiro acesso.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Depois, organize o download e acompanhe a"
+            },
+            {
+              "start": 28.433333333333334,
+              "duration": 4.466666666666665,
+              "layout": "cta",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "308a42ca27065975a8f2ce84933402fc712e5352245508ca400a5fc3726a1c31",
+                "bytes": 68399,
+                "layout": "cta",
+                "fps": 30,
+                "frames": 134,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Entenda antes de comprar.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Para acompanhar jogos e consoles"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.08,
+        "true_peak_dbtp": -1.82,
+        "corrected": true,
+        "human_listening": false
+      }
+    },
+    "duration_seconds": 432.267,
+    "duration_formatted": "07:12",
+    "monetization_midroll_eligible": false,
+    "file_size": 47743694,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado.mp4",
+    "video_no_narration_url": "/long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria-reeditado/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "O QUE VOCÊ COMPRA?",
+        "angle": "Decisão de compra",
+        "headline": "O QUE VOCÊ COMPRA?",
+        "subline": "Preço, formato e download",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria-reeditado/thumb-1.png"
+      },
+      {
+        "id": "thumb_2",
+        "label": "ATÉ 212 GB PREPARE O CONSOLE",
+        "angle": "Armazenamento",
+        "headline": "ATÉ 212 GB",
+        "subline": "Condições da instalação",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria-reeditado/thumb-2.png"
+      },
+      {
+        "id": "thumb_3",
+        "label": "CAIXA SEM DISCO",
+        "angle": "Versão de varejo",
+        "headline": "CAIXA SEM DISCO",
+        "subline": "Entenda o código para download",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria-reeditado/thumb-3.png"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O custo real de entrar em Leonida",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements"
+      },
+      {
+        "number": "02",
+        "title": "Preço: edição, moeda e comparação",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 33.1,
+        "timestamp": "00:33",
+        "source": "https://ir.take2games.com/node/32311 · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions"
+      },
+      {
+        "number": "03",
+        "title": "Caixa de varejo: o que ela entrega",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 112.467,
+        "timestamp": "01:52",
+        "source": "https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://en-americas-support.nintendo.com/app/answers/detail/a_id/68415/p/172"
+      },
+      {
+        "number": "04",
+        "title": "Armazenamento e tempo de download",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 189.534,
+        "timestamp": "03:09",
+        "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq"
+      },
+      {
+        "number": "05",
+        "title": "Calendário: três datas, funções distintas",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 281.667,
+        "timestamp": "04:41",
+        "source": "https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation"
+      },
+      {
+        "number": "06",
+        "title": "O que está confirmado sobre a experiência",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 330.434,
+        "timestamp": "05:30",
+        "source": "https://blog.playstation.com/2026/06/24/grand-theft-auto-vi-plays-best-on-ps5-november-19/ · https://www.rockstargames.com/VI/media · https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/"
+      },
+      {
+        "number": "07",
+        "title": "O impacto para quem compra",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 399.367,
+        "timestamp": "06:39",
+        "source": "https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "67 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.08 LUFS; -1.82 dBTP. Escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "O custo real de entrar em Leonida",
+        "hook": "GTA seis tem preço anunciado de setenta e nove dólares e noventa e nove centavos nos Estados Unidos.",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:45",
+        "duration_seconds": 45,
+        "related_slug": "o-efeito-gta-6-na-industria-reeditado"
+      },
+      {
+        "id": "short_2",
+        "title": "Preço: edição, moeda e comparação",
+        "hook": "No comunicado de abertura das reservas, a Take Two apresentou duas referências para o mercado americano: setenta e nove dólares e noventa e nove centavos na Standard e noventa e nove dólares e noventa e nove centavos na Ultimate.",
+        "chapter_number": "02",
+        "start_timestamp": "00:33",
+        "end_timestamp": "01:18",
+        "duration_seconds": 45,
+        "related_slug": "o-efeito-gta-6-na-industria-reeditado"
+      }
+    ],
+    "youtube": {
+      "title": "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+      "description": "O que conferir na edição, no código da caixa, no armazenamento e no calendário antes de comprar GTA VI.\n\nEdição revisada de O efeito GTA VI na indústria. Informações conferidas em fontes oficiais em 4 de novembro de 2026; animações e simulações identificadas; imagens e trechos oficiais creditados.\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 O custo real de entrar em Leonida\n00:33 Preço: edição, moeda e comparação\n01:52 Caixa de varejo: o que ela entrega\n03:09 Armazenamento e tempo de download\n04:41 Calendário: três datas, funções distintas\n05:30 O que está confirmado sobre a experiência\n06:39 O impacto para quem compra\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\n• Cap. 02: https://ir.take2games.com/node/32311 · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions\n• Cap. 03: https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://en-americas-support.nintendo.com/app/answers/detail/a_id/68415/p/172\n• Cap. 04: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\n• Cap. 05: https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation\n• Cap. 06: https://blog.playstation.com/2026/06/24/grand-theft-auto-vi-plays-best-on-ps5-november-19/ · https://www.rockstargames.com/VI/media · https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/\n• Cap. 07: https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nQual desses pontos mais pesa na sua decisão: edição, formato da caixa ou preparação do console?",
+      "tags": [
+        "Grand Theft Auto VI",
+        "GTA VI",
+        "GTA 6",
+        "Rockstar Games",
+        "PlayStation 5",
+        "Xbox Series X",
+        "Xbox Series S",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Qual desses pontos mais pesa na sua decisão: edição, formato da caixa ou preparação do console?",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "marketing": {
+      "standard": "youtube-editorial-v3",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "O que conferir na edição, no código da caixa, no armazenamento e no calendário antes de comprar GTA VI.",
+      "primary_cta": "Para acompanhar jogos e consoles com contexto, inscreva-se no canal.",
+      "title_variants": [
+        "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+        "GTA VI: o que conferir antes de comprar",
+        "GTA VI: entenda o código na caixa e o download"
+      ],
+      "thumbnail_concepts": [
+        "Arte oficial atual e texto: O QUE VOCÊ COMPRA?",
+        "Caixa oficial e destaque: SEM DISCO",
+        "Imagem oficial de Leonida e texto: PREPARE O CONSOLE"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 417.267,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_notes": "Reedição completa no padrão youtube-editorial-v3, com informações conferidas em 04/11/2026, fontes e materiais oficiais. Escuta de pronúncia e naturalidade pendente. Arquivo original preservado para comparação.",
+    "approved_at": "2026-11-05T04:33:20.210Z",
+    "created_at": "2026-11-05T02:43:13.724Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
+    "replaces_slug": "o-efeito-gta-6-na-industria",
+    "review_history": [
+      {
+        "id": "approved-reconciled-o-efeito-gta-6-na-industria-reeditado",
+        "kind": "approved",
+        "at": "2026-11-05T04:33:20.210Z",
+        "detail": "Aprovação confirmada pelo usuário ao reconciliar o histórico. Registro criado agora, sem atribuir uma data anterior à aprovação."
+      }
+    ]
+  },
+  "zelda-gta-vi-corrida-goty-2026-reeditado": {
+    "slug": "zelda-gta-vi-corrida-goty-2026-reeditado",
+    "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+    "title": "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+    "subtitle": "O que as regras dizem sobre remakes, calendário e votação do jogo do ano.",
+    "status": "scheduled",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aprovado e agendado no YouTube",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-FranciscaNeural",
+    "editorial_standard": "youtube-editorial-v3",
+    "is_preview": false,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 9.366666666666667,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "46d35ced246ad4e7c4c66b420373d65a3cdcb6b8c862b61b993e713e5b6f8704",
+                "bytes": 256719,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 281,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Zelda × GTA VI",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+              "narrationAnchor": "Um Zelda com nota noventa e seis"
+            },
+            {
+              "start": 9.366666666666667,
+              "duration": 10.566666666666666,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "258dd1d0c4778f12ad4926183b86252f2f019da505b51adb9a4d8b9a8dcedb30",
+                "bytes": 5773838,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 317,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 36,
+                "source_audio": "muted"
+              },
+              "headline": "Expectativa não é indicação.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "Para a Rockstar, a primeira barreira é"
+            },
+            {
+              "start": 19.933333333333334,
+              "duration": 10.866666666666667,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "b16f06ed88e12bb8450e12e0e8d9173632ed1f87b1ecd3e66cd25b17ab1c1bcd",
+                "bytes": 128703,
+                "layout": "process",
+                "fps": 30,
+                "frames": 326,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Três etapas diferentes.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+              "narrationAnchor": "Vamos separar as três etapas dessa corrida:"
+            }
+          ]
+        },
+        {
+          "chapter": "02",
+          "voiceStartSec": 30.8,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 15.166666666666666,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "2e524381e9a4def38ade5a9ff4afceff0bb4b16463528bcbfa85688a9ea19c42",
+                "bytes": 198107,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 455,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Uma estreia forte nas análises.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+              "narrationAnchor": "O levantamento publicado pelo GameSpot em quatro"
+            },
+            {
+              "start": 15.166666666666666,
+              "duration": 13.4,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "4457389c7e7dfd87a2cdb94a9723c4c4a220fc349679334a6886688a65def3f4",
+                "bytes": 389595,
+                "layout": "image",
+                "fps": 30,
+                "frames": 402,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O lançamento é em 5 de novembro.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+              "narrationAnchor": "A Nintendo marca o lançamento para cinco"
+            },
+            {
+              "start": 28.566666666666666,
+              "duration": 13.400000000000002,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "38d4f348f8e5224f0879d7b73450171dd842591c52987ba315237b0c89908e31",
+                "bytes": 275886,
+                "layout": "image",
+                "fps": 30,
+                "frames": 402,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O trabalho vai além da resolução.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+              "narrationAnchor": "O projeto reconstrói o clássico para o"
+            },
+            {
+              "start": 41.96666666666667,
+              "duration": 15.033333333333331,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "e0d6209747a938b9622f8da42b245e4ae5b0c0de71b667e8cf9a75de9cfce571",
+                "bytes": 145955,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 451,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Reconstruir também ensina.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+              "narrationAnchor": "Na entrevista da Nintendo, o produtor Eiji"
+            },
+            {
+              "start": 57,
+              "duration": 16.36666666666666,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "6a0d2e0513ac626b66817ac6530a3b06853f0e1b3765a5ec6d38149ec820c112",
+                "bytes": 310323,
+                "layout": "image",
+                "fps": 30,
+                "frames": 491,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A comparação precisa considerar o trabalho novo.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+              "narrationAnchor": "A pergunta editorial interessante é como essa"
+            }
+          ]
+        },
+        {
+          "chapter": "03",
+          "voiceStartSec": 104.167,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.7,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "273931601114e58659970f7a6af06184d50451a2f23223fcd626b6f79470daf8",
+                "bytes": 216292,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 411,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Sim, remakes podem concorrer.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide03.jpg",
+              "narrationAnchor": "O regulamento do The Game Awards permite"
+            },
+            {
+              "start": 13.7,
+              "duration": 12.100000000000001,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "81b2f6963a8db43736bf4d0af74d685bfe2adb92c19d4bd4052e8a281afd66dc",
+                "bytes": 266157,
+                "layout": "image",
+                "fps": 30,
+                "frames": 363,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A regra abre a porta.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+              "narrationAnchor": "Isso resolve a dúvida sobre poder participar,"
+            },
+            {
+              "start": 25.8,
+              "duration": 12.2,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "00d43aadf4dcb1fb692ea348562202aa72732c3d2df5880a48b6fac6f577b007",
+                "bytes": 10429416,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 366,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 47,
+                "source_audio": "muted"
+              },
+              "headline": "GTA VI também precisa passar pelas etapas.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "Para GTA seis, o tamanho da expectativa"
+            }
+          ]
+        },
+        {
+          "chapter": "04",
+          "voiceStartSec": 142.167,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.2,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "76044ce824ea651813f771431b75eb0ffb4e552dfd8377d43b94824d68c1ff48",
+                "bytes": 185547,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 396,
+                "animated_frames": 51,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "As datas que importam.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+              "narrationAnchor": "No calendário anunciado, Zelda chega em cinco"
+            },
+            {
+              "start": 13.2,
+              "duration": 11.900000000000002,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "70c84727f45c8dbd32d2ad6ca96491a02b1d12df280e8870af3e846ae5970329",
+                "bytes": 174778,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 357,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Dentro do prazo anunciado.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "Com essas datas, GTA seis está previsto"
+            },
+            {
+              "start": 25.1,
+              "duration": 14.399999999999999,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d99b25d97ca0c8548e3ca283008e9eaac2bb370b8b64bda229b1eaacb2005dcc",
+                "bytes": 6606556,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 432,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 6,
+                "source_audio": "muted"
+              },
+              "headline": "Avaliar exige acesso ao jogo.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Existe ainda a questão prática do tempo"
+            },
+            {
+              "start": 39.5,
+              "duration": 15.06666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "54ad55b3718b71031c7f8e01b095a7f33582b8f05faa9bec7761fde18b34c642",
+                "bytes": 251439,
+                "layout": "image",
+                "fps": 30,
+                "frames": 452,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Data confirmada e acesso confirmado são evidências diferentes.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+              "narrationAnchor": "A conclusão responsável é limitada ao que"
+            }
+          ]
+        },
+        {
+          "chapter": "05",
+          "voiceStartSec": 196.734,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.533333333333333,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "3130a94a49ae1deeeb6be5cdfa54eba6dceab362d6e9fd2eeacd5a0569bddd5b",
+                "bytes": 202257,
+                "layout": "process",
+                "fps": 30,
+                "frames": 436,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A média e a votação medem coisas diferentes.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+              "narrationAnchor": "Uma média combina avaliações publicadas por diferentes"
+            },
+            {
+              "start": 14.533333333333333,
+              "duration": 14.366666666666665,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "ea10e7c6f417bdf88870b7a0616c57a64b2fb96938cace27d4232fb29bd59d2b",
+                "bytes": 373749,
+                "layout": "image",
+                "fps": 30,
+                "frames": 431,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O júri reúne veículos internacionais.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+              "narrationAnchor": "O TGA reúne mais de cem veículos"
+            },
+            {
+              "start": 28.9,
+              "duration": 12.600000000000001,
+              "layout": "bars",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "71cf53c6afb44fe9f6b431f39b5bfca311d73e6ba9c67dd5fc4865294038da2d",
+                "bytes": 128543,
+                "layout": "bars",
+                "fps": 30,
+                "frames": 378,
+                "animated_frames": 60,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O peso da votação final.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "Na escolha dos vencedores, o júri pesa"
+            },
+            {
+              "start": 41.5,
+              "duration": 12.966666666666669,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "c0bff7cd2b6bba3133ca8cede30eb106c1ecfbcebaf595f37c6fa91556d872e9",
+                "bytes": 6936968,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 389,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 58,
+                "source_audio": "muted"
+              },
+              "headline": "Popularidade não resolve a conta sozinha.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "Uma comunidade muito mobilizada pode participar e"
+            },
+            {
+              "start": 54.46666666666667,
+              "duration": 12.933333333333337,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "da2fce6430e08b2d2d7316643f951e4a71612bf403b23dde57940ed5e1014149",
+                "bytes": 337048,
+                "layout": "image",
+                "fps": 30,
+                "frames": 388,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "96 é recepção crítica.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+              "narrationAnchor": "Por isso, a nota noventa e seis"
+            }
+          ]
+        },
+        {
+          "chapter": "06",
+          "voiceStartSec": 264.134,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.633333333333333,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "3ed14ae6359c28f36b0cd19898f0ba0d0e12746c6e6f7fdb325b9bfb7593e41a",
+                "bytes": 280004,
+                "layout": "image",
+                "fps": 30,
+                "frames": 409,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Reconstrução de um clássico.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+              "narrationAnchor": "Se o encontro acontecer, uma comparação útil"
+            },
+            {
+              "start": 13.633333333333333,
+              "duration": 13.466666666666669,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "c5c1c04de59fab4f0ff26b67290c452c874c46435745e394b7a571d0a651106a",
+                "bytes": 8014272,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 404,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 24,
+                "source_audio": "muted"
+              },
+              "headline": "Uma aventura nova também precisa se sustentar.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "No caso de GTA seis, a escala"
+            },
+            {
+              "start": 27.1,
+              "duration": 14.100000000000001,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d2a078895db3ce694b1bbb7eda1771645685726fd534138aac9d1d4b6fbc3533",
+                "bytes": 184244,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 423,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O próximo passo é a lista oficial.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+              "narrationAnchor": "O anúncio dos indicados mostrará se esse"
+            },
+            {
+              "start": 41.2,
+              "duration": 12.266666666666666,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "75b039d4938d389e63bfcc0157f540b55829364f6ed01a4e95679ce9f03337a1",
+                "bytes": 278951,
+                "layout": "image",
+                "fps": 30,
+                "frames": 368,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Qual trabalho merece ser reconhecido?",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+              "narrationAnchor": "A discussão fica melhor quando sai de"
+            },
+            {
+              "start": 53.46666666666667,
+              "duration": 4.766666666666666,
+              "layout": "cta",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "8a8a9f94d0e98b624295a4a34db4c45f8eefe7ef39b61699a6ce065217179f47",
+                "bytes": 61545,
+                "layout": "cta",
+                "fps": 30,
+                "frames": 143,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Jogos e indústria, com contexto.",
+              "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+              "narrationAnchor": "Para acompanhar jogos e indústria"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.8,
+        "true_peak_dbtp": -1.89,
+        "corrected": false,
+        "human_listening": false
+      },
+      "audio_mix": {
+        "music": "Shadow — James Gargette — CC0",
+        "previous_gain": 0.06,
+        "gain": 0.16,
+        "gain_change_db": 8.52,
+        "ducking": {
+          "threshold": 0.08,
+          "ratio": 2,
+          "attack_ms": 35,
+          "release_ms": 650
+        },
+        "picture_packet_hash_unchanged": true,
+        "previous_mix_backup": "tmp/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/before-music-adjustment.mp4",
+        "verification": {
+          "passed": true,
+          "full_decode": true,
+          "integrated_lufs": -14.8,
+          "true_peak_dbtp": -1.89,
+          "corrected": false,
+          "human_listening": false
+        }
+      }
+    },
+    "duration_seconds": 322.367,
+    "duration_formatted": "05:22",
+    "monetization_midroll_eligible": false,
+    "file_size": 50007796,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado.mp4",
+    "video_no_narration_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Opção 1",
+        "angle": "ZELDA × GTA VI",
+        "headline": "DUELO NO TGA?",
+        "subline": "ZELDA × GTA VI",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-1.jpg"
+      },
+      {
+        "id": "thumb_2",
+        "label": "Opção 2",
+        "angle": "ENTENDA A VOTAÇÃO",
+        "headline": "96 É TROFÉU?",
+        "subline": "ENTENDA A VOTAÇÃO",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-2.jpg"
+      },
+      {
+        "id": "thumb_3",
+        "label": "Opção 3",
+        "angle": "GTA VI NO TGA 2026",
+        "headline": "DENTRO DO PRAZO?",
+        "subline": "GTA VI NO TGA 2026",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-3.jpg"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "O duelo ainda precisa acontecer",
+        "kicker": "A PERGUNTA CERTA",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://thegameawards.com/faq"
+      },
+      {
+        "number": "02",
+        "title": "O que a nota de Zelda realmente diz",
+        "kicker": "CRÍTICA E RECONSTRUÇÃO",
+        "start_seconds": 30.8,
+        "timestamp": "00:30",
+        "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/ · https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/"
+      },
+      {
+        "number": "03",
+        "title": "Um remake pode concorrer?",
+        "kicker": "A REGRA NÃO EXCLUI O FORMATO",
+        "start_seconds": 104.167,
+        "timestamp": "01:44",
+        "source": "https://thegameawards.com/faq"
+      },
+      {
+        "number": "04",
+        "title": "O calendário sem contagem inventada",
+        "kicker": "DATA DE LANÇAMENTO E PRAZO",
+        "start_seconds": 142.167,
+        "timestamp": "02:22",
+        "source": "https://thegameawards.com/faq · https://www.rockstargames.com/VI · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/"
+      },
+      {
+        "number": "05",
+        "title": "Quem transforma recepção em prêmio",
+        "kicker": "NOTAS NÃO SÃO CÉDULAS",
+        "start_seconds": 196.734,
+        "timestamp": "03:16",
+        "source": "https://thegameawards.com/faq · https://thegameawards.com/voting-jury"
+      },
+      {
+        "number": "06",
+        "title": "Como comparar sem declarar um vencedor",
+        "kicker": "O QUE OBSERVAR DAQUI PARA A FRENTE",
+        "start_seconds": 264.134,
+        "timestamp": "04:24",
+        "source": "https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.rockstargames.com/VI · https://thegameawards.com/faq"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "58 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.8 LUFS; -1.89 dBTP. Trilha ajustada; escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "O duelo ainda precisa acontecer",
+        "hook": "Um Zelda com nota noventa e seis pode enfrentar GTA seis pelo jogo do ano?",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:45",
+        "duration_seconds": 45,
+        "related_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
+      },
+      {
+        "id": "short_2",
+        "title": "O que a nota de Zelda realmente diz",
+        "hook": "O levantamento publicado pelo GameSpot em quatro de novembro aponta média noventa e seis no Metacritic para o novo Ocarina of Time.",
+        "chapter_number": "02",
+        "start_timestamp": "00:30",
+        "end_timestamp": "01:15",
+        "duration_seconds": 45,
+        "related_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
+      }
+    ],
+    "youtube": {
+      "title": "Zelda x GTA 6 no GOTY 2026: quem pode levar o prêmio?",
+      "description": "Zelda com nota 96 e GTA 6 perto do prazo do The Game Awards: esse duelo pelo GOTY 2026 pode acontecer? Entenda quem pode concorrer, como funcionam as indicações e o peso real do voto do público.\n\nO vídeo separa recepção crítica, elegibilidade e vitória, sem tratar os jogos como finalistas confirmados. A média de Zelda é o levantamento publicado pelo GameSpot em 4 de novembro de 2026 e pode mudar. Datas e regras conferidas nessa data.\n\nCAPÍTULOS\n00:00 O duelo ainda precisa acontecer\n00:30 O que a nota de Zelda realmente diz\n01:44 Um remake pode concorrer?\n02:22 O calendário sem contagem inventada\n03:16 Quem transforma recepção em prêmio\n04:24 Como comparar sem declarar um vencedor\n\nPara você, o que mais pesa na escolha do jogo do ano?\nInscreva-se para acompanhar jogos e indústria com contexto.\n\nMatérias e análises: https://orangebrick.blog\n\nFONTES\nhttps://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html\nhttps://thegameawards.com/faq\nhttps://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/\nhttps://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/\nhttps://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/\nhttps://www.rockstargames.com/VI\nhttps://thegameawards.com/voting-jury\n\nImagens: Nintendo e Rockstar Games.\nTrilha: Shadow — James Gargette (CC0): https://opengameart.org/content/shadow-2\n\n#GTA6 #Zelda #TheGameAwards",
+      "tags": [
+        "GTA 6",
+        "GTA VI",
+        "Grand Theft Auto VI",
+        "Zelda",
+        "The Legend of Zelda Ocarina of Time",
+        "GOTY 2026",
+        "The Game Awards 2026",
+        "jogo do ano",
+        "Nintendo Switch 2",
+        "Rockstar Games",
+        "Nintendo",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Que aspecto você considera decisivo para escolher um jogo do ano?",
+      "visibility": "private",
+      "scheduled_at": "2026-11-05T15:00:00Z",
+      "video_id": "UC_GLh8mV2o",
+      "video_url": "https://www.youtube.com/watch?v=UC_GLh8mV2o",
+      "upload_status": "scheduled"
+    },
+    "marketing": {
+      "standard": "youtube-editorial-v3",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "O que as regras dizem sobre remakes, calendário e votação do jogo do ano.",
+      "primary_cta": "Para acompanhar jogos e indústria com contexto, inscreva-se no canal.",
+      "title_variants": [
+        "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+        "Zelda pode enfrentar GTA VI pelo jogo do ano?",
+        "Nota 96 e prazo do TGA: entenda Zelda x GTA VI"
+      ],
+      "thumbnail_concepts": [
+        "Zelda e GTA VI: DUELO CONFIRMADO?",
+        "Zelda: 96 NÃO É TROFÉU",
+        "GTA VI: DENTRO DO PRAZO?"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 307.367,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_notes": "Reedição no padrão aprovado, com roteiro mais curto, fontes atualizadas e voz Francisca. Revisão auditiva humana pendente. Original preservado. Trilha aumentada em 8,52 dB antes do ducking, com redução automática mais suave. Escuta humana pendente.",
+    "approved_at": "2026-11-05T03:35:45.482Z",
+    "created_at": "2026-11-05T03:09:24.982Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
+    "replaces_slug": "zelda-gta-vi-corrida-goty-2026",
+    "review_history": [
+      {
+        "id": "approved-zelda-gta-vi-corrida-goty-2026-reeditado",
+        "kind": "approved",
+        "at": "2026-11-05T03:35:45.482Z",
+        "detail": "Aprovação registrada antes do envio autorizado ao YouTube."
+      },
+      {
+        "id": "scheduled-zelda-gta-vi-corrida-goty-2026-reeditado",
+        "kind": "scheduled",
+        "at": "2026-11-05T03:35:45.482Z",
+        "detail": "Publicação agendada no YouTube para 05/11/2026, 12:00, horário de Brasília.",
+        "youtube_video_id": "UC_GLh8mV2o"
+      }
+    ]
+  },
+  "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado": {
+    "slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+    "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+    "title": "God of War Laufey foi adiado: nova data e o que muda",
+    "subtitle": "Faye, o Everywhen, combate e o detalhe da Collector Box que merece atenção.",
+    "status": "scheduled",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "Aprovado e agendado no YouTube",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-ThalitaMultilingualNeural",
+    "editorial_standard": "youtube-editorial-v3",
+    "is_preview": false,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.4,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "48fbb3d57fb1b80e598e29551eca88319fb50dd8f3841e4d2b82d3caaa424f6a",
+                "bytes": 265095,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 372,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Faye chega em maio.",
+              "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+              "narrationAnchor": "God of War Laufey saiu de fevereiro"
+            },
+            {
+              "start": 12.4,
+              "duration": 11.700000000000001,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "75d347c0fb8e8eebfe5ac30faa602a895258bfaa0c520d96963df92de32ae21b",
+                "bytes": 148772,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 351,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "De fevereiro para maio.",
+              "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+              "narrationAnchor": "O calendário anterior apontava dezesseis de fevereiro."
+            },
+            {
+              "start": 24.1,
+              "duration": 14.233333333333334,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "121a69107cdf8929b19f2828d79bd2f8812c1b9391c8dad2fa87884a9ad74de8",
+                "bytes": 291197,
+                "layout": "image",
+                "fps": 30,
+                "frames": 427,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O que muda além do calendário?",
+              "source": "https://blog.playstation.com/uploads/2026/06/c568cfbd5d3e9b5dc1c099420ca32d5d56d0256e.jpg",
+              "narrationAnchor": "Para entender o projeto, vale olhar para"
+            }
+          ]
+        },
+        {
+          "chapter": "02",
+          "voiceStartSec": 38.333,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.2,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "8e7645d0e76c47dab7b70f65c2e647fca2ecec3af70bb7be424d64c2aa1d5982",
+                "bytes": 325565,
+                "layout": "image",
+                "fps": 30,
+                "frames": 396,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A história começa depois do funeral.",
+              "source": "https://blog.playstation.com/uploads/2026/06/1fb563c849f5f555690a331bbbb89f01cec7e5d0.jpg",
+              "narrationAnchor": "Faye desperta depois de seu funeral em"
+            },
+            {
+              "start": 13.2,
+              "duration": 11.8,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "e5480488dc180f7fe62019b1bb3625cef66521d3cfc3b847533ecb20d03a5856",
+                "bytes": 281418,
+                "layout": "image",
+                "fps": 30,
+                "frames": 354,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Ela precisa agir por conta própria.",
+              "source": "https://blog.playstation.com/uploads/2026/06/c568cfbd5d3e9b5dc1c099420ca32d5d56d0256e.jpg",
+              "narrationAnchor": "O novo ponto de vista permite conhecer"
+            },
+            {
+              "start": 25,
+              "duration": 12.100000000000001,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "70a960643416fe97abee9b2a11fc83181dd3cf7fedfb2ae7ccc630614cfc7ebe",
+                "bytes": 147457,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 363,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O próximo capítulo principal da série.",
+              "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+              "narrationAnchor": "Na apresentação assinada pela diretora de comunicação"
+            },
+            {
+              "start": 37.1,
+              "duration": 13.366666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "21ca14d77ddc3eb95d23e9cbe7e8093e0c58b91c76ef53f68b54b097aac3dd52",
+                "bytes": 310179,
+                "layout": "image",
+                "fps": 30,
+                "frames": 401,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Mudar a protagonista muda a pergunta.",
+              "source": "https://blog.playstation.com/uploads/2026/09/0b49e7bea6dabc13cc42e1dffa512bffce6cf815.jpg",
+              "narrationAnchor": "Essa mudança cria uma questão interessante para"
+            }
+          ]
+        },
+        {
+          "chapter": "03",
+          "voiceStartSec": 88.8,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.966666666666667,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "61d5b3de7e794c5ea5bc70e0779c6c8911a02e1c8fd48e726fea3f4697ed2ea7",
+                "bytes": 350788,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 389,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O Everywhen amplia o cenário.",
+              "source": "https://blog.playstation.com/uploads/2026/06/11e4fd90abbd12235bf8c02eb2e0df777aab1d80.jpg",
+              "narrationAnchor": "O destino de Faye é o Everywhen,"
+            },
+            {
+              "start": 12.966666666666667,
+              "duration": 16.43333333333333,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "316715020727854479d8a307bde316856e8bbb029239951771ae4640ce83647c",
+                "bytes": 325139,
+                "layout": "image",
+                "fps": 30,
+                "frames": 493,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Uma paisagem também pode contar história.",
+              "source": "https://blog.playstation.com/uploads/2026/06/bf2289b94400a3f16dee48e8f1d68f5a21de76f4.jpg",
+              "narrationAnchor": "As imagens oficiais mostram figuras, construções e"
+            },
+            {
+              "start": 29.4,
+              "duration": 12.800000000000004,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "13b3e1b44ad1d072a02d11b453c280b9a287f56d284cc5ffa7cfd83e5d429e48",
+                "bytes": 341635,
+                "layout": "image",
+                "fps": 30,
+                "frames": 384,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Encontrar uma saída é parte do conflito.",
+              "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+              "narrationAnchor": "A jornada envolve compreender esse lugar e"
+            },
+            {
+              "start": 42.2,
+              "duration": 15.066666666666663,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "9872e5d4a02f96ecd01816f37e50d476763e7302a5fd2e3d52f43afa072bd31d",
+                "bytes": 287294,
+                "layout": "image",
+                "fps": 30,
+                "frames": 452,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Companhia em um lugar estranho.",
+              "source": "https://blog.playstation.com/uploads/2026/06/ac77c0ffa02b542704e0dac0cb89a42eeb1e9641.jpg",
+              "narrationAnchor": "Faye também terá companhia: Phranque e Rue"
+            }
+          ]
+        },
+        {
+          "chapter": "04",
+          "voiceStartSec": 146.067,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.7,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "fa8ce334955157252502f67ec4a6809e28d19a7c12ebe8c1fa1890a394d1a5b5",
+                "bytes": 345135,
+                "layout": "image",
+                "fps": 30,
+                "frames": 381,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Movimento como parte da identidade.",
+              "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+              "narrationAnchor": "O estúdio descreve uma combinação entre a"
+            },
+            {
+              "start": 12.7,
+              "duration": 4.800000000000001,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "f8a1d07dc4a02142f71f9c152cc3b260b81eca3851d72106aceae268f3dd2e46",
+                "bytes": 8587261,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 144,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://blog.playstation.com/uploads/2026/09/254eb34604b011e523c806c3e4b59fc8bc82ba3e.mp4",
+                "source_start": 0,
+                "source_audio": "muted"
+              },
+              "headline": "O arco em ação.",
+              "source": "https://blog.playstation.com/uploads/2026/09/d9d0a64623639de5ce6e30a52ed09b74c8c0282f.jpg",
+              "narrationAnchor": "Nesta demonstração oficial, observe como o arco"
+            },
+            {
+              "start": 17.5,
+              "duration": 16.866666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "2f263c54330728f23fb79e6ab90ccdf32ef400e531cba94460a01d5c5502d8ec",
+                "bytes": 493735,
+                "layout": "image",
+                "fps": 30,
+                "frames": 506,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O modo de mira muda o ataque.",
+              "source": "https://blog.playstation.com/uploads/2026/09/d9d0a64623639de5ce6e30a52ed09b74c8c0282f.jpg",
+              "narrationAnchor": "O PlayStation Blog detalha o arco Serpent"
+            },
+            {
+              "start": 34.36666666666667,
+              "duration": 5.033333333333331,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "076ff3d3aab2043936081607c1ab88877d0980cd41f9386c0a0a1f61192cf444",
+                "bytes": 12814394,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 151,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://blog.playstation.com/uploads/2026/09/6255c1b8417892dee0bcb4d0b5f33d7779d1d01e.mp4",
+                "source_start": 0,
+                "source_audio": "muted"
+              },
+              "headline": "Uma segunda demonstração de combate.",
+              "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+              "narrationAnchor": "Outro trecho oficial mostra o combate em"
+            },
+            {
+              "start": 39.4,
+              "duration": 13.866666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "36bc34d935caf6ae41e727e67fa164bed714c44cfba673426c571f5f73f57ff3",
+                "bytes": 385682,
+                "layout": "image",
+                "fps": 30,
+                "frames": 416,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A demonstração não é um teste independente.",
+              "source": "https://blog.playstation.com/uploads/2026/09/bafca2172045024e8fb2136ff2a7029179214d7d.jpg",
+              "narrationAnchor": "Essas cenas ajudam a entender a proposta,"
+            }
+          ]
+        },
+        {
+          "chapter": "05",
+          "voiceStartSec": 199.334,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.766666666666667,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "b64643f3c8c71081641a6063896391a26fb735e60e8b077b102f1ba6386ecee1",
+                "bytes": 150877,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 413,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A nova data está confirmada.",
+              "source": "https://blog.playstation.com/uploads/2026/06/faf12b84129bcb6b3bf751cdf7ca9d44725d4d08.jpg",
+              "narrationAnchor": "O que podemos afirmar com segurança é"
+            },
+            {
+              "start": 13.766666666666667,
+              "duration": 14.299999999999999,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "32a5d6ab813b208a78a65ce68a93711f03fe2a5fda35cba2e485d67d9afa4a83",
+                "bytes": 281855,
+                "layout": "image",
+                "fps": 30,
+                "frames": 429,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Confira o que cada edição inclui.",
+              "source": "https://blog.playstation.com/uploads/2026/09/0ac734f7d5b27faed4dec1e8c4a3ba9e892bd27d.jpg",
+              "narrationAnchor": "Para quem pensa em reservar, a primeira"
+            },
+            {
+              "start": 28.066666666666666,
+              "duration": 14.033333333333335,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "f5772a9a805748071ebc4876c94430c3a8da16f8fcc697d93430193fb132ec1e",
+                "bytes": 259026,
+                "layout": "image",
+                "fps": 30,
+                "frames": 421,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A Collector Box não inclui o jogo.",
+              "source": "https://blog.playstation.com/uploads/2026/09/ae2b78ae3d605a74bb2f7e4594b322f16cc07dc3.jpg",
+              "narrationAnchor": "Aqui está o detalhe que merece atenção:"
+            },
+            {
+              "start": 42.1,
+              "duration": 15.366666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "7b308642176fd8f26af2bfd09559368aae4ae301689b43776b31d777a8f94a65",
+                "bytes": 283111,
+                "layout": "image",
+                "fps": 30,
+                "frames": 461,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Reserva feita? Confira o pedido.",
+              "source": "https://blog.playstation.com/uploads/2026/09/80456f7d6b73917ed6ac7162328b97d7e69df1b9.jpg",
+              "narrationAnchor": "Se você já reservou, confira o pedido"
+            }
+          ]
+        },
+        {
+          "chapter": "06",
+          "voiceStartSec": 256.801,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.866666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "c858409af709e8ba0f97ed2bb75c570965dc77564e4267dfae2c38279ab04317",
+                "bytes": 260242,
+                "layout": "image",
+                "fps": 30,
+                "frames": 416,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A proposta já tem identidade.",
+              "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+              "narrationAnchor": "Laufey já tem uma proposta clara: acompanhar"
+            },
+            {
+              "start": 13.866666666666667,
+              "duration": 14.866666666666667,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "307ce732bcd6bd3b9b59ecc4472cc3e2a71455e9384f08b70f1080af91e78194",
+                "bytes": 213772,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 446,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "O próximo marco é 20 de maio.",
+              "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+              "narrationAnchor": "Até vinte de maio de dois mil"
+            },
+            {
+              "start": 28.733333333333334,
+              "duration": 4.533333333333331,
+              "layout": "cta",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "60935e69d5d7fccab381c45efb566f8585e49f6712dcf2d16665715cceacb3b8",
+                "bytes": 63717,
+                "layout": "cta",
+                "fps": 30,
+                "frames": 136,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Jogos e indústria, com contexto.",
+              "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+              "narrationAnchor": "Para acompanhar jogos e indústria"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-ThalitaMultilingualNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.08,
+        "true_peak_dbtp": -1.82,
+        "corrected": true,
+        "human_listening": false
+      }
+    },
+    "duration_seconds": 290.068,
+    "duration_formatted": "04:50",
+    "monetization_midroll_eligible": false,
+    "file_size": 32722442,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.mp4",
+    "video_no_narration_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Opção 1",
+        "angle": "GOD OF WAR LAUFEY",
+        "headline": "ADIADO PARA MAIO",
+        "subline": "GOD OF WAR LAUFEY",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-1.jpg"
+      },
+      {
+        "id": "thumb_2",
+        "label": "Opção 2",
+        "angle": "UM NOVO GOD OF WAR",
+        "headline": "FAYE NO COMANDO",
+        "subline": "UM NOVO GOD OF WAR",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-2.jpg"
+      },
+      {
+        "id": "thumb_3",
+        "label": "Opção 3",
+        "angle": "CUIDADO COM A COLLECTOR BOX",
+        "headline": "SEM O JOGO?",
+        "subline": "CUIDADO COM A COLLECTOR BOX",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-3.jpg"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "A data mudou. A proposta continua.",
+        "kicker": "O QUE ESTÁ CONFIRMADO",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/"
+      },
+      {
+        "number": "02",
+        "title": "Faye assume o ponto de vista",
+        "kicker": "UMA GUERREIRA ALÉM DA MEMÓRIA",
+        "start_seconds": 38.333,
+        "timestamp": "00:38",
+        "source": "https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/ · https://www.playstation.com/en-us/games/god-of-war-laufey/"
+      },
+      {
+        "number": "03",
+        "title": "Everywhen: um mundo para atravessar",
+        "kicker": "O ALÉM DOS DEUSES",
+        "start_seconds": 88.8,
+        "timestamp": "01:28",
+        "source": "https://www.playstation.com/en-us/games/god-of-war-laufey/ · https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/"
+      },
+      {
+        "number": "04",
+        "title": "O combate ganha outra cadência",
+        "kicker": "O QUE AS DEMONSTRAÇÕES MOSTRAM",
+        "start_seconds": 146.067,
+        "timestamp": "02:26",
+        "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/ · https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/"
+      },
+      {
+        "number": "05",
+        "title": "Adiamento e compra: dois cuidados",
+        "kicker": "O QUE CONFERIR ANTES DE RESERVAR",
+        "start_seconds": 199.334,
+        "timestamp": "03:19",
+        "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/ · https://www.playstation.com/en-us/games/god-of-war-laufey/"
+      },
+      {
+        "number": "06",
+        "title": "O que acompanhar até maio",
+        "kicker": "A PROMESSA PRECISA VIRAR EXPERIÊNCIA",
+        "start_seconds": 256.801,
+        "timestamp": "04:16",
+        "source": "https://www.playstation.com/en-us/games/god-of-war-laufey/ · https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "53 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.08 LUFS; -1.82 dBTP. Escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "A data mudou. A proposta continua.",
+        "hook": "God of War Laufey saiu de fevereiro e agora chega em vinte de maio de dois mil e vinte e sete.",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:45",
+        "duration_seconds": 45,
+        "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+      },
+      {
+        "id": "short_2",
+        "title": "Faye assume o ponto de vista",
+        "hook": "Faye desperta depois de seu funeral em uma terra desconhecida.",
+        "chapter_number": "02",
+        "start_timestamp": "00:38",
+        "end_timestamp": "01:23",
+        "duration_seconds": 45,
+        "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+      }
+    ],
+    "youtube": {
+      "title": "God of War Laufey foi adiado: nova data e o que muda",
+      "description": "God of War Laufey foi adiado para 20 de maio de 2027 no PS5. Entenda o que foi confirmado sobre a aventura de Faye, o mundo Everywhen, o combate e o detalhe da Collector Box que você precisa conferir antes de comprar.\n\nA nova data foi registrada no PlayStation Blog em 4 de novembro de 2026. Neste vídeo, separamos a proposta oficial do jogo do que ainda depende de demonstrações completas e avaliações independentes.\n\nCAPÍTULOS\n00:00 A data mudou. A proposta continua.\n00:38 Faye assume o ponto de vista\n01:28 Everywhen: um mundo para atravessar\n02:26 O combate ganha outra cadência\n03:19 Adiamento e compra: dois cuidados\n04:16 O que acompanhar até maio\n\nO que você mais quer ver em uma demonstração completa de Laufey?\nInscreva-se para acompanhar jogos e indústria com contexto.\n\nMais matérias e análises: https://orangebrick.blog\n\nFONTES OFICIAIS\nhttps://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/\nhttps://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/\nhttps://www.playstation.com/en-us/games/god-of-war-laufey/\n\nImagens e demonstrações: Sony Interactive Entertainment / Santa Monica Studio. Áudio original das demonstrações removido.\nTrilha: Shadow — James Gargette (CC0): https://opengameart.org/content/shadow-2\n\n#GodOfWar #Laufey #PS5",
+      "tags": [
+        "God of War Laufey",
+        "God of War",
+        "Laufey",
+        "Faye",
+        "God of War Laufey adiado",
+        "God of War 2027",
+        "PS5",
+        "PlayStation 5",
+        "Santa Monica Studio",
+        "Everywhen",
+        "God of War gameplay",
+        "Collector Box",
+        "Orange Brick"
+      ],
+      "pinned_comment": "O que você mais quer ver em uma demonstração completa de God of War Laufey?",
+      "visibility": "private",
+      "scheduled_at": "2026-11-06T15:00:00Z",
+      "video_id": "y6ChtY0MkmU",
+      "video_url": "https://www.youtube.com/watch?v=y6ChtY0MkmU",
+      "upload_status": "scheduled"
+    },
+    "marketing": {
+      "standard": "youtube-editorial-v3",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "Faye, o Everywhen, combate e o detalhe da Collector Box que merece atenção.",
+      "primary_cta": "Para acompanhar jogos e indústria com contexto, inscreva-se no canal.",
+      "title_variants": [
+        "God of War Laufey foi adiado: nova data e o que muda",
+        "God of War Laufey: Faye, combate e nova data no PS5",
+        "Laufey chega em maio: o que sabemos do novo God of War"
+      ],
+      "thumbnail_concepts": [
+        "ADIADO PARA MAIO",
+        "FAYE NO COMANDO",
+        "A CAIXA NÃO TEM O JOGO"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 275.068,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_notes": "Reedição no padrão aprovado, com roteiro mais curto, fontes atualizadas, voz Thalita e trilha mais presente. Revisão auditiva humana pendente. Original preservado.",
+    "approved_at": "2026-11-05T03:49:14.577Z",
+    "created_at": "2026-11-05T03:48:36.883Z",
+    "updated_at": "2026-11-05T04:35:07.061Z",
+    "replaces_slug": "god-of-war-laufey-do-anuncio-ao-adiamento",
+    "review_history": [
+      {
+        "id": "approved-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+        "kind": "approved",
+        "at": "2026-11-05T03:49:14.577Z",
+        "detail": "Aprovação registrada antes do envio autorizado ao YouTube."
+      },
+      {
+        "id": "scheduled-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+        "kind": "scheduled",
+        "at": "2026-11-05T03:49:14.577Z",
+        "detail": "Publicação agendada no YouTube para 06/11/2026, 12:00, horário de Brasília.",
+        "youtube_video_id": "y6ChtY0MkmU"
+      }
+    ]
+  },
+  "gta-6-212gb-prepare-seu-console": {
+    "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+    "title": "GTA 6: até 212 GB — prepare seu console para o download",
+    "subtitle": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+    "status": "pending_review",
+    "pipeline_stage_index": 7,
+    "pipeline_stage_label": "7/8 · Aguardando sua revisão e clique em Aprovar",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-FranciscaNeural",
+    "slug": "gta-6-212gb-prepare-seu-console",
+    "updated_at": "2026-11-06T20:30:18.205Z",
+    "error": "A produção foi interrompida. Confira roteiro, materiais e provedor de voz antes de tentar novamente.",
+    "editorial_standard": "youtube-editorial-v3",
+    "is_preview": false,
+    "production": {
+      "scenes": [
+        {
+          "chapter": "01",
+          "voiceStartSec": 0,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.133333333333333,
+              "layout": "hero",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "c55c410d9cf33a68cfa014eda7db8daf268cbc745bab37c00a1f20ffb57ee301",
+                "bytes": 323828,
+                "layout": "hero",
+                "fps": 30,
+                "frames": 424,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "GTA VI: até 212 GB.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "GTA seis pode exigir até duzentos e"
+            },
+            {
+              "start": 14.133333333333333,
+              "duration": 13.866666666666667,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "20fd594379f7787b44f7c5897ac6505bd8a61ca4bf7e057fed322306d0437acb",
+                "bytes": 187945,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 416,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Até 212 GB disponíveis.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "A palavra importante é até."
+            },
+            {
+              "start": 28,
+              "duration": 9.966666666666669,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "0a7569ecc526e7e2c0977738274ed255be4031f9490fcb302a5f3f42740e9dfb",
+                "bytes": 3424517,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 299,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 7,
+                "source_audio": "muted"
+              },
+              "headline": "O primeiro passo é verificar espaço.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Uma instalação desse tamanho começa antes do"
+            },
+            {
+              "start": 37.96666666666667,
+              "duration": 13,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "6e0995fe62ae479c8e907aa442ef98c3170474582bab5c2ca8721258856d1136",
+                "bytes": 158684,
+                "layout": "process",
+                "fps": 30,
+                "frames": 390,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Três perguntas para se preparar.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Depois, vale separar três perguntas."
+            }
+          ]
+        },
+        {
+          "chapter": "02",
+          "voiceStartSec": 50.967,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.966666666666667,
+              "layout": "metrics",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "1d1bf4465b9cd380f5c8480bb1c6240309a401336a9473125a9e1faf7e1887d0",
+                "bytes": 222312,
+                "layout": "metrics",
+                "fps": 30,
+                "frames": 389,
+                "animated_frames": 43,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Capacidade e espaço livre diferem.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "Antes de começar, abra a área de"
+            },
+            {
+              "start": 12.966666666666667,
+              "duration": 11.633333333333335,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "7f895c72b086784bf1b3884ff076fd0d12022bcc591656f38b8cdcd731836936",
+                "bytes": 167214,
+                "layout": "process",
+                "fps": 30,
+                "frames": 349,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Prepare o armazenamento.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Também vale revisar o que está instalado"
+            },
+            {
+              "start": 24.6,
+              "duration": 13.100000000000001,
+              "layout": "bars",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "608836fa45a7917aeb0321d174cfe491cce1a012bbd48e2abc14a8dc7fc0d7d4",
+                "bytes": 151349,
+                "layout": "bars",
+                "fps": 30,
+                "frames": 393,
+                "animated_frames": 70,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Velocidade muda a espera.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "O tamanho do arquivo muda outra parte"
+            },
+            {
+              "start": 37.7,
+              "duration": 15.466666666666661,
+              "layout": "quote",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "e2c42969b933a9f9937fa65513a69a6116fafcf33172720ba1e755e8ab8dd9b2",
+                "bytes": 157334,
+                "layout": "quote",
+                "fps": 30,
+                "frames": 464,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A simulação não mede sua conexão.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Esse cálculo não é uma previsão do"
+            },
+            {
+              "start": 53.166666666666664,
+              "duration": 9.800000000000004,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "6ccf14a9c7f9addf7fa620036d49b39c400729902eff3dc3723fb59470d42bae",
+                "bytes": 7599828,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 294,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 40,
+                "source_audio": "muted"
+              },
+              "headline": "Espaço e conexão: prepare os dois.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+              "narrationAnchor": "Planeje as duas tarefas: reservar espaço suficiente"
+            }
+          ]
+        },
+        {
+          "chapter": "03",
+          "voiceStartSec": 113.934,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 13.1,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "9c9778edacf4029894a9d651b81e10a935bcf7ac596b9aeaea0e18574b09dcb0",
+                "bytes": 323079,
+                "layout": "image",
+                "fps": 30,
+                "frames": 393,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Comece pela lista de jogos instalados.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Compare o espaço livre exibido pelo console"
+            },
+            {
+              "start": 13.1,
+              "duration": 11.233333333333333,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "5710f995137dc731795e7020b05697887727769e62348499a41809904371e2a4",
+                "bytes": 6433947,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 337,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 28,
+                "source_audio": "muted"
+              },
+              "headline": "Excluir um jogo não precisa encerrar a jornada.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+              "narrationAnchor": "No PlayStation, jogos removidos podem ser baixados"
+            },
+            {
+              "start": 24.333333333333332,
+              "duration": 13.933333333333334,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "ce8f6a6b50f3cd8109ef496d6f9227221927ff62ab8d2508287c72dbfd30e2d9",
+                "bytes": 345916,
+                "layout": "image",
+                "fps": 30,
+                "frames": 418,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Jogo instalado e progresso são coisas diferentes.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+              "narrationAnchor": "O arquivo do jogo e os dados"
+            },
+            {
+              "start": 38.266666666666666,
+              "duration": 16.96666666666667,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "9dbc5ee42d34fd922b72d658292f842e4b8d3a3bd60c7f4a8808630e47b2c2e1",
+                "bytes": 389146,
+                "layout": "image",
+                "fps": 30,
+                "frames": 509,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Expansão também exige compatibilidade.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "Comprar armazenamento extra é uma opção, mas"
+            }
+          ]
+        },
+        {
+          "chapter": "04",
+          "voiceStartSec": 169.167,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 12.766666666666667,
+              "layout": "timeline",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "d784f308e4ece76542c5739c7eb8413a6acdbb91e5d6d5e167f3a290d1543964",
+                "bytes": 165036,
+                "layout": "timeline",
+                "fps": 30,
+                "frames": 383,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Pré-download em 10 de novembro.",
+              "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+              "narrationAnchor": "A Rockstar anuncia o início do pré-download"
+            },
+            {
+              "start": 12.766666666666667,
+              "duration": 14.6,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "1a63eabc55b291dd5ae0aa37c633d508bc818ffc0e34545d4a5a25e90f315bcb",
+                "bytes": 297773,
+                "layout": "image",
+                "fps": 30,
+                "frames": 438,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Confira sua edição e sua loja.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+              "narrationAnchor": "Confirme as condições da sua edição e"
+            },
+            {
+              "start": 27.366666666666667,
+              "duration": 13.566666666666663,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "a429cd7fb23979f6780f3db78055e330c359781a569b7d2c79f1ec232734f039",
+                "bytes": 8582480,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 407,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 50,
+                "source_audio": "muted"
+              },
+              "headline": "Planeje uma janela de download.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+              "narrationAnchor": "Se sua conexão é compartilhada, escolha um"
+            },
+            {
+              "start": 40.93333333333333,
+              "duration": 15.300000000000004,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "791d73247fd5ebca8ba0027f7cb6eb916d20fd6359c5a63a1a2a1657a0df3471",
+                "bytes": 329776,
+                "layout": "image",
+                "fps": 30,
+                "frames": 459,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "A estimativa não é uma promessa.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+              "narrationAnchor": "Os tempos que mostramos são apenas contas"
+            }
+          ]
+        },
+        {
+          "chapter": "05",
+          "voiceStartSec": 225.4,
+          "scenes": [
+            {
+              "start": 0,
+              "duration": 14.5,
+              "layout": "process",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "a502fa157ae57d4a8f5f732b8de4f95077529378678f443ca3f1c324481bca8e",
+                "bytes": 172509,
+                "layout": "process",
+                "fps": 30,
+                "frames": 435,
+                "animated_frames": 68,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Prepare o console em etapas.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+              "narrationAnchor": "O plano é simples."
+            },
+            {
+              "start": 14.5,
+              "duration": 15.466666666666665,
+              "layout": "image",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "4a07d5fbfb15e0150b01c224d970d8d26e12668662ebc422926942cf75675544",
+                "bytes": 336810,
+                "layout": "image",
+                "fps": 30,
+                "frames": 464,
+                "animated_frames": 45,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Deixe margem para a instalação.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+              "narrationAnchor": "Se puder, mantenha alguma margem livre após"
+            },
+            {
+              "start": 29.966666666666665,
+              "duration": 14.833333333333332,
+              "layout": "footage",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "20266b78ca2a0c154268b2b89eb4f0dd97e24eb228ea4135febfa08b30b9b755",
+                "bytes": 9583442,
+                "layout": "footage",
+                "fps": 30,
+                "frames": 445,
+                "camera": "fixed-viewport/native-footage",
+                "fixed_frame_verified": true,
+                "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+                "source_start": 60,
+                "source_audio": "muted"
+              },
+              "headline": "O número deve ajudar na decisão.",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+              "narrationAnchor": "No fim, duzentos e doze gigabytes são"
+            },
+            {
+              "start": 44.8,
+              "duration": 5,
+              "layout": "cta",
+              "camera": "fixed",
+              "render_verification": {
+                "fingerprint": "956573cbb4215688886f3bc9b92e8065c3da0377a2f983564a98f628c9050f3c",
+                "bytes": 75379,
+                "layout": "cta",
+                "fps": 30,
+                "frames": 150,
+                "animated_frames": 34,
+                "camera": "fixed",
+                "fixed_frame_verified": true
+              },
+              "headline": "Acompanhe os próximos vídeos",
+              "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+              "narrationAnchor": "Para acompanhar jogos e tecnologia"
+            }
+          ]
+        }
+      ],
+      "voices": [
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        },
+        {
+          "provider": "edge-tts",
+          "voice": "pt-BR-FranciscaNeural",
+          "word_timing": "sentence-weighted-estimate",
+          "review_required": true
+        }
+      ],
+      "human_audio_review": false,
+      "audio_verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.22,
+        "true_peak_dbtp": -1.75,
+        "corrected": true,
+        "human_listening": false
+      }
+    },
+    "duration_seconds": 275.2,
+    "duration_formatted": "04:35",
+    "monetization_midroll_eligible": false,
+    "file_size": 46225383,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "video_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console.mp4",
+    "video_no_narration_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console-sem-narracao.mp4",
+    "video_no_narration_clean_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console-sem-narracao-sem-legenda.mp4",
+    "srt_url": "/long-videos/gta-6-212gb-prepare-seu-console/gta-6-212gb-prepare-seu-console.srt",
+    "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/preview-sheet.jpg",
+    "thumbnails": [
+      {
+        "id": "thumb_1",
+        "label": "Opção 1",
+        "angle": "Armazenamento e download",
+        "headline": "ATÉ 212 GB",
+        "subline": "SEU CONSOLE ESTÁ PRONTO?",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-1.jpg"
+      },
+      {
+        "id": "thumb_2",
+        "label": "Opção 2",
+        "angle": "Armazenamento e download",
+        "headline": "GTA 6 VAI CABER?",
+        "subline": "ESPAÇO E DOWNLOAD",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-2.jpg"
+      },
+      {
+        "id": "thumb_3",
+        "label": "Opção 3",
+        "angle": "Armazenamento e download",
+        "headline": "PREPARE O CONSOLE",
+        "subline": "ANTES DE BAIXAR GTA 6",
+        "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/gta-6-212gb-prepare-seu-console/thumbnail-3.jpg"
+      }
+    ],
+    "selected_thumbnail_id": "thumb_1",
+    "chapters": [
+      {
+        "number": "01",
+        "title": "Até 212 GB: o que isso significa",
+        "kicker": "O NÚMERO E O CONTEXTO",
+        "start_seconds": 0,
+        "timestamp": "00:00",
+        "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements"
+      },
+      {
+        "number": "02",
+        "title": "Armazenamento e tempo de download",
+        "kicker": "O QUE MUDA PARA QUEM JOGA",
+        "start_seconds": 50.967,
+        "timestamp": "00:50",
+        "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq"
+      },
+      {
+        "number": "03",
+        "title": "Libere espaço sem perder o controle",
+        "kicker": "ANTES DE APAGAR",
+        "start_seconds": 113.934,
+        "timestamp": "01:53",
+        "source": "https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/ · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements"
+      },
+      {
+        "number": "04",
+        "title": "Quando o pré-download começa?",
+        "kicker": "CALENDÁRIO OFICIAL",
+        "start_seconds": 169.167,
+        "timestamp": "02:49",
+        "source": "https://www.rockstargames.com/VI"
+      },
+      {
+        "number": "05",
+        "title": "O que fazer antes de jogar",
+        "kicker": "UM PLANO PRÁTICO",
+        "start_seconds": 225.4,
+        "timestamp": "03:45",
+        "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://www.rockstargames.com/VI · https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/"
+      }
+    ],
+    "qa_checks": [
+      {
+        "id": "editorial_standard",
+        "label": "Padrão editorial de retenção",
+        "passed": true,
+        "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+      },
+      {
+        "id": "pronunciation_sync",
+        "label": "Revisão auditiva e legendas",
+        "passed": false,
+        "detail": "54 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+      },
+      {
+        "id": "verified_sources",
+        "label": "Revisão das fontes",
+        "passed": false,
+        "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+      },
+      {
+        "id": "loudness_mix",
+        "label": "Áudio final medido",
+        "passed": true,
+        "detail": "-14.22 LUFS; -1.75 dBTP. Escuta humana pendente."
+      },
+      {
+        "id": "visual_diversity",
+        "label": "Materiais visuais",
+        "passed": false,
+        "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+      }
+    ],
+    "shorts_suggestions": [
+      {
+        "id": "short_1",
+        "title": "Até 212 GB: o que isso significa",
+        "hook": "GTA seis pode exigir até duzentos e doze gigabytes livres no seu console.",
+        "chapter_number": "01",
+        "start_timestamp": "01:00",
+        "end_timestamp": "01:45",
+        "duration_seconds": 45,
+        "related_slug": "gta-6-212gb-prepare-seu-console"
+      },
+      {
+        "id": "short_2",
+        "title": "Armazenamento e tempo de download",
+        "hook": "Antes de começar, abra a área de armazenamento do seu console e veja o espaço que está livre de verdade.",
+        "chapter_number": "02",
+        "start_timestamp": "00:50",
+        "end_timestamp": "01:35",
+        "duration_seconds": 45,
+        "related_slug": "gta-6-212gb-prepare-seu-console"
+      }
+    ],
+    "youtube": {
+      "title": "GTA 6: até 212 GB — prepare seu console para o download",
+      "description": "Espaço, pré-download e conexão: o que conferir antes de jogar.\n\nGTA VI pode exigir até 212 GB disponíveis, conforme o aparelho. Entenda o que a Rockstar confirmou, como conferir armazenamento e como interpretar estimativas de download. Informações verificadas em 6 de novembro de 2026.\n\nCAPÍTULOS DO EPISÓDIO:\n00:00 Até 212 GB: o que isso significa\n00:50 Armazenamento e tempo de download\n01:53 Libere espaço sem perder o controle\n02:49 Quando o pré-download começa?\n03:45 O que fazer antes de jogar\n\nFONTES PARA CONSULTA E REVISÃO:\n• Cap. 01: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\n• Cap. 02: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq\n• Cap. 03: https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/ · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements\n• Cap. 04: https://www.rockstargames.com/VI\n• Cap. 05: https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://www.rockstargames.com/VI · https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/\n\nLeia todas as matérias e dossiês completos em: https://orangebrick.blog\n\nVocê vai liberar espaço apagando jogos ou pretende ampliar o armazenamento?\n\n#GTA6 #PlayStation5 #XboxSeriesX",
+      "tags": [
+        "Grand Theft Auto VI",
+        "GTA VI",
+        "GTA 6",
+        "Rockstar Games",
+        "PlayStation 5",
+        "Xbox Series X",
+        "Xbox Series S",
+        "Orange Brick"
+      ],
+      "pinned_comment": "Você vai liberar espaço apagando jogos ou pretende ampliar o armazenamento?",
+      "visibility": "private",
+      "scheduled_at": null
+    },
+    "marketing": {
+      "standard": "youtube-editorial-v3",
+      "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      "promise": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+      "primary_cta": "Para acompanhar jogos e tecnologia com contexto, inscreva-se no canal.",
+      "title_variants": [
+        "GTA 6: até 212 GB — prepare seu console para o download",
+        "GTA 6 vai lotar seu console? Entenda os 212 GB",
+        "GTA 6: espaço, pré-download e quanto tempo pode levar"
+      ],
+      "thumbnail_concepts": [
+        "ATÉ 212 GB: SEU CONSOLE ESTÁ PRONTO?",
+        "GTA 6: PREPARE O DOWNLOAD",
+        "PRECISA APAGAR JOGOS?"
+      ],
+      "thumbnail_review_required": true,
+      "end_screen": {
+        "studio_configuration_required": true,
+        "start_seconds": 260.2,
+        "related_video": null
+      },
+      "metrics_review_hours": [
+        24,
+        72,
+        168,
+        672
+      ]
+    },
+    "review_notes": "Vídeo pronto para revisão. A narração e o equilíbrio da trilha precisam de escuta humana antes da publicação.",
+    "approved_at": null,
+    "created_at": "2026-11-06T20:29:34.308Z"
+  },
+  "gta-6-212gb-prepare-seu-console-reeditado": {
+    "series_badge": "ORANGE BRICK · REPORTAGEM",
+    "title": "GTA 6: até 212 GB — prepare seu console para o download",
+    "subtitle": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+    "status": "generating",
+    "pipeline_stage_index": 4,
+    "pipeline_stage_label": "4/8 · Renderizando cenas guiadas pela narração em 1920×1080",
+    "source_mode": "custom_script",
+    "source_post_slugs": [],
+    "visual_style": "documentario",
+    "voice_id": "pt-BR-FranciscaNeural",
+    "slug": "gta-6-212gb-prepare-seu-console-reeditado",
+    "updated_at": "2026-11-06T20:40:48.950Z"
   }
 }

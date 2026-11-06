@@ -1,0 +1,823 @@
+{
+  "slug": "zelda-gta-vi-corrida-goty-2026-reeditado",
+  "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+  "title": "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+  "subtitle": "O que as regras dizem sobre remakes, calendário e votação do jogo do ano.",
+  "status": "scheduled",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "Aprovado e agendado no YouTube",
+  "source_mode": "custom_script",
+  "source_post_slugs": [],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-FranciscaNeural",
+  "editorial_standard": "youtube-editorial-v3",
+  "is_preview": false,
+  "production": {
+    "scenes": [
+      {
+        "chapter": "01",
+        "voiceStartSec": 0,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 9.366666666666667,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "46d35ced246ad4e7c4c66b420373d65a3cdcb6b8c862b61b993e713e5b6f8704",
+              "bytes": 256719,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 281,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Zelda × GTA VI",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+            "narrationAnchor": "Um Zelda com nota noventa e seis"
+          },
+          {
+            "start": 9.366666666666667,
+            "duration": 10.566666666666666,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "258dd1d0c4778f12ad4926183b86252f2f019da505b51adb9a4d8b9a8dcedb30",
+              "bytes": 5773838,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 317,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 36,
+              "source_audio": "muted"
+            },
+            "headline": "Expectativa não é indicação.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "Para a Rockstar, a primeira barreira é"
+          },
+          {
+            "start": 19.933333333333334,
+            "duration": 10.866666666666667,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "b16f06ed88e12bb8450e12e0e8d9173632ed1f87b1ecd3e66cd25b17ab1c1bcd",
+              "bytes": 128703,
+              "layout": "process",
+              "fps": 30,
+              "frames": 326,
+              "animated_frames": 68,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Três etapas diferentes.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+            "narrationAnchor": "Vamos separar as três etapas dessa corrida:"
+          }
+        ]
+      },
+      {
+        "chapter": "02",
+        "voiceStartSec": 30.8,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 15.166666666666666,
+            "layout": "metrics",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "2e524381e9a4def38ade5a9ff4afceff0bb4b16463528bcbfa85688a9ea19c42",
+              "bytes": 198107,
+              "layout": "metrics",
+              "fps": 30,
+              "frames": 455,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Uma estreia forte nas análises.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+            "narrationAnchor": "O levantamento publicado pelo GameSpot em quatro"
+          },
+          {
+            "start": 15.166666666666666,
+            "duration": 13.4,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "4457389c7e7dfd87a2cdb94a9723c4c4a220fc349679334a6886688a65def3f4",
+              "bytes": 389595,
+              "layout": "image",
+              "fps": 30,
+              "frames": 402,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O lançamento é em 5 de novembro.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+            "narrationAnchor": "A Nintendo marca o lançamento para cinco"
+          },
+          {
+            "start": 28.566666666666666,
+            "duration": 13.400000000000002,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "38d4f348f8e5224f0879d7b73450171dd842591c52987ba315237b0c89908e31",
+              "bytes": 275886,
+              "layout": "image",
+              "fps": 30,
+              "frames": 402,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O trabalho vai além da resolução.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+            "narrationAnchor": "O projeto reconstrói o clássico para o"
+          },
+          {
+            "start": 41.96666666666667,
+            "duration": 15.033333333333331,
+            "layout": "quote",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "e0d6209747a938b9622f8da42b245e4ae5b0c0de71b667e8cf9a75de9cfce571",
+              "bytes": 145955,
+              "layout": "quote",
+              "fps": 30,
+              "frames": 451,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Reconstruir também ensina.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+            "narrationAnchor": "Na entrevista da Nintendo, o produtor Eiji"
+          },
+          {
+            "start": 57,
+            "duration": 16.36666666666666,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "6a0d2e0513ac626b66817ac6530a3b06853f0e1b3765a5ec6d38149ec820c112",
+              "bytes": 310323,
+              "layout": "image",
+              "fps": 30,
+              "frames": 491,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A comparação precisa considerar o trabalho novo.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+            "narrationAnchor": "A pergunta editorial interessante é como essa"
+          }
+        ]
+      },
+      {
+        "chapter": "03",
+        "voiceStartSec": 104.167,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.7,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "273931601114e58659970f7a6af06184d50451a2f23223fcd626b6f79470daf8",
+              "bytes": 216292,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 411,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Sim, remakes podem concorrer.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide03.jpg",
+            "narrationAnchor": "O regulamento do The Game Awards permite"
+          },
+          {
+            "start": 13.7,
+            "duration": 12.100000000000001,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "81b2f6963a8db43736bf4d0af74d685bfe2adb92c19d4bd4052e8a281afd66dc",
+              "bytes": 266157,
+              "layout": "image",
+              "fps": 30,
+              "frames": 363,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A regra abre a porta.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+            "narrationAnchor": "Isso resolve a dúvida sobre poder participar,"
+          },
+          {
+            "start": 25.8,
+            "duration": 12.2,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "00d43aadf4dcb1fb692ea348562202aa72732c3d2df5880a48b6fac6f577b007",
+              "bytes": 10429416,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 366,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 47,
+              "source_audio": "muted"
+            },
+            "headline": "GTA VI também precisa passar pelas etapas.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "Para GTA seis, o tamanho da expectativa"
+          }
+        ]
+      },
+      {
+        "chapter": "04",
+        "voiceStartSec": 142.167,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.2,
+            "layout": "timeline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "76044ce824ea651813f771431b75eb0ffb4e552dfd8377d43b94824d68c1ff48",
+              "bytes": 185547,
+              "layout": "timeline",
+              "fps": 30,
+              "frames": 396,
+              "animated_frames": 51,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "As datas que importam.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+            "narrationAnchor": "No calendário anunciado, Zelda chega em cinco"
+          },
+          {
+            "start": 13.2,
+            "duration": 11.900000000000002,
+            "layout": "metrics",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "70c84727f45c8dbd32d2ad6ca96491a02b1d12df280e8870af3e846ae5970329",
+              "bytes": 174778,
+              "layout": "metrics",
+              "fps": 30,
+              "frames": 357,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Dentro do prazo anunciado.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "Com essas datas, GTA seis está previsto"
+          },
+          {
+            "start": 25.1,
+            "duration": 14.399999999999999,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "d99b25d97ca0c8548e3ca283008e9eaac2bb370b8b64bda229b1eaacb2005dcc",
+              "bytes": 6606556,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 432,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 6,
+              "source_audio": "muted"
+            },
+            "headline": "Avaliar exige acesso ao jogo.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+            "narrationAnchor": "Existe ainda a questão prática do tempo"
+          },
+          {
+            "start": 39.5,
+            "duration": 15.06666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "54ad55b3718b71031c7f8e01b095a7f33582b8f05faa9bec7761fde18b34c642",
+              "bytes": 251439,
+              "layout": "image",
+              "fps": 30,
+              "frames": 452,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Data confirmada e acesso confirmado são evidências diferentes.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+            "narrationAnchor": "A conclusão responsável é limitada ao que"
+          }
+        ]
+      },
+      {
+        "chapter": "05",
+        "voiceStartSec": 196.734,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 14.533333333333333,
+            "layout": "process",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "3130a94a49ae1deeeb6be5cdfa54eba6dceab362d6e9fd2eeacd5a0569bddd5b",
+              "bytes": 202257,
+              "layout": "process",
+              "fps": 30,
+              "frames": 436,
+              "animated_frames": 68,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A média e a votação medem coisas diferentes.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+            "narrationAnchor": "Uma média combina avaliações publicadas por diferentes"
+          },
+          {
+            "start": 14.533333333333333,
+            "duration": 14.366666666666665,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "ea10e7c6f417bdf88870b7a0616c57a64b2fb96938cace27d4232fb29bd59d2b",
+              "bytes": 373749,
+              "layout": "image",
+              "fps": 30,
+              "frames": 431,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O júri reúne veículos internacionais.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+            "narrationAnchor": "O TGA reúne mais de cem veículos"
+          },
+          {
+            "start": 28.9,
+            "duration": 12.600000000000001,
+            "layout": "bars",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "71cf53c6afb44fe9f6b431f39b5bfca311d73e6ba9c67dd5fc4865294038da2d",
+              "bytes": 128543,
+              "layout": "bars",
+              "fps": 30,
+              "frames": 378,
+              "animated_frames": 60,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O peso da votação final.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "Na escolha dos vencedores, o júri pesa"
+          },
+          {
+            "start": 41.5,
+            "duration": 12.966666666666669,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "c0bff7cd2b6bba3133ca8cede30eb106c1ecfbcebaf595f37c6fa91556d872e9",
+              "bytes": 6936968,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 389,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 58,
+              "source_audio": "muted"
+            },
+            "headline": "Popularidade não resolve a conta sozinha.",
+            "source": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+            "narrationAnchor": "Uma comunidade muito mobilizada pode participar e"
+          },
+          {
+            "start": 54.46666666666667,
+            "duration": 12.933333333333337,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "da2fce6430e08b2d2d7316643f951e4a71612bf403b23dde57940ed5e1014149",
+              "bytes": 337048,
+              "layout": "image",
+              "fps": 30,
+              "frames": 388,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "96 é recepção crítica.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+            "narrationAnchor": "Por isso, a nota noventa e seis"
+          }
+        ]
+      },
+      {
+        "chapter": "06",
+        "voiceStartSec": 264.134,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.633333333333333,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "3ed14ae6359c28f36b0cd19898f0ba0d0e12746c6e6f7fdb325b9bfb7593e41a",
+              "bytes": 280004,
+              "layout": "image",
+              "fps": 30,
+              "frames": 409,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Reconstrução de um clássico.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+            "narrationAnchor": "Se o encontro acontecer, uma comparação útil"
+          },
+          {
+            "start": 13.633333333333333,
+            "duration": 13.466666666666669,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "c5c1c04de59fab4f0ff26b67290c452c874c46435745e394b7a571d0a651106a",
+              "bytes": 8014272,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 404,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+              "source_start": 24,
+              "source_audio": "muted"
+            },
+            "headline": "Uma aventura nova também precisa se sustentar.",
+            "source": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+            "narrationAnchor": "No caso de GTA seis, a escala"
+          },
+          {
+            "start": 27.1,
+            "duration": 14.100000000000001,
+            "layout": "timeline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "d2a078895db3ce694b1bbb7eda1771645685726fd534138aac9d1d4b6fbc3533",
+              "bytes": 184244,
+              "layout": "timeline",
+              "fps": 30,
+              "frames": 423,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O próximo passo é a lista oficial.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+            "narrationAnchor": "O anúncio dos indicados mostrará se esse"
+          },
+          {
+            "start": 41.2,
+            "duration": 12.266666666666666,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "75b039d4938d389e63bfcc0157f540b55829364f6ed01a4e95679ce9f03337a1",
+              "bytes": 278951,
+              "layout": "image",
+              "fps": 30,
+              "frames": 368,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Qual trabalho merece ser reconhecido?",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+            "narrationAnchor": "A discussão fica melhor quando sai de"
+          },
+          {
+            "start": 53.46666666666667,
+            "duration": 4.766666666666666,
+            "layout": "cta",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "8a8a9f94d0e98b624295a4a34db4c45f8eefe7ef39b61699a6ce065217179f47",
+              "bytes": 61545,
+              "layout": "cta",
+              "fps": 30,
+              "frames": 143,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Jogos e indústria, com contexto.",
+            "source": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+            "narrationAnchor": "Para acompanhar jogos e indústria"
+          }
+        ]
+      }
+    ],
+    "voices": [
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-FranciscaNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      }
+    ],
+    "human_audio_review": false,
+    "audio_verification": {
+      "passed": true,
+      "full_decode": true,
+      "integrated_lufs": -14.8,
+      "true_peak_dbtp": -1.89,
+      "corrected": false,
+      "human_listening": false
+    },
+    "audio_mix": {
+      "music": "Shadow — James Gargette — CC0",
+      "previous_gain": 0.06,
+      "gain": 0.16,
+      "gain_change_db": 8.52,
+      "ducking": {
+        "threshold": 0.08,
+        "ratio": 2,
+        "attack_ms": 35,
+        "release_ms": 650
+      },
+      "picture_packet_hash_unchanged": true,
+      "previous_mix_backup": "tmp/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/before-music-adjustment.mp4",
+      "verification": {
+        "passed": true,
+        "full_decode": true,
+        "integrated_lufs": -14.8,
+        "true_peak_dbtp": -1.89,
+        "corrected": false,
+        "human_listening": false
+      }
+    }
+  },
+  "duration_seconds": 322.367,
+  "duration_formatted": "05:22",
+  "monetization_midroll_eligible": false,
+  "file_size": 50007796,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado.mp4",
+  "video_no_narration_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado-sem-narracao.mp4",
+  "video_no_narration_clean_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado-sem-narracao-sem-legenda.mp4",
+  "srt_url": "/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/zelda-gta-vi-corrida-goty-2026-reeditado.srt",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/preview-sheet.jpg",
+  "thumbnails": [
+    {
+      "id": "thumb_1",
+      "label": "Opção 1",
+      "angle": "ZELDA × GTA VI",
+      "headline": "DUELO NO TGA?",
+      "subline": "ZELDA × GTA VI",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-1.jpg"
+    },
+    {
+      "id": "thumb_2",
+      "label": "Opção 2",
+      "angle": "ENTENDA A VOTAÇÃO",
+      "headline": "96 É TROFÉU?",
+      "subline": "ENTENDA A VOTAÇÃO",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-2.jpg"
+    },
+    {
+      "id": "thumb_3",
+      "label": "Opção 3",
+      "angle": "GTA VI NO TGA 2026",
+      "headline": "DENTRO DO PRAZO?",
+      "subline": "GTA VI NO TGA 2026",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/zelda-gta-vi-corrida-goty-2026-reeditado/thumbnail-3.jpg"
+    }
+  ],
+  "selected_thumbnail_id": "thumb_1",
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O duelo ainda precisa acontecer",
+      "kicker": "A PERGUNTA CERTA",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://thegameawards.com/faq"
+    },
+    {
+      "number": "02",
+      "title": "O que a nota de Zelda realmente diz",
+      "kicker": "CRÍTICA E RECONSTRUÇÃO",
+      "start_seconds": 30.8,
+      "timestamp": "00:30",
+      "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/ · https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/"
+    },
+    {
+      "number": "03",
+      "title": "Um remake pode concorrer?",
+      "kicker": "A REGRA NÃO EXCLUI O FORMATO",
+      "start_seconds": 104.167,
+      "timestamp": "01:44",
+      "source": "https://thegameawards.com/faq"
+    },
+    {
+      "number": "04",
+      "title": "O calendário sem contagem inventada",
+      "kicker": "DATA DE LANÇAMENTO E PRAZO",
+      "start_seconds": 142.167,
+      "timestamp": "02:22",
+      "source": "https://thegameawards.com/faq · https://www.rockstargames.com/VI · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/"
+    },
+    {
+      "number": "05",
+      "title": "Quem transforma recepção em prêmio",
+      "kicker": "NOTAS NÃO SÃO CÉDULAS",
+      "start_seconds": 196.734,
+      "timestamp": "03:16",
+      "source": "https://thegameawards.com/faq · https://thegameawards.com/voting-jury"
+    },
+    {
+      "number": "06",
+      "title": "Como comparar sem declarar um vencedor",
+      "kicker": "O QUE OBSERVAR DAQUI PARA A FRENTE",
+      "start_seconds": 264.134,
+      "timestamp": "04:24",
+      "source": "https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.rockstargames.com/VI · https://thegameawards.com/faq"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "editorial_standard",
+      "label": "Padrão editorial de retenção",
+      "passed": true,
+      "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Revisão auditiva e legendas",
+      "passed": false,
+      "detail": "58 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+    },
+    {
+      "id": "verified_sources",
+      "label": "Revisão das fontes",
+      "passed": false,
+      "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Áudio final medido",
+      "passed": true,
+      "detail": "-14.8 LUFS; -1.89 dBTP. Trilha ajustada; escuta humana pendente."
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Materiais visuais",
+      "passed": false,
+      "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "O duelo ainda precisa acontecer",
+      "hook": "Um Zelda com nota noventa e seis pode enfrentar GTA seis pelo jogo do ano?",
+      "chapter_number": "01",
+      "start_timestamp": "01:00",
+      "end_timestamp": "01:45",
+      "duration_seconds": 45,
+      "related_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
+    },
+    {
+      "id": "short_2",
+      "title": "O que a nota de Zelda realmente diz",
+      "hook": "O levantamento publicado pelo GameSpot em quatro de novembro aponta média noventa e seis no Metacritic para o novo Ocarina of Time.",
+      "chapter_number": "02",
+      "start_timestamp": "00:30",
+      "end_timestamp": "01:15",
+      "duration_seconds": 45,
+      "related_slug": "zelda-gta-vi-corrida-goty-2026-reeditado"
+    }
+  ],
+  "youtube": {
+    "title": "Zelda x GTA 6 no GOTY 2026: quem pode levar o prêmio?",
+    "description": "Zelda com nota 96 e GTA 6 perto do prazo do The Game Awards: esse duelo pelo GOTY 2026 pode acontecer? Entenda quem pode concorrer, como funcionam as indicações e o peso real do voto do público.\n\nO vídeo separa recepção crítica, elegibilidade e vitória, sem tratar os jogos como finalistas confirmados. A média de Zelda é o levantamento publicado pelo GameSpot em 4 de novembro de 2026 e pode mudar. Datas e regras conferidas nessa data.\n\nCAPÍTULOS\n00:00 O duelo ainda precisa acontecer\n00:30 O que a nota de Zelda realmente diz\n01:44 Um remake pode concorrer?\n02:22 O calendário sem contagem inventada\n03:16 Quem transforma recepção em prêmio\n04:24 Como comparar sem declarar um vencedor\n\nPara você, o que mais pesa na escolha do jogo do ano?\nInscreva-se para acompanhar jogos e indústria com contexto.\n\nMatérias e análises: https://orangebrick.blog\n\nFONTES\nhttps://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html\nhttps://thegameawards.com/faq\nhttps://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/\nhttps://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/\nhttps://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/\nhttps://www.rockstargames.com/VI\nhttps://thegameawards.com/voting-jury\n\nImagens: Nintendo e Rockstar Games.\nTrilha: Shadow — James Gargette (CC0): https://opengameart.org/content/shadow-2\n\n#GTA6 #Zelda #TheGameAwards",
+    "tags": [
+      "GTA 6",
+      "GTA VI",
+      "Grand Theft Auto VI",
+      "Zelda",
+      "The Legend of Zelda Ocarina of Time",
+      "GOTY 2026",
+      "The Game Awards 2026",
+      "jogo do ano",
+      "Nintendo Switch 2",
+      "Rockstar Games",
+      "Nintendo",
+      "Orange Brick"
+    ],
+    "pinned_comment": "Que aspecto você considera decisivo para escolher um jogo do ano?",
+    "visibility": "private",
+    "scheduled_at": "2026-11-05T15:00:00Z",
+    "video_id": "UC_GLh8mV2o",
+    "video_url": "https://www.youtube.com/watch?v=UC_GLh8mV2o",
+    "upload_status": "scheduled"
+  },
+  "marketing": {
+    "standard": "youtube-editorial-v3",
+    "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+    "promise": "O que as regras dizem sobre remakes, calendário e votação do jogo do ano.",
+    "primary_cta": "Para acompanhar jogos e indústria com contexto, inscreva-se no canal.",
+    "title_variants": [
+      "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+      "Zelda pode enfrentar GTA VI pelo jogo do ano?",
+      "Nota 96 e prazo do TGA: entenda Zelda x GTA VI"
+    ],
+    "thumbnail_concepts": [
+      "Zelda e GTA VI: DUELO CONFIRMADO?",
+      "Zelda: 96 NÃO É TROFÉU",
+      "GTA VI: DENTRO DO PRAZO?"
+    ],
+    "thumbnail_review_required": true,
+    "end_screen": {
+      "studio_configuration_required": true,
+      "start_seconds": 307.367,
+      "related_video": null
+    },
+    "metrics_review_hours": [
+      24,
+      72,
+      168,
+      672
+    ]
+  },
+  "review_notes": "Reedição no padrão aprovado, com roteiro mais curto, fontes atualizadas e voz Francisca. Revisão auditiva humana pendente. Original preservado. Trilha aumentada em 8,52 dB antes do ducking, com redução automática mais suave. Escuta humana pendente.",
+  "approved_at": "2026-11-05T03:35:45.482Z",
+  "created_at": "2026-11-05T03:09:24.982Z",
+  "updated_at": "2026-11-05T04:35:07.061Z",
+  "replaces_slug": "zelda-gta-vi-corrida-goty-2026",
+  "review_history": [
+    {
+      "id": "approved-zelda-gta-vi-corrida-goty-2026-reeditado",
+      "kind": "approved",
+      "at": "2026-11-05T03:35:45.482Z",
+      "detail": "Aprovação registrada antes do envio autorizado ao YouTube."
+    },
+    {
+      "id": "scheduled-zelda-gta-vi-corrida-goty-2026-reeditado",
+      "kind": "scheduled",
+      "at": "2026-11-05T03:35:45.482Z",
+      "detail": "Publicação agendada no YouTube para 05/11/2026, 12:00, horário de Brasília.",
+      "youtube_video_id": "UC_GLh8mV2o"
+    }
+  ]
+}

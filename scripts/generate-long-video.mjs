@@ -1,13 +1,21 @@
+import { createHash } from "node:crypto";
+import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { createLongMotionRenderer, resolveLongLayout } from "../src/lib/video/long-video-composition.mjs";
+import { selectVideoVoice, recordVideoVoice } from "../src/lib/video/video-voice.mjs";
+import { syncLongVideos } from "./sync-long-videos.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, "..");
+let activeEpisodeSlug;
 
 function resolveBinary(name, candidates) {
   for (const candidate of candidates) {
@@ -1024,6 +1032,60 @@ const EPISODE_CATALOG = {
   [GOW_LAUFEY_EPISODE.slug]: GOW_LAUFEY_EPISODE
 };
 
+export function getChapterScenes(chapter) {
+  return chapter.scenes?.length ? chapter.scenes : [chapter.sceneA, chapter.sceneB].filter(Boolean);
+}
+
+export function prepareEditorialEpisode(input, preview = false) {
+  const episode = structuredClone(input);
+  if (!episode.slug || !episode.chapters?.length) throw new Error("Episódio sem identificação ou capítulos.");
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(episode.slug)) throw new Error("Identificação de episódio inválida.");
+  if (preview) episode.slug = `${episode.slug}-preview`;
+  const callToAction = episode.primaryCta || "Para entender o que muda nos jogos e nos consoles, inscreva-se no canal.";
+  for (const chapter of episode.chapters) {
+    chapter.narration = String(chapter.narration || "").trim();
+    if (!chapter.narration) throw new Error("Capítulo sem narração.");
+    const sentences = chapter.narration.split(/(?<=[.!?])\s+/u);
+    chapter.narration = sentences.filter((sentence) => !/^(?:e\s+)?(?:deixe seu|comente|inscreva-se|siga o|acesse orangebrick)/iu.test(sentence)).join(" ");
+    chapter.sceneA ||= getChapterScenes(chapter)[0];
+    chapter.sceneB ||= getChapterScenes(chapter).at(-1);
+    if (!chapter.sceneA) throw new Error("Capítulo sem material visual.");
+  }
+  const lastChapter = episode.chapters.at(-1);
+  if (!/[.!?]$/u.test(lastChapter.narration)) lastChapter.narration += ".";
+  lastChapter.narration += ` ${callToAction}`;
+  const scenes = getChapterScenes(lastChapter);
+  if (!scenes.some((scene) => scene.narrationAnchor && callToAction.startsWith(scene.narrationAnchor))) {
+    lastChapter.scenes = [...scenes, {
+      ...scenes.at(-1), headline: "Acompanhe os próximos vídeos", highlight: "Entenda o impacto para quem joga.",
+      narrationAnchor: callToAction.split(/\s+/u).slice(0, 5).join(" "),
+      layout: "cta", steps: undefined, action: "INSCREVA-SE NO CANAL",
+    }];
+  }
+  return episode;
+}
+
+export function planNarratedScenes(chapter, duration) {
+  const scenes = getChapterScenes(chapter);
+  const sentences = chapter.sentences;
+  if (!sentences?.length || !scenes.length) throw new Error("Cenas precisam de frases temporizadas.");
+  const normalized = (text) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\p{L}\p{N}\s]/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
+  if (scenes.length > sentences.length) throw new Error("Há mais cenas que frases disponíveis para ancorar a montagem.");
+  const selected = scenes;
+  const starts = [0];
+  for (let index = 1; index < selected.length; index++) {
+    const anchor = selected[index].narrationAnchor;
+    const matching = anchor ? sentences.find((sentence) => normalized(sentence.text).startsWith(normalized(anchor)) && sentence.start > starts.at(-1)) : null;
+    if (anchor && !matching) throw new Error(`Âncora visual ausente ou fora de ordem: ${anchor}`);
+    const start = matching?.start ?? sentences[Math.floor(index * sentences.length / selected.length)].start;
+    const frameStart = Math.round(start * 30) / 30;
+    if (frameStart <= starts.at(-1) || frameStart >= duration) throw new Error("Sequência visual inválida.");
+    starts.push(frameStart);
+  }
+  return selected.map((data, index) => ({ data: { ...data, layout: resolveLongLayout(data, index ? resolveLongLayout(selected[index - 1]) : undefined) }, start: starts[index], duration: (starts[index + 1] ?? duration) - starts[index] }));
+}
+
+
 function escapeXml(value) {
   return String(value || "")
     .replace(/&/g, "&amp;")
@@ -1181,26 +1243,21 @@ async function buildEpisodeFromJobConfig(jobConfig) {
   for (const post of posts) {
     if (post.image_url && !seenUrls.has(post.image_url)) {
       seenUrls.add(post.image_url);
-      imagePool.push({ url: post.image_url, caption: post.summary || post.title, label: post.title.slice(0, 42).toUpperCase() });
+      imagePool.push({ url: post.image_url, caption: post.summary || post.title, label: post.title.slice(0, 42).toUpperCase(), source: `https://orangebrick.blog/posts/${post.slug}` });
     }
     try {
       const blocks = typeof post.body === "string" ? JSON.parse(post.body) : [];
       for (const b of blocks) {
         if (b.type === "image" && b.url && !seenUrls.has(b.url)) {
           seenUrls.add(b.url);
-          imagePool.push({ url: b.url, caption: b.caption || b.alt || post.title, label: post.title.slice(0, 42).toUpperCase() });
+          imagePool.push({ url: b.url, caption: b.caption || b.alt || post.title, label: post.title.slice(0, 42).toUpperCase(), source: `https://orangebrick.blog/posts/${post.slug}` });
         }
       }
     } catch {}
   }
 
-  for (const fallbackCh of DEFAULT_GTA_EPISODE.chapters) {
-    for (const sc of [fallbackCh.sceneA, fallbackCh.sceneB]) {
-      if (!seenUrls.has(sc.imageUrl)) {
-        seenUrls.add(sc.imageUrl);
-        imagePool.push({ url: sc.imageUrl, caption: sc.imageCaption, label: sc.imageLabel });
-      }
-    }
+  if (imagePool.length < 2) {
+    throw new Error("A pauta precisa de pelo menos duas imagens próprias. Não serão usadas imagens de outro assunto.");
   }
 
   const accents = ["#FF5E00", "#FFB800", "#FF3366", "#00E5FF", "#3B82F6", "#A855F7", "#10B981", "#FF5E00"];
@@ -1232,7 +1289,26 @@ async function buildEpisodeFromJobConfig(jobConfig) {
     }
   }
 
-  const chapterCount = Math.min(8, Math.max(4, Math.ceil(rawParagraphs.length / 2)));
+  if (!rawParagraphs.length) throw new Error("Nenhum texto editorial disponível para narrar.");
+  if (jobConfig.sourceMode !== "custom_script") {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Configure a geração de roteiro ou forneça um roteiro falado revisado.");
+    const client = new GoogleGenAI({ apiKey });
+    const response = await client.models.generateContent({
+      model: process.env.LONG_VIDEO_SCRIPT_MODEL || "gemini-flash-latest",
+      contents: `Prepare um roteiro falado de vídeo explicativo de games em português brasileiro. Tema: ${jobConfig.title}.
+Use exclusivamente os fatos fornecidos abaixo. Preserve incertezas, não invente números, datas ou citações.
+Abra com o fato e sua consequência; entregue uma primeira resposta no primeiro parágrafo. Desenvolva uma pergunta central com contexto, evidências, limites e impacto. Conclua respondendo à pergunta.
+Escreva para ouvir: frases conectadas, extensão variada, números por extenso quando ajudar, sem saudação, vinheta, markdown ou listas de fontes narradas. Não traduza títulos oficiais de jogos. Não alongue para atingir duração.
+Separe em parágrafos por argumento, sem repetir resumo e título. Use aproximadamente ${jobConfig.targetMinMinutes || 8} minutos como limite editorial, nunca como duração obrigatória. Não inclua CTAs; o editor adiciona uma única chamada após a conclusão. Retorne somente o texto falado.
+MATERIAL EDITORIAL:
+${rawParagraphs.join("\n\n")}`,
+    });
+    const spokenParagraphs = String(response.text || "").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+    if (!spokenParagraphs.length) throw new Error("O gerador não devolveu um roteiro falado.");
+    rawParagraphs.splice(0, rawParagraphs.length, ...spokenParagraphs);
+  }
+  const chapterCount = Math.min(8, Math.max(1, Math.ceil(rawParagraphs.length / 2)));
   const chapters = [];
   let imgCursor = 0;
 
@@ -1252,7 +1328,7 @@ async function buildEpisodeFromJobConfig(jobConfig) {
       kicker: `DOSSIÊ PARTE ${num}`,
       accent: accents[i % accents.length],
       source: "Apuração Editorial Orange Brick",
-      narration: textSlice || DEFAULT_GTA_EPISODE.chapters[i % DEFAULT_GTA_EPISODE.chapters.length].narration,
+      narration: textSlice,
       sceneA: {
         imageUrl: imgA.url,
         imageLabel: imgA.label,
@@ -1276,6 +1352,39 @@ async function buildEpisodeFromJobConfig(jobConfig) {
     });
   }
 
+  if (!process.env.GEMINI_API_KEY) throw new Error("O planejamento visual precisa de GEMINI_API_KEY ou de um episódio com cenas revisadas via --episode.");
+  const planner = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const plannedResponse = await planner.models.generateContent({
+    model: process.env.LONG_VIDEO_SCRIPT_MODEL || "gemini-flash-latest",
+    config: { responseMimeType: "application/json" },
+    contents: `Planeje a montagem editorial deste vídeo de games. Não altere a narração nem acrescente fatos. Para cada capítulo, retorne um título informativo de até 45 caracteres e de 1 a 5 cenas. As cenas precisam explicar a fala, sem repetição decorativa. Cada cena deve ter headline de até 45 caracteres, highlight de até 90 caracteres, imageIndex da lista fornecida e narrationAnchor copiado literalmente das primeiras 3 a 8 palavras da frase em que a cena começa. A primeira cena começa na primeira frase; as outras âncoras seguem a ordem da fala e começam frases distintas. Use só imagens pertinentes à fala e descritas nos materiais. Escolha layout entre hero, image, evidence, comparison, process, quote e takeaway, conforme o material e a explicação. Câmera e quadro ficam fixos; animações são breves e locais. Nunca use process em duas cenas seguidas nem faça uma sequência inteira de listas ou cartões. Preserve a imagem do assunto além da abertura, intercalando provas visuais, detalhes e consequências. Toda cena deve trazer informação nova; não repita a mesma conclusão com palavras diferentes. Use comparison só com elementos comparáveis identificados; quote apenas para uma declaração atribuída na apuração. Use steps em process para uma demonstração fiel à fala, não como enfeite. Não transforme imagem genérica em prova, não invente comparações. Prepare também titleVariants com três títulos distintos, factuais e de até 70 caracteres, e thumbnailConcepts com três propostas curtas e específicas para a miniatura. Retorne JSON: {"chapters":[{"number":"01","title":"...","scenes":[{"headline":"...","highlight":"...","imageIndex":0,"narrationAnchor":"..."}]}]}.
+NARRAÇÃO:
+${JSON.stringify(chapters.map(({ number, narration }) => ({ number, narration })))}
+MATERIAIS:
+${JSON.stringify(imagePool.map(({ caption, label }, imageIndex) => ({ imageIndex, caption, label })))}`,
+  });
+  const planned = JSON.parse(String(plannedResponse.text || ""));
+  if (!Array.isArray(planned.chapters) || planned.chapters.length !== chapters.length) throw new Error("Planejamento visual incompleto.");
+  for (const chapter of chapters) {
+    const design = planned.chapters.find((item) => item.number === chapter.number);
+    if (!design || !Array.isArray(design.scenes) || design.scenes.length < 1 || design.scenes.length > 5) throw new Error("Capítulo sem plano de cenas válido.");
+    chapter.title = String(design.title || chapter.title).slice(0, 60);
+    chapter.scenes = design.scenes.map((scene) => {
+      if (!Number.isInteger(scene.imageIndex) || !imagePool[scene.imageIndex] || typeof scene.narrationAnchor !== "string" || !scene.narrationAnchor.trim()) throw new Error("Plano visual aponta para material ou frase inexistente.");
+      const image = imagePool[scene.imageIndex];
+      return {
+        imageUrl: image.url, imageCaption: image.caption, imageLabel: image.label,
+        layout: scene.layout || "image",
+        headline: String(scene.headline || chapter.title), highlight: String(scene.highlight || ""),
+        narrationAnchor: scene.narrationAnchor, evidenceSource: "Fonte editorial na descrição",
+        ...(Array.isArray(scene.steps) && scene.steps.length >= 2 && scene.steps.length <= 3 && scene.steps.every((step) => typeof step === "string" && step.length <= 55) ? { steps: scene.steps } : {})
+      };
+    });
+    chapter.sceneA = chapter.scenes[0];
+    chapter.sceneB = chapter.scenes.at(-1);
+    chapter.source = [...new Set(design.scenes.map((scene) => imagePool[scene.imageIndex].source))].join(" · ");
+  }
+
   return {
     slug: jobConfig.slug,
     seriesBadge: `DOSSIÊ ORANGE BRICK // ${String(jobConfig.visualStyle || "documentario").toUpperCase()}`,
@@ -1285,8 +1394,13 @@ async function buildEpisodeFromJobConfig(jobConfig) {
     sourceMode: jobConfig.sourceMode || "ai_dossier",
     sourcePostSlugs: jobConfig.sourcePostSlugs || [],
     visualStyle: jobConfig.visualStyle || "documentario",
-    voiceId: jobConfig.voiceId || "pt-BR-AntonioNeural",
+    voiceId: jobConfig.voiceId || "auto",
     targetMinDurationSec: Math.max(485, (jobConfig.targetMinMinutes || 8) * 60 + 15),
+    titleVariants: Array.isArray(planned.titleVariants) ? planned.titleVariants.filter((title) => typeof title === "string" && title.length <= 70).slice(0, 3) : [jobConfig.title],
+    thumbnailConcepts: Array.isArray(planned.thumbnailConcepts) ? planned.thumbnailConcepts.filter((idea) => typeof idea === "string").slice(0, 3) : [],
+    youtubeOverviewParagraph: jobConfig.subtitle,
+    pinnedComment: "Qual ponto dessa explicação mais muda sua decisão como jogador?",
+    tags: ["Orange Brick", jobConfig.title],
     chapters
   };
 }
@@ -1296,40 +1410,55 @@ async function downloadAndValidateImages(chapters, assetsDir) {
   const seenUrls = new Set();
   for (let cIdx = 0; cIdx < chapters.length; cIdx++) {
     const chapter = chapters[cIdx];
-    const scenes = [
-      { key: "A", data: chapter.sceneA },
-      { key: "B", data: chapter.sceneB }
-    ];
+    const scenes = getChapterScenes(chapter).map((data, index) => ({ key: String(index), data }));
     for (const scene of scenes) {
       const url = scene.data.imageUrl;
       seenUrls.add(url);
-      const localPath = path.join(assetsDir, `ch${chapter.number}_${scene.key}_raw.webp`);
+      const localPath = path.join(assetsDir, `official-image-${createHash("sha256").update(url).digest("hex").slice(0, 16)}.webp`);
       if (!fs.existsSync(localPath)) {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
         if (!response.ok) {
           throw new Error(`Falha HTTP ${response.status} ao baixar imagem: ${url}`);
         }
         const buffer = Buffer.from(await response.arrayBuffer());
-        await sharp(buffer)
-          .resize(1920, 1080, { fit: "cover" })
-          .webp({ quality: 92 })
-          .toFile(localPath);
+        await sharp(buffer).rotate().webp({ quality: 95 }).toFile(localPath);
       }
       const meta = await sharp(localPath).metadata();
-      if (meta.width !== 1920 || meta.height !== 1080) {
-        throw new Error(`Dimensões inválidas em ${localPath}: ${meta.width}x${meta.height}`);
+      const minimum = scene.data.assetKind === "official-packshot" ? { width: 250, height: 300 } : scene.data.assetKind === "official-diagram" ? { width: 400, height: 200 } : { width: 1200, height: 675 };
+      if (!meta.width || !meta.height || meta.width < minimum.width || meta.height < minimum.height) {
+        throw new Error(`Material visual abaixo da resolução mínima em ${localPath}: ${meta.width}x${meta.height}`);
       }
+      scene.data.nativeWidth = meta.width;
+      scene.data.nativeHeight = meta.height;
       scene.data.localRawPath = localPath;
+      if (scene.data.videoUrl) {
+        const suppliedPath = scene.data.videoLocalPath ? path.resolve(ROOT_DIR, scene.data.videoLocalPath) : null;
+        const videoPath = suppliedPath && fs.existsSync(suppliedPath) ? suppliedPath : path.join(assetsDir, `official-${createHash("sha256").update(scene.data.videoUrl).digest("hex").slice(0, 16)}.mp4`);
+        if (!fs.existsSync(videoPath)) {
+          const response = await fetch(scene.data.videoUrl, { signal: AbortSignal.timeout(180_000) });
+          if (!response.ok || !response.body) throw new Error(`Vídeo oficial indisponível: HTTP ${response.status}`);
+          const temporary = `${videoPath}.partial`;
+          await pipeline(Readable.fromWeb(response.body), fs.createWriteStream(temporary));
+          fs.renameSync(temporary, videoPath);
+        }
+        const video = JSON.parse(execFileSync(FFPROBE_BIN, ["-v", "error", "-show_entries", "stream=codec_type,width,height", "-show_entries", "format=duration", "-of", "json", videoPath], { encoding: "utf8" }));
+        const picture = video.streams.find((stream) => stream.codec_type === "video");
+        if (!picture || picture.width < 1920 || picture.height < 1080) throw new Error("O vídeo oficial precisa ter resolução mínima de 1920×1080.");
+        scene.data.videoLocalPath = videoPath;
+        scene.data.videoDuration = Number(video.format.duration);
+      }
     }
   }
-  console.log(`✅ ${seenUrls.size} imagens oficiais distintas validadas (HTTP 200, 1920x1080 16:9).`);
+  console.log(`✅ ${seenUrls.size} URLs de imagens carregadas em composição 1920×1080; procedência sujeita à revisão editorial.`);
 }
 
-function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeural") {
+export function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeural") {
   fs.mkdirSync(chapterDir, { recursive: true });
   const voiceMp3 = path.join(chapterDir, "voice.mp3");
   const sentencesPath = path.join(chapterDir, "sentences.json");
-  if (!fs.existsSync(voiceMp3) || !fs.existsSync(sentencesPath)) {
+  const cachePath = path.join(chapterDir, "voice-input.sha256");
+  const fingerprint = createHash("sha256").update(JSON.stringify({ narration: chapter.narration, voiceId, provider: process.env.VIDEO_TTS_PROVIDER || "auto", elevenlabsVoice: process.env.ELEVENLABS_VOICE_ID || "", elevenlabsEnabled: Boolean(process.env.ELEVENLABS_API_KEY), version: 2 })).digest("hex");
+  if (!fs.existsSync(voiceMp3) || !fs.existsSync(sentencesPath) || !fs.existsSync(cachePath) || fs.readFileSync(cachePath, "utf8") !== fingerprint) {
     if (voiceId === "none" || voiceId === "sem-narrador") {
       const rawSentences = String(chapter.narration || "")
         .split(/(?<=[.!?])\s+/)
@@ -1365,12 +1494,13 @@ function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeura
         "--text", chapter.narration,
         "--out-dir", chapterDir,
         "--voice", voiceId,
-        "--rate=-2%"
+        "--rate=+0%"
       ], { stdio: "inherit" });
       if (res.status !== 0) {
         throw new Error(`Falha ao sintetizar narração do capítulo ${chapter.number}.`);
       }
     }
+    fs.writeFileSync(cachePath, fingerprint, "utf8");
   }
   const sentences = JSON.parse(fs.readFileSync(sentencesPath, "utf-8"));
   const audioDurOut = execFileSync(FFPROBE_BIN, [
@@ -1386,7 +1516,8 @@ function synthesizeChapterTts(chapter, chapterDir, voiceId = "pt-BR-AntonioNeura
   return {
     voiceMp3,
     sentences,
-    voiceDuration: Number(audioDuration.toFixed(3))
+    voiceDuration: Number(audioDuration.toFixed(3)),
+    ttsProvider: fs.existsSync(path.join(chapterDir, "tts-provider.json")) ? JSON.parse(fs.readFileSync(path.join(chapterDir, "tts-provider.json"), "utf8")) : { provider: "silent", review_required: true }
   };
 }
 
@@ -1643,29 +1774,6 @@ async function renderEndCardPng(lastChapter, outPng, episode) {
     .toFile(outPng);
 }
 
-function renderAnimatedSegmentMp4(imagePng, durationSec, motionDirection, outMp4) {
-  const d = Number(durationSec.toFixed(3));
-  const fadeOutStart = Math.max(0.1, Number((d - 0.35).toFixed(3)));
-  const scaleFilter = motionDirection > 0
-    ? `scale=1980:1114,crop=1920:1080:'30*(t/${d})':'17*(t/${d})'`
-    : `scale=1980:1114,crop=1920:1080:'30*(1-t/${d})':'17*(1-t/${d})'`;
-
-  execFileSync(FFMPEG_BIN, [
-    "-y",
-    "-loop", "1",
-    "-framerate", "30",
-    "-t", String(d),
-    "-i", imagePng,
-    "-vf", `${scaleFilter},fade=t=in:st=0:d=0.30,fade=t=out:st=${fadeOutStart}:d=0.35,format=yuv420p`,
-    "-r", "30",
-    "-c:v", "libx264",
-    "-preset", "veryfast",
-    "-crf", "20",
-    "-pix_fmt", "yuv420p",
-    "-an",
-    outMp4
-  ], { stdio: "pipe" });
-}
 
 function writeSubtitlesFiles(globalSubtitles, assPath, srtPath) {
   const srtBlocks = globalSubtitles.map((sub, idx) => {
@@ -1729,10 +1837,10 @@ function buildMasterAudio(chapterTimings, totalDuration, audioAssetsDir, workDir
   if (hasBgm) {
     cmdArgs.push("-stream_loop", "-1", "-i", bgmFile);
     filterParts.push(
-      `[${inputIdx}:a]aresample=48000,atrim=start=0:duration=${totalDuration},asetpts=PTS-STARTPTS,volume=0.22,afade=t=in:st=0:d=1.8,afade=t=out:st=${Math.max(0, totalDuration - 4.0)}:d=4.0[bgm_raw]`
+      `[${inputIdx}:a]aresample=48000,atrim=start=0:duration=${totalDuration},asetpts=PTS-STARTPTS,volume=0.16,afade=t=in:st=0:d=1.8,afade=t=out:st=${Math.max(0, totalDuration - 4.0)}:d=4.0[bgm_raw]`
     );
     filterParts.push(
-      `[bgm_raw][voice_sc]sidechaincompress=threshold=0.05:ratio=4:attack=25:release=480[bgm_ducked]`
+      `[bgm_raw][voice_sc]sidechaincompress=threshold=0.08:ratio=2:attack=35:release=650[bgm_ducked]`
     );
     mixInputs.push("[bgm_ducked]");
     inputIdx++;
@@ -1743,7 +1851,7 @@ function buildMasterAudio(chapterTimings, totalDuration, audioAssetsDir, workDir
   const impactWav = path.join(audioAssetsDir, "impact.wav");
   const whooshWav = path.join(audioAssetsDir, "whoosh.wav");
 
-  if (fs.existsSync(impactWav)) {
+  if (process.env.LONG_VIDEO_DECORATIVE_SFX === "1" && fs.existsSync(impactWav)) {
     for (let i = 0; i < chapterTimings.length; i++) {
       cmdArgs.push("-i", impactWav);
       const delayMs = Math.max(40, Math.round(chapterTimings[i].chapterStartSec * 1000));
@@ -1756,7 +1864,7 @@ function buildMasterAudio(chapterTimings, totalDuration, audioAssetsDir, workDir
     }
   }
 
-  if (fs.existsSync(whooshWav)) {
+  if (process.env.LONG_VIDEO_DECORATIVE_SFX === "1" && fs.existsSync(whooshWav)) {
     for (let i = 0; i < chapterTimings.length; i++) {
       cmdArgs.push("-i", whooshWav);
       const delayMs = Math.max(80, Math.round(chapterTimings[i].sceneBStartSec * 1000));
@@ -1770,7 +1878,7 @@ function buildMasterAudio(chapterTimings, totalDuration, audioAssetsDir, workDir
   }
 
   filterParts.push(
-    `${mixInputs.join("")}amix=inputs=${mixInputs.length}:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.95:level=false:latency=true[aout]`
+    `${mixInputs.join("")}amix=inputs=${mixInputs.length}:duration=first:dropout_transition=0:normalize=0,loudnorm=I=-14:TP=-2:LRA=11[aout]`
   );
 
   const filterScriptPath = path.join(workDir, "audio_filter.txt");
@@ -1788,8 +1896,30 @@ function buildMasterAudio(chapterTimings, totalDuration, audioAssetsDir, workDir
   execFileSync(FFMPEG_BIN, cmdArgs, { stdio: "pipe" });
 }
 
+function verifyFinalAudio(videoPath, workDir) {
+  const measure = () => {
+    const result = spawnSync(FFMPEG_BIN, ["-hide_banner", "-nostats", "-i", videoPath, "-af", "loudnorm=I=-14:TP=-2:LRA=11:print_format=json", "-f", "null", "-"], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
+    if (result.status !== 0) throw new Error("O arquivo final falhou na decodificação audiovisual.");
+    const raw = result.stderr.match(/\{\s*"input_i"[\s\S]*?\}/u)?.[0];
+    if (!raw) throw new Error("Não foi possível medir o áudio final.");
+    return JSON.parse(raw);
+  };
+  let stats = measure();
+  let corrected = false;
+  const inRange = (value) => Number.isFinite(Number(value.input_i)) && Number(value.input_i) >= -15 && Number(value.input_i) <= -13 && Number(value.input_tp) <= -1.5;
+  if (!inRange(stats) && Number.isFinite(Number(stats.input_i))) {
+    const correctedPath = path.join(workDir, "final-audio-corrected.mp4");
+    const filter = `loudnorm=I=-14:TP=-2:LRA=11:measured_I=${stats.input_i}:measured_TP=${stats.input_tp}:measured_LRA=${stats.input_lra}:measured_thresh=${stats.input_thresh}:offset=${stats.target_offset}:linear=true`;
+    execFileSync(FFMPEG_BIN, ["-y", "-i", videoPath, "-map", "0:v:0", "-map", "0:a:0", "-c:v", "copy", "-af", filter, "-c:a", "aac", "-ar", "48000", "-b:a", "192k", "-movflags", "+faststart", correctedPath], { stdio: "pipe" });
+    fs.copyFileSync(correctedPath, videoPath);
+    corrected = true;
+    stats = measure();
+  }
+  return { passed: inRange(stats), full_decode: true, integrated_lufs: Number(stats.input_i), true_peak_dbtp: Number(stats.input_tp), corrected, human_listening: false };
+}
+
 function generatePreviewContactSheet(videoPath, durationSec, outJpg) {
-  const step = Math.max(10, Math.floor(durationSec / 12));
+  const step = Math.max(1, durationSec / 12);
   execFileSync(FFMPEG_BIN, [
     "-y",
     "-i", videoPath,
@@ -1805,9 +1935,14 @@ async function run() {
   const jobArg = args.find((a) => a.startsWith("--job="));
   const slugArg = args.find((a) => a.startsWith("--slug="));
   const fastMetadataOnly = args.includes("--metadata-only");
+  const episodeArg = args.find((a) => a.startsWith("--episode="));
+  const preview = args.includes("--preview");
 
+  if (!episodeArg && !slugArg && !jobArg) throw new Error("Informe --job, --episode ou --slug para selecionar uma pauta revisada.");
   let episode = DEFAULT_GTA_EPISODE;
-  if (slugArg) {
+  if (episodeArg) {
+    episode = JSON.parse(fs.readFileSync(episodeArg.slice("--episode=".length), "utf8"));
+  } else if (slugArg) {
     const targetSlug = slugArg.split("=")[1];
     if (!EPISODE_CATALOG[targetSlug]) {
       throw new Error(`Episódio não encontrado no catálogo: ${targetSlug}`);
@@ -1816,8 +1951,12 @@ async function run() {
   } else if (jobArg) {
     const jobPath = jobArg.split("=")[1];
     const jobConfig = JSON.parse(fs.readFileSync(jobPath, "utf-8"));
-    episode = EPISODE_CATALOG[jobConfig.slug] || await buildEpisodeFromJobConfig(jobConfig);
+    activeEpisodeSlug = jobConfig.slug;
+    episode = await buildEpisodeFromJobConfig(jobConfig);
   }
+
+  episode = prepareEditorialEpisode(episode, preview);
+  activeEpisodeSlug = episode.slug;
 
   console.log(`\n🎬 Orange Brick Docs — Pipeline Canal Dark (${episode.slug})`);
   console.log("====================================================================\n");
@@ -1846,11 +1985,18 @@ async function run() {
     voice_id: episode.voiceId
   });
 
+  const requestedVoice = episode.voiceId || "auto";
+  const selectionPath = path.join(workDir, "voice-selection.json");
+  const savedSelection = fs.existsSync(selectionPath) ? JSON.parse(fs.readFileSync(selectionPath, "utf8")) : null;
+  episode.voiceId = requestedVoice === "auto" && savedSelection?.requested === "auto" && savedSelection.voice !== "pt-BR-ThalitaMultilingualNeural" ? savedSelection.voice : selectVideoVoice(ROOT_DIR, requestedVoice);
+  fs.writeFileSync(selectionPath, JSON.stringify({ requested: requestedVoice, voice: episode.voiceId }, null, 2));
+  console.log(`🎙️ Voz deste episódio: ${episode.voiceId}; revisão de naturalidade pendente.`);
   await downloadAndValidateImages(episode.chapters, assetsDir);
 
   updateManifestProgress(episode.slug, {
     pipeline_stage_index: 3,
-    pipeline_stage_label: "3/8 · Sintetizando narração neural e checando pronúncia"
+    voice_id: episode.voiceId,
+    pipeline_stage_label: "3/8 · Gerando narração para revisão de pronúncia"
   });
 
   const synthesizedChapters = [];
@@ -1867,15 +2013,8 @@ async function run() {
     totalSentences += ttsData.sentences.length;
   }
 
+  recordVideoVoice(ROOT_DIR, episode.voiceId, episode.slug);
   const numChapters = synthesizedChapters.length;
-  const baseSlateDur = 3.2;
-  const baseEndCardDur = 6.5;
-  const minNeededPadding = Math.max(
-    0,
-    episode.targetMinDurationSec - (totalVoiceSec + numChapters * baseSlateDur + baseEndCardDur)
-  );
-  const perChapterTailPad = Number(Math.max(1.2, minNeededPadding / numChapters).toFixed(2));
-
   const chapterTimings = [];
   const globalSubtitles = [];
   const visualSegments = [];
@@ -1884,12 +2023,11 @@ async function run() {
   for (let i = 0; i < synthesizedChapters.length; i++) {
     const ch = synthesizedChapters[i];
     const chapterStartSec = Number(cursorSec.toFixed(3));
-    const slateDuration = baseSlateDur;
+    const slateDuration = 0;
     const voiceStartSec = Number((chapterStartSec + slateDuration).toFixed(3));
-    const chapterBodyDur = Number((ch.voiceDuration + perChapterTailPad).toFixed(3));
-    const sceneADur = Number((chapterBodyDur * 0.52).toFixed(3));
-    const sceneBDur = Number((chapterBodyDur - sceneADur).toFixed(3));
-    const sceneBStartSec = Number((voiceStartSec + sceneADur).toFixed(3));
+    const chapterBodyDur = Math.ceil(ch.voiceDuration * 30) / 30;
+    const scenePlan = planNarratedScenes(ch, chapterBodyDur);
+    const sceneBStartSec = Number((voiceStartSec + (scenePlan[1]?.start || 0)).toFixed(3));
     const chapterEndSec = Number((voiceStartSec + chapterBodyDur).toFixed(3));
 
     for (const s of ch.sentences) {
@@ -1912,8 +2050,7 @@ async function run() {
       sceneBStartSec,
       chapterEndSec,
       slateDuration,
-      sceneADur,
-      sceneBDur,
+      scenePlan,
       voiceMp3: ch.voiceMp3,
       chapterRef: ch
     });
@@ -1922,7 +2059,7 @@ async function run() {
   }
 
   const endCardStartSec = Number(cursorSec.toFixed(3));
-  const endCardDuration = baseEndCardDur;
+  const endCardDuration = 0;
   const totalDuration = Number((endCardStartSec + endCardDuration).toFixed(3));
 
   const finalMp4Path = path.join(outDir, `${episode.slug}.mp4`);
@@ -1935,37 +2072,22 @@ async function run() {
   if (!fastMetadataOnly || !fs.existsSync(finalMp4Path)) {
     updateManifestProgress(episode.slug, {
       pipeline_stage_index: 4,
-      pipeline_stage_label: "4/8 · Renderizando 16 cenas documentais em 1920×1080"
+      pipeline_stage_label: "4/8 · Renderizando cenas guiadas pela narração em 1920×1080"
     });
 
-    for (let i = 0; i < chapterTimings.length; i++) {
-      const timing = chapterTimings[i];
-      const ch = timing.chapterRef;
-
-      const slatePng = path.join(platesDir, `ch${ch.number}_slate.png`);
-      const sceneAPng = path.join(platesDir, `ch${ch.number}_sceneA.png`);
-      const sceneBPng = path.join(platesDir, `ch${ch.number}_sceneB.png`);
-
-      await renderChapterSlatePng(ch, numChapters, timing.chapterStartSec, slatePng, episode.slateFooterText);
-      await renderSceneDossierPng(ch, ch.sceneA, "A", numChapters, timing.voiceStartSec, sceneAPng);
-      await renderSceneDossierPng(ch, ch.sceneB, "B", numChapters, timing.sceneBStartSec, sceneBPng);
-
-      const slateMp4 = path.join(segsDir, `seg_${ch.number}_0_slate.mp4`);
-      const sceneAMp4 = path.join(segsDir, `seg_${ch.number}_1_sceneA.mp4`);
-      const sceneBMp4 = path.join(segsDir, `seg_${ch.number}_2_sceneB.mp4`);
-
-      renderAnimatedSegmentMp4(slatePng, timing.slateDuration, 1, slateMp4);
-      renderAnimatedSegmentMp4(sceneAPng, timing.sceneADur, i % 2 === 0 ? 1 : -1, sceneAMp4);
-      renderAnimatedSegmentMp4(sceneBPng, timing.sceneBDur, i % 2 === 0 ? -1 : 1, sceneBMp4);
-
-      visualSegments.push(slateMp4, sceneAMp4, sceneBMp4);
+    const motionRenderer = await createLongMotionRenderer(ROOT_DIR, FFMPEG_BIN);
+    try {
+      for (const timing of chapterTimings) {
+        for (const [index, scene] of timing.scenePlan.entries()) {
+          const segment = path.join(segsDir, `seg_${timing.number}_${index}.mp4`);
+          console.log(`🎞️ Cena ${index + 1}/${timing.scenePlan.length}: ${scene.data.layout} · ${scene.duration.toFixed(1)}s · quadro fixo`);
+          scene.renderVerification = await motionRenderer.render(scene.data, scene.duration, segment);
+          visualSegments.push(segment);
+        }
+      }
+    } finally {
+      await motionRenderer.close();
     }
-
-    const endCardPng = path.join(platesDir, "end_card.png");
-    const endCardMp4 = path.join(segsDir, "seg_99_end.mp4");
-    await renderEndCardPng(synthesizedChapters[synthesizedChapters.length - 1], endCardPng, episode);
-    renderAnimatedSegmentMp4(endCardPng, endCardDuration, 1, endCardMp4);
-    visualSegments.push(endCardMp4);
 
     updateManifestProgress(episode.slug, {
       pipeline_stage_index: 5,
@@ -2047,26 +2169,26 @@ async function run() {
     }
   }
 
+  const audioQa = verifyFinalAudio(finalMp4Path, workDir);
+  fs.writeFileSync(path.join(outDir, "verification.json"), JSON.stringify(audioQa, null, 2), "utf8");
+
   const thumbnails = [];
 
   const chaptersTxtLines = chapterTimings.map((ch) => `${formatClock(ch.chapterStartSec)} ${ch.title}`);
   const sourcesTxtLines = chapterTimings.map((ch) => `• Cap. ${ch.number}: ${ch.source}`);
 
-  const overviewParagraph = episode.youtubeOverviewParagraph ||
-    "Neste dossiê investigativo do Orange Brick, dissecamos o impacto real de Grand Theft Auto VI na indústria global de games: o novo teto de US$ 80 defendido nos bastidores, a edição física vendida em caixa com código e sem disco Blu-ray, os 210 GB exigidos no SSD do PS5 e Xbox Series S, a aliança técnica com o PS5 Pro, a estreia na Netflix, a caçada aos grupos hackers Lapsus$ e Cyberleek e as mecânicas de simulação em Leonida.";
+  const overviewParagraph = episode.youtubeOverviewParagraph || episode.subtitle || episode.youtubeTitle;
 
-  const pinnedComment = episode.pinnedComment ||
-    "Na sua opinião: pagar US$ 80 (cerca de R$ 450) e reservar 210 GB no SSD vale a pena pelo salto técnico de GTA VI em Leonida, ou o resto da indústria vai usar a Rockstar como desculpa para encarecer tudo em 2027? Comente aqui embaixo!";
+  const pinnedComment = episode.pinnedComment || "Qual ponto desta explicação mais afeta você como jogador?";
 
   const youtubeDescription = [
     episode.subtitle,
     "",
     overviewParagraph,
     "",
-    "CAPÍTULOS DO EPISÓDIO:",
-    ...chaptersTxtLines,
+    ...(chaptersTxtLines.length >= 3 && chapterTimings.every((chapter) => chapter.chapterEndSec - chapter.chapterStartSec >= 10) ? ["CAPÍTULOS DO EPISÓDIO:", ...chaptersTxtLines] : []),
     "",
-    "FONTES VERIFICADAS NESTE DOSSIÊ:",
+    "FONTES PARA CONSULTA E REVISÃO:",
     ...sourcesTxtLines,
     "",
     "Leia todas as matérias e dossiês completos em: https://orangebrick.blog",
@@ -2074,36 +2196,11 @@ async function run() {
     pinnedComment
   ].join("\n");
 
-  const defaultShortsTemplates = [
-    {
-      id: "short_1",
-      title: "Por que os estúdios torciam para GTA VI custar US$ 80?",
-      hook: "Martin Klima (Warhorse Studios) revelou o segredo que nenhuma publicadora tinha coragem de admitir sobre o preço de GTA 6.",
-      chapterIdx: 1,
-      duration_seconds: 52,
-      related_slug: "warhorse-espera-que-gta-6-abra-caminho-para-novo-padrao-de-us-80"
-    },
-    {
-      id: "short_2",
-      title: "Caixa vazia: A mídia física de GTA VI não tem disco",
-      hook: "Você vai comprar a caixa física de GTA 6 em 12 de novembro achando que tem Blu-ray? A página oficial da Rockstar confirmou o contrário.",
-      chapterIdx: 2,
-      duration_seconds: 48,
-      related_slug: "gta-vi-edicao-fisica-codigo-na-caixa-sem-disco"
-    },
-    {
-      id: "short_3",
-      title: "210 GB no PS5 e o sufoco no Xbox Series S",
-      hook: "Os servidores da PSN entregaram o peso real de GTA 6: 210 GB logo na largada. Veja quanto sobra no SSD do PS5 e do Series S.",
-      chapterIdx: 3,
-      duration_seconds: 55,
-      related_slug: "gta-vi-vai-pesar-210-gb-no-ps5-e-abre-pre-load-em-12-de-novembro"
-    }
-  ];
-
-  const shortsTemplates = Array.isArray(episode.shortsTemplates) && episode.shortsTemplates.length > 0
-    ? episode.shortsTemplates
-    : defaultShortsTemplates;
+  const shortsTemplates = episode.shortsTemplates?.length ? episode.shortsTemplates : episode.chapters.slice(0, 2).map((chapter, index) => ({
+    id: `short_${index + 1}`, title: chapter.title,
+    hook: chapter.narration.split(/(?<=[.!?])\s+/)[0], chapterIdx: index,
+    duration_seconds: 45, related_slug: episode.slug
+  }));
 
   const shortsSuggestions = shortsTemplates.map((tpl) => {
     const chTiming = chapterTimings[Math.min(tpl.chapterIdx || 0, chapterTimings.length - 1)];
@@ -2121,42 +2218,11 @@ async function run() {
   });
 
   const qaChecks = [
-    {
-      id: "midroll_duration",
-      label: "Janela de Monetização Mid-Roll (≥ 08:00)",
-      passed: totalDuration >= 480,
-      detail: `${formatClock(totalDuration)} (${totalDuration}s) — Anúncios intermediários liberados no YouTube`
-    },
-    {
-      id: "loudness_mix",
-      label: "Volume no Padrão do YouTube e Sidechain",
-      passed: true,
-      detail: "Master AAC 48 kHz / 192 kbps com trilha dark duckada sob a voz e zero silêncio morto"
-    },
-    {
-      id: "pronunciation_sync",
-      label: "Checagem de Pronúncia e Legenda Sincronizada",
-      passed: totalSentences > 0,
-      detail: `${totalSentences} frases conferidas • Legendas .ASS queimada e .SRT alinhadas ao milissegundo`
-    },
-    {
-      id: "verified_sources",
-      label: "Fatos Conferidos e Fontes Originais",
-      passed: true,
-      detail: `${numChapters} capítulos com fontes primárias verificadas`
-    },
-    {
-      id: "visual_diversity",
-      label: "Cenas 16:9 sem Repetição de Imagem",
-      passed: true,
-      detail: `${numChapters * 2} artes e capturas oficiais distintas validadas (HTTP 200 • 1920×1080)`
-    },
-    {
-      id: "script_originality",
-      label: "Comparação Anti-Repetição no Canal",
-      passed: true,
-      detail: "Roteiro 100% original comparado ao histórico de vídeos longos do canal"
-    }
+    { id: "editorial_standard", label: "Padrão editorial de retenção", passed: true, detail: "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único." },
+    { id: "pronunciation_sync", label: "Revisão auditiva e legendas", passed: false, detail: `${totalSentences} frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana.` },
+    { id: "verified_sources", label: "Revisão das fontes", passed: false, detail: "Fontes registradas; conferir afirmações antes de aprovar." },
+    { id: "loudness_mix", label: "Áudio final medido", passed: audioQa.passed, detail: `${audioQa.integrated_lufs} LUFS; ${audioQa.true_peak_dbtp} dBTP. Escuta humana pendente.` },
+    { id: "visual_diversity", label: "Materiais visuais", passed: false, detail: "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão." }
   ];
 
   const stats = fs.statSync(finalMp4Path);
@@ -2173,6 +2239,9 @@ async function run() {
     source_post_slugs: episode.sourcePostSlugs,
     visual_style: episode.visualStyle,
     voice_id: episode.voiceId,
+    editorial_standard: "youtube-editorial-v3",
+    is_preview: preview,
+    production: { scenes: chapterTimings.map((chapter) => ({ chapter: chapter.number, voiceStartSec: chapter.voiceStartSec, scenes: chapter.scenePlan.map(({ start, duration, data, renderVerification }) => ({ start, duration, layout: data.layout, camera: "fixed", render_verification: renderVerification || null, headline: data.headline, source: data.imageUrl, narrationAnchor: data.narrationAnchor || null })) })), voices: synthesizedChapters.map((chapter) => chapter.ttsProvider), human_audio_review: false, audio_verification: audioQa },
     duration_seconds: totalDuration,
     duration_formatted: formatClock(totalDuration),
     monetization_midroll_eligible: totalDuration >= 480,
@@ -2199,21 +2268,21 @@ async function run() {
     youtube: {
       title: episode.youtubeTitle,
       description: youtubeDescription,
-      tags: episode.tags || [
-        "GTA 6",
-        "Grand Theft Auto VI",
-        "Rockstar Games",
-        "GTA 6 preco 80 dolares",
-        "GTA 6 210 GB",
-        "GTA 6 midia fisica sem disco",
-        "GTA 6 gameplay mecanicas",
-        "GTA 6 Leonida Vice City",
-        "Take Two Interactive",
-        "Orange Brick"
-      ],
+      tags: episode.tags || ["Orange Brick", episode.youtubeTitle],
       pinned_comment: pinnedComment,
       visibility: "private",
       scheduled_at: null
+    },
+    marketing: {
+      standard: "youtube-editorial-v3",
+      audience: "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+      promise: episode.subtitle,
+      primary_cta: episode.primaryCta || "Inscreva-se para entender o que muda nos jogos e consoles",
+      title_variants: episode.titleVariants || [episode.youtubeTitle],
+      thumbnail_concepts: episode.thumbnailConcepts || [],
+      thumbnail_review_required: true,
+      end_screen: { studio_configuration_required: true, start_seconds: Math.max(0, totalDuration - 15), related_video: episode.relatedVideoUrl || null },
+      metrics_review_hours: [24, 72, 168, 672]
     },
     review_notes: null,
     approved_at: null,
@@ -2225,12 +2294,26 @@ async function run() {
   fs.writeFileSync(path.join(outDir, "youtube-metadata.json"), JSON.stringify(manifestItem, null, 2), "utf-8");
   fs.writeFileSync(path.join(outDir, "youtube-post.txt"), `${episode.youtubeTitle}\n\n${youtubeDescription}\n\nCOMENTÁRIO FIXADO:\n${pinnedComment}\n`, "utf-8");
 
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+    try {
+      await syncLongVideos([episode.slug], { root: ROOT_DIR });
+      console.log("✅ Vídeo e registro sincronizados com a biblioteca do servidor.");
+    } catch (error) {
+      console.error(`⚠️ O vídeo foi criado, mas a sincronização está pendente: ${error.message}`);
+      updateManifestProgress(episode.slug, { sync_error: error.message });
+      process.exitCode = 1;
+    }
+  }
+
   console.log(`\n🎉 SUCESSO! Episódio e Kit Pipeline Canal Dark salvos no manifesto!`);
   console.log(`   📂 Vídeo MP4: ${finalMp4Path} (${(stats.size / (1024 * 1024)).toFixed(1)} MB)`);
   console.log(`   ⏱️ Duração: ${formatClock(totalDuration)} (${totalDuration}s)\n`);
 }
 
-run().catch((err) => {
-  console.error("\n❌ Erro fatal na geração do vídeo longo:", err);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  run().catch((err) => {
+    console.error("\n❌ Erro fatal na geração do vídeo longo:", err);
+    if (activeEpisodeSlug && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(activeEpisodeSlug)) updateManifestProgress(activeEpisodeSlug, { status: "failed", error: "A produção foi interrompida. Confira roteiro, materiais e provedor de voz antes de tentar novamente.", pipeline_stage_label: "Produção interrompida para revisão" });
+    process.exitCode = 1;
+  });
+}

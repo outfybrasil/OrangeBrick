@@ -227,6 +227,7 @@ export default function PublicationsPage() {
                       <section aria-label={`Instagram: ${post.title}`} className="min-w-0 border-t border-white/10 py-3">
                         <h4 className="mb-2 text-xs font-bold uppercase text-gray-500">Instagram</h4>
                         <Delivery status={post.instagram} />
+                        <Link href={`/admin/posts-sociais?postId=${post.id}`} className="mt-2 inline-flex min-h-10 items-center text-xs font-bold text-brand-orange">Gerar post ou carrossel</Link>
                       </section>
 
                       <section aria-label={`TikTok: ${post.title}`} className="min-w-0 border-t border-white/10 py-3">

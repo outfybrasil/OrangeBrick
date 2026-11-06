@@ -1,0 +1,195 @@
+{
+  "slug": "game-key-card-edicao-fluida-v3",
+  "seriesBadge": "O QUE MUDA PARA QUEM JOGA",
+  "title": "Game-Key Card: o que você realmente compra?",
+  "youtubeTitle": "Game-Key Card: o que você realmente compra?",
+  "subtitle": "Entenda o download inicial, o espaço necessário e por que o cartão continua obrigatório.",
+  "sourceMode": "custom_script",
+  "sourcePostSlugs": [],
+  "visualStyle": "documentario",
+  "voiceId": "auto",
+  "youtubeOverviewParagraph": "Prévia revisada: produto, embalagem, demonstrações e consequências, com enquadramento fixo e animações locais.",
+  "pinnedComment": "O download inicial muda sua decisão de comprar a edição física?",
+  "tags": [
+    "Nintendo Switch 2",
+    "Game-Key Card",
+    "Orange Brick"
+  ],
+  "shortsTemplates": [
+    {
+      "id": "short_1",
+      "title": "Game-Key Card precisa de internet?",
+      "hook": "A caixa é física, mas o primeiro download é obrigatório.",
+      "chapterIdx": 0,
+      "duration_seconds": 35,
+      "related_slug": "game-key-card-edicao-fluida-v3-preview"
+    }
+  ],
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O cartão é a chave",
+      "kicker": "ENTENDA O FORMATO",
+      "accent": "#ff6a20",
+      "source": "https://www.nintendo.com/us/gaming-systems/switch-2/faq/",
+      "narration": "A caixa é física, mas o jogo não está inteiro no cartão. O aviso que muda a compra está aqui: Game-Key Card. Ele é a chave para baixar os dados pela internet, antes de jogar pela primeira vez. Esses dados ocupam espaço no console ou em um cartão micro SD Express. Depois de baixar, o cartão continua obrigatório para abrir o jogo. Sem internet, você pode iniciar os títulos que permitem jogar desconectado, depois dessa configuração inicial. E se o cartão for para outro Switch dois? Nesse console, será preciso baixar os dados também. Outro detalhe: segundo o suporte da Nintendo, uma conta Nintendo não é necessária para baixar esses dados. Na loja, procure o símbolo da chave e confira o espaço exigido na embalagem.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "Físico na caixa. Download no console.",
+          "highlight": "Entenda a diferença antes de comprar.",
+          "narrationAnchor": "A caixa é física, mas o jogo",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 563,
+            "height": 910
+          },
+          "mediaLabel": "EMBALAGEM OFICIAL · EXEMPLO",
+          "eyebrow": "ANTES DE COMPRAR"
+        },
+        {
+          "layout": "evidence",
+          "headline": "Procure esta marca.",
+          "highlight": "Game-Key Card identifica o formato que exige o download inicial.",
+          "narrationAnchor": "O aviso que muda a compra está",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "crop": {
+            "left": 736,
+            "top": 545,
+            "width": 1142,
+            "height": 195
+          }
+        },
+        {
+          "layout": "process",
+          "headline": "O jogo vai para o armazenamento.",
+          "highlight": "O cartão funciona como a chave de acesso.",
+          "narrationAnchor": "Ele é a chave para baixar os",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "steps": [
+            "Internet",
+            "Dados do jogo",
+            "Console"
+          ],
+          "processKind": "download"
+        },
+        {
+          "layout": "storage",
+          "headline": "O download precisa caber.",
+          "highlight": "O espaço necessário varia conforme o jogo.",
+          "narrationAnchor": "Esses dados ocupam espaço no console ou",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA"
+        },
+        {
+          "layout": "insert",
+          "headline": "Baixou? O cartão ainda é necessário.",
+          "highlight": "Ele precisa estar inserido para iniciar o jogo.",
+          "narrationAnchor": "Depois de baixar, o cartão continua obrigatório",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/keyCard-step01_img.png",
+          "imageCaption": "Ilustração oficial da Nintendo: Game-Key Card sobre a entrada do Switch 2.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "assetKind": "official-diagram"
+        },
+        {
+          "layout": "offline",
+          "headline": "Sem internet não significa sem cartão.",
+          "highlight": "Após a configuração inicial, para jogos que permitem uso offline.",
+          "narrationAnchor": "Sem internet, você pode iniciar os títulos",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA"
+        },
+        {
+          "layout": "handoff",
+          "headline": "E em outro Switch 2?",
+          "highlight": "O cartão pode mudar de console.",
+          "narrationAnchor": "E se o cartão for para outro",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA"
+        },
+        {
+          "layout": "process",
+          "headline": "Neste console, baixe os dados também.",
+          "highlight": "O primeiro download precisa ser feito nesse aparelho.",
+          "narrationAnchor": "Nesse console, será preciso baixar os dados",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "steps": [
+            "Internet",
+            "Dados do jogo",
+            "Console B"
+          ],
+          "processKind": "download"
+        },
+        {
+          "layout": "quote",
+          "headline": "Conta Nintendo não é necessária para baixar os dados.",
+          "highlight": "Informação do suporte oficial da Nintendo.",
+          "narrationAnchor": "Outro detalhe: segundo o suporte da Nintendo,",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "quoteAttribution": "O QUE DIZ A NINTENDO"
+        },
+        {
+          "layout": "takeaway",
+          "headline": "Reconheça a chave. Confira o espaço.",
+          "highlight": "O aviso na embalagem ajuda a decidir antes de levar.",
+          "narrationAnchor": "Na loja, procure o símbolo da chave",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "crop": {
+            "left": 0,
+            "top": 0,
+            "width": 563,
+            "height": 910
+          }
+        },
+        {
+          "layout": "cta",
+          "headline": "Entenda antes de comprar.",
+          "highlight": "Jogos e consoles, com contexto.",
+          "narrationAnchor": "Para entender o que muda",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/key-card/assets/img/intro_img01.png",
+          "imageCaption": "Exemplo oficial de embalagem de Game-Key Card da Nintendo.",
+          "evidenceSource": "Nintendo · Guia oficial de Game-Key Cards",
+          "tag": "GAME-KEY CARD · O QUE MUDA PARA QUEM JOGA",
+          "action": "INSCREVA-SE NO CANAL"
+        }
+      ]
+    }
+  ],
+  "titleVariants": [
+    "Game-Key Card: o que você realmente compra?",
+    "Game-Key Card no Switch 2: entenda o download obrigatório",
+    "O cartão é a chave: como funciona o Game-Key Card"
+  ],
+  "thumbnailConcepts": [
+    "Embalagem oficial com foco no aviso Game-Key Card; texto: PRECISA BAIXAR",
+    "Cartão oficial e seta para armazenamento; texto: O JOGO FICA ONDE?",
+    "Diagrama editorial cartão → download → console; texto: ENTENDA ANTES DE COMPRAR"
+  ]
+}

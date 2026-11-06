@@ -14,6 +14,10 @@ heditor turns a recording of someone speaking into a short vertical video that h
 
 The standard is high: **every video gets an edit designed for it.** A style is a proven visual language, never a template to stamp. If two videos in the same batch look like the same mould, the work is not done.
 
+## Orange Brick project profile
+
+When working inside Orange Brick, read `references/orange-brick.md` before choosing a style or building a composition. The user's project direction takes precedence over generic style defaults.
+
 ## 0. Setup (once per machine)
 
 ```bash

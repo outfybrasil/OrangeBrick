@@ -1036,3 +1036,53 @@ export const CATEGORY_CONFIG: Record<PostCategory, { label: string; color: strin
   review: { label: "Review", color: "#D9B45B" },
   opinion: { label: "Opinião", color: "#E5766B" },
 };
+
+export interface SocialPostAsset {
+  url: string;
+  alt: string;
+  caption: string;
+}
+
+export interface SocialPostSlide {
+  id: string;
+  kind: "cover" | "content" | "cta";
+  title: string;
+  text: string;
+  imageUrl: string;
+  alt: string;
+  caption: string;
+  fit: "contain" | "cover";
+  positionX: number;
+  positionY: number;
+}
+
+export interface SocialPostDraft {
+  version: 1;
+  postId: string;
+  sourceUpdatedAt: string;
+  format: "single" | "carousel";
+  caption: string;
+  music: string;
+  slides: SocialPostSlide[];
+  savedAt: string | null;
+}
+
+export interface SocialInstagramPublication {
+  attempt: number;
+  batchId: string;
+  status: "processing" | "published" | "failed" | "unknown";
+  phase: "creating" | "publishing" | "finished";
+  accountId: string;
+  username: string;
+  containerId: string | null;
+  mediaId: string | null;
+  permalink: string | null;
+  error: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SocialPostListStatus {
+  status: "published" | "processing" | "unknown" | "failed" | "not_sent" | "unavailable";
+  publishedFormats: Array<SocialPostDraft["format"]>;
+}

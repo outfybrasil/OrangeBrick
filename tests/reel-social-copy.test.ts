@@ -1,3 +1,4 @@
+import { generateSocialCopys } from "../src/lib/social/social-copy.ts";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -26,6 +27,7 @@ function loadGenerateSocialCopys() {
   const exports: { generateSocialCopys?: (post: SocialPostInput) => SocialCopyOutput } = {};
   const require = createRequire(import.meta.url);
   const mockedRequire = (name: string) => {
+    if (name.endsWith("social-copy")) return { generateSocialCopys };
     if (name.endsWith("reel-script")) return {};
     if (name.endsWith("reel-remote")) return { enqueueRemoteReel: async () => ({}), cancelRemoteReel: async () => ({}), usesRemoteReels: () => false };
     return require(name);

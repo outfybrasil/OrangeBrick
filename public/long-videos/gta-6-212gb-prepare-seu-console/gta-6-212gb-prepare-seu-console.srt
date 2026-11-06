@@ -1,0 +1,357 @@
+1
+00:00:00,100 --> 00:00:05,012
+GTA seis pode exigir até duzentos e doze
+gigabytes livres no seu console.
+
+2
+00:00:04,963 --> 00:00:09,750
+A Rockstar confirmou esse limite, mas o valor
+necessário depende do aparelho.
+
+3
+00:00:09,750 --> 00:00:14,125
+Antes de apagar qualquer jogo, entenda o que
+esse número realmente diz.
+
+4
+00:00:14,125 --> 00:00:15,962
+A palavra importante é até.
+
+5
+00:00:15,963 --> 00:00:20,813
+A página de suporte não apresenta uma tabela
+com um valor exato para cada modelo.
+
+6
+00:00:20,812 --> 00:00:21,375
+Portanto,
+
+7
+00:00:21,375 --> 00:00:26,375
+afirmar que todos precisam liberar exatamente
+duzentos e doze gigabytes seria ir
+
+8
+00:00:26,375 --> 00:00:28,000
+além do que foi informado.
+
+9
+00:00:28,000 --> 00:00:31,413
+Uma instalação desse tamanho começa antes do
+lançamento.
+
+10
+00:00:31,413 --> 00:00:35,811
+O primeiro passo é abrir as configurações do
+seu console e conferir quanto
+
+11
+00:00:35,811 --> 00:00:37,950
+armazenamento está disponível agora.
+
+12
+00:00:37,950 --> 00:00:40,588
+Depois, vale separar três perguntas.
+
+13
+00:00:40,587 --> 00:00:42,200
+Quanto espaço está livre?
+
+14
+00:00:42,200 --> 00:00:44,525
+Quanto tempo a conexão pode levar?
+
+15
+00:00:44,525 --> 00:00:48,237
+E quando a edição digital estará disponível
+para pré-download?
+
+16
+00:00:48,237 --> 00:00:50,900
+Vamos resolver uma de cada vez.
+
+17
+00:00:51,067 --> 00:00:52,109
+Antes de começar,
+
+18
+00:00:52,109 --> 00:00:57,379
+abra a área de armazenamento do seu console e
+veja o espaço que está livre de verdade.
+
+19
+00:00:57,329 --> 00:01:01,737
+A capacidade impressa na caixa do aparelho não
+significa que toda ela estará
+
+20
+00:01:01,737 --> 00:01:03,941
+disponível para instalar um jogo novo.
+
+21
+00:01:03,942 --> 00:01:08,504
+Também vale revisar o que está instalado e o
+que você realmente pretende manter.
+
+22
+00:01:08,505 --> 00:01:10,990
+A ideia é preparar espaço com antecedência,
+
+23
+00:01:10,990 --> 00:01:15,555
+sem apagar arquivos às pressas no momento em
+que o download estiver disponível.
+
+24
+00:01:15,554 --> 00:01:20,416
+O tamanho do arquivo muda outra parte da
+experiência: a espera pela transferência.
+
+25
+00:01:20,417 --> 00:01:22,057
+Para ilustrar a diferença,
+
+26
+00:01:22,057 --> 00:01:26,283
+considere um exemplo teórico de duzentos e
+doze gigabytes decimais,
+
+27
+00:01:26,283 --> 00:01:28,679
+em uma conexão constante e sem perdas.
+
+28
+00:01:28,679 --> 00:01:32,504
+Esse cálculo não é uma previsão do tempo que o
+seu aparelho vai levar.
+
+29
+00:01:32,505 --> 00:01:38,905
+Rede sem fio, outros dispositivos, servidor e
+condições da conexão podem mudar o resultado.
+
+30
+00:01:38,905 --> 00:01:44,118
+A utilidade do exemplo é mostrar por que o
+tamanho importa antes do dia do lançamento.
+
+31
+00:01:44,117 --> 00:01:45,687
+Planeje as duas tarefas:
+
+32
+00:01:45,687 --> 00:01:51,118
+reservar espaço suficiente para o seu aparelho
+e organizar a transferência conforme
+
+33
+00:01:51,118 --> 00:01:53,867
+a disponibilidade oficial do pré download.
+
+34
+00:01:54,034 --> 00:01:58,948
+Compare o espaço livre exibido pelo console
+com o requisito da sua versão quando ele
+
+35
+00:01:58,948 --> 00:02:00,059
+estiver disponível.
+
+36
+00:02:00,009 --> 00:02:03,746
+Veja quais jogos você já terminou ou não
+pretende abrir agora.
+
+37
+00:02:03,746 --> 00:02:07,021
+Não é necessário sair removendo tudo sem
+conferir.
+
+38
+00:02:07,022 --> 00:02:11,884
+No PlayStation, jogos removidos podem ser
+baixados novamente pela biblioteca.
+
+39
+00:02:11,884 --> 00:02:13,974
+Antes de excluir qualquer conteúdo,
+
+40
+00:02:13,974 --> 00:02:18,272
+confira sua licença e as condições de acesso à
+conta que comprou o jogo.
+
+41
+00:02:18,271 --> 00:02:22,508
+O arquivo do jogo e os dados de progresso são
+categorias diferentes.
+
+42
+00:02:22,509 --> 00:02:24,501
+Antes de limpar o armazenamento,
+
+43
+00:02:24,501 --> 00:02:29,046
+confira os dados salvos e as opções de cópia
+disponíveis no seu aparelho.
+
+44
+00:02:29,046 --> 00:02:32,184
+Não presuma que todo progresso está salvo na
+nuvem.
+
+45
+00:02:32,184 --> 00:02:36,584
+Comprar armazenamento extra é uma opção, mas
+não precisa ser a primeira.
+
+46
+00:02:36,584 --> 00:02:37,872
+Se decidir expandir,
+
+47
+00:02:37,872 --> 00:02:42,571
+confirme a compatibilidade e as condições do
+seu console antes de gastar.
+
+48
+00:02:42,572 --> 00:02:48,223
+Um acessório externo qualquer não deve ser
+tratado como solução universal para rodar
+
+49
+00:02:48,223 --> 00:02:49,097
+jogos atuais.
+
+50
+00:02:49,267 --> 00:02:53,892
+A Rockstar anuncia o início do pré-download em
+dez de novembro e o lançamento em
+
+51
+00:02:53,892 --> 00:02:56,667
+dezenove de novembro de dois mil e vinte e
+seis.
+
+52
+00:02:56,617 --> 00:03:01,917
+São datas com funções diferentes: baixar antes
+não significa começar a jogar antes.
+
+53
+00:03:01,917 --> 00:03:05,430
+Confirme as condições da sua edição e da loja
+em que comprou.
+
+54
+00:03:05,429 --> 00:03:10,673
+A página oficial apresenta o pré-download como
+informação geral; eventuais horários,
+
+55
+00:03:10,673 --> 00:03:16,542
+disponibilidade e instruções específicas
+precisam ser conferidos na plataforma correspondente.
+
+56
+00:03:16,542 --> 00:03:18,455
+Se sua conexão é compartilhada,
+
+57
+00:03:18,455 --> 00:03:22,467
+escolha um horário em que outras pessoas não
+dependam tanto dela.
+
+58
+00:03:22,467 --> 00:03:26,131
+Uma conexão cabeada ou estável pode ajudar na
+consistência,
+
+59
+00:03:26,131 --> 00:03:30,105
+mas não garante a velocidade contratada
+durante todo o processo.
+
+60
+00:03:30,105 --> 00:03:33,505
+Os tempos que mostramos são apenas contas para
+comparação.
+
+61
+00:03:33,504 --> 00:03:39,192
+Instabilidade, limites de servidor e outras
+atividades na rede podem alterar o resultado.
+
+62
+00:03:39,192 --> 00:03:45,317
+O tamanho efetivamente baixado também pode ser
+diferente do espaço disponível exigido.
+
+63
+00:03:45,500 --> 00:03:46,913
+O plano é simples.
+
+64
+00:03:46,862 --> 00:03:49,037
+Primeiro, confira o espaço livre.
+
+65
+00:03:49,038 --> 00:03:53,100
+Depois, decida o que pode remover e proteja
+seus dados salvos.
+
+66
+00:03:53,100 --> 00:03:53,791
+Em seguida,
+
+67
+00:03:53,791 --> 00:03:58,944
+verifique a disponibilidade do pré-download na
+sua loja e reserve tempo suficiente
+
+68
+00:03:58,944 --> 00:03:59,887
+para a conexão.
+
+69
+00:03:59,888 --> 00:04:03,713
+Se puder, mantenha alguma margem livre após a
+instalação.
+
+70
+00:04:03,712 --> 00:04:05,854
+Isso é uma precaução de organização,
+
+71
+00:04:05,854 --> 00:04:09,425
+não uma afirmação sobre o tamanho de uma
+atualização futura.
+
+72
+00:04:09,425 --> 00:04:15,375
+O valor e a necessidade de novas atualizações
+só podem ser confirmados quando forem divulgados.
+
+73
+00:04:15,375 --> 00:04:19,778
+No fim, duzentos e doze gigabytes são o limite
+divulgado pela Rockstar,
+
+74
+00:04:19,778 --> 00:04:23,437
+não uma sentença de que todo console usará
+exatamente isso.
+
+75
+00:04:23,438 --> 00:04:26,250
+Confira seu aparelho, sua edição e sua rede.
+
+76
+00:04:26,250 --> 00:04:30,212
+Assim você chega ao lançamento preparado sem
+gastar por impulso.
+
+77
+00:04:30,212 --> 00:04:35,112
+Para acompanhar jogos e tecnologia com
+contexto, inscreva-se no canal.

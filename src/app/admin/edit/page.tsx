@@ -690,6 +690,7 @@ function EditForm() {
       }
       actions={
         <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+          {postId && <Link href={`/admin/posts-sociais?postId=${postId}`} className="inline-flex min-h-11 items-center justify-center border border-white/15 px-3.5 text-xs font-bold text-gray-200 hover:bg-white/5">Gerar post</Link>}
           <button
             type="button"
             onClick={() => setShowPreview(true)}

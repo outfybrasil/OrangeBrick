@@ -72,6 +72,23 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Usar curiosidade e emoção sem clickbait: não prometer algo que o vídeo não entrega, fabricar fatos ou reações, ou esconder contexto importante. Viralização não é garantida.
 - Antes de entregar, conferir se o gancho corresponde ao vídeo, se o ritmo não tem trechos dispensáveis, se a mensagem é compreensível sem áudio, se a descrição representa o conteúdo e se a chamada para ação combina com o objetivo da página.
 
+## 🎬 Padrão de vídeos aprovado em 04/11/2026
+
+- Aprovação final do usuário: adotar `youtube-editorial-v3`, demonstrado em `public/long-videos/game-key-card-edicao-fluida-v3-preview/`, como referência padrão para as próximas produções. Preservar sua direção de edição e áudio, adaptando cenas e duração à pauta, sem repetir mecanicamente a sequência da prévia.
+
+- Aplicar o plano de `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md`, seção de YouTube, edição longa e voz, em todos os novos vídeos.
+- Definir público, pergunta central, promessa de título/miniatura, objetivo principal e CTA antes de produzir. Abrir com o fato ou consequência, entregar valor cedo e concluir a resposta antes do CTA.
+- Usar uma chamada principal por momento, ligada ao benefício de acompanhar o canal; não empilhar comentário, curtida, inscrição e visita ao site na mesma fala.
+- Vídeos longos devem durar o necessário para explicar a pauta. Nunca inserir silêncio ou repetições para atingir duração de monetização. Planejar cenas pela fala, com âncoras revisadas, fontes e materiais diretamente ligados ao assunto.
+- Manter câmera, quadro, títulos principais e marca fixos. Não usar deslocamento ou zoom contínuo da tela para simular dinamismo. Animar elementos individuais apenas para demonstrar uma ação, destacar uma evidência ou conduzir a leitura, com movimento suave e determinístico.
+- Não transformar o desenvolvimento em uma sequência de três cartões. Variar entre produto real, detalhe de material oficial, prova visual, demonstração, comparação sustentada e consequência prática. Cada cena deve acrescentar informação; a conclusão deve entregar uma decisão útil, sem repetir o roteiro.
+- Preparar roteiro falado natural, preservar pausas expressivas e velocidade normal. Identificar o provedor e a voz usados; não trocar para outro provedor após falha sem revisão explícita. Gerar uma amostra antes de uma produção paga completa.
+- Variar vozes editoriais entre episódios quando a seleção estiver automática, mantendo uma única voz ao longo do vídeo. Respeitar escolhas explícitas e revisar a naturalidade e a pronúncia de cada voz; não presumir qualidade humana pelo nome do sintetizador.
+- Usar alinhamento real de palavras quando disponível e identificar estimativas quando não houver. Nunca marcar pronúncia, fatos, licença ou loudness como aprovados sem a validação correspondente.
+- Entregar prévia de vídeo como arquivo audiovisual para revisão, com o que foi medido e o que precisa ser ouvido. Não publicar automaticamente a prévia.
+- Preparar embalagem, fontes, capítulos válidos, sugestão de próximo vídeo e Shorts complementares. Configurar tela final e vídeo relacionado no Studio quando aplicável; elementos desenhados no MP4 não são links interativos.
+- Avaliar retenção aos 30 segundos, curva de permanência, tempo assistido, inscritos por mil visualizações e continuidade. Tratar metas e cadência como hipóteses do canal, sem garantias de alcance.
+
 ## 📅 Game Release Dates & Official Cover Art Standards
 
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**

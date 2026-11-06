@@ -1,5 +1,4 @@
 {
-  "slug": "o-efeito-gta-6-na-industria",
   "series_badge": "DOSSIÊ ORANGE BRICK // EPISÓDIO #01",
   "title": "O EFEITO GTA VI: Jogada de US$ 80, Caixa Sem Disco, 210 GB e o Terremoto na Indústria",
   "subtitle": "Como um único lançamento marcado para 19 de novembro de 2026 redesenhou preços, calendários, hardware e mídia física no mercado global.",
@@ -17,6 +16,8 @@
   ],
   "visual_style": "documentario",
   "voice_id": "pt-BR-AntonioNeural",
+  "slug": "o-efeito-gta-6-na-industria",
+  "updated_at": "2026-11-05T04:35:07.061Z",
   "duration_seconds": 738.3,
   "duration_formatted": "12:18",
   "monetization_midroll_eligible": true,
@@ -25,7 +26,7 @@
   "fps": 30,
   "video_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.mp4",
   "srt_url": "/long-videos/o-efeito-gta-6-na-industria/o-efeito-gta-6-na-industria.srt",
-  "preview_sheet_url": "/long-videos/o-efeito-gta-6-na-industria/preview-sheet.jpg",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/preview-sheet.jpg",
   "thumbnails": [
     {
       "id": "thumb_1",
@@ -33,7 +34,7 @@
       "angle": "Foco econômico (US$ 80 + R$ 450)",
       "headline": "US$ 80 E SEM DISCO",
       "subline": "O EFEITO GTA VI",
-      "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_1.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_1.png"
     },
     {
       "id": "thumb_2",
@@ -41,7 +42,7 @@
       "angle": "Foco em hardware (210 GB no SSD + Caixa Vazia)",
       "headline": "210 GB NO PS5",
       "subline": "CAIXA SÓ COM CÓDIGO",
-      "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_2.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_2.png"
     },
     {
       "id": "thumb_3",
@@ -49,7 +50,7 @@
       "angle": "Foco investigativo (Lapsus$ + Leonida)",
       "headline": "A GUERRA POR TRÁS",
       "subline": "DE GTA VI EM NOVEMBRO",
-      "url": "/long-videos/o-efeito-gta-6-na-industria/thumb_3.png"
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/o-efeito-gta-6-na-industria/thumb_3.png"
     }
   ],
   "selected_thumbnail_id": "thumb_1",
@@ -208,8 +209,17 @@
     "visibility": "private",
     "scheduled_at": null
   },
-  "review_notes": null,
+  "review_notes": "Versão anterior preservada. A edição corrigida está em /long-videos/o-efeito-gta-6-na-industria-reeditado/o-efeito-gta-6-na-industria-reeditado.mp4",
   "approved_at": null,
   "created_at": "2026-11-04T18:20:10.830Z",
-  "updated_at": "2026-11-04T18:20:10.830Z"
+  "review_history": [
+    {
+      "id": "superseded-o-efeito-gta-6-na-industria-reeditado",
+      "kind": "superseded",
+      "at": "2026-11-05T04:33:20.210Z",
+      "detail": "Versão anterior preservada; a reedição aprovada é uma produção separada.",
+      "related_slug": "o-efeito-gta-6-na-industria-reeditado"
+    }
+  ],
+  "replaced_by_slug": "o-efeito-gta-6-na-industria-reeditado"
 }

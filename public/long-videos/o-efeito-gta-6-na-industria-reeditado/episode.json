@@ -1,0 +1,620 @@
+{
+  "slug": "o-efeito-gta-6-na-industria-reeditado",
+  "seriesBadge": "ORANGE BRICK · EDIÇÃO REVISADA",
+  "title": "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+  "youtubeTitle": "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+  "subtitle": "O que conferir na edição, no código da caixa, no armazenamento e no calendário antes de comprar GTA VI.",
+  "sourceMode": "custom_script",
+  "sourcePostSlugs": [],
+  "visualStyle": "documentario",
+  "voiceId": "pt-BR-ThalitaMultilingualNeural",
+  "primaryCta": "Para acompanhar jogos e consoles com contexto, inscreva-se no canal.",
+  "youtubeOverviewParagraph": "Edição revisada de O efeito GTA VI na indústria. Informações conferidas em fontes oficiais em 4 de novembro de 2026; animações e simulações identificadas; imagens e trechos oficiais creditados.",
+  "pinnedComment": "Qual desses pontos mais pesa na sua decisão: edição, formato da caixa ou preparação do console?",
+  "tags": [
+    "Grand Theft Auto VI",
+    "GTA VI",
+    "GTA 6",
+    "Rockstar Games",
+    "PlayStation 5",
+    "Xbox Series X",
+    "Xbox Series S",
+    "Orange Brick"
+  ],
+  "titleVariants": [
+    "GTA VI: preço, caixa sem disco e até 212 GB — o que muda",
+    "GTA VI: o que conferir antes de comprar",
+    "GTA VI: entenda o código na caixa e o download"
+  ],
+  "thumbnailConcepts": [
+    "Arte oficial atual e texto: O QUE VOCÊ COMPRA?",
+    "Caixa oficial e destaque: SEM DISCO",
+    "Imagem oficial de Leonida e texto: PREPARE O CONSOLE"
+  ],
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O custo real de entrar em Leonida",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements",
+      "narration": "GTA seis tem preço anunciado de setenta e nove dólares e noventa e nove centavos nos Estados Unidos. A caixa de varejo contém um código, sem disco, e a instalação pode exigir até duzentos e doze gigabytes. Esses três pontos mudam a preparação de quem vai jogar. E cada um precisa ser entendido no seu contexto: a moeda da loja, o tipo de licença e o limite de armazenamento informado para o aparelho. A proposta é separar o que está documentado da expectativa. Assim, você decide com informação e prepara o console antes de jogar.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "O custo vai além da etiqueta.",
+          "highlight": "Preço, conteúdo da caixa e espaço para instalar.",
+          "narrationAnchor": "GTA seis tem preço anunciado de setenta",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: cover.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "eyebrow": "ANTES DE COMPRAR",
+          "mediaLabel": "ARTE OFICIAL ATUALIZADA",
+          "mediaWide": true
+        },
+        {
+          "layout": "process",
+          "headline": "Três perguntas antes da compra.",
+          "highlight": "O formato e a infraestrutura também fazem parte da decisão.",
+          "narrationAnchor": "Esses três pontos mudam a preparação de",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "steps": [
+            "Qual edição?",
+            "O que vem na caixa?",
+            "Onde instalar?"
+          ]
+        },
+        {
+          "layout": "footage",
+          "headline": "Fatos antes da expectativa.",
+          "highlight": "",
+          "narrationAnchor": "A proposta é separar o que está",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 5
+        }
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Preço: edição, moeda e comparação",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://ir.take2games.com/node/32311 · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions",
+      "narration": "No comunicado de abertura das reservas, a Take Two apresentou duas referências para o mercado americano: setenta e nove dólares e noventa e nove centavos na Standard e noventa e nove dólares e noventa e nove centavos na Ultimate. A diferença entre esses valores é de vinte dólares. Para comparar as edições, observe o conteúdo adicional que acompanha cada uma e se ele tem utilidade para você. O nome mais caro, sozinho, não demonstra uma vantagem necessária para todo jogador. Para quem compra no Brasil, há outra etapa nessa comparação. Um valor em dólar convertido no câmbio não equivale automaticamente ao preço cobrado na loja brasileira, que deve ser consultado na conta e na plataforma em que você pretende jogar. A data da captura também importa. Uma oferta, uma edição diferente ou um pacote com extras pode alterar a comparação. Por isso, a referência deve identificar exatamente o produto anunciado, em vez de colocar preços de versões distintas lado a lado. É possível discutir preço e conteúdo sem afirmar que um único lançamento determina o que todas as outras empresas vão cobrar. A pergunta útil é mais concreta: qual edição entrega o que você realmente quer comprar? Resolvida essa parte, existe um segundo detalhe importante, porque a aparência física da embalagem não revela, por si só, como o jogo será entregue.",
+      "scenes": [
+        {
+          "layout": "metrics",
+          "headline": "Duas edições, preços diferentes.",
+          "highlight": "Valores anunciados nos Estados Unidos; não são preços brasileiros.",
+          "narrationAnchor": "No comunicado de abertura das reservas, a",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: standard.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Take-Two Interactive · comunicado de 24/06/2026",
+          "metrics": [
+            {
+              "label": "STANDARD · EUA",
+              "value": "US$ 79,99",
+              "detail": "Edição base"
+            },
+            {
+              "label": "ULTIMATE · EUA",
+              "value": "US$ 99,99",
+              "detail": "Edição com conteúdo adicional"
+            }
+          ]
+        },
+        {
+          "layout": "image",
+          "headline": "O adicional precisa fazer sentido.",
+          "highlight": "Compare conteúdo, não apenas o nome da edição.",
+          "narrationAnchor": "A diferença entre esses valores é de",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6BWQSfnOYTcVVsRj8ay2ML/8e51ba006c8d309d0c6a1b582c44b041/UltimateEdition_07_en_us_R04_Deliv.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: ultimate.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "quote",
+          "headline": "Conversão não é preço local.",
+          "highlight": "Confira moeda, região e edição na loja da sua conta.",
+          "narrationAnchor": "Para quem compra no Brasil, há outra",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: city-night.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Comparação editorial · consulte a loja brasileira da plataforma",
+          "quoteAttribution": "ORIENTAÇÃO DE COMPRA"
+        },
+        {
+          "layout": "image",
+          "headline": "Compare o mesmo produto.",
+          "highlight": "Edição, mercado e data precisam estar identificados.",
+          "narrationAnchor": "A data da captura também importa.",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: standard.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "footage",
+          "headline": "Preço não prevê todo o mercado.",
+          "highlight": "",
+          "narrationAnchor": "É possível discutir preço e conteúdo sem",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: jason.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 17
+        },
+        {
+          "layout": "takeaway",
+          "headline": "Agora, olhe para dentro da caixa.",
+          "highlight": "O formato de entrega muda a compra.",
+          "narrationAnchor": "A pergunta útil é mais concreta: qual",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: cover.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        }
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Caixa de varejo: o que ela entrega",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation · https://en-americas-support.nintendo.com/app/answers/detail/a_id/68415/p/172",
+      "narration": "O suporte da Rockstar identifica a versão de varejo de GTA seis como uma caixa com código para download. Não haverá disco dentro dela. Isso deve ser conferido antes da compra, especialmente quando a embalagem parece com a de um lançamento tradicional em Blu ray. O caminho é diferente do de uma mídia que o console lê para iniciar a instalação. Nesse formato, o código é usado na loja da plataforma e os dados do jogo precisam chegar ao aparelho pela internet. Não confunda caixa com código e Game Key Card do Switch dois. No Game Key Card, o cartão continua necessário para iniciar o jogo depois do download. Na caixa de GTA seis, a entrega acontece pelo resgate do código na conta. Se o jogo for um presente, confirme a plataforma e a região da conta de quem vai receber. A Rockstar informa que as restrições regionais do resgate seguem a região associada à conta da plataforma. A Ultimate física também exige atenção na comparação. A página de versões informa que ela não é oferecida em caixa, mas que compradores da Standard podem adquirir o conteúdo de atualização depois do resgate do código. Escolher uma embalagem de prateleira não elimina a preparação digital. Internet, conta compatível e armazenamento continuam fazendo parte do acesso ao jogo.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "Caixa com código. Sem disco.",
+          "highlight": "Imagem publicada na Rockstar Store.",
+          "narrationAnchor": "O suporte da Rockstar identifica a versão",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: codebox.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "assetKind": "official-packshot",
+          "nativeDisplay": {
+            "width": 300,
+            "height": 374
+          },
+          "eyebrow": "VERSÃO DE VAREJO",
+          "mediaLabel": "PACKSHOT OFICIAL · TAMANHO NATIVO"
+        },
+        {
+          "layout": "process",
+          "headline": "Da caixa para a conta.",
+          "highlight": "Esquema explicativo do formato code-in-box.",
+          "narrationAnchor": "O caminho é diferente do de uma",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: codebox.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "assetKind": "official-packshot",
+          "steps": [
+            "Código na caixa",
+            "Resgate na plataforma",
+            "Download no console"
+          ]
+        },
+        {
+          "layout": "metrics",
+          "headline": "Dois formatos, regras diferentes.",
+          "highlight": "Regras específicas de cada plataforma.",
+          "narrationAnchor": "Não confunda caixa com código e Game",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: cover.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Support · edições; Nintendo Support · Game-Key Card",
+          "quoteAttribution": "FORMATOS DIFERENTES",
+          "metrics": [
+            {
+              "label": "CODE-IN-BOX",
+              "value": "Resgate",
+              "detail": "Código na conta da plataforma"
+            },
+            {
+              "label": "GAME-KEY CARD",
+              "value": "Cartão",
+              "detail": "Precisa continuar inserido"
+            }
+          ]
+        },
+        {
+          "layout": "image",
+          "headline": "Presente? Confira a região.",
+          "highlight": "A região da conta importa para o resgate.",
+          "narrationAnchor": "Se o jogo for um presente, confirme",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: standard.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "metrics",
+          "headline": "A atualização é digital.",
+          "highlight": "Confira as condições e o preço na plataforma escolhida.",
+          "narrationAnchor": "A Ultimate física também exige atenção na",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6BWQSfnOYTcVVsRj8ay2ML/8e51ba006c8d309d0c6a1b582c44b041/UltimateEdition_07_en_us_R04_Deliv.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: ultimate.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Support · edições e versões",
+          "metrics": [
+            {
+              "label": "VERSÃO EM CAIXA",
+              "value": "Standard",
+              "detail": "Código para download"
+            },
+            {
+              "label": "CONTEÚDO ADICIONAL",
+              "value": "Upgrade",
+              "detail": "Disponível separadamente"
+            }
+          ]
+        },
+        {
+          "layout": "footage",
+          "headline": "A preparação continua no console.",
+          "highlight": "",
+          "narrationAnchor": "Escolher uma embalagem de prateleira não elimina",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: lucia.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 29
+        }
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Armazenamento e tempo de download",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq",
+      "narration": "A referência atual do suporte é de até duzentos e doze gigabytes de espaço disponível, dependendo do aparelho. O valor precisa aparecer com essa condição, porque um máximo anunciado não é a confirmação de um tamanho idêntico para todas as versões. Antes de começar, abra a área de armazenamento do seu console e veja o espaço que está livre de verdade. A capacidade impressa na caixa do aparelho não significa que toda ela estará disponível para instalar um jogo novo. Também vale revisar o que está instalado e o que você realmente pretende manter. A ideia é preparar espaço com antecedência, sem apagar arquivos às pressas no momento em que o download estiver disponível. O tamanho do arquivo muda outra parte da experiência: a espera pela transferência. Para ilustrar a diferença, considere um exemplo teórico de duzentos e doze gigabytes decimais, em uma conexão constante e sem perdas. Esse cálculo não é uma previsão do tempo que o seu aparelho vai levar. Rede sem fio, outros dispositivos, servidor e condições da conexão podem mudar o resultado. A utilidade do exemplo é mostrar por que o tamanho importa antes do dia do lançamento. Outra distinção importante: espaço instalado não explica sozinho por que a editora escolheu uma caixa sem disco. Para atribuir uma causa técnica ou comercial à decisão, seria necessária uma declaração ou documentação que estabelecesse essa relação. Planeje as duas tarefas: reservar espaço suficiente para o seu aparelho e organizar a transferência conforme a disponibilidade oficial do pré download.",
+      "scenes": [
+        {
+          "layout": "metrics",
+          "headline": "Até 212 GB, conforme o aparelho.",
+          "highlight": "Requisito informado pela Rockstar; não é um tamanho universal.",
+          "narrationAnchor": "A referência atual do suporte é de",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Support · requisitos de instalação, atualização de 03/11/2026",
+          "metrics": [
+            {
+              "label": "ESPAÇO DISPONÍVEL",
+              "value": "Até 212 GB",
+              "detail": "Dependendo do aparelho"
+            }
+          ]
+        },
+        {
+          "layout": "metrics",
+          "headline": "Capacidade e espaço livre diferem.",
+          "highlight": "Confira o armazenamento nas configurações do console.",
+          "narrationAnchor": "Antes de começar, abra a área de",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: jason.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Esquema editorial · sem simular uma interface real",
+          "metrics": [
+            {
+              "label": "CAPACIDADE ANUNCIADA",
+              "value": "Total",
+              "detail": "Inclui sistema e conteúdo"
+            },
+            {
+              "label": "PARA NOVA INSTALAÇÃO",
+              "value": "Disponível",
+              "detail": "Espaço que está livre agora"
+            }
+          ]
+        },
+        {
+          "layout": "process",
+          "headline": "Prepare o armazenamento.",
+          "highlight": "Verifique os dados antes de remover qualquer conteúdo.",
+          "narrationAnchor": "Também vale revisar o que está instalado",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "steps": [
+            "Conferir espaço",
+            "Revisar instalações",
+            "Preparar o download"
+          ]
+        },
+        {
+          "layout": "bars",
+          "headline": "Velocidade muda a espera.",
+          "highlight": "Simulação ideal · 212 GB decimais · conexão constante · sem perdas.",
+          "narrationAnchor": "O tamanho do arquivo muda outra parte",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Cálculo editorial: bytes × 8 ÷ velocidade; não é medição de download",
+          "bars": [
+            {
+              "label": "25 Mb/s",
+              "value": "≈ 18h51",
+              "ratio": 1
+            },
+            {
+              "label": "50 Mb/s",
+              "value": "≈ 9h25",
+              "ratio": 0.5
+            },
+            {
+              "label": "100 Mb/s",
+              "value": "≈ 4h43",
+              "ratio": 0.25
+            }
+          ]
+        },
+        {
+          "layout": "quote",
+          "headline": "A simulação não mede sua conexão.",
+          "highlight": "O tempo real depende das condições da transferência.",
+          "narrationAnchor": "Esse cálculo não é uma previsão do",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: city-night.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Simulação editorial · tempos aproximados, sem teste de rede",
+          "quoteAttribution": "COMO INTERPRETAR O GRÁFICO"
+        },
+        {
+          "layout": "image",
+          "headline": "Tamanho não comprova a causa.",
+          "highlight": "Formato de entrega e requisito de instalação são fatos diferentes.",
+          "narrationAnchor": "Outra distinção importante: espaço instalado não explica",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: standard.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "footage",
+          "headline": "Espaço e conexão: prepare os dois.",
+          "highlight": "",
+          "narrationAnchor": "Planeje as duas tarefas: reservar espaço suficiente",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 40
+        }
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Calendário: três datas, funções distintas",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://store.rockstargames.com/game/buy-gta-vi?drm=PlayStation",
+      "narration": "A comunicação mais recente diferencia três momentos do lançamento. O pré download digital começa em dez de novembro, a caixa tem envio estimado a partir de doze de novembro, e a estreia do jogo está marcada para dezenove de novembro de dois mil e vinte e seis. As datas não devem ser misturadas. O início do pré download não significa que o jogo já pode ser iniciado, e uma previsão de envio não informa, sozinha, quando uma encomenda chegará ao endereço do comprador. Para a versão em caixa, acompanhe as condições do varejista e o recebimento do código. Quem depende dessa entrega precisa considerar o seu pedido concreto, em vez de assumir que terá exatamente a mesma antecedência de uma compra digital. Com essas etapas separadas, o calendário ajuda: conferir o download, acompanhar a entrega e saber quando o jogo será liberado.",
+      "scenes": [
+        {
+          "layout": "timeline",
+          "headline": "Três datas, três etapas.",
+          "highlight": "Anúncios consultados em 04/11/2026; confirme as condições da sua plataforma.",
+          "narrationAnchor": "A comunicação mais recente diferencia três momentos",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: cover.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar · suporte e loja oficial, consulta de 04/11/2026",
+          "events": [
+            {
+              "date": "10 NOV",
+              "label": "Pré-download digital"
+            },
+            {
+              "date": "12 NOV",
+              "label": "Envio estimado da caixa"
+            },
+            {
+              "date": "19 NOV",
+              "label": "Lançamento"
+            }
+          ]
+        },
+        {
+          "layout": "metrics",
+          "headline": "Preparar não é começar a jogar.",
+          "highlight": "O acesso depende da liberação na plataforma.",
+          "narrationAnchor": "As datas não devem ser misturadas.",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar · calendário e suporte oficial",
+          "metrics": [
+            {
+              "label": "PRÉ-DOWNLOAD",
+              "value": "Preparar",
+              "detail": "Transferir os dados"
+            },
+            {
+              "label": "LANÇAMENTO",
+              "value": "Liberar",
+              "detail": "Iniciar o jogo"
+            }
+          ]
+        },
+        {
+          "layout": "hero",
+          "headline": "Considere a entrega do seu pedido.",
+          "highlight": "Confira prazo, plataforma e região com o varejista.",
+          "narrationAnchor": "Para a versão em caixa, acompanhe as",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/3FsVRdtaqmQJGIxXjyehoF/b4c7032f8c9a7429f710acd2019a15d6/GTAVI_PreOrderWebstore_CodeInABox_Flat_NR_SONY_300x374_R04.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: codebox.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "assetKind": "official-packshot",
+          "nativeDisplay": {
+            "width": 300,
+            "height": 374
+          },
+          "eyebrow": "COMPRA EM CAIXA",
+          "mediaLabel": "EXEMPLO OFICIAL DA VERSÃO PS5"
+        },
+        {
+          "layout": "footage",
+          "headline": "Organize cada etapa da compra.",
+          "highlight": "",
+          "narrationAnchor": "Com essas etapas separadas, o calendário ajuda:",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: city-night.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 51
+        }
+      ]
+    },
+    {
+      "number": "06",
+      "title": "O que está confirmado sobre a experiência",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://blog.playstation.com/2026/06/24/grand-theft-auto-vi-plays-best-on-ps5-november-19/ · https://www.rockstargames.com/VI/media · https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+      "narration": "Na divulgação do PlayStation, a parceria com a Rockstar aparece associada a recursos de imersão do console. O comunicado menciona resposta tátil, gatilhos adaptáveis, áudio tridimensional e o armazenamento de alta velocidade. Mary Yee, vice presidente sênior de marketing da Sony, apresentou a promessa de que GTA seis aproveitaria os recursos de imersão do PlayStation cinco. Essa é uma posição da fabricante no contexto da divulgação do produto. Uma mensagem promocional não substitui uma comparação de resolução, estabilidade e desempenho entre aparelhos, feita nas mesmas condições. Os materiais oficiais apresentados aqui mostram personagens e ambientes de Leonida. Eles ajudam a conhecer a proposta visual do jogo, mas não devem ser tratados como uma medição do desempenho de todos os consoles ou como prova de qualquer mecânica descrita em um vazamento. Por isso, esta versão concentra a análise nas informações documentadas que afetam a compra. Detalhes de versões antigas em desenvolvimento precisam ser identificados como históricos e só podem virar promessa de recurso final quando houver confirmação correspondente.",
+      "scenes": [
+        {
+          "layout": "image",
+          "headline": "Recursos descritos pela Sony.",
+          "highlight": "Imersão, áudio e armazenamento no comunicado oficial.",
+          "narrationAnchor": "Na divulgação do PlayStation, a parceria com",
+          "imageUrl": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-adaptive-triggers-image-block-01-en-30aug23",
+          "imageCaption": "Imagem oficial da Sony mostrando os gatilhos adaptáveis do DualSense.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Sony · DualSense; PlayStation.Blog · recursos citados para GTA VI",
+          "assetKind": "official-diagram",
+          "nativeDisplay": {
+            "width": 400,
+            "height": 321
+          }
+        },
+        {
+          "layout": "quote",
+          "headline": "A promessa precisa de contexto.",
+          "highlight": "Mary Yee · vice-presidente sênior de marketing, SIE.",
+          "narrationAnchor": "Mary Yee, vice presidente sênior de marketing",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: jason.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Mary Yee · PlayStation.Blog, 24/06/2026 · declaração contextualizada",
+          "quoteAttribution": "DECLARAÇÃO DA FABRICANTE · PARÁFRASE"
+        },
+        {
+          "layout": "footage",
+          "headline": "Divulgação não é teste comparativo.",
+          "highlight": "",
+          "narrationAnchor": "Uma mensagem promocional não substitui uma comparação",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: jason.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Launch Trailer oficial · imagens promocionais",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4",
+          "videoStart": 60
+        },
+        {
+          "layout": "image",
+          "headline": "Imagens oficiais não medem desempenho.",
+          "highlight": "Captura promocional oficial de Leonida; sem métricas de desempenho.",
+          "narrationAnchor": "Os materiais oficiais apresentados aqui mostram personagens",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: grassrivers.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "quote",
+          "headline": "Versão de teste não é promessa final.",
+          "highlight": "Diferencie material de desenvolvimento e anúncio de recurso.",
+          "narrationAnchor": "Por isso, esta versão concentra a análise",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Orange Brick · distinção entre evidência, divulgação e expectativa",
+          "quoteAttribution": "CRITÉRIO EDITORIAL"
+        }
+      ]
+    },
+    {
+      "number": "07",
+      "title": "O impacto para quem compra",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://ir.take2games.com/node/32311 · https://support.rockstargames.com/articles/4QfG4FmZCf5W1gS8jy4UVT/grand-theft-auto-vi-platform-editions-and-versions · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq",
+      "narration": "Na hora de decidir, confira a edição na loja da sua região, leia a descrição da caixa e veja o armazenamento disponível no console. Se a compra for um presente, acrescente a conferência de plataforma e região da conta de destino. Depois, organize o download e acompanhe a data de liberação do jogo. Esse cuidado evita confundir uma embalagem física com dados já instalados, ou uma promessa de marketing com uma garantia de desempenho que ainda precisa ser demonstrada.",
+      "scenes": [
+        {
+          "layout": "takeaway",
+          "headline": "Confira antes de fechar a compra.",
+          "highlight": "Edição e região · conteúdo da caixa · espaço disponível.",
+          "narrationAnchor": "Na hora de decidir, confira a edição",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: standard.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial"
+        },
+        {
+          "layout": "timeline",
+          "headline": "Da escolha ao primeiro acesso.",
+          "highlight": "Uma preparação de cada vez, sem depender de suposições.",
+          "narrationAnchor": "Depois, organize o download e acompanhe a",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: city-night.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Síntese editorial · condições da compra e da plataforma",
+          "events": [
+            {
+              "date": "ESCOLHER",
+              "label": "Edição e formato"
+            },
+            {
+              "date": "PREPARAR",
+              "label": "Espaço e download"
+            },
+            {
+              "date": "JOGAR",
+              "label": "Após a liberação"
+            }
+          ]
+        },
+        {
+          "layout": "cta",
+          "headline": "Entenda antes de comprar.",
+          "highlight": "Jogos e consoles com contexto.",
+          "narrationAnchor": "Para acompanhar jogos e consoles",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "action": "INSCREVA-SE NO CANAL"
+        }
+      ]
+    }
+  ]
+}

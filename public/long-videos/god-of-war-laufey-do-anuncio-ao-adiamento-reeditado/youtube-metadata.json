@@ -1,0 +1,758 @@
+{
+  "slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+  "series_badge": "ORANGE BRICK · EDIÇÃO REVISADA",
+  "title": "God of War Laufey foi adiado: nova data e o que muda",
+  "subtitle": "Faye, o Everywhen, combate e o detalhe da Collector Box que merece atenção.",
+  "status": "scheduled",
+  "pipeline_stage_index": 7,
+  "pipeline_stage_label": "Aprovado e agendado no YouTube",
+  "source_mode": "custom_script",
+  "source_post_slugs": [],
+  "visual_style": "documentario",
+  "voice_id": "pt-BR-ThalitaMultilingualNeural",
+  "editorial_standard": "youtube-editorial-v3",
+  "is_preview": false,
+  "production": {
+    "scenes": [
+      {
+        "chapter": "01",
+        "voiceStartSec": 0,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 12.4,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "48fbb3d57fb1b80e598e29551eca88319fb50dd8f3841e4d2b82d3caaa424f6a",
+              "bytes": 265095,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 372,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Faye chega em maio.",
+            "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+            "narrationAnchor": "God of War Laufey saiu de fevereiro"
+          },
+          {
+            "start": 12.4,
+            "duration": 11.700000000000001,
+            "layout": "timeline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "75d347c0fb8e8eebfe5ac30faa602a895258bfaa0c520d96963df92de32ae21b",
+              "bytes": 148772,
+              "layout": "timeline",
+              "fps": 30,
+              "frames": 351,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "De fevereiro para maio.",
+            "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+            "narrationAnchor": "O calendário anterior apontava dezesseis de fevereiro."
+          },
+          {
+            "start": 24.1,
+            "duration": 14.233333333333334,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "121a69107cdf8929b19f2828d79bd2f8812c1b9391c8dad2fa87884a9ad74de8",
+              "bytes": 291197,
+              "layout": "image",
+              "fps": 30,
+              "frames": 427,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O que muda além do calendário?",
+            "source": "https://blog.playstation.com/uploads/2026/06/c568cfbd5d3e9b5dc1c099420ca32d5d56d0256e.jpg",
+            "narrationAnchor": "Para entender o projeto, vale olhar para"
+          }
+        ]
+      },
+      {
+        "chapter": "02",
+        "voiceStartSec": 38.333,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.2,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "8e7645d0e76c47dab7b70f65c2e647fca2ecec3af70bb7be424d64c2aa1d5982",
+              "bytes": 325565,
+              "layout": "image",
+              "fps": 30,
+              "frames": 396,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A história começa depois do funeral.",
+            "source": "https://blog.playstation.com/uploads/2026/06/1fb563c849f5f555690a331bbbb89f01cec7e5d0.jpg",
+            "narrationAnchor": "Faye desperta depois de seu funeral em"
+          },
+          {
+            "start": 13.2,
+            "duration": 11.8,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "e5480488dc180f7fe62019b1bb3625cef66521d3cfc3b847533ecb20d03a5856",
+              "bytes": 281418,
+              "layout": "image",
+              "fps": 30,
+              "frames": 354,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Ela precisa agir por conta própria.",
+            "source": "https://blog.playstation.com/uploads/2026/06/c568cfbd5d3e9b5dc1c099420ca32d5d56d0256e.jpg",
+            "narrationAnchor": "O novo ponto de vista permite conhecer"
+          },
+          {
+            "start": 25,
+            "duration": 12.100000000000001,
+            "layout": "quote",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "70a960643416fe97abee9b2a11fc83181dd3cf7fedfb2ae7ccc630614cfc7ebe",
+              "bytes": 147457,
+              "layout": "quote",
+              "fps": 30,
+              "frames": 363,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O próximo capítulo principal da série.",
+            "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+            "narrationAnchor": "Na apresentação assinada pela diretora de comunicação"
+          },
+          {
+            "start": 37.1,
+            "duration": 13.366666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "21ca14d77ddc3eb95d23e9cbe7e8093e0c58b91c76ef53f68b54b097aac3dd52",
+              "bytes": 310179,
+              "layout": "image",
+              "fps": 30,
+              "frames": 401,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Mudar a protagonista muda a pergunta.",
+            "source": "https://blog.playstation.com/uploads/2026/09/0b49e7bea6dabc13cc42e1dffa512bffce6cf815.jpg",
+            "narrationAnchor": "Essa mudança cria uma questão interessante para"
+          }
+        ]
+      },
+      {
+        "chapter": "03",
+        "voiceStartSec": 88.8,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 12.966666666666667,
+            "layout": "hero",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "61d5b3de7e794c5ea5bc70e0779c6c8911a02e1c8fd48e726fea3f4697ed2ea7",
+              "bytes": 350788,
+              "layout": "hero",
+              "fps": 30,
+              "frames": 389,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O Everywhen amplia o cenário.",
+            "source": "https://blog.playstation.com/uploads/2026/06/11e4fd90abbd12235bf8c02eb2e0df777aab1d80.jpg",
+            "narrationAnchor": "O destino de Faye é o Everywhen,"
+          },
+          {
+            "start": 12.966666666666667,
+            "duration": 16.43333333333333,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "316715020727854479d8a307bde316856e8bbb029239951771ae4640ce83647c",
+              "bytes": 325139,
+              "layout": "image",
+              "fps": 30,
+              "frames": 493,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Uma paisagem também pode contar história.",
+            "source": "https://blog.playstation.com/uploads/2026/06/bf2289b94400a3f16dee48e8f1d68f5a21de76f4.jpg",
+            "narrationAnchor": "As imagens oficiais mostram figuras, construções e"
+          },
+          {
+            "start": 29.4,
+            "duration": 12.800000000000004,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "13b3e1b44ad1d072a02d11b453c280b9a287f56d284cc5ffa7cfd83e5d429e48",
+              "bytes": 341635,
+              "layout": "image",
+              "fps": 30,
+              "frames": 384,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Encontrar uma saída é parte do conflito.",
+            "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+            "narrationAnchor": "A jornada envolve compreender esse lugar e"
+          },
+          {
+            "start": 42.2,
+            "duration": 15.066666666666663,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "9872e5d4a02f96ecd01816f37e50d476763e7302a5fd2e3d52f43afa072bd31d",
+              "bytes": 287294,
+              "layout": "image",
+              "fps": 30,
+              "frames": 452,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Companhia em um lugar estranho.",
+            "source": "https://blog.playstation.com/uploads/2026/06/ac77c0ffa02b542704e0dac0cb89a42eeb1e9641.jpg",
+            "narrationAnchor": "Faye também terá companhia: Phranque e Rue"
+          }
+        ]
+      },
+      {
+        "chapter": "04",
+        "voiceStartSec": 146.067,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 12.7,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "fa8ce334955157252502f67ec4a6809e28d19a7c12ebe8c1fa1890a394d1a5b5",
+              "bytes": 345135,
+              "layout": "image",
+              "fps": 30,
+              "frames": 381,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Movimento como parte da identidade.",
+            "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+            "narrationAnchor": "O estúdio descreve uma combinação entre a"
+          },
+          {
+            "start": 12.7,
+            "duration": 4.800000000000001,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "f8a1d07dc4a02142f71f9c152cc3b260b81eca3851d72106aceae268f3dd2e46",
+              "bytes": 8587261,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 144,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://blog.playstation.com/uploads/2026/09/254eb34604b011e523c806c3e4b59fc8bc82ba3e.mp4",
+              "source_start": 0,
+              "source_audio": "muted"
+            },
+            "headline": "O arco em ação.",
+            "source": "https://blog.playstation.com/uploads/2026/09/d9d0a64623639de5ce6e30a52ed09b74c8c0282f.jpg",
+            "narrationAnchor": "Nesta demonstração oficial, observe como o arco"
+          },
+          {
+            "start": 17.5,
+            "duration": 16.866666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "2f263c54330728f23fb79e6ab90ccdf32ef400e531cba94460a01d5c5502d8ec",
+              "bytes": 493735,
+              "layout": "image",
+              "fps": 30,
+              "frames": 506,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O modo de mira muda o ataque.",
+            "source": "https://blog.playstation.com/uploads/2026/09/d9d0a64623639de5ce6e30a52ed09b74c8c0282f.jpg",
+            "narrationAnchor": "O PlayStation Blog detalha o arco Serpent"
+          },
+          {
+            "start": 34.36666666666667,
+            "duration": 5.033333333333331,
+            "layout": "footage",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "076ff3d3aab2043936081607c1ab88877d0980cd41f9386c0a0a1f61192cf444",
+              "bytes": 12814394,
+              "layout": "footage",
+              "fps": 30,
+              "frames": 151,
+              "camera": "fixed-viewport/native-footage",
+              "fixed_frame_verified": true,
+              "source": "https://blog.playstation.com/uploads/2026/09/6255c1b8417892dee0bcb4d0b5f33d7779d1d01e.mp4",
+              "source_start": 0,
+              "source_audio": "muted"
+            },
+            "headline": "Uma segunda demonstração de combate.",
+            "source": "https://blog.playstation.com/uploads/2026/06/6c7d0bf58ce8c4060049c865844e688c9da52b57.jpg",
+            "narrationAnchor": "Outro trecho oficial mostra o combate em"
+          },
+          {
+            "start": 39.4,
+            "duration": 13.866666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "36bc34d935caf6ae41e727e67fa164bed714c44cfba673426c571f5f73f57ff3",
+              "bytes": 385682,
+              "layout": "image",
+              "fps": 30,
+              "frames": 416,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A demonstração não é um teste independente.",
+            "source": "https://blog.playstation.com/uploads/2026/09/bafca2172045024e8fb2136ff2a7029179214d7d.jpg",
+            "narrationAnchor": "Essas cenas ajudam a entender a proposta,"
+          }
+        ]
+      },
+      {
+        "chapter": "05",
+        "voiceStartSec": 199.334,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.766666666666667,
+            "layout": "quote",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "b64643f3c8c71081641a6063896391a26fb735e60e8b077b102f1ba6386ecee1",
+              "bytes": 150877,
+              "layout": "quote",
+              "fps": 30,
+              "frames": 413,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A nova data está confirmada.",
+            "source": "https://blog.playstation.com/uploads/2026/06/faf12b84129bcb6b3bf751cdf7ca9d44725d4d08.jpg",
+            "narrationAnchor": "O que podemos afirmar com segurança é"
+          },
+          {
+            "start": 13.766666666666667,
+            "duration": 14.299999999999999,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "32a5d6ab813b208a78a65ce68a93711f03fe2a5fda35cba2e485d67d9afa4a83",
+              "bytes": 281855,
+              "layout": "image",
+              "fps": 30,
+              "frames": 429,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Confira o que cada edição inclui.",
+            "source": "https://blog.playstation.com/uploads/2026/09/0ac734f7d5b27faed4dec1e8c4a3ba9e892bd27d.jpg",
+            "narrationAnchor": "Para quem pensa em reservar, a primeira"
+          },
+          {
+            "start": 28.066666666666666,
+            "duration": 14.033333333333335,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "f5772a9a805748071ebc4876c94430c3a8da16f8fcc697d93430193fb132ec1e",
+              "bytes": 259026,
+              "layout": "image",
+              "fps": 30,
+              "frames": 421,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A Collector Box não inclui o jogo.",
+            "source": "https://blog.playstation.com/uploads/2026/09/ae2b78ae3d605a74bb2f7e4594b322f16cc07dc3.jpg",
+            "narrationAnchor": "Aqui está o detalhe que merece atenção:"
+          },
+          {
+            "start": 42.1,
+            "duration": 15.366666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "7b308642176fd8f26af2bfd09559368aae4ae301689b43776b31d777a8f94a65",
+              "bytes": 283111,
+              "layout": "image",
+              "fps": 30,
+              "frames": 461,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Reserva feita? Confira o pedido.",
+            "source": "https://blog.playstation.com/uploads/2026/09/80456f7d6b73917ed6ac7162328b97d7e69df1b9.jpg",
+            "narrationAnchor": "Se você já reservou, confira o pedido"
+          }
+        ]
+      },
+      {
+        "chapter": "06",
+        "voiceStartSec": 256.801,
+        "scenes": [
+          {
+            "start": 0,
+            "duration": 13.866666666666667,
+            "layout": "image",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "c858409af709e8ba0f97ed2bb75c570965dc77564e4267dfae2c38279ab04317",
+              "bytes": 260242,
+              "layout": "image",
+              "fps": 30,
+              "frames": 416,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "A proposta já tem identidade.",
+            "source": "https://blog.playstation.com/uploads/2026/06/3804460f7e26cb8a6538d97c1cfefe846f47c3d6.jpg",
+            "narrationAnchor": "Laufey já tem uma proposta clara: acompanhar"
+          },
+          {
+            "start": 13.866666666666667,
+            "duration": 14.866666666666667,
+            "layout": "timeline",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "307ce732bcd6bd3b9b59ecc4472cc3e2a71455e9384f08b70f1080af91e78194",
+              "bytes": 213772,
+              "layout": "timeline",
+              "fps": 30,
+              "frames": 446,
+              "animated_frames": 45,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "O próximo marco é 20 de maio.",
+            "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+            "narrationAnchor": "Até vinte de maio de dois mil"
+          },
+          {
+            "start": 28.733333333333334,
+            "duration": 4.533333333333331,
+            "layout": "cta",
+            "camera": "fixed",
+            "render_verification": {
+              "fingerprint": "60935e69d5d7fccab381c45efb566f8585e49f6712dcf2d16665715cceacb3b8",
+              "bytes": 63717,
+              "layout": "cta",
+              "fps": 30,
+              "frames": 136,
+              "animated_frames": 34,
+              "camera": "fixed",
+              "fixed_frame_verified": true
+            },
+            "headline": "Jogos e indústria, com contexto.",
+            "source": "https://blog.playstation.com/uploads/2026/06/7e8cbe9fbcde0ee358f5e4ffd1149bfc76a5686f.jpg",
+            "narrationAnchor": "Para acompanhar jogos e indústria"
+          }
+        ]
+      }
+    ],
+    "voices": [
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      },
+      {
+        "provider": "edge-tts",
+        "voice": "pt-BR-ThalitaMultilingualNeural",
+        "word_timing": "sentence-weighted-estimate",
+        "review_required": true
+      }
+    ],
+    "human_audio_review": false,
+    "audio_verification": {
+      "passed": true,
+      "full_decode": true,
+      "integrated_lufs": -14.08,
+      "true_peak_dbtp": -1.82,
+      "corrected": true,
+      "human_listening": false
+    }
+  },
+  "duration_seconds": 290.068,
+  "duration_formatted": "04:50",
+  "monetization_midroll_eligible": false,
+  "file_size": 32722442,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "video_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.mp4",
+  "video_no_narration_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado-sem-narracao.mp4",
+  "video_no_narration_clean_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado-sem-narracao-sem-legenda.mp4",
+  "srt_url": "/long-videos/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado.srt",
+  "preview_sheet_url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/preview-sheet.jpg",
+  "thumbnails": [
+    {
+      "id": "thumb_1",
+      "label": "Opção 1",
+      "angle": "GOD OF WAR LAUFEY",
+      "headline": "ADIADO PARA MAIO",
+      "subline": "GOD OF WAR LAUFEY",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-1.jpg"
+    },
+    {
+      "id": "thumb_2",
+      "label": "Opção 2",
+      "angle": "UM NOVO GOD OF WAR",
+      "headline": "FAYE NO COMANDO",
+      "subline": "UM NOVO GOD OF WAR",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-2.jpg"
+    },
+    {
+      "id": "thumb_3",
+      "label": "Opção 3",
+      "angle": "CUIDADO COM A COLLECTOR BOX",
+      "headline": "SEM O JOGO?",
+      "subline": "CUIDADO COM A COLLECTOR BOX",
+      "url": "https://hmjqqoselkgtfkkqrnit.supabase.co/storage/v1/object/public/post-images/long-video-assets/god-of-war-laufey-do-anuncio-ao-adiamento-reeditado/thumbnail-3.jpg"
+    }
+  ],
+  "selected_thumbnail_id": "thumb_1",
+  "chapters": [
+    {
+      "number": "01",
+      "title": "A data mudou. A proposta continua.",
+      "kicker": "O QUE ESTÁ CONFIRMADO",
+      "start_seconds": 0,
+      "timestamp": "00:00",
+      "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/"
+    },
+    {
+      "number": "02",
+      "title": "Faye assume o ponto de vista",
+      "kicker": "UMA GUERREIRA ALÉM DA MEMÓRIA",
+      "start_seconds": 38.333,
+      "timestamp": "00:38",
+      "source": "https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/ · https://www.playstation.com/en-us/games/god-of-war-laufey/"
+    },
+    {
+      "number": "03",
+      "title": "Everywhen: um mundo para atravessar",
+      "kicker": "O ALÉM DOS DEUSES",
+      "start_seconds": 88.8,
+      "timestamp": "01:28",
+      "source": "https://www.playstation.com/en-us/games/god-of-war-laufey/ · https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/"
+    },
+    {
+      "number": "04",
+      "title": "O combate ganha outra cadência",
+      "kicker": "O QUE AS DEMONSTRAÇÕES MOSTRAM",
+      "start_seconds": 146.067,
+      "timestamp": "02:26",
+      "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/ · https://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/"
+    },
+    {
+      "number": "05",
+      "title": "Adiamento e compra: dois cuidados",
+      "kicker": "O QUE CONFERIR ANTES DE RESERVAR",
+      "start_seconds": 199.334,
+      "timestamp": "03:19",
+      "source": "https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/ · https://www.playstation.com/en-us/games/god-of-war-laufey/"
+    },
+    {
+      "number": "06",
+      "title": "O que acompanhar até maio",
+      "kicker": "A PROMESSA PRECISA VIRAR EXPERIÊNCIA",
+      "start_seconds": 256.801,
+      "timestamp": "04:16",
+      "source": "https://www.playstation.com/en-us/games/god-of-war-laufey/ · https://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/"
+    }
+  ],
+  "qa_checks": [
+    {
+      "id": "editorial_standard",
+      "label": "Padrão editorial de retenção",
+      "passed": true,
+      "detail": "Quadro fixo, animações locais, progressão de composições, duração baseada na fala e CTA único."
+    },
+    {
+      "id": "pronunciation_sync",
+      "label": "Revisão auditiva e legendas",
+      "passed": false,
+      "detail": "53 frases temporizadas; pronúncia e leitura das legendas aguardam revisão humana."
+    },
+    {
+      "id": "verified_sources",
+      "label": "Revisão das fontes",
+      "passed": false,
+      "detail": "Fontes registradas; conferir afirmações antes de aprovar."
+    },
+    {
+      "id": "loudness_mix",
+      "label": "Áudio final medido",
+      "passed": true,
+      "detail": "-14.08 LUFS; -1.82 dBTP. Escuta humana pendente."
+    },
+    {
+      "id": "visual_diversity",
+      "label": "Materiais visuais",
+      "passed": false,
+      "detail": "Arquivos carregados; enquadramento, diversidade e direitos aguardam revisão."
+    }
+  ],
+  "shorts_suggestions": [
+    {
+      "id": "short_1",
+      "title": "A data mudou. A proposta continua.",
+      "hook": "God of War Laufey saiu de fevereiro e agora chega em vinte de maio de dois mil e vinte e sete.",
+      "chapter_number": "01",
+      "start_timestamp": "01:00",
+      "end_timestamp": "01:45",
+      "duration_seconds": 45,
+      "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+    },
+    {
+      "id": "short_2",
+      "title": "Faye assume o ponto de vista",
+      "hook": "Faye desperta depois de seu funeral em uma terra desconhecida.",
+      "chapter_number": "02",
+      "start_timestamp": "00:38",
+      "end_timestamp": "01:23",
+      "duration_seconds": 45,
+      "related_slug": "god-of-war-laufey-do-anuncio-ao-adiamento-reeditado"
+    }
+  ],
+  "youtube": {
+    "title": "God of War Laufey foi adiado: nova data e o que muda",
+    "description": "God of War Laufey foi adiado para 20 de maio de 2027 no PS5. Entenda o que foi confirmado sobre a aventura de Faye, o mundo Everywhen, o combate e o detalhe da Collector Box que você precisa conferir antes de comprar.\n\nA nova data foi registrada no PlayStation Blog em 4 de novembro de 2026. Neste vídeo, separamos a proposta oficial do jogo do que ainda depende de demonstrações completas e avaliações independentes.\n\nCAPÍTULOS\n00:00 A data mudou. A proposta continua.\n00:38 Faye assume o ponto de vista\n01:28 Everywhen: um mundo para atravessar\n02:26 O combate ganha outra cadência\n03:19 Adiamento e compra: dois cuidados\n04:16 O que acompanhar até maio\n\nO que você mais quer ver em uma demonstração completa de Laufey?\nInscreva-se para acompanhar jogos e indústria com contexto.\n\nMais matérias e análises: https://orangebrick.blog\n\nFONTES OFICIAIS\nhttps://blog.playstation.com/2026/09/28/god-of-war-laufey-pre-orders-available-starting-september-29-editions-detailed/\nhttps://blog.playstation.com/2026/06/02/first-look-at-god-of-war-laufey/\nhttps://www.playstation.com/en-us/games/god-of-war-laufey/\n\nImagens e demonstrações: Sony Interactive Entertainment / Santa Monica Studio. Áudio original das demonstrações removido.\nTrilha: Shadow — James Gargette (CC0): https://opengameart.org/content/shadow-2\n\n#GodOfWar #Laufey #PS5",
+    "tags": [
+      "God of War Laufey",
+      "God of War",
+      "Laufey",
+      "Faye",
+      "God of War Laufey adiado",
+      "God of War 2027",
+      "PS5",
+      "PlayStation 5",
+      "Santa Monica Studio",
+      "Everywhen",
+      "God of War gameplay",
+      "Collector Box",
+      "Orange Brick"
+    ],
+    "pinned_comment": "O que você mais quer ver em uma demonstração completa de God of War Laufey?",
+    "visibility": "private",
+    "scheduled_at": "2026-11-06T15:00:00Z",
+    "video_id": "y6ChtY0MkmU",
+    "video_url": "https://www.youtube.com/watch?v=y6ChtY0MkmU",
+    "upload_status": "scheduled"
+  },
+  "marketing": {
+    "standard": "youtube-editorial-v3",
+    "audience": "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
+    "promise": "Faye, o Everywhen, combate e o detalhe da Collector Box que merece atenção.",
+    "primary_cta": "Para acompanhar jogos e indústria com contexto, inscreva-se no canal.",
+    "title_variants": [
+      "God of War Laufey foi adiado: nova data e o que muda",
+      "God of War Laufey: Faye, combate e nova data no PS5",
+      "Laufey chega em maio: o que sabemos do novo God of War"
+    ],
+    "thumbnail_concepts": [
+      "ADIADO PARA MAIO",
+      "FAYE NO COMANDO",
+      "A CAIXA NÃO TEM O JOGO"
+    ],
+    "thumbnail_review_required": true,
+    "end_screen": {
+      "studio_configuration_required": true,
+      "start_seconds": 275.068,
+      "related_video": null
+    },
+    "metrics_review_hours": [
+      24,
+      72,
+      168,
+      672
+    ]
+  },
+  "review_notes": "Reedição no padrão aprovado, com roteiro mais curto, fontes atualizadas, voz Thalita e trilha mais presente. Revisão auditiva humana pendente. Original preservado.",
+  "approved_at": "2026-11-05T03:49:14.577Z",
+  "created_at": "2026-11-05T03:48:36.883Z",
+  "updated_at": "2026-11-05T04:35:07.061Z",
+  "replaces_slug": "god-of-war-laufey-do-anuncio-ao-adiamento",
+  "review_history": [
+    {
+      "id": "approved-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+      "kind": "approved",
+      "at": "2026-11-05T03:49:14.577Z",
+      "detail": "Aprovação registrada antes do envio autorizado ao YouTube."
+    },
+    {
+      "id": "scheduled-god-of-war-laufey-do-anuncio-ao-adiamento-reeditado",
+      "kind": "scheduled",
+      "at": "2026-11-05T03:49:14.577Z",
+      "detail": "Publicação agendada no YouTube para 06/11/2026, 12:00, horário de Brasília.",
+      "youtube_video_id": "y6ChtY0MkmU"
+    }
+  ]
+}

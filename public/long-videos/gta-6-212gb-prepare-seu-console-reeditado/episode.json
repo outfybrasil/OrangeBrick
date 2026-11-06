@@ -1,0 +1,392 @@
+{
+  "slug": "gta-6-212gb-prepare-seu-console-reeditado",
+  "seriesBadge": "ORANGE BRICK · REPORTAGEM",
+  "title": "GTA 6: até 212 GB — prepare seu console para o download",
+  "youtubeTitle": "GTA 6: até 212 GB — prepare seu console para o download",
+  "subtitle": "Espaço, pré-download e conexão: o que conferir antes de jogar.",
+  "sourceMode": "custom_script",
+  "sourcePostSlugs": [],
+  "visualStyle": "documentario",
+  "voiceId": "pt-BR-FranciscaNeural",
+  "primaryCta": "Para acompanhar jogos e tecnologia com contexto, inscreva-se no canal.",
+  "youtubeOverviewParagraph": "Uma reportagem sobre o espaço que GTA VI pode exigir, o pré-download e a preparação do console, com trechos do Trailer 2 oficial da Rockstar.",
+  "pinnedComment": "Você vai liberar espaço apagando jogos ou pretende ampliar o armazenamento?",
+  "tags": [
+    "Grand Theft Auto VI",
+    "GTA VI",
+    "GTA 6",
+    "Rockstar Games",
+    "PlayStation 5",
+    "Xbox Series X",
+    "Xbox Series S",
+    "Orange Brick"
+  ],
+  "titleVariants": [
+    "GTA 6: até 212 GB — prepare seu console para o download",
+    "GTA 6 vai lotar seu console? Entenda os 212 GB",
+    "GTA 6: espaço, pré-download e quanto tempo pode levar"
+  ],
+  "thumbnailConcepts": [
+    "ATÉ 212 GB: SEU CONSOLE ESTÁ PRONTO?",
+    "GTA 6: PREPARE O DOWNLOAD",
+    "PRECISA APAGAR JOGOS?"
+  ],
+  "chapters": [
+    {
+      "number": "01",
+      "title": "Até 212 GB: o que isso significa",
+      "kicker": "O NÚMERO E O CONTEXTO",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements",
+      "narration": "GTA seis pode exigir até duzentos e doze gigabytes livres no seu console. A Rockstar confirmou esse limite, mas o valor necessário depende do aparelho. Antes de apagar qualquer jogo, entenda o que esse número realmente diz. A palavra importante é até. A página de suporte não apresenta uma tabela com um valor exato para cada modelo. Portanto, afirmar que todos precisam liberar exatamente duzentos e doze gigabytes seria ir além do que foi informado. Uma instalação desse tamanho começa antes do lançamento. O primeiro passo é abrir as configurações do seu console e conferir quanto armazenamento está disponível agora. Depois, vale separar três perguntas. Quanto espaço está livre? Quanto tempo a conexão pode levar? E quando a edição digital estará disponível para pré-download? Vamos resolver uma de cada vez.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "GTA VI: até 212 GB.",
+          "highlight": "O espaço exigido depende do aparelho.",
+          "narrationAnchor": "GTA seis pode exigir até duzentos e",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true
+        },
+        {
+          "layout": "metrics",
+          "headline": "O que a Rockstar confirmou.",
+          "highlight": "Não é um tamanho confirmado para todos os consoles.",
+          "narrationAnchor": "A palavra importante é até.",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Support · requisitos de instalação",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "metrics": [
+            {
+              "label": "ESPAÇO MÁXIMO INFORMADO",
+              "value": "ATÉ 212 GB",
+              "detail": "Pode variar conforme o aparelho"
+            }
+          ],
+          "newsVisual": true
+        },
+        {
+          "layout": "footage",
+          "headline": "O primeiro passo é verificar espaço.",
+          "highlight": "",
+          "narrationAnchor": "Uma instalação desse tamanho começa antes do",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoStart": 4,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4"
+        },
+        {
+          "layout": "footage",
+          "headline": "Três perguntas para se preparar.",
+          "highlight": "Espaço disponível, conexão e data do pré-download.",
+          "narrationAnchor": "Depois, vale separar três perguntas.",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "steps": [
+            "Conferir espaço",
+            "Avaliar conexão",
+            "Planejar a data"
+          ],
+          "newsVisual": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 12
+        }
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Armazenamento e tempo de download",
+      "kicker": "O QUE MUDA PARA QUEM JOGA",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq",
+      "narration": "Antes de começar, abra a área de armazenamento do seu console e veja o espaço que está livre de verdade. A capacidade impressa na caixa do aparelho não significa que toda ela estará disponível para instalar um jogo novo. Também vale revisar o que está instalado e o que você realmente pretende manter. A ideia é preparar espaço com antecedência, sem apagar arquivos às pressas no momento em que o download estiver disponível. O tamanho do arquivo muda outra parte da experiência: a espera pela transferência. Para ilustrar a diferença, considere um exemplo teórico de duzentos e doze gigabytes decimais, em uma conexão constante e sem perdas. Esse cálculo não é uma previsão do tempo que o seu aparelho vai levar. Rede sem fio, outros dispositivos, servidor e condições da conexão podem mudar o resultado. A utilidade do exemplo é mostrar por que o tamanho importa antes do dia do lançamento. Planeje as duas tarefas: reservar espaço suficiente para o seu aparelho e organizar a transferência conforme a disponibilidade oficial do pré download.",
+      "scenes": [
+        {
+          "layout": "image",
+          "headline": "Capacidade e espaço livre diferem.",
+          "highlight": "A capacidade anunciada inclui espaço usado pelo sistema e por outros arquivos.",
+          "narrationAnchor": "Antes de começar, abra a área de",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: jason.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Esquema editorial · sem simular uma interface real",
+          "newsVisual": true
+        },
+        {
+          "layout": "process",
+          "headline": "Prepare o armazenamento.",
+          "highlight": "Verifique os dados antes de remover qualquer conteúdo.",
+          "narrationAnchor": "Também vale revisar o que está instalado",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "steps": [
+            "Conferir espaço",
+            "Revisar instalações",
+            "Preparar o download"
+          ],
+          "newsVisual": true
+        },
+        {
+          "layout": "bars",
+          "headline": "Velocidade muda a espera.",
+          "highlight": "Simulação ideal · 212 GB decimais · conexão constante · sem perdas.",
+          "narrationAnchor": "O tamanho do arquivo muda outra parte",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: vice-city.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Cálculo editorial: bytes × 8 ÷ velocidade; não é medição de download",
+          "bars": [
+            {
+              "label": "25 Mb/s",
+              "value": "≈ 18h51",
+              "ratio": 1
+            },
+            {
+              "label": "50 Mb/s",
+              "value": "≈ 9h25",
+              "ratio": 0.5
+            },
+            {
+              "label": "100 Mb/s",
+              "value": "≈ 4h43",
+              "ratio": 0.25
+            }
+          ],
+          "newsVisual": true
+        },
+        {
+          "layout": "footage",
+          "headline": "A simulação não mede sua conexão.",
+          "highlight": "O tempo real depende das condições da transferência.",
+          "narrationAnchor": "Esse cálculo não é uma previsão do",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: city-night.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "quoteAttribution": "COMO INTERPRETAR O GRÁFICO",
+          "newsVisual": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 24
+        },
+        {
+          "layout": "footage",
+          "headline": "Espaço e conexão: prepare os dois.",
+          "highlight": "",
+          "narrationAnchor": "Planeje as duas tarefas: reservar espaço suficiente",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/4J82PfLuwL3o3tOAww68ba/941a232acda3ecadb92d5ec1a04125f3/04_-_Leonida_Keys_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI: keys.",
+          "tag": "GTA VI · O QUE MUDA PARA QUEM JOGA",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 36
+        }
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Libere espaço sem perder o controle",
+      "kicker": "ANTES DE APAGAR",
+      "accent": "#ff752f",
+      "source": "https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/ · https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements",
+      "narration": "Compare o espaço livre exibido pelo console com o requisito da sua versão quando ele estiver disponível. Veja quais jogos você já terminou ou não pretende abrir agora. Não é necessário sair removendo tudo sem conferir. No PlayStation, jogos removidos podem ser baixados novamente pela biblioteca. Antes de excluir qualquer conteúdo, confira sua licença e as condições de acesso à conta que comprou o jogo. O arquivo do jogo e os dados de progresso são categorias diferentes. Antes de limpar o armazenamento, confira os dados salvos e as opções de cópia disponíveis no seu aparelho. Não presuma que todo progresso está salvo na nuvem. Comprar armazenamento extra é uma opção, mas não precisa ser a primeira. Se decidir expandir, confirme a compatibilidade e as condições do seu console antes de gastar. Um acessório externo qualquer não deve ser tratado como solução universal para rodar jogos atuais.",
+      "scenes": [
+        {
+          "layout": "footage",
+          "headline": "Comece pela lista de jogos instalados.",
+          "highlight": "O número útil é o espaço livre exibido no seu aparelho.",
+          "narrationAnchor": "Compare o espaço livre exibido pelo console",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 48
+        },
+        {
+          "layout": "footage",
+          "headline": "Excluir um jogo não precisa encerrar a jornada.",
+          "highlight": "",
+          "narrationAnchor": "No PlayStation, jogos removidos podem ser baixados",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoStart": 60,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4"
+        },
+        {
+          "layout": "image",
+          "headline": "Jogo instalado e progresso são coisas diferentes.",
+          "highlight": "Verifique os dados salvos antes de apagar qualquer arquivo.",
+          "narrationAnchor": "O arquivo do jogo e os dados",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "PlayStation Support · armazenamento e dados salvos",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true
+        },
+        {
+          "layout": "footage",
+          "headline": "Expansão também exige compatibilidade.",
+          "highlight": "Confira os requisitos do fabricante antes de comprar armazenamento.",
+          "narrationAnchor": "Comprar armazenamento extra é uma opção, mas",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 72
+        }
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Quando o pré-download começa?",
+      "kicker": "CALENDÁRIO OFICIAL",
+      "accent": "#ff752f",
+      "source": "https://www.rockstargames.com/VI",
+      "narration": "A Rockstar anuncia o início do pré-download em dez de novembro e o lançamento em dezenove de novembro de dois mil e vinte e seis. São datas com funções diferentes: baixar antes não significa começar a jogar antes. Confirme as condições da sua edição e da loja em que comprou. A página oficial apresenta o pré-download como informação geral; eventuais horários, disponibilidade e instruções específicas precisam ser conferidos na plataforma correspondente. Se sua conexão é compartilhada, escolha um horário em que outras pessoas não dependam tanto dela. Uma conexão cabeada ou estável pode ajudar na consistência, mas não garante a velocidade contratada durante todo o processo. Os tempos que mostramos são apenas contas para comparação. Instabilidade, limites de servidor e outras atividades na rede podem alterar o resultado. O tamanho efetivamente baixado também pode ser diferente do espaço disponível exigido.",
+      "scenes": [
+        {
+          "layout": "timeline",
+          "headline": "Pré-download em 10 de novembro.",
+          "highlight": "Lançamento anunciado: 19 de novembro de 2026.",
+          "narrationAnchor": "A Rockstar anuncia o início do pré-download",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · calendário oficial",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "events": [
+            {
+              "date": "10 NOV",
+              "label": "Pré-download anunciado"
+            },
+            {
+              "date": "19 NOV",
+              "label": "Lançamento anunciado"
+            }
+          ],
+          "newsVisual": true
+        },
+        {
+          "layout": "footage",
+          "headline": "Confira sua edição e sua loja.",
+          "highlight": "Disponibilidade e detalhes podem depender da plataforma.",
+          "narrationAnchor": "Confirme as condições da sua edição e",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/2bQ11ydObxmD2CvRyUlII6/e6e94f08f74e6a439e8937421653245e/GTAVI_PreOrderWebstore_CompareEditionsThumbnail_Standard_1280x720_R01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 84
+        },
+        {
+          "layout": "footage",
+          "headline": "Planeje uma janela de download.",
+          "highlight": "",
+          "narrationAnchor": "Se sua conexão é compartilhada, escolha um",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoStart": 96,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4"
+        },
+        {
+          "layout": "image",
+          "headline": "A estimativa não é uma promessa.",
+          "highlight": "Velocidade real varia com rede, servidor e uso simultâneo.",
+          "narrationAnchor": "Os tempos que mostramos são apenas contas",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/6fCadLh4X6V5RMdA5JDFyq/f60e9fff76c4eaaa74ab902c9feb7a50/09_-_Vice_City_09.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Análise editorial · hipóteses da simulação",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true
+        }
+      ]
+    },
+    {
+      "number": "05",
+      "title": "O que fazer antes de jogar",
+      "kicker": "UM PLANO PRÁTICO",
+      "accent": "#ff752f",
+      "source": "https://support.rockstargames.com/articles/M6h7B5fJZMwG1dnzQkt4Z/grand-theft-auto-vi-installation-requirements · https://www.rockstargames.com/VI · https://www.playstation.com/en-au/support/hardware/ps5-manage-storage-space/",
+      "narration": "O plano é simples. Primeiro, confira o espaço livre. Depois, decida o que pode remover e proteja seus dados salvos. Em seguida, verifique a disponibilidade do pré-download na sua loja e reserve tempo suficiente para a conexão. Se puder, mantenha alguma margem livre após a instalação. Isso é uma precaução de organização, não uma afirmação sobre o tamanho de uma atualização futura. O valor e a necessidade de novas atualizações só podem ser confirmados quando forem divulgados. No fim, duzentos e doze gigabytes são o limite divulgado pela Rockstar, não uma sentença de que todo console usará exatamente isso. Confira seu aparelho, sua edição e sua rede. Assim você chega ao lançamento preparado sem gastar por impulso.",
+      "scenes": [
+        {
+          "layout": "process",
+          "headline": "Prepare o console em etapas.",
+          "highlight": "Verificar primeiro ajuda a evitar compras desnecessárias.",
+          "narrationAnchor": "O plano é simples.",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · material oficial",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "steps": [
+            "Conferir espaço",
+            "Revisar dados salvos",
+            "Planejar download"
+          ],
+          "newsVisual": true
+        },
+        {
+          "layout": "footage",
+          "headline": "Deixe margem para a instalação.",
+          "highlight": "Atualizações e necessidades futuras não têm tamanho confirmado.",
+          "narrationAnchor": "Se puder, mantenha alguma margem livre após",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5kRNXiO9oSU1AyAhkG5RmL/a4db57e837e080601745f4820d62327a/08_-_Grassrivers_03.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4",
+          "videoStart": 108
+        },
+        {
+          "layout": "footage",
+          "headline": "O número deve ajudar na decisão.",
+          "highlight": "",
+          "narrationAnchor": "No fim, duzentos e doze gigabytes são",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+          "imageCaption": "Material oficial de Grand Theft Auto VI, Rockstar Games.",
+          "evidenceSource": "Rockstar Games · Trailer 2 oficial · áudio original removido",
+          "tag": "GTA VI · ARMAZENAMENTO E DOWNLOAD",
+          "mediaWide": true,
+          "videoStart": 120,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Trailer_2/GTAVI_Trailer_2.mp4",
+          "videoLocalPath": "tmp/gta-reedit/trailer-2.mp4"
+        }
+      ]
+    }
+  ]
+}

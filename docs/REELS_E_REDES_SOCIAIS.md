@@ -1170,3 +1170,53 @@ O workflow `reel-generator.yml` usa o motor local `@brasa/motion` com composiç�
 A narração automática usa Edge TTS com Thalita e Francisca. O executor consulta o último trabalho concluído para alternar a voz mesmo quando o GitHub inicia uma máquina nova. A voz, o provedor e o padrão `youtube-editorial-v3` ficam registrados no JSON do roteiro salvo em `reel_jobs.script`.
 
 Antes da fila, `scripts/verify-reel-runtime.mjs` sintetiza uma amostra e renderiza um quadro em 1080 × 1920. O workflow pode ser executado com `verify_only: true` para validar a instalação sem gerar nem publicar itens da fila. O teste técnico não substitui escuta de pronúncia e naturalidade.
+
+## Posts e carrosséis por matéria
+
+O editor em `/admin/posts-sociais` cria uma imagem única ou um carrossel a partir de uma matéria salva. Está disponível no menu administrativo, no botão **Gerar post** do editor e na seção Instagram de **Publicações**. O atalho de Reels permite alternar entre os materiais da mesma matéria.
+
+- A geração monta um rascunho usando título, resumo, trechos do corpo e imagens vinculadas à matéria. Não faz nova apuração nem gera fatos; manchete, textos e créditos precisam de revisão editorial.
+- Cada matéria tem um rascunho independente por formato. Salvar não altera a notícia nem publica em redes sociais. Alterações na matéria exigem gerar uma nova versão antes de salvar ou exportar o material antigo.
+- O carrossel admite até 20 slides, incluindo capa e CTA. A capa permanece no início e o CTA no fim; slides internos podem ser adicionados, removidos e reordenados. Imagens não podem se repetir.
+- A composição é quadrada, em 1080 × 1080, com marca e textos afastados das bordas. O enquadramento padrão mostra a imagem completa; preencher e reposicionar são escolhas explícitas do editor. Prévia e exportação usam o mesmo renderizador, com fontes Outfit hospedadas localmente.
+- As imagens são carregadas por uma rota administrativa, com verificação de arquivo, tamanho, resolução mínima de 1200 × 675 e bloqueio de endereços privados. Falhas deixam a imagem pendente e impedem sua exportação.
+- O download inclui JPGs numerados, legenda, créditos, textos alternativos e instruções. A música é uma indicação para seleção no catálogo do Instagram; não há áudio embutido nos JPGs.
+
+A API `/api/admin/social-posts` exige sessão administrativa com segundo fator. Rascunhos JSON ficam no bucket privado `social-post-drafts`, criado pelo servidor no primeiro salvamento com a credencial de serviço já configurada no projeto. Nenhuma migration de banco é necessária. O caminho é `{postId}/{single|carousel}.json`; o último salvamento substitui o rascunho daquele formato. A revisão aberta permanece disponível se o Storage falhar. Os arquivos finais são gerados no navegador durante o download e não ocupam Storage.
+
+### Publicação de imagens no Instagram
+
+O bloco **Publicar no Instagram** no editor de posts usa a conexão do servidor já utilizada pelos Reels: `COMPOSIO_API_KEY` + `COMPOSIO_INSTAGRAM_ACCOUNT`, ou `INSTAGRAM_ACCESS_TOKEN` + `INSTAGRAM_ACCOUNT_ID` (com os aliases `META_*` existentes). A conta é consultada e exibida antes do envio; se mudar entre revisão e publicação, o envio é bloqueado. Não é necessário conectar outra conta.
+
+O editor exige confirmar a revisão antes de publicar e salva automaticamente o rascunho revisado quando há alterações abertas. Este fluxo aceita uma imagem ou carrosséis de até 10 imagens, incluindo o CTA. O download continua permitindo 20 slides. Música é apenas uma indicação editorial: o envio direto publica sem a faixa, mediante confirmação explícita quando há uma música sugerida.
+
+A API `/api/admin/social-posts/instagram` exige administrador com MFA em todas as operações. Primeiro prepara um lote de revisão, recebe cada JPG em requisições separadas, verifica formato e dimensões de 1080 × 1080 e guarda os arquivos no bucket privado `social-post-media`. Links temporários permitem que o Instagram busque as imagens. O servidor cria os contêineres filhos na ordem dos slides, espera pelo processamento, cria o carrossel e solicita a publicação uma única vez.
+
+Cada tentativa tem uma reserva imutável numerada em `social-post-drafts/instagram/{postId}/{single|carousel}/`. A criação sem sobrescrita garante que duas solicitações simultâneas disputem a mesma reserva e só uma prossiga. O histórico é independente de `reel_social_publications`: postar uma imagem não bloqueia o Reel da mesma matéria. Falhas anteriores à solicitação de publicação permitem uma nova tentativa; resultado incerto mantém o envio bloqueado até consulta ao Instagram. O botão **Conferir resultado no Instagram** reconhece o estado `PUBLISHED`, ou libera uma nova tentativa apenas quando o contêiner está em erro ou expirado. Envios publicados não oferecem repetição automática.
+
+A versão Graph padrão acompanha a integração existente (`v21.0`); `INSTAGRAM_GRAPH_VERSION` permite fixar outra versão suportada. O bucket de imagens e o histórico são criados privadamente pelo servidor, sem migration de banco. Os lotes preparados expiram para envio após uma hora; arquivos e registros permanecem para conferência, sem exclusão automática nesta versão. Testes de publicação usam respostas simuladas e não enviam conteúdo real à conta.
+
+Antes do envio, o editor exige legenda e crédito nas imagens utilizadas. A prévia **Legenda que será publicada** mostra o texto final com o link absoluto e os créditos, deduplicando a mesma atribuição entre slides. O servidor valida novamente o limite de 2.200 caracteres antes de publicar.
+
+### Padrão compartilhado de legendas e preenchimento de imagens
+
+`src/lib/social/social-copy.ts` é a base compartilhada de copy dos Reels e dos posts. Os posts seguem gancho, contexto sem repetição, pergunta ligada à categoria, link da matéria com UTM, chamada para seguir `@ob.labs` e cinco hashtags. A primeira hashtag identifica o jogo; em seguida entram as marcas ou plataformas relacionadas à pauta e tags amplas de descoberta, como `Gaming`, `Gamer` e `Viral`. `Carrossel`, `NoticiasDeGames` e `Instagram` não são usadas como hashtags do feed. O comportamento padrão dos Reels e de suas descrições do YouTube permanece o mesmo.
+
+A descrição da capa parte do texto alternativo da matéria; as imagens internas aproveitam suas legendas. A origem é preenchida a partir de `editorial_images.source_url` quando existe um registro, da URL externa do arquivo quando disponível ou, por último, da matéria do Orange Brick como referência de reprodução. Essa origem não é uma declaração de autoria, licença ou titularidade. Créditos explícitos existentes são preservados.
+
+Ao abrir rascunhos antigos, os campos vazios e as legendas geradas pelo modelo antigo recebem os padrões atuais. Alterações manuais são preservadas. O painel identifica o ajuste para revisão, sem preencher imagem por imagem; o rascunho é salvo automaticamente ao publicar. O botão **Aplicar padrão de legenda e hashtags** atualiza a copy de um rascunho manual quando o editor desejar, sem regenerar os slides. A validação editorial e a confirmação da publicação continuam necessárias.
+
+
+### Confirmação e CTA do feed
+
+A caixa de revisão pode ser marcada mesmo com alterações ainda não salvas. O botão **Salvar e publicar no Instagram** persiste o rascunho antes de preparar o envio e usa exatamente essa versão para renderizar as imagens. A conta, o limite de imagens, a legenda e a versão da matéria continuam sendo validados antes da publicação. Pendências bloqueiam o envio com uma mensagem específica, sem impedir a marcação da caixa.
+
+O último slide destaca a pergunta de interação em tamanho grande, como **O que essa notícia muda pra você?**, e acrescenta **Comenta aí.** abaixo, em tamanho menor (32 px). A pergunta e “Comenta aí” aparecem somente na imagem final; não são repetidas na legenda do feed. A pergunta pode ser editada no título do slide final. CTAs escritos manualmente são preservados; os antigos CTAs gerados de curtir/seguir são atualizados ao reabrir o rascunho.
+
+Exemplo de hashtags para God of War: `#GodOfWar #PlayStation #Gaming #Viral #Gamer`. As marcas são selecionadas por menção na pauta ou relação conhecida da franquia, sem sugerir exclusividade nem adicionar consoles sem relação com o assunto. Hashtags editoriais antigas são substituídas no bloco de hashtags do rascunho, preservando o restante do texto.
+
+A lista de matérias em Posts sociais exibe o histórico confirmado de imagem única e carrossel, com selo de publicado e estados de envio. Publicações manuais fora do painel não são inferidas. Nas capas quadradas, marca, título e rodapé ficam na coluna central de 756 px, protegidos do recorte central 3:4 da grade do perfil. A fotografia mantém seu tamanho.
+
+Após um envio confirmado, o botão Preparar nova publicação abre uma republicação explícita. O usuário revisa novamente e confirma criar outro post. O lote guarda a tentativa anterior autorizada, conferida de novo na reserva atômica; histórico alterado, envio pendente e repetição do mesmo lote são bloqueados. O post anterior e seus registros não são excluídos.
+
+Os textos dos slides devem resumir a informação com frases completas dentro do limite de 300 caracteres (200 na capa). O gerador seleciona frases completas do texto, sem recortar palavras ou acrescentar reticências; se nenhuma frase couber, solicita resumir o trecho antes da geração. Cortes automáticos antigos reconhecidos são recuperados ao abrir, preservando edições manuais. Salvar e publicar bloqueiam títulos ou textos terminados em reticências, com orientação para concluir o resumo. Priorizar fato, consequência e contexto relevante, evitando repetir a manchete nos slides seguintes.

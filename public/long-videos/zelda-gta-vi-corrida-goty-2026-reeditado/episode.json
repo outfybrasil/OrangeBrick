@@ -1,0 +1,449 @@
+{
+  "slug": "zelda-gta-vi-corrida-goty-2026-reeditado",
+  "seriesBadge": "ORANGE BRICK · EDIÇÃO REVISADA",
+  "title": "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+  "youtubeTitle": "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+  "subtitle": "O que as regras dizem sobre remakes, calendário e votação do jogo do ano.",
+  "sourceMode": "custom_script",
+  "sourcePostSlugs": [],
+  "visualStyle": "documentario",
+  "voiceId": "pt-BR-FranciscaNeural",
+  "primaryCta": "Para acompanhar jogos e indústria com contexto, inscreva-se no canal.",
+  "youtubeOverviewParagraph": "Zelda e GTA VI podem disputar o jogo do ano no The Game Awards 2026? Entenda a diferença entre nota, elegibilidade, indicação e vitória. Informações conferidas em 4 de novembro de 2026. A média citada é o levantamento publicado pelo GameSpot nessa data, não uma consulta direta ao Metacritic.",
+  "pinnedComment": "Que aspecto você considera decisivo para escolher um jogo do ano?",
+  "tags": [
+    "The Game Awards 2026",
+    "The Legend of Zelda Ocarina of Time",
+    "Grand Theft Auto VI",
+    "GTA VI",
+    "Nintendo Switch 2",
+    "GOTY",
+    "Orange Brick"
+  ],
+  "titleVariants": [
+    "Zelda x GTA VI no TGA: nota, prazo e voto explicados",
+    "Zelda pode enfrentar GTA VI pelo jogo do ano?",
+    "Nota 96 e prazo do TGA: entenda Zelda x GTA VI"
+  ],
+  "thumbnailConcepts": [
+    "Zelda e GTA VI: DUELO CONFIRMADO?",
+    "Zelda: 96 NÃO É TROFÉU",
+    "GTA VI: DENTRO DO PRAZO?"
+  ],
+  "chapters": [
+    {
+      "number": "01",
+      "title": "O duelo ainda precisa acontecer",
+      "kicker": "A PERGUNTA CERTA",
+      "accent": "#ff752f",
+      "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://thegameawards.com/faq",
+      "narration": "Um Zelda com nota noventa e seis pode enfrentar GTA seis pelo jogo do ano? Pode, mas existe um caminho entre receber elogios e subir ao palco com o troféu. Para a Rockstar, a primeira barreira é o calendário. Para a Nintendo, ser um remake não fecha a porta da premiação. E uma média alta da crítica não escolhe o vencedor automaticamente. Vamos separar as três etapas dessa corrida: estar dentro das regras, conquistar uma indicação e vencer a votação. Essa diferença muda completamente a leitura do confronto.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "Zelda × GTA VI",
+          "highlight": "O duelo pelo jogo do ano é uma possibilidade.",
+          "narrationAnchor": "Um Zelda com nota noventa e seis",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Nintendo · material oficial",
+          "mediaWide": true
+        },
+        {
+          "layout": "footage",
+          "headline": "Expectativa não é indicação.",
+          "highlight": "",
+          "narrationAnchor": "Para a Rockstar, a primeira barreira é",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Rockstar Games · trailer oficial · áudio original removido",
+          "mediaWide": true,
+          "videoStart": 36,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4"
+        },
+        {
+          "layout": "process",
+          "headline": "Três etapas diferentes.",
+          "highlight": "A regra permite entrar; os votos decidem o restante.",
+          "narrationAnchor": "Vamos separar as três etapas dessa corrida:",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · regras oficiais do TGA",
+          "mediaWide": true,
+          "steps": [
+            "Elegibilidade",
+            "Indicação",
+            "Vitória"
+          ]
+        }
+      ]
+    },
+    {
+      "number": "02",
+      "title": "O que a nota de Zelda realmente diz",
+      "kicker": "CRÍTICA E RECONSTRUÇÃO",
+      "accent": "#ff752f",
+      "source": "https://tech.yahoo.com/gaming/articles/ocarina-time-remake-claimed-2026-132605719.html · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/ · https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-24-the-legend-of-zelda-ocarina-of-time-part-1/",
+      "narration": "O levantamento publicado pelo GameSpot em quatro de novembro aponta média noventa e seis no Metacritic para o novo Ocarina of Time. É um sinal forte de recepção crítica, com uma ressalva: médias podem mudar conforme chegam novas análises. A Nintendo marca o lançamento para cinco de novembro. Portanto, a notícia das avaliações aparece antes da estreia comercial. Não devemos transformar acesso antecipado da imprensa em afirmação de que todo mundo já está jogando. O projeto reconstrói o clássico para o Switch dois, com mudanças na câmera e na movimentação, cenas com vozes e música orquestrada. São escolhas que podem alterar a experiência de quem conhece o original e de quem chega agora. Na entrevista da Nintendo, o produtor Eiji Aonuma também contextualiza o aprendizado da equipe ao revisitar essa estrutura. Havia desenvolvedores com experiências diferentes com o original. Isso é mais preciso do que dizer que ninguém tinha jogado o clássico. A pergunta editorial interessante é como essa reconstrução funciona hoje: os controles ajudam, os espaços continuam interessantes e as mudanças preservam o sentido da aventura? São pontos concretos para uma análise, sem reduzir tudo ao prestígio do nome Zelda.",
+      "scenes": [
+        {
+          "layout": "metrics",
+          "headline": "Uma estreia forte nas análises.",
+          "highlight": "Levantamento publicado em 4 de novembro de 2026.",
+          "narrationAnchor": "O levantamento publicado pelo GameSpot em quatro",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "GameSpot · levantamento de 04/11/2026",
+          "mediaWide": true,
+          "metrics": [
+            {
+              "label": "METACRITIC · SEGUNDO O GAMESPOT",
+              "value": "96/100",
+              "detail": "Registro de 04/11/2026 · média sujeita a atualização"
+            }
+          ]
+        },
+        {
+          "layout": "image",
+          "headline": "O lançamento é em 5 de novembro.",
+          "highlight": "Análises antecipadas e disponibilidade pública são momentos distintos.",
+          "narrationAnchor": "A Nintendo marca o lançamento para cinco",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Nintendo · data oficial consultada em 04/11/2026",
+          "mediaWide": true
+        },
+        {
+          "layout": "image",
+          "headline": "O trabalho vai além da resolução.",
+          "highlight": "Câmera, movimentação, cenas e música foram retrabalhadas.",
+          "narrationAnchor": "O projeto reconstrói o clássico para o",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Nintendo · anúncio do 40º aniversário de Zelda",
+          "mediaWide": true
+        },
+        {
+          "layout": "quote",
+          "headline": "Reconstruir também ensina.",
+          "highlight": "Conhecer a estrutura do clássico pode alimentar projetos futuros.",
+          "narrationAnchor": "Na entrevista da Nintendo, o produtor Eiji",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Nintendo · Ask the Developer, vol. 24 · parte 1",
+          "mediaWide": true,
+          "quoteAttribution": "EIJI AONUMA · PRODUTOR · PARÁFRASE"
+        },
+        {
+          "layout": "image",
+          "headline": "A comparação precisa considerar o trabalho novo.",
+          "highlight": "Nostalgia pode fazer parte da experiência; não substitui a avaliação.",
+          "narrationAnchor": "A pergunta editorial interessante é como essa",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · critérios propostos para a comparação",
+          "mediaWide": true
+        }
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Um remake pode concorrer?",
+      "kicker": "A REGRA NÃO EXCLUI O FORMATO",
+      "accent": "#ff752f",
+      "source": "https://thegameawards.com/faq",
+      "narration": "O regulamento do The Game Awards permite remakes nas categorias quando o júri considera o novo trabalho criativo e técnico digno de indicação. Assim, o formato de reconstrução não elimina Ocarina of Time dessa conversa. Isso resolve a dúvida sobre poder participar, mas não promete uma vaga. Pense na diferença entre poder disputar uma corrida e conseguir se classificar entre os finalistas: uma condição vem antes da outra. Para GTA seis, o tamanho da expectativa também não substitui a avaliação do jogo. O confronto só estará confirmado quando os dois aparecerem oficialmente entre os indicados da mesma categoria.",
+      "scenes": [
+        {
+          "layout": "hero",
+          "headline": "Sim, remakes podem concorrer.",
+          "highlight": "O regulamento considera o trabalho criativo e técnico novo.",
+          "narrationAnchor": "O regulamento do The Game Awards permite",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide03.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "The Game Awards · FAQ oficial · elegibilidade de remakes",
+          "mediaWide": true
+        },
+        {
+          "layout": "image",
+          "headline": "A regra abre a porta.",
+          "highlight": "Ela não reserva uma vaga para Zelda.",
+          "narrationAnchor": "Isso resolve a dúvida sobre poder participar,",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · distinção entre elegibilidade e indicação",
+          "mediaWide": true
+        },
+        {
+          "layout": "footage",
+          "headline": "GTA VI também precisa passar pelas etapas.",
+          "highlight": "",
+          "narrationAnchor": "Para GTA seis, o tamanho da expectativa",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Rockstar Games · trailer oficial · áudio original removido",
+          "mediaWide": true,
+          "videoStart": 47,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4"
+        }
+      ]
+    },
+    {
+      "number": "04",
+      "title": "O calendário sem contagem inventada",
+      "kicker": "DATA DE LANÇAMENTO E PRAZO",
+      "accent": "#ff752f",
+      "source": "https://thegameawards.com/faq · https://www.rockstargames.com/VI · https://www.nintendo.com/us/store/products/the-legend-of-zelda-ocarina-of-time-switch-2/",
+      "narration": "No calendário anunciado, Zelda chega em cinco de novembro e GTA seis em dezenove de novembro. O corte geral de elegibilidade do TGA está marcado para vinte de novembro, às nove da noite no horário do Pacífico. Com essas datas, GTA seis está previsto para chegar antes do limite. Mas chamar essa margem de exatas vinte e quatro horas seria impreciso sem cruzar os horários de disponibilidade e os fusos envolvidos. Existe ainda a questão prática do tempo para avaliar um lançamento grande. A página de regras permite acesso antecipado para análise. Essa possibilidade não comprova que a Rockstar forneceu cópias, nem quando cada veículo teria recebido o jogo. A conclusão responsável é limitada ao que está documentado: o lançamento anunciado cabe no corte. A situação dos códigos de análise precisa de confirmação própria. Qualquer mudança oficial de calendário exige conferir essa conta novamente.",
+      "scenes": [
+        {
+          "layout": "timeline",
+          "headline": "As datas que importam.",
+          "highlight": "Datas anunciadas, conferidas em 4 de novembro de 2026.",
+          "narrationAnchor": "No calendário anunciado, Zelda chega em cinco",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide06.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Nintendo · Rockstar Games · The Game Awards",
+          "mediaWide": true,
+          "events": [
+            {
+              "date": "05 NOV",
+              "label": "Zelda · lançamento"
+            },
+            {
+              "date": "19 NOV",
+              "label": "GTA VI · lançamento"
+            },
+            {
+              "date": "20 NOV",
+              "label": "TGA · corte às 21h PT"
+            }
+          ],
+          "eyebrow": "CALENDÁRIO E PRÓXIMOS PASSOS"
+        },
+        {
+          "layout": "metrics",
+          "headline": "Dentro do prazo anunciado.",
+          "highlight": "A data se encaixa; a duração exata exige horários compatíveis.",
+          "narrationAnchor": "Com essas datas, GTA seis está previsto",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "The Game Awards · FAQ oficial · sem contagem regressiva estimada",
+          "mediaWide": true,
+          "metrics": [
+            {
+              "label": "CORTE DE ELEGIBILIDADE",
+              "value": "20 NOV",
+              "detail": "21h · horário do Pacífico · 2026"
+            }
+          ]
+        },
+        {
+          "layout": "footage",
+          "headline": "Avaliar exige acesso ao jogo.",
+          "highlight": "",
+          "narrationAnchor": "Existe ainda a questão prática do tempo",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/7zDbmT7wDNEoMFiioNkEtr/81ec30f2edd179aa0f04555d2e0faaf6/02_-_Jason_Duval_01.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Rockstar Games · trailer oficial · áudio original removido",
+          "mediaWide": true,
+          "videoStart": 6,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4"
+        },
+        {
+          "layout": "image",
+          "headline": "Data confirmada e acesso confirmado são evidências diferentes.",
+          "highlight": "Não preencher lacunas com rumores sobre códigos de análise.",
+          "narrationAnchor": "A conclusão responsável é limitada ao que",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5zPpF5MY73vX7yVA2m7cao/dd6c2aaef11d2c8c151c952b1de0c5ff/03_-_Lucia_Caminos_01.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · separação entre calendário e acesso antecipado",
+          "mediaWide": true
+        }
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Quem transforma recepção em prêmio",
+      "kicker": "NOTAS NÃO SÃO CÉDULAS",
+      "accent": "#ff752f",
+      "source": "https://thegameawards.com/faq · https://thegameawards.com/voting-jury",
+      "narration": "Uma média combina avaliações publicadas por diferentes veículos. A votação de uma premiação pede outra decisão: quais trabalhos merecem reconhecimento naquela categoria. Mesmo quando existe gente em comum, os processos não são idênticos. O TGA reúne mais de cem veículos e canais em um júri internacional, com representantes brasileiros. Cada veículo expressa uma posição coletiva. Isso impede tratar a nota isolada de um crítico como se fosse o voto inteiro de uma redação. Na escolha dos vencedores, o júri pesa noventa por cento e o público, dez por cento. Esses números descrevem a composição da votação. Eles não significam que um dos jogos tenha noventa por cento de chance de ganhar. Uma comunidade muito mobilizada pode participar e influenciar a parcela popular. Ainda assim, tamanho da torcida, visualizações de trailer e expectativa não fornecem, por si, o resultado da votação do júri. Por isso, a nota noventa e seis deve entrar como contexto da recepção de Zelda. Transformá-la em previsão matemática de vitória apagaria as escolhas dos demais votantes e a comparação com outros candidatos.",
+      "scenes": [
+        {
+          "layout": "process",
+          "headline": "A média e a votação medem coisas diferentes.",
+          "highlight": "Um agregado de notas não é a cédula coletiva de um veículo.",
+          "narrationAnchor": "Uma média combina avaliações publicadas por diferentes",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide02.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · comparação de processos",
+          "mediaWide": true,
+          "steps": [
+            "Análises publicadas",
+            "Avaliação da categoria",
+            "Escolha dos indicados"
+          ]
+        },
+        {
+          "layout": "image",
+          "headline": "O júri reúne veículos internacionais.",
+          "highlight": "A lista oficial inclui representantes brasileiros.",
+          "narrationAnchor": "O TGA reúne mais de cem veículos",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide04.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "The Game Awards · Voting Jury e FAQ",
+          "mediaWide": true
+        },
+        {
+          "layout": "bars",
+          "headline": "O peso da votação final.",
+          "highlight": "Percentuais de participação na decisão, não chances de vitória.",
+          "narrationAnchor": "Na escolha dos vencedores, o júri pesa",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "The Game Awards · FAQ oficial · seleção dos vencedores",
+          "mediaWide": true,
+          "bars": [
+            {
+              "label": "Júri",
+              "value": "90%",
+              "ratio": 0.9
+            },
+            {
+              "label": "Público",
+              "value": "10%",
+              "ratio": 0.1
+            }
+          ],
+          "eyebrow": "REGRA OFICIAL · PESOS DA VOTAÇÃO"
+        },
+        {
+          "layout": "footage",
+          "headline": "Popularidade não resolve a conta sozinha.",
+          "highlight": "",
+          "narrationAnchor": "Uma comunidade muito mobilizada pode participar e",
+          "imageUrl": "https://images.ctfassets.net/h1rqp7q66d54/5d4fHCy1aK8wi6CgsOddln/07dbfb881a8511304031627ae86181ce/01_-_Vice_City_01.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Rockstar Games · trailer oficial · áudio original removido",
+          "mediaWide": true,
+          "videoStart": 58,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4"
+        },
+        {
+          "layout": "image",
+          "headline": "96 é recepção crítica.",
+          "highlight": "Não existe conversão automática de média em troféu.",
+          "narrationAnchor": "Por isso, a nota noventa e seis",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide01.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · interpretação dos dados e das regras",
+          "mediaWide": true
+        }
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Como comparar sem declarar um vencedor",
+      "kicker": "O QUE OBSERVAR DAQUI PARA A FRENTE",
+      "accent": "#ff752f",
+      "source": "https://www.nintendo.com/us/whatsnew/the-legend-of-zelda-40th-anniversary-celebration-revealed-in-new-nintendo-direct-presentation/ · https://www.rockstargames.com/VI · https://thegameawards.com/faq",
+      "narration": "Se o encontro acontecer, uma comparação útil pode olhar para direção, desenho das atividades e consistência da experiência. No caso de Zelda, interessa avaliar como a reconstrução sustenta a aventura para além da memória afetiva. No caso de GTA seis, a escala prometida e a apresentação dos trailers precisam se transformar em uma experiência que funcione ao jogar. Material promocional ajuda a conhecer a proposta, mas não é um teste independente de qualidade. O anúncio dos indicados mostrará se esse duelo existe de fato. Depois, a cerimônia de dez de dezembro dará a resposta da premiação. Até lá, não devemos apagar os outros jogos do ano para fabricar uma final entre duas marcas. A discussão fica melhor quando sai de qual marca é maior e entra em quais escolhas tornaram a experiência especial. Esse é o ponto para observar nas análises e no jogo completo, antes de escolher o seu favorito.",
+      "scenes": [
+        {
+          "layout": "image",
+          "headline": "Reconstrução de um clássico.",
+          "highlight": "Observar o que mudou e como essas escolhas funcionam hoje.",
+          "narrationAnchor": "Se o encontro acontecer, uma comparação útil",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide05.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Análise editorial · comparação hipotética",
+          "mediaWide": true
+        },
+        {
+          "layout": "footage",
+          "headline": "Uma aventura nova também precisa se sustentar.",
+          "highlight": "",
+          "narrationAnchor": "No caso de GTA seis, a escala",
+          "imageUrl": "https://www.rockstargames.com/VI/_next/static/media/Official_Cover_Art_landscape.12.uu2irr.2_a.jpg",
+          "imageCaption": "Imagem promocional oficial de Grand Theft Auto VI.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Rockstar Games · trailer oficial · áudio original removido",
+          "mediaWide": true,
+          "videoStart": 24,
+          "videoUrl": "https://media-rockstargames-com.akamaized.net/VI/downloads/videos/GTAVI_Launch_Trailer/GTAVI_Launch_Trailer.mp4",
+          "videoLocalPath": "tmp/gta-reedit/launch-trailer.mp4"
+        },
+        {
+          "layout": "timeline",
+          "headline": "O próximo passo é a lista oficial.",
+          "highlight": "Outros jogos também podem ocupar o centro da disputa.",
+          "narrationAnchor": "O anúncio dos indicados mostrará se esse",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide08.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "The Game Awards · data da cerimônia · análise editorial",
+          "mediaWide": true,
+          "events": [
+            {
+              "date": "INDICADOS",
+              "label": "Conferir a lista oficial"
+            },
+            {
+              "date": "10 DEZ",
+              "label": "Cerimônia do TGA 2026"
+            }
+          ],
+          "eyebrow": "CALENDÁRIO E PRÓXIMOS PASSOS"
+        },
+        {
+          "layout": "image",
+          "headline": "Qual trabalho merece ser reconhecido?",
+          "highlight": "Avaliar a experiência completa, com as regras à vista.",
+          "narrationAnchor": "A discussão fica melhor quando sai de",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Encerramento editorial",
+          "mediaWide": true
+        },
+        {
+          "layout": "cta",
+          "headline": "Jogos e indústria, com contexto.",
+          "highlight": "Orange Brick",
+          "narrationAnchor": "Para acompanhar jogos e indústria",
+          "imageUrl": "https://www.nintendo.com/ph/games/switch2/aa9ja/img/slide07.jpg",
+          "imageCaption": "Screenshot oficial de The Legend of Zelda: Ocarina of Time para Nintendo Switch 2.",
+          "tag": "ZELDA × GTA VI · THE GAME AWARDS",
+          "evidenceSource": "Encerramento editorial",
+          "mediaWide": true
+        }
+      ]
+    }
+  ]
+}

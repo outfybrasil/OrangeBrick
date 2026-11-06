@@ -1,0 +1,22 @@
+{
+  "music": "Shadow — James Gargette — CC0",
+  "previous_gain": 0.06,
+  "gain": 0.16,
+  "gain_change_db": 8.52,
+  "ducking": {
+    "threshold": 0.08,
+    "ratio": 2,
+    "attack_ms": 35,
+    "release_ms": 650
+  },
+  "picture_packet_hash_unchanged": true,
+  "previous_mix_backup": "tmp/long-videos/zelda-gta-vi-corrida-goty-2026-reeditado/before-music-adjustment.mp4",
+  "verification": {
+    "passed": true,
+    "full_decode": true,
+    "integrated_lufs": -14.8,
+    "true_peak_dbtp": -1.89,
+    "corrected": false,
+    "human_listening": false
+  }
+}
