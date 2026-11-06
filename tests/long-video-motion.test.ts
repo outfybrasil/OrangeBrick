@@ -13,6 +13,20 @@ import { chooseEditorialVoice } from "../src/lib/video/video-voice.mjs";
 
 const require = createRequire(import.meta.url);
 
+let chromiumAvailable = false;
+try {
+  const probe = await chromium.launch({ headless: true });
+  await probe.close();
+  chromiumAvailable = true;
+} catch {}
+
+let ffmpegAvailable = false;
+try {
+  execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
+  execFileSync("ffprobe", ["-version"], { stdio: "ignore" });
+  ffmpegAvailable = true;
+} catch {}
+
 test("a voz editorial usa Francisca e preserva outras escolhas explícitas", () => {
   assert.equal(chooseEditorialVoice("auto", "pt-BR-ThalitaMultilingualNeural"), "pt-BR-FranciscaNeural");
   assert.equal(chooseEditorialVoice("auto", "pt-BR-FranciscaNeural"), "pt-BR-ThalitaMultilingualNeural");
@@ -27,7 +41,7 @@ test("a montagem rejeita processos consecutivos e composições inexistentes", (
   assert.equal(resolveLongLayout({ layout: "evidence" }, "process"), "evidence");
 });
 
-test("o quadro permanece fixo e a animação interna é determinística", async () => {
+test("o quadro permanece fixo e a animação interna é determinística", { skip: !chromiumAvailable ? "Playwright chromium não está disponível no ambiente" : false }, async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
@@ -61,7 +75,7 @@ test("o quadro permanece fixo e a animação interna é determinística", async 
   }
 });
 
-test("o render mantém 30 fps e a duração completa depois que a animação termina", async () => {
+test("o render mantém 30 fps e a duração completa depois que a animação termina", { skip: !chromiumAvailable || !ffmpegAvailable ? "Playwright chromium ou ffmpeg não está disponível no ambiente" : false }, async () => {
   const directory = await mkdtemp(path.join(tmpdir(), "orangebrick-motion-"));
   const renderer = await createLongMotionRenderer(process.cwd(), "ffmpeg");
   try {
