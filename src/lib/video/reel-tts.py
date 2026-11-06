@@ -45,17 +45,21 @@ def save_timing_files(out_dir: Path, sentences, provider: str, words=None, voice
 
 def normalize_sentence_timings(sentences):
     normalized = []
-    previous_end = 0
+    previous_end = 0.0
     for sentence in sentences:
-        start = sentence["start"]
-        end = sentence["end"]
+        start = round(float(sentence["start"]), 3)
+        end = round(float(sentence["end"]), 3)
         if start < previous_end:
-            if previous_end - start > 0.0021:
-                raise ValueError("As frases da narração têm sobreposição incompatível com o arredondamento.")
-            start = previous_end
+            if previous_end - start > 0.05 and normalized and start > normalized[-1]["start"] + 0.2:
+                normalized[-1]["end"] = start
+                normalized[-1]["duration"] = round(start - normalized[-1]["start"], 3)
+                previous_end = start
+            else:
+                start = previous_end
         if end <= start:
-            raise ValueError("Uma frase da narração não tem duração válida.")
-        normalized.append({**sentence, "start": start, "end": end, "duration": round(end - start, 3)})
+            end = round(start + max(round(float(sentence.get("duration", 0.1)), 3), 0.1), 3)
+        duration = round(end - start, 3)
+        normalized.append({**sentence, "start": start, "end": end, "duration": duration})
         previous_end = end
     return normalized
 

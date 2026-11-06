@@ -3,10 +3,12 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+sys.modules.setdefault("edge_tts", MagicMock())
 
 spec = importlib.util.spec_from_file_location("reel_tts", Path(__file__).resolve().parents[1] / "src/lib/video/reel-tts.py")
 tts = importlib.util.module_from_spec(spec)
@@ -33,15 +35,16 @@ class VoiceContinuityTests(unittest.TestCase):
             self.assertEqual(metadata["word_timing"], "provider-alignment")
             self.assertTrue(metadata["review_required"])
 
-    def test_boundary_rounding_only_corrects_up_to_two_milliseconds(self):
+    def test_boundary_overlap_is_normalized_without_raising_error(self):
         sentences = [{"text": "Uma frase.", "start": 0, "end": 3.088}, {"text": "Outra frase.", "start": 3.087, "end": 5.924}]
         corrected = tts.normalize_sentence_timings(sentences)
         self.assertEqual(corrected[1]["start"], corrected[0]["end"])
         self.assertEqual(corrected[1]["end"], 5.924)
         self.assertEqual(sentences[1]["start"], 3.087)
         sentences[1]["start"] = 2.9
-        with self.assertRaises(ValueError):
-            tts.normalize_sentence_timings(sentences)
+        corrected_overlap = tts.normalize_sentence_timings(sentences)
+        self.assertEqual(corrected_overlap[1]["start"], corrected_overlap[0]["end"])
+        self.assertGreater(corrected_overlap[1]["end"], corrected_overlap[1]["start"])
 
     def test_incomplete_transcript_is_rejected(self):
         with self.assertRaises(ValueError):
