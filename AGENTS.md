@@ -89,6 +89,18 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Preparar embalagem, fontes, capítulos válidos, sugestão de próximo vídeo e Shorts complementares. Configurar tela final e vídeo relacionado no Studio quando aplicável; elementos desenhados no MP4 não são links interativos.
 - Avaliar retenção aos 30 segundos, curva de permanência, tempo assistido, inscritos por mil visualizações e continuidade. Tratar metas e cadência como hipóteses do canal, sem garantias de alcance.
 
+## Crescimento de vídeos — aprovado em 09/11/2026
+
+- Aplicar a seção “Aplicação nos geradores e plano orgânico” de `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md` em vídeos longos e Reels. Manter `youtube-editorial-v3`.
+- Alinhar título, miniatura, primeira fala e primeira prova visual. Abrir pela consequência para quem joga ou curiosidade demonstrável; entregar a primeira resposta cedo e concluir antes do CTA.
+- Usar uma chamada principal ao OB Labs, canal do Orange Brick, sem pedidos repetidos. Preservar escolhas explícitas do usuário.
+- Registrar promessa e plano de audiência nos metadados de produção; conferir imagens, fatos e voz antes de aprovar. Metadados não equivalem a validação humana.
+- Medir em 24 h, 72 h e sete dias; separar longos e curtos, períodos processados e contadores públicos. Não usar views como prova isolada de retenção ou conversão.
+- O Analytics foi ativado em 09/11. Conferir as métricas disponíveis e suas datas efetivas; não tratar dados ausentes como zero nem anunciar acompanhamento automático que não esteja implementado.
+- O plano inicial de quatro semanas propõe um longo e três Shorts por semana, como hipótese de teste. Não alterar agendamentos, identidade pública nem enviar mensagens a terceiros automaticamente para executar o plano.
+
+---
+
 ## 📅 Game Release Dates & Official Cover Art Standards
 
 - **Nomes dos Jogos:** MANTER o nome original oficial do jogo (ex: *Marvel's Wolverine*, *Starfield: Shattered Space*, *Grand Theft Auto VI*, *Halo: Campaign Evolved Remake*). **NUNCA traduzir títulos de jogos.**

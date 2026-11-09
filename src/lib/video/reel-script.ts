@@ -36,6 +36,14 @@ export interface ReelScriptData {
   ttsProvider?: "elevenlabs" | "edge-tts";
   ttsVoice?: string;
   editorialStandard?: string;
+  audiencePlan?: {
+    version: string;
+    channel: string;
+    objective: "returning-audience";
+    promise: string;
+    reviewHours: number[];
+    reviewRequired: string[];
+  };
 }
 
 export interface ReelScriptOptions {
@@ -213,7 +221,7 @@ CONTEÚDO:
 ${sourceBody}
 
 REGRAS:
-1. A primeira fala deve ser o gancho, com um fato concreto, consequência ou dúvida real que o próprio vídeo responde. Repita a mesma ideia na primeira tela. Comece direto, sem vinheta, saudação ou apresentação do canal.
+1. Alinhe título, primeira fala e primeira imagem à mesma promessa. Abra pela consequência concreta para quem joga ou por uma curiosidade que a imagem disponível demonstra. Se o título fala de preço, posse, armazenamento ou limitação, não abra pelo calendário nem por números corporativos. Uma data só abre a fala quando ela própria é a notícia. Comece direto, sem vinheta, saudação ou apresentação do canal.
 2. Conte uma única história nesta ordem: gancho, fato principal, contexto que muda a leitura, impacto para quem joga e conclusão. Use surpresa, curiosidade ou debate apenas quando os fatos sustentarem esse ângulo. Entregue a resposta antes do fim; não esconda informação para forçar retenção.
 3. Escreva como conversa jornalística, variando a extensão das frases e conectando as ideias. Prepare números e siglas para uma leitura natural, sem inventar fatos ou traduzir nomes oficiais de jogos. Escreva de 75 a 95 palavras faladas em português brasileiro natural para preservar o fato, o contexto e o impacto. Use frases curtas, com no máximo 22 palavras cada, ritmo oral e tom adequado à categoria. Em breaking, hardware e industry, seja jornalístico e factual; em opinion, deixe a opinião clara.
 ${rule4}
@@ -228,7 +236,7 @@ DIREÇÃO EDITORIAL:
 - Escolha layout conforme a ideia: image para gameplay/produto, detail para um fato ou número importante, brief para dois ou três pontos confirmados, comparison somente para dois elementos comparáveis identificados. Alterne a composição quando a explicação mudar; não force variedade sem motivo.
 - Em comparison, inclua comparison: [{imageIndex: índice do primeiro material, label: identificação real de até 24 caracteres}, {imageIndex: índice do segundo material, label: identificação real de até 24 caracteres}]. Não invente antes/depois, diferenças técnicas ou relações que os materiais não demonstram.
 - Escreva highlight como uma informação que complemente o título; use pills para resumir fatos curtos, sem repetir a mesma frase.
-- Escolha imageIndex usando somente os materiais listados abaixo. Não sugira que uma imagem mostra algo que sua descrição não confirma.
+- Escolha imageIndex usando somente os materiais listados abaixo. A primeira imagem deve identificar imediatamente o produto ou demonstrar a promessa da abertura. Personagens e paisagens não comprovam preço, embalagem ou requisito técnico. Não sugira que uma imagem mostra algo que sua descrição não confirma.
 - Use títulos informativos e naturais. Evite linguagem de trailer, exageros, emojis e jargões publicitários. A imagem deve explicar o fato; títulos e legendas não precisam repetir a mesma informação.
 MATERIAIS DISPONÍVEIS:
 ${visualAssetDescriptions(post)}
@@ -290,7 +298,7 @@ function buildReviewPrompt(post: Post, sourceBody: string, draft: ReelScriptData
   const endingRule = ctaVariant === "follow"
     ? "terminar com uma chamada clara para seguir o OB Labs (ex: 'Quer entender o que muda para quem joga? Siga o OB Labs.')"
     : "terminar com uma pergunta completa que seja a mesma do campo ctaQuestion";
-  return `Revise editorialmente o roteiro antes da renderização. Compare cada informação com a matéria. Preserve o fato principal, o contexto e o impacto; corrija qualquer frase, cena ou dado incompleto. Não invente, não altere números, datas, autoria, status de anúncio ou grau de certeza. Nunca use reticências nem corte texto para caber: reescreva sem perder a ideia. A narração final deve ter de 75 a 95 palavras, no máximo 22 palavras por frase, e ${endingRule}; o encerramento conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Retorne somente o JSON revisado.\n\nMATÉRIA\nTítulo: ${post.title}\nResumo: ${post.summary}\nConteúdo: ${sourceBody}\n\nROTEIRO PARA REVISÃO\n${JSON.stringify(draft)}`;
+  return `Revise editorialmente o roteiro antes da renderização. Compare cada informação com a matéria. Confira se título, primeira fala e primeiro material entregam a mesma promessa concreta, se a conclusão responde ao gancho e se o CTA aparece uma única vez depois da entrega. Preserve o fato principal, o contexto e o impacto; corrija qualquer frase, cena ou dado incompleto. Não invente, não altere números, datas, autoria, status de anúncio ou grau de certeza. Nunca use reticências nem corte texto para caber: reescreva sem perder a ideia. A narração final deve ter de 75 a 95 palavras, no máximo 22 palavras por frase, e ${endingRule}; o encerramento conta nesse limite. Os limites dos textos de tela são: gancho 55 caracteres, título principal 48, subtítulo 64, selo 24, título de cena 36, destaque 48, tag 18 e pílula 18. Mantenha exatamente cinco cenas e o mesmo formato JSON. Retorne somente o JSON revisado.\n\nMATÉRIA\nTítulo: ${post.title}\nResumo: ${post.summary}\nConteúdo: ${sourceBody}\n\nROTEIRO PARA REVISÃO\n${JSON.stringify(draft)}`;
 }
 
 function buildRepairPrompt(post: Post, invalid: string, error: string, ctaVariant: ReelCtaVariant = "comment"): string {
@@ -336,29 +344,12 @@ function normalizeNarrationQuestion(narration: string, question: string) {
 
 function normalizeNarrationFollow(narration: string, benefitCall: string) {
   const followCall = "Siga o OB Labs.";
+  const audienceCall = /^(?:(?:e|então)\s+)?(?:siga\s+(?:(?:o|a)\s+)?(?:OB\s+Labs|@ob\.labs|Orange\s*Brick)|inscreva-se\b|deixe\s+(?:seu|sua|o|a)\b|comente\b|acesse\s+orangebrick)/iu;
   const sentences = narration.trim().split(/(?<=[.!?])\s+/u).filter(Boolean);
-  const lastSentence = sentences[sentences.length - 1] || "";
-  if (/siga\s+(?:o\s+)?(?:@)?ob\.labs/i.test(lastSentence)) {
-    return sentences.join(" ");
-  }
-  let questionIndex = -1;
-  for (let index = sentences.length - 1; index >= 0; index--) {
-    if (sentences[index].trim().endsWith("?")) {
-      questionIndex = index;
-      break;
-    }
-  }
   const cleanCall = benefitCall.endsWith("?") ? benefitCall : `${benefitCall}?`;
-  if (questionIndex >= 0) {
-    sentences[questionIndex] = `${cleanCall} ${followCall}`;
-    if (questionIndex !== sentences.length - 1) {
-      const moved = sentences.splice(questionIndex, 1)[0];
-      sentences.push(moved);
-    }
-  } else {
-    sentences.push(`${cleanCall} ${followCall}`);
-  }
-  return sentences.join(" ");
+  const content = sentences.filter((sentence) => !audienceCall.test(sentence.trim()) && sentence.trim() !== cleanCall);
+  if (content.at(-1)?.endsWith("?")) content.pop();
+  return `${content.join(" ")} ${cleanCall} ${followCall}`.trim();
 }
 
 function narrationWords(value: string) {
@@ -480,6 +471,14 @@ function parseScript(raw: string, post: Post, ctaVariant: ReelCtaVariant = "comm
     throw new Error("Roteiro retornado pelo Gemini está incompleto.");
   }
   data.ctaVariant = ctaVariant;
+  data.audiencePlan = {
+    version: "youtube-audience-2026-11-09",
+    channel: "OB Labs — Orange Brick",
+    objective: "returning-audience",
+    promise: String(data.hook || data.headline || post.title),
+    reviewHours: [24, 72, 168],
+    reviewRequired: ["title-opening-alignment", "first-image-evidence", "answer-before-cta", "single-cta", "voice-pronunciation"],
+  };
   data.hook = fitDisplayText(data.hook || data.scenes[0]?.headline || data.headline || "", 55, "gancho");
   if (!data.hook || /frase de gancho/i.test(data.hook)) throw new Error("Roteiro retornado pelo Gemini não tem um gancho válido.");
   data.headline = fitDisplayText(data.headline || data.hook, 48, "título principal");

@@ -1,6 +1,6 @@
 # Estratégia para converter vídeos em seguidores
 
-**Atualizado em:** 4 de novembro de 2026
+**Atualizado em:** 9 de novembro de 2026
 **Objetivo:** aumentar seguidores do OB Labs no Instagram, TikTok e YouTube e medir quais formatos e chamadas ajudam nessa conversão.
 
 ## Diagnóstico inicial
@@ -293,3 +293,60 @@ O aumento de variedade é uma hipótese editorial de retenção, não um resulta
 - [Teste A/B de títulos e miniaturas — YouTube Help](https://support.google.com/youtube/answer/16391400).
 - [Telas finais — YouTube Help](https://support.google.com/youtube/answer/6388789).
 - [Vídeo relacionado em Shorts — YouTube Help](https://support.google.com/youtube/answer/14075157?hl=en).
+
+
+## Aplicação nos geradores e plano orgânico — aprovado em 09/11/2026
+
+O usuário autorizou aplicar as conclusões aos próximos vídeos longos e Reels. O planejamento a seguir substitui o teste anterior de CTA como primeiro experimento: primeiro padronizar a chamada e comparar aberturas; depois testar outras variáveis. O padrão visual aprovado continua sendo `youtube-editorial-v3`.
+
+### Implementação
+
+- `src/lib/video/reel-script.ts`: geração e revisão pedem alinhamento entre título, primeira fala e prova visual; consequência ou curiosidade demonstrável antes de calendário e números corporativos. A normalização remove convites repetidos e usa uma única chamada ao OB Labs. A escolha explícita de CTA de comentário continua disponível.
+- `scripts/generate-reel.mjs`: `production.json` registra `audiencePlan`, com promessa, objetivo de audiência recorrente, revisão em 24/72/168 horas e itens que exigem revisão editorial.
+- `scripts/generate-long-video.mjs`: roteiro e planejamento visual receberam as mesmas regras de promessa e prova. O preparo do episódio preserva um CTA ao OB Labs mesmo quando executado novamente, e o manifesto registra o plano de audiência. O nome da marca gráfica permanece Orange Brick.
+- A geração de metadados de revisão não comprova, automaticamente, a adequação da imagem, a retenção, a pronúncia ou a execução do acompanhamento. São requisitos para verificar em cada produção. Não foi criado um agendador de experimentos ou snapshots por idade nesta etapa.
+
+### Plano de crescimento orgânico: ciclo inicial de quatro semanas
+
+**Público inicial:** jogadores brasileiros que querem decidir o que comprar, como preparar o console e o que uma mudança de plataforma afeta em sua biblioteca. Reduzir a dispersão editorial durante o teste, mantendo notícias de outros temas quando houver uma consequência clara para esse público.
+
+**Promessa recorrente:** “OB Labs, o canal do Orange Brick que explica o que muda para quem joga.” Antes de fazer mudanças públicas, preparar bio, banner e organização coerentes com essa promessa. Não misturar uma promessa principal de gameplays completas com uma programação principal de notícias. A mudança pública de descrição e identidade ainda não foi executada.
+
+**Séries propostas:**
+
+| Série | Pergunta do espectador | Papel no crescimento |
+|---|---|---|
+| Antes de comprar | O que vem, o que custa e qual limitação preciso conhecer? | Busca e utilidade persistente |
+| Mudou no meu console | O que funciona hoje, para quem e com quais requisitos? | Recorrência e confiança |
+| Por dentro dos games | Como funciona este produto ou decisão incomum? | Descoberta com prova visual |
+
+A série é uma promessa reconhecível, não uma vinheta longa. Cada episódio deve funcionar sozinho. Não transformar notícia antiga em novidade para preencher calendário.
+
+**Cadência de teste:** um longo e três Shorts por semana, durante quatro semanas: quatro longos e doze curtos. É uma hipótese de organização e capacidade, não um horário ou volume comprovadamente favorecido pelo algoritmo. Não interromper ou alterar agendamentos existentes automaticamente. Ajustar essa cadência à apuração e aos materiais oficiais disponíveis, sem preencher vagas com assuntos fracos.
+
+Cada longo terá uma pergunta central. Dois Shorts ligados a ele devem entregar respostas próprias sobre aspectos diferentes; o terceiro pode cobrir uma curiosidade visual pertinente ao público. Evitar recortar o longo como teaser que esconde a resposta. Publicar em dias distintos facilita observar cada entrega, mas não comprova penalidade por publicações próximas.
+
+**Semana 1 — coerência e primeira medição:** revisar promessa do canal e organizar as três séries; escolher um assunto útil com demanda de busca verificável; preparar roteiro, título, miniatura e primeira prova em conjunto; registrar o primeiro par de aberturas e o baseline das métricas disponíveis. Não propor temas como confirmados sem apuração atual.
+
+**Semana 2 — busca e continuidade:** publicar uma explicação complementar ao primeiro longo; associar os Shorts ao vídeo correto pela função de vídeo relacionado; configurar tela final do longo para o próximo assunto pertinente e organizar a playlist. Essas configurações precisam ser confirmadas no Studio: links desenhados no arquivo não são interativos.
+
+**Semana 3 — aprofundar a pergunta que gerou interesse:** usar consultas de busca e dúvidas reais dos comentários para escolher a próxima pauta; responder aos comentários recebidos com informação útil, sem mensagens automáticas genéricas. Revisar os primeiros 30 segundos do longo e a queda inicial dos curtos. Não interpretar um pico ou uma inscrição isolada como tendência.
+
+**Semana 4 — avaliação:** comparar os seis pares de Shorts nas mesmas idades; comparar os longos com janela já consolidada, deixando os recém-publicados como preliminares; manter os ângulos que repetirem bons sinais e revisar os demais. Se o tráfego crescer sem inscrições ou retorno, revisar a promessa de continuidade e o CTA antes de aumentar volume.
+
+### Distribuição e descoberta de cada publicação
+
+1. **Busca:** títulos com jogo/produto e pergunta concreta, em português natural; descrição inicial que responde à mesma promessa; capítulos para navegar pela explicação. Priorizar termos confirmados pela pesquisa e pelo relatório de consultas quando disponível, sem acumular palavras-chave ou hashtags genéricas.
+2. **Recomendação interna:** indicar um próximo vídeo realmente relacionado, com tela final e playlist verificadas. Priorizar continuidade temática, não enviar todos os vídeos para um link genérico do site.
+3. **Shorts:** responder a uma pergunta completa e configurar o longo relacionado quando houver complementaridade. Usar o convite para acompanhar após o valor entregue, sem repetir a chamada nem pedir várias ações.
+4. **Orange Brick:** incorporar o longo na matéria correspondente ou em uma seção contextual, quando editorialmente pertinente. O link e o texto devem explicar o benefício de assistir, sem criar tráfego artificial. Essa implantação no site não foi executada nesta etapa.
+5. **Instagram e TikTok:** usar versões nativas e independentes da mesma pauta. Não prometer conversão dessas redes para YouTube; medir acessos rastreados separadamente. Uma rede não deve servir apenas como anúncio vazio da outra.
+6. **Comunidades:** somente compartilhar onde o assunto é útil e as regras permitem, com contexto próprio, quando houver autorização para publicar naquele espaço. Nenhum disparo ou mensagem a terceiros faz parte desta implementação.
+
+### Medição e decisões
+
+Registrar em 24 h, 72 h e sete dias: data real da consulta, período efetivamente processado, formato, série, gancho, CTA, título/miniatura usados, views, visualizações engajadas, média assistida, curva, compartilhamentos e inscrições atribuídas. CTR, impressões, escolha no feed e retorno devem ser exportados do Studio enquanto não forem acessíveis pela integração. Um dado ainda não processado permanece pendente.
+
+Indicadores principais: retenção inicial e média assistida dentro do mesmo formato; inscrições atribuídas por mil views com numerador e denominador do mesmo relatório; espectadores recorrentes; continuidade para outro vídeo. Mostrar sempre contagens absolutas junto das taxas, pois o canal ainda tem amostra pequena. Meta inicial é obter melhora repetida frente à própria linha de base, não prometer determinada quantidade de inscritos em 30 dias.
+
+Se houver pouca exposição com boa permanência, testar título/miniatura e demanda do assunto. Se houver cliques/exibição e queda inicial, revisar correspondência entre promessa e abertura. Se houver permanência sem inscrições ou retorno, revisar benefício recorrente e continuidade. Sem impressões/CTR, não atribuir automaticamente baixo alcance à miniatura. Continuar a estratégia orgânica; não contratar tráfego ou aumentar produção para mascarar uma entrega fraca.

@@ -314,5 +314,19 @@ test("reel scripts support follow cta variant with OB Labs closing and action", 
   assert.match(script.narrationText, /Quer entender o impacto nos consoles\? Siga o OB Labs\.$/);
   assert.equal(script.ctaAction, "Siga o OB Labs para entender o que muda nos games");
   assert.equal(script.ctaButton, "SIGA O OB LABS");
+
+  const duplicatedGenerate = loadGenerateReelScript({
+    ...response,
+    narrationText: `${response.narrationText} Siga o OB Labs para entender o que muda nos games. Siga o OB Labs.`,
+  });
+  const deduplicated = await duplicatedGenerate({
+    title: "Faraway chega em 5 de novembro ao PS5, Xbox, Switch 2 e PC",
+    summary: "Faraway estreia em 5 de novembro em consoles e PC; o arcade terá 16 fases.",
+    category: "breaking",
+    body: "",
+  }, "test", { ctaVariant: "follow" });
+  assert.equal((deduplicated.narrationText.match(/Siga o OB Labs/g) || []).length, 1);
+  assert.match(deduplicated.narrationText, /o preço ainda não foi revelado/);
+  assert.match(deduplicated.narrationText, /Quer entender o impacto nos consoles\? Siga o OB Labs\.$/);
 });
 

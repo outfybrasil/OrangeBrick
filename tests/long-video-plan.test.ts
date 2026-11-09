@@ -25,11 +25,22 @@ test("prévia preserva o episódio original e adiciona um CTA após a resposta",
   assert.equal(preview.slug, "cartao-fisico-preview");
   assert.equal(input.slug, "cartao-fisico");
   assert.equal(input.chapters[0].narration, chapter.narration);
-  assert.match(preview.chapters[0].narration, /O download vem depois\..*inscreva-se no canal\.$/);
+  assert.match(preview.chapters[0].narration, /O download vem depois\..*inscreva-se no OB Labs\.$/);
 });
 
 test("o padrão remove pedidos empilhados e rejeita identificador de caminho", () => {
   const result = prepareEditorialEpisode({ slug: "cartao", chapters: [{ ...chapter, narration: "O fato foi explicado. Deixe seu comentário e acesse orangebrick ponto blog." }] });
   assert.doesNotMatch(result.chapters[0].narration, /Deixe seu comentário/);
   assert.throws(() => prepareEditorialEpisode({ slug: "../cartao", chapters: [chapter] }), /inválida/);
+});
+
+
+test("preparar novamente mantém uma única chamada e preserva a conclusão", () => {
+  const once = prepareEditorialEpisode({ slug: "cartao", chapters: [chapter] });
+  const twice = prepareEditorialEpisode(once);
+  assert.equal(twice.chapters[0].narration, once.chapters[0].narration);
+  assert.equal((twice.chapters[0].narration.match(/inscreva-se/giu) || []).length, 1);
+  assert.match(twice.chapters[0].narration, /O download vem depois/);
+  assert.equal(twice.chapters[0].scenes.length, once.chapters[0].scenes.length);
+  assert.deepEqual(twice.audiencePlan.reviewHours, [24, 72, 168]);
 });

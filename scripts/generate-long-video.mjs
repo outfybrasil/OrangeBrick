@@ -1041,12 +1041,12 @@ export function prepareEditorialEpisode(input, preview = false) {
   if (!episode.slug || !episode.chapters?.length) throw new Error("Episódio sem identificação ou capítulos.");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(episode.slug)) throw new Error("Identificação de episódio inválida.");
   if (preview) episode.slug = `${episode.slug}-preview`;
-  const callToAction = episode.primaryCta || "Para entender o que muda nos jogos e nos consoles, inscreva-se no canal.";
+  const callToAction = episode.primaryCta || "Para entender o que muda nos jogos e nos consoles, inscreva-se no OB Labs.";
   for (const chapter of episode.chapters) {
     chapter.narration = String(chapter.narration || "").trim();
     if (!chapter.narration) throw new Error("Capítulo sem narração.");
     const sentences = chapter.narration.split(/(?<=[.!?])\s+/u);
-    chapter.narration = sentences.filter((sentence) => !/^(?:e\s+)?(?:deixe seu|comente|inscreva-se|siga o|acesse orangebrick)/iu.test(sentence)).join(" ");
+    chapter.narration = sentences.filter((sentence) => sentence.trim() !== callToAction.trim() && !/^(?:e\s+)?(?:deixe seu|comente|inscreva-se|siga o|acesse orangebrick|para entender o que muda.*inscreva-se)/iu.test(sentence)).join(" ");
     chapter.sceneA ||= getChapterScenes(chapter)[0];
     chapter.sceneB ||= getChapterScenes(chapter).at(-1);
     if (!chapter.sceneA) throw new Error("Capítulo sem material visual.");
@@ -1062,6 +1062,15 @@ export function prepareEditorialEpisode(input, preview = false) {
       layout: "cta", steps: undefined, action: "INSCREVA-SE NO CANAL",
     }];
   }
+  episode.audiencePlan = {
+    version: "youtube-audience-2026-11-09",
+    channel: "OB Labs — Orange Brick",
+    objective: "returning-audience",
+    promise: episode.youtubeTitle || episode.title || episode.subtitle || episode.slug,
+    opening: episode.chapters[0].narration.split(/(?<=[.!?])\s+/u)[0],
+    reviewHours: [24, 72, 168],
+    reviewRequired: ["title-thumbnail-opening-alignment", "first-answer-early", "first-image-evidence", "answer-before-cta", "single-cta", "studio-related-video", "voice-pronunciation"],
+  };
   return episode;
 }
 
@@ -1298,7 +1307,7 @@ async function buildEpisodeFromJobConfig(jobConfig) {
       model: process.env.LONG_VIDEO_SCRIPT_MODEL || "gemini-flash-latest",
       contents: `Prepare um roteiro falado de vídeo explicativo de games em português brasileiro. Tema: ${jobConfig.title}.
 Use exclusivamente os fatos fornecidos abaixo. Preserve incertezas, não invente números, datas ou citações.
-Abra com o fato e sua consequência; entregue uma primeira resposta no primeiro parágrafo. Desenvolva uma pergunta central com contexto, evidências, limites e impacto. Conclua respondendo à pergunta.
+Alinhe título, miniatura planejada, primeira fala e primeira prova visual. Abra pela consequência concreta para o jogador ou por uma curiosidade comprovável, sem adiar o benefício para uma introdução sobre calendário ou números corporativos. Uma data só deve abrir o roteiro quando ela própria for a notícia. Entregue uma primeira resposta no primeiro parágrafo. Desenvolva uma pergunta central com contexto, evidências, limites e impacto. Conclua respondendo à pergunta.
 Escreva para ouvir: frases conectadas, extensão variada, números por extenso quando ajudar, sem saudação, vinheta, markdown ou listas de fontes narradas. Não traduza títulos oficiais de jogos. Não alongue para atingir duração.
 Separe em parágrafos por argumento, sem repetir resumo e título. Use aproximadamente ${jobConfig.targetMinMinutes || 8} minutos como limite editorial, nunca como duração obrigatória. Não inclua CTAs; o editor adiciona uma única chamada após a conclusão. Retorne somente o texto falado.
 MATERIAL EDITORIAL:
@@ -1357,7 +1366,7 @@ ${rawParagraphs.join("\n\n")}`,
   const plannedResponse = await planner.models.generateContent({
     model: process.env.LONG_VIDEO_SCRIPT_MODEL || "gemini-flash-latest",
     config: { responseMimeType: "application/json" },
-    contents: `Planeje a montagem editorial deste vídeo de games. Não altere a narração nem acrescente fatos. Para cada capítulo, retorne um título informativo de até 45 caracteres e de 1 a 5 cenas. As cenas precisam explicar a fala, sem repetição decorativa. Cada cena deve ter headline de até 45 caracteres, highlight de até 90 caracteres, imageIndex da lista fornecida e narrationAnchor copiado literalmente das primeiras 3 a 8 palavras da frase em que a cena começa. A primeira cena começa na primeira frase; as outras âncoras seguem a ordem da fala e começam frases distintas. Use só imagens pertinentes à fala e descritas nos materiais. Escolha layout entre hero, image, evidence, comparison, process, quote e takeaway, conforme o material e a explicação. Câmera e quadro ficam fixos; animações são breves e locais. Nunca use process em duas cenas seguidas nem faça uma sequência inteira de listas ou cartões. Preserve a imagem do assunto além da abertura, intercalando provas visuais, detalhes e consequências. Toda cena deve trazer informação nova; não repita a mesma conclusão com palavras diferentes. Use comparison só com elementos comparáveis identificados; quote apenas para uma declaração atribuída na apuração. Use steps em process para uma demonstração fiel à fala, não como enfeite. Não transforme imagem genérica em prova, não invente comparações. Prepare também titleVariants com três títulos distintos, factuais e de até 70 caracteres, e thumbnailConcepts com três propostas curtas e específicas para a miniatura. Retorne JSON: {"chapters":[{"number":"01","title":"...","scenes":[{"headline":"...","highlight":"...","imageIndex":0,"narrationAnchor":"..."}]}]}.
+    contents: `Planeje a montagem editorial deste vídeo de games. Não altere a narração nem acrescente fatos. Para cada capítulo, retorne um título informativo de até 45 caracteres e de 1 a 5 cenas. As cenas precisam explicar a fala, sem repetição decorativa. Cada cena deve ter headline de até 45 caracteres, highlight de até 90 caracteres, imageIndex da lista fornecida e narrationAnchor copiado literalmente das primeiras 3 a 8 palavras da frase em que a cena começa. A primeira cena começa na primeira frase e deve mostrar a evidência da promessa do título; personagens e paisagens não comprovam preço, embalagem ou requisito técnico. As outras âncoras seguem a ordem da fala e começam frases distintas. Use só imagens pertinentes à fala e descritas nos materiais. Escolha layout entre hero, image, evidence, comparison, process, quote e takeaway, conforme o material e a explicação. Câmera e quadro ficam fixos; animações são breves e locais. Nunca use process em duas cenas seguidas nem faça uma sequência inteira de listas ou cartões. Preserve a imagem do assunto além da abertura, intercalando provas visuais, detalhes e consequências. Toda cena deve trazer informação nova; não repita a mesma conclusão com palavras diferentes. Use comparison só com elementos comparáveis identificados; quote apenas para uma declaração atribuída na apuração. Use steps em process para uma demonstração fiel à fala, não como enfeite. Não transforme imagem genérica em prova, não invente comparações. Prepare também titleVariants com três títulos distintos, factuais e de até 70 caracteres, e thumbnailConcepts com três propostas curtas e específicas para a miniatura. Retorne JSON: {"chapters":[{"number":"01","title":"...","scenes":[{"headline":"...","highlight":"...","imageIndex":0,"narrationAnchor":"..."}]}]}.
 NARRAÇÃO:
 ${JSON.stringify(chapters.map(({ number, narration }) => ({ number, narration })))}
 MATERIAIS:
@@ -2275,9 +2284,10 @@ async function run() {
     },
     marketing: {
       standard: "youtube-editorial-v3",
+      audience_plan: episode.audiencePlan,
       audience: "Jogadores brasileiros interessados no impacto de jogos, consoles e indústria",
       promise: episode.subtitle,
-      primary_cta: episode.primaryCta || "Inscreva-se para entender o que muda nos jogos e consoles",
+      primary_cta: episode.primaryCta || "Inscreva-se no OB Labs para entender o que muda nos jogos e consoles",
       title_variants: episode.titleVariants || [episode.youtubeTitle],
       thumbnail_concepts: episode.thumbnailConcepts || [],
       thumbnail_review_required: true,

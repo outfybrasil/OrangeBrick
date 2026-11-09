@@ -233,6 +233,7 @@ async function run() {
     soundEffects: [],
     voice: ttsMetadata,
     editorialStandard: "youtube-editorial-v3",
+    audiencePlan: script.audiencePlan,
   }, null, 2));
   const masterAudio = path.join(workDir, "master_audio.m4a");
 
