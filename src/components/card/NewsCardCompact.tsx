@@ -47,7 +47,7 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionCh
       <article
         data-home-event="article"
         data-home-target={post.slug}
-        className="group relative mb-3 grid grid-cols-1 overflow-hidden bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 sm:min-h-[148px] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
+        className="group relative mb-3 grid grid-cols-1 overflow-hidden bg-surface ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 sm:min-h-[148px] sm:grid-cols-[200px_minmax(0,1fr)] md:grid-cols-[220px_minmax(0,1fr)]"
       >
         <Link href={postHref} className="relative block aspect-video overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange sm:aspect-auto sm:h-full">
           {post.image_url ? (

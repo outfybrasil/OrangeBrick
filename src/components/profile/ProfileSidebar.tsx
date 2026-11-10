@@ -24,7 +24,7 @@ export function ProfileSidebar({
   return (
     <aside aria-label="Informações gamer do perfil" className="space-y-6">
       {playingNow && (
-        <div className="rounded-sm border border-brand-orange/40 bg-[#111217] p-5 shadow-lg">
+        <div className="rounded-sm border border-brand-orange/40 bg-surface p-5 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-white/10">
             <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
             <h3 className="font-heading text-xs font-black uppercase tracking-wider text-white">
@@ -41,7 +41,7 @@ export function ProfileSidebar({
       )}
 
       {favoriteGames.length > 0 && (
-        <div className="rounded-sm border border-white/10 bg-[#111217] p-5">
+        <div className="rounded-sm border border-white/10 bg-surface p-5">
           <div className="flex items-center gap-2 pb-3 border-b border-white/10">
             <span className="text-sm" aria-hidden="true">⭐</span>
             <h3 className="font-heading text-xs font-black uppercase tracking-wider text-white">
@@ -56,7 +56,7 @@ export function ProfileSidebar({
                 <Link
                   key={gameSlug}
                   href={`/games/${encodeURIComponent(gameSlug)}`}
-                  className="group relative aspect-[3/4] overflow-hidden rounded-sm border border-white/10 bg-[#16171D] transition-colors hover:border-brand-orange"
+                  className="group relative aspect-[3/4] overflow-hidden rounded-sm border border-white/10 bg-surface-raised transition-colors hover:border-brand-orange"
                   title={title}
                 >
                   {matchedGame?.image_url ? (
@@ -78,7 +78,7 @@ export function ProfileSidebar({
       )}
 
       {guaranteedGames.length > 0 && (
-        <div className="rounded-sm border border-white/10 bg-[#111217] p-5">
+        <div className="rounded-sm border border-white/10 bg-surface p-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
@@ -123,7 +123,7 @@ export function ProfileSidebar({
       )}
 
       {radarGames.length > 0 && (
-        <div className="rounded-sm border border-white/10 bg-[#111217] p-5">
+        <div className="rounded-sm border border-white/10 bg-surface p-5">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-full bg-brand-orange" aria-hidden="true" />
@@ -168,7 +168,7 @@ export function ProfileSidebar({
       )}
 
       {isOwner && (
-        <div className="rounded-sm border border-white/10 bg-[#16171D] p-5 text-xs text-gray-400 space-y-3">
+        <div className="rounded-sm border border-white/10 bg-surface-raised p-5 text-xs text-gray-400 space-y-3">
           <p className="font-bold text-white uppercase tracking-wider">
             Meu Painel Pessoal
           </p>

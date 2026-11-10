@@ -15,7 +15,7 @@ export function GamerPollWidget({ poll, onVote, isAuthenticated = false, isVotin
   const hasVoted = poll.user_voted_option !== undefined && poll.user_voted_option !== null;
 
   return (
-    <section className="overflow-hidden bg-[#111217] ring-1 ring-white/10" aria-labelledby="daily-poll-title" aria-describedby="daily-poll-description">
+    <section className="overflow-hidden bg-surface ring-1 ring-white/10" aria-labelledby="daily-poll-title" aria-describedby="daily-poll-description">
       <header className="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-brand-orange/20 via-brand-orange/[0.06] to-transparent px-3.5 py-2.5">
         <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-brand-orange">
           <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black" aria-hidden="true"><Icon name="question" size={13} /></span>

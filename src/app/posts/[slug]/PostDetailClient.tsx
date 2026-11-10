@@ -427,7 +427,7 @@ export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: 
             {postSummary}
           </p>
 
-          <section className="flex items-center gap-2.5 border border-white/10 bg-[#111217] px-4 py-3">
+          <section className="flex items-center gap-2.5 border border-white/10 bg-surface px-4 py-3">
             <span aria-hidden="true" className={`h-2 w-2 shrink-0 ${post.information_status === "rumor" ? "bg-amber-400" : post.information_status === "corrected" ? "bg-sky-400" : "bg-emerald-400"}`} />
             <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
               Estado da informação: <span className="text-white">{dict.post.infoStatus[post.information_status || "confirmed"]}</span>
@@ -534,7 +534,7 @@ export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: 
                 const rCategory = isEn ? ((dict.categories as Record<string, string>)[rp.category] || rp.category) : (CATEGORY_LABELS[rp.category] || rp.category);
                 const rHref = isEn ? `/en/posts/${rp.slug_en || rp.slug}` : `/posts/${rp.slug}`;
                 return (
-                  <Link key={rp.id} href={rHref} className="group flex gap-3 rounded-xl border border-white/10 bg-[#0e0f14] p-3 transition-colors hover:border-brand-orange/30">
+                  <Link key={rp.id} href={rHref} className="group flex gap-3 rounded-xl border border-white/10 bg-surface p-3 transition-colors hover:border-brand-orange/30">
                     {rp.image_url ? (
                       <Image src={rp.image_url} alt={rTitle} width={96} height={64} className="h-16 w-24 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
                     ) : (

@@ -624,7 +624,7 @@ export default function ProfileSettingsPage() {
               </Field>
               <Field label="Foto de perfil" hint="JPG, PNG, WebP ou AVIF. Até 4 MB.">
                 <div className="flex flex-wrap items-center gap-3 border border-white/15 bg-black/20 p-3">
-                  <label className="inline-flex min-h-11 cursor-pointer items-center bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526]">
+                  <label className="inline-flex min-h-11 cursor-pointer items-center bg-brand-orange px-4 text-xs font-bold text-white hover:bg-brand-orange-bright">
                     {isAvatarUploading ? "Processando…" : "Escolher foto"}
                     <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" disabled={isAvatarUploading} className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ""; }} />
                   </label>
@@ -755,7 +755,7 @@ export default function ProfileSettingsPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="ml-auto inline-flex min-h-11 items-center bg-brand-orange px-6 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50"
+                className="ml-auto inline-flex min-h-11 items-center bg-brand-orange px-6 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-orange-bright disabled:opacity-50"
               >
                 {isSaving ? "Salvando…" : "Salvar alterações"}
               </button>

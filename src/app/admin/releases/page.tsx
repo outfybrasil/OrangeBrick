@@ -397,46 +397,46 @@ export default function AdminReleasesPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <label className="text-xs font-semibold text-gray-400">
               Identificador
-              <input value={draft.id} onChange={(event) => updateDraft("id", event.target.value)} disabled={items.some((item) => item.id === draft.id)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange disabled:opacity-55" />
+              <input value={draft.id} onChange={(event) => updateDraft("id", event.target.value)} disabled={items.some((item) => item.id === draft.id)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange disabled:opacity-55" />
             </label>
             <label className="text-xs font-semibold text-gray-400 xl:col-span-2">
               Nome oficial do jogo
-              <input value={draft.game} onChange={(event) => updateDraft("game", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.game} onChange={(event) => updateDraft("game", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Selo
-              <input value={draft.badge} onChange={(event) => updateDraft("badge", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.badge} onChange={(event) => updateDraft("badge", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Data exibida
-              <input value={draft.release_label} onChange={(event) => updateDraft("release_label", event.target.value)} placeholder="28 de Julho" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.release_label} onChange={(event) => updateDraft("release_label", event.target.value)} placeholder="28 de Julho" className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Data para organização semanal
-              <input type="date" value={draft.release_date} onChange={(event) => updateDraft("release_date", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input type="date" value={draft.release_date} onChange={(event) => updateDraft("release_date", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Dia ou agenda
-              <input value={draft.schedule_label} onChange={(event) => updateDraft("schedule_label", event.target.value)} placeholder="Terça-feira" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.schedule_label} onChange={(event) => updateDraft("schedule_label", event.target.value)} placeholder="Terça-feira" className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Categoria
-              <select value={draft.category} onChange={(event) => updateDraft("category", event.target.value as ReleaseDraft["category"])} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange">
+              <select value={draft.category} onChange={(event) => updateDraft("category", event.target.value as ReleaseDraft["category"])} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange">
                 <option value="week">Esta semana</option>
                 <option value="upcoming">Próximos</option>
               </select>
             </label>
             <label className="text-xs font-semibold text-gray-400">
               Ordem
-              <input type="number" value={draft.sort_order} onChange={(event) => updateDraft("sort_order", Number(event.target.value))} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input type="number" value={draft.sort_order} onChange={(event) => updateDraft("sort_order", Number(event.target.value))} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400 xl:col-span-2">
               Plataformas, separadas por vírgula
-              <input value={draft.platforms} onChange={(event) => updateDraft("platforms", event.target.value)} placeholder="PC, PS5, XSX" className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.platforms} onChange={(event) => updateDraft("platforms", event.target.value)} placeholder="PC, PS5, XSX" className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <label className="text-xs font-semibold text-gray-400 xl:col-span-2">
               Slug da matéria relacionada
-              <input value={draft.post_slug} onChange={(event) => updateDraft("post_slug", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-white outline-none focus:border-brand-orange" />
+              <input value={draft.post_slug} onChange={(event) => updateDraft("post_slug", event.target.value)} className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-white outline-none focus:border-brand-orange" />
             </label>
             <fieldset className="space-y-3 md:col-span-2 xl:col-span-4">
               <legend className="text-xs font-semibold text-gray-300">Arte promocional 16:9</legend>
@@ -453,7 +453,7 @@ export default function AdminReleasesPage() {
                     }}
                     disabled={isImporting}
                     placeholder="https://site-oficial.com/arte.jpg"
-                    className="mt-1.5 w-full rounded-xl border border-white/10 bg-[#111218] px-3 text-xs text-white outline-none transition-colors placeholder:text-white/35 focus:border-brand-orange disabled:opacity-50"
+                    className="mt-1.5 w-full rounded-xl border border-white/10 bg-surface px-3 text-xs text-white outline-none transition-colors placeholder:text-white/35 focus:border-brand-orange disabled:opacity-50"
                   />
                 </label>
                 <label className="text-xs font-semibold text-gray-400">
@@ -467,7 +467,7 @@ export default function AdminReleasesPage() {
                       setSourceFile(event.target.files?.[0] || null);
                       setSourceUrl("");
                     }}
-                    className="mt-1.5 block min-h-11 w-full cursor-pointer rounded-xl border border-white/10 bg-[#111218] px-3 py-2 text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-xs file:font-bold file:text-white hover:file:bg-white/15 disabled:opacity-50"
+                    className="mt-1.5 block min-h-11 w-full cursor-pointer rounded-xl border border-white/10 bg-surface px-3 py-2 text-xs text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-xs file:font-bold file:text-white hover:file:bg-white/15 disabled:opacity-50"
                   />
                 </label>
               </div>

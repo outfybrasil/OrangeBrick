@@ -102,7 +102,7 @@ export function ProfileHeader({
           {isOwner ? (
             <Link
               href="/configuracoes/perfil"
-              className="inline-flex min-h-11 items-center justify-center rounded-sm border border-brand-orange/50 bg-[#16171D] px-5 text-xs font-black uppercase tracking-wider text-white transition-all hover:border-brand-orange hover:bg-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="inline-flex min-h-11 items-center justify-center rounded-sm border border-brand-orange/50 bg-surface-raised px-5 text-xs font-black uppercase tracking-wider text-white transition-all hover:border-brand-orange hover:bg-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
             >
               Editar Perfil
             </Link>
@@ -121,7 +121,7 @@ export function ProfileHeader({
               className={`inline-flex min-h-11 items-center justify-center rounded-sm px-6 text-xs font-black uppercase tracking-wider transition-all focus-visible:outline-2 focus-visible:outline-brand-orange ${
                 isFollowing
                   ? "border border-brand-orange bg-brand-orange text-white"
-                  : "border border-brand-orange/60 bg-[#16171D] text-brand-orange hover:border-brand-orange hover:bg-brand-orange hover:text-white"
+                  : "border border-brand-orange/60 bg-surface-raised text-brand-orange hover:border-brand-orange hover:bg-brand-orange hover:text-white"
               }`}
             >
               {isFollowing ? "Seguindo" : "Seguir"}
@@ -134,14 +134,14 @@ export function ProfileHeader({
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Mais opções"
               aria-expanded={menuOpen}
-              className="flex h-11 w-11 items-center justify-center rounded-sm border border-white/10 bg-[#16171D] text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
+              className="flex h-11 w-11 items-center justify-center rounded-sm border border-white/10 bg-surface-raised text-gray-400 transition-colors hover:border-brand-orange/40 hover:text-white"
             >
               •••
             </button>
 
             {menuOpen && (
               <div
-                className="absolute right-0 top-12 z-40 w-48 rounded-sm border border-white/10 bg-[#111217] py-1 shadow-2xl animate-fade-in"
+                className="absolute right-0 top-12 z-40 w-48 rounded-sm border border-white/10 bg-surface py-1 shadow-2xl animate-fade-in"
                 onClick={() => setMenuOpen(false)}
               >
                 <button

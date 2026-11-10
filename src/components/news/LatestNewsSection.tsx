@@ -95,7 +95,7 @@ export function LatestNewsSection({ initialPosts, initialTotal }: LatestNewsSect
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="my-12 rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+        <div className="my-12 rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
           Nenhuma matéria encontrada nesta categoria.
         </div>
       ) : (
@@ -168,7 +168,7 @@ export function LatestNewsSection({ initialPosts, initialTotal }: LatestNewsSect
           <button
             type="button"
             onClick={() => void loadMore()}
-            className="inline-flex min-h-12 items-center justify-center rounded-sm border border-brand-orange/40 bg-[#16171D] px-8 text-xs font-black uppercase tracking-wider text-brand-orange transition-all hover:border-brand-orange hover:bg-brand-orange hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+            className="inline-flex min-h-12 items-center justify-center rounded-sm border border-brand-orange/40 bg-surface-raised px-8 text-xs font-black uppercase tracking-wider text-brand-orange transition-all hover:border-brand-orange hover:bg-brand-orange hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
           >
             Carregar mais notícias
           </button>

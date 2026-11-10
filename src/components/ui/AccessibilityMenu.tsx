@@ -112,12 +112,12 @@ export function AccessibilityMenu() {
         <section
           id="accessibility-panel"
           aria-label="Aparência e acessibilidade"
-          className="mb-3 w-[min(22rem,calc(100vw-1.5rem))] border border-white/15 bg-[#15161b] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.48)]"
+          className="mb-3 w-[min(22rem,calc(100vw-1.5rem))] border border-white/15 bg-surface p-4 shadow-[0_18px_55px_rgba(0,0,0,0.48)]"
         >
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="font-heading text-lg font-extrabold text-white">Aparência e acessibilidade</h2>
-              <p className="mt-1 text-xs leading-5 text-[#bfc1c9]">Ajustes ficam salvos neste dispositivo.</p>
+              <p className="mt-1 text-xs leading-5 text-ink-soft">Ajustes ficam salvos neste dispositivo.</p>
             </div>
             <button type="button" onClick={() => setIsOpen(false)} aria-label="Fechar preferências" className="flex min-h-11 min-w-11 items-center justify-center text-gray-300 hover:bg-white/5 hover:text-white">
               <X size={18} />
@@ -150,7 +150,7 @@ export function AccessibilityMenu() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-bold text-white">Tamanho do texto</p>
-                <p className="mt-0.5 text-xs text-[#bfc1c9]">{Math.round(preferences.fontScale * 100)}%</p>
+                <p className="mt-0.5 text-xs text-ink-soft">{Math.round(preferences.fontScale * 100)}%</p>
               </div>
               <div className="flex items-center border border-white/15">
                 <button type="button" aria-label="Diminuir texto" disabled={preferences.fontScale <= 0.9} onClick={() => update({ ...preferences, fontScale: Math.max(0.9, preferences.fontScale - 0.1) })} className="flex min-h-11 min-w-11 items-center justify-center disabled:opacity-35 hover:bg-white/5">
@@ -168,7 +168,7 @@ export function AccessibilityMenu() {
               <span className={`flex h-6 w-6 items-center justify-center border ${preferences.highContrast ? "border-brand-orange bg-brand-orange text-white" : "border-white/20 text-transparent"}`}><Check size={15} /></span>
             </button>
 
-            <button type="button" onClick={restoreDefaults} disabled={preferences.fontScale === 1 && !preferences.highContrast && themePreference === "system"} className="mt-3 flex min-h-11 items-center gap-2 text-xs font-bold text-[#bfc1c9] hover:text-white disabled:opacity-35">
+            <button type="button" onClick={restoreDefaults} disabled={preferences.fontScale === 1 && !preferences.highContrast && themePreference === "system"} className="mt-3 flex min-h-11 items-center gap-2 text-xs font-bold text-ink-soft hover:text-white disabled:opacity-35">
               <RotateCcw size={15} /> Restaurar padrão
             </button>
           </div>
@@ -182,7 +182,7 @@ export function AccessibilityMenu() {
         aria-expanded={isOpen}
         aria-controls="accessibility-panel"
         onClick={() => setIsOpen((current) => !current)}
-        className="ml-auto flex h-12 w-12 items-center justify-center border border-brand-orange/60 bg-[#15161b] text-brand-orange shadow-[0_10px_32px_rgba(0,0,0,0.4)] transition-colors hover:bg-brand-orange hover:text-white"
+        className="ml-auto flex h-12 w-12 items-center justify-center border border-brand-orange/60 bg-surface text-brand-orange shadow-[0_10px_32px_rgba(0,0,0,0.4)] transition-colors hover:bg-brand-orange hover:text-white"
       >
         <Accessibility size={22} />
       </button>

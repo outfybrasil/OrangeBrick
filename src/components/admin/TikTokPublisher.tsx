@@ -253,7 +253,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               onClick={copyCaption}
               className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300 hover:bg-cyan-400/20"
             >
-              {copied ? "Legenda Copiada! ✓" : "📋 Copiar Legenda e Hashtags"}
+              {copied ? "Legenda copiada!" : "Copiar Legenda e Hashtags"}
             </button>
 
             <a
@@ -315,7 +315,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
                   onClick={copyCaption}
                   className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/20"
                 >
-                  {copied ? "Copiado! ✓" : "Copiar"}
+                  {copied ? "Copiado!" : "Copiar"}
                 </button>
               </div>
             </div>

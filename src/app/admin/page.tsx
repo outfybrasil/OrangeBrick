@@ -443,7 +443,7 @@ export default function AdminDashboard() {
       actions={
         <Link
           href="/admin/edit"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright"
         >
           <span aria-hidden="true" className="text-base leading-none">+</span>
           Nova matéria
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
       {statsError && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-amber-400/30 bg-amber-400/10 p-4 text-sm text-amber-200"><span>{statsError}</span><button type="button" onClick={() => void fetchStats()} className="min-h-11 border border-amber-400/40 px-3 font-bold hover:bg-amber-400/10">Tentar novamente</button></div>}
       <section aria-label="Estatísticas gerais" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* PUBLICADAS */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* EM PRODUÇÃO */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -498,7 +498,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* AGENDADAS */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -517,7 +517,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_20rem]">
 
         {/* FILA EDITORIAL */}
-        <section aria-labelledby="editorial-queue-title" className="rounded-xl border border-white/10 bg-[#0e0f14]">
+        <section aria-labelledby="editorial-queue-title" className="rounded-xl border border-white/10 bg-surface">
           {/* HEADER DA TABELA */}
           <div className="flex flex-col gap-4 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
@@ -568,7 +568,7 @@ export default function AdminDashboard() {
             <select
               value={filterCategory}
               onChange={(e) => { setFilterCategory(e.target.value as PostCategory | "all"); setCurrentPage(1); }}
-              className="h-9 rounded-lg border border-white/10 bg-[#0e0f14] px-3 text-xs text-gray-300 outline-none focus:border-brand-orange/40"
+              className="h-9 rounded-lg border border-white/10 bg-surface px-3 text-xs text-gray-300 outline-none focus:border-brand-orange/40"
             >
               <option value="all">Todas as categorias</option>
               {CATEGORY_OPTIONS.map(([val, label]) => (
@@ -579,7 +579,7 @@ export default function AdminDashboard() {
             <select
               value={selectedEditor}
               onChange={(e) => { setSelectedEditor(e.target.value); setCurrentPage(1); }}
-              className="h-9 rounded-lg border border-white/10 bg-[#0e0f14] px-3 text-xs text-gray-300 outline-none focus:border-brand-orange/40"
+              className="h-9 rounded-lg border border-white/10 bg-surface px-3 text-xs text-gray-300 outline-none focus:border-brand-orange/40"
             >
               <option value="all">Todos os editores</option>
               {authorsList.map((author) => (
@@ -607,7 +607,7 @@ export default function AdminDashboard() {
                   </svg>
                   {isBatchDeleting ? "Excluindo…" : `Apagar selecionadas (${selectedIds.length})`}
                 </button>
-                <select value={batchCategory} onChange={(event) => setBatchCategory(event.target.value as PostCategory | "")} className="min-h-11 rounded-lg border border-white/10 bg-[#111218] px-3 text-xs text-white outline-none focus:border-brand-orange">
+                <select value={batchCategory} onChange={(event) => setBatchCategory(event.target.value as PostCategory | "")} className="min-h-11 rounded-lg border border-white/10 bg-surface px-3 text-xs text-white outline-none focus:border-brand-orange">
                   <option value="">Trocar categoria…</option>
                   {CATEGORY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
@@ -660,7 +660,7 @@ export default function AdminDashboard() {
                         >
                           ⋮
                         </summary>
-                        <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#15161b] p-1.5 shadow-xl shadow-black/60">
+                        <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-surface p-1.5 shadow-xl shadow-black/60">
                           <Link
                             href={`/admin/edit?id=${post.id}`}
                             className="flex min-h-10 items-center px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.06]"
@@ -879,7 +879,7 @@ export default function AdminDashboard() {
                             >
                               ⋮
                             </summary>
-                            <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#15161b] p-1.5 shadow-xl shadow-black/40">
+                            <div className="absolute right-0 top-full z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-surface p-1.5 shadow-xl shadow-black/40">
                               <Link
                                 href={`/admin/edit?id=${post.id}`}
                                 className="flex min-h-11 items-center px-3 text-xs font-bold text-gray-200 transition-colors hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-brand-orange"
@@ -993,7 +993,7 @@ export default function AdminDashboard() {
             aria-modal="true"
             aria-labelledby="delete-confirmation-title"
             aria-describedby="delete-confirmation-description"
-            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60"
+            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-surface p-6 shadow-2xl shadow-black/60"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-300" aria-hidden="true">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -1053,7 +1053,7 @@ export default function AdminDashboard() {
             aria-modal="true"
             aria-labelledby="batch-delete-confirmation-title"
             aria-describedby="batch-delete-confirmation-description"
-            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60"
+            className="w-full max-w-lg rounded-2xl border border-red-500/25 bg-surface p-6 shadow-2xl shadow-black/60"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-500/10 text-red-300" aria-hidden="true">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -1112,7 +1112,7 @@ export default function AdminDashboard() {
         {/* WIDGETS DA DIREITA */}
         <aside className="space-y-4">
           {/* PRIORIDADES DE HOJE */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+          <div className="rounded-xl border border-white/10 bg-surface p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Prioridades de hoje</h3>
               <span className="text-xs font-bold text-brand-orange">{recentDrafts.length} rascunhos</span>
@@ -1135,7 +1135,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* RITMO DA REDAÇÃO */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+          <div className="rounded-xl border border-white/10 bg-surface p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Ritmo da redação</h3>
               <span className="text-xs text-gray-500">Últimos 7 dias</span>
@@ -1160,7 +1160,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* DISTRIBUIÇÃO EDITORIAL */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+          <div className="rounded-xl border border-white/10 bg-surface p-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Distribuição editorial</h3>
               <span className="text-xs text-gray-500">Todas as matérias</span>

@@ -49,7 +49,7 @@ export function TrendingNewsSection({ items }: TrendingNewsSectionProps) {
           return (
             <article
               key={item.post.id}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-sm border border-white/10 bg-[#111217] p-4 transition-colors duration-200 hover:border-brand-orange/40"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-sm border border-white/10 bg-surface p-4 transition-colors duration-200 hover:border-brand-orange/40"
             >
               <div>
                 <div className="relative aspect-video w-full overflow-hidden bg-background-void rounded-sm">

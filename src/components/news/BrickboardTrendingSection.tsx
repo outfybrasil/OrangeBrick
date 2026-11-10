@@ -51,7 +51,7 @@ export function BrickboardTrendingSection({ bricks }: BrickboardTrendingSectionP
           return (
             <article
               key={brick.id}
-              className="flex flex-col justify-between rounded-sm border border-white/10 bg-[#111217] p-5 transition-colors duration-200 hover:border-brand-orange/40"
+              className="flex flex-col justify-between rounded-sm border border-white/10 bg-surface p-5 transition-colors duration-200 hover:border-brand-orange/40"
             >
               <div>
                 <div className="flex items-center gap-3">

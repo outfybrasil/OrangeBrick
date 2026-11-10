@@ -90,7 +90,7 @@ export default function FirstStepsPage() {
 
   return (
     <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white sm:px-6">
-      <section className="w-full max-w-3xl border border-white/10 bg-[#111217] p-6 sm:p-10">
+      <section className="w-full max-w-3xl border border-white/10 bg-surface p-6 sm:p-10">
         <header className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
           <Link href="/" className="font-heading text-lg font-black uppercase tracking-wider text-white">
             Orange<span className="text-brand-orange">_</span>Brick

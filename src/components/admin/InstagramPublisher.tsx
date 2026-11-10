@@ -266,7 +266,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
               }}
               className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
             >
-              🔄 Apagou do perfil? Repostar vídeo no Instagram
+              Apagou do perfil? Repostar vídeo no Instagram
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
                   onClick={copyCaption}
                   className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/20"
                 >
-                  {copied ? "Copiado! ✓" : "Copiar"}
+                  {copied ? "Copiado!" : "Copiar"}
                 </button>
               </div>
             </div>

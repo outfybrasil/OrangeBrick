@@ -478,7 +478,7 @@ export function GamePageClient({
               </div>
             </div>
 
-            <section aria-labelledby="game-review-scores-title" className="mb-5 rounded-xl border border-white/10 bg-[#12141A] p-4">
+            <section aria-labelledby="game-review-scores-title" className="mb-5 rounded-xl border border-white/10 bg-surface p-4">
               <h2 id="game-review-scores-title" className="mb-3 font-heading text-sm font-black uppercase tracking-wider text-white">
                 Notas dos jogadores
               </h2>
@@ -569,7 +569,7 @@ export function GamePageClient({
               {!reviewEditorOpen && gameReviewNotice && <p role="status" className="mt-2 text-xs text-emerald-300">{gameReviewNotice}</p>}
             </section>
 
-            {hasRadar && <div className="border border-white/10 bg-[#12141A] p-4 rounded-xl">
+            {hasRadar && <div className="border border-white/10 bg-surface p-4 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                   Termômetro da Comunidade

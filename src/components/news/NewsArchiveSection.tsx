@@ -41,7 +41,7 @@ export function NewsArchiveSection({ initialSearch = "", initialPeriod = "todas"
   };
 
   return (
-    <section aria-labelledby="archive-section-heading" className="my-14 rounded-sm border border-white/10 bg-[#111217] p-6 sm:p-8">
+    <section aria-labelledby="archive-section-heading" className="my-14 rounded-sm border border-white/10 bg-surface p-6 sm:p-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-6">
         <div>
           <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange">
@@ -57,7 +57,7 @@ export function NewsArchiveSection({ initialSearch = "", initialPeriod = "todas"
 
         <Link
           href="/noticias/arquivo"
-          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sm border border-brand-orange/40 bg-[#16171D] px-5 text-xs font-black uppercase tracking-wider text-brand-orange transition-all hover:border-brand-orange hover:bg-brand-orange hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sm border border-brand-orange/40 bg-surface-raised px-5 text-xs font-black uppercase tracking-wider text-brand-orange transition-all hover:border-brand-orange hover:bg-brand-orange hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange"
         >
           Abrir arquivo completo →
         </Link>

@@ -437,7 +437,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             {isMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-9 z-30 min-w-[190px] rounded-xl border border-white/15 bg-[#14161D] p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100"
+                className="absolute right-0 top-9 z-30 min-w-[190px] rounded-xl border border-white/15 bg-surface-raised p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.8)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-100"
               >
                 <button
                   type="button"
@@ -834,10 +834,10 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-modal="true"
             aria-labelledby={`report-title-${reportTarget.id}`}
             tabIndex={-1}
-            className="w-full max-w-md rounded-xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-md rounded-xl border border-white/10 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`report-title-${reportTarget.id}`} className="text-lg font-bold text-white">{isEn ? "Why are you reporting?" : "Por que você está denunciando?"}</h3>
-            <p className="mt-2 text-sm leading-6 text-[#b8bac2]">{isEn ? "The report goes to moderation. The author won't see who sent it." : "A denúncia vai para a moderação. O autor não verá quem enviou."}</p>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">{isEn ? "The report goes to moderation. The author won't see who sent it." : "A denúncia vai para a moderação. O autor não verá quem enviou."}</p>
             <fieldset className="mt-5 space-y-2">
               <legend className="sr-only">{isEn ? "Report reason" : "Motivo da denúncia"}</legend>
               {reportReasons.map((reason) => (
@@ -855,7 +855,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               ))}
             </fieldset>
             <div className="mt-5 grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setReportTarget(null)} disabled={isReporting} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] hover:bg-white/5 hover:text-white disabled:opacity-50">
+              <button type="button" onClick={() => setReportTarget(null)} disabled={isReporting} className="min-h-11 rounded-xl px-4 text-sm font-semibold text-ink-soft hover:bg-white/5 hover:text-white disabled:opacity-50">
                 {isEn ? "Cancel" : "Cancelar"}
               </button>
               <button type="button" onClick={() => void handleReport()} disabled={isReporting} className="min-h-11 rounded-xl bg-brand-orange px-4 text-sm font-bold text-white hover:bg-brand-orange/90 disabled:opacity-50">
@@ -880,12 +880,12 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-labelledby={`delete-brick-comment-title-${commentPendingDelete}`}
             aria-describedby={`delete-brick-comment-description-${commentPendingDelete}`}
             tabIndex={-1}
-            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-comment-title-${commentPendingDelete}`} className="text-lg font-bold text-white">
               {isEn ? "Delete comment?" : "Apagar comentário?"}
             </h3>
-            <p id={`delete-brick-comment-description-${commentPendingDelete}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
+            <p id={`delete-brick-comment-description-${commentPendingDelete}`} className="mt-2 text-sm leading-6 text-ink-soft">
               {isEn ? "This action cannot be undone." : "Esta ação não pode ser desfeita."}
             </p>
             <div className="mt-5 grid grid-cols-2 gap-2">
@@ -893,7 +893,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 type="button"
                 onClick={() => setCommentPendingDelete(null)}
                 disabled={isDeletingComment}
-                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-ink-soft transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
               >
                 {isEn ? "Cancel" : "Cancelar"}
               </button>
@@ -923,12 +923,12 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-labelledby={`delete-brick-post-title-${post.id}`}
             aria-describedby={`delete-brick-post-description-${post.id}`}
             tabIndex={-1}
-            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-post-title-${post.id}`} className="text-lg font-bold text-white">
               {isEn ? "Delete post?" : "Apagar publicação?"}
             </h3>
-            <p id={`delete-brick-post-description-${post.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
+            <p id={`delete-brick-post-description-${post.id}`} className="mt-2 text-sm leading-6 text-ink-soft">
               {isEn ? "This action cannot be undone and will permanently remove the post." : "Esta ação não pode ser desfeita e removerá a publicação permanentemente."}
             </p>
             {deletePostError && <p role="alert" className="mt-3 text-sm text-red-300">{deletePostError}</p>}
@@ -937,7 +937,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 type="button"
                 onClick={() => setIsDeletePostOpen(false)}
                 disabled={isDeletingPost}
-                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-ink-soft transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
               >
                 {isEn ? "Cancel" : "Cancelar"}
               </button>
@@ -967,7 +967,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-modal="true"
             aria-labelledby={`edit-brick-post-title-${post.id}`}
             tabIndex={-1}
-            className="w-full max-w-lg rounded-xl border border-white/15 bg-[#14161D] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.8)] sm:p-6"
+            className="w-full max-w-lg rounded-xl border border-white/15 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.8)] sm:p-6"
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id={`edit-brick-post-title-${post.id}`} className="font-subtitle text-base font-bold text-white">

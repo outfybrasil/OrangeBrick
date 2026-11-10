@@ -46,7 +46,7 @@ export function PublishConfirmModal({
         aria-labelledby="publish-confirmation-title"
         aria-describedby="publish-confirmation-description"
         tabIndex={-1}
-        className="max-h-[calc(100dvh-4rem)] w-full max-w-lg overflow-y-auto rounded-lg border border-white/10 bg-[#0e0f14] p-6 shadow-2xl shadow-black/60 focus:outline-none"
+        className="max-h-[calc(100dvh-4rem)] w-full max-w-lg overflow-y-auto rounded-lg border border-white/10 bg-surface p-6 shadow-2xl shadow-black/60 focus:outline-none"
       >
         <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400" aria-hidden="true">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

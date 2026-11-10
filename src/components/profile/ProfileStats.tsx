@@ -8,7 +8,7 @@ interface ProfileStatsProps {
 
 export function ProfileStats({ bricksCount, hypesCount, gamesCount }: ProfileStatsProps) {
   return (
-    <div className="grid grid-cols-3 divide-x divide-white/10 rounded-sm border border-white/10 bg-[#111217] py-3 text-center sm:py-4">
+    <div className="grid grid-cols-3 divide-x divide-white/10 rounded-sm border border-white/10 bg-surface py-3 text-center sm:py-4">
       <div className="px-2 sm:px-4">
         <span className="block font-heading text-xl font-black text-white sm:text-2xl">
           {bricksCount}

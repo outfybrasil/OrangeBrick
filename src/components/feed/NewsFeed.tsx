@@ -265,7 +265,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                 href={sideHref}
                 data-home-event="article"
                 data-home-target={post.slug}
-                className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-[#111217] ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
+                className="group relative flex min-w-0 flex-1 items-start gap-3 overflow-hidden lg:min-h-0 lg:flex-col lg:items-stretch lg:gap-0 bg-surface ring-1 ring-white/10 transition-colors duration-200 hover:ring-brand-orange/50 focus-visible:outline-2 focus-visible:outline-brand-orange"
               >
                 {post.image_url && (
                   <div className="relative ml-3 mt-3 aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-[#08090C] sm:w-36 lg:ml-0 lg:mt-0 lg:h-[48%] lg:w-full lg:rounded-none lg:aspect-auto">
@@ -400,7 +400,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                   <Link href="/noticias?periodo=mes" className="inline-flex min-h-12 items-center justify-center bg-brand-orange px-3 text-center text-xs font-black uppercase text-white transition-colors active:bg-[#d94f00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">
                     Notícias do mês
                   </Link>
-                  <Link href="/noticias" className="inline-flex min-h-12 items-center justify-center bg-[#111217] px-3 text-center text-xs font-black uppercase text-white transition-colors active:bg-card-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">
+                  <Link href="/noticias" className="inline-flex min-h-12 items-center justify-center bg-surface px-3 text-center text-xs font-black uppercase text-white transition-colors active:bg-card-slate focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange">
                     Todas as notícias
                   </Link>
                 </div>

@@ -127,7 +127,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
               onClick={() => { setIsReposting(true); setConfirmed(false); }}
               className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
             >
-              🔄 Apagou do canal? Repostar vídeo no YouTube
+              Apagou do canal? Repostar vídeo no YouTube
             </button>
           </div>
         </div>
@@ -140,7 +140,7 @@ export function YouTubePublisher({ postId, reelJobId, initialTitle, initialDescr
             onClick={() => { setIsReposting(true); setConfirmed(false); }}
             className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/20"
           >
-            🔄 Forçar repostagem no YouTube
+            Forçar repostagem no YouTube
           </button>
         </div>
       ) : (

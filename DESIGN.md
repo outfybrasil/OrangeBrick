@@ -7,6 +7,9 @@ colors:
   orange-shadow: "#A84300"
   void: "#0D0E12"
   slate: "#1C1E24"
+  surface: "#111217"
+  surface-raised: "#191B21"
+  orange-bright: "#FF7526"
   text: "#E5E5E5"
   text-muted: "#999BA3"
   text-subtle: "#C7C8CD"
@@ -104,6 +107,9 @@ A paleta combina um fundo quase preto, superfícies de ardósia e laranja de sin
 
 - **Vazio Editorial:** fundo principal e cartões de conteúdo.
 - **Ardósia:** superfícies elevadas, menus e estados temporários.
+- **Superfície (`surface`, `#111217`):** painéis e cartões sobre o Vazio Editorial.
+- **Superfície Elevada (`surface-raised`, `#191B21`):** modais, menus e áreas de destaque dentro de painéis.
+- Os tokens `surface`, `surface-raised`, `ink-soft` e `brand-orange-bright` leem as variáveis `--theme-*`; novas cores de componente devem usar tokens, não hexadecimais escritos na classe, para que os temas claro e de alto contraste funcionem sem sobrescritas.
 - **Texto Claro:** corpo e informação funcional.
 - **Branco:** títulos e contraste máximo.
 - **Preto de Contraste:** modo de acessibilidade com separação máxima entre conteúdo e fundo.

@@ -15,7 +15,7 @@ export function SecondaryNewsCard({ post, hypes = 0, comments = 0 }: SecondaryNe
   const postDate = post.published_at || post.created_at;
 
   return (
-    <article className="group relative flex flex-col sm:flex-row lg:flex-row gap-4 overflow-hidden rounded-sm border border-white/10 bg-[#111217] p-4 transition-colors duration-200 hover:border-brand-orange/40">
+    <article className="group relative flex flex-col sm:flex-row lg:flex-row gap-4 overflow-hidden rounded-sm border border-white/10 bg-surface p-4 transition-colors duration-200 hover:border-brand-orange/40">
       <Link
         href={`/posts/${post.slug}`}
         className="relative aspect-video w-full shrink-0 overflow-hidden bg-background-void sm:w-44 lg:w-48 focus-visible:outline-2 focus-visible:outline-brand-orange"

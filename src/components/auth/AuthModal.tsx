@@ -102,7 +102,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         tabIndex={-1}
-        className="relative my-auto w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-8"
+        className="relative my-auto w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-8"
       >
         <button
           type="button"
@@ -122,7 +122,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
           <h2 id="auth-modal-title" className="font-heading text-2xl font-bold text-white">
             {user ? "Adicionar ou alternar conta" : activeTab === "signup" ? "Criar conta na comunidade" : "Entre para participar"}
           </h2>
-          <p className="mt-1.5 text-xs sm:text-sm leading-5 sm:leading-6 text-[#b8bac2]">
+          <p className="mt-1.5 text-xs sm:text-sm leading-5 sm:leading-6 text-ink-soft">
             {user
               ? "Alterne para outra conta salva ou acesse com uma nova conta."
               : activeTab === "signup"
@@ -179,7 +179,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
                   <button
                     type="button"
                     onClick={() => navigateToCredentialAuth("/cadastro")}
-                    className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-all hover:bg-[#ff7526]"
+                    className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-orange px-4 text-xs font-bold text-white transition-all hover:bg-brand-orange-bright"
                   >
                     <span>Abrir formulário de cadastro</span>
                     <span aria-hidden="true">→</span>
@@ -309,7 +309,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
                 <div className="my-4 flex items-center gap-3 text-xs text-gray-600"><span className="h-px flex-1 bg-white/10" /><span>ou</span><span className="h-px flex-1 bg-white/10" /></div>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => navigateToCredentialAuth("/entrar")} className="flex min-h-11 items-center justify-center rounded-xl border border-white/15 text-sm font-bold text-white transition-colors hover:border-brand-orange/50">Entrar com e-mail</button>
-                  <button type="button" onClick={() => navigateToCredentialAuth("/cadastro")} className="flex min-h-11 items-center justify-center rounded-xl bg-brand-orange text-sm font-bold text-white transition-colors hover:bg-[#ff7526]">Criar conta</button>
+                  <button type="button" onClick={() => navigateToCredentialAuth("/cadastro")} className="flex min-h-11 items-center justify-center rounded-xl bg-brand-orange text-sm font-bold text-white transition-colors hover:bg-brand-orange-bright">Criar conta</button>
                 </div>
               </>
             )}

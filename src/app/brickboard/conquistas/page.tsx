@@ -175,7 +175,7 @@ export default function AchievementsPage() {
             <p className="text-sm text-gray-300">Selecione até três conquistas desbloqueadas para exibir no perfil.</p>
             <div className="flex items-center gap-3">
               {message && <span className="text-xs text-gray-400">{message}</span>}
-              <button type="button" onClick={() => void saveShowcase()} disabled={isSaving} className="min-h-11 bg-brand-orange px-5 text-xs font-bold hover:bg-[#ff7526] disabled:cursor-wait disabled:opacity-60">{isSaving ? "Salvando…" : "Salvar vitrine"}</button>
+              <button type="button" onClick={() => void saveShowcase()} disabled={isSaving} className="min-h-11 bg-brand-orange px-5 text-xs font-bold hover:bg-brand-orange-bright disabled:cursor-wait disabled:opacity-60">{isSaving ? "Salvando…" : "Salvar vitrine"}</button>
             </div>
           </div>
         )}

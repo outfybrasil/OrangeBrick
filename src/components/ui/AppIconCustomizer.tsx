@@ -128,7 +128,7 @@ export function AppIconCustomizer() {
             </span>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#12141a] p-4 shadow-xl">
+          <div className="relative overflow-hidden rounded-xl border border-white/10 bg-surface p-4 shadow-xl">
             <div className="mb-3.5 flex items-center gap-3 border-b border-white/5 pb-3">
               <img
                 src={isInverted ? "/icons/icon-inverted-192.png?v=3" : "/icons/icon-192.png?v=3"}

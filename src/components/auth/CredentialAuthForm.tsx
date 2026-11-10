@@ -293,24 +293,21 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
 
   if (submittedEmail && (isSignup || confirmationRequired)) {
     return (
-      <div className="mx-auto w-full max-w-[32rem] border border-brand-orange/30 bg-[#111217] p-6 shadow-2xl sm:p-10">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-orange/40 bg-brand-orange/10 text-brand-orange">
+      <div className="mx-auto w-full max-w-[32rem] border border-brand-orange/30 bg-surface p-6 shadow-2xl sm:p-10">
+        <div className="flex h-16 w-16 items-center justify-center rounded-sm border border-brand-orange/40 bg-brand-orange/10 text-brand-orange">
           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
 
         <div className="mt-6">
-          <span className="font-subtitle text-xs font-bold uppercase tracking-[0.16em] text-brand-orange">
-            Quase lá!
-          </span>
-          <h1 className="mt-2 font-heading text-3xl font-black text-white sm:text-4xl">
+          <h1 className="font-heading text-3xl font-black text-white sm:text-4xl">
             Confirme seu e-mail
           </h1>
           <p className="mt-3 text-sm leading-6 text-gray-300">
             Um link de confirmação foi enviado para o endereço abaixo:
           </p>
-          <div className="mt-3 inline-block rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 font-mono text-sm font-bold text-brand-orange">
+          <div className="mt-3 inline-block rounded-sm border border-white/10 bg-white/5 px-3.5 py-2 font-mono text-sm font-bold text-brand-orange">
             {submittedEmail}
           </div>
           <p className="mt-4 text-xs leading-5 text-gray-400">
@@ -323,7 +320,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
             href="https://mail.google.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/10"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-sm border border-white/15 bg-white/5 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/10"
           >
             <span>Abrir Gmail</span>
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -334,7 +331,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
             href="https://outlook.live.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/10"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-sm border border-white/15 bg-white/5 text-xs font-bold text-white transition-colors hover:border-brand-orange/40 hover:bg-white/10"
           >
             <span>Abrir Outlook</span>
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -360,13 +357,13 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
             type="button"
             disabled={resendLoading}
             onClick={handleResendConfirmation}
-            className="flex min-h-11 w-full items-center justify-center rounded-xl border border-brand-orange/30 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10 disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center rounded-sm border border-brand-orange/30 text-xs font-bold text-brand-orange transition-colors hover:bg-brand-orange/10 disabled:opacity-50"
           >
             {resendLoading ? "Reenviando e-mail..." : "Não recebeu? Reenviar link de confirmação"}
           </button>
           <Link
             href="/entrar"
-            className="flex min-h-11 w-full items-center justify-center rounded-xl bg-white/5 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex min-h-11 w-full items-center justify-center rounded-sm bg-white/5 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
           >
             Ir para a tela de login
           </Link>
@@ -376,14 +373,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[32rem] border border-white/10 bg-[#111217] p-6 shadow-2xl sm:p-10">
-      <div className="mb-6 flex items-center gap-3">
-        <span className="h-px w-8 bg-brand-orange" />
-        <span className="font-subtitle text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">
-          {isSignup ? "Cadastro Orange Brick" : "Acesso Orange Brick"}
-        </span>
-      </div>
-
+    <div className="mx-auto w-full max-w-[32rem] border border-white/10 bg-surface p-6 shadow-2xl sm:p-10">
       <h1 className="max-w-md text-balance font-heading text-3xl font-black leading-tight text-white sm:text-4xl">
         {isSignup ? "Crie sua conta completa" : "Entre na sua conta"}
       </h1>
@@ -394,7 +384,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
       </p>
 
       {!isSignup && savedAccounts.length > 0 && (
-        <div className="mt-6 border border-brand-orange/20 bg-brand-orange/5 p-4 rounded-xl">
+        <div className="mt-6 border border-brand-orange/20 bg-brand-orange/5 p-4 rounded-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-brand-orange">
               Contas conectadas neste dispositivo
@@ -410,7 +400,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
               return (
                 <div
                   key={account.userId}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#16181f] p-2.5 transition-colors hover:border-brand-orange/40"
+                  className="flex items-center justify-between gap-3 rounded-sm border border-white/10 bg-[#16181f] p-2.5 transition-colors hover:border-brand-orange/40"
                 >
                   <button
                     type="button"
@@ -445,7 +435,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                       type="button"
                       disabled={Boolean(switchingUserId)}
                       onClick={() => handleQuickSwitch(account.userId)}
-                      className="rounded-lg bg-brand-orange px-3 py-1.5 text-xs font-bold text-white hover:bg-[#ff7526] transition-colors"
+                      className="rounded-sm bg-brand-orange px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-orange-bright transition-colors"
                     >
                       {isSwitching ? "Entrando..." : "Acessar"}
                     </button>
@@ -472,7 +462,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
           type="button"
           disabled={loading}
           onClick={() => void handleGoogleLogin()}
-          className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white px-4 text-sm font-bold text-[#202126] transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex min-h-12 w-full items-center justify-center gap-3 rounded-sm border border-white/20 bg-white px-4 text-sm font-bold text-[#202126] transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -516,7 +506,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                 onChange={(e) => handleNicknameChange(e.target.value)}
                 aria-invalid={errorField === "nickname"}
                 placeholder="Ex: Alex Silva"
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] px-3.5 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
+                className="min-h-11 w-full rounded-sm border border-white/15 bg-[#0d0e12] px-3.5 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
               />
               <p className="mt-1 text-xs text-gray-500">Nome visível em comentários.</p>
             </div>
@@ -536,7 +526,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   aria-invalid={errorField === "username"}
                   placeholder="alex-gamer"
-                  className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] pl-8 pr-3 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange font-mono"
+                  className="min-h-11 w-full rounded-sm border border-white/15 bg-[#0d0e12] pl-8 pr-3 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange font-mono"
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">Identificador único no portal.</p>
@@ -557,7 +547,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={errorField === "email" || errorField === "form"}
             placeholder="voce@exemplo.com"
-            className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] px-3.5 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
+            className="min-h-11 w-full rounded-sm border border-white/15 bg-[#0d0e12] px-3.5 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
           />
         </div>
 
@@ -583,7 +573,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
               onChange={(e) => setPassword(e.target.value)}
               aria-invalid={errorField === "password" || errorField === "form"}
               placeholder="Mínimo de 8 caracteres"
-              className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] pl-3.5 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
+              className="min-h-11 w-full rounded-sm border border-white/15 bg-[#0d0e12] pl-3.5 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
             />
             <button
               type="button"
@@ -640,7 +630,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 aria-invalid={errorField === "confirmation"}
                 placeholder="Repita sua senha"
-                className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] pl-3.5 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
+                className="min-h-11 w-full rounded-sm border border-white/15 bg-[#0d0e12] pl-3.5 pr-10 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
               />
               <button
                 type="button"
@@ -683,7 +673,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                     key={slug}
                     type="button"
                     onClick={() => togglePlatform(slug)}
-                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-all ${
+                    className={`rounded-sm border px-3 py-1.5 text-xs font-bold transition-all ${
                       isSelected
                         ? "border-brand-orange bg-brand-orange text-white shadow-[0_0_15px_rgba(255,94,0,0.3)]"
                         : "border-white/15 bg-white/5 text-gray-300 hover:border-white/30 hover:bg-white/10"
@@ -698,7 +688,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         )}
 
         <div className="pt-2">
-          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-xs leading-5 text-gray-300">
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded-sm border border-white/10 bg-black/20 p-3 text-xs leading-5 text-gray-300">
             <input
               type="checkbox"
               checked={eligibilityConfirmed}
@@ -734,7 +724,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         )}
 
         {error && (
-          <div role="alert" className="rounded-xl border border-red-500/35 bg-red-500/10 p-3.5 text-xs text-red-300 flex items-start gap-2.5">
+          <div role="alert" className="rounded-sm border border-red-500/35 bg-red-500/10 p-3.5 text-xs text-red-300 flex items-start gap-2.5">
             <svg className="h-4 w-4 shrink-0 text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
@@ -755,7 +745,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         )}
 
         {message && (
-          <div role="status" className="rounded-xl border border-emerald-500/35 bg-emerald-500/10 p-3.5 text-xs text-emerald-200">
+          <div role="status" className="rounded-sm border border-emerald-500/35 bg-emerald-500/10 p-3.5 text-xs text-emerald-200">
             {message}
           </div>
         )}
@@ -763,7 +753,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-orange px-5 text-sm font-black text-white transition-all hover:bg-[#ff7526] hover:shadow-[0_0_20px_rgba(255,94,0,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55"
+          className="flex min-h-12 w-full items-center justify-center rounded-sm bg-brand-orange px-5 text-sm font-black text-white transition-all hover:bg-brand-orange-bright hover:shadow-[0_0_20px_rgba(255,94,0,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55"
         >
           {loading ? (
             <div className="flex items-center gap-2">
@@ -793,7 +783,7 @@ export function CredentialAuthForm(props: CredentialAuthFormProps) {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto w-full max-w-[32rem] min-h-[480px] rounded-2xl border border-white/10 bg-[#111217] p-8 animate-pulse" />
+        <div className="mx-auto w-full max-w-[32rem] min-h-[480px] rounded-sm border border-white/10 bg-surface p-8 animate-pulse" />
       }
     >
       <CredentialAuthFormInner {...props} />

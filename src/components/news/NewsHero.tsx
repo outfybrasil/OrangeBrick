@@ -15,7 +15,7 @@ export function NewsHero({ post, hypes = 0, comments = 0 }: NewsHeroProps) {
   const postDate = post.published_at || post.created_at;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111217] transition-colors duration-200 hover:border-brand-orange/40">
+    <article className="group relative flex flex-col overflow-hidden rounded-sm border border-white/10 bg-surface transition-colors duration-200 hover:border-brand-orange/40">
       <Link
         href={`/posts/${post.slug}`}
         className="relative aspect-video w-full overflow-hidden bg-background-void focus-visible:outline-2 focus-visible:outline-brand-orange"

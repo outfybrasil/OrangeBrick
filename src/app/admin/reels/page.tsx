@@ -11,6 +11,7 @@ import { CATEGORY_CONFIG, type PostCategory } from "@/lib/types/database";
 import type { AdminReelItem } from "@/app/api/admin/reels/route";
 import type { ReelSocialPlatform, ReelSocialPublication, ReelSocialStatus } from "@/lib/video/reel-social-delivery";
 import type { DarkPipelineConfig, LongVideoManifestItem, LongVideoVisualStyle } from "@/lib/video/reel-service";
+import { X } from "lucide-react";
 
 function formatBytes(bytes?: number) {
   if (!bytes) return "—";
@@ -567,7 +568,7 @@ function DarkPipelineStudio({
               : "bg-brand-orange text-black hover:bg-brand-orange/90"
           }`}
         >
-          <span>{showCreatorDrawer ? "✕ Fechar Formulário" : "+ Criar Novo Vídeo Longo"}</span>
+          <span>{showCreatorDrawer ? "Fechar Formulário" : "+ Criar Novo Vídeo Longo"}</span>
         </button>
       </div>
 
@@ -596,7 +597,7 @@ function DarkPipelineStudio({
                     : "text-gray-400 hover:text-white"
                 }`}
               >
-                🤖 Pedir Roteiro à IA
+                Pedir Roteiro à IA
               </button>
               <button
                 type="button"
@@ -607,7 +608,7 @@ function DarkPipelineStudio({
                     : "text-gray-400 hover:text-white"
                 }`}
               >
-                📄 Usar Meu Roteiro (.TXT)
+                Usar Meu Roteiro (.TXT)
               </button>
             </div>
           </div>
@@ -720,7 +721,7 @@ function DarkPipelineStudio({
                       Roteiro Completo em Texto Livre (separe blocos com linha em branco)
                     </label>
                     <label className="inline-flex min-h-[36px] cursor-pointer items-center justify-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1 text-xs font-bold text-white hover:bg-white/10">
-                      📂 Importar arquivo .TXT
+                      Importar arquivo .TXT
                       <input type="file" accept=".txt,.md" onChange={handleUploadScriptFile} className="hidden" />
                     </label>
                   </div>
@@ -744,7 +745,7 @@ function DarkPipelineStudio({
                       }`}
                     >
                       {manualScriptStats.reachesMidRoll
-                        ? "✓ Atinge 8+ min (Mid-Roll Liberado)"
+                        ? "Atinge 8+ min (Mid-Roll Liberado)"
                         : "Recomendado: ~1.100 palavras para 8+ min"}
                     </span>
                   </div>
@@ -767,18 +768,18 @@ function DarkPipelineStudio({
                     onChange={(e) => setCreatorStyle(e.target.value as LongVideoVisualStyle)}
                     className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3.5 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                   >
-                    <option value="documentario">🎬 Documentário Investigativo (Ken Burns + Dossiê Split-Screen)</option>
-                    <option value="cinema">🎞️ Ensaio Cinematográfico (Letterbox 2.35:1 + Atmosfera de Filme)</option>
-                    <option value="arquivo-cofre">🗄️ Arquivo-Cofre (Provas Numeradas + Carimbos de Fonte)</option>
-                    <option value="circuito">⚡ Circuito de Hardware (Especificações + Telemetria Técnica)</option>
-                    <option value="tribunal">⚖️ Tribunal da Indústria (Tese vs. Contraponto em Tela Dividida)</option>
-                    <option value="mesa-de-risco">📈 Mesa de Risco & Mercado (Gráficos Financeiros + Dados do Setor)</option>
-                    <option value="turno-da-madrugada">🌙 Turno da Madrugada (Investigação Noir + Alto Contraste)</option>
+                    <option value="documentario">Documentário Investigativo (Ken Burns + Dossiê Split-Screen)</option>
+                    <option value="cinema">Ensaio Cinematográfico (Letterbox 2.35:1 + Atmosfera de Filme)</option>
+                    <option value="arquivo-cofre">Arquivo-Cofre (Provas Numeradas + Carimbos de Fonte)</option>
+                    <option value="circuito">Circuito de Hardware (Especificações + Telemetria Técnica)</option>
+                    <option value="tribunal">Tribunal da Indústria (Tese vs. Contraponto em Tela Dividida)</option>
+                    <option value="mesa-de-risco">Mesa de Risco & Mercado (Gráficos Financeiros + Dados do Setor)</option>
+                    <option value="turno-da-madrugada">Turno da Madrugada (Investigação Noir + Alto Contraste)</option>
                     <option value="linha-do-tempo">⏳ Linha do Tempo Histórica (Cronologia + Evolução de Franquia)</option>
-                    <option value="raio-x">🔍 Raio-X de Gameplay & Engine (Decomposição de Mecânicas + HUD)</option>
-                    <option value="duelo">⚔️ Duelo Comparativo (Lado a Lado: Consoles, Preços ou Gerações)</option>
-                    <option value="manchete">📰 Manchete & Bastidores (Recortes de Imprensa + Declarações)</option>
-                    <option value="impacto">💥 Impacto & Ruptura (Cortes Rápidos + Dados em Destaque)</option>
+                    <option value="raio-x">Raio-X de Gameplay & Engine (Decomposição de Mecânicas + HUD)</option>
+                    <option value="duelo">Duelo Comparativo (Lado a Lado: Consoles, Preços ou Gerações)</option>
+                    <option value="manchete">Manchete & Bastidores (Recortes de Imprensa + Declarações)</option>
+                    <option value="impacto">Impacto & Ruptura (Cortes Rápidos + Dados em Destaque)</option>
                   </select>
                 </div>
 
@@ -793,9 +794,9 @@ function DarkPipelineStudio({
                       className="mt-1.5 w-full rounded-xl border border-white/15 bg-[#0b0d14] px-3 py-2.5 text-xs font-bold text-white focus:border-brand-orange focus:outline-none"
                     >
                       <option value="auto">Voz editorial automática</option>
-                      <option value="none">🔇 Sem Narrador (Gravar Minha Voz por Cima)</option>
-                      <option value="pt-BR-AntonioNeural">🎙️ Antonio Neural (Grave Documental)</option>
-                      <option value="pt-BR-FranciscaNeural">🎙️ Francisca Neural (Editorial Ágil)</option>
+                      <option value="none">Sem Narrador (Gravar Minha Voz por Cima)</option>
+                      <option value="pt-BR-AntonioNeural">Antonio Neural (Grave Documental)</option>
+                      <option value="pt-BR-FranciscaNeural">Francisca Neural (Editorial Ágil)</option>
                     </select>
                   </div>
 
@@ -818,7 +819,7 @@ function DarkPipelineStudio({
 
                 {creatorVoice === "none" && (
                   <div className="rounded-xl border border-brand-orange/40 bg-brand-orange/10 p-3 text-xs text-amber-200">
-                    <p className="font-black uppercase text-brand-orange">🎤 Modo Gravação de Voz Própria Ativo</p>
+                    <p className="font-black uppercase text-brand-orange">Modo Gravação de Voz Própria Ativo</p>
                     <p className="mt-0.5 text-xs leading-relaxed text-gray-200">
                       O vídeo será gerado sem voz de IA, mantendo apenas a trilha ambiente suave e o ritmo de leitura natural (135 palavras/min) com legendas sincronizadas na tela e arquivo .SRT para servir de teleprompter quando você gravar seu áudio por cima.
                     </p>
@@ -827,10 +828,10 @@ function DarkPipelineStudio({
 
                 <div className="rounded-xl border border-white/10 bg-[#0b0d14] p-3.5 text-xs text-gray-300 space-y-1.5">
                   <p className="font-bold text-white">O que a esteira entrega automaticamente:</p>
-                  <p>✓ Vídeo 1920×1080 com cenas ligadas à narração e abertura direta</p>
-                  <p>✓ Narração, trilha discreta e legendas para revisão</p>
-                  <p>✓ Duração baseada no conteúdo, sem pausas para preencher tempo</p>
-                  <p>✓ Descrição, fontes e sugestões de Shorts relacionados</p>
+                  <p>Vídeo 1920×1080 com cenas ligadas à narração e abertura direta</p>
+                  <p>Narração, trilha discreta e legendas para revisão</p>
+                  <p>Duração baseada no conteúdo, sem pausas para preencher tempo</p>
+                  <p>Descrição, fontes e sugestões de Shorts relacionados</p>
                 </div>
               </div>
 
@@ -848,7 +849,7 @@ function DarkPipelineStudio({
                   onClick={handleCreateLongEpisode}
                   className="flex min-h-[42px] items-center justify-center rounded-xl bg-brand-orange px-5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-transform hover:scale-[1.01] disabled:opacity-60"
                 >
-                  {isSubmittingDarkAction ? "Gerando Vídeo..." : "🚀 Iniciar Produção do Vídeo"}
+                  {isSubmittingDarkAction ? "Gerando Vídeo..." : "Iniciar Produção do Vídeo"}
                 </button>
               </div>
             </div>
@@ -875,7 +876,7 @@ function DarkPipelineStudio({
               className={`flex flex-col w-full sm:min-w-[280px] sm:flex-1 justify-between gap-2.5 rounded-2xl border p-3 sm:p-3.5 text-left transition-all ${
                 isSelected
                   ? "border-brand-orange bg-[#141824] shadow-xl"
-                  : "border-white/10 bg-[#0e1017] hover:border-white/25"
+                  : "border-white/10 bg-surface hover:border-white/25"
               }`}
             >
               <button
@@ -941,7 +942,7 @@ function DarkPipelineStudio({
                       title="Apagar este vídeo longo"
                       className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-300 transition-colors hover:bg-red-500/25 hover:text-red-200"
                     >
-                      🗑️ Apagar
+                      Apagar
                     </button>
                   </>
                 )}
@@ -1057,14 +1058,14 @@ function DarkPipelineStudio({
                       rel="noreferrer"
                       className="flex min-h-[38px] items-center justify-center rounded-lg border border-white/15 bg-white/[0.04] px-3 py-1.5 text-center text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
-                      🖼️ Folha Cenas
+                      Folha Cenas
                     </a>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
+            <div className="rounded-3xl border border-white/10 bg-surface p-3.5 sm:p-5">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
@@ -1159,7 +1160,7 @@ function DarkPipelineStudio({
                   onClick={() => void handleReviewDecision("approve")}
                   className="flex min-h-[44px] items-center justify-center flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-black shadow-lg transition-all hover:bg-emerald-400 disabled:opacity-60"
                 >
-                  ✓ Aprovar Episódio para o Canal
+                  Aprovar Episódio para o Canal
                 </button>
                 <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2.5">
                   <button
@@ -1168,7 +1169,7 @@ function DarkPipelineStudio({
                     onClick={() => setShowRejectPrompt((prev) => !prev)}
                     className="flex min-h-[44px] items-center justify-center rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-300 transition-all hover:bg-red-500/25"
                   >
-                    ✕ Reprovar
+                    Reprovar
                   </button>
                   <button
                     type="button"
@@ -1178,7 +1179,7 @@ function DarkPipelineStudio({
                     }
                     className="flex min-h-[44px] items-center justify-center rounded-xl border border-red-500/40 bg-red-950/30 px-4 py-3 text-xs font-black uppercase tracking-wider text-red-200 transition-all hover:bg-red-900/40"
                   >
-                    🗑️ Apagar
+                    Apagar
                   </button>
                 </div>
               </div>
@@ -1240,7 +1241,7 @@ function DarkPipelineStudio({
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
+            <div className="rounded-3xl border border-white/10 bg-surface p-3.5 sm:p-5">
               <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                 Etapa 6 · Checagens Automáticas de Qualidade (QA Gate)
               </span>
@@ -1272,7 +1273,7 @@ function DarkPipelineStudio({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5 space-y-4">
+            <div className="rounded-3xl border border-white/10 bg-surface p-3.5 sm:p-5 space-y-4">
               <div>
                 <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                   Etapa 8 · Agendamento YouTube & Kit de Publicação
@@ -1284,7 +1285,7 @@ function DarkPipelineStudio({
 
               {activeLongVideo.youtube?.scheduled_at && (
                 <div className="rounded-xl border border-sky-500/30 bg-sky-950/20 p-3 text-xs text-sky-200">
-                  📅 Agendado para: <strong>{formatDate(activeLongVideo.youtube.scheduled_at)}</strong> ({activeLongVideo.youtube.visibility || "public"})
+                  Agendado para: <strong>{formatDate(activeLongVideo.youtube.scheduled_at)}</strong> ({activeLongVideo.youtube.visibility || "public"})
                 </div>
               )}
 
@@ -1309,9 +1310,9 @@ function DarkPipelineStudio({
                     onChange={(e) => setScheduleVisibility(e.target.value as typeof scheduleVisibility)}
                     className="mt-1 w-full rounded-xl border border-white/15 bg-[#131622] px-3 py-2 text-xs font-bold text-white"
                   >
-                    <option value="public">🌍 Público (Estreia Imediata na Hora)</option>
-                    <option value="unlisted">🔗 Não Listado (Revisão Externa)</option>
-                    <option value="private">🔒 Privado</option>
+                    <option value="public">Público (Estreia Imediata na Hora)</option>
+                    <option value="unlisted">Não Listado (Revisão Externa)</option>
+                    <option value="private">Privado</option>
                   </select>
                 </div>
               </div>
@@ -1322,7 +1323,7 @@ function DarkPipelineStudio({
                 onClick={() => void handleScheduleLongVideo()}
                 className="w-full rounded-xl bg-white px-4 py-2.5 text-xs font-black uppercase tracking-wider text-black transition-colors hover:bg-gray-200 disabled:opacity-60"
               >
-                📅 Confirmar Agendamento no YouTube
+                Confirmar Agendamento no YouTube
               </button>
 
               {activeLongVideo.youtube && (
@@ -1365,21 +1366,21 @@ function DarkPipelineStudio({
                       onClick={() => void copyText("Tags SEO", activeLongVideo.youtube.tags.join(", "))}
                       className="flex min-h-[38px] items-center justify-center rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
-                      🏷️ Copiar {activeLongVideo.youtube.tags.length} Tags SEO
+                      Copiar {activeLongVideo.youtube.tags.length} Tags SEO
                     </button>
                     <button
                       type="button"
                       onClick={() => void copyText("Comentário Fixado", activeLongVideo.youtube.pinned_comment)}
                       className="flex min-h-[38px] items-center justify-center rounded-xl border border-white/10 bg-[#131622] px-3 py-2 text-xs font-bold text-gray-200 hover:bg-white/10"
                     >
-                      💬 Copiar Comentário
+                      Copiar Comentário
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
+            <div className="rounded-3xl border border-white/10 bg-surface p-3.5 sm:p-5">
               <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                 Distribuição Cruzada · Funil de Tráfego Orgânico
               </span>
@@ -1847,7 +1848,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span className="truncate">🎬 Vídeos Longos</span>
+            <span className="truncate">Vídeos Longos</span>
             <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
               {longVideos.length}
             </span>
@@ -1862,7 +1863,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <span className="truncate">📱 Reels (9:16)</span>
+            <span className="truncate">Reels (9:16)</span>
             <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
               {stats.ready}/{stats.total}
             </span>
@@ -1924,7 +1925,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       ) : (
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-white/10 bg-[#0e1017] p-4.5">
+            <div className="rounded-2xl border border-white/10 bg-surface p-4.5">
               <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total de Matérias</p>
               <p className="mt-1 font-heading text-3xl font-black text-white">{stats.total}</p>
               <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-400">
@@ -1953,14 +1954,14 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
 
             <div className="rounded-2xl border border-brand-orange/30 bg-brand-orange/5 p-4.5">
               <p className="text-xs font-bold uppercase tracking-wider text-brand-orange">Automação de Publicação</p>
-              <p className="mt-1 font-heading text-xl font-black text-white">ATIVADA ⚡</p>
+              <p className="mt-1 font-heading text-xl font-black text-white">ATIVADA</p>
               <p className="mt-2 text-xs text-gray-300">
                 Quando o Reel termina, a publicação segue YouTube, Instagram e TikTok.
               </p>
             </div>
           </div>
 
-          <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0e1017] p-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-white/10 bg-surface p-3.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
@@ -2022,15 +2023,16 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar por título ou slug..."
-                  className="w-full sm:w-64 rounded-lg border border-white/10 bg-[#141620] px-3.5 py-1.5 text-xs text-white placeholder-gray-500 focus:border-brand-orange focus:outline-none"
+                  className="w-full sm:w-64 rounded-lg border border-white/10 bg-[#141620] py-1.5 pl-3.5 pr-11 text-xs text-white placeholder-gray-500 focus:border-brand-orange focus:outline-none"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-white"
+                    aria-label="Limpar busca"
+                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-white"
                   >
-                    ✕
+                    <X aria-hidden="true" className="size-4" />
                   </button>
                 )}
               </div>
@@ -2064,7 +2066,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 return (
                   <div
                     key={item.id}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#0e1017] transition-all hover:border-white/20 hover:shadow-xl"
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-surface transition-all hover:border-white/20 hover:shadow-xl"
                   >
                     <div>
                       <div className="relative aspect-video w-full overflow-hidden bg-black">
@@ -2143,7 +2145,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                                       : "bg-purple-500/15 text-purple-200 border border-purple-500/30"
                                 }`}
                               >
-                                {p === "youtube" ? "🔴 YT" : p === "tiktok" ? "🎵 TikTok" : "📸 Insta"}
+                                {p === "youtube" ? "YT" : p === "tiktok" ? "TikTok" : "Insta"}
                               </span>
                             ))}
                           </div>
@@ -2152,7 +2154,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                         {isReady && (
                           <div className="mt-3 flex items-center gap-3 border-t border-white/5 pt-2 text-xs text-gray-400">
                             <span>⏱️ {item.duration ? `${item.duration}s` : "35s"}</span>
-                            <span>💾 {formatBytes(item.file_size)}</span>
+                            <span>{formatBytes(item.file_size)}</span>
                             <span className="text-emerald-400 font-bold">1080×1920</span>
                           </div>
                         )}
@@ -2257,16 +2259,16 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
       {selectedReel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-6 backdrop-blur-md animate-in fade-in duration-200">
           <div
-            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-y-auto rounded-3xl border border-white/15 bg-[#0e1017] shadow-2xl lg:flex-row lg:overflow-hidden"
+            className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-y-auto rounded-3xl border border-white/15 bg-surface shadow-2xl lg:flex-row lg:overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               onClick={() => setSelectedReel(null)}
-              className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-gray-300 transition-colors hover:bg-white/20 hover:text-white"
+              className="absolute right-4 top-4 z-20 flex size-11 items-center justify-center rounded-full bg-white/10 text-gray-300 transition-colors hover:bg-white/20 hover:text-white"
               aria-label="Fechar assistente de postagem"
             >
-              ✕
+              <X aria-hidden="true" className="size-5" />
             </button>
 
             <div className="flex shrink-0 flex-col items-center justify-center border-b border-white/10 bg-black/60 p-4 lg:w-[380px] lg:border-b-0 lg:border-r">
@@ -2351,7 +2353,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                               : "bg-purple-500/20 text-purple-200 border border-purple-500/30"
                         }`}
                       >
-                        {p === "youtube" ? "🔴 YouTube" : p === "tiktok" ? "🎵 TikTok" : "📸 Instagram"}
+                        {p === "youtube" ? "YouTube" : p === "tiktok" ? "TikTok" : "Instagram"}
                       </span>
                     ))
                   )}
@@ -2375,7 +2377,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                       : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <span>📸 Instagram Reels</span>
+                  <span>Instagram Reels</span>
                 </button>
 
                 <button
@@ -2387,7 +2389,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                       : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <span>🎵 TikTok</span>
+                  <span>TikTok</span>
                 </button>
 
                 <button
@@ -2399,7 +2401,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                       : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <span>🔴 YouTube Shorts</span>
+                  <span>YouTube Shorts</span>
                 </button>
               </div>
 
@@ -2458,9 +2460,10 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 <button
                   type="button"
                   onClick={() => setTargetPlatformsModal(null)}
-                  className="rounded-lg p-1.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Fechar seleção de plataformas"
+                  className="flex size-11 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  ✕
+                  <X aria-hidden="true" className="size-5" />
                 </button>
               </div>
               <h3 className="mt-3 font-heading text-lg font-black text-white leading-snug">
@@ -2491,7 +2494,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-white">🔴 YouTube Shorts</span>
+                    <span className="font-extrabold text-sm text-white">YouTube Shorts</span>
                     {targetPlatformsModal.platforms.youtube && (
                       <span className="rounded bg-[#ff0000]/30 px-1.5 py-0.2 text-xs font-black uppercase text-red-200">Ativo</span>
                     )}
@@ -2521,7 +2524,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-white">🎵 TikTok</span>
+                    <span className="font-extrabold text-sm text-white">TikTok</span>
                     {targetPlatformsModal.platforms.tiktok && (
                       <span className="rounded bg-[#fe2c55]/30 px-1.5 py-0.2 text-xs font-black uppercase text-pink-200">Ativo</span>
                     )}
@@ -2551,7 +2554,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-white">📸 Instagram Reels</span>
+                    <span className="font-extrabold text-sm text-white">Instagram Reels</span>
                     {targetPlatformsModal.platforms.instagram && (
                       <span className="rounded bg-pink-500/30 px-1.5 py-0.2 text-xs font-black uppercase text-pink-200">Ativo</span>
                     )}
@@ -2566,7 +2569,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
             <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-xs text-gray-400">
               {!targetPlatformsModal.platforms.youtube && !targetPlatformsModal.platforms.tiktok && !targetPlatformsModal.platforms.instagram ? (
                 <span className="text-amber-400 font-semibold">
-                  ⚠️ Nenhuma rede selecionada: o Reel será gerado somente para download local no painel, sem envio a nenhuma rede social.
+                  Nenhuma rede selecionada: o Reel será gerado somente para download local no painel, sem envio a nenhuma rede social.
                 </span>
               ) : (
                 <span>

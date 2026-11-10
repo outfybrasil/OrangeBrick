@@ -162,12 +162,12 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
             aria-labelledby={`delete-comment-title-${comment.id}`}
             aria-describedby={`delete-comment-description-${comment.id}`}
             tabIndex={-1}
-            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-comment-title-${comment.id}`} className="text-lg font-bold text-white">
               Apagar comentário?
             </h3>
-            <p id={`delete-comment-description-${comment.id}`} className="mt-2 text-sm leading-6 text-[#b8bac2]">
+            <p id={`delete-comment-description-${comment.id}`} className="mt-2 text-sm leading-6 text-ink-soft">
               Esta ação não pode ser desfeita.
             </p>
             {deleteError && <p role="alert" className="mt-3 text-sm text-red-300">{deleteError}</p>}
@@ -176,7 +176,7 @@ export function CommentItem({ comment, onLike, onReply, onDelete }: CommentItemP
                 type="button"
                 onClick={() => setShowDeleteConfirmation(false)}
                 disabled={isDeleting}
-                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#d2d3d8] transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange disabled:opacity-50"
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-ink-soft transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-brand-orange disabled:opacity-50"
               >
                 Cancelar
               </button>

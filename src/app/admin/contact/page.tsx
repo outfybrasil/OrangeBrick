@@ -113,10 +113,10 @@ export default function AdminContactPage() {
           <button type="button" onClick={() => void load()} className="min-h-10 border border-white/15 px-3 text-xs font-bold text-white hover:bg-white/5">Atualizar</button>
         </div>
         {error && <p role="alert" className="border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
-        {loading ? <p className="py-10 text-center text-sm text-gray-400">Carregando mensagens…</p> : submissions.length === 0 ? <p className="border border-white/10 bg-[#0e0f14] p-8 text-center text-sm text-gray-400">Nenhuma mensagem recebida.</p> : (
+        {loading ? <p className="py-10 text-center text-sm text-gray-400">Carregando mensagens…</p> : submissions.length === 0 ? <p className="border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">Nenhuma mensagem recebida.</p> : (
           <div className="space-y-3">
             {submissions.map((submission) => (
-              <article key={submission.id} className={`border bg-[#0e0f14] p-4 sm:p-5 ${submission.is_read ? "border-white/10" : "border-brand-orange/40"}`}>
+              <article key={submission.id} className={`border bg-surface p-4 sm:p-5 ${submission.is_read ? "border-white/10" : "border-brand-orange/40"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs font-bold uppercase tracking-wider text-brand-orange">{submission.subject || submission.company || "Geral"}</p>

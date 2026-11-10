@@ -61,7 +61,7 @@ export function EditorialQualityChecklist({
   const pending = items.length - completed;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+    <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">
           Qualidade editorial

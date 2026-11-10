@@ -50,7 +50,7 @@ export default function AdminSettingsPage() {
 
   return (
     <AdminShell active="settings" title="Configurações" description="Defina os padrões usados ao abrir uma nova matéria.">
-      <section className="max-w-2xl rounded-xl border border-white/10 bg-[#0e0f14] p-5">
+      <section className="max-w-2xl rounded-xl border border-white/10 bg-surface p-5">
         <h2 className="text-base font-bold text-white">Padrões do editor</h2>
         <p className="mt-1 text-xs leading-5 text-gray-400">Essas preferências não preenchem conteúdo editorial; apenas definem autoria e categoria iniciais.</p>
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -84,7 +84,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/10 pt-5">
-          <button type="button" onClick={() => void savePreferences()} disabled={!isReady || isSaving || !preferences.defaultAuthor.trim()} className="min-h-11 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526] disabled:opacity-40">
+          <button type="button" onClick={() => void savePreferences()} disabled={!isReady || isSaving || !preferences.defaultAuthor.trim()} className="min-h-11 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white hover:bg-brand-orange-bright disabled:opacity-40">
             {isSaving ? "Salvando..." : "Salvar preferências"}
           </button>
           {message && <p role="status" className="text-xs text-emerald-300">{message}</p>}

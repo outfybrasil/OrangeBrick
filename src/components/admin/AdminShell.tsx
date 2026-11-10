@@ -136,7 +136,7 @@ export function AdminShell({
 
   return (
     <div className="admin-root min-h-dvh bg-[#0a0b0e] text-white selection:bg-brand-orange selection:text-white">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-[#0e0f14] xl:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-white/10 bg-surface xl:flex">
         <div className="flex min-h-16 flex-col items-start justify-center gap-1 border-b border-white/10 px-5">
           <BrandLogo alt="Orange Brick" className="h-5 w-auto" />
           <p className="text-xs font-semibold text-gray-500">Redação</p>
@@ -371,7 +371,7 @@ export function AdminShell({
             role="dialog"
             aria-modal="true"
             aria-label="Navegação administrativa"
-            className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-[#0e0f14] p-4 shadow-2xl animate-in slide-in-from-left duration-200 focus:outline-none"
+            className="flex h-full w-[min(20rem,86vw)] flex-col border-r border-white/10 bg-surface p-4 shadow-2xl animate-in slide-in-from-left duration-200 focus:outline-none"
             tabIndex={-1}
           >
             <div className="flex min-h-14 items-center justify-between border-b border-white/10 pb-3">

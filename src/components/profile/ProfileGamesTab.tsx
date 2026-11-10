@@ -298,7 +298,7 @@ export function ProfileGamesTab({
         type="button"
         onClick={openNewReview}
         disabled={!currentUserId || loadingGameReviews}
-        className="inline-flex min-h-10 items-center justify-center rounded-sm bg-brand-orange px-4 text-xs font-black uppercase text-white hover:bg-[#ff7526] disabled:cursor-wait disabled:opacity-60"
+        className="inline-flex min-h-10 items-center justify-center rounded-sm bg-brand-orange px-4 text-xs font-black uppercase text-white hover:bg-brand-orange-bright disabled:cursor-wait disabled:opacity-60"
       >
         Adicionar jogo
       </button>
@@ -419,7 +419,7 @@ export function ProfileGamesTab({
           <button
             type="submit"
             disabled={!selectedGame || !rating || savingReview}
-            className="inline-flex min-h-10 items-center justify-center rounded-sm bg-brand-orange px-4 text-xs font-black uppercase text-white hover:bg-[#ff7526] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-10 items-center justify-center rounded-sm bg-brand-orange px-4 text-xs font-black uppercase text-white hover:bg-brand-orange-bright disabled:cursor-not-allowed disabled:opacity-50"
           >
             {savingReview ? "Salvando..." : "Salvar avaliação"}
           </button>
@@ -441,7 +441,7 @@ export function ProfileGamesTab({
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {visibleGameReviews.map((review) => (
-          <article key={review.game_id} className="flex min-w-0 gap-3 rounded-sm border border-white/10 bg-[#111217] p-3">
+          <article key={review.game_id} className="flex min-w-0 gap-3 rounded-sm border border-white/10 bg-surface p-3">
             <Link href={`/games/${encodeURIComponent(review.game.slug)}`} aria-label={`Ver detalhes de ${review.game.name}`} className="w-28 shrink-0 self-start overflow-hidden rounded-sm bg-black/30 focus-visible:outline-2 focus-visible:outline-brand-orange sm:w-32">
               <GameCoverImage src={review.game.cover_image_url} alt={review.game.name} fit="contain" />
             </Link>
@@ -491,7 +491,7 @@ export function ProfileGamesTab({
 
   if (!hasGames) {
     return (
-      <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+      <div className="rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
         {isOwner ? (
           <div className="space-y-3">
             <p>Você ainda não adicionou jogos ao seu perfil.</p>
@@ -523,7 +523,7 @@ export function ProfileGamesTab({
       {gameReviewsError && <p role="alert" className="text-sm text-red-300">{gameReviewsError}</p>}
       {loadingGameReviews && isOwner && <p role="status" className="text-sm text-gray-400">Carregando seus jogos avaliados...</p>}
       {isOwner && !loadingGameReviews && gameReviews.length === 0 && (
-        <p className="rounded-sm border border-white/10 bg-[#111217] p-4 text-sm text-gray-400">Você ainda não avaliou jogos no seu Brick.</p>
+        <p className="rounded-sm border border-white/10 bg-surface p-4 text-sm text-gray-400">Você ainda não avaliou jogos no seu Brick.</p>
       )}
       {reviewsSection}
       {/* Sub-filtros quando o usuário tem jogos marcados */}
@@ -574,7 +574,7 @@ export function ProfileGamesTab({
             </h3>
           </div>
 
-          <div className="mt-4 flex items-center gap-4 rounded-sm border border-brand-orange/40 bg-[#111217] p-4 transition-colors hover:border-brand-orange">
+          <div className="mt-4 flex items-center gap-4 rounded-sm border border-brand-orange/40 bg-surface p-4 transition-colors hover:border-brand-orange">
             <div className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-sm bg-card-slate sm:w-40">
               <div className="flex h-full w-full items-center justify-center font-heading text-xs font-black uppercase text-brand-orange">
                 {playingNow}
@@ -609,7 +609,7 @@ export function ProfileGamesTab({
                 <Link
                   key={gameSlug}
                   href={`/games/${encodeURIComponent(gameSlug)}`}
-                  className="group relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-sm border border-white/10 bg-[#16171D] sm:w-full transition-colors hover:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
+                  className="group relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-sm border border-white/10 bg-surface-raised sm:w-full transition-colors hover:border-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange"
                 >
                   {matchedGame?.image_url ? (
                     <GameCoverImage
@@ -653,7 +653,7 @@ export function ProfileGamesTab({
               <Link
                 key={game.id}
                 href={`/games/${encodeURIComponent(game.id)}`}
-                className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111217] transition-colors hover:border-brand-orange"
+                className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-surface transition-colors hover:border-brand-orange"
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-background-void">
                   {game.image_url ? (
@@ -704,7 +704,7 @@ export function ProfileGamesTab({
               <Link
                 key={game.id}
                 href={`/games/${encodeURIComponent(game.id)}`}
-                className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-[#111217] transition-colors hover:border-brand-orange"
+                className="group flex flex-col overflow-hidden rounded-sm border border-white/10 bg-surface transition-colors hover:border-brand-orange"
               >
                 <div className="relative aspect-video w-full overflow-hidden bg-background-void">
                   {game.image_url ? (

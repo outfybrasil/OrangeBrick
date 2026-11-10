@@ -253,7 +253,7 @@ export default function PublicationsPage() {
 
       {candidate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="publication-retry-title" className="w-full max-w-lg rounded-xl border border-amber-400/30 bg-[#0e0f14] p-5">
+          <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="publication-retry-title" className="w-full max-w-lg rounded-xl border border-amber-400/30 bg-surface p-5">
             <p id="publication-retry-title" className="text-sm font-bold">Tentar enviar novamente o aviso de “{candidate.title}” ao administrador no Telegram?</p>
             <p className="mt-2 text-xs leading-5 text-gray-300">A matéria no site e o envio ao YouTube não serão repetidos.</p>
             <div className="mt-3 flex flex-wrap gap-3">

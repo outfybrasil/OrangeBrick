@@ -410,7 +410,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
           </div>
           <button
             onClick={() => requireUser(() => setIsComposeOpen(true))}
-            className="flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] self-start sm:self-auto shrink-0 shadow-lg shadow-brand-orange/20"
+            className="flex min-h-10 items-center justify-center gap-2 rounded-xl bg-brand-orange px-5 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright self-start sm:self-auto shrink-0 shadow-lg shadow-brand-orange/20"
           >
             <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -463,7 +463,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
             </button>
             <div className="min-w-0 flex-1"><p className="truncate text-xs text-gray-400">{selectedPlatform === "TODOS" ? dict.community.platforms.allLabel : PLATFORM_TABS.find(platform => platform.id === selectedPlatform)?.label || selectedPlatform}{searchQuery.trim() ? ` · ${dict.common.search}: ${searchQuery.trim()}` : ""}</p><p role="status" className="mt-1 text-xs text-gray-500">{displayPosts.length} {displayPosts.length === 1 ? dict.community.foundSingle : dict.community.foundMultiple}</p></div>
           </div>
-          <div id="brickboard-filters" hidden={!filtersOpen} className="mt-3 rounded-xl border border-white/10 bg-[#111217] p-4">
+          <div id="brickboard-filters" hidden={!filtersOpen} className="mt-3 rounded-xl border border-white/10 bg-surface p-4">
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(10rem,15rem)]">
               <div className="min-w-0"><label htmlFor="brickboard-search" className="mb-2 block text-xs font-semibold text-gray-300">{dict.community.searchLabel}</label><input id="brickboard-search" type="search" value={searchQuery} maxLength={120} onChange={event => { setSearchQuery(event.target.value); setVisiblePostCount(8); }} placeholder={dict.community.searchPlaceholder} className="min-h-11 w-full min-w-0 rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange" /></div>
               <div className="min-w-0"><label htmlFor="brickboard-platform" className="mb-2 block text-xs font-semibold text-gray-300">{isEn ? "Platform" : "Plataforma"}</label><select id="brickboard-platform" value={selectedPlatform} onChange={event => { setSelectedPlatform(event.target.value); setVisiblePostCount(8); }} className="min-h-11 w-full rounded-lg border border-white/15 bg-[#08090C] px-3 text-sm text-white outline-none focus:border-brand-orange">{PLATFORM_TABS.map(platform => <option key={platform.id} value={platform.id}>{platform.label} ({platformCounts[platform.id] || 0})</option>)}</select></div>
@@ -552,7 +552,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
               <button
                 type="button"
                 onClick={() => requireUser(() => setIsComposeOpen(true))}
-                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white shadow-md shadow-brand-orange/20 transition-colors hover:bg-[#ff7526]"
+                className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white shadow-md shadow-brand-orange/20 transition-colors hover:bg-brand-orange-bright"
               >
                 {dict.community.postBrick}
               </button>
@@ -637,7 +637,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
                   <button
                     type="button"
                     onClick={() => requireUser(() => setIsComposeOpen(true))}
-                    className="ml-auto bg-brand-orange px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
+                    className="ml-auto bg-brand-orange px-4 py-1.5 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright"
                   >
                     {dict.community.postBrick}
                   </button>
@@ -717,7 +717,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
 
               {/* PERGUNTA DO DIA */}
               {poll && (
-                <div className="overflow-hidden border border-white/10 bg-[#101116]">
+                <div className="overflow-hidden border border-white/10 bg-surface">
                   <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
                     <div className="flex items-center gap-2">
 <span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="question" size={14} /></span>
@@ -762,7 +762,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
               )}
 
               {suggestedProfiles.length > 0 && (
-                <div className="overflow-hidden border border-white/10 bg-[#101116] rounded-lg">
+                <div className="overflow-hidden border border-white/10 bg-surface rounded-lg">
                   <div className="border-b border-white/10 px-4 py-3">
                     <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">
                       {isEn ? "Who to follow" : "Pessoas para seguir"}
@@ -807,7 +807,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
               )}
 
               {trendingTopics.length > 0 && (
-                <div className="overflow-hidden border border-white/10 bg-[#101116]">
+                <div className="overflow-hidden border border-white/10 bg-surface">
                   <div className="flex min-h-10 items-center justify-between gap-3 bg-brand-orange/[0.12] px-4 py-2">
                     <span className="flex items-center gap-2 text-xs font-black uppercase text-brand-orange"><span className="grid size-5 place-items-center rounded-full bg-brand-orange text-black"><Icon name="trending-up" size={14} /></span>{isEn ? "Trending now" : "Em alta agora"}</span>
                     <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-xs font-bold text-gray-300">Brickboard</span>

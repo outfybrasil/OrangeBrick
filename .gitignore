@@ -75,3 +75,5 @@ public/long-videos/**/*.mp4
 __pycache__/
 *.pyc
 /Brasa-Motion-Portable/
+
+/.agents/skills/impeccable/scripts/bin/

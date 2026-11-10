@@ -17,7 +17,7 @@ export function GameCoverImage({ src, alt, className = "", fit = "cover", priori
   if (!src || hasError) {
     return (
       <div
-        className={`relative aspect-video w-full overflow-hidden border border-white/10 bg-[#12141A] flex flex-col items-center justify-center p-4 text-center select-none ${className}`}
+        className={`relative aspect-video w-full overflow-hidden border border-white/10 bg-surface flex flex-col items-center justify-center p-4 text-center select-none ${className}`}
         aria-label={alt}
       >
         <div aria-hidden="true" className="absolute inset-0 opacity-15 bg-[radial-gradient(#FF5E00_1px,transparent_1px)] [background-size:16px_16px]" />

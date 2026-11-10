@@ -137,7 +137,7 @@ export function PrivacyControls() {
       <h2 id="privacy-controls-title" className="text-xl font-bold text-white">
         Controle seus dados
       </h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[#b8bac2]">
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
         Revogue preferências no dispositivo a qualquer momento. Se estiver conectado, também pode baixar uma cópia ou excluir sua conta.
       </p>
 
@@ -172,7 +172,7 @@ export function PrivacyControls() {
       </div>
 
       {message && (
-        <p role="status" className="mt-4 text-sm text-[#d2d3d8]">
+        <p role="status" className="mt-4 text-sm text-ink-soft">
           {message}
         </p>
       )}
@@ -191,15 +191,15 @@ export function PrivacyControls() {
             aria-labelledby="delete-account-title"
             aria-describedby="delete-account-description"
             tabIndex={-1}
-            className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-red-400/25 bg-surface-raised p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id="delete-account-title" className="text-xl font-bold text-white">
               Excluir conta definitivamente?
             </h3>
-            <p id="delete-account-description" className="mt-3 text-sm leading-6 text-[#b8bac2]">
+            <p id="delete-account-description" className="mt-3 text-sm leading-6 text-ink-soft">
               Seus dados de perfil e participação serão removidos. Digite <strong className="text-white">EXCLUIR</strong> para confirmar.
             </p>
-            <label htmlFor="delete-account-confirmation" className="mt-5 block text-xs font-bold text-[#d2d3d8]">
+            <label htmlFor="delete-account-confirmation" className="mt-5 block text-xs font-bold text-ink-soft">
               Confirmação
             </label>
             <input
@@ -213,7 +213,7 @@ export function PrivacyControls() {
               <button
                 type="button"
                 onClick={() => setShowDelete(false)}
-                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-[#b8bac2] hover:bg-white/5 hover:text-white"
+                className="min-h-11 rounded-xl px-4 text-sm font-semibold text-ink-soft hover:bg-white/5 hover:text-white"
               >
                 Cancelar
               </button>

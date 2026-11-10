@@ -524,7 +524,7 @@ export function ProfileView({
                 {activeTab === "bricks" && (
                   <div>
                     {directBricks.length === 0 ? (
-                      <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+                      <div className="rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
                         {isOwner ? (
                           <div className="space-y-3">
                             <p>Seu primeiro Brick começa aqui.</p>
@@ -579,7 +579,7 @@ export function ProfileView({
                 {activeTab === "reposts" && (
                   <div>
                     {repostPosts.length === 0 ? (
-                      <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+                      <div className="rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
                         Nenhum Brick republicado ainda.
                       </div>
                     ) : (
@@ -608,7 +608,7 @@ export function ProfileView({
                 {activeTab === "saved" && isOwner && (
                   <div>
                     {savedBricks.length === 0 && bookmarks.length === 0 ? (
-                      <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+                      <div className="rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
                         Nenhum item salvo ainda.
                       </div>
                     ) : (
@@ -617,7 +617,7 @@ export function ProfileView({
                           <section className="space-y-2.5">
                             <h2 className="font-heading text-xs font-bold uppercase tracking-wider text-gray-400">Matérias salvas ({bookmarks.length})</h2>
                             {bookmarks.map((bookmark) => (
-                              <div key={bookmark.id} className="flex items-center justify-between gap-3 border border-white/10 bg-[#111217] p-4">
+                              <div key={bookmark.id} className="flex items-center justify-between gap-3 border border-white/10 bg-surface p-4">
                                 <Link href={`/posts/${bookmark.slug}`} className="min-w-0 flex-1 truncate text-sm font-bold text-white transition-colors hover:text-brand-orange">
                                   {bookmark.title}
                                 </Link>

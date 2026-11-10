@@ -40,7 +40,7 @@ export default function NewPasswordPage() {
 
   return (
     <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
-      <section className="w-full max-w-md border border-white/10 bg-[#111217] p-5 sm:p-8">
+      <section className="w-full max-w-md border border-white/10 bg-surface p-5 sm:p-8">
         <p className="font-subtitle text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Segurança da conta</p>
         <h1 className="mt-3 font-heading text-3xl font-black">Crie uma nova senha.</h1>
         {sessionState === "checking" ? (
@@ -58,7 +58,7 @@ export default function NewPasswordPage() {
               <input id="new-password-confirmation" type="password" autoComplete="new-password" required minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="min-h-12 w-full border border-white/15 bg-[#0d0e12] px-4 text-base text-white outline-none focus:border-brand-orange focus-visible:ring-2 focus-visible:ring-brand-orange/30" />
             </div>
             {error && <p role="alert" className="border border-red-500/35 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-            <button type="submit" disabled={loading} className="min-h-12 w-full bg-brand-orange px-5 text-sm font-black text-white hover:bg-[#ff7526] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55">{loading ? "Salvando..." : "Salvar nova senha"}</button>
+            <button type="submit" disabled={loading} className="min-h-12 w-full bg-brand-orange px-5 text-sm font-black text-white hover:bg-brand-orange-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55">{loading ? "Salvando..." : "Salvar nova senha"}</button>
           </form>
         )}
       </section>

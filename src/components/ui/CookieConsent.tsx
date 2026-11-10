@@ -69,7 +69,7 @@ export function CookieConsent() {
             <p id="consent-title" className="font-heading text-sm font-bold text-white sm:text-base">
               Suas preferências de privacidade
             </p>
-            <p id="consent-description" className="mt-1 max-w-xl text-xs leading-4 text-[#b8bac2] sm:mt-2 sm:text-sm sm:leading-6">
+            <p id="consent-description" className="mt-1 max-w-xl text-xs leading-4 text-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
               {adsenseEnabled
                 ? "O armazenamento essencial mantém o site funcionando. Você pode escolher separadamente as métricas de leitura e os anúncios do Google, que podem usar cookies para personalização."
                 : "O site funciona com armazenamento essencial. Com sua permissão, também guardamos um identificador aleatório para reconhecer reações e medir leituras sem usar seu nome ou e-mail."}{" "}
@@ -91,7 +91,7 @@ export function CookieConsent() {
                   />
                   <span>
                     Métricas de leitura
-                    <span className="mt-0.5 block text-xs leading-5 text-[#b8bac2]">Reações e leituras agregadas do site.</span>
+                    <span className="mt-0.5 block text-xs leading-5 text-ink-soft">Reações e leituras agregadas do site.</span>
                   </span>
                 </label>
                 <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm text-white">
@@ -103,7 +103,7 @@ export function CookieConsent() {
                   />
                   <span>
                     Publicidade do Google
-                    <span className="mt-0.5 block text-xs leading-5 text-[#b8bac2]">Permite carregar anúncios e cookies de publicidade.</span>
+                    <span className="mt-0.5 block text-xs leading-5 text-ink-soft">Permite carregar anúncios e cookies de publicidade.</span>
                   </span>
                 </label>
               </div>
@@ -114,7 +114,7 @@ export function CookieConsent() {
               <button
                 type="button"
                 onClick={() => choose(false, false)}
-                className="min-h-11 rounded-xl border border-white/15 px-3 text-xs font-semibold text-[#d7d8dc] transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:px-4 sm:text-sm"
+                className="min-h-11 rounded-xl border border-white/15 px-3 text-xs font-semibold text-ink-soft transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:px-4 sm:text-sm"
               >
                 Só essenciais
               </button>
@@ -138,7 +138,7 @@ export function CookieConsent() {
               <button
                 type="button"
                 onClick={() => choose(false, false)}
-                className="min-h-10 rounded-xl border border-white/15 px-3 text-xs font-semibold text-[#d7d8dc] transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:min-h-11 sm:px-4 sm:text-sm"
+                className="min-h-10 rounded-xl border border-white/15 px-3 text-xs font-semibold text-ink-soft transition-colors hover:border-white/30 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange sm:min-h-11 sm:px-4 sm:text-sm"
               >
                 Só essenciais
               </button>

@@ -32,7 +32,7 @@ export function NewsCategoryNav({ selectedCategory, onSelectCategory }: NewsCate
               className={`inline-flex min-h-11 shrink-0 items-center justify-center rounded-sm px-4 py-2 text-xs font-black uppercase tracking-wider transition-all focus-visible:outline-2 focus-visible:outline-brand-orange ${
                 isActive
                   ? "bg-brand-orange text-white shadow-[0_0_12px_rgba(255,94,0,0.4)]"
-                  : "border border-white/10 bg-[#16171D] text-gray-300 hover:border-brand-orange/40 hover:text-white"
+                  : "border border-white/10 bg-surface-raised text-gray-300 hover:border-brand-orange/40 hover:text-white"
               }`}
             >
               {cat.label}

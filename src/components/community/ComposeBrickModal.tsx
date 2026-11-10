@@ -208,7 +208,7 @@ export function ComposeBrickModal({
               <path d="M8 13h3m2 0h3" />
             </svg>
           </span>
-          <h1 id="compose-brick-title" className="text-[17px] font-[720] tracking-[-0.2px] text-[#f1f1f3] m-0">
+          <h1 id="compose-brick-title" className="text-lg font-[720] tracking-[-0.2px] text-[#f1f1f3] m-0">
             {isEn ? "Create new Brick" : "Criar novo Brick"}
           </h1>
           <button
@@ -400,14 +400,14 @@ export function ComposeBrickModal({
               type="button"
               onClick={handleClose}
               disabled={isPublishing}
-              className="h-[42px] px-4 text-[13px] font-bold text-[#b6b6bd] hover:text-white hover:bg-white/[0.04] transition-colors rounded-[2px]"
+              className="h-[42px] px-4 text-sm font-bold text-[#b6b6bd] hover:text-white hover:bg-white/[0.04] transition-colors rounded-[2px]"
             >
               {isEn ? "Cancel" : "Cancelar"}
             </button>
             <button
               type="submit"
               disabled={isPublishDisabled}
-              className={`min-w-[120px] h-[42px] px-4 text-[13px] font-bold rounded-[2px] transition-colors ${
+              className={`min-w-[120px] h-[42px] px-4 text-sm font-bold rounded-[2px] transition-colors ${
                 isPublishDisabled
                   ? "border border-[#713b21] bg-[#713b21] text-[#d5a181] cursor-not-allowed"
                   : "border border-[#ff6500] bg-[#ff6500] text-[#19120e] hover:bg-[#ff7921]"

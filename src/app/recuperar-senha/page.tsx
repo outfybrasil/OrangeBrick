@@ -26,7 +26,7 @@ export default function PasswordRecoveryPage() {
 
   return (
     <main id="conteudo-principal" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-background-void px-4 py-10 text-white">
-      <section className="w-full max-w-md border border-white/10 bg-[#111217] p-5 sm:p-8">
+      <section className="w-full max-w-md border border-white/10 bg-surface p-5 sm:p-8">
         <Link href="/entrar" className="inline-flex min-h-11 items-center text-sm font-bold text-gray-400 hover:text-white">← Voltar ao acesso</Link>
         <p className="mt-5 font-subtitle text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Recuperar acesso</p>
         <h1 className="mt-3 font-heading text-3xl font-black text-white">Redefina sua senha.</h1>
@@ -40,7 +40,7 @@ export default function PasswordRecoveryPage() {
               <input id="recovery-email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-12 w-full border border-white/15 bg-[#0d0e12] px-4 text-base text-white outline-none focus:border-brand-orange focus-visible:ring-2 focus-visible:ring-brand-orange/30" placeholder="voce@exemplo.com" />
             </div>
             {error && <p role="alert" className="border border-red-500/35 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
-            <button type="submit" disabled={loading} className="min-h-12 w-full bg-brand-orange px-5 text-sm font-black text-white hover:bg-[#ff7526] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55">{loading ? "Enviando..." : "Enviar link de recuperação"}</button>
+            <button type="submit" disabled={loading} className="min-h-12 w-full bg-brand-orange px-5 text-sm font-black text-white hover:bg-brand-orange-bright focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange disabled:cursor-wait disabled:opacity-55">{loading ? "Enviando..." : "Enviar link de recuperação"}</button>
           </form>
         )}
       </section>

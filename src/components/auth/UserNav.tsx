@@ -76,7 +76,7 @@ export function UserNav() {
         {emailAuthEnabled ? (
           <Link
             href="/cadastro"
-            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black shadow-sm transition-all hover:bg-[#ff7526] sm:flex sm:px-4"
+            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black shadow-sm transition-all hover:bg-brand-orange-bright sm:flex sm:px-4"
           >
             <span>{isEn ? "Sign Up" : "Criar conta"}</span>
           </Link>
@@ -84,7 +84,7 @@ export function UserNav() {
           <button
             type="button"
             onClick={() => { setAuthModalTab("signup"); setIsAuthModalOpen(true); }}
-            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black transition-all hover:bg-[#ff7526] sm:flex sm:px-4"
+            className="hidden min-h-11 items-center gap-1.5 whitespace-nowrap rounded-xl bg-brand-orange px-3 text-xs font-bold text-black transition-all hover:bg-brand-orange-bright sm:flex sm:px-4"
           >
             {isEn ? "Sign Up" : "Criar conta"}
           </button>

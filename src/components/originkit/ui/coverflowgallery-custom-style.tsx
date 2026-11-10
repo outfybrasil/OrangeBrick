@@ -169,7 +169,7 @@ export default function CoverflowGallery({
               onClick={() => selected ? step(1) : setActive(index)}
               aria-label={selected ? `${slide.title}. Próximo lançamento` : `Selecionar ${slide.title}`}
               aria-current={selected ? "true" : undefined}
-              className="absolute inset-0 overflow-hidden bg-[#111217] text-left shadow-[0_22px_52px_rgba(0,0,0,0.48)] focus-visible:outline-2 focus-visible:outline-brand-orange"
+              className="absolute inset-0 overflow-hidden bg-surface text-left shadow-[0_22px_52px_rgba(0,0,0,0.48)] focus-visible:outline-2 focus-visible:outline-brand-orange"
               style={{
                 borderRadius: Math.min(16, Math.max(0, radius) * 4),
                 opacity: visible ? 1 : 0,

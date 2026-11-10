@@ -19,7 +19,7 @@ export function ProfileAvatar({ avatarUrl, displayName, isOfficial }: ProfileAva
 
   return (
     <div className="relative -mt-14 shrink-0 sm:-mt-16">
-      <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-background-void bg-[#16171D] shadow-xl ring-2 ring-white/10 sm:h-32 sm:w-32">
+      <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-background-void bg-surface-raised shadow-xl ring-2 ring-white/10 sm:h-32 sm:w-32">
         {resolved ? (
           <Image
             src={resolved}

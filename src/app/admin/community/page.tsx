@@ -313,7 +313,7 @@ export default function CommunityAdminPage() {
           <button
             type="button"
             onClick={() => setShowNewPollModal(true)}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526] transition-colors"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white hover:bg-brand-orange-bright transition-colors"
           >
             + Nova pergunta
           </button>
@@ -330,7 +330,7 @@ export default function CommunityAdminPage() {
       {/* 4 CARDS DE KPIS NO TOPO */}
       <section aria-label="Estatísticas da Comunidade" className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* CONVERSAS ATIVAS */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -345,7 +345,7 @@ export default function CommunityAdminPage() {
         </div>
 
         {/* PARTICIPAÇÕES HOJE */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -360,7 +360,7 @@ export default function CommunityAdminPage() {
         </div>
 
         {/* DENÚNCIAS ABERTAS */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -375,7 +375,7 @@ export default function CommunityAdminPage() {
         </div>
 
         {/* TAXA DE RESPOSTA */}
-        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e0f14] p-4">
+        <div className="flex items-center justify-between rounded-xl border border-white/10 bg-surface p-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
               <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -397,7 +397,7 @@ export default function CommunityAdminPage() {
         <div className="space-y-6">
 
           {/* FILA DE MODERAÇÃO */}
-          <section aria-labelledby="moderation-queue-title" className="rounded-xl border border-white/10 bg-[#0e0f14]">
+          <section aria-labelledby="moderation-queue-title" className="rounded-xl border border-white/10 bg-surface">
             <div className="flex flex-col gap-4 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <h2 id="moderation-queue-title" className="font-heading text-base font-bold text-white">
@@ -436,7 +436,7 @@ export default function CommunityAdminPage() {
                     className="h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] pl-9 pr-3 text-xs text-white outline-none focus:border-brand-orange/40"
                   />
                 </div>
-                <select className="h-9 rounded-lg border border-white/10 bg-[#0e0f14] px-3 text-xs text-gray-300 outline-none">
+                <select className="h-9 rounded-lg border border-white/10 bg-surface px-3 text-xs text-gray-300 outline-none">
                   <option>Todas as prioridades</option>
                   <option>Alta</option>
                   <option>Média</option>
@@ -549,7 +549,7 @@ export default function CommunityAdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* ATIVIDADE NO BRICKBOARD */}
-            <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 flex flex-col justify-between">
+            <div className="rounded-xl border border-white/10 bg-surface p-4 flex flex-col justify-between">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white">Atividade no Brickboard</h3>
                 <p className="mt-1 text-xs text-gray-400">Nenhuma série histórica configurada.</p>
@@ -562,7 +562,7 @@ export default function CommunityAdminPage() {
             </div>
 
             {/* CONVERSAS EM DESTAQUE */}
-            <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 flex flex-col justify-between">
+            <div className="rounded-xl border border-white/10 bg-surface p-4 flex flex-col justify-between">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white mb-3">Conversas em destaque</h3>
                 <div className="space-y-3">
@@ -583,7 +583,7 @@ export default function CommunityAdminPage() {
         <aside className="space-y-4">
 
           {/* PERGUNTA DO DIA */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Pergunta do dia</h3>
               <span className="text-xs text-gray-500">{poll?.prompt_date ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${poll.prompt_date}T12:00:00`)) : "Sem pergunta ativa"}</span>
@@ -619,7 +619,7 @@ export default function CommunityAdminPage() {
           </div>
 
           {/* SAÚDE DA COMUNIDADE */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-heading text-sm font-bold text-white">Saúde da comunidade</h3>
               <span className="text-xs font-bold text-gray-500">Sem cálculo</span>
@@ -659,7 +659,7 @@ export default function CommunityAdminPage() {
           </div>
 
           {/* ASSUNTOS ACOMPANHADOS */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <h3 className="font-heading text-sm font-bold text-white">Assuntos acompanhados</h3>
@@ -728,7 +728,7 @@ export default function CommunityAdminPage() {
       {/* MODAL DE CRIAR/EDITAR PERGUNTA DO DIA */}
       {showNewPollModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowNewPollModal(false)}>
-          <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md space-y-4 rounded-xl border border-white/10 bg-[#0e0f14] p-4 text-white sm:p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="poll-dialog-title" className="w-full max-w-md space-y-4 rounded-xl border border-white/10 bg-surface p-4 text-white sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="poll-dialog-title" className="font-heading text-base font-bold">Pergunta do dia</h3>
               <button type="button" onClick={() => setShowNewPollModal(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar">
@@ -796,7 +796,7 @@ export default function CommunityAdminPage() {
                 type="button"
                 onClick={handleSavePoll}
                 disabled={isSavingPoll}
-                className="h-9 rounded bg-brand-orange px-4 text-xs font-bold text-white hover:bg-[#ff7526] disabled:opacity-50"
+                className="h-9 rounded bg-brand-orange px-4 text-xs font-bold text-white hover:bg-brand-orange-bright disabled:opacity-50"
               >
                 {isSavingPoll ? "Salvando..." : "Salvar Pergunta"}
               </button>
@@ -806,7 +806,7 @@ export default function CommunityAdminPage() {
       )}
       {pendingModeration && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setPendingModeration(null)}>
-          <div role="alertdialog" aria-modal="true" aria-labelledby="moderation-dialog-title" aria-describedby="moderation-dialog-description" className="w-full max-w-lg rounded-xl border border-white/10 bg-[#0e0f14] p-6 text-white">
+          <div role="alertdialog" aria-modal="true" aria-labelledby="moderation-dialog-title" aria-describedby="moderation-dialog-description" className="w-full max-w-lg rounded-xl border border-white/10 bg-surface p-6 text-white">
             <h3 id="moderation-dialog-title" className="font-heading text-lg font-bold">Confirmar ação de moderação</h3>
             <p id="moderation-dialog-description" className="mt-2 text-sm leading-6 text-gray-300">
               {pendingModeration.action === "dismiss" && "A denúncia será encerrada sem alterar o conteúdo."}
@@ -826,7 +826,7 @@ export default function CommunityAdminPage() {
                 autoFocus
                 disabled={Boolean(activeModerationId)}
                 onClick={() => void handleModeration(pendingModeration.report.id, pendingModeration.action)}
-                className="min-h-11 bg-brand-orange px-4 text-sm font-bold text-white hover:bg-[#ff7526] disabled:opacity-50"
+                className="min-h-11 bg-brand-orange px-4 text-sm font-bold text-white hover:bg-brand-orange-bright disabled:opacity-50"
               >
                 {activeModerationId ? "Processando..." : "Confirmar ação"}
               </button>

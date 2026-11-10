@@ -4,7 +4,7 @@ import { CredentialAuthForm } from "@/components/auth/CredentialAuthForm";
 export default function SignupPage() {
   return (
     <main id="conteudo-principal" tabIndex={-1} className="grid min-h-dvh bg-background-void text-white lg:grid-cols-[minmax(0,0.95fr)_minmax(32rem,1.05fr)]">
-      <section className="relative hidden min-h-dvh overflow-hidden border-r border-white/10 bg-[#12141a] p-10 lg:flex lg:flex-col lg:justify-between xl:p-16">
+      <section className="relative hidden min-h-dvh overflow-hidden border-r border-white/10 bg-surface p-10 lg:flex lg:flex-col lg:justify-between xl:p-16">
         <div>
           <Link href="/" className="font-heading text-xl font-black uppercase tracking-wider text-white">
             Orange<span className="text-brand-orange">_</span>Brick
@@ -16,10 +16,7 @@ export default function SignupPage() {
         </div>
 
         <div className="max-w-xl">
-          <p className="font-subtitle text-xs font-bold uppercase tracking-[0.16em] text-brand-orange">
-            O portal termina. A conversa começa.
-          </p>
-          <h2 className="mt-4 text-balance font-heading text-5xl font-black leading-[0.98] tracking-[-0.03em] xl:text-6xl">
+          <h2 className="text-balance font-heading text-5xl font-black leading-[0.98] tracking-[-0.03em] xl:text-6xl">
             Notícia boa não termina no último parágrafo.
           </h2>
           <p className="mt-5 max-w-[54ch] text-base leading-7 text-gray-300">

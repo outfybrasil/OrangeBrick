@@ -713,7 +713,7 @@ function EditForm() {
               type="button"
               onClick={() => setShowPublishConfirm(true)}
               disabled={isSaving || isLoading}
-              className="col-span-2 min-h-11 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526] disabled:opacity-50 sm:col-span-1"
+              className="col-span-2 min-h-11 rounded-lg px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright disabled:opacity-50 sm:col-span-1"
             >
               Publicar matéria
             </button>
@@ -744,7 +744,7 @@ function EditForm() {
             <button
               type="button"
               onClick={restoreLocalDraft}
-              className="min-h-11 rounded bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-[#ff7526]"
+              className="min-h-11 rounded bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright"
             >
               Restaurar rascunho
             </button>
@@ -764,7 +764,7 @@ function EditForm() {
             ← Voltar para visão geral
           </Link>
 
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-5 space-y-5">
+          <div className="rounded-xl border border-white/10 bg-surface p-5 space-y-5">
             {/* TÍTULO DA MATÉRIA */}
             <div>
               <div className="flex items-center justify-between text-xs font-bold uppercase text-gray-500 mb-1.5">
@@ -1009,7 +1009,7 @@ function EditForm() {
         {/* ── COLUNA DIREITA: SIDEBAR DE CONFIGURAÇÕES E CHECKLIST ── */}
         <aside className="space-y-4">
           {/* PAINEL DE PUBLICAÇÃO */}
-          <div className="rounded-b-xl border-x border-b border-white/10 bg-[#0e0f14] p-4 space-y-4">
+          <div className="rounded-b-xl border-x border-b border-white/10 bg-surface p-4 space-y-4">
             <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Publicação</h3>
 
             <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
@@ -1024,7 +1024,7 @@ function EditForm() {
                 <select
                   value={authorName}
                   onChange={(e) => { setAuthorName(e.target.value); setHasChanges(true); }}
-                  className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
+                  className="h-8 w-full rounded border border-white/10 bg-surface px-2 text-xs text-white outline-none"
                 >
                   {(authorName && !AUTHOR_OPTIONS.includes(authorName) ? [authorName, ...AUTHOR_OPTIONS] : AUTHOR_OPTIONS).map((name) => (
                     <option key={name} value={name}>{name}</option>
@@ -1053,7 +1053,7 @@ function EditForm() {
                     setScheduledAt(val ? new Date(val).toISOString() : null);
                     setHasChanges(true);
                   }}
-                  className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none focus:border-brand-orange/40"
+                  className="h-8 w-full rounded border border-white/10 bg-surface px-2 text-xs text-white outline-none focus:border-brand-orange/40"
                 />
                 {scheduledAt && (
                   <button
@@ -1072,7 +1072,7 @@ function EditForm() {
               <select
                 value={category}
                 onChange={(e) => { setCategory(e.target.value as PostCategory); setHasChanges(true); }}
-                className="h-8 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
+                className="h-8 w-full rounded border border-white/10 bg-surface px-2 text-xs text-white outline-none"
               >
                 {CATEGORY_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1085,7 +1085,7 @@ function EditForm() {
               <select
                 value={topicId}
                 onChange={(event) => { setTopicId(event.target.value); setHasChanges(true); }}
-                className="h-9 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none"
+                className="h-9 w-full rounded border border-white/10 bg-surface px-2 text-xs text-white outline-none"
               >
                 <option value="">Nenhum tópico</option>
                 {topics.map((topic) => <option key={topic.id} value={topic.id}>{topic.name}</option>)}
@@ -1094,7 +1094,7 @@ function EditForm() {
 
             <div>
               <label htmlFor="information-status" className="mb-1 block text-xs font-bold text-gray-500">Estado da informação</label>
-              <select id="information-status" value={informationStatus} onChange={(event) => { setInformationStatus(event.target.value as InformationStatus); setHasChanges(true); }} className="h-9 w-full rounded border border-white/10 bg-[#0e0f14] px-2 text-xs text-white outline-none focus:border-brand-orange/50">
+              <select id="information-status" value={informationStatus} onChange={(event) => { setInformationStatus(event.target.value as InformationStatus); setHasChanges(true); }} className="h-9 w-full rounded border border-white/10 bg-surface px-2 text-xs text-white outline-none focus:border-brand-orange/50">
                 <option value="confirmed">Confirmada</option>
                 <option value="developing">Em desenvolvimento</option>
                 <option value="rumor">Rumor não confirmado</option>
@@ -1114,7 +1114,7 @@ function EditForm() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fala em destaque</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">A publicação exige uma página específica e a confirmação do texto e da autoria.</p></div>
             <textarea value={quoteText} onChange={(event) => { setQuoteText(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} rows={4} maxLength={500} placeholder="Declaração exata, sem aspas" aria-label="Declaração em destaque" className="w-full rounded border border-white/10 bg-background-void p-2 text-xs text-white outline-none focus:border-brand-orange/50" />
             <div className="grid gap-2 xs:grid-cols-2"><label className="space-y-1 text-xs font-bold text-gray-300">Nome da pessoa<input value={quoteAuthor} onChange={(event) => { setQuoteAuthor(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} placeholder="Ex.: Phil Spencer" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label><label className="space-y-1 text-xs font-bold text-gray-300">Cargo ou função<input value={quoteRole} onChange={(event) => { setQuoteRole(event.target.value); setQuoteSourceVerified(false); setHasChanges(true); }} placeholder="Ex.: CEO da Microsoft Gaming" className="min-h-11 w-full rounded border border-white/10 bg-background-void px-3 text-sm font-normal text-white outline-none focus:border-brand-orange/50" /></label></div>
@@ -1129,13 +1129,13 @@ function EditForm() {
             </label>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <div><h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Fontes consultadas</h3><p className="mt-1 text-xs leading-relaxed text-gray-500">Uma por linha: Nome|URL. Use |oficial quando for comunicado oficial e |verificada após conferir a página e sua relevância.</p></div>
             <textarea value={sourcesText} onChange={(event) => { setSourcesText(event.target.value); setHasChanges(true); }} rows={5} spellCheck={false} placeholder={"Xbox Wire|https://news.xbox.com/article/slug|oficial|verificada\nVGC|https://videogameschronicle.com/article/slug|verificada"} aria-label="Fontes da matéria, uma por linha no formato Nome|URL, com marcadores oficial e verificada opcionais" className="w-full rounded border border-white/10 bg-background-void p-2 font-mono text-xs leading-relaxed text-white outline-none focus:border-brand-orange/50" />
           </div>
 
           {/* WIDGET IMAGEM DE CAPA */}
-          <div className="rounded-xl border border-white/10 bg-[#0e0f14] p-4 space-y-3">
+          <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">
             <h3 className="font-heading text-xs font-bold uppercase tracking-wider text-white">Imagem de capa</h3>
             <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-background-void border border-white/10">
               {imageUrl ? (
@@ -1193,7 +1193,7 @@ function EditForm() {
       {/* MODAL DE PREVIEW */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onMouseDown={(event) => event.target === event.currentTarget && setShowPreview(false)}>
-          <div ref={previewRef} role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" tabIndex={-1} className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-white/10 bg-[#0e0f14] p-4 text-white focus:outline-none sm:max-h-[90vh] sm:p-6">
+          <div ref={previewRef} role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" tabIndex={-1} className="max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-white/10 bg-surface p-4 text-white focus:outline-none sm:max-h-[90vh] sm:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id="preview-dialog-title" className="font-heading text-lg font-bold">Pré-visualização da Matéria</h3>
               <button type="button" onClick={() => setShowPreview(false)} className="min-h-11 min-w-11 text-gray-400 hover:text-white" aria-label="Fechar pré-visualização">

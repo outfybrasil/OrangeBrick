@@ -121,7 +121,7 @@ export function CommunityPulse() {
             href={isEn ? `/en/brickboard?post=${posts[0].id}` : `/brickboard?post=${posts[0].id}`}
             data-home-event="brickboard"
             data-home-target={posts[0].id}
-            className="group block rounded-sm border border-white/10 bg-[#111217] p-5 sm:p-6 transition-colors hover:border-brand-orange/40"
+            className="group block rounded-sm border border-white/10 bg-surface p-5 sm:p-6 transition-colors hover:border-brand-orange/40"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3.5 min-w-0">
@@ -171,7 +171,7 @@ export function CommunityPulse() {
                   href={`/brickboard?post=${post.id}`}
                   data-home-event="brickboard"
                   data-home-target={post.id}
-                  className="group flex flex-col justify-between rounded-lg border border-white/10 bg-[#111217] p-4 transition-colors hover:border-brand-orange/40 hover:bg-white/[0.02]"
+                  className="group flex flex-col justify-between rounded-lg border border-white/10 bg-surface p-4 transition-colors hover:border-brand-orange/40 hover:bg-white/[0.02]"
                 >
                   <div className="flex items-center gap-2.5 mb-2">
                     {post.author_avatar ? (

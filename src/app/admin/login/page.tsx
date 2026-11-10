@@ -63,7 +63,7 @@ export default function AdminLogin() {
 
   return (
     <main id="conteudo-principal" tabIndex={-1} className="grid min-h-dvh bg-background-void text-white lg:grid-cols-[minmax(360px,0.9fr)_minmax(520px,1.1fr)]">
-      <section className="relative hidden overflow-hidden border-r border-white/[0.07] bg-[#15161d] p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
+      <section className="relative hidden overflow-hidden border-r border-white/[0.07] bg-surface p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
         
         <Link href="/" className="relative flex w-fit items-center gap-3 rounded-xl focus-visible:outline-2 focus-visible:outline-brand-orange">
           <BrandLogo alt="Orange Brick" className="h-7 w-auto" />
@@ -94,7 +94,7 @@ export default function AdminLogin() {
             <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-bold text-gray-400">Admin</span>
           </div>
 
-          <div className="rounded-2xl bg-[#15161d] p-5 sm:p-8">
+          <div className="rounded-2xl bg-surface p-5 sm:p-8">
             <div>
               <p className="text-sm font-bold text-brand-orange">Acesso administrativo</p>
               <h1 className="mt-2 font-heading text-3xl font-black tracking-[-0.03em]">Entrar na redação</h1>

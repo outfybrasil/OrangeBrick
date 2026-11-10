@@ -25,7 +25,7 @@ export function ProfileRepliesTab({ replies, isLoading }: ProfileRepliesTabProps
     return (
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse rounded-sm border border-white/10 bg-[#111217] p-5">
+          <div key={i} className="animate-pulse rounded-sm border border-white/10 bg-surface p-5">
             <div className="h-4 w-1/3 rounded bg-card-slate" />
             <div className="mt-3 h-12 rounded bg-card-slate/50" />
             <div className="mt-3 h-4 w-1/2 rounded bg-card-slate" />
@@ -37,7 +37,7 @@ export function ProfileRepliesTab({ replies, isLoading }: ProfileRepliesTabProps
 
   if (replies.length === 0) {
     return (
-      <div className="rounded-sm border border-white/10 bg-[#111217] p-8 text-center text-sm text-gray-400">
+      <div className="rounded-sm border border-white/10 bg-surface p-8 text-center text-sm text-gray-400">
         Nenhuma resposta publicada ainda.
       </div>
     );
@@ -48,10 +48,10 @@ export function ProfileRepliesTab({ replies, isLoading }: ProfileRepliesTabProps
       {replies.map((reply) => (
         <article
           key={reply.id}
-          className="rounded-sm border border-white/10 bg-[#111217] p-5 transition-colors hover:border-brand-orange/40"
+          className="rounded-sm border border-white/10 bg-surface p-5 transition-colors hover:border-brand-orange/40"
         >
           {reply.original_post && (
-            <div className="mb-4 rounded-sm border-l-2 border-brand-orange bg-[#16171D] p-3 text-xs">
+            <div className="mb-4 rounded-sm border-l-2 border-brand-orange bg-surface-raised p-3 text-xs">
               <span className="font-bold text-gray-400">
                 Em resposta a{" "}
                 <span className="text-white">

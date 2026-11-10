@@ -63,12 +63,12 @@ export function GameRadarAutocomplete({ onSelect }: { onSelect: (game: GameResul
         }}
         placeholder="Digite o nome oficial do jogo"
         autoComplete="off"
-        className="min-h-11 w-full rounded-xl border border-white/10 bg-[#111218] px-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-brand-orange"
+        className="min-h-11 w-full rounded-xl border border-white/10 bg-surface px-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-brand-orange"
       />
       {isLoading && <span className="absolute right-4 top-10 size-4 animate-spin rounded-full border-2 border-brand-orange border-t-transparent" aria-label="Buscando jogos" />}
       {error && <p className="mt-2 text-xs text-amber-200">{error}</p>}
       {displayedResults.length > 0 && (
-        <div className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-y-auto rounded-xl border border-white/10 bg-[#111218] p-1 shadow-2xl shadow-black/60">
+        <div className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-y-auto rounded-xl border border-white/10 bg-surface p-1 shadow-2xl shadow-black/60">
           {displayedResults.map((game) => (
             <button key={game.id} type="button" onClick={() => { onSelect(game); setQuery(game.title); setResults([]); }} className="flex min-h-14 w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange">
               {game.referenceImageUrl ? <img src={game.referenceImageUrl} alt="" className="h-10 w-16 shrink-0 rounded-md object-cover" /> : <span className="h-10 w-16 shrink-0 rounded-md bg-white/[0.05]" />}
