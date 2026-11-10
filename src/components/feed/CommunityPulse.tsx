@@ -187,12 +187,12 @@ export function CommunityPulse() {
                       </div>
                     )}
                     <span className="truncate text-xs font-bold text-gray-300">{post.author_name}</span>
-                    <span className="text-[11px] text-gray-500">· {timeAgo(post.created_at)}</span>
+                    <span className="text-xs text-gray-500">· {timeAgo(post.created_at)}</span>
                   </div>
                   <p className="line-clamp-2 text-xs leading-relaxed text-gray-300 group-hover:text-white">
                     {post.content}
                   </p>
-                  <div className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-500">
+                  <div className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>

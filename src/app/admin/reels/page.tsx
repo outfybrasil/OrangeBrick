@@ -543,10 +543,10 @@ function DarkPipelineStudio({
       <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#0b0d14] p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="rounded-md bg-brand-orange/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
+            <span className="rounded-md bg-brand-orange/20 px-2 py-0.5 text-xs font-black uppercase tracking-wider text-brand-orange">
               {darkConfig?.channel_name || "Orange Brick Docs"}
             </span>
-            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-300">
               Mid-Roll (&ge; 08:00)
             </span>
           </div>
@@ -575,7 +575,7 @@ function DarkPipelineStudio({
         <div className="rounded-3xl border border-brand-orange/40 bg-[#0e111a] p-3.5 sm:p-6 shadow-2xl">
           <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
+              <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-brand-orange">
                 Etapa 1 da Esteira · Entrada da Produção
               </span>
               <h3 className="mt-1 font-heading text-lg sm:text-xl font-black text-white">
@@ -620,7 +620,7 @@ function DarkPipelineStudio({
                     <label className="block text-xs font-bold uppercase tracking-wider text-gray-300">
                       Ideias Rápidas de Pauta (Opcional)
                     </label>
-                    <span className="text-[11px] text-gray-500">Ou digite o tema que desejar abaixo</span>
+                    <span className="text-xs text-gray-500">Ou digite o tema que desejar abaixo</span>
                   </div>
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     {DARK_PRESET_THEMES.map((preset) => (
@@ -635,7 +635,7 @@ function DarkPipelineStudio({
                         }`}
                       >
                         <p className="line-clamp-1 text-xs font-black text-brand-orange">{preset.label.split("·")[1]?.trim() || preset.label}</p>
-                        <p className="mt-0.5 line-clamp-1 text-[11px] text-gray-400">{preset.subtitle}</p>
+                        <p className="mt-0.5 line-clamp-1 text-xs text-gray-400">{preset.subtitle}</p>
                       </button>
                     ))}
                   </div>
@@ -707,7 +707,7 @@ function DarkPipelineStudio({
                             />
                             <span className="truncate font-semibold">{post.title}</span>
                           </div>
-                          <span className="shrink-0 text-[10px] text-gray-400">{formatDate(post.published_at || post.created_at)}</span>
+                          <span className="shrink-0 text-xs text-gray-400">{formatDate(post.published_at || post.created_at)}</span>
                         </label>
                       );
                     })}
@@ -737,7 +737,7 @@ function DarkPipelineStudio({
                       <strong className="text-white">{manualScriptStats.formattedDuration}</strong>
                     </span>
                     <span
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-black uppercase ${
+                      className={`rounded-md px-2 py-0.5 text-xs font-black uppercase ${
                         manualScriptStats.reachesMidRoll
                           ? "bg-emerald-500/20 text-emerald-300"
                           : "bg-amber-500/20 text-amber-300"
@@ -819,7 +819,7 @@ function DarkPipelineStudio({
                 {creatorVoice === "none" && (
                   <div className="rounded-xl border border-brand-orange/40 bg-brand-orange/10 p-3 text-xs text-amber-200">
                     <p className="font-black uppercase text-brand-orange">🎤 Modo Gravação de Voz Própria Ativo</p>
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-gray-200">
+                    <p className="mt-0.5 text-xs leading-relaxed text-gray-200">
                       O vídeo será gerado sem voz de IA, mantendo apenas a trilha ambiente suave e o ritmo de leitura natural (135 palavras/min) com legendas sincronizadas na tela e arquivo .SRT para servir de teleprompter quando você gravar seu áudio por cima.
                     </p>
                   </div>
@@ -861,7 +861,7 @@ function DarkPipelineStudio({
           <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
             Episódios em Produção / Revisão ({longVideos.length})
           </p>
-          <span className="text-[11px] text-gray-500">Selecione para assistir e aprovar</span>
+          <span className="text-xs text-gray-500">Selecione para assistir e aprovar</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -888,17 +888,17 @@ function DarkPipelineStudio({
                 className="w-full min-w-0 text-left"
               >
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                  <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase ${badge.className}`}>
+                  <span className={`rounded-md border px-2 py-0.5 text-xs font-black uppercase ${badge.className}`}>
                     {badge.label}
                   </span>
-                  <span className="text-[11px] font-bold text-emerald-400">
+                  <span className="text-xs font-bold text-emerald-400">
                     ⏱️ {video.duration_formatted} {video.monetization_midroll_eligible ? "· Mid-Roll Ativo" : ""}
                   </span>
                 </div>
                 <p className="mt-1.5 font-heading text-sm font-black text-white leading-snug break-words">
                   {video.title}
                 </p>
-                <p className="mt-1 text-[11px] text-gray-400 break-words">
+                <p className="mt-1 text-xs text-gray-400 break-words">
                   {video.chapters?.length || 8} capítulos · {formatBytes(video.file_size)} · {video.resolution}
                 </p>
               </button>
@@ -910,14 +910,14 @@ function DarkPipelineStudio({
                       type="button"
                       disabled={isSubmittingDarkAction}
                       onClick={() => void handleDeleteLongEpisode(video.slug)}
-                      className="rounded-lg bg-red-500 px-2.5 py-1.5 text-[11px] font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
+                      className="rounded-lg bg-red-500 px-2.5 py-1.5 text-xs font-black uppercase text-white hover:bg-red-400 disabled:opacity-60"
                     >
                       Confirmar
                     </button>
                     <button
                       type="button"
                       onClick={() => setConfirmDeleteSlug(null)}
-                      className="rounded-lg border border-white/15 px-2 py-1.5 text-[11px] font-bold text-gray-300 hover:text-white"
+                      className="rounded-lg border border-white/15 px-2 py-1.5 text-xs font-bold text-gray-300 hover:text-white"
                     >
                       Cancelar
                     </button>
@@ -939,7 +939,7 @@ function DarkPipelineStudio({
                       type="button"
                       onClick={() => setConfirmDeleteSlug(video.slug)}
                       title="Apagar este vídeo longo"
-                      className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[11px] font-bold text-red-300 transition-colors hover:bg-red-500/25 hover:text-red-200"
+                      className="rounded-lg border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-bold text-red-300 transition-colors hover:bg-red-500/25 hover:text-red-200"
                     >
                       🗑️ Apagar
                     </button>
@@ -985,7 +985,7 @@ function DarkPipelineStudio({
               </div>
 
               <div className="flex flex-col gap-3 border-t border-white/10 bg-[#10131d] p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
                   {activeLongVideo.video_url && (
                     <button
                       type="button"
@@ -1067,14 +1067,14 @@ function DarkPipelineStudio({
             <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
+                  <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                     Etapas 2, 3 e 4 · Navegação Interativa por Capítulos
                   </span>
                   <h3 className="font-heading text-base sm:text-lg font-black text-white">
                     Roteiro Sincronizado & Fontes Primárias ({activeLongVideo.chapters?.length || 0} Capítulos)
                   </h3>
                 </div>
-                <span className="text-[11px] sm:text-xs text-gray-400">Clique para pular no vídeo</span>
+                <span className="text-xs text-gray-400">Clique para pular no vídeo</span>
               </div>
 
               <div className="mt-4 space-y-2">
@@ -1092,19 +1092,19 @@ function DarkPipelineStudio({
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <span className="shrink-0 rounded-lg bg-black/60 px-2 py-0.5 font-mono text-[11px] sm:text-xs font-extrabold text-brand-orange">
+                        <span className="shrink-0 rounded-lg bg-black/60 px-2 py-0.5 font-mono text-xs font-extrabold text-brand-orange">
                           {chapter.timestamp}
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-black text-white leading-snug break-words">
                             Cap. {chapter.number} — {chapter.title}
                           </p>
-                          <p className="mt-0.5 text-[10px] sm:text-[11px] text-gray-400 leading-snug line-clamp-1">
+                          <p className="mt-0.5 text-xs text-gray-400 leading-snug line-clamp-1">
                             Fonte: <strong className="text-gray-200">{chapter.source || "Apuração Orange Brick"}</strong>
                           </p>
                         </div>
                       </div>
-                      <span className="shrink-0 text-[10px] sm:text-[11px] font-semibold text-brand-orange">
+                      <span className="shrink-0 text-xs font-semibold text-brand-orange">
                         Pular ▶
                       </span>
                     </button>
@@ -1117,10 +1117,10 @@ function DarkPipelineStudio({
           <div className="space-y-6 xl:col-span-5 w-full min-w-0">
             <div className="rounded-3xl border border-brand-orange/40 bg-[#10131e] p-3.5 sm:p-5 shadow-xl">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-orange">
+                <span className="rounded-md bg-brand-orange/20 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-brand-orange">
                   Etapa 7 · Portão de Revisão Humana
                 </span>
-                <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase ${longStatusBadge(activeLongVideo.status).className}`}>
+                <span className={`rounded-md border px-2 py-0.5 text-xs font-black uppercase ${longStatusBadge(activeLongVideo.status).className}`}>
                   {longStatusBadge(activeLongVideo.status).label}
                 </span>
               </div>
@@ -1140,7 +1140,7 @@ function DarkPipelineStudio({
               )}
 
               <div className="mt-4">
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
                   Notas do Revisor Editorial (Opcional)
                 </label>
                 <input
@@ -1241,7 +1241,7 @@ function DarkPipelineStudio({
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
-              <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
+              <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                 Etapa 6 · Checagens Automáticas de Qualidade (QA Gate)
               </span>
               <h3 className="mt-0.5 font-heading text-base font-black text-white">
@@ -1256,10 +1256,10 @@ function DarkPipelineStudio({
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-extrabold text-white leading-snug break-words">{check.label}</p>
-                      <p className="mt-0.5 text-[11px] text-gray-400 leading-snug break-words">{check.detail}</p>
+                      <p className="mt-0.5 text-xs text-gray-400 leading-snug break-words">{check.detail}</p>
                     </div>
                     <span
-                      className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
+                      className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-black uppercase ${
                         check.passed
                           ? "bg-emerald-500/20 text-emerald-300"
                           : "bg-amber-500/20 text-amber-300"
@@ -1274,7 +1274,7 @@ function DarkPipelineStudio({
 
             <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5 space-y-4">
               <div>
-                <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
+                <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                   Etapa 8 · Agendamento YouTube & Kit de Publicação
                 </span>
                 <h3 className="mt-0.5 font-heading text-base font-black text-white">
@@ -1290,7 +1290,7 @@ function DarkPipelineStudio({
 
               <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-gray-400">
+                  <label className="block text-xs font-bold uppercase text-gray-400">
                     Data e Hora de Estreia
                   </label>
                   <input
@@ -1301,7 +1301,7 @@ function DarkPipelineStudio({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-gray-400">
+                  <label className="block text-xs font-bold uppercase text-gray-400">
                     Visibilidade no YouTube
                   </label>
                   <select
@@ -1329,7 +1329,7 @@ function DarkPipelineStudio({
                 <div className="space-y-2.5 border-t border-white/10 pt-4">
                   <div className="rounded-xl border border-white/10 bg-[#131622] p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase text-gray-400">Título YouTube (CTR)</span>
+                      <span className="text-xs font-bold uppercase text-gray-400">Título YouTube (CTR)</span>
                       <button
                         type="button"
                         onClick={() => void copyText("Título", activeLongVideo.youtube.title)}
@@ -1343,7 +1343,7 @@ function DarkPipelineStudio({
 
                   <div className="rounded-xl border border-white/10 bg-[#131622] p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold uppercase text-gray-400">
+                      <span className="text-xs font-bold uppercase text-gray-400">
                         Descrição com Capítulos (00:00) e Fontes
                       </span>
                       <button
@@ -1354,7 +1354,7 @@ function DarkPipelineStudio({
                         Copiar
                       </button>
                     </div>
-                    <pre className="mt-1 max-h-32 overflow-y-auto whitespace-pre-wrap break-all font-mono text-[11px] text-gray-300">
+                    <pre className="mt-1 max-h-32 overflow-y-auto whitespace-pre-wrap break-all font-mono text-xs text-gray-300">
                       {activeLongVideo.youtube.description}
                     </pre>
                   </div>
@@ -1380,7 +1380,7 @@ function DarkPipelineStudio({
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-[#0e1017] p-3.5 sm:p-5">
-              <span className="text-[11px] font-black uppercase tracking-wider text-brand-orange">
+              <span className="text-xs font-black uppercase tracking-wider text-brand-orange">
                 Distribuição Cruzada · Funil de Tráfego Orgânico
               </span>
               <h3 className="mt-0.5 font-heading text-base font-black text-white">
@@ -1398,11 +1398,11 @@ function DarkPipelineStudio({
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                       <span className="text-xs font-black text-white leading-snug break-words">{cut.title}</span>
-                      <span className="self-start sm:self-auto shrink-0 rounded bg-brand-orange/20 px-2 py-0.5 font-mono text-[10px] font-bold text-brand-orange">
+                      <span className="self-start sm:self-auto shrink-0 rounded bg-brand-orange/20 px-2 py-0.5 font-mono text-xs font-bold text-brand-orange">
                         {cut.start_timestamp} → {cut.end_timestamp} ({cut.duration_seconds}s)
                       </span>
                     </div>
-                    <p className="text-[11px] text-gray-300 break-words">
+                    <p className="text-xs text-gray-300 break-words">
                       Gancho: &ldquo;{cut.hook}&rdquo;
                     </p>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5">
@@ -1414,14 +1414,14 @@ function DarkPipelineStudio({
                             Math.max(0, Number.parseInt(cut.chapter_number, 10) - 1)
                           )
                         }
-                        className="text-left text-[11px] font-bold text-gray-400 hover:text-white"
+                        className="text-left text-xs font-bold text-gray-400 hover:text-white"
                       >
                         ▶ Ouvir trecho no player
                       </button>
                       <button
                         type="button"
                         onClick={() => onOpenRelatedReel(cut.related_slug)}
-                        className="text-left sm:text-right text-[11px] font-extrabold text-brand-orange hover:underline"
+                        className="text-left sm:text-right text-xs font-extrabold text-brand-orange hover:underline"
                       >
                         Abrir nos Reels 9:16 →
                       </button>
@@ -1841,14 +1841,14 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <button
             type="button"
             onClick={() => switchMode("long")}
-            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "long"
                 ? "bg-brand-orange text-black shadow-lg shadow-brand-orange/20"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
             <span className="truncate">🎬 Vídeos Longos</span>
-            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs font-extrabold ${pipelineMode === "long" ? "bg-black/20 text-black" : "bg-white/10 text-gray-300"}`}>
               {longVideos.length}
             </span>
           </button>
@@ -1856,20 +1856,20 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <button
             type="button"
             onClick={() => switchMode("short")}
-            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all ${
+            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-2.5 py-2 sm:px-4 sm:py-2.5 text-xs font-black uppercase tracking-wider transition-all ${
               pipelineMode === "short"
                 ? "bg-white text-black shadow-lg"
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
             <span className="truncate">📱 Reels (9:16)</span>
-            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs font-extrabold ${pipelineMode === "short" ? "bg-black/15 text-black" : "bg-white/10 text-gray-300"}`}>
               {stats.ready}/{stats.total}
             </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 px-1 text-[11px] sm:text-xs text-gray-400">
+        <div className="flex items-center gap-2 px-1 text-xs text-gray-400">
           <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-400">
             <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
             Trava Humana Ativa: Nada vai ao ar sem aprovação
@@ -2083,24 +2083,24 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
 
                         <span
                           style={{ backgroundColor: cat.color }}
-                          className="absolute left-3 top-3 rounded-md px-2 py-0.5 text-[10px] font-black uppercase text-black"
+                          className="absolute left-3 top-3 rounded-md px-2 py-0.5 text-xs font-black uppercase text-black"
                         >
                           {cat.label}
                         </span>
 
                         <div className="absolute right-3 top-3">
                           {isReady ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-black uppercase text-black backdrop-blur-sm shadow-md">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-xs font-black uppercase text-black backdrop-blur-sm shadow-md">
                               <span className="h-1.5 w-1.5 rounded-full bg-black" />
                               PRONTO
                             </span>
                           ) : isGenerating ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black uppercase text-black backdrop-blur-sm animate-pulse">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black uppercase text-black backdrop-blur-sm animate-pulse">
                               <span className="h-1.5 w-1.5 rounded-full bg-black" />
                               {isQueued ? "NA FILA" : "GERANDO"}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-black/60 border border-white/20 px-2 py-0.5 text-[10px] font-bold uppercase text-gray-300 backdrop-blur-sm">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-black/60 border border-white/20 px-2 py-0.5 text-xs font-bold uppercase text-gray-300 backdrop-blur-sm">
                               PENDENTE
                             </span>
                           )}
@@ -2123,7 +2123,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                       </div>
 
                       <div className="p-4">
-                        <p className="text-[11px] font-semibold text-gray-400">
+                        <p className="text-xs font-semibold text-gray-400">
                           {item.is_published ? "Publicado em" : "Criado em"} {formatDate(item.published_at || item.created_at)}
                         </p>
                         <h3 className="mt-1 line-clamp-2 font-heading text-sm font-black leading-snug text-white">
@@ -2135,7 +2135,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                             {item.targetPlatforms.map((p) => (
                               <span
                                 key={p}
-                                className={`rounded px-1.5 py-0.5 text-[9px] font-black uppercase ${
+                                className={`rounded px-1.5 py-0.5 text-xs font-black uppercase ${
                                   p === "youtube"
                                     ? "bg-[#ff0000]/15 text-red-300 border border-[#ff0000]/30"
                                     : p === "tiktok"
@@ -2150,7 +2150,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                         )}
 
                         {isReady && (
-                          <div className="mt-3 flex items-center gap-3 border-t border-white/5 pt-2 text-[11px] text-gray-400">
+                          <div className="mt-3 flex items-center gap-3 border-t border-white/5 pt-2 text-xs text-gray-400">
                             <span>⏱️ {item.duration ? `${item.duration}s` : "35s"}</span>
                             <span>💾 {formatBytes(item.file_size)}</span>
                             <span className="text-emerald-400 font-bold">1080×1920</span>
@@ -2171,17 +2171,17 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                               {isStalled || isRetrying ? <span aria-hidden="true">⚠</span> : <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />}
                               <span>{isQueued ? `Na fila${item.queue_position ? ` · posição ${item.queue_position}` : ""}` : "Sintetizando voz e renderizando quadros"}</span>
                             </div>
-                            <p className="mt-1 pl-5 text-[11px] font-medium text-gray-300">
+                            <p className="mt-1 pl-5 text-xs font-medium text-gray-300">
                               Tempo estimado restante: {formatCountdown(remainingSeconds)}
                             </p>
-                            {isEstimateOverdue && <p className="mt-1 pl-5 text-[11px] text-amber-200">A estimativa foi ultrapassada; o worker ainda informa que está processando.</p>}
-                            {isRetrying && <p className="mt-1 pl-5 text-[11px]">A geração foi retomada automaticamente. Tentativa {item.attempts}.</p>}
-                            {isStalled && <p role="alert" className="mt-1 pl-5 text-[11px]">Possível travamento detectado. Atualize a lista; se o status não mudar, cancele e tente gerar novamente.</p>}
+                            {isEstimateOverdue && <p className="mt-1 pl-5 text-xs text-amber-200">A estimativa foi ultrapassada; o worker ainda informa que está processando.</p>}
+                            {isRetrying && <p className="mt-1 pl-5 text-xs">A geração foi retomada automaticamente. Tentativa {item.attempts}.</p>}
+                            {isStalled && <p role="alert" className="mt-1 pl-5 text-xs">Possível travamento detectado. Atualize a lista; se o status não mudar, cancele e tente gerar novamente.</p>}
                           </div>
                         )}
 
                         {item.status === "failed" && !isGenerating && (
-                          <p className="mt-2 text-[11px] text-red-400">
+                          <p className="mt-2 text-xs text-red-400">
                             {item.error || "Houve uma falha na renderização anterior."}{item.attempts ? ` Tentativas: ${item.attempts}.` : ""}
                           </p>
                         )}
@@ -2304,7 +2304,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                     type="button"
                     onClick={() => handleCancel(selectedReel.slug)}
                     disabled={cancellingSlug === selectedReel.slug}
-                    className="rounded-lg border border-red-500/40 bg-red-500/10 py-1.5 text-[11px] font-bold text-red-300 hover:text-white hover:bg-red-500/20 transition-colors"
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 py-1.5 text-xs font-bold text-red-300 hover:text-white hover:bg-red-500/20 transition-colors"
                   >
                     {cancellingSlug === selectedReel.slug ? "Cancelando..." : "Cancelar criação do Reel"}
                   </button>
@@ -2313,7 +2313,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                     type="button"
                     onClick={() => promptPlatformSelection(selectedReel)}
                     disabled={triggeringSlug === selectedReel.slug}
-                    className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-[11px] font-bold text-gray-400 hover:text-white hover:bg-white/10"
+                    className="rounded-lg border border-white/10 bg-white/[0.04] py-1.5 text-xs font-bold text-gray-400 hover:text-white hover:bg-white/10"
                   >
                     {triggeringSlug === selectedReel.slug ? "Processando..." : "Regerar este vídeo com IA"}
                   </button>
@@ -2323,7 +2323,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
 
             <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-7 lg:overflow-y-auto">
               <div>
-                <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-black uppercase text-brand-orange">
+                <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs font-black uppercase text-brand-orange">
                   Assistente de Publicação
                 </span>
                 <h2 className="mt-1 font-heading text-xl font-black text-white sm:text-2xl leading-snug">
@@ -2334,16 +2334,16 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                 </p>
 
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-gray-400">Publicação automática:</span>
+                  <span className="text-xs font-bold text-gray-400">Publicação automática:</span>
                   {(selectedReel.targetPlatforms || ["youtube", "tiktok", "instagram"]).length === 0 ? (
-                    <span className="rounded bg-amber-500/20 px-2 py-0.5 text-[10px] font-black uppercase text-amber-300 border border-amber-500/30">
+                    <span className="rounded bg-amber-500/20 px-2 py-0.5 text-xs font-black uppercase text-amber-300 border border-amber-500/30">
                       Desativada (Download Apenas)
                     </span>
                   ) : (
                     (selectedReel.targetPlatforms || ["youtube", "tiktok", "instagram"]).map((p) => (
                       <span
                         key={p}
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-black uppercase ${
+                        className={`rounded-md px-2 py-0.5 text-xs font-black uppercase ${
                           p === "youtube"
                             ? "bg-[#ff0000]/20 text-red-300 border border-[#ff0000]/30"
                             : p === "tiktok"
@@ -2358,7 +2358,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   <button
                     type="button"
                     onClick={() => promptPlatformSelection(selectedReel)}
-                    className="ml-2 text-[11px] font-extrabold text-brand-orange hover:underline"
+                    className="ml-2 text-xs font-extrabold text-brand-orange hover:underline"
                   >
                     Alterar redes
                   </button>
@@ -2452,7 +2452,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
           <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#121214] p-6 shadow-2xl space-y-5">
             <div>
               <div className="flex items-center justify-between">
-                <span className="rounded-md bg-brand-orange/20 px-2.5 py-1 text-[11px] font-black uppercase text-brand-orange tracking-wide">
+                <span className="rounded-md bg-brand-orange/20 px-2.5 py-1 text-xs font-black uppercase text-brand-orange tracking-wide">
                   Destinos de Publicação
                 </span>
                 <button
@@ -2493,7 +2493,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-sm text-white">🔴 YouTube Shorts</span>
                     {targetPlatformsModal.platforms.youtube && (
-                      <span className="rounded bg-[#ff0000]/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-red-200">Ativo</span>
+                      <span className="rounded bg-[#ff0000]/30 px-1.5 py-0.2 text-xs font-black uppercase text-red-200">Ativo</span>
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-300">
@@ -2523,7 +2523,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-sm text-white">🎵 TikTok</span>
                     {targetPlatformsModal.platforms.tiktok && (
-                      <span className="rounded bg-[#fe2c55]/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-pink-200">Ativo</span>
+                      <span className="rounded bg-[#fe2c55]/30 px-1.5 py-0.2 text-xs font-black uppercase text-pink-200">Ativo</span>
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-300">
@@ -2553,7 +2553,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                   <div className="flex items-center gap-2">
                     <span className="font-extrabold text-sm text-white">📸 Instagram Reels</span>
                     {targetPlatformsModal.platforms.instagram && (
-                      <span className="rounded bg-pink-500/30 px-1.5 py-0.2 text-[9px] font-black uppercase text-pink-200">Ativo</span>
+                      <span className="rounded bg-pink-500/30 px-1.5 py-0.2 text-xs font-black uppercase text-pink-200">Ativo</span>
                     )}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-300">
@@ -2563,7 +2563,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
               </label>
             </div>
 
-            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-[11px] text-gray-400">
+            <div className="rounded-xl bg-white/[0.03] border border-white/5 p-3 text-xs text-gray-400">
               {!targetPlatformsModal.platforms.youtube && !targetPlatformsModal.platforms.tiktok && !targetPlatformsModal.platforms.instagram ? (
                 <span className="text-amber-400 font-semibold">
                   ⚠️ Nenhuma rede selecionada: o Reel será gerado somente para download local no painel, sem envio a nenhuma rede social.

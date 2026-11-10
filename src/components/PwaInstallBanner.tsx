@@ -101,12 +101,12 @@ export function PwaInstallBanner() {
       </div>
 
       <div className="flex items-center justify-between rounded-xl border border-white/5 bg-black/30 px-3 py-1.5 text-xs">
-        <span className="text-[11px] text-gray-400">Estilo do ícone:</span>
+        <span className="text-xs text-gray-400">Estilo do ícone:</span>
         <div className="flex gap-1.5">
           <button
             type="button"
             onClick={() => setAppIcon("default")}
-            className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+            className={`rounded px-2 py-0.5 text-xs font-bold transition-colors ${
               !isInverted ? "bg-brand-orange text-white" : "bg-white/5 text-gray-400 hover:text-white"
             }`}
           >
@@ -115,7 +115,7 @@ export function PwaInstallBanner() {
           <button
             type="button"
             onClick={() => setAppIcon("inverted")}
-            className={`rounded px-2 py-0.5 text-[10px] font-bold transition-colors ${
+            className={`rounded px-2 py-0.5 text-xs font-bold transition-colors ${
               isInverted ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:text-white"
             }`}
           >

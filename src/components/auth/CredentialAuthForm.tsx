@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { safeReturnTo } from "@/lib/auth/return-to";
 import { ONBOARDING_GUIDE_PATH, ONBOARDING_PENDING, ONBOARDING_PROFILE_PATH, requiresOnboarding } from "@/lib/auth/onboarding";
 import { PLATFORMS_CONFIG, PLATFORM_SLUGS, type PlatformSlug } from "@/lib/types/platform";
+import { Check } from "lucide-react";
 
 interface CredentialAuthFormProps {
   mode: "login" | "signup";
@@ -395,10 +396,10 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
       {!isSignup && savedAccounts.length > 0 && (
         <div className="mt-6 border border-brand-orange/20 bg-brand-orange/5 p-4 rounded-xl">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-brand-orange">
+            <span className="text-xs font-bold uppercase tracking-wider text-brand-orange">
               Contas conectadas neste dispositivo
             </span>
-            <span className="text-[10px] text-gray-400">
+            <span className="text-xs text-gray-400">
               Clique para acessar
             </span>
           </div>
@@ -481,7 +482,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
           </svg>
           <span>{loading ? "Conectando ao Google…" : isSignup ? "Cadastrar com Google" : "Continuar com Google"}</span>
         </button>
-        <p className="mt-2 text-center text-[11px] text-gray-500">
+        <p className="mt-2 text-center text-xs text-gray-500">
           Ao continuar com Google, você concorda com os{" "}
           <Link href="/termos" className="text-gray-400 underline underline-offset-2 hover:text-white">
             Termos
@@ -517,7 +518,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                 placeholder="Ex: Alex Silva"
                 className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] px-3.5 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange"
               />
-              <p className="mt-1 text-[11px] text-gray-500">Nome visível em comentários.</p>
+              <p className="mt-1 text-xs text-gray-500">Nome visível em comentários.</p>
             </div>
 
             <div>
@@ -538,7 +539,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
                   className="min-h-11 w-full rounded-xl border border-white/15 bg-[#0d0e12] pl-8 pr-3 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-brand-orange focus-visible:ring-1 focus-visible:ring-brand-orange font-mono"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-gray-500">Identificador único no portal.</p>
+              <p className="mt-1 text-xs text-gray-500">Identificador único no portal.</p>
             </div>
           </div>
         )}
@@ -605,7 +606,7 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
 
           {isSignup && password.length > 0 && (
             <div className="mt-2 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-400">Força da senha:</span>
                 <span className="font-bold text-gray-300">{passwordStrength.label}</span>
               </div>
@@ -660,8 +661,9 @@ function CredentialAuthFormInner({ mode }: CredentialAuthFormProps) {
               </button>
             </div>
             {passwordConfirmation.length > 0 && (
-              <p className={`mt-1 text-[11px] font-bold ${passwordsMatch ? "text-emerald-400" : "text-amber-400"}`}>
-                {passwordsMatch ? "✓ As senhas coincidem" : "As senhas ainda não coincidem"}
+              <p className={`mt-1 inline-flex items-center gap-1 text-xs font-bold ${passwordsMatch ? "text-emerald-400" : "text-amber-400"}`}>
+                {passwordsMatch && <Check aria-hidden="true" className="size-3.5" strokeWidth={3} />}
+                {passwordsMatch ? "As senhas coincidem" : "As senhas ainda não coincidem"}
               </p>
             )}
           </div>

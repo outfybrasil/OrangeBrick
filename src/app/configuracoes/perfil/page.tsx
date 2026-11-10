@@ -516,7 +516,7 @@ export default function ProfileSettingsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <span className="rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-brand-orange">
+          <span className="rounded-full border border-brand-orange/30 bg-brand-orange/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-orange">
             Acesso Restrito
           </span>
           <h1 className="mt-4 font-heading text-2xl font-black text-white sm:text-3xl">Configurações de Perfil</h1>

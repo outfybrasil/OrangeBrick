@@ -155,7 +155,7 @@ function ProfileSetupContent() {
               <span>{user.email?.[0].toUpperCase() || "?"}</span>
             )}
           </div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-orange">Seu primeiro passo</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-orange">Seu primeiro passo</p>
           <h1 className="mt-2 text-xl font-heading font-black uppercase tracking-wider">
             Configure seu perfil
           </h1>

@@ -13,7 +13,7 @@ export function ProfileStats({ bricksCount, hypesCount, gamesCount }: ProfileSta
         <span className="block font-heading text-xl font-black text-white sm:text-2xl">
           {bricksCount}
         </span>
-        <span className="mt-0.5 block text-[10px] font-black uppercase tracking-widest text-gray-400 sm:text-xs">
+        <span className="mt-0.5 block text-xs font-black uppercase tracking-widest text-gray-400 sm:text-xs">
           Bricks
         </span>
       </div>
@@ -23,7 +23,7 @@ export function ProfileStats({ bricksCount, hypesCount, gamesCount }: ProfileSta
           <ReactionIcon type="hype" count={hypesCount} size={16} />
           <span>{hypesCount}</span>
         </span>
-        <span className="mt-0.5 block text-[10px] font-black uppercase tracking-widest text-gray-400 sm:text-xs">
+        <span className="mt-0.5 block text-xs font-black uppercase tracking-widest text-gray-400 sm:text-xs">
           Hypes
         </span>
       </div>
@@ -32,7 +32,7 @@ export function ProfileStats({ bricksCount, hypesCount, gamesCount }: ProfileSta
         <span className="block font-heading text-xl font-black text-white sm:text-2xl">
           {gamesCount}
         </span>
-        <span className="mt-0.5 block text-[10px] font-black uppercase tracking-widest text-gray-400 sm:text-xs">
+        <span className="mt-0.5 block text-xs font-black uppercase tracking-widest text-gray-400 sm:text-xs">
           Jogos
         </span>
       </div>

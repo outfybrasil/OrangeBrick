@@ -456,7 +456,7 @@ export default function NotificationBell() {
             </button>
           </div>
           {error.steps.length > 0 && (
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] leading-relaxed text-red-200/90">
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs leading-relaxed text-red-200/90">
               {error.steps.map((step) => (
                 <li key={step}>{step}</li>
               ))}
@@ -467,7 +467,7 @@ export default function NotificationBell() {
               type="button"
               onClick={() => void subscribe()}
               disabled={loading}
-              className="min-h-9 rounded-lg border border-red-400/40 px-3 text-[11px] font-bold text-red-200 transition-colors hover:bg-red-500/15 hover:text-white disabled:opacity-50"
+              className="min-h-9 rounded-lg border border-red-400/40 px-3 text-xs font-bold text-red-200 transition-colors hover:bg-red-500/15 hover:text-white disabled:opacity-50"
             >
               Tentar de novo
             </button>

@@ -192,7 +192,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 space-y-3">
           <p className="text-xs font-bold text-cyan-200">Configurações de envio de rascunho</p>
           <div>
-            <label className="text-[11px] font-bold text-gray-300">TikTok Access Token (Bearer):</label>
+            <label className="text-xs font-bold text-gray-300">TikTok Access Token (Bearer):</label>
             <input
               type="password"
               placeholder={configuredOnServer ? "Definido no servidor (.env)" : "act.example_tiktok_token..."}
@@ -307,7 +307,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             <div className="flex items-center justify-between pb-1.5">
               <label className="text-xs font-bold text-gray-300">Texto / Hashtags do TikTok:</label>
               <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
+                <span className={`text-xs font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
                   {caption.length}/2200
                 </span>
                 <button
@@ -332,7 +332,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
 
             {hashtags.length > 0 && (
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] uppercase font-bold text-gray-400">Hashtags:</span>
+                <span className="text-xs uppercase font-bold text-gray-400">Hashtags:</span>
                 {hashtags.map((tag) => {
                   const active = caption.includes(tag);
                   return (
@@ -343,7 +343,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
                         toggleHashtag(tag);
                         setConfirmed(false);
                       }}
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-mono transition-colors ${
+                      className={`rounded-md px-2 py-0.5 text-xs font-mono transition-colors ${
                         active
                           ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                           : "bg-white/5 text-gray-400 border border-white/10 hover:border-white/20"
@@ -398,7 +398,7 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             </a>
           </div>
 
-          <p className="text-[11px] text-gray-400">
+          <p className="text-xs text-gray-400">
             A legenda e as hashtags devem ser coladas no TikTok ao finalizar a publicação.
           </p>
         </form>

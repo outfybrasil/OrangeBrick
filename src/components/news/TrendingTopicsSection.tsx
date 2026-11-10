@@ -38,7 +38,7 @@ export function TrendingTopicsSection({ topics }: TrendingTopicsSectionProps) {
             >
               <span>{topic.name}</span>
               {typeof topic.count === "number" && topic.count > 0 && (
-                <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-mono text-gray-400">
+                <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-xs font-mono text-gray-400">
                   {topic.count}
                 </span>
               )}

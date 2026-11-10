@@ -111,7 +111,7 @@ export default async function SearchPage({
                     >
                       <span>{tab.label}</span>
                       <span
-                        className={`rounded-full px-1.5 py-0.2 text-[10px] tabular-nums ${
+                        className={`rounded-full px-1.5 py-0.2 text-xs tabular-nums ${
                           isActive ? "bg-black/20 text-white" : "bg-white/10 text-gray-400"
                         }`}
                       >

@@ -24,6 +24,7 @@ import type { PrivateProgressData } from "@/lib/types/progression";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { BrickboardLogo } from "@/components/ui/BrickboardLogo";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { Check, Plus } from "lucide-react";
 
 const PLATFORM_TABS_PT = [
   { id: "TODOS", label: "Todos" },
@@ -782,7 +783,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
                             )}
                             <div className="min-w-0">
                               <p className="truncate text-xs font-bold text-white group-hover/person:text-brand-orange">{p.name}</p>
-                              <p className="truncate text-[11px] text-gray-500">@{p.username}</p>
+                              <p className="truncate text-xs text-gray-500">@{p.username}</p>
                             </div>
                           </Link>
                           <button
@@ -790,13 +791,13 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
                             onClick={() => requireUser(() => toggleFollow("profile", p.username))}
                             aria-pressed={isFollowing}
                             aria-label={isFollowing ? (isEn ? `Unfollow ${p.name}` : `Deixar de seguir ${p.name}`) : (isEn ? `Follow ${p.name}` : `Seguir ${p.name}`)}
-                            className={`grid size-7 place-items-center rounded border text-xs font-bold transition-colors ${
+                            className={`grid size-11 shrink-0 place-items-center rounded border transition-colors ${
                               isFollowing
                                 ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
                                 : "border-brand-orange/50 text-brand-orange hover:bg-brand-orange hover:text-white"
                             }`}
                           >
-                            {isFollowing ? "✓" : "+"}
+                            {isFollowing ? <Check aria-hidden="true" className="size-4" strokeWidth={2.5} /> : <Plus aria-hidden="true" className="size-4" strokeWidth={2.5} />}
                           </button>
                         </div>
                       );

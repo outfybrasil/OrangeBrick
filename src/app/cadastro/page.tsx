@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Gamepad2, LockKeyhole, Newspaper } from "lucide-react";
 import { CredentialAuthForm } from "@/components/auth/CredentialAuthForm";
 
 export default function SignupPage() {
@@ -12,7 +11,7 @@ export default function SignupPage() {
           </Link>
           <div className="mt-2 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
-            <span className="font-mono text-[11px] text-gray-400">Novo Cadastro Gamer</span>
+            <span className="font-mono text-xs text-gray-400">Novo Cadastro Gamer</span>
           </div>
         </div>
 
@@ -27,37 +26,20 @@ export default function SignupPage() {
             Crie sua conta para votar, debater e acumular conquistas com quem realmente acompanha a indústria gamer.
           </p>
 
-          <div className="mt-8 space-y-3.5 border-t border-white/10 pt-6">
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-orange/30 bg-brand-orange/10 text-brand-orange">
-                <Gamepad2 aria-hidden="true" className="size-4" strokeWidth={1.8} />
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Identidade gamer completa:</strong>
-                <span className="text-gray-400">Escolha seu nickname e seu @username exclusivo na comunidade.</span>
-              </div>
+          <dl className="mt-8 border-b border-white/10">
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Identidade gamer completa</dt>
+              <dd className="text-sm leading-6 text-gray-400">Escolha seu nickname e seu @username exclusivo na comunidade.</dd>
             </div>
-
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                <LockKeyhole aria-hidden="true" className="size-4" strokeWidth={1.8} />
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Acesso seguro e sem paywall:</strong>
-                <span className="text-gray-400">100% gratuito, com autenticação por e-mail ou Google OAuth.</span>
-              </div>
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Acesso seguro e sem paywall</dt>
+              <dd className="text-sm leading-6 text-gray-400">100% gratuito, com autenticação por e-mail ou Google OAuth.</dd>
             </div>
-
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400">
-                <Newspaper aria-hidden="true" className="size-4" strokeWidth={1.8} />
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Feed pelas suas plataformas:</strong>
-                <span className="text-gray-400">Acompanhe novidades de PC, PlayStation, Xbox, Nintendo e Indies.</span>
-              </div>
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Feed pelas suas plataformas</dt>
+              <dd className="text-sm leading-6 text-gray-400">Acompanhe novidades de PC, PlayStation, Xbox, Nintendo e Indies.</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
         <div className="flex items-center justify-between text-xs text-gray-500">

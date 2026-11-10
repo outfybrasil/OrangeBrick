@@ -59,7 +59,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.orange-signal}"
-    textColor: "{colors.white}"
+    textColor: "{colors.contrast}"
     rounded: "{rounded.editorial}"
     padding: "12px 16px"
   card-editorial:

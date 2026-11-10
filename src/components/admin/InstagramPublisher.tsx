@@ -193,7 +193,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
         <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-3.5 space-y-3">
           <p className="text-xs font-bold text-purple-200">Configurações da Meta Graph API (Instagram)</p>
           <div>
-            <label className="text-[11px] font-bold text-gray-300">Instagram Business Account ID:</label>
+            <label className="text-xs font-bold text-gray-300">Instagram Business Account ID:</label>
             <input
               type="text"
               placeholder={serverAccountId || "ex: 17841400000000000"}
@@ -203,7 +203,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
             />
           </div>
           <div>
-            <label className="text-[11px] font-bold text-gray-300">Meta Access Token (Long-Lived):</label>
+            <label className="text-xs font-bold text-gray-300">Meta Access Token (Long-Lived):</label>
             <input
               type="password"
               placeholder={configuredOnServer ? "Definido no servidor (.env)" : "EAABw..."}
@@ -294,7 +294,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
             <div className="flex items-center justify-between pb-1.5">
               <label className="text-xs font-bold text-gray-300">Legenda do Reels:</label>
               <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
+                <span className={`text-xs font-mono ${caption.length > 2180 ? "text-amber-400 font-bold" : "text-gray-400"}`}>
                   {caption.length}/2200
                 </span>
                 <button
@@ -319,7 +319,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
 
             {hashtags.length > 0 && (
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] uppercase font-bold text-gray-400">Hashtags:</span>
+                <span className="text-xs uppercase font-bold text-gray-400">Hashtags:</span>
                 {hashtags.map((tag) => {
                   const active = caption.includes(tag);
                   return (
@@ -330,7 +330,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
                         toggleHashtag(tag);
                         setConfirmed(false);
                       }}
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-mono transition-colors ${
+                      className={`rounded-md px-2 py-0.5 text-xs font-mono transition-colors ${
                         active
                           ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                           : "bg-white/5 text-gray-400 border border-white/10 hover:border-white/20"
@@ -383,7 +383,7 @@ export function InstagramPublisher({ postId, videoUrl, initialCaption, hashtags 
             </a>
           </div>
 
-          <p className="text-[11px] text-gray-400">
+          <p className="text-xs text-gray-400">
             Dica: Ao clicar em &ldquo;Abrir Meta Business Suite&rdquo;, a legenda com as hashtags é copiada automaticamente para sua área de transferência.
           </p>
         </form>

@@ -57,7 +57,7 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll, isEn = false }
         aria-modal="true"
         aria-labelledby="create-poll-title"
         tabIndex={-1}
-        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-[#191b21] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-6"
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-white/10 bg-[#191b21] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:max-h-[calc(100dvh-2rem)] sm:p-6"
       >
         <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll, isEn = false }
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={isEn ? "e.g. What is your most anticipated game of 2026?" : "Ex: Qual é o seu jogo mais aguardado de 2026?"}
-              className="w-full rounded-xl border border-white/10 bg-background-void p-3 text-sm text-white outline-none focus:border-brand-orange"
+              className="w-full rounded-sm border border-white/10 bg-background-void p-3 text-sm text-white outline-none focus:border-brand-orange"
             />
           </div>
 
@@ -105,13 +105,13 @@ export function CreatePollModal({ isOpen, onClose, onPublishPoll, isEn = false }
                   placeholder={isEn ? `Option ${idx + 1}` : `Opção ${idx + 1}`}
                   value={opt}
                   onChange={(e) => updateOption(idx, e.target.value)}
-                  className="flex-1 rounded-xl border border-white/10 bg-background-void px-3.5 py-2.5 text-xs text-white outline-none focus:border-brand-orange"
+                  className="flex-1 rounded-sm border border-white/10 bg-background-void px-3.5 py-2.5 text-xs text-white outline-none focus:border-brand-orange"
                 />
                 {options.length > 2 && (
                   <button
                     type="button"
                     onClick={() => removeOption(idx)}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-red-400"
+                    className="flex size-11 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-red-400"
                     title={isEn ? "Remove option" : "Remover opção"}
                     aria-label={isEn ? `Remove option ${idx + 1}` : `Remover opção ${idx + 1}`}
                   >

@@ -1067,12 +1067,12 @@ export default function AdminDashboard() {
               Você está prestes a excluir definitivamente {selectedIds.length} {selectedIds.length === 1 ? "matéria selecionada" : "matérias selecionadas"}. Esta ação não pode ser desfeita.
             </p>
             <div className="mt-4 max-h-48 overflow-y-auto space-y-2 rounded-xl bg-white/[0.04] p-3 text-xs">
-              <p className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">Matérias que serão apagadas:</p>
+              <p className="font-bold text-gray-500 uppercase tracking-wider text-xs">Matérias que serão apagadas:</p>
               {posts.filter((p) => selectedIds.includes(p.id)).slice(0, 5).map((p) => (
                 <div key={p.id} className="flex items-center gap-2 text-gray-300">
                   <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
                   <span className="truncate font-semibold">{p.title}</span>
-                  {p.is_published && <span className="ml-auto shrink-0 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">Publicada</span>}
+                  {p.is_published && <span className="ml-auto shrink-0 rounded bg-emerald-500/20 px-1.5 py-0.5 text-xs font-bold text-emerald-400">Publicada</span>}
                 </div>
               ))}
               {selectedIds.length > 5 && (

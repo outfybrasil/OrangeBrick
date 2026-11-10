@@ -107,7 +107,7 @@ export function ReactionBar({
                 {hype}
               </span>
               {hype >= 100 && (
-                <span className="hidden sm:inline-block rounded bg-brand-orange/20 px-1 py-0.2 text-[10px] font-black uppercase text-brand-orange tracking-wider">
+                <span className="hidden sm:inline-block rounded bg-brand-orange/20 px-1 py-0.2 text-xs font-black uppercase text-brand-orange tracking-wider">
                   {REACTION_LABELS.hype.level5Badge}
                 </span>
               )}

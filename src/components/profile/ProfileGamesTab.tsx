@@ -347,7 +347,7 @@ export function ProfileGamesTab({
                     className="flex min-h-12 w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-white hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-brand-orange"
                   >
                     <span className="min-w-0 truncate font-bold">{game.name}</span>
-                    <span className="shrink-0 text-[11px] text-gray-400">{game.release_date?.slice(0, 4) || "Catálogo"}</span>
+                    <span className="shrink-0 text-xs text-gray-400">{game.release_date?.slice(0, 4) || "Catálogo"}</span>
                   </button>
                 </li>
               ))}
@@ -396,7 +396,7 @@ export function ProfileGamesTab({
                   placeholder="O que você achou do jogo?"
                   className="w-full resize-y rounded-sm border border-white/15 bg-[#0c0e12] px-3 py-2 text-sm text-white outline-none focus:border-brand-orange"
                 />
-                <p className="mt-1 text-right text-[11px] text-gray-500">{reviewText.length}/280</p>
+                <p className="mt-1 text-right text-xs text-gray-500">{reviewText.length}/280</p>
               </div>
             </div>
 
@@ -467,7 +467,7 @@ export function ProfileGamesTab({
               {review.review_text && <p className="mt-2 line-clamp-3 whitespace-pre-wrap break-words text-xs leading-relaxed text-gray-300">{review.review_text}</p>}
               {isOwner && (
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-[10px] font-bold uppercase text-gray-500">{review.is_public ? "Pública" : "Só você"}</span>
+                  <span className="text-xs font-bold uppercase text-gray-500">{review.is_public ? "Pública" : "Só você"}</span>
                   <button type="button" onClick={() => editReview(review)} className="min-h-8 text-xs font-bold text-brand-orange hover:text-white">Editar</button>
                   {confirmingDeleteGameId === review.game_id ? (
                     <span className="flex items-center gap-2 text-xs text-gray-300">
@@ -581,7 +581,7 @@ export function ProfileGamesTab({
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-orange">
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-orange">
                 Em andamento
               </span>
               <h4 className="mt-1 font-heading text-lg font-black uppercase text-white truncate sm:text-xl">
@@ -643,7 +643,7 @@ export function ProfileGamesTab({
                 Garanti ({guaranteedGames.length})
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-gray-500">
+            <span className="text-xs font-mono text-gray-500">
               Coleção deste usuário
             </span>
           </div>
@@ -667,7 +667,7 @@ export function ProfileGamesTab({
                       Orange Brick
                     </div>
                   )}
-                  <span className="absolute bottom-2 left-2 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-brand-orange uppercase">
+                  <span className="absolute bottom-2 left-2 rounded bg-black/80 px-1.5 py-0.5 font-mono text-xs font-bold text-brand-orange uppercase">
                     Garanti
                   </span>
                 </div>
@@ -694,7 +694,7 @@ export function ProfileGamesTab({
                 No Radar ({radarGames.length})
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-gray-500">
+            <span className="text-xs font-mono text-gray-500">
               Acompanhando expectativa
             </span>
           </div>
@@ -718,7 +718,7 @@ export function ProfileGamesTab({
                       Orange Brick
                     </div>
                   )}
-                  <span className="absolute bottom-2 left-2 rounded bg-black/80 px-1.5 py-0.5 font-mono text-[9px] font-bold text-gray-300 uppercase">
+                  <span className="absolute bottom-2 left-2 rounded bg-black/80 px-1.5 py-0.5 font-mono text-xs font-bold text-gray-300 uppercase">
                     No Radar
                   </span>
                 </div>

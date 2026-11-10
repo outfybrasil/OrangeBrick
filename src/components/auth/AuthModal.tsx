@@ -213,7 +213,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, initialTab = "login" }: 
           <>
             {selectableAccounts.length > 0 && (
               <div className="mt-5 space-y-2">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
                   Contas salvas neste dispositivo
                 </p>
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">

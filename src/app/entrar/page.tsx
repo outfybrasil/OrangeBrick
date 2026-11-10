@@ -11,7 +11,7 @@ export default function LoginPage() {
           </Link>
           <div className="mt-2 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-mono text-[11px] text-gray-400">Portal & Comunidade Gamer</span>
+            <span className="font-mono text-xs text-gray-400">Portal & Comunidade Gamer</span>
           </div>
         </div>
 
@@ -26,37 +26,20 @@ export default function LoginPage() {
             Acesse seus votos, suas discussões no Brickboard e matérias salvas com seu perfil gamer.
           </p>
 
-          <div className="mt-8 space-y-3.5 border-t border-white/10 pt-6">
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-orange/30 bg-brand-orange/10 text-brand-orange font-bold">
-                ✓
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Troca rápida de contas:</strong>
-                <span className="text-gray-400">Alterne entre múltiplos perfis no mesmo dispositivo com 1 clique.</span>
-              </div>
+          <dl className="mt-8 border-b border-white/10">
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Troca rápida de contas</dt>
+              <dd className="text-sm leading-6 text-gray-400">Alterne entre múltiplos perfis no mesmo dispositivo com 1 clique.</dd>
             </div>
-
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold">
-                ⚡
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Radar de Lançamentos:</strong>
-                <span className="text-gray-400">Vote no hype dos lançamentos e registre os jogos que você já garantiu.</span>
-              </div>
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Radar de Lançamentos</dt>
+              <dd className="text-sm leading-6 text-gray-400">Vote no hype dos lançamentos e registre os jogos que você já garantiu.</dd>
             </div>
-
-            <div className="flex items-center gap-3 text-xs text-gray-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-bold">
-                🏆
-              </div>
-              <div>
-                <strong className="text-white block font-bold">Brickboard & Conquistas:</strong>
-                <span className="text-gray-400">Ganhe XP interagindo com a comunidade e desbloqueie títulos exclusivos.</span>
-              </div>
+            <div className="grid gap-1 border-t border-white/10 py-4 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-heading text-sm font-bold text-white">Brickboard & Conquistas</dt>
+              <dd className="text-sm leading-6 text-gray-400">Ganhe XP interagindo com a comunidade e desbloqueie títulos exclusivos.</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
         <div className="flex items-center justify-between text-xs text-gray-500">

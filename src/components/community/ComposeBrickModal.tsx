@@ -199,7 +199,7 @@ export function ComposeBrickModal({
         aria-modal="true"
         aria-labelledby="compose-brick-title"
         tabIndex={-1}
-        className="relative z-10 w-full min-h-dvh sm:min-h-0 sm:w-[520px] sm:max-w-full overflow-hidden sm:rounded-2xl border-0 sm:border border-[#35363d] bg-[#191a1f] shadow-2xl flex flex-col"
+        className="relative z-10 w-full min-h-dvh sm:min-h-0 sm:w-[520px] sm:max-w-full overflow-hidden sm:rounded-xl border-0 sm:border border-[#35363d] bg-[#191a1f] shadow-2xl flex flex-col"
       >
         <header className="h-[70px] sm:h-[82px] flex items-center px-4 sm:px-6 border-b border-[#303137]">
           <span className="grid place-items-center w-7 h-7 text-[#ff6500] mr-3 shrink-0" aria-hidden="true">
@@ -344,7 +344,7 @@ export function ComposeBrickModal({
                   <img loading="lazy" decoding="async" src={attachedArticle.image_url} alt="" className="w-14 h-12 object-cover shrink-0" referrerPolicy="no-referrer" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6500]">{isEn ? "Attached article" : "Matéria anexada"}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#ff6500]">{isEn ? "Attached article" : "Matéria anexada"}</span>
                   <p className="truncate text-xs font-bold text-[#f1f1f3]">{attachedArticle.title}</p>
                 </div>
                 <button
@@ -358,7 +358,7 @@ export function ComposeBrickModal({
               </div>
             )}
 
-            <p className="mb-2 text-[11px] font-bold text-[#b1b1b7] tracking-[0.045em]">
+            <p className="mb-2 text-xs font-bold text-[#b1b1b7] tracking-[0.045em]">
               {isEn ? "PLATFORM" : "PLATAFORMA"} <span className="ml-1 text-[#85868d] font-normal tracking-normal">{isEn ? "OPTIONAL · choose one or more" : "OPCIONAL · escolha uma ou mais"}</span>
             </p>
             <div className="flex gap-2 flex-wrap pb-4" aria-label={isEn ? "Select platforms" : "Selecionar plataformas"}>

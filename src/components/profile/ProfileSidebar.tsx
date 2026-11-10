@@ -66,7 +66,7 @@ export function ProfileSidebar({
                       className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center p-1 text-center font-heading text-[10px] font-black uppercase text-gray-400 group-hover:text-brand-orange">
+                    <div className="flex h-full w-full items-center justify-center p-1 text-center font-heading text-xs font-black uppercase text-gray-400 group-hover:text-brand-orange">
                       {title}
                     </div>
                   )}
@@ -90,14 +90,14 @@ export function ProfileSidebar({
               <button
                 type="button"
                 onClick={() => onSelectTab("games")}
-                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+                className="text-xs font-bold uppercase text-gray-400 hover:text-brand-orange"
               >
                 Ver todos →
               </button>
             ) : (
               <a
                 href="#jogos"
-                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+                className="text-xs font-bold uppercase text-gray-400 hover:text-brand-orange"
               >
                 Ver todos →
               </a>
@@ -113,7 +113,7 @@ export function ProfileSidebar({
                 <span className="truncate font-bold text-gray-300 hover:text-white">
                   {game.game}
                 </span>
-                <span className="shrink-0 text-[10px] font-mono text-gray-500">
+                <span className="shrink-0 text-xs font-mono text-gray-500">
                   {game.release_label}
                 </span>
               </Link>
@@ -135,14 +135,14 @@ export function ProfileSidebar({
               <button
                 type="button"
                 onClick={() => onSelectTab("games")}
-                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+                className="text-xs font-bold uppercase text-gray-400 hover:text-brand-orange"
               >
                 Ver todos →
               </button>
             ) : (
               <a
                 href="#jogos"
-                className="text-[11px] font-bold uppercase text-gray-400 hover:text-brand-orange"
+                className="text-xs font-bold uppercase text-gray-400 hover:text-brand-orange"
               >
                 Ver todos →
               </a>
@@ -158,7 +158,7 @@ export function ProfileSidebar({
                 <span className="truncate font-bold text-gray-300 hover:text-white">
                   {game.game}
                 </span>
-                <span className="shrink-0 text-[10px] font-mono text-gray-500">
+                <span className="shrink-0 text-xs font-mono text-gray-500">
                   {game.release_label}
                 </span>
               </Link>

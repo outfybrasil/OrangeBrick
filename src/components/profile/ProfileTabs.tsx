@@ -49,7 +49,7 @@ export function ProfileTabs({
               <span>{tab.label}</span>
               {typeof tab.count === "number" && tab.count > 0 && (
                 <span
-                  className={`rounded-full px-1.5 py-0.2 text-[10px] font-mono ${
+                  className={`rounded-full px-1.5 py-0.2 text-xs font-mono ${
                     isActive ? "bg-brand-orange text-white" : "bg-white/10 text-gray-400"
                   }`}
                 >

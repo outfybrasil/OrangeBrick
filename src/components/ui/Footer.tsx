@@ -21,7 +21,7 @@ export function Footer() {
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
             <BrandLogo alt="Orange Brick" loading="lazy" className="h-7 w-auto sm:h-8" />
           </div>
-          <p className="text-xs sm:text-xs text-gray-400 font-sans max-w-sm leading-relaxed">
+          <p className="text-xs text-gray-400 font-sans max-w-sm leading-relaxed">
             {dict.footer.description}
           </p>
         </div>

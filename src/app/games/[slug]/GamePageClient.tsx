@@ -606,7 +606,7 @@ export function GamePageClient({
                       }`}
                     >
                       <span className="text-xs font-black tracking-wider">{option.shortLabel}</span>
-                      <span className={`text-[11px] tabular-nums mt-0.5 ${isSelected ? "text-white/80" : "text-gray-500"}`}>
+                      <span className={`text-xs tabular-nums mt-0.5 ${isSelected ? "text-white/80" : "text-gray-500"}`}>
                         {counts[option.type]}
                       </span>
                     </button>

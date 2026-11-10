@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { resolveAvatarUrl } from "@/lib/avatar";
+import { X } from "lucide-react";
 
 export interface FollowUserItem {
   id: string;
@@ -68,9 +69,9 @@ export function ProfileFollowModal({
             type="button"
             onClick={onClose}
             aria-label="Fechar modal"
-            className="flex h-8 w-8 items-center justify-center rounded-sm text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex size-11 items-center justify-center rounded-sm text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           >
-            ✕
+            <X aria-hidden="true" className="size-5" strokeWidth={2} />
           </button>
         </div>
 

@@ -535,7 +535,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
       )}
 
       {post.media_url && !post.attached_article && !post.shared_post && (
-        <div className="relative mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-background-void/90 flex items-center justify-center">
+        <div className="relative mt-2.5 w-full overflow-hidden rounded-sm border border-white/10 bg-background-void/90 flex items-center justify-center">
           <img loading="lazy" decoding="async" src={post.media_url} alt={post.media_alt || "Imagem anexada sem descrição alternativa."} className="h-auto max-h-[420px] w-full object-contain" />
         </div>
       )}
@@ -543,7 +543,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
       {post.attached_article && (
         <Link
           href={`${isEn ? "/en" : ""}/posts/${post.attached_article.slug}`}
-          className={`group/article mt-2.5 w-full overflow-hidden rounded-xl border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C] ${compactArticle ? "flex items-center" : "block"}`}
+          className={`group/article mt-2.5 w-full overflow-hidden rounded-sm border border-white/10 bg-[#0E1015] transition-all hover:border-brand-orange/50 hover:bg-[#12151C] ${compactArticle ? "flex items-center" : "block"}`}
         >
           {post.attached_article.image_url && (
             <div className={compactArticle ? "relative h-20 w-24 shrink-0 overflow-hidden border-r border-white/10 bg-black/60 sm:w-28" : "relative aspect-video w-full overflow-hidden border-b border-white/10 bg-black/60"}>
@@ -557,7 +557,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             </div>
           )}
           <div className="min-w-0 space-y-1 p-3 sm:p-3.5">
-            <span className="text-[11px] font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
+            <span className="text-xs font-subtitle font-bold text-brand-orange uppercase tracking-wider block">
               {compactArticle ? (isEn ? "Shared article" : "Matéria compartilhada") : post.attached_article.category || "Orange Brick"}
             </span>
             <h5 className="break-words font-subtitle text-xs sm:text-sm font-bold leading-snug text-white transition-colors group-hover/article:text-brand-orange line-clamp-2">
@@ -661,7 +661,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               onChange={(e) => setShareText(e.target.value)}
               placeholder={isEn ? "Your thoughts on this..." : "Seu comentário sobre isso..."}
               maxLength={280}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-emerald-500"
+              className="min-h-11 min-w-0 flex-1 rounded-sm border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-emerald-500"
               autoFocus
             />
             <button
@@ -803,7 +803,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               maxLength={280}
               aria-label={replyTarget ? (isEn ? `Reply to ${replyTarget.author_name}` : `Resposta para ${replyTarget.author_name}`) : (isEn ? "Your reply to the Brick" : "Sua resposta ao Brick")}
               disabled={isSubmittingComment}
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange"
+              className="min-h-11 min-w-0 flex-1 rounded-sm border border-gray-800 bg-[#0D0F14] px-3.5 text-xs text-white outline-none transition-colors placeholder:text-gray-500 focus:border-brand-orange"
             />
             <button
               type="submit"
@@ -834,7 +834,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-modal="true"
             aria-labelledby={`report-title-${reportTarget.id}`}
             tabIndex={-1}
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-md rounded-xl border border-white/10 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`report-title-${reportTarget.id}`} className="text-lg font-bold text-white">{isEn ? "Why are you reporting?" : "Por que você está denunciando?"}</h3>
             <p className="mt-2 text-sm leading-6 text-[#b8bac2]">{isEn ? "The report goes to moderation. The author won't see who sent it." : "A denúncia vai para a moderação. O autor não verá quem enviou."}</p>
@@ -880,7 +880,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-labelledby={`delete-brick-comment-title-${commentPendingDelete}`}
             aria-describedby={`delete-brick-comment-description-${commentPendingDelete}`}
             tabIndex={-1}
-            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-comment-title-${commentPendingDelete}`} className="text-lg font-bold text-white">
               {isEn ? "Delete comment?" : "Apagar comentário?"}
@@ -923,7 +923,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-labelledby={`delete-brick-post-title-${post.id}`}
             aria-describedby={`delete-brick-post-description-${post.id}`}
             tabIndex={-1}
-            className="w-full max-w-sm rounded-2xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
+            className="w-full max-w-sm rounded-xl border border-red-400/25 bg-[#191b21] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.65)] sm:p-6"
           >
             <h3 id={`delete-brick-post-title-${post.id}`} className="text-lg font-bold text-white">
               {isEn ? "Delete post?" : "Apagar publicação?"}
@@ -967,7 +967,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
             aria-modal="true"
             aria-labelledby={`edit-brick-post-title-${post.id}`}
             tabIndex={-1}
-            className="w-full max-w-lg rounded-2xl border border-white/15 bg-[#14161D] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.8)] sm:p-6"
+            className="w-full max-w-lg rounded-xl border border-white/15 bg-[#14161D] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.8)] sm:p-6"
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 id={`edit-brick-post-title-${post.id}`} className="font-subtitle text-base font-bold text-white">
@@ -978,7 +978,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                 onClick={() => setIsEditOpen(false)}
                 disabled={isSavingEdit}
                 aria-label={isEn ? "Close edit modal" : "Fechar modal de edição"}
-                className="grid size-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                className="grid size-11 place-items-center rounded-sm text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -997,7 +997,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
                   maxLength={280}
                   rows={4}
                   placeholder={isEn ? "What's happening in gaming?" : "O que está acontecendo no mundo dos games?"}
-                  className="w-full resize-none rounded-xl border border-white/10 bg-[#0B0C10] p-3.5 font-body text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                  className="w-full resize-none rounded-sm border border-white/10 bg-[#0B0C10] p-3.5 font-body text-sm text-white placeholder:text-gray-500 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange"
                   autoFocus
                 />
                 <div className="mt-2 flex items-center justify-between text-xs">

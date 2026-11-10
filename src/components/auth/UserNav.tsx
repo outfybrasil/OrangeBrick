@@ -206,10 +206,10 @@ export function UserNav() {
             )}
 
             <div className="pt-2 mt-2 border-t border-brand-orange-muted/15">
-              <div className="px-3 py-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              <div className="px-3 py-1 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-gray-400">
                 <span>{isEn ? "Accounts" : "Contas"}</span>
                 {savedAccounts.length > 1 && (
-                  <span className="text-[10px] text-brand-orange font-mono">
+                  <span className="text-xs text-brand-orange font-mono">
                     {savedAccounts.length} {isEn ? "saved" : "salvas"}
                   </span>
                 )}
@@ -246,7 +246,7 @@ export function UserNav() {
                             className="w-6 h-6 rounded-full object-cover shrink-0 border border-brand-orange/30 bg-[#08090C]"
                           />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold text-[10px] shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold text-xs shrink-0">
                             {account.nickname.charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -254,7 +254,7 @@ export function UserNav() {
                           <p className="font-bold text-xs truncate leading-tight">
                             {account.nickname}
                           </p>
-                          <p className="text-[10px] text-gray-400 truncate leading-tight">
+                          <p className="text-xs text-gray-400 truncate leading-tight">
                             @{account.username}
                           </p>
                         </div>
@@ -336,7 +336,7 @@ export function UserNav() {
                     setIsDropdownOpen(false);
                     signOutAll();
                   }}
-                  className="flex min-h-9 w-full items-center gap-2 rounded-lg px-3 text-left font-medium text-red-400/70 text-[11px] transition-colors hover:bg-red-500/15 hover:text-red-300"
+                  className="flex min-h-9 w-full items-center gap-2 rounded-lg px-3 text-left font-medium text-red-400/70 text-xs transition-colors hover:bg-red-500/15 hover:text-red-300"
                 >
                   <svg className="w-3.5 h-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
