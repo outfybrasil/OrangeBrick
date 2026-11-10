@@ -882,6 +882,7 @@ export function BrickboardContent({ isEn: isEnProp }: { isEn?: boolean } = {}) {
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       <Footer />
+      <div aria-hidden="true" className="h-[4.25rem] lg:hidden" />
       <BackToTop aboveFloatingAction />
     </>
   );

@@ -48,7 +48,8 @@ export function PlatformHubClient({ config }: PlatformHubClientProps) {
                 className="min-h-11 w-full rounded-xl border border-brand-orange-muted/20 bg-background-void/90 px-3 pl-9 text-xs text-white shadow-inner outline-none transition-all focus:border-brand-orange/60 focus:ring-1 focus:ring-brand-orange/30 sm:pl-10 sm:text-sm"
               />
               <svg
-                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 sm:h-4 sm:w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

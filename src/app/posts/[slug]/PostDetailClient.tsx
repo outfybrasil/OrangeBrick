@@ -32,6 +32,7 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { useBookmarks } from "@/lib/hooks/useBookmarks";
 import { useToast } from "@/lib/contexts/ToastContext";
 import { AdSenseUnit } from "@/components/ui/AdSenseUnit";
+import { ArrowLeft } from "lucide-react";
 
 
 type ContentBlock = EditorialBlock;
@@ -352,9 +353,10 @@ export function PostArticle({ post, stats, relatedPosts = [], isEn: isEnProp }: 
                 router.push(isEn ? "/en" : "/");
               }
             }}
-            className="flex min-h-10 shrink-0 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:min-h-11 sm:gap-2"
+            aria-label={dict.post.back}
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-xl px-2 text-xs font-semibold text-gray-400 transition-colors hover:bg-white/5 hover:text-white sm:gap-2"
           >
-            ← <span className="hidden xs:inline">{dict.post.back}</span>
+            <ArrowLeft aria-hidden="true" className="size-4" /> <span className="hidden xs:inline">{dict.post.back}</span>
           </button>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <LanguageSwitcher currentLocale={isEn ? "en" : "pt"} />

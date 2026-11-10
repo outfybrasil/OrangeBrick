@@ -4,14 +4,8 @@ import { usePathname } from "next/navigation";
 import { GradientButtonGroup } from "@/components/ui/gradient-button-group";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
-export function MobileBottomNav() {
-  const pathname = usePathname();
-  const { profile } = useAuth();
-  const currentLocale = pathname.startsWith("/en") ? "en" : "pt";
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-  const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
-
-  if (
+export function hidesMobileBottomNav(pathname: string) {
+  return (
     pathname.startsWith("/admin") ||
     pathname.startsWith("/auth") ||
     pathname === "/profile/setup" ||
@@ -19,7 +13,17 @@ export function MobileBottomNav() {
     pathname === "/cadastro" ||
     pathname === "/entrar" ||
     pathname.startsWith("/configuracoes")
-  ) {
+  );
+}
+
+export function MobileBottomNav() {
+  const pathname = usePathname();
+  const { profile } = useAuth();
+  const currentLocale = pathname.startsWith("/en") ? "en" : "pt";
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const myProfileHref = profile?.username ? `/u/${encodeURIComponent(profile.username)}` : "/meu-brick";
+
+  if (hidesMobileBottomNav(pathname)) {
     return null;
   }
 
@@ -64,7 +68,7 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <div aria-hidden="true" className="h-[calc(6.5rem+env(safe-area-inset-bottom))] lg:hidden watch-hidden" />
+      <div aria-hidden="true" className="h-[calc(13.75rem+env(safe-area-inset-bottom))] lg:hidden watch-hidden" />
       <div
         className="mobile-overlay-sensitive fixed inset-x-0 bottom-0 z-40 px-[max(0.75rem,env(safe-area-inset-left))] pb-[max(0.65rem,env(safe-area-inset-bottom))] lg:hidden watch-hidden"
       >

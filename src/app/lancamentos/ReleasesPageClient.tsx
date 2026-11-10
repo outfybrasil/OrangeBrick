@@ -544,14 +544,14 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
               ) : (
                 <ol className="divide-y divide-white/[0.08]">
                   {communityRankings.map(({ item, counts, total }, index) => (
-                    <li key={item.id} className="grid grid-cols-[2rem_1fr_auto] items-center gap-3 py-3">
+                    <li key={item.id} className="relative grid grid-cols-[2rem_1fr_auto] items-center gap-3 py-3">
                       <span className={`font-heading text-xl font-black tabular-nums ${index === 0 ? "text-brand-orange" : "text-gray-600"}`}>
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
                         <Link
                           href={`/games/${item.id}`}
-                          className="truncate text-sm font-extrabold text-white transition-colors hover:text-brand-orange block"
+                          className="block truncate text-sm font-extrabold text-white transition-colors after:absolute after:inset-0 after:content-[''] hover:text-brand-orange"
                         >
                           {item.game}
                         </Link>
@@ -565,7 +565,7 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                         </span>
                         <Link
                           href={`/games/${item.id}`}
-                          className="hidden sm:inline-block text-xs font-bold text-brand-orange hover:underline"
+                          className="relative z-10 hidden text-xs font-bold text-brand-orange hover:underline sm:inline-block"
                         >
                           Ver jogo →
                         </Link>
@@ -657,28 +657,28 @@ export function ReleasesPageClient({ initialReleases, initialHypeCounts }: Relea
                               {item.dayOfWeek}
                             </span>
                           </div>
-                          <Link href={`/games/${item.id}`}>
+                          <Link href={`/games/${item.id}`} className="-my-3.5 block py-3.5">
                             <h3 className="font-heading text-sm font-extrabold leading-tight text-white transition-colors group-hover:text-brand-orange sm:text-base line-clamp-2">
                               {item.game}
                             </h3>
                           </Link>
                         </div>
 
-                        <div className="mt-4 flex items-end justify-between gap-2">
+                        <div className="mt-2 flex items-center justify-between gap-2">
                           <p className="truncate text-xs font-bold uppercase tracking-wide text-gray-400">
                             {item.platforms.join(" · ")}
                           </p>
                           <div className="flex items-center gap-2 shrink-0">
                             <Link
                               href={`/games/${item.id}`}
-                              className="text-xs font-bold text-gray-400 hover:text-white transition-colors"
+                              className="inline-flex min-h-11 items-center px-1 text-xs font-bold text-gray-400 transition-colors hover:text-white"
                             >
                               Ver jogo →
                             </Link>
                             {item.slug && (
                               <Link
                                 href={`/posts/${item.slug}`}
-                                className="text-xs font-bold text-brand-orange hover:underline"
+                                className="inline-flex min-h-11 items-center px-1 text-xs font-bold text-brand-orange hover:underline"
                               >
                                 Matéria
                               </Link>

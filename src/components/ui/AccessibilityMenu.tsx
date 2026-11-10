@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Accessibility, Check, Contrast, Minus, Moon, Monitor, Plus, RotateCcw, Sun, X } from "lucide-react";
+import { hidesMobileBottomNav } from "@/components/ui/MobileBottomNav";
 
 const STORAGE_KEY = "orange-accessibility";
 const THEME_STORAGE_KEY = "orange-theme";
@@ -27,6 +29,7 @@ function applyThemePreference(preference: ThemePreference) {
 }
 
 export function AccessibilityMenu() {
+  const withoutBottomNav = hidesMobileBottomNav(usePathname() || "");
   const [isOpen, setIsOpen] = useState(false);
   const [preferences, setPreferences] = useState<Preferences>(DEFAULTS);
   const [themePreference, setThemePreference] = useState<ThemePreference>("system");
@@ -107,7 +110,9 @@ export function AccessibilityMenu() {
   };
 
   return (
-    <div ref={panelRef} className="accessibility-menu fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-3 z-[65] sm:bottom-5 sm:right-5 watch-hidden">
+    <>
+    {withoutBottomNav && <div aria-hidden="true" className="h-[calc(4.5rem+env(safe-area-inset-bottom))] sm:hidden watch-hidden" />}
+    <div ref={panelRef} className={`accessibility-menu fixed ${withoutBottomNav ? "bottom-[calc(0.75rem+env(safe-area-inset-bottom))]" : "bottom-[calc(6.5rem+env(safe-area-inset-bottom))]"} right-3 z-[65] sm:bottom-5 sm:right-5 watch-hidden`}>
       {isOpen && (
         <section
           id="accessibility-panel"
@@ -187,5 +192,6 @@ export function AccessibilityMenu() {
         <Accessibility size={22} />
       </button>
     </div>
+    </>
   );
 }
