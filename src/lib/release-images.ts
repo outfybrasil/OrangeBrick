@@ -63,6 +63,17 @@ export function isManagedReleaseImageUrl(value: string) {
   }
 }
 
+export function isSupabaseStorageImageUrl(value: string | null | undefined) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!value || !supabaseUrl) return false;
+  try {
+    const imageUrl = new URL(value);
+    return imageUrl.origin === new URL(supabaseUrl).origin && imageUrl.pathname.startsWith("/storage/v1/object/public/");
+  } catch {
+    return false;
+  }
+}
+
 export function isAllowedReleaseImageUrl(value: string) {
   return validateReleaseImageUrl(value) === null;
 }

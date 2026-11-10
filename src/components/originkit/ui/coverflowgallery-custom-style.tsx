@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import { isSupabaseStorageImageUrl } from "@/lib/release-images";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
 interface CoverflowSlide {
@@ -179,7 +181,9 @@ export default function CoverflowGallery({
                 transition: reducedMotion ? "none" : `transform ${duration}s ${easing}, opacity ${duration}s ${easing}`,
               }}
             >
-              {slide.image?.src && <img loading="lazy" decoding="async" src={slide.image.src} alt={slide.image.alt || ""} draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />}
+              {visible && slide.image?.src && (isSupabaseStorageImageUrl(slide.image.src)
+                ? <Image src={slide.image.src} alt={slide.image.alt || ""} fill sizes={`${effectiveWidth}px`} draggable={false} className="select-none object-cover" />
+                : <img loading="lazy" decoding="async" src={slide.image.src} alt={slide.image.alt || ""} draggable={false} className="absolute inset-0 h-full w-full select-none object-cover" />)}
               {showTitle && (
                 <>
                   <span className={`absolute inset-0 ${isTop ? "bg-gradient-to-b" : "bg-gradient-to-t"} from-black/90 via-black/20 to-transparent`} aria-hidden="true" />
