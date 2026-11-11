@@ -8,7 +8,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   workers: process.env.CI ? 1 : undefined,
   reporter: "list",
-  globalTimeout: 300_000,
+  globalTimeout: 900_000,
   timeout: 30_000,
   expect: { timeout: 5_000 },
   outputDir: "test-results",

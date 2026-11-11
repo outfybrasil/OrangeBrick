@@ -21,11 +21,22 @@ export function createServiceDataClient() {
   );
 }
 
+const PUBLIC_QUERY_TIMEOUT_MS = 5_000;
+
+const fetchWithTimeout: typeof fetch = (input, init) => {
+  const timeout = AbortSignal.timeout(PUBLIC_QUERY_TIMEOUT_MS);
+  return fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout });
+};
+
+export function hasServiceRoleKey() {
+  return Boolean(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
 export function createPublicServerClient() {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
+    { auth: { autoRefreshToken: false, persistSession: false }, db: { retry: false }, global: { fetch: fetchWithTimeout } }
   );
 }
 

@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import { ReleasesPageClient } from "./ReleasesPageClient";
 import type { ReleaseItem } from "@/components/feed/ReleaseRadarStrip";
-import { createPublicServerClient } from "@/lib/supabase/server";
-import type { ReleaseRadarItem } from "@/lib/types/database";
+import { getActiveReleaseItems, getReleaseHypeCounts } from "@/lib/server/public-data-cache";
 import { isRetainedRelease } from "@/lib/release-dates";
 
 export const revalidate = 1800;
@@ -19,17 +18,9 @@ export const metadata: Metadata = {
 };
 
 export default async function LancamentosPage() {
-  const supabase = createPublicServerClient();
-  const [{ data: items }, { data: hype, error: hypeError }] = await Promise.all([
-    supabase
-      .from("release_radar_items")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true }),
-    supabase.rpc("get_release_hype_counts"),
-  ]);
+  const [items, hype] = await Promise.all([getActiveReleaseItems(), getReleaseHypeCounts()]);
 
-  const initialReleases: ReleaseItem[] = ((items || []) as unknown as ReleaseRadarItem[]).filter((item) => isRetainedRelease(item.release_date)).map((item) => ({
+  const initialReleases: ReleaseItem[] = items.filter((item) => isRetainedRelease(item.release_date)).map((item) => ({
     id: item.id,
     game: item.game,
     releaseDate: item.release_label,
@@ -42,9 +33,9 @@ export default async function LancamentosPage() {
     slug: item.post_slug || undefined,
   }));
 
-  const initialHypeCounts: Record<string, Record<"buy" | "watch" | "skip", number>> | undefined = hypeError ? undefined : {};
+  const initialHypeCounts: Record<string, Record<"buy" | "watch" | "skip", number>> | undefined = hype ? {} : undefined;
   if (initialHypeCounts) {
-    for (const row of ((hype || []) as Array<{ release_id: string; vote_type: string; vote_count: number }>)) {
+    for (const row of hype || []) {
       if (row.vote_type !== "buy" && row.vote_type !== "watch" && row.vote_type !== "skip") continue;
       const current = initialHypeCounts[row.release_id] || { buy: 0, watch: 0, skip: 0 };
       current[row.vote_type] = Number(row.vote_count);

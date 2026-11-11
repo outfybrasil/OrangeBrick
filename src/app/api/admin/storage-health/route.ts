@@ -6,46 +6,12 @@ import {
   findOrphanedEditorialFiles,
   removeOrphanedEditorialFilesWithAudit,
 } from "@/lib/operations";
+import { listBucketFiles, measureStorageUsage } from "@/lib/server/storage-usage";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function serviceClient() { return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)!, { auth: { autoRefreshToken: false, persistSession: false } }); }
-
-async function listBucketItems(supabase: ReturnType<typeof serviceClient>, bucket: string, prefix: string) {
-  const items = [];
-  for (let offset = 0; ; offset += 1000) {
-    const { data, error } = await supabase.storage.from(bucket).list(prefix, {
-      limit: 1000,
-      offset,
-      sortBy: { column: "name", order: "asc" },
-    });
-    if (error) throw error;
-    items.push(...(data || []));
-    if (!data || data.length < 1000) return items;
-  }
-}
-
-async function bucketUsage(supabase: ReturnType<typeof serviceClient>, bucket: string, prefix = ""): Promise<{ files: number; bytes: number }> {
-  let files = 0;
-  let bytes = 0;
-  for (const item of await listBucketItems(supabase, bucket, prefix)) {
-    const path = prefix ? `${prefix}/${item.name}` : item.name;
-    if (item.metadata) { files += 1; bytes += Number(item.metadata.size || 0); }
-    else { const nested = await bucketUsage(supabase, bucket, path); files += nested.files; bytes += nested.bytes; }
-  }
-  return { files, bytes };
-}
-
-async function bucketFiles(supabase: ReturnType<typeof serviceClient>, bucket: string, prefix = ""): Promise<Array<{ path: string; bytes: number }>> {
-  const files: Array<{ path: string; bytes: number }> = [];
-  for (const item of await listBucketItems(supabase, bucket, prefix)) {
-    const path = prefix ? `${prefix}/${item.name}` : item.name;
-    if (item.metadata) files.push({ path, bytes: Number(item.metadata.size || 0) });
-    else files.push(...await bucketFiles(supabase, bucket, path));
-  }
-  return files;
-}
 
 export async function GET(request: Request) {
   const authorization = request.headers.get("authorization");
@@ -53,10 +19,11 @@ export async function GET(request: Request) {
   const supabase = serviceClient();
   const { data: { user } } = await supabase.auth.getUser(authorization.slice(7));
   if (!isVerifiedAdminSession(user, authorization.slice(7))) return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-  const [editorialFiles, profiles, { data: imageRows }] = await Promise.all([bucketFiles(supabase, "post-images"), bucketUsage(supabase, "profile-images"), supabase.from("editorial_images").select("storage_path")]);
+  const [editorialFiles, usage, { data: imageRows }] = await Promise.all([listBucketFiles(supabase, "post-images"), measureStorageUsage(supabase), supabase.from("editorial_images").select("storage_path")]);
+  const profiles = usage.buckets.find((bucket) => bucket.id === "profile-images") || { files: 0, bytes: 0 };
   const tracked = new Set((imageRows || []).map((row) => row.storage_path));
   const orphans = findOrphanedEditorialFiles(editorialFiles, tracked);
-  return NextResponse.json({ editorial: { files: editorialFiles.length, bytes: editorialFiles.reduce((sum, file) => sum + file.bytes, 0) }, profiles, trackedEditorialFiles: tracked.size, possibleEditorialOrphans: orphans.length, orphans: orphans.slice(0, 200) });
+  return NextResponse.json({ editorial: { files: editorialFiles.length, bytes: editorialFiles.reduce((sum, file) => sum + file.bytes, 0) }, profiles: { files: profiles.files, bytes: profiles.bytes }, total: { bytes: usage.bytes, quotaBytes: usage.quotaBytes, ratio: usage.ratio }, trackedEditorialFiles: tracked.size, possibleEditorialOrphans: orphans.length, orphans: orphans.slice(0, 200) });
 }
 
 export async function DELETE(request: Request) {
@@ -89,7 +56,7 @@ export async function DELETE(request: Request) {
 
   let files: Array<{ path: string; bytes: number }>;
   try {
-    files = await bucketFiles(supabase, "post-images");
+    files = await listBucketFiles(supabase, "post-images");
   } catch {
     return NextResponse.json({ error: "Não foi possível verificar os arquivos do Storage" }, { status: 503 });
   }

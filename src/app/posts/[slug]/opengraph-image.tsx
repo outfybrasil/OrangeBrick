@@ -4,6 +4,8 @@ import { createPublicServerClient } from "@/lib/supabase/server";
 export const alt = "Card de compartilhamento da matéria do Orange Brick";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 604800;
+export const dynamic = "force-static";
 
 const CATEGORY_LABELS: Record<string, string> = {
   breaking: "Plantão",

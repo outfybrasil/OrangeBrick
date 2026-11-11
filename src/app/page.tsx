@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { HomePageClient } from "@/components/feed/HomePageClient";
-import { createPublicServerClient } from "@/lib/supabase/server";
-import type { Post } from "@/lib/types/database";
-import { POST_LIST_COLUMNS } from "@/lib/types/database";
+import { getLatestPublishedPosts } from "@/lib/server/public-data-cache";
 import { getSiteUrl } from "@/lib/site-url";
 import { saoPauloNewsDate } from "@/lib/news-query";
 import type { Metadata } from "next";
@@ -36,19 +34,9 @@ export const metadata: Metadata = {
 
 const PAGE_SIZE = 50;
 
-async function fetchLatestPosts() {
-  const supabase = createPublicServerClient();
-  const { data } = await supabase
-    .from("posts")
-    .select(POST_LIST_COLUMNS)
-    .eq("is_published", true)
-    .order("published_at", { ascending: false, nullsFirst: false }).order("id", { ascending: false })
-    .limit(PAGE_SIZE);
-  return (data as unknown as Post[] | null) || [];
-}
 
 export default async function HomePage() {
-  const initialPosts = await fetchLatestPosts();
+  const initialPosts = await getLatestPublishedPosts(PAGE_SIZE);
   const siteUrl = getSiteUrl();
 
   const structuredData = {

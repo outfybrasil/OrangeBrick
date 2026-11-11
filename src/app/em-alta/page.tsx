@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Footer } from "@/components/ui/Footer";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { createPublicServerClient, createServiceRoleClient, hasServiceRoleKey } from "@/lib/supabase/server";
 import type { Post } from "@/lib/types/database";
 import { POST_LIST_COLUMNS } from "@/lib/types/database";
 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TrendingPage() {
-  const supabase = createServiceRoleClient();
+  const supabase = hasServiceRoleKey() ? createServiceRoleClient() : createPublicServerClient();
   const [{ data: postData }, { data: scoreData, error: scoreError }] = await Promise.all([
     supabase.from("posts").select(POST_LIST_COLUMNS).eq("is_published", true).order("published_at", { ascending: false }).limit(40),
     supabase.rpc("get_post_interest_scores"),

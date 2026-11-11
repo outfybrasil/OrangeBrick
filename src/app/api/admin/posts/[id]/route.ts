@@ -1,7 +1,8 @@
 import { isVerifiedAdminSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_POSTS_TAG } from "@/lib/server/public-data-cache";
 import { saoPauloNewsDate } from "@/lib/news-query";
 
 export const runtime = "nodejs";
@@ -54,6 +55,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
   const { data: saved, error: saveError } = await supabase.from("posts").update({ is_featured: body.featured, featured_priority: body.featured ? 100 : 0, updated_at: new Date().toISOString() }).eq("id", id).eq("is_published", true).select("id,is_featured,updated_at").maybeSingle();
   if (saveError || !saved) return NextResponse.json({ error: saveError?.message || "Não foi possível definir o destaque" }, { status: 500 });
+  revalidateTag(PUBLIC_POSTS_TAG, { expire: 0 });
   revalidatePath("/");
   revalidatePath("/noticias");
   return NextResponse.json({ post: saved }, { headers: { "Cache-Control": "private, no-store" } });

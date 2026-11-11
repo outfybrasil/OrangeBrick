@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { PUBLIC_POSTS_TAG } from "@/lib/server/public-data-cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { queuePublicationNotice, deliverPublicationNotice } from "./telegram-publication.ts";
 import { triggerReelGeneration } from "../video/reel-service.ts";
@@ -37,6 +38,7 @@ export type PublicationEffectsResult = {
 };
 
 export function refreshPublishedPages(): void {
+  revalidateTag(PUBLIC_POSTS_TAG, { expire: 0 });
   for (const path of ["/", "/noticias", "/feed.xml", "/sitemap.xml", "/news-sitemap.xml", "/en", "/brickboard", "/en/brickboard"]) revalidatePath(path);
   revalidatePath("/posts/[slug]", "page");
   revalidatePath("/en/posts/[slug]", "page");

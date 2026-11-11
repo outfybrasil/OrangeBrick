@@ -1,6 +1,7 @@
 import { GoogleGenAI, type GenerateContentParameters, type GenerateContentResponse } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "node:crypto";
+import sharp from "sharp";
 import type { Post, PostCategory } from "../types/database.ts";
 import { fetchValidatedRemote, readResponseBuffer } from "../server/network.ts";
 import { independentEditorialPublisherCount, isOfficialEditorialSource, isSpecificEditorialSource, parseEditorialBlocks } from "../content-validation.ts";
@@ -235,6 +236,8 @@ async function geminiSearchImages(query: string, deadline: number, imageSourcePa
 
 const MIN_IMAGE_WIDTH = 1200;
 const MIN_IMAGE_HEIGHT = 675;
+const STORED_IMAGE_WIDTH = 1920;
+const STORED_IMAGE_HEIGHT = 1080;
 const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 
 function sniffImageContentType(buffer: Buffer, declared?: string | null): string | null {
@@ -362,23 +365,23 @@ async function uploadToSupabaseStorage(
   postId: string,
   prefix: string,
   buffer: Buffer,
-  contentType: string,
   sourceUrl: string,
   contentSha256: string,
-  width: number,
-  height: number,
 ): Promise<string> {
-  const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
-  const filename = `editorial/${postId}/${prefix}-${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("post-images").upload(filename, buffer, {
-    contentType,
+  const output = await sharp(buffer, { failOn: "error", limitInputPixels: 40_000_000 })
+    .rotate()
+    .resize(STORED_IMAGE_WIDTH, STORED_IMAGE_HEIGHT, { fit: "cover" })
+    .webp({ quality: 82, effort: 5 })
+    .toBuffer();
+  const filename = `editorial/${postId}/${prefix}-${crypto.randomUUID()}.webp`;
+  const { error } = await supabase.storage.from("post-images").upload(filename, output, {
+    contentType: "image/webp",
     cacheControl: "31536000",
     upsert: false,
   });
   if (error) throw error;
   const { data } = supabase.storage.from("post-images").getPublicUrl(filename);
-  const renderBase = data.publicUrl.replace("/object/public/", "/render/image/public/");
-  const publicUrl = `${renderBase}?width=1920&height=1080&resize=cover&quality=82&format=webp`;
+  const publicUrl = data.publicUrl;
   const registryRecord = {
     post_id: null,
     kind: prefix === "cover" ? "cover" : "body",
@@ -386,10 +389,10 @@ async function uploadToSupabaseStorage(
     storage_path: filename,
     public_url: publicUrl,
     alt_text: null,
-    width,
-    height,
-    file_size: buffer.byteLength,
-    mime_type: contentType,
+    width: STORED_IMAGE_WIDTH,
+    height: STORED_IMAGE_HEIGHT,
+    file_size: output.byteLength,
+    mime_type: "image/webp",
   };
   const firstInsert = await supabase.from("editorial_images").insert({ ...registryRecord, content_sha256: contentSha256 });
   let registryError = firstInsert.error;
@@ -457,7 +460,7 @@ function createImagePipeline(supabase: ReturnType<typeof getSupabaseAdmin>, post
       if (usedHashes.has(sha256)) return null;
       usedHashes.add(sha256);
       const evidenceSource = sourcePage && isTrustedEditorialImageSourcePage(sourcePage) ? sourcePage : url;
-      const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, processed.contentType, evidenceSource, sha256, processed.width, processed.height);
+      const uploadedUrl = await uploadToSupabaseStorage(supabase, postId, prefix, processed.buffer, evidenceSource, sha256);
       verifiedImages.push({ url: uploadedUrl, sourceUrl: sourcePage || url, sha256, ...description });
       return uploadedUrl;
     } catch {

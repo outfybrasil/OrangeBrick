@@ -2278,6 +2278,7 @@ function AdminReelsContent({ defaultMode = "short" }: { defaultMode?: "short" | 
                     src={selectedReel.video_url}
                     controls
                     playsInline
+                    preload="metadata"
                     className="h-full w-full object-cover"
                   />
                 ) : (
