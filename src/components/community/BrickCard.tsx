@@ -400,7 +400,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               onClick={onToggleFollowAuthor}
               aria-pressed={isFollowingAuthor}
               title={isFollowingAuthor ? (isEn ? "Unfollow author" : "Deixar de seguir autor") : (isEn ? "Follow author" : "Seguir autor")}
-              className={`grid size-8 place-items-center border transition-colors ${
+              className={`grid size-11 place-items-center border transition-colors sm:size-8 ${
                 isFollowingAuthor
                   ? "border-brand-orange/50 bg-brand-orange/10 text-brand-orange"
                   : "border-white/10 text-gray-500 hover:border-white/25 hover:text-white"
@@ -425,7 +425,7 @@ export function BrickCard({ post, compactArticle = false, onReaction, onDeletePo
               onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-label={isEn ? "More options" : "Mais opções"}
               aria-expanded={isMenuOpen}
-              className="flex size-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex size-11 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white sm:size-8"
             >
               <svg className="size-4" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="5" cy="12" r="2" />
