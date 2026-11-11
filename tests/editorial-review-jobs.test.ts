@@ -26,13 +26,13 @@ async function fixture() {
 test("the review queue is private, deduplicates requests and permits only one worker", async () => {
   const db = await fixture();
   try {
-    const jobs = await db.query<{ id: string }>("select * from enqueue_editorial_reviews($1::uuid[],'admin','admin')", [[first, second]]);
+    const jobs = await db.query<{ id: string; post_id: string }>("select * from enqueue_editorial_reviews($1::uuid[],'admin','admin')", [[first, second]]);
     assert.equal(jobs.rows.length, 2);
     assert.equal((await db.query<{ scheduled_at: unknown }>("select scheduled_at from posts where id=$1", [first])).rows[0].scheduled_at, null);
     const duplicate = await db.query<{ id: string }>("select * from enqueue_editorial_reviews($1::uuid[],'admin','admin')", [[first]]);
-    assert.equal(duplicate.rows[0].id, jobs.rows[0].id);
+    assert.equal(duplicate.rows[0].id, jobs.rows.find((row) => row.post_id === first)?.id);
     const claimed = await db.query<{ id: string; post_id: string }>("select * from claim_editorial_review($1)", [token]);
-    assert.equal(claimed.rows[0].post_id, first);
+    assert.equal(claimed.rows[0].id, jobs.rows[0].id);
     assert.equal((await db.query("select * from claim_editorial_review($1)", [second])).rows.length, 0);
     await db.exec("reset role;set role authenticated");
     await assert.rejects(db.query("select * from editorial_review_jobs"), /permission denied/);
@@ -46,18 +46,22 @@ test("review results preserve identity and publication state, clear scheduling a
   const db = await fixture();
   try {
     await db.query("select * from enqueue_editorial_reviews($1::uuid[],'admin','admin')", [[first, second]]);
-    const job = (await db.query<{ id: string }>("select * from claim_editorial_review($1)", [token])).rows[0];
-    const candidate = { id: first, slug: "changed-slug", is_published: false, title: "Revised", summary: "New summary", body: "[]", image_url: null, image_alt: "", information_status: "developing", featured_quote: { absence_registered: true }, editorial_sources: [], short_article_reason: "Cobertura focada em um anúncio breve." };
+    const job = (await db.query<{ id: string; post_id: string }>("select * from claim_editorial_review($1)", [token])).rows[0];
+    const reviewed = job.post_id;
+    const other = reviewed === first ? second : first;
+    const originalSlug = reviewed === first ? "original-slug" : "second-slug";
+    const candidate = { id: reviewed, slug: "changed-slug", is_published: false, title: "Revised", summary: "New summary", body: "[]", image_url: null, image_alt: "", information_status: "developing", featured_quote: { absence_registered: true }, editorial_sources: [], short_article_reason: "Cobertura focada em um anúncio breve." };
     await assert.rejects(db.query("select finish_editorial_review($1,$2,$3::jsonb,'{}','completed')", [job.id, second, JSON.stringify(candidate)]), /Outra revisão/);
     await assert.rejects(db.query("select finish_editorial_review($1,$2,$3::jsonb,'{}','completed')", [job.id, token, JSON.stringify({ ...candidate, is_published: true })]), /mesmo rascunho/);
     await db.query("select finish_editorial_review($1,$2,$3::jsonb,'{}','needs_review')", [job.id, token, JSON.stringify(candidate)]);
-    const post = (await db.query<{ title: string; slug: string; is_published: boolean; scheduled_at: unknown }>("select * from posts where id=$1", [first])).rows[0];
-    assert.equal(post.title, "Revised"); assert.equal(post.slug, "original-slug"); assert.equal(post.is_published, false); assert.equal(post.scheduled_at, null);
-    const next = (await db.query<{ id: string }>("select * from claim_editorial_review($1)", [token])).rows[0];
-    await db.query("update posts set title='Human edit',updated_at=clock_timestamp() where id=$1", [second]);
-    const result = await db.query<{ status: string }>("select finish_editorial_review($1,$2,$3::jsonb,'{}','completed') as status", [next.id, token, JSON.stringify({ ...candidate, id: second })]);
+    const post = (await db.query<{ title: string; slug: string; is_published: boolean; scheduled_at: unknown }>("select * from posts where id=$1", [reviewed])).rows[0];
+    assert.equal(post.title, "Revised"); assert.equal(post.slug, originalSlug); assert.equal(post.is_published, false); assert.equal(post.scheduled_at, null);
+    const next = (await db.query<{ id: string; post_id: string }>("select * from claim_editorial_review($1)", [token])).rows[0];
+    assert.equal(next.post_id, other);
+    await db.query("update posts set title='Human edit',updated_at=clock_timestamp() where id=$1", [other]);
+    const result = await db.query<{ status: string }>("select finish_editorial_review($1,$2,$3::jsonb,'{}','completed') as status", [next.id, token, JSON.stringify({ ...candidate, id: other })]);
     assert.equal(result.rows[0].status, "skipped");
-    assert.equal((await db.query<{ title: string }>("select title from posts where id=$1", [second])).rows[0].title, "Human edit");
+    assert.equal((await db.query<{ title: string }>("select title from posts where id=$1", [other])).rows[0].title, "Human edit");
   } finally { await db.close(); }
 });
 
