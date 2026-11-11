@@ -12,6 +12,7 @@ const OFFICIAL_ASSET_DOMAINS = [
   "unrealengine.com",
   "nomanssky.com",
   "xboxwire.thesourcemediaassets.com",
+  "flightsimulator.azureedge.net",
   "steamstatic.com",
   "steamcommunity.com",
   "xboxservices.com",
