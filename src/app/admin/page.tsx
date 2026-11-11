@@ -432,15 +432,6 @@ export default function AdminDashboard() {
       active="overview"
       title="Visão geral"
       description="Acompanhe o que está publicado, encontre pendências e mova cada matéria para a próxima etapa."
-      actions={
-        <Link
-          href="/admin/edit"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-orange px-4 text-xs font-bold text-white transition-colors hover:bg-brand-orange-bright"
-        >
-          <span aria-hidden="true" className="text-base leading-none">+</span>
-          Nova matéria
-        </Link>
-      }
       wide
     >
       {error && (

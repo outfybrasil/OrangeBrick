@@ -149,10 +149,6 @@ export function AdminShell({
               </Link>
               <Link href="/admin/publicacoes" className={navClass("publications")} aria-current={active === "publications" ? "page" : undefined}><ComposeIcon />Publicações</Link>
               <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
-              <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}>
-                <ComposeIcon />
-                Nova matéria
-              </Link>
               <Link href="/admin/posts-sociais" className={navClass("social-posts")} aria-current={active === "social-posts" ? "page" : undefined}>
                 <ComposeIcon />
                 Posts & Carrosséis
@@ -294,7 +290,7 @@ export function AdminShell({
         aria-label="Navegação rápida mobile"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0a0b0e]/95 p-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-2xl xl:hidden"
       >
-        <div className="grid grid-cols-4 items-center gap-1">
+        <div className="grid grid-cols-3 items-center gap-1">
           <Link
             href="/admin"
             className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
@@ -305,18 +301,6 @@ export function AdminShell({
           >
             <OverviewIcon />
             <span>Início</span>
-          </Link>
-
-          <Link
-            href="/admin/edit"
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
-              active === "editor"
-                ? "bg-brand-orange/15 text-brand-orange"
-                : "text-gray-400 hover:text-white active:scale-95"
-            }`}
-          >
-            <ComposeIcon />
-            <span>Escrever</span>
           </Link>
 
           <Link
@@ -387,7 +371,6 @@ export function AdminShell({
                   <Link href="/admin" className={navClass("overview")} aria-current={active === "overview" ? "page" : undefined}><OverviewIcon />Visão geral</Link>
                   <Link href="/admin/publicacoes" className={navClass("publications")} aria-current={active === "publications" ? "page" : undefined}><ComposeIcon />Publicações</Link>
                   <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
-                  <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/posts-sociais" className={navClass("social-posts")} aria-current={active === "social-posts" ? "page" : undefined}><ComposeIcon />Posts & Carrosséis</Link>
                   <Link href="/admin/reels" className={navClass(videoSection)} aria-current={isVideoSection ? "page" : undefined}><ReelsIcon />Vídeos</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
