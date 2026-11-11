@@ -49,6 +49,50 @@ function MiniBarChart({ values, color }: { values: number[]; color: string }) {
   );
 }
 
+interface CommunityNote { id: string; content: string; source_url: string; created_at: string }
+
+function CommunityNotesPanel() {
+  const supabase = useMemo(() => createDataClient(), []);
+  const [notes, setNotes] = useState<CommunityNote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.from("community_notes").select("id, content, source_url, created_at").eq("status", "pending").order("created_at", { ascending: true });
+    if (error) setMessage("Não foi possível carregar as notas da comunidade.");
+    else setNotes((data || []) as CommunityNote[]);
+    setLoading(false);
+  }, [supabase]);
+
+  useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
+
+  async function moderate(id: string, status: "helpful" | "rejected") {
+    const { error } = await supabase.from("community_notes").update({ status }).eq("id", id);
+    setMessage(error ? "Não foi possível revisar a nota." : status === "helpful" ? "Nota aprovada." : "Nota rejeitada.");
+    await load();
+  }
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-surface p-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 className="font-heading text-sm font-bold text-white">Notas da comunidade</h3>
+        <span className="text-xs font-bold text-brand-orange">{loading ? "—" : notes.length} pendentes</span>
+      </div>
+      {message && <p role="status" className="mt-3 text-xs text-gray-300">{message}</p>}
+      {loading ? <p className="py-3 text-xs text-gray-400">Carregando notas...</p> : notes.length === 0 ? <p className="py-3 text-xs text-gray-500">Nenhuma nota aguardando revisão.</p> : notes.map((note) => (
+        <div key={note.id} className="border-t border-white/10 py-3 first:border-t-0">
+          <p className="text-xs leading-relaxed text-gray-200">{note.content}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <a href={note.source_url} target="_blank" rel="noreferrer" className="min-h-9 px-2 py-2 text-xs font-bold text-brand-orange">Ver fonte ↗</a>
+            <button type="button" onClick={() => void moderate(note.id, "helpful")} className="min-h-9 border border-emerald-400/40 px-3 text-xs font-bold text-emerald-300">Aprovar</button>
+            <button type="button" onClick={() => void moderate(note.id, "rejected")} className="min-h-9 border border-red-400/30 px-3 text-xs font-bold text-red-300">Rejeitar</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function CommunityAdminPage() {
   const router = useRouter();
   const supabase = useMemo(() => createDataClient(), []);
@@ -309,6 +353,12 @@ export default function CommunityAdminPage() {
             className="text-xs font-bold text-brand-orange hover:text-white transition-colors"
           >
             Ver Brickboard
+          </Link>
+          <Link
+            href="/admin/progression"
+            className="text-xs font-bold text-gray-300 hover:text-white transition-colors"
+          >
+            Progressão
           </Link>
           <button
             type="button"
@@ -581,6 +631,8 @@ export default function CommunityAdminPage() {
 
         {/* COLUNA DIREITA (WIDGETS DE SAÚDE, POLL & ASSUNTOS) */}
         <aside className="space-y-4">
+
+          <CommunityNotesPanel />
 
           {/* PERGUNTA DO DIA */}
           <div className="rounded-xl border border-white/10 bg-surface p-4 space-y-3">

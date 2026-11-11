@@ -37,16 +37,6 @@ function ReelsIcon() {
   );
 }
 
-function DarkPipelineIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
-      <rect x="2" y="5" width="20" height="14" rx="2.5" />
-      <polygon points="10 9.5 15.5 12 10 14.5 10 9.5" fill="currentColor" stroke="none" />
-      <path d="M6 19v2M18 19v2" />
-    </svg>
-  );
-}
-
 function ComposeIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -126,7 +116,12 @@ export function AdminShell({
         : "text-gray-400 hover:bg-white/[0.04] hover:text-white"
     }`;
 
-  const todayDateStr = new Intl.DateTimeFormat("pt-BR", {
+  const isVideoSection = active === "reels" || active === "long-videos";
+  const videoSection: AdminSection = isVideoSection ? active : "reels";
+  const isCommunitySection = active === "community" || active === "progression";
+  const communitySection: AdminSection = isCommunitySection ? active : "community";
+
+  const todayDateStr =new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -162,29 +157,17 @@ export function AdminShell({
                 <ComposeIcon />
                 Posts & Carrosséis
               </Link>
-              <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}>
+              <Link href="/admin/reels" className={navClass(videoSection)} aria-current={isVideoSection ? "page" : undefined}>
                 <ReelsIcon />
-                Reels & Vídeos
-              </Link>
-              <Link href="/admin/videos-longos" className={navClass("long-videos")} aria-current={active === "long-videos" ? "page" : undefined}>
-                <DarkPipelineIcon />
-                <span>Vídeos Longos</span>
+                Vídeos
               </Link>
               <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}>
                 <ReleasesIcon />
                 Radar de lançamentos
               </Link>
-              <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}>
+              <Link href="/admin/community" className={navClass(communitySection)} aria-current={isCommunitySection ? "page" : undefined}>
                 <CommunityIcon />
                 Comunidade
-              </Link>
-              <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}>
-                <ProgressionIcon />
-                Progressão
-              </Link>
-              <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}>
-                <OverviewIcon />
-                Saúde e auditoria
               </Link>
             </div>
           </div>
@@ -194,6 +177,10 @@ export function AdminShell({
               Administração
             </p>
             <div className="space-y-1">
+              <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}>
+                <OverviewIcon />
+                Saúde e auditoria
+              </Link>
               <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}>
                 <OverviewIcon />
                 Caixa de entrada
@@ -335,7 +322,7 @@ export function AdminShell({
           <Link
             href="/admin/reels"
             className={`flex flex-col items-center justify-center gap-1 rounded-xl py-1.5 text-xs font-bold transition-all ${
-              active === "reels"
+              isVideoSection
                 ? "bg-brand-orange/15 text-brand-orange"
                 : "text-gray-400 hover:text-white active:scale-95"
             }`}
@@ -402,12 +389,9 @@ export function AdminShell({
                   <Link href="/admin/metricas" className={navClass("metrics")} aria-current={active === "metrics" ? "page" : undefined}><ProgressionIcon />Audiência</Link>
                   <Link href="/admin/edit" className={navClass("editor")} aria-current={active === "editor" ? "page" : undefined}><ComposeIcon />Nova matéria</Link>
                   <Link href="/admin/posts-sociais" className={navClass("social-posts")} aria-current={active === "social-posts" ? "page" : undefined}><ComposeIcon />Posts & Carrosséis</Link>
-                  <Link href="/admin/reels" className={navClass("reels")} aria-current={active === "reels" ? "page" : undefined}><ReelsIcon />Reels & Vídeos</Link>
-                  <Link href="/admin/videos-longos" className={navClass("long-videos")} aria-current={active === "long-videos" ? "page" : undefined}><DarkPipelineIcon />Vídeos Longos</Link>
+                  <Link href="/admin/reels" className={navClass(videoSection)} aria-current={isVideoSection ? "page" : undefined}><ReelsIcon />Vídeos</Link>
                   <Link href="/admin/releases" className={navClass("releases")} aria-current={active === "releases" ? "page" : undefined}><ReleasesIcon />Radar de lançamentos</Link>
-                  <Link href="/admin/community" className={navClass("community")} aria-current={active === "community" ? "page" : undefined}><CommunityIcon />Comunidade</Link>
-                  <Link href="/admin/progression" className={navClass("progression")} aria-current={active === "progression" ? "page" : undefined}><ProgressionIcon />Progressão</Link>
-                  <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}><OverviewIcon />Saúde e auditoria</Link>
+                  <Link href="/admin/community" className={navClass(communitySection)} aria-current={isCommunitySection ? "page" : undefined}><CommunityIcon />Comunidade</Link>
                 </div>
               </div>
 
@@ -416,6 +400,7 @@ export function AdminShell({
                   Administração
                 </p>
                 <div className="space-y-1">
+                  <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}><OverviewIcon />Saúde e auditoria</Link>
                   <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}><OverviewIcon />Caixa de entrada</Link>
                   <Link href="/admin/team" className={navClass("team")}><CommunityIcon />Equipe</Link>
                   <Link href="/admin/settings" className={navClass("settings")}><OverviewIcon />Configurações</Link>

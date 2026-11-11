@@ -113,7 +113,6 @@ export default function AdminDashboard() {
   const [statsError, setStatsError] = useState<string | null>(null);
   const [recentDrafts, setRecentDrafts] = useState<PaginatedPost[]>([]);
   const [weeklyPublished, setWeeklyPublished] = useState<{ published_at: string | null }[]>([]);
-  const [categoryDistributionRaw, setCategoryDistribution] = useState<{ category: string; count: number }[]>([]);
 
   const updateSelectedCategory = async () => {
     if (!batchCategory || selectedIds.length === 0) return;
@@ -355,7 +354,6 @@ export default function AdminDashboard() {
       setStats(data);
       setRecentDrafts((draftsRes.data || []) as PaginatedPost[]);
       setWeeklyPublished((weeklyRes.data || []) as { published_at: string | null }[]);
-      setCategoryDistribution(data.categoryCounts);
       setStatsError(null);
     } catch (statsLoadError) {
       setStats(null);
@@ -415,12 +413,6 @@ export default function AdminDashboard() {
     };
   }), [dashboardNow, weeklyPublished]);
 
-  const categoryDistribution = useMemo(() => CATEGORY_OPTIONS.map(([category, label]) => ({
-    category,
-    label,
-    count: categoryDistributionRaw.find(c => c.category === category)?.count || 0,
-  })).filter((item) => item.count > 0), [categoryDistributionRaw]);
-  const categoryTotal = categoryDistributionRaw.reduce((total, item) => total + item.count, 0);
 
   const allVisibleSelected = posts.length > 0 && posts.every((post) => selectedIds.includes(post.id));
 
@@ -494,7 +486,6 @@ export default function AdminDashboard() {
             <p className="mt-2 font-heading text-3xl font-black text-white">{stats ? inProductionCount : "—"}</p>
             <p className="mt-1 text-xs text-gray-500">Rascunhos</p>
           </div>
-          {stats && <MiniBarChart values={[inProductionCount]} color="bg-brand-orange" />}
         </div>
 
         {/* AGENDADAS */}
@@ -509,7 +500,6 @@ export default function AdminDashboard() {
             <p className="mt-2 font-heading text-3xl font-black text-white">{stats ? scheduledCount : "—"}</p>
             <p className="mt-1 text-xs text-gray-500">Rascunhos com horário definido</p>
           </div>
-          {stats && <MiniBarChart values={[scheduledCount]} color="bg-sky-400" />}
         </div>
       </section>
 
@@ -1127,58 +1117,10 @@ export default function AdminDashboard() {
               ))}
             </div>
             <div className="mt-4 border-t border-white/10 pt-3">
-              <Link href="/admin?status=production" className="flex items-center justify-between text-xs font-semibold text-gray-400 hover:text-white">
+              <button type="button" onClick={() => { setFilterStatus("production"); setCurrentPage(1); document.getElementById("editorial-queue-title")?.scrollIntoView({ behavior: "smooth" }); }} className="flex w-full items-center justify-between text-xs font-semibold text-gray-400 hover:text-white">
                 <span>Ver todos os rascunhos</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-              </Link>
-            </div>
-          </div>
-
-          {/* RITMO DA REDAÇÃO */}
-          <div className="rounded-xl border border-white/10 bg-surface p-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-heading text-sm font-bold text-white">Ritmo da redação</h3>
-              <span className="text-xs text-gray-500">Últimos 7 dias</span>
-            </div>
-            <div className="mt-4">
-              <p className="text-2xl font-black font-heading text-white">{stats ? weeklyPublished.length : "—"}</p>
-              <p className="text-xs text-gray-400 mt-0.5">publicações nos últimos 7 dias</p>
-            </div>
-            {/* GRÁFICO DE BARRAS DA SEMANA */}
-            <div className="mt-4 flex items-end justify-between gap-2 h-20 border-b border-white/10 pb-2">
-              {stats && weeklyRhythm.map((item) => (
-                <div key={item.day} className="flex flex-col items-center flex-1 h-full justify-end">
-                  <span className="text-xs font-bold text-gray-400 mb-1">{item.val}</span>
-                  <div
-                    style={{ height: `${weeklyPublished.length > 0 ? Math.max(8, (item.val / Math.max(...weeklyRhythm.map((day) => day.val), 1)) * 100) : 0}%` }}
-                    className="w-full bg-brand-orange rounded-t-sm transition-all"
-                  />
-                  <span className="mt-1 text-xs font-semibold text-gray-500">{item.day}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* DISTRIBUIÇÃO EDITORIAL */}
-          <div className="rounded-xl border border-white/10 bg-surface p-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="font-heading text-sm font-bold text-white">Distribuição editorial</h3>
-              <span className="text-xs text-gray-500">Todas as matérias</span>
-            </div>
-            <div className="mt-3 space-y-3">
-              {!stats ? <p className="py-3 text-xs text-gray-500">Dados indisponíveis.</p> : categoryDistribution.length === 0 ? (
-                <p className="py-3 text-xs text-gray-500">Nenhuma matéria cadastrada.</p>
-              ) : categoryDistribution.map((item) => (
-                <div key={item.category}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-semibold text-gray-300">{item.label}</span>
-                    <span className="font-bold text-gray-500">{item.count}</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-orange rounded-full" style={{ width: `${(item.count / Math.max(categoryTotal, 1)) * 100}%` }} />
-                  </div>
-                </div>
-              ))}
+              </button>
             </div>
           </div>
         </aside>

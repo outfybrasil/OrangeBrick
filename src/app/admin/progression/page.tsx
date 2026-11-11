@@ -164,6 +164,7 @@ export default function ProgressionAdminPage() {
       title="Progressão"
       description="Audite XP, ajuste regras e controle a temporada sem editar saldos diretamente."
       wide
+      actions={<Link href="/admin/community" className="text-xs font-bold text-brand-orange hover:text-white transition-colors">Voltar à Comunidade</Link>}
       status={data?.season ? <span className="text-xs font-bold text-amber-300">{data.season.name} · {data.season.status}</span> : undefined}
     >
       {error && <p role="alert" className="mb-5 border-y border-red-500/30 bg-red-500/[0.06] px-4 py-3 text-sm text-red-200">{error}</p>}
