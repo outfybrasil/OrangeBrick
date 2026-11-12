@@ -56,7 +56,6 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
   const { posts: rawPosts, isLoading, isLoadingMore, hasMore, error, loadMore, refresh } =
     useInfiniteFeed(category, initialPosts);
   const hasRequestedFilters = Boolean(category || platformSlug || searchQuery || activeTag);
-  const Heading = headingLevel;
 
   const posts = useMemo(() => {
     let result = rawPosts;
@@ -316,7 +315,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
             <div className="mb-4 flex flex-col gap-3 border-b border-brand-orange/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-6 w-1 bg-brand-orange" />
-                <Heading className="font-heading text-xl font-black text-white">
+                <h2 className="font-heading text-xl font-black text-white">
                   {category ? (
                     isEn ? (
                       <>News in <span className="text-brand-orange">{dict.categories[category]}</span></>
@@ -330,7 +329,7 @@ export function NewsFeed({ headingLevel = "h2", category, platformSlug = null, s
                       <>Últimas <span className="text-brand-orange">notícias</span></>
                     )
                   )}
-                </Heading>
+                </h2>
               </div>
 
               {onSelectCategory && (

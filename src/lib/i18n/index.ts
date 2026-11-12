@@ -17,16 +17,13 @@ export function isValidLocale(value: string | null | undefined): value is Locale
 }
 
 export function detectLocale(country: string | null, acceptLanguage: string | null): Locale {
-  if (country) {
-    return country.toUpperCase() === "BR" ? "pt" : "en";
+  const primary = acceptLanguage?.split(",")[0]?.split(";")[0]?.trim().toLowerCase() || "";
+  if (primary) {
+    return primary.startsWith("pt") ? "pt" : "en";
   }
 
-  if (acceptLanguage) {
-    const primary = acceptLanguage.split(",")[0]?.trim().toLowerCase() || "";
-    if (primary.startsWith("pt")) {
-      return "pt";
-    }
-    return "en";
+  if (country) {
+    return country.toUpperCase() === "BR" ? "pt" : "en";
   }
 
   return DEFAULT_LOCALE;

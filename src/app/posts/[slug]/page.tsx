@@ -84,10 +84,12 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
     description: post.summary,
     alternates: {
       canonical,
-      languages: {
-        "pt-BR": `/posts/${post.slug}`,
-        "en-US": `/en/posts/${post.slug_en || post.slug}`,
-      },
+      languages: post.title_en && post.body_en
+        ? {
+          "pt-BR": `/posts/${post.slug}`,
+          "en-US": `/en/posts/${post.slug_en || post.slug}`,
+        }
+        : undefined,
     },
     robots: isPreview ? { index: false, follow: false } : undefined,
     openGraph: {

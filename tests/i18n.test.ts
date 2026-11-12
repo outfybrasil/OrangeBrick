@@ -39,3 +39,9 @@ test("getDictionary provides correct dictionary with all keys present", () => {
   assert.equal(en.nav.news, "News");
   assert.equal(pt.nav.news, "Notícias");
 });
+
+test("detectLocale prefers browser language over IP country", () => {
+  assert.equal(detectLocale("PT", "pt-PT,pt;q=0.9"), "pt");
+  assert.equal(detectLocale("US", "pt-BR"), "pt");
+  assert.equal(detectLocale("BR", "en-US,en;q=0.9"), "en");
+});

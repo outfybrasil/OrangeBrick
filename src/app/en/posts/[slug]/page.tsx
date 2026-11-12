@@ -81,16 +81,19 @@ export async function generateMetadata({ params, searchParams }: PostPageProps):
   const postTitle = post.title_en || post.title;
   const postSummary = post.summary_en || post.summary;
   const postSlug = post.slug_en || post.slug;
-  const canonical = `/en/posts/${postSlug}`;
+  const isTranslated = Boolean(post.title_en && post.body_en);
+  const canonical = isTranslated ? `/en/posts/${postSlug}` : `/posts/${post.slug}`;
   return {
     title: postTitle,
     description: postSummary,
     alternates: {
       canonical,
-      languages: {
-        "pt-BR": `/posts/${post.slug}`,
-        "en-US": `/en/posts/${postSlug}`,
-      },
+      languages: isTranslated
+        ? {
+          "pt-BR": `/posts/${post.slug}`,
+          "en-US": `/en/posts/${postSlug}`,
+        }
+        : undefined,
     },
     robots: isPreview ? { index: false, follow: false } : undefined,
     openGraph: {
