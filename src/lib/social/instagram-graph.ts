@@ -46,17 +46,18 @@ export function instagramGraph(fetcher: typeof fetch = fetch) {
 export async function publishInstagramImages(options: {
   account: InstagramAccount;
   caption: string;
-  images: Array<{ url: string; alt: string }>;
+  images: Array<{ url: string; alt: string; video?: boolean }>;
   call: ReturnType<typeof instagramGraph>["call"];
   beforePublish: (containerId: string) => Promise<void>;
   pause?: () => Promise<void>;
 }) {
   const { account, images, call } = options;
   if (images.length < 1 || images.length > 10) throw new Error("O envio direto aceita entre 1 e 10 imagens.");
+  if (images.some(image => image.video) && images.length < 2) throw new Error("O vídeo de capa só pode ser enviado dentro de um carrossel.");
   const pause = options.pause || (() => new Promise<void>(resolve => setTimeout(resolve, 2000)));
   const deadline = Date.now() + 180_000;
   const ready = async (id: string) => {
-    for (let attempt = 0; attempt < 15 && Date.now() < deadline; attempt++) {
+    for (let attempt = 0; attempt < 80 && Date.now() < deadline; attempt++) {
       const result = await call(`${encodeURIComponent(id)}?fields=status_code,status`);
       if (result.status_code === "FINISHED") return;
       if (result.status_code === "ERROR" || result.status_code === "EXPIRED") throw new Error("O Instagram não conseguiu processar uma imagem. Confira os arquivos e tente novamente.");
@@ -68,7 +69,8 @@ export async function publishInstagramImages(options: {
   const children: string[] = [];
   for (const image of images) {
     if (Date.now() > deadline) throw new Error("O preparo do Instagram excedeu o tempo limite. Nenhuma publicação foi solicitada.");
-    const result = await call(`${account.id}/media`, "POST", { image_url: image.url, alt_text: image.alt.slice(0, 1000), ...(images.length > 1 ? { is_carousel_item: "true" } : { caption: options.caption }) });
+    const media: Record<string, string> = image.video ? { media_type: "VIDEO", video_url: image.url } : { image_url: image.url, alt_text: image.alt.slice(0, 1000) };
+    const result = await call(`${account.id}/media`, "POST", { ...media, ...(images.length > 1 ? { is_carousel_item: "true" } : { caption: options.caption }) });
     if (!result.id) throw new Error("O Instagram não retornou o identificador da imagem.");
     children.push(String(result.id));
   }

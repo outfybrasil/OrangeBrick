@@ -144,7 +144,8 @@ export function validateSocialDraft(value: unknown, post: SocialSourcePost): Soc
     return { id: slide.id, kind: slide.kind, title: slide.title.trim(), text: slide.text.trim(), imageUrl: slide.imageUrl, alt: slide.alt.trim(), caption: slide.caption.trim(), fit: slide.fit, positionX: slide.positionX, positionY: slide.positionY };
   });
   if (draft.format === "carousel" && slides.at(-1)?.kind !== "cta") throw new Error("Reserve o último slide para o CTA.");
-  return { version: 1, postId: post.id, sourceUpdatedAt: draft.sourceUpdatedAt, format: draft.format, caption: draft.caption.trim(), music: draft.music.trim(), slides, savedAt: null };
+  if (draft.coverMotion !== undefined && typeof draft.coverMotion !== "boolean") throw new Error("Opção de capa animada inválida.");
+  return { version: 1, postId: post.id, sourceUpdatedAt: draft.sourceUpdatedAt, format: draft.format, caption: draft.caption.trim(), music: draft.music.trim(), slides, ...(draft.format === "carousel" && draft.coverMotion === true ? { coverMotion: true } : {}), savedAt: null };
 }
 
 const START = "(?<![\\p{L}\\p{N}])";

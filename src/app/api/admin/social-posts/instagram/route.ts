@@ -6,6 +6,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/site-url";
 import { readRequestFormData, readResponseBuffer } from "@/lib/server/network";
 import { enrichSocialPost } from "@/lib/social/post-context";
+import { isFaststartH264Mp4 } from "@/lib/social/mp4";
 import { applySocialDefaults, instagramPostCaption, socialDraftQualityIssues, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
 import { instagramConfigured, instagramGraph, publishInstagramImages } from "@/lib/social/instagram-graph";
 import { claimInstagramPublication, ensureSocialBucket, latestInstagramPublication, saveInstagramPublication, socialDraftBucket, socialMediaBucket } from "@/lib/social/instagram-history";
@@ -80,11 +81,18 @@ export async function POST(request: Request) {
       const prepared = await batch(db, post, format, id);
       if (typeof index !== "string" || !/^\d+$/.test(index) || Number(index) >= prepared.draft.slides.length || !(file instanceof File) || file.size > 3 * 1024 * 1024) return reply({ error: "Arquivo ou posição de imagem inválidos." }, 400);
       const input = Buffer.from(await file.arrayBuffer());
+      const slidePath = `${post.id}/${format}/${id}/${String(Number(index) + 1).padStart(2, "0")}`;
+      if (Number(index) === 0 && prepared.draft.coverMotion) {
+        if (!isFaststartH264Mp4(new Uint8Array(input))) return reply({ error: "Envie o vídeo MP4 da capa gerado pelo editor." }, 400);
+        const { error } = await db.storage.from(socialMediaBucket).upload(`${slidePath}.mp4`, input, { upsert: false, contentType: "video/mp4" });
+        if (error) return reply({ error: "Não foi possível guardar o vídeo da capa. Prepare o envio novamente." }, 503);
+        return reply({ uploaded: Number(index) });
+      }
       const image = sharp(input, { failOn: "error", limitInputPixels: 2_000_000 });
       const metadata = await image.metadata();
       if (metadata.format !== "jpeg" || metadata.width !== 1080 || metadata.height !== 1350) return reply({ error: "Envie apenas os JPGs de 1080 × 1350 preparados pelo editor." }, 400);
       const output = await image.jpeg({ quality: 96, chromaSubsampling: "4:4:4" }).toBuffer();
-      const { error } = await db.storage.from(socialMediaBucket).upload(`${post.id}/${format}/${id}/${String(Number(index) + 1).padStart(2, "0")}.jpg`, output, { upsert: false, contentType: "image/jpeg" });
+      const { error } = await db.storage.from(socialMediaBucket).upload(`${slidePath}.jpg`, output, { upsert: false, contentType: "image/jpeg" });
       if (error) return reply({ error: "Não foi possível guardar uma imagem. Prepare o envio novamente." }, 503);
       return reply({ uploaded: Number(index) });
     }
@@ -131,13 +139,14 @@ export async function POST(request: Request) {
     if (prepared.draft.music && body.withoutMusic !== true) return reply({ error: "Confirme o envio sem música." }, 400);
     const account = await graph.account();
     if (account.id !== body.accountId) return reply({ error: "A conta de destino mudou. Atualize a conexão e revise antes de publicar." }, 409);
-    const paths = prepared.draft.slides.map((_, index) => `${post.id}/${format}/${body.batchId}/${String(index + 1).padStart(2, "0")}.jpg`);
+    const video = (index: number) => index === 0 && Boolean(prepared.draft.coverMotion);
+    const paths = prepared.draft.slides.map((_, index) => `${post.id}/${format}/${body.batchId}/${String(index + 1).padStart(2, "0")}.${video(index) ? "mp4" : "jpg"}`);
     const { data: signed, error: signingError } = await db.storage.from(socialMediaBucket).createSignedUrls(paths, 3600);
     if (signingError || !signed || signed.length !== paths.length || signed.some(item => item.error || !item.signedUrl)) return reply({ error: "Uma imagem ainda não está disponível. Prepare o envio novamente." }, 400);
     claim = await claimInstagramPublication(db, post.id, format, String(body.batchId), account, prepared.republishOf);
     if (!claim) return reply({ error: "Já existe um envio deste formato. Atualize o histórico antes de repetir.", publication: await latestInstagramPublication(db, post.id, format) }, 409);
     const caption = instagramPostCaption(prepared.draft, getSiteUrl());
-    const result = await publishInstagramImages({ account, caption, images: signed.map((item, index) => ({ url: item.signedUrl!, alt: [prepared.draft.slides[index].alt, prepared.draft.slides[index].title, prepared.draft.slides[index].text].filter(Boolean).join(". ") })), call: graph.call, beforePublish: async containerId => {
+    const result = await publishInstagramImages({ account, caption, images: signed.map((item, index) => ({ url: item.signedUrl!, video: video(index), alt: [prepared.draft.slides[index].alt, prepared.draft.slides[index].title, prepared.draft.slides[index].text].filter(Boolean).join(". ") })), call: graph.call, beforePublish: async containerId => {
       claim!.containerId = containerId; claim!.phase = "publishing";
       await saveInstagramPublication(db, post.id, format, claim!);
       publishRequested = true;

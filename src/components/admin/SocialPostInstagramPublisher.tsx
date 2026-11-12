@@ -81,7 +81,7 @@ export function SocialPostInstagramPublisher({ draft, ready, needsSave, onSave, 
       const prepared = await requestJson({ action: "prepare", draft: publishingDraft, confirmed: true, withoutMusic: Boolean(publishingDraft.music), ...(status.publication?.status === "published" && republishOf === status.publication.attempt ? { republishOf } : {}) });
       for (const [index, image] of images.entries()) {
         onBusy(`Enviando imagem ${index + 1} de ${images.length}…`);
-        const body = new FormData(); body.set("batchId", prepared.batchId); body.set("index", String(index)); body.set("image", image, `${String(index + 1).padStart(2, "0")}.jpg`);
+        const body = new FormData(); body.set("batchId", prepared.batchId); body.set("index", String(index)); body.set("image", image, `${String(index + 1).padStart(2, "0")}.${image.type === "video/mp4" ? "mp4" : "jpg"}`);
         const response = await api(endpoint, { method: "POST", body });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Não foi possível enviar uma imagem.");

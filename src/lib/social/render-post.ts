@@ -103,6 +103,78 @@ export function renderSocialSlide(canvas: HTMLCanvasElement, slide: SocialPostSl
   drawText(ctx, slide.kind === "cta" ? "ORANGE BRICK • NOTÍCIAS DE GAMES" : "ORANGE BRICK • CRÉDITOS NA LEGENDA", { x: MARGIN, y: 1254, width: CONTENT_WIDTH, height: 30 }, font, 24, 400, "#c7c8cd", 24, "O rodapé");
 }
 
+export const SOCIAL_MOTION_SECONDS = 5;
+export const SOCIAL_STORY_HEIGHT = 1920;
+
+function wave(t: number, period: number) {
+  return Math.sin(Math.PI * ((t % period) / period)) ** 2;
+}
+
+export function renderSocialCoverMotion(canvas: HTMLCanvasElement, slide: SocialPostSlide, total: number, resources: SocialRenderResources, t: number) {
+  renderSocialSlide(canvas, slide, 0, total, resources);
+  const ctx = canvas.getContext("2d");
+  if (!ctx || !resources.image) return;
+  const image = { y: 140, height: 608 };
+  ctx.fillStyle = "#ff5e00";
+  ctx.fillRect(MARGIN + 90, 784, 150 * wave(t, SOCIAL_MOTION_SECONDS / 2), 6);
+  const shine = Math.min(1, Math.max(0, (t - 0.8) / 1.4));
+  if (shine > 0 && shine < 1) {
+    const x = -500 + shine * (SOCIAL_SLIDE_WIDTH + 1000);
+    const gradient = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
+    gradient.addColorStop(0, "rgba(255,255,255,0)");
+    gradient.addColorStop(0.5, "rgba(255,255,255,0.22)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, image.y, SOCIAL_SLIDE_WIDTH, image.height); ctx.clip();
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, image.y, SOCIAL_SLIDE_WIDTH, image.height);
+    ctx.restore();
+  }
+  const pill = { width: 236, height: 60 };
+  const x = SOCIAL_SLIDE_WIDTH - MARGIN - pill.width;
+  const y = image.y + image.height - pill.height - 24;
+  ctx.fillStyle = "rgba(13,14,18,0.88)";
+  ctx.beginPath(); ctx.roundRect(x, y, pill.width, pill.height, 30); ctx.fill();
+  ctx.font = `900 26px ${resources.font}`;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText("ARRASTE", x + 26, y + pill.height / 2 + 1);
+  ctx.font = `900 44px ${resources.font}`;
+  const step = (t * 2) % 1.5;
+  for (let index = 0; index < 3; index++) {
+    const lit = Math.max(0, 1 - Math.abs(step - index * 0.4) * 2.2);
+    ctx.fillStyle = `rgba(255,94,0,${0.35 + 0.65 * lit})`;
+    ctx.fillText("›", x + 150 + index * 22, y + pill.height / 2 - 3);
+  }
+}
+
+export function renderSocialStory(canvas: HTMLCanvasElement, slide: SocialPostSlide, resources: SocialRenderResources) {
+  canvas.width = SOCIAL_SLIDE_WIDTH;
+  canvas.height = SOCIAL_STORY_HEIGHT;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Seu navegador não oferece suporte à prévia. Tente outro navegador.");
+  const { logo, image, font } = resources;
+  ctx.fillStyle = "#0d0e12";
+  ctx.fillRect(0, 0, SOCIAL_SLIDE_WIDTH, SOCIAL_STORY_HEIGHT);
+  ctx.drawImage(logo, MARGIN, 270, 340, 340 * logo.height / logo.width);
+  drawText(ctx, "NOVO NO FEED", { x: SOCIAL_SLIDE_WIDTH - MARGIN - 300, y: 272, width: 300, height: 34 }, font, 28, 900, "#ff5e00", 24, "O selo", "right");
+  ctx.fillStyle = "#ff5e00";
+  ctx.fillRect(MARGIN, 380, 90, 6);
+  drawText(ctx, slide.title.toLocaleUpperCase("pt-BR"), { x: MARGIN, y: 414, width: CONTENT_WIDTH, height: 400 }, font, 100, 900, "#ffffff", 56, "A manchete do story");
+  if (image) {
+    const box = { x: 0, y: 860, width: SOCIAL_SLIDE_WIDTH, height: 608 };
+    const scale = Math.max(box.width / image.width, box.height / image.height);
+    const w = image.width * scale;
+    const h = image.height * scale;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(box.x, box.y, box.width, box.height); ctx.clip();
+    ctx.drawImage(image, box.x + (box.width - w) * slide.positionX / 100, box.y + (box.height - h) * slide.positionY / 100, w, h);
+    ctx.restore();
+  }
+  drawText(ctx, "Toque no link para ler a matéria completa.", { x: MARGIN, y: 1500, width: CONTENT_WIDTH, height: 90 }, font, 38, 400, "#e5e5e5", 34, "O convite do story");
+}
+
 export function socialCanvasJpeg(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Não foi possível exportar o slide.")), "image/jpeg", 0.96));
 }

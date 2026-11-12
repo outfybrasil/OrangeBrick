@@ -8,7 +8,8 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, SocialInstagramPublication, SocialPostListStatus, SocialPostAsset, SocialPostDraft, SocialPostSlide } from "@/lib/types/database";
 import { assertSocialDraftQuality, instagramPostCaption, generateSocialCaption, generateSocialDraft, socialDraftQualityIssues, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
-import { loadSocialImage, renderSocialSlide, socialCanvasJpeg, socialRenderFont } from "@/lib/social/render-post";
+import { loadSocialImage, renderSocialCoverMotion, renderSocialSlide, renderSocialStory, socialCanvasJpeg, socialRenderFont, SOCIAL_MOTION_SECONDS, SOCIAL_SLIDE_HEIGHT, SOCIAL_SLIDE_WIDTH } from "@/lib/social/render-post";
+import { encodeSocialVideo, socialVideoSupported } from "@/lib/social/cover-video";
 import { createSocialZip } from "@/lib/social/zip";
 
 const control = "min-h-11 w-full border border-white/20 bg-[#15171d] px-3 py-2 text-sm text-white focus-visible:outline-2 focus-visible:outline-brand-orange disabled:opacity-50";
@@ -52,6 +53,7 @@ function SocialPostEditor() {
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [videoSupported, setVideoSupported] = useState(false);
   const [message, setMessage] = useState("");
   const [previewError, setPreviewError] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -108,6 +110,12 @@ function SocialPostEditor() {
   useEffect(() => {
     const urls = objectUrls.current;
     return () => urls.forEach(url => URL.revokeObjectURL(url));
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void socialVideoSupported(SOCIAL_SLIDE_WIDTH, SOCIAL_SLIDE_HEIGHT).then(value => { if (active) setVideoSupported(value); });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -175,6 +183,24 @@ function SocialPostEditor() {
     catch (cause) { setError(cause instanceof Error ? cause.message : "Erro ao salvar."); }
     finally { setBusy(""); }
   }
+  async function renderCoverVideo(snapshot: SocialPostDraft) {
+    const cover = snapshot.slides[0];
+    const target = document.createElement("canvas");
+    const resource = await resources(cover);
+    return encodeSocialVideo(target, SOCIAL_MOTION_SECONDS, time => renderSocialCoverMotion(target, cover, snapshot.slides.length, resource, time));
+  }
+  async function renderStory(snapshot: SocialPostDraft) {
+    const target = document.createElement("canvas");
+    renderSocialStory(target, snapshot.slides[0], await resources(snapshot.slides[0]));
+    return socialCanvasJpeg(target);
+  }
+  async function exportStory() {
+    if (!draft || !source) return;
+    setError(""); setMessage(""); setBusy("Preparando o story…");
+    try { download(await renderStory(draft), `${source.post.slug}-story.jpg`); setMessage("Story baixado. Adicione o adesivo de link para a matéria ao publicar."); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível baixar o story."); }
+    finally { setBusy(""); }
+  }
   async function exportImages(onlySelected = false) {
     if (!draft || !source) return;
     setError(""); setMessage("");
@@ -185,19 +211,27 @@ function SocialPostEditor() {
       const files: Array<{ name: string; data: Uint8Array }> = [];
       const indices = onlySelected ? [selected] : draft.slides.map((_, index) => index);
       for (const index of indices) {
+        if (index === 0 && draft.coverMotion) {
+          setBusy("Gerando o vídeo da capa…");
+          const video = await renderCoverVideo(draft);
+          if (onlySelected) { download(video, `${source.post.slug}-01.mp4`); setMessage("Vídeo da capa baixado."); return; }
+          files.push({ name: "slides/01.mp4", data: new Uint8Array(await video.arrayBuffer()) });
+        }
         setBusy(`Preparando imagem ${index + 1} de ${draft.slides.length}…`);
         const target = document.createElement("canvas");
         renderSocialSlide(target, draft.slides[index], index, draft.slides.length, await resources(draft.slides[index]));
         const blob = await socialCanvasJpeg(target);
         const name = `${String(index + 1).padStart(2, "0")}.jpg`;
         if (onlySelected) { download(blob, `${source.post.slug}-${name}`); setMessage("Imagem baixada."); return; }
-        files.push({ name: `slides/${name}`, data: new Uint8Array(await blob.arrayBuffer()) });
+        files.push({ name: index === 0 && draft.coverMotion ? "alternativas/01-capa-estatica.jpg" : `slides/${name}`, data: new Uint8Array(await blob.arrayBuffer()) });
       }
+      setBusy("Preparando o story…");
+      files.push({ name: "story/story.jpg", data: new Uint8Array(await (await renderStory(draft)).arrayBuffer()) });
       const encoder = new TextEncoder();
       const origin = window.location.origin;
       const caption = instagramPostCaption(draft, origin);
       const credits = draft.slides.map((item, index) => ({ slide: index + 1, textoAlternativo: [item.alt, item.title, item.text].filter(Boolean).join(". "), legenda: item.caption, imagem: item.imageUrl }));
-      files.push({ name: "legenda.txt", data: encoder.encode(caption) }, { name: "creditos-e-acessibilidade.json", data: encoder.encode(JSON.stringify(credits, null, 2)) }, { name: "instrucoes.txt", data: encoder.encode(`Orange Brick — ${draft.slides.length} imagem(ns), 1080 × 1350.\nSelecione os JPGs em ordem numérica, no formato retrato 4:5, sem zoom. O CTA já conta no total de slides.\nRevise os textos e os créditos antes de publicar.\n${draft.music ? `Música sugerida: ${draft.music}. Adicione pelo catálogo do Instagram, se disponível para a conta.\n` : ""}Áudio não está incorporado aos JPGs.\nMatéria: ${origin}/posts/${source.post.slug}\n`) });
+      files.push({ name: "legenda.txt", data: encoder.encode(caption) }, { name: "creditos-e-acessibilidade.json", data: encoder.encode(JSON.stringify(credits, null, 2)) }, { name: "instrucoes.txt", data: encoder.encode(`Orange Brick — ${draft.slides.length} slide(s), 1080 × 1350.\nSelecione os arquivos da pasta slides em ordem numérica, no formato retrato 4:5, sem zoom. O CTA já conta no total de slides.\n${draft.coverMotion ? "A capa é um vídeo de 5 segundos sem som. Se preferir publicar só imagens, use alternativas/01-capa-estatica.jpg no lugar.\n" : ""}O story de divulgação está em story/story.jpg (1080 × 1920). Ao publicar, adicione o adesivo de link para a matéria na área livre abaixo do texto.\nRevise os textos e os créditos antes de publicar.\n${draft.music ? `Música sugerida: ${draft.music}. Adicione pelo catálogo do Instagram, se disponível para a conta.\n` : ""}Nenhum arquivo contém áudio.\nMatéria: ${origin}/posts/${source.post.slug}\n`) });
       download(new Blob([new Uint8Array(createSocialZip(files))], { type: "application/zip" }), `${source.post.slug}-${format}.zip`);
       setMessage("Pacote baixado com imagens, legenda, créditos e textos alternativos.");
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível baixar. Tente novamente."); }
@@ -210,6 +244,7 @@ function SocialPostEditor() {
     if (snapshot.sourceUpdatedAt !== source.post.updated_at) throw new Error("A matéria mudou. Gere uma nova versão.");
     const images: Blob[] = [];
     for (const [index, item] of snapshot.slides.entries()) {
+      if (index === 0 && snapshot.coverMotion) { images.push(await renderCoverVideo(snapshot)); continue; }
       const target = document.createElement("canvas");
       renderSocialSlide(target, item, index, snapshot.slides.length, await resources(item));
       images.push(await socialCanvasJpeg(target));
@@ -263,7 +298,7 @@ function SocialPostEditor() {
           {stale && <p role="alert" className="mb-4 border border-amber-300/30 p-3 text-sm text-amber-200">A matéria mudou desde este rascunho. Gere uma nova versão para usar o conteúdo atualizado.</p>}
           {!draft && <p className="border-y border-white/10 py-12 text-sm text-gray-400">Este formato ainda não tem rascunho. Clique em Gerar rascunho para preparar a capa e os slides.</p>}
           {draft && slide && <>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-gray-300">{draft.slides.length} de {format === 'single' ? 1 : 20} imagens {format === 'carousel' && '(CTA incluído)'}<span className="ml-3 text-gray-400">{dirty ? "Alterações não salvas" : draft.savedAt ? `Salvo em ${new Date(draft.savedAt).toLocaleString('pt-BR')}` : "Rascunho aberto"}</span></p><div className="flex flex-wrap gap-2"><button className={button} disabled={Boolean(busy) || Boolean(stale)} onClick={() => void save()}>Salvar rascunho</button><button className={`${button} border-brand-orange bg-brand-orange text-black hover:bg-brand-orange/90`} disabled={Boolean(busy) || Boolean(stale) || previewLoading || Boolean(previewError)} onClick={() => void exportImages()}>Baixar pacote</button></div></div>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-gray-300">{draft.slides.length} de {format === 'single' ? 1 : 20} imagens {format === 'carousel' && '(CTA incluído)'}<span className="ml-3 text-gray-400">{dirty ? "Alterações não salvas" : draft.savedAt ? `Salvo em ${new Date(draft.savedAt).toLocaleString('pt-BR')}` : "Rascunho aberto"}</span></p><div className="flex flex-wrap gap-2"><button className={button} disabled={Boolean(busy) || Boolean(stale)} onClick={() => void save()}>Salvar rascunho</button><button className={`${button} border-brand-orange bg-brand-orange text-black hover:bg-brand-orange/90`} disabled={Boolean(busy) || Boolean(stale) || previewLoading || Boolean(previewError)} onClick={() => void exportImages()}>Baixar pacote</button><button className={button} disabled={Boolean(busy) || Boolean(stale) || previewLoading || Boolean(previewError)} onClick={() => void exportStory()}>Baixar story</button></div></div>
             {busy && <p role="status" className="mb-3 text-sm text-brand-orange">{busy}</p>}
             {qualityIssues.length > 0 && <div role="alert" className="mb-4 border border-amber-300/30 p-3 text-sm text-amber-200"><p className="font-semibold">Revise antes de baixar ou publicar:</p><ul className="mt-2 list-disc space-y-1 pl-5">{qualityIssues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
             <SocialPostInstagramPublisher key={`${draft.postId}:${draft.format}`} draft={draft} ready={!stale} needsSave={dirty || !draft.savedAt} onSave={persistDraft} onPublicationChange={updatePublicationStatus} disabled={Boolean(busy)} renderImages={renderInstagramImages} onBusy={setBusy} />
@@ -279,7 +314,7 @@ function SocialPostEditor() {
                   {slide.kind !== 'cta' && <><label className="block text-sm">Imagem da matéria<select className={`${control} mt-2`} value={slide.imageUrl} onChange={event => { const asset = source.assets.find(asset => asset.url === event.target.value); updateSlide({ imageUrl: asset?.url || '', alt: asset?.alt || '', caption: asset?.caption || '', positionX: 50, positionY: 50 }); }}><option value="">{slide.kind === 'cover' ? 'Selecione a capa' : 'Somente texto'}</option>{source.assets.map((asset, index) => <option key={asset.url} value={asset.url} disabled={draft.slides.some((item, i) => i !== selected && item.imageUrl === asset.url)}>{index === 0 ? 'Capa da matéria' : `Imagem ${index}`} — {asset.alt || 'Sem texto alternativo'}</option>)}</select></label>{slide.imageUrl && <><label className="block text-sm">Enquadramento<select className={`${control} mt-2`} value={slide.fit} onChange={event => updateSlide({ fit: event.target.value as SocialPostSlide['fit'] })}><option value="contain">Mostrar imagem completa</option><option value="cover">Preencher área da imagem</option></select></label>{slide.fit === 'cover' && <div className="grid grid-cols-2 gap-4">{(['positionX', 'positionY'] as const).map((axis, index) => <label key={axis} className="block text-sm">{index === 0 ? 'Posição horizontal' : 'Posição vertical'}<input type="range" min="0" max="100" value={slide[axis]} onChange={event => updateSlide({ [axis]: Number(event.target.value) })} className="mt-3 min-h-11 w-full accent-brand-orange" /></label>)}</div>}<label className="block text-sm">Texto alternativo<textarea className={`${control} mt-2`} maxLength={500} value={slide.alt} onChange={event => updateSlide({ alt: event.target.value })} /></label><label className="block text-sm">Legenda e crédito da imagem<textarea className={`${control} mt-2`} maxLength={500} value={slide.caption} onChange={event => updateSlide({ caption: event.target.value })} placeholder="Quem ou o que aparece; crédito da imagem" /></label></>}</>}
                 </div>
               </div>
-              <div className="mt-8 grid gap-5 border-t border-white/10 pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(250px,0.6fr)]"><div><label className="block text-sm font-semibold">Legenda do post<textarea className={`${control} mt-2 min-h-56 font-normal`} value={draft.caption} maxLength={2200} onChange={event => updateDraft({ caption: event.target.value })} /><span className="mt-1 block text-xs font-normal text-gray-400">{draft.caption.length}/2.200 caracteres</span></label><button type="button" className={`${button} mt-3`} onClick={() => { updateDraft({ caption: generateSocialCaption(source.post, format) }); setMessage("Legenda atualizada com o padrão editorial e cinco hashtags. Revise antes de publicar."); }}>Aplicar padrão de legenda e hashtags</button></div><div><label className="block text-sm font-semibold">Música sugerida (opcional)<input className={`${control} mt-2 font-normal`} maxLength={200} value={draft.music} onChange={event => updateDraft({ music: event.target.value })} placeholder="Nome da faixa — artista" /></label><p className="mt-3 text-sm leading-6 text-gray-400">Adicione a faixa pelo catálogo do Instagram, se disponível para a conta. O pacote inclui a indicação; as imagens não contêm áudio.</p><p className="mt-5 text-sm leading-6 text-gray-400">Revise os fatos, a manchete e os créditos. Baixar ou salvar o material não publica no Instagram nem altera a matéria.</p></div></div>
+              <div className="mt-8 grid gap-5 border-t border-white/10 pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(250px,0.6fr)]"><div><label className="block text-sm font-semibold">Legenda do post<textarea className={`${control} mt-2 min-h-56 font-normal`} value={draft.caption} maxLength={2200} onChange={event => updateDraft({ caption: event.target.value })} /><span className="mt-1 block text-xs font-normal text-gray-400">{draft.caption.length}/2.200 caracteres</span></label><button type="button" className={`${button} mt-3`} onClick={() => { updateDraft({ caption: generateSocialCaption(source.post, format) }); setMessage("Legenda atualizada com o padrão editorial e cinco hashtags. Revise antes de publicar."); }}>Aplicar padrão de legenda e hashtags</button></div><div><label className="block text-sm font-semibold">Música sugerida (opcional)<input className={`${control} mt-2 font-normal`} maxLength={200} value={draft.music} onChange={event => updateDraft({ music: event.target.value })} placeholder="Nome da faixa — artista" /></label><p className="mt-3 text-sm leading-6 text-gray-400">Adicione a faixa pelo catálogo do Instagram, se disponível para a conta. O pacote inclui a indicação; as imagens não contêm áudio.</p>{format === 'carousel' && <label className="mt-5 flex items-start gap-3 text-sm"><input type="checkbox" className="mt-1 size-5 accent-brand-orange" disabled={!videoSupported && !draft.coverMotion} checked={Boolean(draft.coverMotion)} onChange={event => updateDraft({ coverMotion: event.target.checked })} /><span><span className="font-semibold">Capa animada</span><span className="mt-1 block leading-6 text-gray-400">{videoSupported ? "A capa vira um vídeo de 5 segundos, sem som, com brilho na imagem e aviso para arrastar. O primeiro quadro é a própria capa." : "Este navegador não gera vídeo H.264. Use o Chrome, o Edge ou o Safari atualizados."}</span></span></label>}<p className="mt-5 text-sm leading-6 text-gray-400">Revise os fatos, a manchete e os créditos. Baixar ou salvar o material não publica no Instagram nem altera a matéria.</p></div></div>
             </fieldset>
           </>}
         </>}

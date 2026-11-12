@@ -10,8 +10,11 @@ export async function ensureSocialBucket(db: SupabaseClient, media = false) {
   if (error && Number(error.statusCode) !== 404 && !/bucket.*not found/i.test(error.message)) throw new Error("Não foi possível acessar o armazenamento de posts.");
   if (data?.public) throw new Error("O armazenamento de posts precisa ser privado.");
   if (!data) {
-    const { error } = await db.storage.createBucket(bucket, { public: false, fileSizeLimit: media ? 3 * 1024 * 1024 : 100_000, allowedMimeTypes: media ? ["image/jpeg"] : ["application/json"] });
+    const { error } = await db.storage.createBucket(bucket, { public: false, fileSizeLimit: media ? 3 * 1024 * 1024 : 100_000, allowedMimeTypes: media ? ["image/jpeg", "video/mp4"] : ["application/json"] });
     if (error && Number(error.statusCode) !== 409 && !/already exists/i.test(error.message)) throw new Error("Não foi possível preparar o armazenamento de posts.");
+  } else if (media && Array.isArray(data.allowed_mime_types) && !data.allowed_mime_types.includes("video/mp4")) {
+    const { error } = await db.storage.updateBucket(bucket, { public: false, fileSizeLimit: 3 * 1024 * 1024, allowedMimeTypes: [...data.allowed_mime_types, "video/mp4"] });
+    if (error) throw new Error("Não foi possível liberar o vídeo de capa no armazenamento de posts.");
   }
 }
 

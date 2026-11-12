@@ -1064,6 +1064,7 @@ export interface SocialPostDraft {
   caption: string;
   music: string;
   slides: SocialPostSlide[];
+  coverMotion?: boolean;
   savedAt: string | null;
 }
 

@@ -118,6 +118,7 @@ test("rota exige confirmação e conta revisada, publica uma vez e bloqueia resu
   const { default: ts } = await import("typescript");
   const { default: vm } = await import("node:vm");
   const { applySocialDefaults, instagramPostCaption, socialDraftQualityIssues, validateSocialDraft, generateSocialDraft } = await import("../src/lib/social/post-plan.ts");
+  const mp4 = await import("../src/lib/social/mp4.ts");
   const source = { id: "00000000-0000-4000-8000-000000000001", slug: "gta-vi", title: "Rockstar divulga imagens de GTA VI", summary: "Imagens oficiais mostram os personagens.", body: "[]", image_url: "https://official.test/cover.jpg", image_alt: "Jason e Lucia em imagem oficial de GTA VI.", updated_at: "2026-11-05T12:00:00Z", information_status: "confirmed" as const };
   const draft = generateSocialDraft(source, "carousel");
   draft.slides[0].caption = "Jason e Lucia. Crédito: Rockstar Games.";
@@ -146,6 +147,7 @@ test("rota exige confirmação e conta revisada, publica uma vez e bloqueia resu
       if (name === "@/lib/auth") return { isVerifiedAdminSession: () => admin };
       if (name === "@/lib/site-url") return { getSiteUrl: () => "https://orangebrick.test" };
       if (name === "@/lib/social/post-plan") return { applySocialDefaults, instagramPostCaption, socialDraftQualityIssues, validateSocialDraft };
+      if (name === "@/lib/social/mp4") return mp4;
       if (name === "@/lib/social/post-context") return { enrichSocialPost: async (_db: unknown, post: unknown) => post };
       if (name === "@/lib/server/network") return { readResponseBuffer: async (response: Response) => Buffer.from(await response.arrayBuffer()) };
       if (name === "@/lib/social/instagram-history") return {
