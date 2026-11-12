@@ -221,6 +221,8 @@ export default async function GamePage({ params }: GamePageProps) {
       {
         "@type": "VideoGame",
         name: game.game,
+        url: `${siteUrl}/games/${encodeURIComponent(decodedSlug)}`,
+        gamePlatform: game.platforms,
         operatingSystem: game.platforms.join(", "),
         applicationCategory: "Game",
         ...(game.release_date ? { datePublished: game.release_date } : {}),
