@@ -80,7 +80,7 @@ async function fetchGroq(messages, retryCount = 0) {
 async function translatePost(post) {
   const metaPrompt = `Translate this gaming news title and summary from Brazilian Portuguese to journalistic American English.
 Requirements:
-1. title_en: Punchy UPPERCASE headline, under 70 characters, no clickbait, no ending period, factual and professional.
+1. title_en: Punchy sentence-case headline (capitalize only the first word, proper nouns and acronyms), under 70 characters, no clickbait, no ending period, factual and professional.
 2. summary_en: Exactly one sentence, ~140 characters, answering what happened + why it matters.
 3. slug_en: Clean kebab-case URL slug based on title_en, max 80 characters.
 
@@ -94,7 +94,7 @@ Return ONLY a JSON object: {"title_en": "...", "summary_en": "...", "slug_en": "
     { role: "user", content: metaPrompt },
   ]);
 
-  const title_en = (metaResult.title_en || "").trim().toUpperCase();
+  const title_en = (metaResult.title_en || "").trim();
   const summary_en = (metaResult.summary_en || "").trim();
   const slug_en = (metaResult.slug_en || "")
     .toLowerCase()

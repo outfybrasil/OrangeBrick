@@ -571,7 +571,7 @@ DIRETRIZES EDITORIAIS E DE ESTRUTURA (ESTRITAMENTE OBRIGATÓRIAS):
 
 5. SCHEMA JSON DE SAÍDA (RESPONDA EXCLUSIVAMENTE O JSON PURO):
 {
-  "title": "TÍTULO EM CAIXA ALTA COM GANCHO FORTE (MÁX 70 CARACTERES)",
+  "title": "Título com gancho forte, só a primeira letra e nomes próprios em maiúscula (máx 70 caracteres)",
   "summary": "Uma frase de ~140 caracteres: o que foi revelado sobre o jogo + por que importa.",
   "category": "breaking | hardware | industry | modding | review | opinion",
   "source_name": "Nome da fonte original (ex: Gematsu, IGN, VGC, PlayStation Blog)",
@@ -1398,7 +1398,7 @@ export async function generateNewsDraft(options: GeneratePostOptions = {}): Prom
       ) + EDITORIAL_STATUS_CHECK;
 
       const generated = await requestEditorialDraft(candidatePrompt, deadline);
-      const candidateTitle = sanitizeStrayQuestionMark((generated.parsed.title || "").replace(/\*\*/g, "").trim().toUpperCase());
+      const candidateTitle = sanitizeStrayQuestionMark((generated.parsed.title || "").replace(/\*\*/g, "").trim());
       const candidateSummary = sanitizeStrayQuestionMark((generated.parsed.summary || "").trim());
       const candidateText = `${candidateTitle} ${candidateSummary}`;
 
@@ -1478,7 +1478,7 @@ FONTES LIDAS: ${serializeUntrustedEditorialData([...editorialSourceMaterials.val
     groundingSources = generated.groundingSources;
   }
 
-  const rawTitle = sanitizeStrayQuestionMark((parsed.title || "NOTÍCIA ORANGE BRICK").replace(/\*\*/g, "").trim().toUpperCase());
+  const rawTitle = sanitizeStrayQuestionMark((parsed.title || "NOTÍCIA ORANGE BRICK").replace(/\*\*/g, "").trim());
   const summary = sanitizeStrayQuestionMark((parsed.summary || "").trim());
   const category: PostCategory = options.reviewPost?.category || (parsed.category && CATEGORY_TAGS[parsed.category as PostCategory]
     ? (parsed.category as PostCategory)

@@ -69,7 +69,7 @@ export function BookmarkDrawer({ isOpen, onClose }: BookmarkDrawerProps) {
                     <Link
                       href={`/posts/${post.slug}`}
                       onClick={onClose}
-                      className="text-xs font-subtitle font-bold text-white line-clamp-2 hover:text-brand-orange transition-colors"
+                      className="text-xs font-subtitle font-bold uppercase text-white line-clamp-2 hover:text-brand-orange transition-colors"
                     >
                       {post.title}
                     </Link>

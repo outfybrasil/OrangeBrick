@@ -77,11 +77,11 @@ export function NewsCardCompact({ post, stats, headingLevel = "h3", onReactionCh
               <span className="h-px min-w-5 flex-1 bg-white/10" aria-hidden="true" />
             </div>
             {headingLevel === "h2" ? (
-              <h2 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
+              <h2 className="line-clamp-2 font-heading text-sm font-bold uppercase leading-snug sm:text-base">
                 <Link href={postHref} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{postTitle}</Link>
               </h2>
             ) : (
-              <h3 className="line-clamp-2 font-heading text-sm font-bold leading-snug sm:text-base">
+              <h3 className="line-clamp-2 font-heading text-sm font-bold uppercase leading-snug sm:text-base">
                 <Link href={postHref} className="text-white transition-colors hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-brand-orange">{postTitle}</Link>
               </h3>
             )}

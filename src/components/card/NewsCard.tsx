@@ -134,7 +134,7 @@ export function NewsCard({ post, stats }: NewsCardProps) {
             WebkitBoxOrient: "vertical",
             overflow: "hidden"
           }}
-          className="mb-3 min-h-[40px] break-words px-3 font-heading text-base font-extrabold leading-snug tracking-tight text-white transition-colors duration-300 group-hover:text-brand-orange xs:min-h-[48px] xs:text-lg sm:px-4 md:min-h-[56px] md:text-xl"
+          className="mb-3 min-h-[40px] break-words px-3 font-heading text-base font-extrabold uppercase leading-snug tracking-tight text-white transition-colors duration-300 group-hover:text-brand-orange xs:min-h-[48px] xs:text-lg sm:px-4 md:min-h-[56px] md:text-xl"
         >
           <Link href={`/posts/${post.slug}`} className="focus-visible:outline-2 focus-visible:outline-brand-orange">{post.title}</Link>
         </h2>

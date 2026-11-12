@@ -69,7 +69,7 @@ export function NewsSidebar({ posts, stats }: NewsSidebarProps) {
                       <div className="mb-1 flex items-center gap-1.5">
                         <Tag category={post.category} />
                       </div>
-                      <h4 className="line-clamp-2 text-xs font-bold leading-snug text-gray-200 transition-colors group-hover:text-white">
+                      <h4 className="line-clamp-2 text-xs font-bold uppercase leading-snug text-gray-200 transition-colors group-hover:text-white">
                         {postTitle}
                       </h4>
                       {hypeCount > 0 && (
