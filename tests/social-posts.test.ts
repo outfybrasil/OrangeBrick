@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { summarizeSocialText, applySocialDefaults, generateSocialCaption, generateSocialDraft, socialPostAssets, validateSocialDraft, type SocialSourcePost } from "../src/lib/social/post-plan.ts";
+import { summarizeSocialText, socialWordCount, SOCIAL_COVER_WORDS, SOCIAL_SLIDE_WORDS, applySocialDefaults, generateSocialCaption, generateSocialDraft, socialPostAssets, validateSocialDraft, type SocialSourcePost } from "../src/lib/social/post-plan.ts";
 import { createSocialZip } from "../src/lib/social/zip.ts";
 
 function post(imageCount = 3): SocialSourcePost {
@@ -255,4 +255,40 @@ test("rascunhos com cortes automáticos são recuperados sem sobrescrever resumo
   assert.equal(applySocialDefaults(manual, source).slides[1].text, manual.slides[1].text);
   manual.slides[1].text = "O jogo será lançado mas…";
   assert.throws(() => validateSocialDraft(manual, source), /Conclua o resumo/);
+});
+
+test("carrossel limita palavras por slide e abre o slide 2 como segunda capa", () => {
+  const source = post(2);
+  source.title = "Sony confirma que o PS5 passou de 100 milhões";
+  source.summary = "O PS5 chegou a 100 milhões de consoles distribuídos. A marca coloca o console perto do PS4.";
+  const long = "A Sony informou o número no relatório trimestral divulgado nesta semana. " + "O resultado inclui todas as versões do console vendidas nas lojas. ".repeat(8);
+  source.body = JSON.stringify([{ id: "intro", type: "text", content: long }, { id: "i0", type: "image", url: "https://official.test/0.jpg", alt: "Console PS5 em foto oficial da Sony.", caption: "PS5. Crédito: Sony." }, { id: "t1", type: "text", content: "## Contexto\n" + long }]);
+  const draft = generateSocialDraft(source, "carousel");
+  assert.equal(draft.slides[0].text, "");
+  assert.ok(socialWordCount(draft.slides[0].title + " " + draft.slides[0].text) <= SOCIAL_COVER_WORDS);
+  assert.equal(draft.slides[1].title, "O PS5 chegou a 100 milhões de consoles distribuídos");
+  assert.ok(draft.slides.filter(slide => slide.kind === "content").every(slide => socialWordCount(`${slide.title} ${slide.text}`) <= SOCIAL_SLIDE_WORDS));
+  assert.equal(new Set(draft.slides.map(slide => slide.id)).size, draft.slides.length);
+  assert.doesNotThrow(() => validateSocialDraft(draft, source));
+  const single = generateSocialDraft(source, "single");
+  assert.ok(socialWordCount(`${single.slides[0].title} ${single.slides[0].text}`) <= SOCIAL_COVER_WORDS);
+});
+
+test("slide 2 usa a manchete quando o resumo começa como continuação ou é longo demais", () => {
+  const source = post(1);
+  source.summary = "Mas o anúncio só vale para o Japão e deixa de fora as outras regiões onde o console é vendido hoje.";
+  assert.equal(generateSocialDraft(source, "carousel").slides[1].title, source.title);
+});
+
+test("textos gerados no formato antigo são resumidos de novo no limite atual", () => {
+  const source = post(1);
+  const content = "O jogo chega em maio para PS5 e Xbox Series X|S. " + "O estúdio confirmou mais detalhes da versão final no comunicado oficial. ".repeat(4);
+  source.body = JSON.stringify([{ id: "intro", type: "text", content }]);
+  const draft = generateSocialDraft(source, "carousel");
+  draft.slides[0].text = summarizeSocialText(source.summary, 200);
+  draft.slides[1].text = summarizeSocialText(content, 300);
+  const migrated = applySocialDefaults(draft, source);
+  assert.equal(migrated.slides[0].text, "");
+  assert.ok(socialWordCount(`${migrated.slides[1].title} ${migrated.slides[1].text}`) <= SOCIAL_SLIDE_WORDS);
+  assert.ok(migrated.slides[1].text.startsWith("O jogo chega em maio"));
 });

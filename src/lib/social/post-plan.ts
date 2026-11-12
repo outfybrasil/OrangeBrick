@@ -14,19 +14,42 @@ function excerpt(value: string, max: number) {
   return text.slice(0, max - 1).replace(/\s+\S*$/, "") + "…";
 }
 
-export function summarizeSocialText(value: string, max = 300): string {
+export const SOCIAL_COVER_WORDS = 20;
+export const SOCIAL_SLIDE_WORDS = 35;
+const SOCIAL_SLIDE_TEXT_CHARS = 230;
+const SOCIAL_SECOND_COVER_CHARS = 90;
+
+export function socialWordCount(value: string): number {
+  return socialPlainText(value).split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word)).length;
+}
+
+export function summarizeSocialText(value: string, max = 300, maxWords = Infinity): string {
   const text = socialPlainText(value);
   if (!text) return "";
   const sentences = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(text)].map(part => part.segment.trim()).filter(sentence => sentence && !/(?:…|\.\.\.)["”’')\]]*$/.test(sentence));
   const selected: string[] = [];
   let length = 0;
   for (const sentence of sentences) {
-    if (length + (selected.length ? 1 : 0) + sentence.length > max) continue;
+    if (length + (selected.length ? 1 : 0) + sentence.length > max || socialWordCount([...selected, sentence].join(" ")) > maxWords) continue;
     selected.push(sentence);
     length += sentence.length + (selected.length > 1 ? 1 : 0);
   }
   if (!selected.length) throw new Error(`Não há uma frase completa que caiba em ${max} caracteres. Resuma este trecho da matéria antes de gerar o post.`);
   return selected.join(" ");
+}
+
+function optionalSummary(value: string, max: number, maxWords: number) {
+  try { return summarizeSocialText(value, max, maxWords); } catch { return ""; }
+}
+
+function secondCoverTitle(post: SocialSourcePost) {
+  const sentence = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(socialPlainText(post.summary))].map(part => part.segment.trim())[0] || "";
+  const usable = sentence.length <= SOCIAL_SECOND_COVER_CHARS && !/^(?:e|mas|então|isso|porém|já|ainda|também)\b/iu.test(sentence) && !/(?:…|\.\.\.)$/.test(sentence);
+  return (usable ? sentence : socialPlainText(post.title)).replace(/[.!]$/, "");
+}
+
+export function socialSlideSummary(content: string, title: string) {
+  return optionalSummary(content.replace(/^#{2,3}\s+[^\n]+/gm, ""), SOCIAL_SLIDE_TEXT_CHARS, Math.max(12, SOCIAL_SLIDE_WORDS - socialWordCount(title)));
 }
 
 function slideHeading(value: string, fallback: string, max: number) {
@@ -58,20 +81,34 @@ export function generateSocialDraft(post: SocialSourcePost, format: SocialPostDr
   const qualifier = post.information_status === "rumor" ? "RUMOR: " : "";
   const coverTitle = socialPlainText(qualifier + post.title);
   if (coverTitle.length > 110) throw new Error("Resuma o título da matéria para até 110 caracteres antes de gerar a capa.");
-  const cover = slide("cover", 0, coverTitle, summarizeSocialText(post.summary, 200), assets[0]);
+  const cover = slide("cover", 0, coverTitle, format === "single" ? optionalSummary(post.summary, 120, SOCIAL_COVER_WORDS - socialWordCount(coverTitle)) : "", assets[0]);
   const caption = generateSocialCaption(post, format);
   const slides = [cover];
   if (format === "carousel") {
-    const blocks = parseEditorialBlocks(post.body).filter(block => block.type === "text");
-    for (const [index, block] of blocks.slice(0, 8).entries()) {
+    const blocks = parseEditorialBlocks(post.body);
+    const assetsByUrl = new Map(assets.map(asset => [asset.url, asset]));
+    let pendingAsset: SocialPostAsset | undefined;
+    let textIndex = -1;
+    for (const block of blocks) {
+      if (block.type === "image") {
+        pendingAsset = assetsByUrl.get(block.url) || pendingAsset;
+        continue;
+      }
+      if (block.type !== "text") continue;
+      textIndex++;
+      if (slides.length > 8) continue;
       const content = block.content.replace(/\*\*Fonte[s]?:\*\*[\s\S]*$/i, "").trim();
       if (!content) continue;
       const heading = content.match(/^#{2,3}\s+([^\n]+)/m)?.[1];
-      slides.push(slide("content", index + 1, slideHeading(heading || (index === 0 ? "O que aconteceu" : "Entenda o contexto"), "Entenda o contexto", 80), summarizeSocialText(content.replace(/^#{2,3}\s+[^\n]+/gm, "")), assets[index + 1]));
+      const title = slides.length === 1 ? secondCoverTitle(post) : slideHeading(heading || "Entenda o contexto", "Entenda o contexto", 80);
+      const text = socialSlideSummary(content, title);
+      if (!text) continue;
+      slides.push(slide("content", textIndex + 1, title, text, pendingAsset));
+      pendingAsset = undefined;
     }
     for (const asset of assets.slice(1).filter(asset => !slides.some(item => item.imageUrl === asset.url))) {
       if (slides.length >= 19) break;
-      slides.push(slide("content", slides.length, slideHeading(asset.caption || "Veja os detalhes", "Veja os detalhes", 80), "", asset));
+      slides.push({ ...slide("content", slides.length, slideHeading(asset.caption || "Veja os detalhes", "Veja os detalhes", 80), "", asset), id: `image-${slides.length}` });
     }
     const cta = socialCommentCta(generateSocialCaption(post, format, true));
     slides.push(slide("cta", 20, cta.title, cta.text));
@@ -152,12 +189,14 @@ export function applySocialDefaults(draft: SocialPostDraft, post: SocialSourcePo
       const block = textBlocks[Number(slide.id.split("-")[1]) - 1];
       if (block) original = block.content.replace(/\*\*Fonte[s]?:\*\*[\s\S]*$/i, "").replace(/^#{2,3}\s+[^\n]+/gm, "").trim();
     }
-    if (!original || slide.text !== excerpt(original, limit) || !slide.text.endsWith("…")) return slide;
-    try {
-      const text = summarizeSocialText(original, limit);
-      changed = true;
-      return { ...slide, text };
-    } catch { return slide; }
+    if (!original) return slide;
+    const legacyCut = slide.text === excerpt(original, limit) && slide.text.endsWith("…");
+    const legacySummary = slide.text === optionalSummary(original, limit, Infinity);
+    if (!legacyCut && !legacySummary) return slide;
+    const text = slide.kind === "cover" ? (draft.format === "single" ? optionalSummary(original, 120, SOCIAL_COVER_WORDS - socialWordCount(slide.title)) : "") : socialSlideSummary(original, slide.title);
+    if (text === slide.text || (!text && slide.kind === "content" && !slide.imageUrl)) return slide;
+    changed = true;
+    return { ...slide, text };
   });
   const qualifier = post.information_status === "rumor" ? "RUMOR: " : "";
   const legacy = `${qualifier}${post.title}\n\n${post.summary}\n\n${draft.format === "carousel" ? "Deslize para entender. " : ""}Curta e siga a Orange Brick para acompanhar mais notícias de games.\n\nMatéria: /posts/${post.slug}\nCréditos das imagens: consulte as legendas dos slides.\n\n#OrangeBrick`;

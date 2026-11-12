@@ -42,35 +42,42 @@ function linesFor(ctx: CanvasRenderingContext2D, text: string, width: number): s
   return lines;
 }
 
-function drawText(ctx: CanvasRenderingContext2D, text: string, box: { x: number; y: number; width: number; height: number }, font: string, size: number, weight: number, color: string) {
+export const SOCIAL_SLIDE_WIDTH = 1080;
+export const SOCIAL_SLIDE_HEIGHT = 1350;
+const MARGIN = 64;
+const CONTENT_WIDTH = SOCIAL_SLIDE_WIDTH - MARGIN * 2;
+
+function drawText(ctx: CanvasRenderingContext2D, text: string, box: { x: number; y: number; width: number; height: number }, font: string, size: number, weight: number, color: string, minSize: number, label: string, align: CanvasTextAlign = "left") {
   if (!text) return;
   let lines: string[] = [];
-  for (; size >= 16; size--) {
+  for (; size >= minSize; size--) {
     ctx.font = `${weight} ${size}px ${font}`;
     lines = linesFor(ctx, text, box.width);
     if (lines.length * size * 1.12 <= box.height) break;
   }
-  if (size < 16) throw new Error("O texto ultrapassa o espaço do slide. Reduza o conteúdo antes de baixar.");
+  if (size < minSize) throw new Error(`${label} não cabe no slide com letra legível no celular. Encurte o texto antes de baixar.`);
   ctx.fillStyle = color;
   ctx.textBaseline = "top";
-  lines.forEach((line, index) => ctx.fillText(line, box.x, box.y + index * size * 1.12));
+  ctx.textAlign = align;
+  const x = align === "right" ? box.x + box.width : box.x;
+  lines.forEach((line, index) => ctx.fillText(line, x, box.y + index * size * 1.12));
+  ctx.textAlign = "left";
 }
 
 export function renderSocialSlide(canvas: HTMLCanvasElement, slide: SocialPostSlide, index: number, total: number, resources: SocialRenderResources) {
-  canvas.width = 1080;
-  canvas.height = 1080;
+  canvas.width = SOCIAL_SLIDE_WIDTH;
+  canvas.height = SOCIAL_SLIDE_HEIGHT;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Seu navegador não oferece suporte à prévia. Tente outro navegador.");
   const { logo, image, font } = resources;
-  ctx.fillStyle = "#0d0e12";
-  ctx.fillRect(0, 0, 1080, 1080);
   const cover = slide.kind === "cover";
-  const inset = cover ? 162 : 54;
-  const contentWidth = 1080 - inset * 2;
-  ctx.drawImage(logo, inset, 36, 310, 310 * logo.height / logo.width);
-  drawText(ctx, `${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`, { x: cover ? 806 : 914, y: 44, width: 112, height: 32 }, font, 23, 400, "#c7c8cd");
+  ctx.fillStyle = "#0d0e12";
+  ctx.fillRect(0, 0, SOCIAL_SLIDE_WIDTH, SOCIAL_SLIDE_HEIGHT);
+  ctx.drawImage(logo, MARGIN, 60, 320, 320 * logo.height / logo.width);
+  drawText(ctx, `${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`, { x: SOCIAL_SLIDE_WIDTH - MARGIN - 160, y: 60, width: 160, height: 34 }, font, 28, 400, "#c7c8cd", 24, "O contador", "right");
+  const title = slide.title.toLocaleUpperCase("pt-BR");
   if (image) {
-    const box = { x: 0, y: 110, width: 1080, height: 530 };
+    const box = { x: 0, y: 140, width: SOCIAL_SLIDE_WIDTH, height: 608 };
     const scale = slide.fit === "cover" ? Math.max(box.width / image.width, box.height / image.height) : Math.min(box.width / image.width, box.height / image.height);
     const w = image.width * scale;
     const h = image.height * scale;
@@ -79,16 +86,21 @@ export function renderSocialSlide(canvas: HTMLCanvasElement, slide: SocialPostSl
     ctx.drawImage(image, box.x + (box.width - w) * slide.positionX / 100, box.y + (box.height - h) * slide.positionY / 100, w, h);
     ctx.restore();
     ctx.fillStyle = "#ff5e00";
-    ctx.fillRect(inset, 658, 90, 6);
-    drawText(ctx, slide.title.toLocaleUpperCase("pt-BR"), { x: inset, y: 690, width: contentWidth, height: slide.kind === "cover" ? 230 : 130 }, font, slide.kind === "cover" ? 88 : 52, 900, slide.kind === "cover" ? "#ff5e00" : "#ffffff");
-    drawText(ctx, slide.text, { x: inset, y: slide.kind === "cover" ? 940 : 840, width: contentWidth, height: slide.kind === "cover" ? 66 : 170 }, font, slide.kind === "cover" ? 24 : 30, 400, "#e5e5e5");
+    ctx.fillRect(MARGIN, 784, 90, 6);
+    if (cover) {
+      drawText(ctx, title, { x: MARGIN, y: 816, width: CONTENT_WIDTH, height: slide.text ? 290 : 390 }, font, 96, 900, "#ff5e00", 56, "A manchete");
+      drawText(ctx, slide.text, { x: MARGIN, y: 1120, width: CONTENT_WIDTH, height: 90 }, font, 38, 400, "#e5e5e5", 34, "O texto da capa");
+    } else {
+      drawText(ctx, title, { x: MARGIN, y: 816, width: CONTENT_WIDTH, height: 140 }, font, 58, 900, "#ffffff", 40, "O título do slide");
+      drawText(ctx, slide.text, { x: MARGIN, y: 976, width: CONTENT_WIDTH, height: 236 }, font, 40, 400, "#e5e5e5", 34, "O texto do slide");
+    }
   } else {
-    ctx.fillStyle = "#ff5e00"; ctx.fillRect(54, 210, 90, 6);
-    drawText(ctx, slide.title.toLocaleUpperCase("pt-BR"), { x: 54, y: 260, width: 972, height: 310 }, font, 94, 900, slide.kind === "cta" ? "#ff5e00" : "#ffffff");
-    drawText(ctx, slide.text, { x: 54, y: 610, width: 972, height: 340 }, font, slide.kind === "cta" ? 32 : 43, 400, "#e5e5e5");
+    ctx.fillStyle = "#ff5e00"; ctx.fillRect(MARGIN, 300, 90, 6);
+    drawText(ctx, title, { x: MARGIN, y: 350, width: CONTENT_WIDTH, height: 400 }, font, 100, 900, slide.kind === "cta" ? "#ff5e00" : "#ffffff", 56, "O título do slide");
+    drawText(ctx, slide.text, { x: MARGIN, y: 790, width: CONTENT_WIDTH, height: 420 }, font, slide.kind === "cta" ? 44 : 48, 400, "#e5e5e5", 34, "O texto do slide");
   }
-  ctx.fillStyle = "#36383f"; ctx.fillRect(inset, 1026, contentWidth, 1);
-  drawText(ctx, slide.kind === "cta" ? "ORANGE BRICK • NOTÍCIAS DE GAMES" : "ORANGE BRICK • CONFIRA OS CRÉDITOS NA LEGENDA", { x: inset, y: 1040, width: contentWidth, height: 24 }, font, 17, 400, "#c7c8cd");
+  ctx.fillStyle = "#36383f"; ctx.fillRect(MARGIN, 1236, CONTENT_WIDTH, 1);
+  drawText(ctx, slide.kind === "cta" ? "ORANGE BRICK • NOTÍCIAS DE GAMES" : "ORANGE BRICK • CRÉDITOS NA LEGENDA", { x: MARGIN, y: 1254, width: CONTENT_WIDTH, height: 30 }, font, 24, 400, "#c7c8cd", 24, "O rodapé");
 }
 
 export function socialCanvasJpeg(canvas: HTMLCanvasElement): Promise<Blob> {

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       const input = Buffer.from(await file.arrayBuffer());
       const image = sharp(input, { failOn: "error", limitInputPixels: 2_000_000 });
       const metadata = await image.metadata();
-      if (metadata.format !== "jpeg" || metadata.width !== 1080 || metadata.height !== 1080) return reply({ error: "Envie apenas os JPGs de 1080 × 1080 preparados pelo editor." }, 400);
+      if (metadata.format !== "jpeg" || metadata.width !== 1080 || metadata.height !== 1350) return reply({ error: "Envie apenas os JPGs de 1080 × 1350 preparados pelo editor." }, 400);
       const output = await image.jpeg({ quality: 96, chromaSubsampling: "4:4:4" }).toBuffer();
       const { error } = await db.storage.from(socialMediaBucket).upload(`${post.id}/${format}/${id}/${String(Number(index) + 1).padStart(2, "0")}.jpg`, output, { upsert: false, contentType: "image/jpeg" });
       if (error) return reply({ error: "Não foi possível guardar uma imagem. Prepare o envio novamente." }, 503);
