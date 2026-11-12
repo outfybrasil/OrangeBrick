@@ -44,7 +44,7 @@ function optionalSummary(value: string, max: number, maxWords: number) {
 
 function secondCoverTitle(post: SocialSourcePost) {
   const sentence = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(socialPlainText(post.summary))].map(part => part.segment.trim())[0] || "";
-  const usable = sentence.length <= SOCIAL_SECOND_COVER_CHARS && !/^(?:e|mas|então|isso|porém|já|ainda|também)\b/iu.test(sentence) && !/(?:…|\.\.\.)$/.test(sentence);
+  const usable = sentence.length <= SOCIAL_SECOND_COVER_CHARS && !/^(?:e|mas|então|isso|porém|já|ainda|também)(?![\p{L}\p{N}])/iu.test(sentence) && !/(?:…|\.\.\.)$/.test(sentence);
   return (usable ? sentence : socialPlainText(post.title)).replace(/[.!]$/, "");
 }
 
@@ -145,6 +145,37 @@ export function validateSocialDraft(value: unknown, post: SocialSourcePost): Soc
   });
   if (draft.format === "carousel" && slides.at(-1)?.kind !== "cta") throw new Error("Reserve o último slide para o CTA.");
   return { version: 1, postId: post.id, sourceUpdatedAt: draft.sourceUpdatedAt, format: draft.format, caption: draft.caption.trim(), music: draft.music.trim(), slides, savedAt: null };
+}
+
+const START = "(?<![\\p{L}\\p{N}])";
+const END = "(?![\\p{L}\\p{N}])";
+const HIDDEN_CTA = new RegExp(`${START}(?:comenta(?:\\s+a[ií])?|comente|deixa?e? (?:o |seu )?like|curte e|salv[ae] (?:esse|este) (?:post|carrossel)|compartilhe|mand[ae] (?:pra|para) (?:algu[eé]m|um amigo)|sig[ae] a orange|segue a orange|link na bio|marque (?:um|uma|algu[eé]m))${END}`, "iu");
+const SECOND_COVER_CONNECTOR = new RegExp(`^(?:e|mas|ent[aã]o|isso|por[eé]m|a[ií]|tamb[eé]m|al[eé]m disso)${END}`, "iu");
+const GENERATED_TEXT_HABITS: Array<[RegExp, string]> = [
+  [/—/u, "travessão"],
+  [/(?:…|\.\.\.)/u, "reticências"],
+  [new RegExp(`${START}não é [^.!?]{1,60}[.!?]\\s+é${END}`, "iu"), "a fórmula “Não é X. É Y.”"],
+  [new RegExp(`${START}(?:revolucion[aá]ri[oa]s?|game[- ]changer|destravar|jornada épica|imperd[ií]vel|simplesmente incr[ií]vel)${END}`, "iu"), "clichê de texto gerado"],
+];
+
+export function socialDraftQualityIssues(draft: SocialPostDraft): string[] {
+  const issues: string[] = [];
+  draft.slides.forEach((slide, index) => {
+    const position = `Slide ${index + 1}`;
+    const words = socialWordCount(`${slide.title} ${slide.text}`);
+    if (slide.kind === "cover" && words > SOCIAL_COVER_WORDS) issues.push(`${position}: a capa tem ${words} palavras; use até ${SOCIAL_COVER_WORDS} para ser lida de relance.`);
+    if (slide.kind === "content" && words > SOCIAL_SLIDE_WORDS) issues.push(`${position}: tem ${words} palavras; use até ${SOCIAL_SLIDE_WORDS}.`);
+    if (slide.kind !== "cta" && HIDDEN_CTA.test(`${slide.title} ${slide.text}`)) issues.push(`${position}: o pedido de ação deve ficar só no último slide.`);
+    for (const [pattern, label] of GENERATED_TEXT_HABITS) if (pattern.test(`${slide.title}\n${slide.text}`)) issues.push(`${position}: remova ${label}.`);
+  });
+  const second = draft.format === "carousel" ? draft.slides[1] : undefined;
+  if (second && second.kind !== "cta" && SECOND_COVER_CONNECTOR.test(second.title.trim())) issues.push("Slide 2: ele precisa se explicar sozinho, pois o Instagram pode mostrá-lo primeiro. Não comece o título com conector.");
+  return issues;
+}
+
+export function assertSocialDraftQuality(draft: SocialPostDraft) {
+  const issues = socialDraftQualityIssues(draft);
+  if (issues.length) throw new Error(`Revise antes de publicar: ${issues.join(" ")}`);
 }
 
 export function instagramPostCaption(draft: SocialPostDraft, origin: string): string {

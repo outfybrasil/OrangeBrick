@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SocialPostInstagramPublisher } from "@/components/admin/SocialPostInstagramPublisher";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { createClient } from "@/lib/supabase/client";
 import type { Post, SocialInstagramPublication, SocialPostListStatus, SocialPostAsset, SocialPostDraft, SocialPostSlide } from "@/lib/types/database";
-import { instagramPostCaption, generateSocialCaption, generateSocialDraft, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
+import { assertSocialDraftQuality, instagramPostCaption, generateSocialCaption, generateSocialDraft, socialDraftQualityIssues, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
 import { loadSocialImage, renderSocialSlide, socialCanvasJpeg, socialRenderFont } from "@/lib/social/render-post";
 import { createSocialZip } from "@/lib/social/zip";
 
@@ -180,6 +180,7 @@ function SocialPostEditor() {
     setError(""); setMessage("");
     try {
       validateSocialDraft(draft, source.post);
+      if (!onlySelected) assertSocialDraftQuality(draft);
       if (draft.sourceUpdatedAt !== source.post.updated_at) throw new Error("A matéria foi alterada. Gere uma nova versão antes de exportar.");
       const files: Array<{ name: string; data: Uint8Array }> = [];
       const indices = onlySelected ? [selected] : draft.slides.map((_, index) => index);
@@ -205,6 +206,7 @@ function SocialPostEditor() {
   async function renderInstagramImages(snapshot = draft) {
     if (!snapshot || !source) throw new Error("Selecione uma matéria e um rascunho.");
     validateSocialDraft(snapshot, source.post);
+    assertSocialDraftQuality(snapshot);
     if (snapshot.sourceUpdatedAt !== source.post.updated_at) throw new Error("A matéria mudou. Gere uma nova versão.");
     const images: Blob[] = [];
     for (const [index, item] of snapshot.slides.entries()) {
@@ -234,6 +236,7 @@ function SocialPostEditor() {
     });
   }, []);
   const stale = draft && source && draft.sourceUpdatedAt !== source.post.updated_at;
+  const qualityIssues = useMemo(() => draft ? socialDraftQualityIssues(draft) : [], [draft]);
 
   return <AdminShell active="social-posts" title="Posts & Carrosséis" description="Transforme uma matéria em imagens para o feed. Revise a composição e baixe para publicar." wide>
     <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
@@ -262,6 +265,7 @@ function SocialPostEditor() {
           {draft && slide && <>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-gray-300">{draft.slides.length} de {format === 'single' ? 1 : 20} imagens {format === 'carousel' && '(CTA incluído)'}<span className="ml-3 text-gray-400">{dirty ? "Alterações não salvas" : draft.savedAt ? `Salvo em ${new Date(draft.savedAt).toLocaleString('pt-BR')}` : "Rascunho aberto"}</span></p><div className="flex flex-wrap gap-2"><button className={button} disabled={Boolean(busy) || Boolean(stale)} onClick={() => void save()}>Salvar rascunho</button><button className={`${button} border-brand-orange bg-brand-orange text-black hover:bg-brand-orange/90`} disabled={Boolean(busy) || Boolean(stale) || previewLoading || Boolean(previewError)} onClick={() => void exportImages()}>Baixar pacote</button></div></div>
             {busy && <p role="status" className="mb-3 text-sm text-brand-orange">{busy}</p>}
+            {qualityIssues.length > 0 && <div role="alert" className="mb-4 border border-amber-300/30 p-3 text-sm text-amber-200"><p className="font-semibold">Revise antes de baixar ou publicar:</p><ul className="mt-2 list-disc space-y-1 pl-5">{qualityIssues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
             <SocialPostInstagramPublisher key={`${draft.postId}:${draft.format}`} draft={draft} ready={!stale} needsSave={dirty || !draft.savedAt} onSave={persistDraft} onPublicationChange={updatePublicationStatus} disabled={Boolean(busy)} renderImages={renderInstagramImages} onBusy={setBusy} />
             <fieldset disabled={Boolean(busy)} className="min-w-0">
               <legend className="sr-only">Editar slides e legenda</legend>

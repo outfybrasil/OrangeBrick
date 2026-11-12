@@ -292,3 +292,20 @@ test("textos gerados no formato antigo são resumidos de novo no limite atual", 
   assert.ok(socialWordCount(`${migrated.slides[1].title} ${migrated.slides[1].text}`) <= SOCIAL_SLIDE_WORDS);
   assert.ok(migrated.slides[1].text.startsWith("O jogo chega em maio"));
 });
+
+test("a verificação aponta pedidos de ação no meio, vícios de texto, excesso de palavras e slide 2 dependente", async () => {
+  const { socialDraftQualityIssues, assertSocialDraftQuality } = await import("../src/lib/social/post-plan.ts");
+  const source = post(2);
+  const draft = generateSocialDraft(source, "carousel");
+  assert.deepEqual(socialDraftQualityIssues(draft), []);
+  assert.doesNotThrow(() => assertSocialDraftQuality(draft));
+  const broken = structuredClone(draft);
+  broken.slides[1].title = "Mas a Rockstar ainda não confirmou";
+  broken.slides[2].text = "Comenta aí o que você achou. Não é só um trailer. É uma virada revolucionária — e tem mais...";
+  broken.slides[0].title = "Uma capa com palavras demais ".repeat(5).trim();
+  const issues = socialDraftQualityIssues(broken);
+  for (const pattern of [/Slide 1: a capa tem/, /Slide 2: ele precisa se explicar/, /Slide 3: o pedido de ação/, /Slide 3: remova travessão/, /Slide 3: remova reticências/, /Slide 3: remova a fórmula/, /Slide 3: remova clichê/]) assert.ok(issues.some(issue => pattern.test(issue)), String(pattern));
+  assert.throws(() => assertSocialDraftQuality(broken), /Revise antes de publicar/);
+  assert.equal(socialDraftQualityIssues(draft).length, 0);
+  assert.ok(!socialDraftQualityIssues({ ...draft, slides: draft.slides.map(slide => slide.kind === "cta" ? { ...slide, text: "Comenta aí." } : slide) }).length);
+});

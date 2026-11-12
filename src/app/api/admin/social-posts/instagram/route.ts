@@ -6,7 +6,7 @@ import { isVerifiedAdminSession } from "@/lib/auth";
 import { getSiteUrl } from "@/lib/site-url";
 import { readRequestFormData, readResponseBuffer } from "@/lib/server/network";
 import { enrichSocialPost } from "@/lib/social/post-context";
-import { applySocialDefaults, instagramPostCaption, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
+import { applySocialDefaults, instagramPostCaption, socialDraftQualityIssues, validateSocialDraft, type SocialSourcePost } from "@/lib/social/post-plan";
 import { instagramConfigured, instagramGraph, publishInstagramImages } from "@/lib/social/instagram-graph";
 import { claimInstagramPublication, ensureSocialBucket, latestInstagramPublication, saveInstagramPublication, socialDraftBucket, socialMediaBucket } from "@/lib/social/instagram-history";
 import type { Database, SocialInstagramPublication, SocialPostDraft } from "@/lib/types/database";
@@ -93,6 +93,8 @@ export async function POST(request: Request) {
       if (body.confirmed !== true) return reply({ error: "Revise o material e confirme a publicação antes de preparar o envio." }, 400);
       const draft = validateSocialDraft(applySocialDefaults(body.draft as SocialPostDraft, post), post);
       if (draft.format !== format || draft.sourceUpdatedAt !== post.updated_at) return reply({ error: "A matéria mudou. Gere uma nova versão antes de enviar." }, 409);
+      const issues = socialDraftQualityIssues(draft);
+      if (issues.length) return reply({ error: `Revise antes de publicar: ${issues.join(" ")}` }, 400);
       if (draft.slides.length > 10) return reply({ error: "Este envio direto aceita até 10 imagens. Reduza os slides ou use o download para postar pelo aplicativo." }, 400);
       if (draft.music && body.withoutMusic !== true) return reply({ error: "Confirme o envio sem a música sugerida ou publique pelo aplicativo." }, 400);
       instagramPostCaption(draft, getSiteUrl());
