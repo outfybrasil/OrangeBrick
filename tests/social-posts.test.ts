@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { summarizeSocialText, socialWordCount, SOCIAL_COVER_WORDS, SOCIAL_SLIDE_WORDS, applySocialDefaults, generateSocialCaption, generateSocialDraft, socialPostAssets, validateSocialDraft, type SocialSourcePost } from "../src/lib/social/post-plan.ts";
+import { summarizeSocialText, socialWordCount, SOCIAL_COVER_WORDS, SOCIAL_SLIDE_WORDS, applySocialDefaults, generateSocialCaption, generateSocialDraft, socialPostAssets, validateSocialDraft, socialDraftQualityIssues, type SocialSourcePost } from "../src/lib/social/post-plan.ts";
 import { createSocialZip } from "../src/lib/social/zip.ts";
 
 function post(imageCount = 3): SocialSourcePost {
@@ -308,4 +308,16 @@ test("a verificação aponta pedidos de ação no meio, vícios de texto, excess
   assert.throws(() => assertSocialDraftQuality(broken), /Revise antes de publicar/);
   assert.equal(socialDraftQualityIssues(draft).length, 0);
   assert.ok(!socialDraftQualityIssues({ ...draft, slides: draft.slides.map(slide => slide.kind === "cta" ? { ...slide, text: "Comenta aí." } : slide) }).length);
+});
+
+test("o gerador troca travessões por vírgulas para o carrossel passar na revisão", () => {
+  const post = { id: "00000000-0000-4000-8000-000000000009", slug: "laufey", title: "God of War — Laufey é adiado", summary: "A Santa Monica adiou o jogo — e explicou o motivo.", image_url: "https://official.test/c.jpg", image_alt: "Arte oficial de Laufey.", updated_at: "2026-11-05T12:00:00Z", information_status: "confirmed", body: JSON.stringify([{ id: "t", type: "text", content: "O estúdio confirmou a mudança — sem nova data — durante a transmissão." }]) } as SocialSourcePost;
+  const draft = generateSocialDraft(post, "carousel");
+  const text = draft.slides.map(slide => `${slide.title} ${slide.text}`).join(" ");
+  assert.equal(text.includes("—"), false);
+  assert.equal(draft.slides[0].title, "God of War: Laufey é adiado");
+  assert.match(text, /O estúdio confirmou a mudança, sem nova data, durante a transmissão\./);
+  assert.equal(socialDraftQualityIssues(draft).some(issue => /travessão/.test(issue)), false);
+  const saved = { ...draft, slides: draft.slides.map(slide => slide.text.startsWith("O estúdio") ? { ...slide, text: "O estúdio confirmou a mudança — sem nova data — durante a transmissão." } : slide) };
+  assert.equal(applySocialDefaults(saved, post).slides.some(slide => slide.text.includes("—")), false);
 });

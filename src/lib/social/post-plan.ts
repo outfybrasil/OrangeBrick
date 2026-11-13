@@ -8,6 +8,10 @@ export function socialPlainText(value: string) {
   return value.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*#_`]/g, "").replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
 }
 
+function socialSlideText(value: string) {
+  return socialPlainText(value).replace(/\s*—\s*/g, ", ").replace(/,\s*([.,;:!?])/g, "$1").replace(/^,\s*/, "");
+}
+
 function excerpt(value: string, max: number) {
   const text = socialPlainText(value);
   if (text.length <= max) return text;
@@ -24,7 +28,7 @@ export function socialWordCount(value: string): number {
 }
 
 export function summarizeSocialText(value: string, max = 300, maxWords = Infinity): string {
-  const text = socialPlainText(value);
+  const text = socialSlideText(value);
   if (!text) return "";
   const sentences = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(text)].map(part => part.segment.trim()).filter(sentence => sentence && !/(?:…|\.\.\.)["”’')\]]*$/.test(sentence));
   const selected: string[] = [];
@@ -43,9 +47,9 @@ function optionalSummary(value: string, max: number, maxWords: number) {
 }
 
 function secondCoverTitle(post: SocialSourcePost) {
-  const sentence = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(socialPlainText(post.summary))].map(part => part.segment.trim())[0] || "";
+  const sentence = [...new Intl.Segmenter("pt-BR", { granularity: "sentence" }).segment(socialSlideText(post.summary))].map(part => part.segment.trim())[0] || "";
   const usable = sentence.length <= SOCIAL_SECOND_COVER_CHARS && !/^(?:e|mas|então|isso|porém|já|ainda|também)(?![\p{L}\p{N}])/iu.test(sentence) && !/(?:…|\.\.\.)$/.test(sentence);
-  return (usable ? sentence : socialPlainText(post.title)).replace(/[.!]$/, "");
+  return (usable ? sentence : socialSlideText(post.title)).replace(/[.!]$/, "");
 }
 
 export function socialSlideSummary(content: string, title: string) {
@@ -53,7 +57,7 @@ export function socialSlideSummary(content: string, title: string) {
 }
 
 function slideHeading(value: string, fallback: string, max: number) {
-  const text = socialPlainText(value);
+  const text = socialSlideText(value);
   return text.length <= max ? text : fallback;
 }
 
@@ -79,7 +83,7 @@ export function generateSocialDraft(post: SocialSourcePost, format: SocialPostDr
     id: `${kind}-${index}`, kind, title, text, imageUrl: asset?.url || "", alt: asset?.alt || "", caption: asset?.caption || "", fit: "contain", positionX: 50, positionY: 50,
   });
   const qualifier = post.information_status === "rumor" ? "RUMOR: " : "";
-  const coverTitle = socialPlainText(qualifier + post.title);
+  const coverTitle = socialPlainText(qualifier + post.title).replace(/\s+—\s+/, ": ").replace(/\s*—\s*/g, ", ");
   if (coverTitle.length > 110) throw new Error("Resuma o título da matéria para até 110 caracteres antes de gerar a capa.");
   const cover = slide("cover", 0, coverTitle, format === "single" ? optionalSummary(post.summary, 120, SOCIAL_COVER_WORDS - socialWordCount(coverTitle)) : "", assets[0]);
   const caption = generateSocialCaption(post, format);
@@ -223,7 +227,8 @@ export function applySocialDefaults(draft: SocialPostDraft, post: SocialSourcePo
     }
     if (!original) return slide;
     const legacyCut = slide.text === excerpt(original, limit) && slide.text.endsWith("…");
-    const legacySummary = slide.text === optionalSummary(original, limit, Infinity);
+    const plain = slide.text.includes("—") ? socialSlideText(slide.text) : slide.text;
+    const legacySummary = plain === optionalSummary(original, limit, Infinity) || (plain !== slide.text && plain === socialSlideSummary(original, slide.title));
     if (!legacyCut && !legacySummary) return slide;
     const text = slide.kind === "cover" ? (draft.format === "single" ? optionalSummary(original, 120, SOCIAL_COVER_WORDS - socialWordCount(slide.title)) : "") : socialSlideSummary(original, slide.title);
     if (text === slide.text || (!text && slide.kind === "content" && !slide.imageUrl)) return slide;
