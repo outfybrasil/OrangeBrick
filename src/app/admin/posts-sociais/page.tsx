@@ -129,19 +129,25 @@ function SocialPostEditor() {
     const logoKey = "logo";
     if (!imageCache.current.has(logoKey)) imageCache.current.set(logoKey, loadSocialImage("/logos/orange-brick-horizontal-dark.png").catch(cause => { imageCache.current.delete(logoKey); throw cause; }));
     const logo = await imageCache.current.get(logoKey)!;
-    let image: HTMLImageElement | undefined;
-    if (slide.imageUrl) {
-      const asset = source?.assets.findIndex(asset => asset.url === slide.imageUrl) ?? -1;
-      if (asset < 0) throw new Error("A imagem não está mais vinculada à matéria. Selecione outra imagem.");
-      const key = `${postId}:${source?.post.updated_at}:${slide.imageUrl}`;
+    const assetImage = (asset: number, imageUrl: string) => {
+      const key = `${postId}:${source?.post.updated_at}:${imageUrl}`;
       if (!imageCache.current.has(key)) imageCache.current.set(key, (async () => {
         const response = await adminFetch(`/api/admin/social-posts?postId=${encodeURIComponent(postId)}&asset=${asset}`);
         const url = URL.createObjectURL(await response.blob()); objectUrls.current.push(url);
         return loadSocialImage(url);
       })().catch(cause => { imageCache.current.delete(key); throw cause; }));
-      image = await imageCache.current.get(key)!;
+      return imageCache.current.get(key)!;
+    };
+    let image: HTMLImageElement | undefined;
+    let backdrop: HTMLImageElement | undefined;
+    if (slide.imageUrl) {
+      const asset = source?.assets.findIndex(asset => asset.url === slide.imageUrl) ?? -1;
+      if (asset < 0) throw new Error("A imagem não está mais vinculada à matéria. Selecione outra imagem.");
+      image = await assetImage(asset, slide.imageUrl);
+    } else if (source?.assets[0]) {
+      backdrop = await assetImage(0, source.assets[0].url);
     }
-    return { logo, image, font: await socialRenderFont() };
+    return { logo, image, backdrop, font: await socialRenderFont() };
   }, [postId, source]);
 
   const slide = draft?.slides[selected];

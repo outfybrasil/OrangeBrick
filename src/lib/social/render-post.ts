@@ -1,6 +1,6 @@
 import type { SocialPostSlide } from "../types/database";
 
-export type SocialRenderResources = { logo: HTMLImageElement; image?: HTMLImageElement; font: string };
+export type SocialRenderResources = { logo: HTMLImageElement; image?: HTMLImageElement; backdrop?: HTMLImageElement; font: string };
 
 export async function loadSocialImage(url: string): Promise<HTMLImageElement> {
   const image = new Image();
@@ -64,43 +64,99 @@ function drawText(ctx: CanvasRenderingContext2D, text: string, box: { x: number;
   ctx.textAlign = "left";
 }
 
+const BG = "#0d0e12";
+const ORANGE = "#ff5e00";
+const MUTED = "#c7c8cd";
+const COVER_FADE_TOP = 560;
+const CONTENT_IMAGE_HEIGHT = 860;
+
+function drawPhoto(ctx: CanvasRenderingContext2D, image: HTMLImageElement, box: { x: number; y: number; width: number; height: number }, positionX = 50, positionY = 50) {
+  const scale = Math.max(box.width / image.width, box.height / image.height);
+  const w = image.width * scale;
+  const h = image.height * scale;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(box.x, box.y, box.width, box.height); ctx.clip();
+  ctx.drawImage(image, box.x + (box.width - w) * positionX / 100, box.y + (box.height - h) * positionY / 100, w, h);
+  ctx.restore();
+}
+
+function fade(ctx: CanvasRenderingContext2D, from: number, to: number, reverse = false) {
+  const gradient = ctx.createLinearGradient(0, from, 0, to);
+  gradient.addColorStop(0, reverse ? "rgba(13,14,18,0.78)" : "rgba(13,14,18,0)");
+  if (!reverse) gradient.addColorStop(0.55, "rgba(13,14,18,0.86)");
+  gradient.addColorStop(1, reverse ? "rgba(13,14,18,0)" : BG);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, from, SOCIAL_SLIDE_WIDTH, to - from);
+}
+
+function drawBackdrop(ctx: CanvasRenderingContext2D, image?: HTMLImageElement) {
+  if (!image) return;
+  ctx.save();
+  ctx.filter = "blur(22px)";
+  drawPhoto(ctx, image, { x: -60, y: -60, width: SOCIAL_SLIDE_WIDTH + 120, height: SOCIAL_SLIDE_HEIGHT + 120 });
+  ctx.restore();
+  ctx.fillStyle = "rgba(13,14,18,0.68)";
+  ctx.fillRect(0, 0, SOCIAL_SLIDE_WIDTH, SOCIAL_SLIDE_HEIGHT);
+}
+
+function drawLabel(ctx: CanvasRenderingContext2D, text: string, y: number, font: string, color = ORANGE) {
+  ctx.font = `900 26px ${font}`;
+  ctx.fillStyle = color;
+  ctx.textBaseline = "top";
+  ctx.textAlign = "left";
+  ctx.fillText(text.toLocaleUpperCase("pt-BR"), MARGIN, y);
+}
+
 export function renderSocialSlide(canvas: HTMLCanvasElement, slide: SocialPostSlide, index: number, total: number, resources: SocialRenderResources) {
   canvas.width = SOCIAL_SLIDE_WIDTH;
   canvas.height = SOCIAL_SLIDE_HEIGHT;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Seu navegador não oferece suporte à prévia. Tente outro navegador.");
-  const { logo, image, font } = resources;
-  const cover = slide.kind === "cover";
-  ctx.fillStyle = "#0d0e12";
+  const { logo, image, backdrop, font } = resources;
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, SOCIAL_SLIDE_WIDTH, SOCIAL_SLIDE_HEIGHT);
-  ctx.drawImage(logo, MARGIN, 60, 320, 320 * logo.height / logo.width);
-  drawText(ctx, `${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`, { x: SOCIAL_SLIDE_WIDTH - MARGIN - 160, y: 60, width: 160, height: 34 }, font, 28, 400, "#c7c8cd", 24, "O contador", "right");
-  const title = slide.title.toLocaleUpperCase("pt-BR");
-  if (image) {
-    const box = { x: 0, y: 140, width: SOCIAL_SLIDE_WIDTH, height: 608 };
-    const scale = slide.fit === "cover" ? Math.max(box.width / image.width, box.height / image.height) : Math.min(box.width / image.width, box.height / image.height);
-    const w = image.width * scale;
-    const h = image.height * scale;
-    ctx.save();
-    ctx.beginPath(); ctx.rect(box.x, box.y, box.width, box.height); ctx.clip();
-    ctx.drawImage(image, box.x + (box.width - w) * slide.positionX / 100, box.y + (box.height - h) * slide.positionY / 100, w, h);
-    ctx.restore();
-    ctx.fillStyle = "#ff5e00";
-    ctx.fillRect(MARGIN, 784, 90, 6);
-    if (cover) {
-      drawText(ctx, title, { x: MARGIN, y: 816, width: CONTENT_WIDTH, height: slide.text ? 290 : 390 }, font, 96, 900, "#ff5e00", 56, "A manchete");
-      drawText(ctx, slide.text, { x: MARGIN, y: 1120, width: CONTENT_WIDTH, height: 90 }, font, 38, 400, "#e5e5e5", 34, "O texto da capa");
-    } else {
-      drawText(ctx, title, { x: MARGIN, y: 816, width: CONTENT_WIDTH, height: 140 }, font, 58, 900, "#ffffff", 40, "O título do slide");
-      drawText(ctx, slide.text, { x: MARGIN, y: 976, width: CONTENT_WIDTH, height: 236 }, font, 40, 400, "#e5e5e5", 34, "O texto do slide");
+  const title = slide.title;
+  if (slide.kind === "cover" && image) {
+    drawPhoto(ctx, image, { x: 0, y: 0, width: SOCIAL_SLIDE_WIDTH, height: SOCIAL_SLIDE_HEIGHT }, slide.positionX, slide.positionY);
+    fade(ctx, 0, 240, true);
+    fade(ctx, COVER_FADE_TOP, SOCIAL_SLIDE_HEIGHT);
+    ctx.fillStyle = ORANGE; ctx.fillRect(MARGIN, 812, 90, 8);
+    drawText(ctx, title, { x: MARGIN, y: 846, width: CONTENT_WIDTH, height: slide.text ? 250 : 320 }, font, 92, 900, "#ffffff", 54, "A manchete");
+    drawText(ctx, slide.text, { x: MARGIN, y: 1110, width: CONTENT_WIDTH, height: 84 }, font, 36, 400, MUTED, 30, "O texto da capa");
+    if (total > 1) drawLabel(ctx, "Deslize para entender →", 1266, font);
+  } else if (slide.kind === "content" && image) {
+    drawPhoto(ctx, image, { x: 0, y: 0, width: SOCIAL_SLIDE_WIDTH, height: CONTENT_IMAGE_HEIGHT }, slide.positionX, slide.positionY);
+    fade(ctx, 0, 240, true);
+    fade(ctx, CONTENT_IMAGE_HEIGHT - 300, CONTENT_IMAGE_HEIGHT);
+    ctx.fillStyle = ORANGE; ctx.fillRect(MARGIN, 868, 90, 6);
+    drawText(ctx, title, { x: MARGIN, y: 896, width: CONTENT_WIDTH, height: 136 }, font, 58, 900, "#ffffff", 40, "O título do slide");
+    drawText(ctx, slide.text, { x: MARGIN, y: 1046, width: CONTENT_WIDTH, height: 170 }, font, 38, 400, MUTED, 30, "O texto do slide");
+  } else if (slide.kind === "cta") {
+    drawBackdrop(ctx, image || backdrop);
+    drawLabel(ctx, "Sua vez", 250, font);
+    drawText(ctx, title, { x: MARGIN, y: 300, width: CONTENT_WIDTH, height: 600 }, font, 92, 900, "#ffffff", 54, "A pergunta do CTA");
+    if (slide.text) {
+      ctx.fillStyle = ORANGE;
+      ctx.beginPath(); ctx.roundRect(MARGIN, 990, CONTENT_WIDTH, 170, 10); ctx.fill();
+      drawText(ctx, slide.text, { x: MARGIN + 44, y: 1036, width: CONTENT_WIDTH - 88, height: 84 }, font, 52, 900, BG, 34, "O texto do CTA");
     }
   } else {
-    ctx.fillStyle = "#ff5e00"; ctx.fillRect(MARGIN, 300, 90, 6);
-    drawText(ctx, title, { x: MARGIN, y: 350, width: CONTENT_WIDTH, height: 400 }, font, 100, 900, slide.kind === "cta" ? "#ff5e00" : "#ffffff", 56, "O título do slide");
-    drawText(ctx, slide.text, { x: MARGIN, y: 790, width: CONTENT_WIDTH, height: 420 }, font, slide.kind === "cta" ? 44 : 48, 400, "#e5e5e5", 34, "O texto do slide");
+    drawBackdrop(ctx, image || backdrop);
+    ctx.fillStyle = ORANGE; ctx.fillRect(MARGIN, 270, 90, 8);
+    drawText(ctx, title, { x: MARGIN, y: 310, width: CONTENT_WIDTH, height: 330 }, font, 84, 900, "#ffffff", 50, "O título do slide");
+    if (slide.text) {
+      ctx.fillStyle = "rgba(22,24,30,0.92)";
+      ctx.beginPath(); ctx.roundRect(MARGIN, 690, CONTENT_WIDTH, 500, 10); ctx.fill();
+      ctx.fillStyle = ORANGE; ctx.fillRect(MARGIN, 690, 10, 500);
+      drawText(ctx, slide.text, { x: MARGIN + 50, y: 740, width: CONTENT_WIDTH - 100, height: 400 }, font, 46, 400, "#e5e5e5", 32, "O texto do slide");
+    }
   }
-  ctx.fillStyle = "#36383f"; ctx.fillRect(MARGIN, 1236, CONTENT_WIDTH, 1);
-  drawText(ctx, slide.kind === "cta" ? "ORANGE BRICK • NOTÍCIAS DE GAMES" : "ORANGE BRICK • CRÉDITOS NA LEGENDA", { x: MARGIN, y: 1254, width: CONTENT_WIDTH, height: 30 }, font, 24, 400, "#c7c8cd", 24, "O rodapé");
+  ctx.drawImage(logo, MARGIN, 52, 250, 250 * logo.height / logo.width);
+  drawText(ctx, `${String(index + 1).padStart(2, "0")}/${String(total).padStart(2, "0")}`, { x: SOCIAL_SLIDE_WIDTH - MARGIN - 160, y: 58, width: 160, height: 34 }, font, 28, 400, MUTED, 24, "O contador", "right");
+  if (slide.kind !== "cover" || !image) {
+    ctx.fillStyle = "#36383f"; ctx.fillRect(MARGIN, 1236, CONTENT_WIDTH, 1);
+    drawText(ctx, slide.kind === "cta" ? "ORANGE BRICK • NOTÍCIAS DE GAMES" : "ORANGE BRICK • CRÉDITOS NA LEGENDA", { x: MARGIN, y: 1254, width: CONTENT_WIDTH, height: 30 }, font, 24, 400, MUTED, 24, "O rodapé");
+  }
 }
 
 export const SOCIAL_MOTION_SECONDS = 5;
@@ -114,25 +170,25 @@ export function renderSocialCoverMotion(canvas: HTMLCanvasElement, slide: Social
   renderSocialSlide(canvas, slide, 0, total, resources);
   const ctx = canvas.getContext("2d");
   if (!ctx || !resources.image) return;
-  const image = { y: 140, height: 608 };
-  ctx.fillStyle = "#ff5e00";
-  ctx.fillRect(MARGIN + 90, 784, 150 * wave(t, SOCIAL_MOTION_SECONDS / 2), 6);
+  const image = { y: 0, height: SOCIAL_SLIDE_HEIGHT };
+  ctx.fillStyle = ORANGE;
+  ctx.fillRect(MARGIN + 90, 812, 150 * wave(t, SOCIAL_MOTION_SECONDS / 2), 8);
   const shine = Math.min(1, Math.max(0, (t - 0.8) / 1.4));
   if (shine > 0 && shine < 1) {
     const x = -500 + shine * (SOCIAL_SLIDE_WIDTH + 1000);
     const gradient = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
     gradient.addColorStop(0, "rgba(255,255,255,0)");
-    gradient.addColorStop(0.5, "rgba(255,255,255,0.22)");
+    gradient.addColorStop(0.5, "rgba(255,255,255,0.16)");
     gradient.addColorStop(1, "rgba(255,255,255,0)");
     ctx.save();
-    ctx.beginPath(); ctx.rect(0, image.y, SOCIAL_SLIDE_WIDTH, image.height); ctx.clip();
+    ctx.beginPath(); ctx.rect(0, image.y, SOCIAL_SLIDE_WIDTH, COVER_FADE_TOP); ctx.clip();
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, image.y, SOCIAL_SLIDE_WIDTH, image.height);
+    ctx.fillRect(0, image.y, SOCIAL_SLIDE_WIDTH, COVER_FADE_TOP);
     ctx.restore();
   }
   const pill = { width: 236, height: 60 };
   const x = SOCIAL_SLIDE_WIDTH - MARGIN - pill.width;
-  const y = image.y + image.height - pill.height - 24;
+  const y = COVER_FADE_TOP + 120;
   ctx.fillStyle = "rgba(13,14,18,0.88)";
   ctx.beginPath(); ctx.roundRect(x, y, pill.width, pill.height, 30); ctx.fill();
   ctx.font = `900 26px ${resources.font}`;
