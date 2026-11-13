@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             image_url: typeof values.image_url === "string" ? values.image_url : null,
             category: typeof values.category === "string" ? values.category : null,
             topic_id: null,
-          }, { queueNotice: true, deliverNotice: true, reel: true, push: true });
+          }, { queueNotice: true, deliverNotice: true, reel: false, push: true });
           if (effects.failures.length) console.error(`[Publicação] Efeitos pós-publicação de ${slug}:`, effects.failures.join(" | "));
         }
       } catch (error) {
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
         const effects = await runPostPublicationEffects(editorial, post, {
           queueNotice: true,
           deliverNotice: true,
-          reel: true,
+          reel: false,
           push: true,
           brickboardThread: post.publish_to_brickboard && post.scheduled_by
             ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }

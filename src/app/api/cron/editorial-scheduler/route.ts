@@ -101,7 +101,7 @@ export async function GET(request: Request) {
       refreshPublishedPages();
       const effects = await runPostPublicationEffects(supabase, post as Post, {
         deliverNotice: true,
-        reel: true,
+        reel: false,
         push: true,
         brickboardThread: post.publish_to_brickboard && post.scheduled_by
           ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }

@@ -49,7 +49,7 @@ export async function runPostPublicationEffects(
   post: PublishedPostRef,
   options: PublicationEffectsOptions = {},
 ): Promise<PublicationEffectsResult> {
-  const { queueNotice = false, deliverNotice = true, reel = true, push = true, brickboardThread = null } = options;
+  const { queueNotice = false, deliverNotice = true, reel = false, push = true, brickboardThread = null } = options;
   const failures: string[] = [];
 
   if (queueNotice) {

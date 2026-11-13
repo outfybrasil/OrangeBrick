@@ -90,7 +90,7 @@ export async function POST(request: Request) {
           try {
             const effects = await runPostPublicationEffects(supabase, post, {
               deliverNotice: false,
-              reel: true,
+              reel: false,
               push: true,
               brickboardThread: post.publish_to_brickboard && post.scheduled_by
                 ? { userId: post.scheduled_by, copy: post.brickboard_copy || post.summary, topicId: post.topic_id }
