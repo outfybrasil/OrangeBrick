@@ -1,6 +1,6 @@
 import { socialCommentPrompt, generateSocialCopys } from "./social-copy.ts";
 import { parseEditorialBlocks } from "../content-validation.ts";
-import type { Post, SocialPostAsset, SocialPostDraft, SocialPostSlide } from "../types/database.ts";
+import type { Post, SocialPostAsset, SocialPostDraft, SocialPostSlide, SocialPostTemplate } from "../types/database.ts";
 
 export type SocialSourcePost = Pick<Post, "id" | "slug" | "title" | "summary" | "body" | "image_url" | "image_alt" | "updated_at" | "information_status"> & Partial<Pick<Post, "category">> & { imageSources?: Record<string, string>; siteUrl?: string };
 
@@ -77,7 +77,13 @@ export function socialPostAssets(post: SocialSourcePost): SocialPostAsset[] {
   });
 }
 
-export function generateSocialDraft(post: SocialSourcePost, format: SocialPostDraft["format"]): SocialPostDraft {
+export const SOCIAL_TEMPLATES: SocialPostTemplate[] = ["editorial", "criador"];
+
+export function nextSocialTemplate(_last?: unknown): SocialPostTemplate {
+  return "editorial";
+}
+
+export function generateSocialDraft(post: SocialSourcePost, format: SocialPostDraft["format"], template: SocialPostTemplate = "editorial"): SocialPostDraft {
   const assets = socialPostAssets(post);
   const slide = (kind: SocialPostSlide["kind"], index: number, title: string, text: string, asset?: SocialPostAsset): SocialPostSlide => ({
     id: `${kind}-${index}`, kind, title, text, imageUrl: asset?.url || "", alt: asset?.alt || "", caption: asset?.caption || "", fit: "contain", positionX: 50, positionY: 50,
@@ -117,7 +123,7 @@ export function generateSocialDraft(post: SocialSourcePost, format: SocialPostDr
     const cta = socialCommentCta(generateSocialCaption(post, format, true));
     slides.push(slide("cta", 20, cta.title, cta.text));
   }
-  return { version: 1, postId: post.id, sourceUpdatedAt: post.updated_at, format, caption, music: "", slides, savedAt: null };
+  return { version: 1, postId: post.id, sourceUpdatedAt: post.updated_at, format, caption, music: "", slides, template, savedAt: null };
 }
 
 export function validateSocialDraft(value: unknown, post: SocialSourcePost): SocialPostDraft {
@@ -149,7 +155,8 @@ export function validateSocialDraft(value: unknown, post: SocialSourcePost): Soc
   });
   if (draft.format === "carousel" && slides.at(-1)?.kind !== "cta") throw new Error("Reserve o último slide para o CTA.");
   if (draft.coverMotion !== undefined && typeof draft.coverMotion !== "boolean") throw new Error("Opção de capa animada inválida.");
-  return { version: 1, postId: post.id, sourceUpdatedAt: draft.sourceUpdatedAt, format: draft.format, caption: draft.caption.trim(), music: draft.music.trim(), slides, ...(draft.format === "carousel" && draft.coverMotion === true ? { coverMotion: true } : {}), savedAt: null };
+  if (draft.template !== undefined && !SOCIAL_TEMPLATES.includes(draft.template)) throw new Error("Modelo de carrossel inválido.");
+  return { version: 1, postId: post.id, sourceUpdatedAt: draft.sourceUpdatedAt, format: draft.format, caption: draft.caption.trim(), music: draft.music.trim(), slides, ...(draft.format === "carousel" && draft.coverMotion === true ? { coverMotion: true } : {}), ...(draft.template ? { template: draft.template } : {}), savedAt: null };
 }
 
 const START = "(?<![\\p{L}\\p{N}])";

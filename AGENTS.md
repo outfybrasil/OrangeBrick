@@ -74,7 +74,7 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 
 ## 🎬 Padrão de vídeos aprovado em 04/11/2026
 
-- Aprovação final do usuário: adotar `youtube-editorial-v3`, demonstrado em `public/long-videos/game-key-card-edicao-fluida-v3-preview/`, como referência padrão para as próximas produções. Preservar sua direção de edição e áudio, adaptando cenas e duração à pauta, sem repetir mecanicamente a sequência da prévia.
+- Aprovação final do usuário: adotar `youtube-editorial-v3` como referência padrão para as próximas produções. Direção, campos obrigatórios e episódio de exemplo estão em `docs/MODELO_VIDEO_LONGO.md`; a prévia original do Game-Key Card foi removida em 11/11/2026. Preservar sua direção de edição e áudio, adaptando cenas e duração à pauta, sem repetir mecanicamente a sequência da prévia.
 
 - Aplicar o plano de `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md`, seção de YouTube, edição longa e voz, em todos os novos vídeos.
 - Definir público, pergunta central, promessa de título/miniatura, objetivo principal e CTA antes de produzir. Abrir com o fato ou consequência, entregar valor cedo e concluir a resposta antes do CTA.
@@ -89,15 +89,19 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Preparar embalagem, fontes, capítulos válidos, sugestão de próximo vídeo e Shorts complementares. Configurar tela final e vídeo relacionado no Studio quando aplicável; elementos desenhados no MP4 não são links interativos.
 - Avaliar retenção aos 30 segundos, curva de permanência, tempo assistido, inscritos por mil visualizações e continuidade. Tratar metas e cadência como hipóteses do canal, sem garantias de alcance.
 
-## Crescimento de vídeos — aprovado em 09/11/2026
+## Crescimento orgânico — revisado em 13/11/2026
 
-- Aplicar a seção “Aplicação nos geradores e plano orgânico” de `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md` em vídeos longos e Reels. Manter `youtube-editorial-v3`.
-- Alinhar título, miniatura, primeira fala e primeira prova visual. Abrir pela consequência para quem joga ou curiosidade demonstrável; entregar a primeira resposta cedo e concluir antes do CTA.
-- Usar uma chamada principal ao OB Labs, canal do Orange Brick, sem pedidos repetidos. Preservar escolhas explícitas do usuário.
-- Registrar promessa e plano de audiência nos metadados de produção; conferir imagens, fatos e voz antes de aprovar. Metadados não equivalem a validação humana.
-- Medir em 24 h, 72 h e sete dias; separar longos e curtos, períodos processados e contadores públicos. Não usar views como prova isolada de retenção ou conversão.
-- O Analytics foi ativado em 09/11. Conferir as métricas disponíveis e suas datas efetivas; não tratar dados ausentes como zero nem anunciar acompanhamento automático que não esteja implementado.
-- O plano inicial de quatro semanas propõe um longo e três Shorts por semana, como hipótese de teste. Não alterar agendamentos, identidade pública nem enviar mensagens a terceiros automaticamente para executar o plano.
+- Seguir `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md`. Objetivo principal: monetizar o OB Labs no YouTube (horas de exibição vêm dos longos). Objetivo paralelo: crescer no TikTok e no Instagram com o mesmo material.
+- Ritmo semanal: 2 longos no YouTube, ~7 verticais publicados nativamente em Shorts, TikTok e Reels, e 1 carrossel no Instagram. Reduzir volume se a qualidade cair.
+- Longos priorizam pautas pesquisáveis que sustentam 8 a 12 minutos de explicação real; nunca alongar artificialmente. Título, miniatura dedicada e primeira fala fazem a mesma promessa.
+- Cada vertical responde a uma pergunta própria e é completo por si só; não usar uma rede como anúncio da outra nem exportar com marca d'água de outra plataforma.
+- Uma chamada principal por vídeo, adaptada à rede. Manter `youtube-editorial-v3`.
+- Calendário (16/11/2026): no máximo 1 vertical por dia em horário fixo, no máximo 2 longos por semana em dias diferentes, nunca publicar em lote. Carrossel semanal acompanhado de um Reel da mesma pauta. Verticais abrem com o fato principal escrito na tela nos 2 primeiros segundos. Longos com título de pergunta prática e miniatura dedicada. Detalhes em `docs/ESTRATEGIA_CONVERSAO_SEGUIDORES.md`.
+- Revisar a cada 2 semanas: retenção aos 30 s, CTR, horas e inscritos no YouTube; tempo assistido, compartilhamentos e seguidores no TikTok e no Instagram. Dado ausente não é zero. Testes A/B formais só quando os vídeos passarem de ~1.000 views.
+- Não alterar agendamentos, identidade pública nem enviar mensagens a terceiros automaticamente.
+- Carrosséis seguem o modelo **editorial** (o do Xbox Playback, 4:5) como padrão fixo, definido em 16/11/2026. O modelo **criador** continua disponível no editor apenas se escolhido manualmente.
+- Vídeos longos seguem o formato do vídeo "Game Pass vai limitar suas horas? A nova conta do Xbox Cloud" (YouTube, 10/11/2026, 5min16), definido em 16/11/2026: pergunta prática no título, explicação de 5 a 8 minutos e direção `youtube-editorial-v3`.
+- Vídeos e carrosséis seguem tom de criador, informal e com humor, sem cara de empresa. O formato de longo de referência é o vídeo do Xbox Cloud definido abaixo; os arquivos de `public/long-videos/xbox-anuncios-versao-criador/fonte` seguem como base técnica de edição.
 
 ---
 
