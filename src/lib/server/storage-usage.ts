@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const STORAGE_QUOTA_BYTES = Number(process.env.STORAGE_QUOTA_BYTES) || 1024 ** 3;
 export const STORAGE_ALERT_RATIO = 0.7;
 
-export type StoredFile = { path: string; bytes: number };
+export type StoredFile = { path: string; bytes: number; updatedAt?: string | null; mimetype?: string | null };
 export type StorageUsage = { bytes: number; files: number; quotaBytes: number; ratio: number; buckets: Array<{ id: string; files: number; bytes: number }> };
 
 export async function listBucketFiles(supabase: SupabaseClient, bucket: string, prefix = ""): Promise<StoredFile[]> {
@@ -13,8 +13,16 @@ export async function listBucketFiles(supabase: SupabaseClient, bucket: string, 
     if (error) throw error;
     for (const item of data || []) {
       const path = prefix ? `${prefix}/${item.name}` : item.name;
-      if (item.metadata) files.push({ path, bytes: Number(item.metadata.size || 0) });
-      else files.push(...await listBucketFiles(supabase, bucket, path));
+      if (item.metadata) {
+        files.push({
+          path,
+          bytes: Number(item.metadata.size || 0),
+          updatedAt: item.updated_at || item.created_at || null,
+          mimetype: typeof item.metadata.mimetype === "string" ? item.metadata.mimetype : null,
+        });
+      } else {
+        files.push(...await listBucketFiles(supabase, bucket, path));
+      }
     }
     if (!data || data.length < 1000) return files;
   }

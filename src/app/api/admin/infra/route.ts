@@ -6,10 +6,20 @@ import { listBucketFiles, measureStorageUsage } from "@/lib/server/storage-usage
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PROTECTED_REEL_PATHS = new Set([
-  "long-videos/manifest-state.mp4",
-  "long-videos/deleted-slugs.mp4",
+const ALLOWED_BUCKETS = new Set([
+  "editorial-reels",
+  "post-images",
+  "social-post-media",
+  "social-post-drafts",
+  "profile-images",
 ]);
+
+const PROTECTED_PATHS_BY_BUCKET: Record<string, Set<string>> = {
+  "editorial-reels": new Set([
+    "long-videos/manifest-state.mp4",
+    "long-videos/deleted-slugs.mp4",
+  ]),
+};
 
 const MONITORED_TABLES = [
   { name: "posts", label: "Matérias" },
@@ -34,6 +44,15 @@ function serviceClient() {
   );
 }
 
+function isSafeStoragePath(item: string): boolean {
+  return (
+    item.length > 0
+    && item.length <= 1024
+    && !item.startsWith("/")
+    && !item.split("/").some((segment) => !segment || segment === "." || segment === "..")
+  );
+}
+
 async function authorizeAdmin(request: Request) {
   const authorization = request.headers.get("authorization");
   if (!authorization?.startsWith("Bearer ")) {
@@ -52,6 +71,44 @@ export async function GET(request: Request) {
   const auth = await authorizeAdmin(request);
   if ("error" in auth) return auth.error;
   const { supabase } = auth;
+
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get("action");
+
+  if (action === "browse") {
+    const bucket = searchParams.get("bucket") || "editorial-reels";
+    if (!ALLOWED_BUCKETS.has(bucket)) {
+      return NextResponse.json({ error: "Bucket inválido." }, { status: 400 });
+    }
+    const files = await listBucketFiles(supabase, bucket);
+    const protectedSet = PROTECTED_PATHS_BY_BUCKET[bucket] || new Set<string>();
+    return NextResponse.json(
+      {
+        bucket,
+        files: files.map((file) => ({
+          path: file.path,
+          bytes: file.bytes,
+          updatedAt: file.updatedAt || null,
+          mimetype: file.mimetype || null,
+          protected: protectedSet.has(file.path),
+        })),
+      },
+      { headers: { "Cache-Control": "private, no-store" } },
+    );
+  }
+
+  if (action === "preview") {
+    const bucket = searchParams.get("bucket") || "";
+    const filePath = searchParams.get("path") || "";
+    if (!ALLOWED_BUCKETS.has(bucket) || !isSafeStoragePath(filePath)) {
+      return NextResponse.json({ error: "Parâmetros inválidos." }, { status: 400 });
+    }
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(filePath, 300);
+    if (error || !data?.signedUrl) {
+      return NextResponse.json({ error: "Não foi possível gerar link de visualização." }, { status: 502 });
+    }
+    return NextResponse.json({ url: data.signedUrl }, { headers: { "Cache-Control": "private, no-store" } });
+  }
 
   const [usage, reelFiles, vpsRowResult, tableCounts] = await Promise.all([
     measureStorageUsage(supabase),
@@ -87,20 +144,7 @@ export async function GET(request: Request) {
     }
   }
 
-  const folderTotals = new Map<string, { folder: string; files: number; bytes: number }>();
-  for (const file of reelFiles) {
-    const folder = file.path.includes("/") ? file.path.split("/")[0] : "(raiz)";
-    const current = folderTotals.get(folder) || { folder, files: 0, bytes: 0 };
-    current.files += 1;
-    current.bytes += file.bytes;
-    folderTotals.set(folder, current);
-  }
-
-  const heavyReelFiles = reelFiles
-    .filter((file) => !PROTECTED_REEL_PATHS.has(file.path) && file.bytes >= 100_000)
-    .sort((a, b) => b.bytes - a.bytes)
-    .slice(0, 60);
-
+  const protectedReels = PROTECTED_PATHS_BY_BUCKET["editorial-reels"];
   const totalRows = tableCounts.reduce((sum, item) => sum + (item.rows ?? 0), 0);
 
   return NextResponse.json(
@@ -112,8 +156,14 @@ export async function GET(request: Request) {
         quotaBytes: usage.quotaBytes,
         ratio: usage.ratio,
         buckets: usage.buckets,
-        reelFolders: [...folderTotals.values()].sort((a, b) => b.bytes - a.bytes),
-        heavyReelFiles,
+        initialBucket: "editorial-reels",
+        initialFiles: reelFiles.map((file) => ({
+          path: file.path,
+          bytes: file.bytes,
+          updatedAt: file.updatedAt || null,
+          mimetype: file.mimetype || null,
+          protected: protectedReels.has(file.path),
+        })),
       },
       database: {
         totalRows,
@@ -129,42 +179,53 @@ export async function DELETE(request: Request) {
   if ("error" in auth) return auth.error;
   const { supabase, user } = auth;
 
-  let body: { paths?: unknown };
+  let body: { bucket?: unknown; paths?: unknown };
   try {
-    body = (await request.json()) as { paths?: unknown };
+    body = (await request.json()) as { bucket?: unknown; paths?: unknown };
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
+  const bucket = typeof body.bucket === "string" ? body.bucket : "editorial-reels";
+  if (!ALLOWED_BUCKETS.has(bucket)) {
+    return NextResponse.json({ error: "Bucket inválido." }, { status: 400 });
+  }
+
+  const protectedSet = PROTECTED_PATHS_BY_BUCKET[bucket] || new Set<string>();
   const rawPaths = Array.isArray(body.paths) ? body.paths : [];
   const safePaths = [...new Set(
     rawPaths.filter(
       (item): item is string =>
         typeof item === "string"
-        && item.length > 0
-        && item.length <= 1024
-        && !PROTECTED_REEL_PATHS.has(item)
-        && !item.startsWith("/")
-        && !item.split("/").some((segment) => !segment || segment === "." || segment === ".."),
+        && isSafeStoragePath(item)
+        && !protectedSet.has(item),
     ),
-  )].slice(0, 50);
+  )].slice(0, 200);
 
   if (!safePaths.length) {
     return NextResponse.json({ error: "Nenhum arquivo válido selecionado." }, { status: 400 });
   }
 
-  const { error: removeError } = await supabase.storage.from("editorial-reels").remove(safePaths);
-  if (removeError) {
-    return NextResponse.json({ error: `Falha ao remover arquivos: ${removeError.message}` }, { status: 502 });
+  let deleted = 0;
+  for (let i = 0; i < safePaths.length; i += 50) {
+    const chunk = safePaths.slice(i, i + 50);
+    const { error: removeError } = await supabase.storage.from(bucket).remove(chunk);
+    if (removeError) {
+      return NextResponse.json(
+        { error: `Falha ao remover arquivos: ${removeError.message}`, deleted },
+        { status: 502 },
+      );
+    }
+    deleted += chunk.length;
   }
 
   await supabase.from("admin_audit_log").insert({
     actor_id: user?.id ?? null,
-    action: "delete_reel_storage_files",
+    action: "delete_storage_files",
     target_type: "storage",
-    target_id: "editorial-reels",
-    details: { count: safePaths.length, paths: safePaths },
+    target_id: bucket,
+    details: { count: deleted, paths: safePaths.slice(0, 50) },
   });
 
-  return NextResponse.json({ deleted: safePaths.length });
+  return NextResponse.json({ deleted, bucket });
 }

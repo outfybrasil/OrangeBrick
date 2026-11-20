@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { StorageExplorer, type BucketSummary, type ExplorerFile } from "@/components/admin/StorageExplorer";
 import { createClient } from "@/lib/supabase/client";
 
 interface VpsSnapshot {
@@ -25,9 +26,9 @@ interface InfraData {
     files: number;
     quotaBytes: number;
     ratio: number;
-    buckets: Array<{ id: string; files: number; bytes: number }>;
-    reelFolders: Array<{ folder: string; files: number; bytes: number }>;
-    heavyReelFiles: Array<{ path: string; bytes: number }>;
+    buckets: BucketSummary[];
+    initialBucket: string;
+    initialFiles: ExplorerFile[];
   };
   database: {
     totalRows: number;
@@ -65,21 +66,10 @@ function textTone(percent: number): string {
   return "text-emerald-300";
 }
 
-const BUCKET_LABELS: Record<string, string> = {
-  "editorial-reels": "Vídeos (Reels e longos)",
-  "post-images": "Imagens das matérias",
-  "social-post-media": "Mídia de carrosséis",
-  "social-post-drafts": "Rascunhos sociais",
-  "profile-images": "Avatares e perfis",
-};
-
 export default function AdminInfraPage() {
   const [data, setData] = useState<InfraData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [deletingPath, setDeletingPath] = useState<string | null>(null);
-  const [confirmPath, setConfirmPath] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -110,39 +100,14 @@ export default function AdminInfraPage() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
-  async function deleteVideo(path: string) {
-    setDeletingPath(path);
-    setMessage(null);
-    try {
-      const { data: { session } } = await createClient().auth.getSession();
-      if (!session) throw new Error("Sessão expirada.");
-      const res = await fetch("/api/admin/infra", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ paths: [path] }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Não foi possível apagar o arquivo.");
-      setConfirmPath(null);
-      setMessage(`Arquivo removido do Storage: ${path}`);
-      await load();
-    } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : "Erro ao remover arquivo.");
-    } finally {
-      setDeletingPath(null);
-    }
-  }
-
   const storagePercent = data ? Math.round(data.storage.ratio * 1000) / 10 : 0;
 
   return (
     <AdminShell
       active="infra"
+      wide
       title="Infraestrutura · VPS e Banco"
-      description="Acompanhe disco e memória da VPS, uso de Storage do Supabase e volume das tabelas em um só lugar."
+      description="Acompanhe disco e memória da VPS, navegue pelos arquivos do Supabase Storage e monitore o banco de dados."
       actions={
         <button
           type="button"
@@ -157,12 +122,6 @@ export default function AdminInfraPage() {
       {error && (
         <div role="alert" className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
           {error}
-        </div>
-      )}
-
-      {message && (
-        <div role="status" className="mb-6 rounded-xl border border-brand-orange/40 bg-brand-orange/10 p-3 text-xs text-gray-100">
-          {message}
         </div>
       )}
 
@@ -216,6 +175,14 @@ export default function AdminInfraPage() {
               </p>
             </div>
           </div>
+
+          {/* Explorador estilo Windows Explorer */}
+          <StorageExplorer
+            buckets={data.storage.buckets}
+            initialBucket={data.storage.initialBucket}
+            initialFiles={data.storage.initialFiles}
+            onAfterDelete={load}
+          />
 
           <div className="grid gap-6 xl:grid-cols-2">
             {/* Painel VPS */}
@@ -291,138 +258,25 @@ export default function AdminInfraPage() {
               )}
             </section>
 
-            {/* Painel Supabase Storage */}
+            {/* Banco de Dados */}
             <section className="rounded-xl border border-white/10 bg-surface p-5">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <h2 className="font-heading text-lg font-black text-white">Supabase Storage</h2>
-                  <p className="text-xs text-gray-400">
-                    {data.storage.files.toLocaleString("pt-BR")} arquivos distribuídos em {data.storage.buckets.length} buckets
-                  </p>
-                </div>
-                <span className={`text-sm font-black ${textTone(storagePercent)}`}>{storagePercent}%</span>
+              <h2 className="font-heading text-lg font-black text-white">Banco de Dados (PostgreSQL · Supabase)</h2>
+              <p className="mt-1 text-xs text-gray-400">
+                Volume de registros nas principais tabelas (limite gratuito: 500 MB no banco e 1 GB no Storage).
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {data.database.tables.map((table) => (
+                  <div key={table.name} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <p className="text-xs text-gray-400">{table.label}</p>
+                    <p className="mt-1 font-heading text-xl font-black text-white">
+                      {table.rows === null ? "—" : table.rows.toLocaleString("pt-BR")}
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-[11px] text-gray-500">{table.name}</p>
+                  </div>
+                ))}
               </div>
-
-              <div className="mt-4">
-                <Meter
-                  label="Uso total da cota (1 GB)"
-                  value={`${formatBytes(data.storage.bytes)} de ${formatBytes(data.storage.quotaBytes)}`}
-                  percent={storagePercent}
-                />
-              </div>
-
-              <div className="mt-5 space-y-2.5 border-t border-white/10 pt-4">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Uso por bucket</p>
-                {data.storage.buckets.map((bucket) => {
-                  const pct = data.storage.bytes > 0 ? Math.round((bucket.bytes / data.storage.bytes) * 100) : 0;
-                  return (
-                    <div key={bucket.id} className="flex items-center justify-between gap-3 text-xs">
-                      <div className="min-w-0">
-                        <span className="font-semibold text-white">{BUCKET_LABELS[bucket.id] || bucket.id}</span>
-                        <span className="ml-2 font-mono text-gray-500">({bucket.id} · {bucket.files} arq.)</span>
-                      </div>
-                      <span className="shrink-0 font-bold text-gray-200">
-                        {formatBytes(bucket.bytes)} <span className="text-gray-500">({pct}%)</span>
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {data.storage.reelFolders.length > 0 && (
-                <div className="mt-5 space-y-2 border-t border-white/10 pt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Pastas em editorial-reels</p>
-                  {data.storage.reelFolders.map((folder) => (
-                    <div key={folder.folder} className="flex items-center justify-between gap-3 text-xs">
-                      <span className="truncate font-mono text-gray-300">
-                        {folder.folder} <span className="text-gray-500">({folder.files})</span>
-                      </span>
-                      <span className="shrink-0 font-bold text-brand-orange">{formatBytes(folder.bytes)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </section>
           </div>
-
-          {/* Vídeos pesados no Storage com botão de limpeza */}
-          <section className="rounded-xl border border-white/10 bg-surface p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h2 className="font-heading text-lg font-black text-white">Vídeos salvos no Storage (editorial-reels)</h2>
-                <p className="text-xs text-gray-400">
-                  Apague aqui vídeos já postados para liberar espaço no Supabase sem precisar usar terminal.
-                </p>
-              </div>
-              <span className="text-xs text-gray-400">{data.storage.heavyReelFiles.length} arquivos &ge; 100 KB</span>
-            </div>
-
-            {data.storage.heavyReelFiles.length === 0 ? (
-              <p className="mt-4 text-sm text-emerald-300">Nenhum vídeo pesado ocupando espaço no bucket editorial-reels.</p>
-            ) : (
-              <div className="mt-4 divide-y divide-white/10">
-                {data.storage.heavyReelFiles.map((file) => {
-                  const isConfirming = confirmPath === file.path;
-                  const isDeleting = deletingPath === file.path;
-                  return (
-                    <div key={file.path} className="flex flex-wrap items-center justify-between gap-3 py-2.5 text-xs">
-                      <span className="min-w-0 flex-1 break-all font-mono text-gray-200">{file.path}</span>
-                      <div className="flex shrink-0 items-center gap-3">
-                        <span className="font-bold text-white">{formatBytes(file.bytes)}</span>
-                        {isConfirming ? (
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              disabled={isDeleting}
-                              onClick={() => void deleteVideo(file.path)}
-                              className="min-h-8 rounded bg-red-500 px-2.5 font-bold text-white hover:bg-red-600 disabled:opacity-50"
-                            >
-                              {isDeleting ? "Apagando..." : "Confirmar"}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={isDeleting}
-                              onClick={() => setConfirmPath(null)}
-                              className="min-h-8 rounded border border-white/15 px-2.5 text-gray-300 hover:text-white"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setConfirmPath(file.path)}
-                            className="min-h-8 rounded border border-red-500/30 px-2.5 font-semibold text-red-300 hover:bg-red-500/10 hover:text-red-200"
-                          >
-                            Apagar
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {/* Banco de Dados */}
-          <section className="rounded-xl border border-white/10 bg-surface p-5">
-            <h2 className="font-heading text-lg font-black text-white">Banco de Dados (PostgreSQL · Supabase)</h2>
-            <p className="mt-1 text-xs text-gray-400">
-              Volume de registros nas principais tabelas. O limite do plano gratuito é de 500 MB no banco (hoje o maior consumo vem do Storage de vídeos, não das tabelas).
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {data.database.tables.map((table) => (
-                <div key={table.name} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
-                  <p className="text-xs text-gray-400">{table.label}</p>
-                  <p className="mt-1 font-heading text-xl font-black text-white">
-                    {table.rows === null ? "—" : table.rows.toLocaleString("pt-BR")}
-                  </p>
-                  <p className="mt-0.5 truncate font-mono text-[11px] text-gray-500">{table.name}</p>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
       )}
     </AdminShell>
