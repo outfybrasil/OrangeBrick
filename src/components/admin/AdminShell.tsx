@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useModalDialog } from "@/lib/hooks/useModalDialog";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-type AdminSection = "social-posts" | "overview" | "long-videos" | "publications" | "metrics" | "editor" | "reels" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "contact";
+type AdminSection = "social-posts" | "overview" | "long-videos" | "publications" | "metrics" | "editor" | "reels" | "releases" | "community" | "progression" | "team" | "settings" | "health" | "infra" | "contact";
 
 interface AdminShellProps {
   active: AdminSection;
@@ -176,6 +176,10 @@ export function AdminShell({
               <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}>
                 <OverviewIcon />
                 Saúde e auditoria
+              </Link>
+              <Link href="/admin/infraestrutura" className={navClass("infra")} aria-current={active === "infra" ? "page" : undefined}>
+                <ProgressionIcon />
+                VPS e Banco
               </Link>
               <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}>
                 <OverviewIcon />
@@ -384,6 +388,7 @@ export function AdminShell({
                 </p>
                 <div className="space-y-1">
                   <Link href="/admin/health" className={navClass("health")} aria-current={active === "health" ? "page" : undefined}><OverviewIcon />Saúde e auditoria</Link>
+                  <Link href="/admin/infraestrutura" className={navClass("infra")} aria-current={active === "infra" ? "page" : undefined}><ProgressionIcon />VPS e Banco</Link>
                   <Link href="/admin/contact" className={navClass("contact")} aria-current={active === "contact" ? "page" : undefined}><OverviewIcon />Caixa de entrada</Link>
                   <Link href="/admin/team" className={navClass("team")}><CommunityIcon />Equipe</Link>
                   <Link href="/admin/settings" className={navClass("settings")}><OverviewIcon />Configurações</Link>
