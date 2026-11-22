@@ -14,11 +14,8 @@ export interface MotionMedia {
   speed?: number;
   fit?: "contain" | "cover";
   position?: { x: number; y: number };
-  endBehavior?: "error" | "hold" | "loop";
-  sourceAudio?: { gainDb: number; fade?: number };
   color?: MotionColor;
-  analysis?: { frozen: { start: number; end: number }[] };
-  frames?: { pattern: string; count: number; fps: number; duration: number };
+  clip?: { path: string; duration: number };
 }
 
 export interface MotionTransition {

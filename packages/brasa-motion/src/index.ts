@@ -46,9 +46,29 @@ export interface MotionScript {
   ctaVariant?: "comment" | "follow";
 }
 
-export type MotionVisualStyle = "editorial" | "cinema" | "ruptura" | "game" | "manchete" | "neon_minimal";
+export type MotionVisualStyle = "editorial" | "cinema" | "game";
 
-export const MOTION_VISUAL_STYLES: MotionVisualStyle[] = ["editorial", "cinema", "ruptura", "game", "manchete", "neon_minimal"];
+export const MOTION_VISUAL_STYLES: MotionVisualStyle[] = ["editorial", "cinema", "game"];
+
+export interface MotionTheme {
+  accent?: string;
+  ink: string;
+  surface: string;
+  paper: string;
+  paperSoft: string;
+  text: string;
+  paperText: string;
+  muted: string;
+  paperAccent: string;
+}
+
+export const MOTION_THEMES: Record<MotionVisualStyle, MotionTheme> = {
+  editorial: { ink: "#151613", surface: "#20231c", paper: "#f2eee4", paperSoft: "#e5dfd2", text: "#faf8f3", paperText: "#1c1e19", muted: "#d6d2c9", paperAccent: "#a34a1d" },
+  cinema: { accent: "#e8bb79", ink: "#0f0e0c", surface: "#1d1a15", paper: "#ece4d4", paperSoft: "#ddd2bd", text: "#f7f0e3", paperText: "#1d1a15", muted: "#d4cab8", paperAccent: "#83551b" },
+  game: { accent: "#b8e986", ink: "#10140f", surface: "#1a2117", paper: "#e9f0e1", paperSoft: "#d5e1c7", text: "#f3f8ee", paperText: "#172014", muted: "#cbd6c1", paperAccent: "#3c6818" },
+};
+
+export const MOTION_SAFE_AREA = { left: 24, top: 96, right: 1056, bottom: 1574 };
 
 export interface NarrationSentence {
   text: string;
@@ -72,7 +92,7 @@ export interface MotionFrame {
 export interface MotionOptions {
   script: MotionScript;
   categoryLabel?: string;
-  brand?: MotionBrand;
+  brand: MotionBrand;
   frame?: MotionFrame;
   duration: number;
   variation?: number;
@@ -167,9 +187,14 @@ export function buildEditPlan(options: MotionOptions): MotionEditScene[] {
     const selected = matched >= 0 ? matched : target;
     const explicit = script.scenes[index].start;
     const wordStart = anchor && options.wordTimings ? findNarrationAnchor(anchor, options, starts[index - 1] + .15) : undefined;
-    if (expanded && explicit === undefined && wordStart === undefined) throw new Error("Cenas adicionais precisam de uma âncora real de palavra ou início explícito.");
-    const at = explicit ?? (wordStart !== undefined && wordStart < (closingIndex > 0 ? sentences[closingIndex].start : sentences.at(-1)!.end) ? wordStart : content[Math.max(0, Math.min(content.length - 1, selected))].start);
-    if (!Number.isFinite(at) || at <= starts[index - 1] + .15 || at >= (closingIndex > 0 ? sentences[closingIndex].start : sentences.at(-1)!.end)) throw new Error("O início das cenas precisa seguir a ordem da narração.");
+    const limit = closingIndex > 0 ? sentences[closingIndex].start : sentences.at(-1)!.end;
+    const earliest = starts[index - 1] + .15;
+    const sentenceStart = content[Math.max(0, Math.min(content.length - 1, selected))].start;
+    const nextSentence = content.find(sentence => sentence.start > earliest && sentence.start < limit)?.start;
+    const fallback = sentenceStart > earliest ? sentenceStart : nextSentence ?? (limit - earliest >= 1.2 ? earliest + (limit - earliest) / 2 : undefined);
+    if (expanded && explicit === undefined && wordStart === undefined && fallback === undefined) throw new Error("Cenas adicionais precisam de uma âncora real de palavra ou início explícito.");
+    const at = explicit ?? (wordStart !== undefined && wordStart < limit ? wordStart : fallback ?? sentenceStart);
+    if (!Number.isFinite(at) || at <= starts[index - 1] + .15 || at >= (closingIndex > 0 ? sentences[closingIndex].start : sentences.at(-1)!.end)) throw new Error(`O início das cenas precisa seguir a ordem da narração (cena ${index + 1}: ${at?.toFixed?.(2)}s, mínimo ${earliest.toFixed(2)}s, limite ${limit.toFixed(2)}s, âncora "${anchor}").`);
     starts.push(at);
     timings.push(explicit !== undefined ? "explicit" : wordStart === at ? "word" : matched >= 0 ? "anchor" : "sentence");
     previousIndex = Math.max(0, Math.min(content.length - 1, selected));
@@ -198,7 +223,7 @@ export function buildEditPlan(options: MotionOptions): MotionEditScene[] {
       id: `scene${index + 1}`, start,
       duration: (starts[index + 1] ?? closingStart) - start,
       imageIndex,
-      headline: index === 0 ? script.headline : scene.headline,
+      headline: index === 0 ? script.hook?.trim() || script.headline : scene.headline,
       label: scene.tag || script.badge,
       layout: index === 0 ? "opening" : layout,
       highlight, points, comparison: canCompare ? comparison : [],
@@ -208,6 +233,11 @@ export function buildEditPlan(options: MotionOptions): MotionEditScene[] {
     };
   }).filter((scene) => scene.duration > 0);
   for (const scene of scenes) {
+    const media = options.media?.[scene.imageIndex];
+    if (media?.type === "video") {
+      if (!media.clip) throw new Error("Prepare o trecho de vídeo antes de montar a cena.");
+      if (media.clip.duration + .001 < scene.duration) throw new Error(`O trecho de vídeo da ${scene.id} é menor que a cena; use um trecho de pelo menos ${scene.duration.toFixed(2)}s.`);
+    }
     const source = script.scenes[Number(scene.id.slice(5)) - 1];
     if (source.focus?.anchor && scene.focusStart === undefined) throw new Error("Âncora da região de foco não encontrada na narração.");
     if (source.graphic?.items?.some(item => item.anchor && findNarrationAnchor(item.anchor, options, scene.start - .001) === undefined)) throw new Error("Âncora do gráfico não encontrada na narração.");
@@ -297,39 +327,47 @@ export function generateCompositionHtml(options: MotionOptions): string {
   const captions = buildCaptions(options.sentences, duration, options.wordTimings, options.captions);
   const style = resolveVisualStyle(options.variation ?? 0, options.style);
   const categoryLabel = options.categoryLabel || "";
-  const brand = options.brand || { name: "Brasa Motion" };
+  const brand = options.brand;
+  if (!brand?.name?.trim()) throw new Error("Informe o nome da marca exibida no vídeo.");
   const brandColor = brand.accent || "#ff7a36";
   if (!/^#[0-9a-f]{6}$/i.test(brandColor)) throw new Error("A cor da marca deve usar seis dígitos hexadecimais.");
-  const accent = style === "cinema" ? "#e8bb79" : style === "game" ? "#b8e986" : brandColor;
+  const theme = MOTION_THEMES[style];
+  const accent = theme.accent || brandColor;
   const frame = { style: "editorial", width: 3, radius: 18, ...options.frame };
   if (!["editorial", "none"].includes(frame.style) || !Number.isFinite(frame.width) || frame.width < 1 || frame.width > 6 || !Number.isFinite(frame.radius) || frame.radius < 0 || frame.radius > 40) {
     throw new Error("Moldura inválida: use largura de 1 a 6 e raio de 0 a 40.");
   }
   const frameHtml = frame.style === "none" ? "" : '<div class="composition-frame" aria-hidden="true"></div>';
   const follow = script.ctaVariant === "follow";
-  const image = (index: number, className = "", moving = true, background = false) => {
+  let track = 1;
+  const image = (index: number, scene: MotionEditScene, className = "", moving = true, background = false) => {
     const media = options.media?.[index];
     const position = media?.position || { x: .5, y: .5 };
     if (![position.x, position.y].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) throw new Error("Posição da mídia inválida.");
     const filter = colorFilter(media?.color);
-    return `<img class="${className}" src="${escapeHtml(imagePaths[index])}" ${moving && media?.frames ? `data-video="${index}"` : ""} style="object-fit:${background || media?.fit === "cover" ? "cover" : "contain"};object-position:${position.x * 100}% ${position.y * 100}%;filter:${background ? "grayscale(1)" : filter}" alt="${escapeHtml(media?.description || options.imageDescriptions?.[index] || "Imagem da matéria")}" />`;
+    const style = `object-fit:${background || media?.fit === "cover" ? "cover" : "contain"};object-position:${position.x * 100}% ${position.y * 100}%;filter:${background ? "grayscale(1)" : filter}`;
+    const description = escapeHtml(media?.description || options.imageDescriptions?.[index] || "Imagem da matéria");
+    if (moving && media?.type === "video" && media.clip) {
+      return `<video class="clip ${className}" src="${escapeHtml(media.clip.path)}" poster="${escapeHtml(imagePaths[index])}" data-start="${scene.start}" data-duration="${Math.min(scene.duration, media.clip.duration)}" data-track-index="${track++}" muted playsinline preload="auto" style="${style}" aria-label="${description}"></video>`;
+    }
+    return `<img class="${className}" src="${escapeHtml(imagePaths[index])}" style="${style}" alt="${description}" />`;
   };
   const sceneHtml = scenes.map((scene, index) => {
     const paper = scene.layout === "brief" || scene.layout === "comparison";
     const focus = scene.focus;
-    const mainImage = `<figure class="media${focus ? " has-focus" : ""}"><div class="focus-surface"${focus ? ` style="transform-origin:${(focus.x + focus.width / 2) * 100}% ${(focus.y + focus.height / 2) * 100}%"` : ""}>${image(scene.imageIndex)}${focus ? `<span class="focus-outline" style="left:${focus.x * 100}%;top:${focus.y * 100}%;width:${focus.width * 100}%;height:${focus.height * 100}%;box-shadow:0 0 0 2000px rgba(0,0,0,${focus.dim ?? .45})"></span>` : ""}</div>${focus ? `<span class="focus-label" data-safe>${escapeHtml(focus.label)}</span>` : ""}<span class="media-edge"></span></figure>`;
+    const mainImage = `<figure class="media${focus ? " has-focus" : ""}"><div class="focus-surface"${focus ? ` style="transform-origin:${(focus.x + focus.width / 2) * 100}% ${(focus.y + focus.height / 2) * 100}%"` : ""}>${image(scene.imageIndex, scene)}${focus ? `<span class="focus-outline" style="left:${focus.x * 100}%;top:${focus.y * 100}%;width:${focus.width * 100}%;height:${focus.height * 100}%;box-shadow:0 0 0 2000px rgba(0,0,0,${focus.dim ?? .45})"></span>` : ""}</div>${focus ? `<span class="focus-label" data-safe>${escapeHtml(focus.label)}</span>` : ""}<span class="media-edge"></span></figure>`;
     const note = scene.highlight ? `<aside class="note" data-safe><span class="note-rule"></span><p>${escapeHtml(scene.highlight)}</p></aside>` : "";
     let visual = mainImage;
     if (scene.layout === "opening") {
       visual = `${mainImage}${scene.highlight ? `<div class="opening-note" data-safe>${escapeHtml(scene.highlight)}</div>` : ""}`;
     } else if (scene.layout === "comparison") {
-      visual = `<div class="comparison-grid" data-safe>${scene.comparison.map((item) => `<figure class="compare-item"><div class="compare-photo">${image(item.imageIndex)}</div><figcaption>${escapeHtml(item.label)}</figcaption></figure>`).join("")}<span class="compare-divider"></span></div>`;
+      visual = `<div class="comparison-grid" data-safe>${scene.comparison.map((item) => `<figure class="compare-item"><div class="compare-photo">${image(item.imageIndex, scene)}</div><figcaption>${escapeHtml(item.label)}</figcaption></figure>`).join("")}<span class="compare-divider"></span></div>`;
     } else if (scene.layout === "brief") {
       visual = `${mainImage}<div class="brief-points" data-safe>${scene.points.map((point, pointIndex) => `<div class="brief-point"><span class="point-index">${String(pointIndex + 1).padStart(2, "0")}</span><p>${escapeHtml(point)}</p><span class="point-line"></span></div>`).join("")}</div>`;
     } else if (scene.layout === "detail") {
       visual = `<div class="fact-card" data-safe><div class="fact-label">${escapeHtml(scene.label)}</div><p class="fact-text" data-fit="54">${escapeHtml(scene.highlight)}</p><span class="fact-line"></span></div>${mainImage}`;
     } else if (scene.layout === "closing") {
-      visual = `<div class="closing-stack">${image(scene.imageIndex, "stack-main")}${image((scene.imageIndex + 1) % imagePaths.length, "stack-secondary")}</div><p class="closing-action" data-safe>${escapeHtml(follow ? brand.handle ? `Siga ${brand.handle}` : "Acompanhe o projeto" : "Deixe sua resposta nos comentários")}<span class="action-arrow">↗</span></p>`;
+      visual = `<div class="closing-stack">${image(scene.imageIndex, scene, "stack-main")}${image((scene.imageIndex + 1) % imagePaths.length, scene, "stack-secondary")}</div><p class="closing-action" data-safe>${escapeHtml(follow ? brand.handle ? `Siga ${brand.handle}` : "Acompanhe o projeto" : "Deixe sua resposta nos comentários")}<span class="action-arrow">↗</span></p>`;
     } else {
       visual = `${mainImage}${note}`;
     }
@@ -341,18 +379,17 @@ export function generateCompositionHtml(options: MotionOptions): string {
         visual = `${graphic.withMedia ? mainImage.replace('class="media', 'class="media number-support') : ""}<div class="editorial-graphic number-graphic${graphic.withMedia ? " with-media" : ""}" data-safe><p class="animated-number" data-from="${graphic.number!.from}" data-to="${graphic.number!.to}">${escapeHtml(graphic.number!.prefix || "")}<span>${graphic.number!.from.toFixed(graphic.number!.decimals ?? 0)}</span>${escapeHtml(graphic.number!.suffix || "")}</p><p class="number-context">${escapeHtml(scene.highlight)}</p></div>`;
       } else {
         const quote = graphic.quote!;
-        visual = `<div class="quote-portrait">${image(scene.imageIndex)}</div><blockquote class="editorial-graphic quote-graphic" data-safe><p>“${escapeHtml(quote.text)}”</p><footer><strong>${escapeHtml(quote.name)}</strong><span>${escapeHtml(quote.role)}</span><cite>${escapeHtml(quote.source)}</cite></footer></blockquote>`;
+        visual = `<div class="quote-portrait">${image(scene.imageIndex, scene)}</div><blockquote class="editorial-graphic quote-graphic" data-safe><p>“${escapeHtml(quote.text)}”</p><footer><strong>${escapeHtml(quote.name)}</strong><span>${escapeHtml(quote.role)}</span><cite>${escapeHtml(quote.source)}</cite></footer></blockquote>`;
       }
     }
     return `<section id="${scene.id}" class="scene ${scene.layout}${paper ? " paper" : ""}"${scene.start === 0 ? ' style="visibility:visible"' : ""} data-start="${scene.start}" data-duration="${scene.duration}" data-layout="${scene.layout}">
-      <div class="scene-background">${image(scene.imageIndex, "", false, true)}</div>
+      <div class="scene-background">${image(scene.imageIndex, scene, "", false, true)}</div>
       ${frameHtml}
       <div class="scene-topline"><span>${escapeHtml(scene.label)}</span><span>${String(index + 1).padStart(2, "0")} / ${String(scenes.length).padStart(2, "0")}</span></div>
       <div class="story" data-safe><h${index === 0 ? "1" : "2"} data-fit="60">${titleWords(scene.headline)}</h${index === 0 ? "1" : "2"}></div>
       ${visual}
     </section>`;
   }).join("\n");
-  const mediaData = options.media || [];
   return `<!doctype html>
 <html lang="pt-BR"><head><meta charset="UTF-8" /><meta name="viewport" content="width=1080, height=1920" />
 <title>${escapeHtml(script.headline)} — ${escapeHtml(brand.name)}</title>
@@ -362,57 +399,58 @@ export function generateCompositionHtml(options: MotionOptions): string {
 @font-face{font-family:Outfit;src:url('assets/motion/outfit-semibold.ttf') format('truetype');font-weight:600;font-display:block}
 @font-face{font-family:Outfit;src:url('assets/motion/outfit-extrabold.ttf') format('truetype');font-weight:800;font-display:block}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:1080px;height:1920px;overflow:hidden;background:#151613;color:#faf8f3;font-family:Outfit,sans-serif}
-#root{position:relative;width:1080px;height:1920px;overflow:hidden;--accent:${accent};--content-inset:76px;--frame-inset:24px}
-.scene{position:absolute;inset:0;visibility:hidden;overflow:hidden;background:#151613}
-.scene.paper{background:#f2eee4;color:#1c1e19}
-.composition-frame{position:absolute;inset:96px var(--frame-inset) 346px;border:${frame.width}px solid #faf8f34d;border-radius:${frame.radius}px;pointer-events:none;z-index:10}
-.paper .composition-frame{border-color:#1c1e194d}
+:root{--accent:${accent};--ink:${theme.ink};--surface:${theme.surface};--paper:${theme.paper};--paper-soft:${theme.paperSoft};--text:${theme.text};--paper-text:${theme.paperText};--muted:${theme.muted};--paper-accent:${theme.paperAccent}}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--ink);color:var(--text);font-family:Outfit,sans-serif}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;--content-inset:76px;--frame-inset:24px}
+.scene{position:absolute;inset:0;visibility:hidden;overflow:hidden;background:var(--ink)}
+.scene.paper{background:var(--paper);color:var(--paper-text)}
+.composition-frame{position:absolute;inset:${MOTION_SAFE_AREA.top}px var(--frame-inset) ${1920 - MOTION_SAFE_AREA.bottom}px;border:${frame.width}px solid color-mix(in srgb,var(--text) 30%,transparent);border-radius:${frame.radius}px;pointer-events:none;z-index:10}
+.paper .composition-frame{border-color:color-mix(in srgb,var(--paper-text) 30%,transparent)}
 .composition-frame:before,.composition-frame:after{content:"";position:absolute;width:46px;height:46px;border-color:var(--accent);border-style:solid}
 .composition-frame:before{top:-${frame.width}px;left:-${frame.width}px;border-width:${frame.width}px 0 0 ${frame.width}px;border-top-left-radius:${frame.radius}px}
 .composition-frame:after{right:-${frame.width}px;bottom:-${frame.width}px;border-width:0 ${frame.width}px ${frame.width}px 0;border-bottom-right-radius:${frame.radius}px}
 .scene-background{position:absolute;inset:0;opacity:.12;overflow:hidden}
 .scene-background img{width:100%;height:100%;object-fit:cover;filter:grayscale(1)}
-.scene-background:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#151613 16%,transparent 42%,#151613 84%)}
+.scene-background:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--ink) 16%,transparent 42%,var(--ink) 84%)}
 .paper .scene-background{display:none}
-.brand{position:absolute;top:118px;left:var(--content-inset);right:var(--content-inset);display:flex;align-items:center;gap:15px;z-index:20;font-size:25px;font-weight:600;letter-spacing:1px;color:#faf8f3;background:#151613;padding:14px 20px;border-radius:6px}
-.brand img{width:59px;height:34px;object-fit:contain}.category{margin-left:auto;font-size:23px;color:#d6d2c9;font-weight:400}
+.brand{position:absolute;top:118px;left:var(--content-inset);right:var(--content-inset);display:flex;align-items:center;gap:15px;z-index:20;font-size:25px;font-weight:600;letter-spacing:1px;color:var(--text);background:var(--ink);padding:14px 20px;border-radius:6px}
+.brand img{width:59px;height:34px;object-fit:contain}.category{margin-left:auto;font-size:23px;color:var(--muted);font-weight:400}
 .scene-topline{position:absolute;top:230px;left:var(--content-inset);right:var(--content-inset);display:flex;justify-content:space-between;font-size:23px;line-height:1.3;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
-.paper .scene-topline{color:#89401d}
+.paper .scene-topline{color:var(--paper-accent)}
 .story{position:absolute;top:312px;left:var(--content-inset);right:var(--content-inset);height:248px;text-align:center}.story h1,.story h2{max-height:100%;overflow:visible}
 h1,h2{font-size:78px;line-height:1.05;letter-spacing:-2.2px;font-weight:800;text-wrap:balance;overflow-wrap:break-word}
 .word-mask{display:inline-block;overflow:clip;vertical-align:top;padding-bottom:6px;margin-bottom:-6px}.title-word{display:inline-block}
-.media{position:absolute;left:var(--content-inset);right:var(--content-inset);top:720px;height:500px;overflow:hidden;border-radius:8px;background:#22251f;border:1px solid rgba(250,248,243,.22);box-shadow:0 24px 70px rgba(0,0,0,.18)}
-.media img{width:100%;height:100%;object-fit:contain}.focus-surface{position:absolute;inset:0}.focus-outline{position:absolute;border:3px solid var(--accent);opacity:0}.focus-label{position:absolute;left:24px;bottom:24px;padding:10px 16px;background:#151613;color:#faf8f3;font-size:30px;opacity:0;max-width:calc(100% - 48px)}.media-edge{position:absolute;inset:0;border:1px solid rgba(250,248,243,.12);border-radius:8px;pointer-events:none}
+.media{position:absolute;left:var(--content-inset);right:var(--content-inset);top:720px;height:500px;overflow:hidden;border-radius:8px;background:var(--surface);border:1px solid color-mix(in srgb,var(--text) 22%,transparent);box-shadow:0 24px 70px rgba(0,0,0,.18)}
+.media img,.media video{width:100%;height:100%;object-fit:contain;display:block}.focus-surface{position:absolute;inset:0}.focus-outline{position:absolute;border:3px solid var(--accent);opacity:0}.focus-label{position:absolute;left:24px;bottom:24px;padding:10px 16px;background:var(--ink);color:var(--text);font-size:30px;opacity:0;max-width:calc(100% - 48px)}.media-edge{position:absolute;inset:0;border:1px solid color-mix(in srgb,var(--text) 12%,transparent);border-radius:8px;pointer-events:none}
 .opening .story{top:312px;height:306px}.opening h1{font-size:94px}.opening .media{top:680px;height:540px;transform:rotate(-1.2deg)}
-.opening-note{position:absolute;top:1230px;left:var(--content-inset);right:var(--content-inset);width:max-content;max-width:790px;margin-inline:auto;text-align:center;padding:18px 24px;background:var(--accent);color:#151613;font-size:33px;font-weight:600;line-height:1.15;transform:rotate(-1.2deg);border:1px solid #151613}
+.opening-note{position:absolute;top:1230px;left:var(--content-inset);right:var(--content-inset);width:max-content;max-width:790px;margin-inline:auto;text-align:center;padding:18px 24px;background:var(--accent);color:var(--ink);font-size:33px;font-weight:600;line-height:1.15;transform:rotate(-1.2deg);border:1px solid var(--ink)}
 .image .media{top:640px;height:540px}
 .note{position:absolute;left:var(--content-inset);right:var(--content-inset);top:1230px;display:flex;align-items:stretch;gap:22px;min-height:64px}.note-rule{width:4px;background:var(--accent);flex-shrink:0;transform-origin:top}.note p{font-size:37px;line-height:1.18;font-weight:400;text-wrap:balance}
 .detail .media{top:1000px;left:215px;right:215px;height:365.625px;transform:none}
-.fact-card{position:absolute;top:620px;left:var(--content-inset);right:var(--content-inset);height:340px;padding:28px 38px;border:1px solid rgba(250,248,243,.24);border-radius:8px;background:#20231c}
-.fact-label{text-align:center;font-size:23px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:#cfccc3;margin-bottom:18px}
+.fact-card{position:absolute;top:620px;left:var(--content-inset);right:var(--content-inset);height:340px;padding:28px 38px;border:1px solid color-mix(in srgb,var(--text) 24%,transparent);border-radius:8px;background:var(--surface)}
+.fact-label{text-align:center;font-size:23px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
 .fact-text{text-align:center;height:174px;font-size:78px;line-height:1.04;font-weight:800;letter-spacing:-2px;color:var(--accent);text-wrap:balance;overflow-wrap:break-word}
 .fact-line{position:absolute;bottom:0;left:0;right:0;height:5px;background:var(--accent);transform-origin:left}
 .brief .media{top:620px;height:393.75px;left:190px;right:190px;transform:rotate(1deg)}
 .brief-points{position:absolute;left:var(--content-inset);right:var(--content-inset);top:1060px;display:grid;gap:12px}
-.brief-point{position:relative;min-height:76px;display:flex;align-items:center;gap:24px;background:#e5dfd2;padding:12px 20px;overflow:hidden}
-.point-index{font-size:30px;color:#a34a1d;font-weight:800}.brief-point p{font-size:35px;line-height:1.15;font-weight:600}.point-line{position:absolute;left:0;top:0;bottom:0;width:4px;background:#b65120;transform-origin:top}
+.brief-point{position:relative;min-height:76px;display:flex;align-items:center;gap:24px;background:var(--paper-soft);padding:12px 20px;overflow:hidden}
+.point-index{font-size:30px;color:var(--paper-accent);font-weight:800}.brief-point p{font-size:35px;line-height:1.15;font-weight:600}.point-line{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--paper-accent);transform-origin:top}
 .comparison-grid{position:absolute;left:var(--content-inset);right:var(--content-inset);top:740px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
-.compare-item{position:relative}.compare-photo{height:400px;background:#ddd7c8;border:1px solid #bcb5a7;border-radius:5px;overflow:hidden;display:flex;align-items:center}.compare-photo img{width:100%;height:100%;object-fit:contain}
+.compare-item{position:relative}.compare-photo{height:400px;background:var(--paper-soft);border:1px solid color-mix(in srgb,var(--paper-text) 25%,transparent);border-radius:5px;overflow:hidden;display:flex;align-items:center}.compare-photo img,.compare-photo video{width:100%;height:100%;object-fit:contain}
 .compare-item figcaption{text-align:center;padding-top:24px;font-size:38px;line-height:1.15;font-weight:600;overflow-wrap:break-word;text-wrap:balance}
-.compare-divider{position:absolute;left:calc(50% - 1px);top:10px;width:2px;height:370px;background:#a85227;transform-origin:top}
+.compare-divider{position:absolute;left:calc(50% - 1px);top:10px;width:2px;height:370px;background:var(--paper-accent);transform-origin:top}
 .closing .story{top:945px;height:270px}.closing h2{font-size:78px}
 .closing-stack{position:absolute;top:380px;left:var(--content-inset);right:var(--content-inset);height:390px}
-.closing-stack img{position:absolute;width:690px;height:390px;object-fit:contain;background:#252820;border:6px solid #f2eee4;border-radius:4px;box-shadow:0 20px 60px #0005}
+.closing-stack img,.closing-stack video{position:absolute;width:690px;height:390px;object-fit:contain;background:var(--surface);border:6px solid var(--paper);border-radius:4px;box-shadow:0 20px 60px #0005}
 .stack-main{left:calc(50% - 410px);top:0;transform:rotate(-3deg)}.stack-secondary{left:calc(50% - 280px);top:65px;transform:rotate(3deg)}
-.closing-action{position:absolute;top:1260px;left:var(--content-inset);right:var(--content-inset);font-size:36px;font-weight:600;line-height:1.2;padding-top:20px;border-top:1px solid #ffffff3b;display:flex;align-items:center;justify-content:space-between;gap:20px}.action-arrow{font-size:48px;color:var(--accent)}
+.closing-action{position:absolute;top:1260px;left:var(--content-inset);right:var(--content-inset);font-size:36px;font-weight:600;line-height:1.2;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--text) 23%,transparent);display:flex;align-items:center;justify-content:space-between;gap:20px}.action-arrow{font-size:48px;color:var(--accent)}
 .captions{position:absolute;left:120px;right:120px;top:0;height:1920px;z-index:30;pointer-events:none}
-.caption{position:absolute;top:1380px;left:0;right:0;width:max-content;max-width:100%;margin-inline:auto;visibility:hidden;padding:14px 22px;background:#151613;color:#fff;font-size:56px;font-weight:600;line-height:1.12;text-align:center;text-wrap:balance;overflow-wrap:break-word;border-radius:4px}.caption em{font-style:normal;color:var(--accent)}
+.caption{position:absolute;top:1380px;left:0;right:0;width:max-content;max-width:100%;margin-inline:auto;visibility:hidden;padding:14px 22px;background:var(--ink);color:var(--text);font-size:56px;font-weight:600;line-height:1.12;text-align:center;text-wrap:balance;overflow-wrap:break-word;border-radius:4px}.caption em{font-style:normal;color:var(--accent)}
 .note,.opening-note,.fact-card,.brief-point{opacity:0}
 .fact-line{transform:scaleX(0)}.compare-divider{transform:scaleY(0)}
 .progress{position:absolute;left:var(--content-inset);right:var(--content-inset);top:1550px;height:4px;background:#81817744;z-index:30;overflow:hidden}.progress-fill{width:100%;height:100%;background:var(--accent);transform-origin:left}
 .caption[data-position="upper"]{top:550px}
-.editorial-graphic{position:absolute;left:var(--content-inset);right:var(--content-inset);top:620px;min-height:480px}.graphic-event{display:flex;gap:28px;padding:24px 0;border-bottom:1px solid #ffffff30;opacity:0}.event-marker{font-size:32px;font-weight:600;color:var(--accent);min-width:60px}.graphic-event h3{font-size:46px;line-height:1.1;margin-bottom:12px}.graphic-event p{font-size:32px;line-height:1.25;color:#d6d2c9}.timeline .event-marker{position:relative}.timeline .graphic-event:not(:last-child) .event-marker:after{content:"";position:absolute;left:18px;top:48px;bottom:-16px;width:2px;background:var(--accent);opacity:.5}.scene:has(.editorial-graphic) .scene-background{opacity:.035}.calendar .event-marker{border:1px solid var(--accent);padding:12px;align-self:flex-start}.number-graphic{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:32px}.animated-number{font-size:140px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}.number-context{font-size:40px;line-height:1.2}.number-graphic.with-media{top:600px;min-height:0;height:300px}.media.number-support{top:940px;left:215px;right:215px;height:365.625px;transform:none}.quote-portrait{position:absolute;left:300px;right:300px;top:600px;height:270px;overflow:hidden}.quote-portrait img{width:100%;height:100%;object-fit:contain}.quote-graphic{top:920px;min-height:0}.quote-graphic>p{font-size:46px;line-height:1.2;text-align:center}.quote-graphic footer{margin-top:24px;text-align:center;display:grid;gap:8px}.quote-graphic strong{font-size:32px}.quote-graphic span,.quote-graphic cite{font-size:24px;font-style:normal;color:#cfccc3}.paper .graphic-event p{color:#3a3e35}.paper .graphic-event{border-color:#1c1e1930}
+.editorial-graphic{position:absolute;left:var(--content-inset);right:var(--content-inset);top:620px;min-height:480px}.graphic-event{display:flex;gap:28px;padding:24px 0;border-bottom:1px solid color-mix(in srgb,var(--text) 19%,transparent);opacity:0}.event-marker{font-size:32px;font-weight:600;color:var(--accent);min-width:60px}.graphic-event h3{font-size:46px;line-height:1.1;margin-bottom:12px}.graphic-event p{font-size:32px;line-height:1.25;color:var(--muted)}.timeline .event-marker{position:relative}.timeline .graphic-event:not(:last-child) .event-marker:after{content:"";position:absolute;left:18px;top:48px;bottom:-16px;width:2px;background:var(--accent);opacity:.5}.scene:has(.editorial-graphic) .scene-background{opacity:.035}.calendar .event-marker{border:1px solid var(--accent);padding:12px;align-self:flex-start}.number-graphic{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:32px}.animated-number{font-size:140px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}.number-context{font-size:40px;line-height:1.2}.number-graphic.with-media{top:600px;min-height:0;height:300px}.media.number-support{top:940px;left:215px;right:215px;height:365.625px;transform:none}.quote-portrait{position:absolute;left:300px;right:300px;top:600px;height:270px;overflow:hidden}.quote-portrait img,.quote-portrait video{width:100%;height:100%;object-fit:contain}.quote-graphic{top:920px;min-height:0}.quote-graphic>p{font-size:46px;line-height:1.2;text-align:center}.quote-graphic footer{margin-top:24px;text-align:center;display:grid;gap:8px}.quote-graphic strong{font-size:32px}.quote-graphic span,.quote-graphic cite{font-size:24px;font-style:normal;color:var(--muted)}.paper .graphic-event p{color:color-mix(in srgb,var(--paper-text) 85%,var(--paper))}.paper .graphic-event{border-color:color-mix(in srgb,var(--paper-text) 19%,transparent)}
 </style></head><body>
 <div id="root" data-composition-id="main" data-start="0" data-duration="${duration}" data-width="1080" data-height="1920">
 ${sceneHtml}
@@ -421,8 +459,8 @@ ${sceneHtml}
     const words = caption.text.split(" ");
     const scene = scenes.find(item => caption.start >= item.start && caption.start < item.start + item.duration);
     const position = options.captions?.scenePositions?.[scene?.id || ""] || options.captions?.position || "bottom";
-    const emphasis = options.captions?.emphasis?.map(normalizeText);
-    const content = words.map((word, wordIndex) => (emphasis ? emphasis.includes(normalizeText(word)) : wordIndex === words.length - 1) ? `<em>${escapeHtml(word)}</em>` : escapeHtml(word)).join(" ");
+    const emphasis = options.captions?.emphasis?.map(normalizeText).filter(Boolean);
+    const content = words.map((word) => (emphasis ? emphasis.includes(normalizeText(word)) : /\p{N}/u.test(word)) ? `<em>${escapeHtml(word)}</em>` : escapeHtml(word)).join(" ");
     return `<div id="caption-${index}" class="caption" data-safe data-position="${position}"${caption.start === 0 ? ' style="visibility:visible"' : ""}>${content}</div>`;
   }).join("")}</div>
 <div class="progress"><div class="progress-fill"></div></div>
@@ -440,8 +478,8 @@ document.fonts.ready.then(()=>{
   });
 document.querySelectorAll(".media.has-focus").forEach(figure=>{
   const surface=figure.querySelector(".focus-surface");
-  const image=surface.querySelector("img");
-  const ratio=image.naturalWidth/image.naturalHeight;
+  const image=surface.querySelector("img,video");
+  const ratio=(image.naturalWidth||image.videoWidth||16)/(image.naturalHeight||image.videoHeight||9);
   const cover=getComputedStyle(image).objectFit==="cover";
   const width=cover?Math.max(figure.clientWidth,figure.clientHeight*ratio):Math.min(figure.clientWidth,figure.clientHeight*ratio);
   const height=width/ratio;
@@ -493,6 +531,17 @@ scenes.forEach((scene,index)=>{
     animate(selector+" .compare-item:nth-child(2)",{opacity:0,y:18},{opacity:1,y:0,duration:entry,ease:"power3.out",immediateRender:false},scene.start+Math.min(.7,scene.duration*.2));
   }
   animate(selector+" .stack-secondary",{x:55,rotation:10},{x:0,rotation:3,duration:settle,ease:"power3.out",immediateRender:false},scene.start);
+  if(scene.graphic?.type==="number"){
+    const number=scene.graphic.number;
+    const target=document.querySelector(selector+" .animated-number span");
+    const length=Math.min(1.4,scene.duration*.45);
+    const format=value=>value.toLocaleString("pt-BR",{minimumFractionDigits:number.decimals??0,maximumFractionDigits:number.decimals??0});
+    const steps=Math.max(1,Math.round(length*30));
+    for(let step=0;step<=steps;step++){
+      const progress=step/steps;
+      tl.set(target,{textContent:format(number.from+(number.to-number.from)*(1-Math.pow(1-progress,3)))},scene.start+.15+progress*length);
+    }
+  }
 });
 const captions=${scriptJson(captions)};
 captions.forEach((caption,index)=>{
@@ -501,30 +550,25 @@ captions.forEach((caption,index)=>{
 });
 tl.fromTo(".progress-fill",{scaleX:0},{scaleX:1,duration:${duration},ease:"none"},0);
 tl.to({}, {duration:${duration}},0);tl.seek(0);window.__timelines.main=tl;
-const media=${scriptJson(mediaData)};
-window.__seekMedia=async(at)=>{
-  scenes.filter(scene=>scene.graphic?.type==="number").forEach(scene=>{
-    const number=scene.graphic.number;
-    const progress=Math.min(1,Math.max(0,(at-scene.start-.15)/Math.min(1.4,scene.duration*.45)));
-    const value=number.from+(number.to-number.from)*(1-Math.pow(1-progress,3));
-    document.querySelector("#"+scene.id+" .animated-number span").textContent=value.toLocaleString("pt-BR",{minimumFractionDigits:number.decimals??0,maximumFractionDigits:number.decimals??0});
+window.__seek=async(at)=>{tl.seek(Math.min(${duration}-.00001,Math.max(0,at)));};
+const safe=${scriptJson(MOTION_SAFE_AREA)};
+window.__layoutIssues=()=>{
+  const issues=[];
+  document.querySelectorAll("[data-safe]").forEach(element=>{
+    if(getComputedStyle(element).visibility!=="visible"||element.closest(".scene")&&getComputedStyle(element.closest(".scene")).visibility!=="visible")return;
+    const box=element.getBoundingClientRect();
+    if(!box.width||!box.height)return;
+    const label=(element.textContent||element.className).trim().replace(/\s+/g," ").slice(0,80);
+    if(box.left<safe.left-1||box.right>safe.right+1||box.top<safe.top-1||box.bottom>safe.bottom+1)issues.push("Fora da área segura: "+label);
   });
-  const pending=[];
-  document.querySelectorAll("img[data-video]").forEach(element=>{
-    const section=element.closest(".scene");
-    if(getComputedStyle(section).visibility!=="visible")return;
-    const item=media[Number(element.dataset.video)];
-    const sequence=item.frames;
-    const local=Math.max(0,at-Number(section.dataset.start));
-    let frame=Math.floor(local*sequence.fps+0.00001);
-    if(item.endBehavior==="loop")frame%=sequence.count;
-    frame=Math.min(sequence.count-1,frame);
-    const source=sequence.pattern.replace("%06d",String(frame+1).padStart(6,"0"));
-    if(element.getAttribute("src")!==source){element.src=source;pending.push(element.decode());}
+  document.querySelectorAll("[data-fit]").forEach(element=>{
+    const scene=element.closest(".scene");
+    if(scene&&getComputedStyle(scene).visibility!=="visible")return;
+    const available=element.classList.contains("fact-text")?element.clientHeight:element.parentElement.clientHeight;
+    if(element.scrollHeight>available+1||element.scrollWidth>element.clientWidth+1)issues.push("Texto excede o espaço mesmo no tamanho mínimo: "+element.textContent.trim().slice(0,80));
   });
-  await Promise.all(pending);
+  return issues;
 };
-window.__seek=async(at)=>{tl.seek(Math.min(${duration}-.00001,Math.max(0,at)));await window.__seekMedia(at);};
 });
 </script></body></html>`;
 }

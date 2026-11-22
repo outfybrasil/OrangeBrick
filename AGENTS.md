@@ -102,6 +102,22 @@ Imagem fotorrealista de [descrever a cena exata do resumo]. Estilo fotografia ed
 - Carrosséis seguem o modelo **editorial** (o do Xbox Playback, 4:5) como padrão fixo, definido em 16/11/2026. O modelo **criador** continua disponível no editor apenas se escolhido manualmente.
 - Vídeos longos seguem o formato do vídeo "Game Pass vai limitar suas horas? A nova conta do Xbox Cloud" (YouTube, 10/11/2026, 5min16), definido em 16/11/2026: pergunta prática no título, explicação de 5 a 8 minutos e direção `youtube-editorial-v3`.
 - Vídeos e carrosséis seguem tom de criador, informal e com humor, sem cara de empresa. O formato de longo de referência é o vídeo do Xbox Cloud definido abaixo; os arquivos de `public/long-videos/xbox-anuncios-versao-criador/fonte` seguem como base técnica de edição.
+- **Padrão fixo para Reels/Shorts/TikTok de Gameplay do criador (aprovado em 18/11/2026):** adotar o layout **Split-Screen Streamer Pro (Estilo Nativo)** sempre que o corte tiver gameplay do criador com facecam:
+  - Canvas `1080×1920`, 30 fps.
+  - **Topo (`1080×608`):** facecam limpa e ampliada do criador (recorte interno sem bordas do overlay da live).
+  - **Meio (`1080×1080` — 1:1 pixel perfeito nativo):** gameplay recortada sem zoom/upscale e sem invadir a moldura da facecam, garantindo nitidez máxima.
+  - **Rodapé (`1080×232`):** faixa com blur escuro da própria gameplay para proteger a área de interface/botões do TikTok, Reels e Shorts.
+  - **Overlay limpo:** divisória fina laranja/amarela com selo `OB LABS` + tag discreta, gancho textual nos 3 primeiros segundos e legendas dinâmicas palavra por palavra (Outfit ExtraBold com contorno preto e palavra ativa em destaque amarelo `#ffd84d`), sem cartões/Polaroid cobrindo a tela.
+  - **Áudio:** usar sempre a voz real do criador e os diálogos do jogo (sem TTS), aplicando isolamento neural de voz (`MDX-Net` / `Kim_Vocal_2.onnx`) para remover músicas com copyright do jogo sem perder a voz do criador nem os diálogos dos personagens.
+- **Padrão fixo de Miniaturas (Thumbnails) para YouTube Longo / Detonado (aprovado em 20/11/2026):** seguir o estilo full-bleed das capas do canal (*INÍCIO DE TUDO / HISTÓRIA GTA 6*, *SÓ ZOEIRA / MUNDO ABERTO*, *GTA 6 AO VIVO*):
+  - **Imagem full-bleed 16:9 (1920×1080):** cena limpa e cinematográfica do próprio jogo (sem overlay da webcam) ou arte/cena que remeta diretamente ao episódio, com vinheta escura suave apenas no lado esquerdo para leitura. **Não usar moldura Polaroid, fita adesiva nem carimbo.**
+  - **Selo `OB` circular** no canto superior esquerdo (fundo escuro, borda e letras `OB` em laranja `#ff6b1a`).
+  - **Tipografia principal à esquerda:** 2 linhas gigantes em caixa alta condensada (`Anton`), branco puro com contorno preto forte (`stroke` + sombra).
+  - **Pílula arredondada abaixo do título:** fundo escuro com borda/texto amarelo (`#ffd62e`) ou fundo vermelho vibrante com texto branco (ex: `HISTÓRIA GTA 6 • EP 3`).
+- **Padrão fixo de Capas para Instagram Reels e YouTube Shorts (aprovado em 21/11/2026):**
+  - **Instagram Reels (`1080×1920`, 9:16):** sempre gerar capa dedicada e enviar automaticamente via `cover_url` na hora da publicação do Reel. Todos os elementos principais (rosto/reação, selo circular `OB`, título `Anton` 2 linhas branco + `#ffd84d` com contorno preto, pílula amarela e cena principal do jogo) **devem ficar 100% dentro da área segura central `3:4` (`y=240..1680`, `1080×1440`)** para nunca cortar nada nem na aba Reels (`9:16`) nem na grade do perfil (`3:4`).
+  - **YouTube Shorts (`1920×1080`, 16:9 com área segura 9:16 central):** centralizar a arte vertical `608×1080` exatamente em `x=656..1264` sobre fundo escuro desfocado da própria cena (sem texto nas laterais), garantindo que nada seja cortado na aba Shorts.
+- **Google Drive exclusivo do Orange Brick:** usar sempre o remote `gdrive-ob:` (`orangebrick0@gmail.com`) com pastas `OrangeBrick/Videos crus`, `OrangeBrick/Introduções e finalizações`, `OrangeBrick/videos-prontos` e `OrangeBrick/tmp`. Nunca usar `gdrive:` (conta de outro projeto).
 
 ---
 
@@ -331,6 +347,16 @@ Exemplos:
 | `modding` | Homebrew, custom ROM, hardware modificado | Entusiasta, comunidade | Projeto → como funciona → onde baixar |
 | `review` | Análise de jogo, console, acessório | Avaliativo, pró/chave/contra, sem nota numérica | Contexto → testes → veredito |
 | `opinion` | Editorial, artigo de opinião | Voz marcante, pode ser ácido, irônico | Tese → argumentos → provocação final |
+
+---
+
+## ☁️ Processamento Pesado via Google Colab CLI (`colab`)
+
+- Usar o **`google-colab-cli`** (`/home/deploy/.local/bin/colab`) para aliviar a VPS (4 vCPUs / 8 GB RAM) em tarefas pesadas de vídeo e áudio.
+- **Render de vídeo (longos e verticais):** usar máquina **L4** (`--gpu L4`, 12 vCPUs e ~52 GB de RAM). Priorizar processamento em **CPU/RAM** no render (evitar forçar renderização pela GPU quando o encoder/compositor ficar mais lento do que em CPU).
+- **Transcrição e áudio pesado (Whisper `large-v3`, isolamento vocal `MDX-Net` / `Kim_Vocal_2.onnx`):** usar máquina **T4** (`--gpu T4`).
+- **Proteção de unidades (obrigatório):** a VM do Colab consome unidades enquanto estiver ligada, mesmo ociosa. Sempre usar `colab run` (encerra ao terminar), `colab ssh --rm`, ou garantir `colab stop -s <sessao>` ao final — inclusive em caso de erro. Conferir com `colab sessions` para não deixar máquinas órfãs.
+- **Fallback para a VPS:** se o Colab estiver indisponível, sem saldo (`colab usage`) ou desautenticado, **avisar o usuário antes** de executar renderização ou transcrição pesada localmente na VPS.
 
 ---
 

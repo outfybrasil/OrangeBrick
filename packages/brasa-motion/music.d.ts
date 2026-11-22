@@ -25,9 +25,30 @@ export interface MusicSelection {
 export const musicDirectory: string;
 export function listMusicTracks(options?: MusicSelection): MusicTrack[];
 export function selectMusicTrack(options?: MusicSelection): MusicTrack;
+export function selectMusicPlaylist(options: MusicSelection & { duration: number }): MusicTrack[];
+import type { SfxPresetId } from "./sfx.js";
+
+export interface MixSfxEvent {
+  preset?: SfxPresetId;
+  filePath?: string;
+  at: number;
+  duration?: number;
+  gainDb?: number;
+  seed?: number;
+}
+
+export interface AudioVacuumSpan {
+  start: number;
+  end: number;
+  duckDb?: number;
+}
+
 export function mixMusicBed(voicePath: string, outputPath: string, options: {
-  track: MusicTrack;
+  track?: MusicTrack;
+  tracks?: MusicTrack[];
   duration: number;
   ffmpeg?: string;
   gapLu?: number;
-}): { id: string; title: string; artist: string; license: string; sourceUrl: string; gapLu: number; targetLufs: number; targetTruePeakDbtp: number; listeningReview: string };
+  sfxEvents?: MixSfxEvent[];
+  vacuums?: AudioVacuumSpan[];
+}): { id: string; title: string; artist: string; license: string; sourceUrl: string; tracks: Array<Pick<MusicTrack, "id" | "title" | "artist" | "license" | "sourceUrl">>; sfx: Array<{ preset?: SfxPresetId; filePath?: string; at: number; sha256?: string; license?: string }>; vacuums: AudioVacuumSpan[]; gapLu: number; targetLufs: number; targetTruePeakDbtp: number; measuredLufs: number; measuredTruePeakDbtp: number; listeningReview: string };
