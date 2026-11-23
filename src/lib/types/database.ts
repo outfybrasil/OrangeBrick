@@ -1065,8 +1065,11 @@ export interface SocialPostDraft {
   music: string;
   slides: SocialPostSlide[];
   coverMotion?: boolean;
+  template?: SocialPostTemplate;
   savedAt: string | null;
 }
+
+export type SocialPostTemplate = "editorial" | "criador";
 
 export interface SocialInstagramPublication {
   attempt: number;
