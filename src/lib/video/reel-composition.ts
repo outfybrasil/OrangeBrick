@@ -5,6 +5,7 @@ import {
   resolveVisualStyle,
   MOTION_VISUAL_STYLES,
   type MotionOptions,
+  type MotionBrand,
   type MotionEditScene,
   type MotionVisualStyle,
   type NarrationSentence,
@@ -17,8 +18,9 @@ export type { NarrationSentence };
 export const REEL_VISUAL_STYLES = MOTION_VISUAL_STYLES;
 export { resolveVisualStyle };
 
-export interface CompositionOptions extends MotionOptions {
+export interface CompositionOptions extends Omit<MotionOptions, "brand"> {
   category: PostCategory;
+  brand?: Partial<MotionBrand>;
 }
 
 function orangeBrickOptions(options: CompositionOptions): MotionOptions {
