@@ -16,6 +16,24 @@ interface TikTokPublisherProps {
 
 type TikTokPublisherStatus = "idle" | "sending" | "submitted" | "published" | "unknown" | "error";
 
+interface TikTokCreatorInfo {
+  nickname: string;
+  username: string;
+  avatarUrl: string;
+  privacyLevelOptions: string[];
+  commentDisabled: boolean;
+  duetDisabled: boolean;
+  stitchDisabled: boolean;
+  maxVideoPostDurationSec: number;
+}
+
+const PRIVACY_LABELS: Record<string, string> = {
+  PUBLIC_TO_EVERYONE: "Público (todos)",
+  MUTUAL_FOLLOW_FRIENDS: "Amigos (seguidores mútuos)",
+  FOLLOWER_OF_CREATOR: "Seguidores",
+  SELF_ONLY: "Somente eu (privado)",
+};
+
 export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [], ready, socialPublication, onDeliveryStatusChange }: TikTokPublisherProps) {
   const inFlight = useRef(false);
   const supabase = useMemo(() => createDataClient(), []);
@@ -27,6 +45,13 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   const [showConfig, setShowConfig] = useState(false);
   const [configuredOnServer, setConfiguredOnServer] = useState(false);
   const [composioConfigured, setComposioConfigured] = useState(false);
+  const [creatorInfo, setCreatorInfo] = useState<TikTokCreatorInfo | null>(null);
+  const [connectingOAuth, setConnectingOAuth] = useState(false);
+  const [publishMode, setPublishMode] = useState<"direct" | "inbox">("direct");
+  const [privacyLevel, setPrivacyLevel] = useState("");
+  const [allowComment, setAllowComment] = useState(false);
+  const [allowDuet, setAllowDuet] = useState(false);
+  const [allowStitch, setAllowStitch] = useState(false);
   const [customToken, setCustomToken] = useState("");
   const [isReposting, setIsReposting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -68,9 +93,30 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
       if (response.ok) {
         setConfiguredOnServer(Boolean(data.configured));
         setComposioConfigured(Boolean(data.composioConfigured));
+        if (data.creatorInfo) setCreatorInfo(data.creatorInfo);
       }
     } catch {}
   }, [token]);
+
+  async function handleConnectTikTok() {
+    if (connectingOAuth) return;
+    setConnectingOAuth(true);
+    setErrorOverride(null);
+    try {
+      const response = await fetch("/api/admin/reels/tiktok?action=link", {
+        headers: { Authorization: `Bearer ${await token()}` },
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.redirectUrl) {
+        throw new Error(data?.error || "Não foi possível abrir o login do TikTok.");
+      }
+      window.open(data.redirectUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setErrorOverride(err instanceof Error ? err.message : "Erro ao iniciar login no TikTok.");
+    } finally {
+      setConnectingOAuth(false);
+    }
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => void checkStatus(), 0);
@@ -128,6 +174,11 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
           confirmed,
           videoUrl,
           caption,
+          publishMode,
+          privacyLevel: publishMode === "direct" ? privacyLevel : undefined,
+          allowComment,
+          allowDuet,
+          allowStitch,
           accessToken: customToken.trim() || undefined,
         }),
       });
@@ -161,31 +212,47 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
   return (
     <div className="space-y-4 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-black border border-cyan-400 text-xs font-black text-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.4)]">
-            TT
-          </span>
+        <div className="flex items-center gap-2.5">
+          {creatorInfo?.avatarUrl ? (
+            <img src={creatorInfo.avatarUrl} alt={creatorInfo.nickname} className="h-9 w-9 rounded-full border border-cyan-400/60 object-cover" />
+          ) : (
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-black border border-cyan-400 text-xs font-black text-cyan-400 shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+              TT
+            </span>
+          )}
           <div>
-            <p className="font-bold text-white">Rascunho no TikTok</p>
+            <p className="font-bold text-white">
+              {creatorInfo ? `${creatorInfo.nickname}${creatorInfo.username ? ` (@${creatorInfo.username})` : ""}` : "Publicar no TikTok"}
+            </p>
             <p className="text-xs text-gray-400">
               {composioConfigured ? (
-                <span className="text-cyan-400">● Conectado via Composio</span>
+                <span className="text-cyan-400">● Conta TikTok conectada via OAuth</span>
               ) : isConfigured ? (
                 <span className="text-cyan-400">● Conexão TikTok API pronta</span>
               ) : (
-                <span className="text-amber-400">● Requer configuração da conta</span>
+                <span className="text-amber-400">● Requer conexão da conta TikTok</span>
               )}
             </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowConfig(!showConfig)}
-          className="rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          {showConfig ? "Ocultar Chaves" : "Configurar API"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void handleConnectTikTok()}
+            disabled={connectingOAuth}
+            className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-bold text-cyan-200 transition-colors hover:bg-cyan-500/20 disabled:opacity-50"
+          >
+            {connectingOAuth ? "Abrindo..." : creatorInfo ? "Trocar conta TikTok" : "Conectar TikTok"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowConfig(!showConfig)}
+            className="rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            {showConfig ? "Ocultar Chaves" : "Configurar API"}
+          </button>
+        </div>
       </div>
 
       {showConfig && (
@@ -357,7 +424,85 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
             )}
           </div>
 
-          <p className="text-xs text-gray-300">O vídeo será enviado para a caixa de entrada do TikTok. Abra a notificação no aplicativo, cole a legenda e as hashtags e finalize a publicação.</p>
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-bold text-gray-300">Modo de envio:</span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPublishMode("direct")}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${publishMode === "direct" ? "bg-cyan-500 text-black" : "border border-white/15 text-gray-300 hover:bg-white/10"}`}
+                >
+                  Publicação Direta
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPublishMode("inbox")}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${publishMode === "inbox" ? "bg-cyan-500 text-black" : "border border-white/15 text-gray-300 hover:bg-white/10"}`}
+                >
+                  Rascunho (Caixa de Entrada)
+                </button>
+              </div>
+            </div>
+
+            {publishMode === "direct" && (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">
+                    Quem pode assistir a este vídeo? (obrigatório)
+                  </label>
+                  <select
+                    value={privacyLevel}
+                    onChange={(e) => setPrivacyLevel(e.target.value)}
+                    className="w-full rounded-lg border border-white/15 bg-[#07080c] px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                  >
+                    <option value="">Selecione o nível de privacidade...</option>
+                    {(creatorInfo?.privacyLevelOptions || ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"]).map((opt) => (
+                      <option key={opt} value={opt}>
+                        {PRIVACY_LABELS[opt] || opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-gray-300 mb-1.5">Permitir que usuários façam:</p>
+                  <div className="flex flex-wrap gap-4 text-xs text-gray-200">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={allowComment}
+                        disabled={Boolean(creatorInfo?.commentDisabled)}
+                        onChange={(e) => setAllowComment(e.target.checked)}
+                        className="h-4 w-4 accent-cyan-400"
+                      />
+                      <span>Comentários</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={allowDuet}
+                        disabled={Boolean(creatorInfo?.duetDisabled)}
+                        onChange={(e) => setAllowDuet(e.target.checked)}
+                        className="h-4 w-4 accent-cyan-400"
+                      />
+                      <span>Dueto</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={allowStitch}
+                        disabled={Boolean(creatorInfo?.stitchDisabled)}
+                        onChange={(e) => setAllowStitch(e.target.checked)}
+                        className="h-4 w-4 accent-cyan-400"
+                      />
+                      <span>Costurar (Stitch)</span>
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
 
           <label className="flex min-h-11 items-start gap-3 text-gray-200">
             <input
@@ -368,8 +513,8 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
               className="mt-1 h-5 w-5 shrink-0 accent-cyan-400"
             />
             <span className="text-xs">
-              {isReposting
-                ? "Confirmo que o vídeo anterior foi apagado no TikTok e desejo enviar um novo rascunho para a conta conectada."
+              {publishMode === "direct"
+                ? "Ao publicar, confirmo a revisão do vídeo, a privacidade escolhida e concordo com a Confirmação de Uso de Música do TikTok."
                 : "Revisei o vídeo. Confirmo o envio como rascunho para finalizar no TikTok."}
             </span>
           </label>
@@ -377,13 +522,13 @@ export function TikTokPublisher({ postId, videoUrl, initialCaption, hashtags = [
           <div className="flex flex-col gap-2 pt-2 sm:flex-row">
             <button
               type="submit"
-              disabled={!ready || status === "sending" || !confirmed || !caption.trim()}
+              disabled={!ready || status === "sending" || !confirmed || !caption.trim() || (publishMode === "direct" && !privacyLevel)}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-pink-500 py-2.5 text-xs font-black uppercase text-black shadow-lg transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === "sending"
                 ? "Enviando para o TikTok..."
-                : isReposting
-                ? "Confirmar novo rascunho no TikTok"
+                : publishMode === "direct"
+                ? "Publicar no TikTok"
                 : "Enviar rascunho ao TikTok"}
             </button>
 

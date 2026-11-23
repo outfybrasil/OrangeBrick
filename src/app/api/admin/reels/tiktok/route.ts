@@ -110,12 +110,56 @@ export async function GET(request: Request) {
     const composioConfigured = Boolean(apiKey && resolvedAccountId);
     const hasEnvToken = Boolean(process.env.TIKTOK_ACCESS_TOKEN || composioConfigured);
 
+    let creatorInfo: {
+      nickname: string;
+      username: string;
+      avatarUrl: string;
+      privacyLevelOptions: string[];
+      commentDisabled: boolean;
+      duetDisabled: boolean;
+      stitchDisabled: boolean;
+      maxVideoPostDurationSec: number;
+    } | null = null;
+
+    if (apiKey && resolvedAccountId) {
+      try {
+        const infoRes = await fetch("https://backend.composio.dev/api/v3.1/tools/execute/proxy", {
+          method: "POST",
+          headers: { "x-api-key": apiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            connected_account_id: resolvedAccountId,
+            user_id: composioUserId,
+            endpoint: "https://open.tiktokapis.com/v2/post/publish/creator_info/query/",
+            method: "POST",
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+            body: {},
+          }),
+          signal: AbortSignal.timeout(12_000),
+        });
+        const infoJson = await infoRes.json().catch(() => null);
+        const info = infoJson?.data?.data;
+        if (infoRes.ok && info && typeof info.creator_nickname === "string") {
+          creatorInfo = {
+            nickname: info.creator_nickname,
+            username: info.creator_username || "",
+            avatarUrl: info.creator_avatar_url || "",
+            privacyLevelOptions: Array.isArray(info.privacy_level_options) ? info.privacy_level_options : ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"],
+            commentDisabled: Boolean(info.comment_disabled),
+            duetDisabled: Boolean(info.duet_disabled),
+            stitchDisabled: Boolean(info.stitch_disabled),
+            maxVideoPostDurationSec: Number(info.max_video_post_duration_sec) || 600,
+          };
+        }
+      } catch {}
+    }
+
     return reply({
       configured: hasEnvToken || composioConfigured,
       hasEnvToken,
       composioConfigured,
       hasUpload,
       accountId: resolvedAccountId,
+      creatorInfo,
     });
   } catch (error) {
     return reply({ error: error instanceof Error ? error.message : "Erro ao consultar status do TikTok." }, 500);
@@ -213,20 +257,45 @@ export async function POST(request: Request) {
       totalChunkCount = Math.floor(videoSize / chunkSize);
     }
 
-    const payload = {
-      source_info: {
-        source: "FILE_UPLOAD",
-        video_size: videoSize,
-        chunk_size: chunkSize,
-        total_chunk_count: totalChunkCount,
-      },
-    };
+    const isDirect = body.publishMode === "direct";
+    const allowedPrivacy = new Set(["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "FOLLOWER_OF_CREATOR", "SELF_ONLY"]);
+    const privacyLevel = typeof body.privacyLevel === "string" && allowedPrivacy.has(body.privacyLevel) ? body.privacyLevel : null;
+    if (isDirect && !privacyLevel) {
+      return fail("Selecione o nível de privacidade antes de publicar diretamente no TikTok.", 400);
+    }
+
+    const payload = isDirect
+      ? {
+          post_info: {
+            title: typeof body.caption === "string" ? body.caption.trim().slice(0, 2200) : "",
+            privacy_level: privacyLevel,
+            disable_comment: body.allowComment !== true,
+            disable_duet: body.allowDuet !== true,
+            disable_stitch: body.allowStitch !== true,
+          },
+          source_info: {
+            source: "FILE_UPLOAD",
+            video_size: videoSize,
+            chunk_size: chunkSize,
+            total_chunk_count: totalChunkCount,
+          },
+        }
+      : {
+          source_info: {
+            source: "FILE_UPLOAD",
+            video_size: videoSize,
+            chunk_size: chunkSize,
+            total_chunk_count: totalChunkCount,
+          },
+        };
 
     let publishId: string | null = null;
     let uploadUrl: string | null = null;
     let lastError: string | null = null;
 
-    const endpoints = [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/" }];
+    const endpoints = isDirect
+      ? [{ url: "https://open.tiktokapis.com/v2/post/publish/video/init/" }]
+      : [{ url: "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/" }];
 
     if (apiKey && accountId && !customAccessToken) {
       for (const ep of endpoints) {
