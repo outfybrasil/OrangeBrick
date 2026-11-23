@@ -80,6 +80,7 @@ export function socialPostAssets(post: SocialSourcePost): SocialPostAsset[] {
 export const SOCIAL_TEMPLATES: SocialPostTemplate[] = ["editorial", "criador"];
 
 export function nextSocialTemplate(_last?: unknown): SocialPostTemplate {
+  void _last;
   return "editorial";
 }
 

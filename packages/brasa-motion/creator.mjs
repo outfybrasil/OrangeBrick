@@ -18,7 +18,7 @@ const checkSvg = '<svg class="mark-icon" viewBox="0 0 100 100"><path class="ink-
 const crossSvg = '<svg class="mark-icon" viewBox="0 0 100 100"><path class="ink-path no" d="M15 15L85 85M85 15L15 85" pathLength="1"/></svg>';
 const arrowSvg = (cls) => `<svg class="hand-arrow ${cls}" viewBox="0 0 300 160"><path class="ink-path" d="M10 20C60 140 190 150 270 95M270 95L228 92M270 95L255 135" pathLength="1"/></svg>`;
 
-export function generateCreatorSceneHtml(scene, layout, { image, mediaSrc, fonts, gsapSource, duration, identity, captions, helpers }) {
+export function generateCreatorSceneHtml(scene, layout, { mediaSrc, fonts, gsapSource, duration, identity, captions, helpers }) {
   const { escape, revealTimes, countMarkup, captionMarkup, captionCss } = helpers;
   const paper = Boolean(scene.paper);
   const ink = paper ? C.ink : "#ffffff";
